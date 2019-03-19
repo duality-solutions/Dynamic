@@ -14,129 +14,6 @@
 CLinkRequestDB *pLinkRequestDB = NULL;
 CLinkAcceptDB *pLinkAcceptDB = NULL;
 
-bool CLinkRequestDB::AddMyLinkRequest(const CLinkRequest& link)
-{
-    LOCK(cs_link_request);
-    return Write(make_pair(std::string("path"), link.LinkPath()), link.RequestorPubKey)
-            && Write(make_pair(std::string("mylink"), link.RequestorPubKey), link);
-}
-
-bool CLinkRequestDB::ReadMyLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link)
-{
-    LOCK(cs_link_request);
-    return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
-}
-
-// Lists active pending link requests.
-bool CLinkRequestDB::ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests)
-{
-    int index = 0;
-    std::pair<std::string, CharString> key;
-    std::unique_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "mylink") {
-                CLinkRequest link;
-                pcursor->GetValue(link);
-                vchLinkRequests.push_back(link);
-                index++;
-            }
-            pcursor->Next();
-        }
-        catch (std::exception& e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
-bool CLinkRequestDB::EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey)
-{
-    if (!MyLinkRequestExists(vchPubKey))
-        return false;
-
-    CLinkRequest link;
-    if (!ReadMyLinkRequest(vchPubKey, link))
-        return false;
-
-    LOCK(cs_link_request);
-    return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
-           CDBWrapper::Erase(make_pair(std::string("path"), link.LinkPath()));
-}
-
-bool CLinkRequestDB::MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey)
-{
-    LOCK(cs_link_request);
-    return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
-}
-
-bool CLinkRequestDB::MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
-{
-    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
-    LOCK(cs_link_request);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        return true;
-    }
-    std::vector<unsigned char> vchReverseLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchReverseLinkPath))) {
-        return true;
-    }
-
-    return false;
-}
-
-bool CLinkRequestDB::GetMyLinkRequest(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& link)
-{
-    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
-                return true;
-            }
-        }
-    }
-    vchLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-// Removes expired records from databases.
-bool CLinkRequestDB::CleanupMyLinkRequestDB(int& nRemoved)
-{
-    LOCK(cs_link_request);
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    std::pair<std::string, std::vector<unsigned char> > key;
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "mylink") {
-                CLinkRequest link;
-                pcursor->GetValue(link);
-                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
-                {
-                    nRemoved++;
-                    EraseMyLinkRequest(link.RequestorPubKey);
-                }
-            }
-            pcursor->Next();
-        } catch (std::exception &e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
 bool CLinkRequestDB::AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid)
 { 
     bool writeState = false;
@@ -179,129 +56,6 @@ bool CLinkRequestDB::LinkRequestExists(const std::vector<unsigned char>& vchPubK
 }
 
 // Link Accept DB
-bool CLinkAcceptDB::AddMyLinkAccept(const CLinkAccept& link)
-{
-    LOCK(cs_link_accept);
-    return Write(make_pair(std::string("path"), link.LinkPath()), link.RecipientPubKey)
-            && Write(make_pair(std::string("mylink"), link.RecipientPubKey), link);
-}
-
-bool CLinkAcceptDB::ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
-{
-    LOCK(cs_link_accept);
-    return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
-}
-
-// Lists my active links pending accept tx.
-bool CLinkAcceptDB::ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts)
-{
-    int index = 0;
-    std::pair<std::string, CharString> key;
-    std::unique_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "mylink") {
-                CLinkAccept link;
-                pcursor->GetValue(link);
-                vchLinkAccepts.push_back(link);
-                index++;
-            }
-            pcursor->Next();
-        }
-        catch (std::exception& e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
-bool CLinkAcceptDB::EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey)
-{
-    if (!MyLinkAcceptExists(vchPubKey))
-        return false;
-
-    CLinkAccept link;
-    if (!ReadMyLinkAccept(vchPubKey, link))
-        return false;
-
-    LOCK(cs_link_accept);
-    return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
-           CDBWrapper::Erase(make_pair(std::string("path"), link.LinkPath()));
-}
-
-bool CLinkAcceptDB::MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey)
-{
-    LOCK(cs_link_accept);
-    return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
-}
-
-bool CLinkAcceptDB::MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
-{
-    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
-    LOCK(cs_link_request);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        return true;
-    }
-    std::vector<unsigned char> vchReverseLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchReverseLinkPath))) {
-        return true;
-    }
-
-    return false;
-}
-
-bool CLinkAcceptDB::GetMyLinkAccept(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkAccept& link)
-{
-    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
-                return true;
-            }
-        }
-    }
-    vchLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
-    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-// Removes expired records from databases.
-bool CLinkAcceptDB::CleanupMyLinkAcceptDB(int& nRemoved)
-{
-    LOCK(cs_link_accept);
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    std::pair<std::string, std::vector<unsigned char> > key;
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "mylink") {
-                CLinkRequest link;
-                pcursor->GetValue(link);
-                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
-                {
-                    nRemoved++;
-                    EraseMyLinkAccept(link.RequestorPubKey);
-                }
-            }
-            pcursor->Next();
-        } catch (std::exception &e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
 bool CLinkAcceptDB::AddLinkAcceptIndex(const vchCharString& vvchOpParameters, const uint256& txid)
 { 
     bool writeState = false;
@@ -411,20 +165,6 @@ bool FlushLinkAcceptDB()
         }
     }
     return true;
-}
-
-void CleanupLinkRequestDB(int& nRemoved)
-{
-    if(pLinkRequestDB != NULL)
-        pLinkRequestDB->CleanupMyLinkRequestDB(nRemoved);
-    FlushLinkRequestDB();
-}
-
-void CleanupLinkAcceptDB(int& nRemoved)
-{
-    if(pLinkAcceptDB != NULL)
-        pLinkAcceptDB->CleanupMyLinkAcceptDB(nRemoved);
-    FlushLinkAcceptDB();
 }
 
 static bool CommonLinkParameterCheck(const vchCharString& vvchOpParameters, std::string& errorMessage)
@@ -562,26 +302,6 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
     return false;
 }
 
-bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
-{
-    // For link requests, check accept links as well.
-    if (CheckLinkageAcceptExists(strRequestorFQDN, strRecipientFQDN))
-        return true;
-
-    if (pLinkRequestDB->MyLinkageExists(strRequestorFQDN, strRecipientFQDN))
-        return true;
-
-    return false;
-}
-
-bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
-{
-    if (pLinkAcceptDB->MyLinkageExists(strRequestorFQDN, strRecipientFQDN))
-        return true;
-
-    return false;
-}
-
 bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck)
 {
     // finds the previous link txid and makes sure this operation is coming from the same wallet address as the new or update entry
@@ -627,42 +347,17 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
         if (fJustCheck)
             return true;
 
+        std::vector<unsigned char> vchSharedPubKey;
+        // TODO (BDAP): make sure the DHT pubkeys have not changed before allowing a global delete.
+        if (vvchOpParameters.size() > 1)
+            vchSharedPubKey = vvchOpParameters[1];
+
         if (strOpType == "bdap_delete_link_request") {
-            pLinkRequestDB->EraseMyLinkRequest(vchPubKey);
+            pLinkRequestDB->EraseLinkRequestIndex(vchPubKey, vchSharedPubKey);
         }
         else if (strOpType == "bdap_delete_link_accept") {
-            pLinkAcceptDB->EraseMyLinkAccept(vchPubKey);
+            pLinkAcceptDB->EraseLinkAcceptIndex(vchPubKey, vchSharedPubKey);
         }
     }
-    return true;
-}
-
-std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion)
-{
-    std::vector<unsigned char> vchDataWithVersion = vchData;
-    vchDataWithVersion.push_back(nVersion);
-    std::rotate(vchDataWithVersion.rbegin(), vchDataWithVersion.rbegin() + 1, vchDataWithVersion.rend());
-    return vchDataWithVersion;
-}
-
-std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion)
-{
-    std::vector<unsigned char> vchDataWithoutVersion = vchData;
-    if (vchData.size() == 0)
-        return vchDataWithoutVersion;
-
-    nVersion = (int)vchData[0];
-    vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
-    return vchDataWithoutVersion;
-}
-
-bool GetLinkInfo(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& linkRequest, CLinkAccept& linkAccept)
-{
-    if (!pLinkRequestDB->GetMyLinkRequest(strRequestorFQDN, strRecipientFQDN, linkRequest))
-        return false;
-
-    if (!pLinkAcceptDB->GetMyLinkAccept(strRequestorFQDN, strRecipientFQDN, linkAccept))
-        return false;
-
     return true;
 }

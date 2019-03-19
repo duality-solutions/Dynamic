@@ -10,6 +10,7 @@
 
 #include "amount.h"
 #include "base58.h"
+#include "bdap/linkstorage.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "ui_interface.h"
@@ -1146,9 +1147,6 @@ public:
     void DeriveNewChildKeyBIP44BychainChildKey(CExtKey& chainChildKey, CKey& secret, bool internal, uint32_t* nInternalChainCounter, uint32_t* nExternalChainCounter);
     // Returns local BDAP DHT Public keys
     bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
-    bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);
-    bool IsLinkForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey);
-    bool GetLinkPrivateKey(const std::vector<unsigned char>& vchSenderPubKey, const std::vector<unsigned char>& vchSharedPubKey, std::array<char, 32>& sharedSeed, std::string& strErrorMessage);
 
 };
 

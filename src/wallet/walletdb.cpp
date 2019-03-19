@@ -8,6 +8,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
+#include "bdap/linkstorage.h"
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
@@ -608,6 +609,14 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadHDPubKey failed";
                 return false;
             }
+        } else if (strType == "link") {
+            uint256 linkID;
+            ssKey >> linkID;
+
+            CLinkStorage storage;
+            ssValue >> storage;
+
+            ProcessLink(storage, true);
         }
     } catch (...) {
         if (strType != "keymeta")
@@ -1029,4 +1038,24 @@ void CWalletDB::IncrementUpdateCounter()
 unsigned int CWalletDB::GetUpdateCounter()
 {
     return nWalletDBUpdateCounter;
+}
+
+// Stores the raw link in the wallet database
+bool CWalletDB::WriteLink(const CLinkStorage& link)
+{
+    ProcessLink(link);
+    std::vector<unsigned char> vchPubKeys = link.vchLinkPubKey;
+    vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
+    uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
+    return Write(std::make_pair(std::string("link"), linkID), link);
+}
+
+bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey)
+{
+    std::vector<unsigned char> vchPubKeys = vchPubKey;
+    vchPubKeys.insert(vchPubKeys.end(), vchSharedKey.begin(), vchSharedKey.end());
+    uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
+    return Erase(std::make_pair(std::string("link"), linkID));
 }

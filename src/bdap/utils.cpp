@@ -339,6 +339,45 @@ int GetBDAPOpType(const CTxOut& out)
     return GetBDAPOpType(out.scriptPubKey);
 }
 
+std::string GetOpCodeType(const std::string& strOpCode)
+{
+    if (strOpCode == "bdap_new_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_delete_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_revoke_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_update_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_move_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_new_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_delete_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_update_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_new_link_accept") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_delete_link_accept") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_update_link_accept") {
+        return "link";
+    }
+    else {
+        return "unknown";
+    }
+}
 
 std::string GetBDAPOpTypeString(const int& op1, const int& op2)
 {
@@ -621,4 +660,23 @@ std::vector<unsigned char> ZeroCharVector()
 std::string ZeroString()
 {
     return stringFromVch(ZeroCharVector());
+}
+
+std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithVersion = vchData;
+    vchDataWithVersion.push_back(nVersion);
+    std::rotate(vchDataWithVersion.rbegin(), vchDataWithVersion.rbegin() + 1, vchDataWithVersion.rend());
+    return vchDataWithVersion;
+}
+
+std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithoutVersion = vchData;
+    if (vchData.size() == 0)
+        return vchDataWithoutVersion;
+
+    nVersion = (int)vchData[0];
+    vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
+    return vchDataWithoutVersion;
 }

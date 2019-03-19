@@ -27,13 +27,13 @@ class CTransaction;
 // OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkRequest))
 
 namespace BDAP {
+
     enum LinkFilterType
     {
         BOTH = 0,
         REQUEST = 1,
         RECIPIENT = 2
     };
-
 }
 
 class CLinkRequest {
@@ -59,6 +59,12 @@ public:
         SetNull();
         UnserializeFromTx(tx);
         txHash = tx->GetHash();
+    }
+
+    CLinkRequest(const std::vector<unsigned char>& vchData, const uint256& hash) {
+        SetNull();
+        UnserializeFromData(vchData);
+        txHash = hash;
     }
 
     inline void SetNull()
@@ -115,7 +121,7 @@ public:
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
     bool UnserializeFromTx(const CTransactionRef& tx);
-    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);
@@ -155,6 +161,12 @@ public:
         SetNull();
         UnserializeFromTx(tx);
         txHash = tx->GetHash();
+    }
+
+    CLinkAccept(const std::vector<unsigned char>& vchData, const uint256& hash) {
+        SetNull();
+        UnserializeFromData(vchData);
+        txHash = hash;
     }
 
     inline void SetNull()
@@ -211,7 +223,7 @@ public:
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
     bool UnserializeFromTx(const CTransactionRef& tx);
-    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);
