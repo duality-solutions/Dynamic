@@ -172,6 +172,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link request", "superman batman"));
 
+    EnsureWalletIsUnlocked();
+
     std::string strRequestorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRequestorFQDN);
     CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
@@ -323,6 +325,8 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
             + HelpExampleCli("link send", "superman batman") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link send", "superman batman"));
+
+    EnsureWalletIsUnlocked();
 
     std::string strAcceptorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strAcceptorFQDN);
@@ -673,6 +677,8 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link delete", "superman batman"));
 
+    EnsureWalletIsUnlocked();
+
     std::string strRequestorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRequestorFQDN);
     CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
@@ -759,6 +765,8 @@ static UniValue DenyLink(const JSONRPCRequest& request)
             + HelpExampleCli("link deny", "superman batman") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link deny", "superman batman"));
+
+    EnsureWalletIsUnlocked();
 
     if (!pHashTableSession->Session)
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
@@ -864,6 +872,8 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
             + HelpExampleCli("link denied", "superman") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link deny", "superman"));
+
+    EnsureWalletIsUnlocked();
 
     if (!pHashTableSession->Session)
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");

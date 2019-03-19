@@ -367,6 +367,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n" + 
             HelpExampleRpc("putbdapdata", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\""));
 
+    EnsureWalletIsUnlocked();
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
@@ -464,6 +465,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n" + 
             HelpExampleRpc("clearbdapdata", "duality auth"));
 
+    EnsureWalletIsUnlocked();
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
@@ -557,6 +559,8 @@ UniValue getbdapdata(const JSONRPCRequest& request)
            HelpExampleCli("getbdapdata", "Duality avatar") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getbdapdata", "Duality avatar"));
+
+    EnsureWalletIsUnlocked();
 
     int64_t nStart = GetTimeMillis();
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
