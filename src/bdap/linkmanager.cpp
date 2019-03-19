@@ -259,7 +259,12 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     }
                     record.LinkID = linkID;
                     record.fRequestFromMe = fIsLinkFromMe;
-                    record.nLinkState = 1;
+                    if (record.nHeightAccept > 0) {
+                        record.nLinkState = 2;
+                    }
+                    else {
+                        record.nLinkState = 1;
+                    }
                     record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                     record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                     record.RequestorPubKey = link.RequestorPubKey;
@@ -268,7 +273,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightRequest = link.nHeight;
                     record.nExpireTimeRequest = link.nExpireTime;
                     record.txHashRequest = link.txHash;
-                    LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                    LogPrint("bdap", "%s -- CLear text link request added to map id = %s\n", __func__, linkID.ToString());
                     m_Links[linkID] = record;
                 }
                 else
@@ -308,7 +313,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightAccept = link.nHeight;
                     record.nExpireTimeAccept = link.nExpireTime;
                     record.txHashAccept = link.txHash;
-                    LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                    LogPrint("bdap", "%s -- Clear text accept added to map id = %s, %s\n", __func__, linkID.ToString(), record.ToString());
                     m_Links[linkID] = record;
                 }
                 else
@@ -359,7 +364,12 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         record.LinkID = linkID;
                         record.fRequestFromMe = fIsLinkFromMe;
-                        record.nLinkState = 1;
+                        if (record.nHeightAccept > 0) {
+                            record.nLinkState = 2;
+                        }
+                        else {
+                            record.nLinkState = 1;
+                        }
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                         record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                         record.RequestorPubKey = link.RequestorPubKey;
@@ -368,7 +378,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
-                        LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                        LogPrint("bdap", "%s -- Encrypted link request from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                         
                     }
@@ -422,9 +432,16 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (it != m_Links.end()) {
                             record = it->second;
                         }
+
                         record.LinkID = linkID;
                         record.fRequestFromMe = fIsLinkFromMe;
-                        record.nLinkState = 1;
+                        if (record.nHeightAccept > 0) {
+                            record.nLinkState = 2;
+                        }
+                        else {
+                            record.nLinkState = 1;
+                        }
+                        
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                         record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                         record.RequestorPubKey = link.RequestorPubKey;
@@ -433,7 +450,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
-                        LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                        LogPrint("bdap", "%s -- Encrypted link request for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
                     else {
@@ -494,7 +511,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
-                        LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                        LogPrint("bdap", "%s -- Encrypted link accept from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
                     else {
@@ -557,7 +574,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
-                        LogPrintf("%s -- Added to map id = %s\n", __func__, linkID.ToString());
+                        LogPrint("bdap", "%s -- Encrypted link accept for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
                     else {

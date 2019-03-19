@@ -1047,6 +1047,7 @@ bool CWalletDB::WriteLink(const CLinkStorage& link)
     std::vector<unsigned char> vchPubKeys = link.vchLinkPubKey;
     vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
     return Write(std::make_pair(std::string("link"), linkID), link);
 }
 
@@ -1055,6 +1056,6 @@ bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std
     std::vector<unsigned char> vchPubKeys = vchPubKey;
     vchPubKeys.insert(vchPubKeys.end(), vchSharedKey.begin(), vchSharedKey.end());
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
-    LogPrintf("%s -- linkID = %s\n", __func__, linkID.ToString());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
     return Erase(std::make_pair(std::string("link"), linkID));
 }
