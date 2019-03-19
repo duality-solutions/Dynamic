@@ -53,7 +53,7 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     }
     oLink.push_back(Pair("time", nTime));
     expired_time = link.nExpireTime;
-    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
     {
         expired = true;
     }
@@ -83,7 +83,7 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     }
     oLink.push_back(Pair("time", nTime));
     expired_time = link.nExpireTime;
-    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
     {
         expired = true;
     }
@@ -113,7 +113,7 @@ static bool BuildJsonLinkInfo(const CLink& link, const CDomainEntry& requestor, 
     }
     oLink.push_back(Pair("time", nTime));
     expired_time = link.nExpireTimeRequest;
-    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
     {
         expired = true;
     }
@@ -130,7 +130,7 @@ static bool BuildJsonLinkInfo(const CLink& link, const CDomainEntry& requestor, 
         }
         oLink.push_back(Pair("accept_time", nTime));
         expired_time = link.nExpireTimeRequest;
-        if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+        if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
         {
             expired = true;
         }
@@ -465,7 +465,7 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                 }
                 oLink.push_back(Pair("time", nTime)); // TODO: rename to request_time
                 expired_time = link.nExpireTimeRequest;
-                if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+                if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
                 {
                     expired = true;
                 }
@@ -482,7 +482,7 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                     }
                     oLink.push_back(Pair("accept_time", nTime));
                     expired_time = link.nExpireTimeRequest;
-                    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+                    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
                     {
                         expired = true;
                     }
@@ -497,6 +497,60 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
     }
 
     return true;
+}
+
+static UniValue ListPendingLinks(const JSONRPCRequest& request)
+{
+     if (request.fHelp || request.params.size() > 4)
+        throw std::runtime_error(
+            "lists pending link requests\n"
+            + HelpRequiringPassphrase() +
+            "\nLink Send Arguments:\n"
+            "1. from account                  (string, optional)    BDAP from account sending the link request\n"
+            "2. to account                    (string, optional)    BDAP to account receiving the link request\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"From Account\"               (string)  Requestor's BDAP full path\n"
+            "  \"To Account\"                 (string)  Recipient's BDAP full path\n"
+            "  \"Link Message\"               (string)  Message from requestor to recipient.\n"
+            "  \"Link Request TxID\"          (string)  Transaction ID for the link request\n"
+            "  \"Time\"                       (int)     Transaction time\n"
+            "  \"Expires On\"                 (int)     Link request expiration\n"
+            "  \"Expired\"                    (boolean) Is link request expired\n"
+            "  },...n \n"
+            "\nExamples:\n"
+            + HelpExampleCli("link pending request", "superman batman") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link pending request", "superman batman"));
+
+    std::string strFromAccountFQDN, strToAccountFQDN;
+    if (request.params.size() > 2) {
+        strFromAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+        ToLowerCase(strFromAccountFQDN);
+    }
+    if (request.params.size() > 3) {
+        strToAccountFQDN = request.params[3].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+        ToLowerCase(strToAccountFQDN);
+    }
+
+    if (!pLinkManager)
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4200 - Link manager map is null.");
+
+    std::vector<CLink> vchPendingLinks;
+    if (!pLinkManager->ListMyPendingRequests(vchPendingLinks))
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4201 - Error listing link requests from memory map");
+
+    if (!pLinkManager->ListMyPendingAccepts(vchPendingLinks))
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4202 - Error listing link accepts from memory map");
+
+    UniValue oLinks(UniValue::VOBJ);
+    if (!BuildJsonMyLists(vchPendingLinks, strFromAccountFQDN, strToAccountFQDN, oLinks))
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4203 - Error creating JSON link requests.");
+
+    int nInQueue = (int)pLinkManager->QueueSize();
+    oLinks.push_back(Pair("locked_links", nInQueue));
+
+    return oLinks;
 }
 
 static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
@@ -543,6 +597,9 @@ static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyLists(vchPendingLinks, strFromAccountFQDN, strToAccountFQDN, oLinks))
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4203 - Error creating JSON link requests.");
+
+    int nInQueue = (int)pLinkManager->QueueSize();
+    oLinks.push_back(Pair("locked_links", nInQueue));
 
     return oLinks;
 }
@@ -591,6 +648,9 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyLists(vchPendingLinks, strFromAccountFQDN, strToAccountFQDN, oLinks))
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_ACCEPT_RPC_ERROR: ERRCODE: 4213 - Error creating JSON link requests.");
+
+    int nInQueue = (int)pLinkManager->QueueSize();
+    oLinks.push_back(Pair("locked_links", nInQueue));
 
     return oLinks;
 }
@@ -644,6 +704,9 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyLists(vchLinkCompleted, strFromAccountFQDN, strToAccountFQDN, oLinks))
         throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4222 - Error creating JSON link requests.");
+
+    int nInQueue = (int)pLinkManager->QueueSize();
+    oLinks.push_back(Pair("locked_links", nInQueue));
 
     return oLinks;
 }
@@ -953,7 +1016,7 @@ UniValue link(const JSONRPCRequest& request)
         throw std::runtime_error(
             "link\n"
             + HelpRequiringPassphrase() +
-            "\nLink commands are request, accept, pending, complete, and delete.\n"
+            "\nLink commands are request, accept, pending, complete, deny, denied and delete.\n"
             "\nExamples:\n"
             + HelpExampleCli("link accept", "superman batman") +
             "\nAs a JSON-RPC call\n"
@@ -984,7 +1047,7 @@ UniValue link(const JSONRPCRequest& request)
     }
     else if (strCommand == "pending") {
         if (request.params.size() == 1) {
-            return ListPendingLinkRequests(request);
+            return ListPendingLinks(request);
         }
         else if (request.params.size() >= 2) {
             std::string strSubCommand = request.params[1].get_str();

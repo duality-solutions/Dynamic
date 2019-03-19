@@ -231,7 +231,7 @@ bool CLinkManager::ListMyCompleted(std::vector<CLink>& vchLinks)
 
 bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly)
 {
-    if (fStoreInQueueOnly) {
+    if (fStoreInQueueOnly || pwalletMain->IsLocked()) {
         linkQueue.push(storage);
         return true;
     }

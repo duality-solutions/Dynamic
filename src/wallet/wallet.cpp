@@ -1277,9 +1277,6 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         if (fExisted || IsMine(tx) || IsFromMe(tx)) {
             const CTransactionRef ptx = MakeTransactionRef(tx);
             if (tx.nVersion == BDAP_TX_VERSION) {
-                if (!pIndex)
-                    LogPrintf("%s -- BDAP transaction with a null pIndex.\n", __func__);
-
                 uint256 linkID;
                 CScript bdapOpScript;
                 int op1, op2;
@@ -1288,9 +1285,9 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     std::string strOpType = GetBDAPOpTypeString(op1, op2);
                     if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
                         uint64_t nExpireTime = 0;
-                        //if (vvchOpParameters.size() > 2)
-                        //    nExpireTime = vvchOpParameters[2];
-
+                        if (vvchOpParameters.size() > 2) {
+                            nExpireTime = CScriptNum(vvchOpParameters[2], false).getint();
+                        }
                         uint64_t nHeight = pIndex ? (uint64_t)pIndex->nHeight : (uint64_t)chainActive.Height();
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
                         std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
