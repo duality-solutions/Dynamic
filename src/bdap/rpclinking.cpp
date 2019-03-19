@@ -187,11 +187,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     // get link request
     CLink prevLink;
     uint256 linkID = GetLinkID(strRequestorFQDN, strRecipientFQDN);
-    if (!pLinkManager->FindLink(linkID, prevLink))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4000 - Initial link request not found.");
-
-    if (!(prevLink.nLinkState == 1))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - Link request is not pending.");
+    if (pLinkManager->FindLink(linkID, prevLink))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - Link request already exists for those accounts.");
 
     CLinkRequest txLink;
     txLink.nVersion = 1; // version 1 = encrytped or a private link.
