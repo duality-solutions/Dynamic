@@ -707,7 +707,7 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
 
     return oLinks;
 }
-
+/*
 static UniValue DeleteLink(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -805,7 +805,7 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
 
     return oLink;
 }
-
+*/
 static UniValue DenyLink(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -1013,7 +1013,7 @@ UniValue link(const JSONRPCRequest& request)
         throw std::runtime_error(
             "link\n"
             + HelpRequiringPassphrase() +
-            "\nLink commands are request, accept, pending, complete, deny, denied and delete.\n"
+            "\nLink commands are request, accept, pending, complete, deny, and denied.\n"
             "\nExamples:\n"
             + HelpExampleCli("link accept", "superman batman") +
             "\nAs a JSON-RPC call\n"
@@ -1033,9 +1033,11 @@ UniValue link(const JSONRPCRequest& request)
     else if (strCommand == "complete") {
         return ListCompletedLinks(request);
     }
+    /*
     else if (strCommand == "delete") {
         return DeleteLink(request);
     }
+    */
     else if (strCommand == "deny") {
         return DenyLink(request);
     }
