@@ -1313,6 +1313,8 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                             }
                         }
                         else if (strOpType == "bdap_delete_link_request" ||  strOpType == "bdap_delete_link_accept") {
+                            // TODO (BDAP): Implement link delete
+                            /*
                             if (strOpType == "bdap_delete_link_request") {
                                 if (walletdb.EraseLink(vchLinkPubKey, vchSharedPubKey)) {
                                     LogPrintf("%s -- ErasePendingLink nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
@@ -1323,6 +1325,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     LogPrintf("%s -- EraseCompletedLink nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
                                 }
                             }
+                            */
                         }
                     }
                 }
