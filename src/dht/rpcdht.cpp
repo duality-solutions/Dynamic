@@ -870,52 +870,17 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
-    std::string strHeaderHex;
-    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5627 - Failed to get header.");
+    CDataRecord record;
+    if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
-    iSequence++;
-    CRecordHeader header(strHeaderHex);
-    unsigned int i = 0;
-    while (i < 5) {
-        strHeaderHex = "";
-        if (header.IsNull()) {
-            if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get header.");
+    result.push_back(Pair("get_seq", iSequence));
+    result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+    result.push_back(Pair("data_version", record.GetHeader().nVersion));
+    result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+    result.push_back(Pair("get_value", record.Value()));
+    result.push_back(Pair("get_value_size", (int)record.Value().size()));
 
-            CRecordHeader headerTemp(strHeaderHex);
-            header = headerTemp;
-        }
-        i++;
-    }
-
-    if (!header.IsNull()) {
-        std::vector<CDataChunk> vChunks;
-        for(unsigned int i = 0; i < header.nChunks; i++) {
-            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
-            std::string strChunk;
-            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5629 - Failed to get chunk.");
-            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
-            vChunks.push_back(chunk);
-        }
-        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
-        if (!record.Valid())
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5630 - Invalid data. Size returned does not match size in header.");
-
-        result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", record.GetHeader().nVersion));
-        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
-        result.push_back(Pair("get_value", record.Value()));
-        result.push_back(Pair("get_value_size", (int)record.Value().size()));
-    }
-    else {
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5631 - Header is null.");
-    }
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
 

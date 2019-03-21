@@ -377,3 +377,59 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     }
     return false;
 }
+
+static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& key32)
+{
+    std::vector<unsigned char> vchKey;
+    for(unsigned int i = 0; i < sizeof(key32); i++) {
+        vchKey.push_back(key32[i]);
+    }
+    return vchKey;
+}
+
+bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
+{
+    bool fAuthoritative = false;
+    uint16_t nTotalSlots = 32;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+        strPutErrorMessage = "Failed to get header.";
+    }
+    iSequence++;
+    CRecordHeader header(strHeaderHex);
+    unsigned int i = 0;
+    while (i < 5) {
+        strHeaderHex = "";
+        if (header.IsNull()) {
+            if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                strPutErrorMessage = "Failed to get header.";
+            }
+            CRecordHeader headerTemp(strHeaderHex);
+            header = headerTemp;
+        }
+        i++;
+    }
+    if (!header.IsNull()) {
+        std::vector<CDataChunk> vChunks;
+        for(unsigned int i = 0; i < header.nChunks; i++) {
+            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+            std::string strChunk;
+            if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
+                strPutErrorMessage = "Failed to get record chunk.";
+                return false;
+            }
+            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+            vChunks.push_back(chunk);
+        }
+        CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
+        LogPrintf("CHashTableSession::%s -- fValid = %s\n", __func__, getRecord.Valid() ? "true" : "false");
+        if (record.HasError()) {
+            strPutErrorMessage = strprintf("Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+            return false;
+        }
+        record = getRecord;
+        return true;
+    }
+    return false;
+}

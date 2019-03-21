@@ -139,10 +139,11 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
     if (header.nChunks != chunks.size())
         throw std::runtime_error("Number of chunks in header mismatches the data.\n");
 
-    if (!dataHeader.IsNull())
-        InitGet(privateKey);
-
-    fValid = true;
+    if (!dataHeader.IsNull()) {
+        if (InitGet(privateKey)) {
+            fValid = true;
+        }
+    }
 }
 
 bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
@@ -151,7 +152,6 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
         strHexChunks += vChunks[i].Value;
     }
-
     if (strHexChunks.size() != dataHeader.nDataSize)
         throw std::runtime_error("Data size in header mismatches total size from all chunks.\n");
 
@@ -160,8 +160,9 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
         vchData = vchUnHex;
     }
     else if (dataHeader.nVersion == 1) {
-        if (!Decrypt(privateKey, vchUnHex, vchData, strErrorMessage))
+        if (!Decrypt(privateKey, vchUnHex, vchData, strErrorMessage)) {
             return false;
+        }
     }
     else {
         strErrorMessage = "Unsupported version.";
