@@ -93,54 +93,6 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     return true;
 }
 
-static bool BuildJsonLinkInfo(const CLink& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
-{
-    bool expired = false;
-    int64_t expired_time = 0;
-    int64_t nTime = 0;
-    oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
-    oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
-    oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
-    //oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
-    oLink.push_back(Pair("txid", link.txHashRequest.GetHex()));
-    if ((unsigned int)chainActive.Height() >= link.nHeightRequest-1) {
-        CBlockIndex *pindex = chainActive[link.nHeightRequest-1];
-        if (pindex) {
-            nTime = pindex->GetMedianTimePast();
-        }
-    }
-    oLink.push_back(Pair("time", nTime));
-    expired_time = link.nExpireTimeRequest;
-    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
-    {
-        expired = true;
-    }
-    oLink.push_back(Pair("expires_on", expired_time));
-    oLink.push_back(Pair("expired", expired));
-    if (!link.txHashAccept.IsNull()) {
-        oLink.push_back(Pair("recipient_link_pubkey", stringFromVch(link.RecipientPubKey)));
-        oLink.push_back(Pair("accept_txid", link.txHashAccept.GetHex()));
-        if ((unsigned int)chainActive.Height() >= link.nHeightAccept-1) {
-            CBlockIndex *pindex = chainActive[link.nHeightRequest-1];
-            if (pindex) {
-                nTime = pindex->GetMedianTimePast();
-            }
-        }
-        oLink.push_back(Pair("accept_time", nTime));
-        expired_time = link.nExpireTimeRequest;
-        if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
-        {
-            expired = true;
-        }
-        oLink.push_back(Pair("accept_expires_on", expired_time));
-        oLink.push_back(Pair("accept_expired", expired));
-    }
-    oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
-    return true;
-}
-
 static UniValue SendLinkRequest(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
