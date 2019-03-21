@@ -159,7 +159,8 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
     record.GetHeader().Salt = strOperationType;
-    pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5402 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -530,7 +531,9 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5516 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
@@ -1028,9 +1031,11 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
@@ -1144,7 +1149,9 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 

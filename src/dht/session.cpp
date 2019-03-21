@@ -284,7 +284,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     strPutErrorMessage = "";
     HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
     int64_t nLastUpdate = (int64_t)GetLastPutDate(recordKey);
-    if (DHT_RECORD_LOCK_SECONDS > GetTime() - nLastUpdate) {
+    if (DHT_RECORD_LOCK_SECONDS >= (GetTime() - nLastUpdate))
+    {
         strPutErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
         return false;
     }
