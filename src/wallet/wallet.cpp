@@ -55,6 +55,7 @@ bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
 bool fSendFreeTransactions = DEFAULT_SEND_FREE_TRANSACTIONS;
 
 const char* DEFAULT_WALLET_DAT = "wallet.dat";
+const char* DEFAULT_WALLET_DAT_MNEMONIC = "wallet_mnemonic.dat";
 
 /** 
  * Fees smaller than this (in satoshis) are considered zero fee (for transaction creation)
@@ -4405,7 +4406,7 @@ CAmount CWallet::GetMinimumFee(unsigned int nTxBytes, unsigned int nConfirmTarge
     return nFeeNeeded;
 }
 
-DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
+DBErrors CWallet::LoadWallet(bool& fFirstRunRet, const bool fImportMnemonic)
 {
     if (!fFileBacked)
         return DB_LOAD_OK;
@@ -4438,7 +4439,10 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
         return nLoadWalletRet;
     fFirstRunRet = !vchDefaultKey.IsValid();
 
-    uiInterface.LoadWallet(this);
+    //Do not execute if Importing a Mnemonic
+    if (!fImportMnemonic) {
+        uiInterface.LoadWallet(this);
+    }
 
     return DB_LOAD_OK;
 }
@@ -5252,8 +5256,10 @@ std::string CWallet::GetWalletHelpString(bool showDebug)
     return strUsage;
 }
 
-CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
+CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool fImportMnemonic)
 {
+    LogPrintf("DEBUGGER %s made it here: %s\n", __func__, walletFile);
+    
     // needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
@@ -5276,7 +5282,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
     CWallet* walletInstance = new CWallet(walletFile);
-    DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun);
+    DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun,true);
     if (nLoadWalletRet != DB_LOAD_OK) {
         if (nLoadWalletRet == DB_CORRUPT) {
             InitError(strprintf(_("Error loading %s: Wallet corrupted"), walletFile));
@@ -5366,8 +5372,11 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
     }
 
     // Warn user every time he starts non-encrypted HD wallet
-    if (GetBoolArg("-usehd", DEFAULT_USE_HD_WALLET) && !walletInstance->IsLocked()) {
-        InitWarning(_("Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!"));
+    //Do not execute the following if Importing a Mnemonic
+    if (!fImportMnemonic) {  
+        if (GetBoolArg("-usehd", DEFAULT_USE_HD_WALLET) && !walletInstance->IsLocked()) {
+            InitWarning(_("Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!"));
+        }
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
@@ -5655,7 +5664,7 @@ bool AutoBackupWallet(CWallet* wallet, std::string strWalletFile, std::string& s
         }
 
         // Create backup of the ...
-        std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M", GetTime());
+        std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M-%S", GetTime());
         if (wallet) {
             // ... opened wallet
             LOCK2(cs_main, wallet->cs_wallet);

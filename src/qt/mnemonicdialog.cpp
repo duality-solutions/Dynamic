@@ -234,14 +234,11 @@ void MnemonicDialog::validateMnemonic() {
 
     isValid = CMnemonic::Check(mnemonicValue.c_str(),selectLanguage);
 
-    switch (isValid) {
-        case true:
-            QMessageBox::information(this, "Validate Mnemonic", "Mnemonic is valid");
-            break;
-        case false:
-            QMessageBox::critical(this, "Validate Mnemonic", "Mnemonic is invalid");
-            break;
-    } //switch isValid
+    if (isValid) {
+        QMessageBox::information(this, "Validate Mnemonic", "Mnemonic is valid");
+    } else {
+        QMessageBox::critical(this, "Validate Mnemonic", "Mnemonic is invalid");
+    }
 
 
 } //createMnemonic
@@ -253,7 +250,7 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
     QString passPhrase = ui->lineEditPassPhrase->text();
     languageValue.replace(QString(" "),QString(""));
     languageValue = languageValue.toLower();
-    forceRescan = ui->checkBoxForceRescan->isChecked();
+    //forceRescan = ui->checkBoxForceRescan->isChecked();
 
     std::string outputmessage = "";
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
@@ -281,12 +278,12 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
 
     languageValue.prepend(QString(" "));
     RPCstr.append(languageValue);
-    RPCstr.append(QString(" \"") + passPhrase + QString("\" 0 100"));
+    //RPCstr.append(QString(" \"") + passPhrase + QString("\" 0 100"));
 
-    if(forceRescan)
-        RPCstr.append(QString(" true"));
+    //if(forceRescan)
+        //RPCstr.append(QString(" true"));
 
-    QMessageBox::information(0,"RPCCmd",RPCstr);
+    //QMessageBox::information(0,"RPCCmd",RPCstr);
 
     try {
         Q_EMIT cmdToConsole(RPCstr);

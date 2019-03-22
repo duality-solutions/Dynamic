@@ -149,9 +149,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressdeltas", 0, "addresses"},
         {"getaddressutxos", 0, "addresses"},
         {"getaddressmempool", 0, "addresses"},
-        {"importmnemonic", 3, "begin"},
-        {"importmnemonic", 4, "end"},
-        {"importmnemonic", 5, "forcerescan"},
+        //{"importmnemonic", 3, "begin"},
+        //{"importmnemonic", 4, "end"},
+        //{"importmnemonic", 5, "forcerescan"},
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},

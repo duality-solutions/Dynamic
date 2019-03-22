@@ -20,7 +20,9 @@ class thread_group;
 
 void StartShutdown();
 void StartRestart();
+void StartMnemonicRestart();
 bool ShutdownRequested();
+bool MnemonicRestartRequested();
 /** Interrupt threads */
 void Interrupt(boost::thread_group& threadGroup);
 void Shutdown();
@@ -53,6 +55,7 @@ bool AppInitSanityChecks();
  */
 bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler);
 void PrepareShutdown();
+void SwapMnemonicWalletFile();
 
 /** The help message mode determines what help message to show */
 enum HelpMessageMode {
