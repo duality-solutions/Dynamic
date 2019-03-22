@@ -782,9 +782,6 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
             "2. \"language\"    (english|french|chinesesimplified|chinesetraditional|italian|japanese|korean|spanish, optional)\n"
             "3. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
-            "4. \"begin\"       (int, optional, default=0) begin key chain index\n"
-            "5. \"end\"         (int, optional, default=100) end key chain index\n"
-            "6. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
@@ -833,94 +830,64 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     LogPrintf("DEBUGGER %s - Passphrase before: %s\n", __func__, strMnemonicPassphrase);  
 
-    int paramsCount = 2; //way to handle empty string passphrase
 
     if (!request.params[2].isNull()) {
         strMnemonicPassphrase = request.params[2].get_str();
-        if (strMnemonicPassphrase != "") {
-            //if parameter is empty string, don't set as passphrase and don't count as a parameter
-            paramsCount++;
-            LogPrintf("DEBUGGER %s - made it here.params count now: %s\n", __func__, std::to_string(paramsCount));
-        };
     }
-    else LogPrintf("DEBUGGER %s - Passphrase NOT considered NULL\n", __func__);  
-
 
     LogPrintf("DEBUGGER %s - Passphrase after: %s\n", __func__, strMnemonicPassphrase);    
 
     if (strMnemonicPassphrase.size() > 24)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
 
-    uint32_t begin = 0, end = 100;
-    if (!request.params[paramsCount].isNull()) //was 3
-        begin = (uint32_t)request.params[paramsCount].get_int(); //was 3
+    LogPrintf("DEBUGGER %s - strMnemonicPassphrase: [%s]\n", __func__, strMnemonicPassphrase); //NEWLY ADDED
+    LogPrintf("DEBUGGER %s - strMnemonic: [%s]\n", __func__, strMnemonic); //NEWLY ADDED
 
-    paramsCount++;    
+    pwalletMain->ShowProgress(_("Importing... Wallet will restart when complete."), 0); // show progress dialog in GUI
+    pwalletMain->ShowProgress("", 25); //show we're working in the background...
 
-    if (!request.params[paramsCount].isNull()) //was 4
-        end = (uint32_t)request.params[paramsCount].get_int(); //was 4
+    //CREATE BACKUP OF WALLET before importing mnemonic and swapping files
+    std::string strBackupWarning;
+    std::string strBackupError;
+    if (!AutoBackupWallet(pwalletMain, "", strBackupWarning, strBackupError)) {
+        if (!strBackupWarning.empty()) {
+            InitWarning(strBackupWarning);
+        }
+        if (!strBackupError.empty()) {
+            InitError(strBackupError);
+            entry.push_back(Pair("Error", "Failed backing up wallet."));
+            return entry;
+        }
+    }
 
-    paramsCount++;    
+    ForceSetArg("-mnemonic", strMnemonic);
+    SoftSetBoolArg("-importmnemonic", true);
 
+    CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
+    pwalletMain = pwallet;
+    pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
+    StartMnemonicRestart();
+    entry.push_back(Pair("Done", "Stopping daemon... Please restart dynamic..."));
 
-    bool forcerescan = true; //was false
-    if(!request.params[paramsCount].isNull()) //was 5
-        forcerescan = request.params[paramsCount].get_bool(); //was 5
-    
-    CHDChain newHdChain;
+    //cleanup
+    ForceRemoveArg("-mnemonic");
+    ForceRemoveArg("-importmnemonic");
 
+    return entry;
+
+//---------------------------------------------------------------------------------------------------------------------------------
+/*
     SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
     if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true, selectLanguage))
         throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
-        LogPrintf("DEBUGGER %s - SetMnemonic failed here...\n", __func__);
+
     newHdChain.Debug(__func__);
 
     if (!pwalletMain->SetHDChain(newHdChain, false))
         throw std::runtime_error(std::string(__func__) + ": SetHDChain failed");
+*/
+//
 
-    bool fInternal = false;
-    int64_t nCreationTime = 1230912000; // Friday, January 2, 2009 10:00:00 AM GMT-06:00
-    int64_t nStartTime = GetTime();
-    std::string strLabel="";
-    uint32_t nInternalChainCounter = begin;
-    uint32_t nExternalChainCounter = begin;
-    pwalletMain->ShowProgress(_("Importing..."), 0); // show progress dialog in GUI
-    int64_t nCount = 0;
-    while(nInternalChainCounter <= end || nExternalChainCounter <= end){
-        pwalletMain->ShowProgress("", std::max(1, std::min(99, (int)(((double)(nInternalChainCounter + nExternalChainCounter) / (double)end)* (double)100 / (double)2))));
-
-        if(nExternalChainCounter > end)
-            fInternal = true;
-
-        CPubKey pubkey;
-        try {
-            pwalletMain->GetKeyFromPool(pubkey, fInternal);
-        } catch (const std::exception& e) {
-            throw std::runtime_error(std::string(__func__) + ": Error in GetKeyFromPool(). \"" + e.what() + "\"");
-        }
-        CKeyID keyid = pubkey.GetID();
-        pwalletMain->SetAddressBook(keyid, strLabel, "receive");
-        LogPrintf("Imported %s...\n", CDynamicAddress(keyid).ToString());
-
-        nCount++;
-        if (fInternal) {
-            nInternalChainCounter++;
-        }
-        else {
-            nExternalChainCounter++;
-        }
-    }
-    int64_t nEndTime = GetTime();
-    pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
-    if(nCount > 0 || forcerescan ){
-        pwalletMain->UpdateTimeFirstKey(nCreationTime);
-        pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
-        pwalletMain->MarkDirty();
-    }
-    entry.push_back(Pair("nEndTime", nEndTime - nStartTime));
-    entry.push_back(Pair("imported_keys", nCount));
-
-    return entry;
 }
 
 UniValue dumpprivkey(const JSONRPCRequest& request)

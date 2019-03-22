@@ -1416,6 +1416,14 @@ void DynamicGUI::detectShutdown()
             rpcConsole->hide();
         qApp->quit();
     }
+    else {
+        if (MnemonicRestartRequested()) {
+            if (rpcConsole) {
+                QStringList args;
+                Q_EMIT handleRestart(args);
+            } //if rpcConsole
+        } //if MnemonicRestartRequested
+    }
 }
 
 void DynamicGUI::showProgress(const QString& title, int nProgress)
