@@ -15,6 +15,7 @@
 class CChainParams;
 class CConnman;
 class CKeyEd25519;
+class CMutableGetEvent;
 
 namespace libtorrent {
     class entry;
@@ -46,10 +47,13 @@ public:
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
     bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
+    bool SubmitGetAllRecords(const std::vector<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>>& vchLinkInfo, 
+                                const std::array<char, 32>& private_seed, const std::string& strOperationType, std::vector<CDataRecord> vchRecords);
 
 private:
     void CleanUpPutCommandMap();
     uint32_t GetLastPutDate(const HashRecordKey& recordKey);
+    bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
 
 };
 

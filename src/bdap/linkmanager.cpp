@@ -612,6 +612,26 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
     return true;
 }
 
+std::vector<LinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath)
+{
+    std::vector<LinkInfo> vchLinkInfo;
+    for(const std::pair<uint256, CLink>& link : m_Links)
+    {
+        if (link.second.nLinkState == 2) // completed link
+        {
+            if (link.second.RequestorFullObjectPath == vchFullObjectPath)
+            {
+                vchLinkInfo.push_back(std::make_pair(link.second.RecipientFullObjectPath, link.second.RecipientPubKey));
+            }
+            else if (link.second.RecipientFullObjectPath == vchFullObjectPath)
+            {
+                vchLinkInfo.push_back(std::make_pair(link.second.RequestorFullObjectPath, link.second.RequestorPubKey));
+            }
+        }
+    }
+    return vchLinkInfo;
+}
+
 uint256 GetLinkID(const CLinkRequest& request)
 {
     std::vector<unsigned char> vchLinkPath = request.LinkPath();

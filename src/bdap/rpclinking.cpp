@@ -860,7 +860,7 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
             "\nLink Denied Arguments:\n"
             "1. recipient          (string)             Your BDAP recipient account\n"
             "\nResult:\n"
-            "{(json object)\n"
+            "{(json objects)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
             "  }\n"
             "\nExamples:\n"

@@ -10,6 +10,9 @@
 
 #include <vector>
 
+// Used to store account FQDN and public key
+typedef std::pair<std::vector<unsigned char>, std::vector<unsigned char>> LinkInfo;
+
 namespace BDAP {
 
     enum LinkType : std::uint8_t

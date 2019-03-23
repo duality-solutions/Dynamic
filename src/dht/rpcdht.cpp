@@ -768,6 +768,9 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     if (!CheckDomainEntryDB())
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5621 - Can not access BDAP domain entry database.\n");
 
+    if (!pLinkManager)
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
@@ -790,7 +793,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     ToLowerCase(strOperationType);
 
     if (!pLinkManager)
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5624 - Can not open link request in memory map");
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CLink link;
     std::string strPubKey;
@@ -853,6 +856,94 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue getallbdaplinkdata(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 2)
+        throw std::runtime_error(
+            "getallbdaplinkdata \"account\" \"operation\"\n"
+            "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
+            "\nArguments:\n"
+            "1. account                (string)      BDAP account used to get all data for this operation\n"
+            "2. operation              (string)      Mutable data operation code\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "  \"link_acceptor\"       (string)      BDAP account that accepted the link\n"
+            "  \"get_pubkey\"          (string)      BDAP account DHT public key for account1\n"
+            "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
+            "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("getallbdaplinkdata", "duality pshare-offer") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("getallbdaplinkdata", "duality pshare-offer"));
+
+    EnsureWalletIsUnlocked();
+
+    int64_t nStart = GetTimeMillis();
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+
+    UniValue result(UniValue::VOBJ);
+   
+    if (!pHashTableSession->Session)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
+
+    if (!CheckDomainEntryDB())
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5721 - Can not access BDAP domain entry database.\n");
+
+    if (!pLinkManager)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
+    entry.ObjectID = vchObjectID;
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5722 - " + entry.GetFullObjectPath() + _(" can not be found.  Get BDAP entry failed!\n"));
+
+    std::string strOperationType = request.params[1].get_str();
+    ToLowerCase(strOperationType);
+
+    if (!pLinkManager)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
+    CKeyEd25519 getKey;
+    std::vector<unsigned char> vchDHTPublicKey = entry.DHTPublicKey;
+    CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+       throw std::runtime_error(strprintf("%s: ERRCODE: 5725 - Failed to get DHT private key for account %s (pubkey = %s)\n", __func__, entry.GetFullObjectPath(), entry.DHTPubKeyString()));
+
+    result.push_back(Pair("get_operation", strOperationType));
+
+    std::vector<LinkInfo> vchLinkInfo = pLinkManager->GetCompletedLinkInfo(entry.vchFullObjectPath());
+    std::vector<CDataRecord> vchRecords;
+    if (!pHashTableSession->SubmitGetAllRecords(vchLinkInfo, getKey.GetDHTPrivSeed(), strOperationType, vchRecords))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+
+    // loop through records
+    for (CDataRecord& record : vchRecords)
+    {
+        LogPrintf("%s -- %s\n", __func__, record.ErrorMessage());
+        /*
+        result.push_back(Pair("get_seq", iSequence));
+        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+        result.push_back(Pair("data_version", record.GetHeader().nVersion));
+        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+        result.push_back(Pair("get_value", record.Value()));
+        result.push_back(Pair("get_value_size", (int)record.Value().size()));
+        */
+    }
+
+    int64_t nEnd = GetTimeMillis();
+    result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+
+    return result;
+}
+
 UniValue putbdaplinkdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 4)
@@ -890,6 +981,9 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     if (!CheckDomainEntryDB())
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5641 - Can not access BDAP domain entry database.\n");
+
+    if (!pLinkManager)
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
@@ -1009,6 +1103,9 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     if (!CheckDomainEntryDB())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5651 - Can not access BDAP domain entry database.\n");
 
+    if (!pLinkManager)
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
@@ -1105,6 +1202,7 @@ static const CRPCCommand commands[] =
     { "dht",             "putbdaplinkdata",          &putbdaplinkdata,              true,    {"account1", "account2", "operation", "value"} },
     { "dht",             "clearbdapdata",            &clearbdapdata,                true,    {"account1", "account2", "operation"} },
     { "dht",             "clearbdaplinkdata",        &clearbdaplinkdata,            true,    {"account1", "account2", "operation"} },
+    { "dht",             "getallbdaplinkdata",       &getallbdaplinkdata,           true,    {"account1", "operation"} },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
