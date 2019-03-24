@@ -885,7 +885,7 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
-    UniValue result(UniValue::VOBJ);
+    UniValue results(UniValue::VOBJ);
    
     if (!pHashTableSession->Session)
         throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
@@ -911,37 +911,39 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     if (!pLinkManager)
         throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
-    CKeyEd25519 getKey;
-    std::vector<unsigned char> vchDHTPublicKey = entry.DHTPublicKey;
-    CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-       throw std::runtime_error(strprintf("%s: ERRCODE: 5725 - Failed to get DHT private key for account %s (pubkey = %s)\n", __func__, entry.GetFullObjectPath(), entry.DHTPubKeyString()));
+    std::vector<CLinkInfo> vchLinkInfo = pLinkManager->GetCompletedLinkInfo(entry.vchFullObjectPath());
+    for (CLinkInfo& linkInfo : vchLinkInfo) {
+        CKeyEd25519 getKey;
+        std::vector<unsigned char> vchDHTPublicKey = linkInfo.vchReceivePubKey;
+        CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+           throw std::runtime_error(strprintf("%s: ERRCODE: 5725 - Failed to get DHT private key for account %s (pubkey = %s)\n", __func__, entry.GetFullObjectPath(), entry.DHTPubKeyString()));
 
-    result.push_back(Pair("get_operation", strOperationType));
+       linkInfo.arrReceivePrivateSeed = getKey.GetDHTPrivSeed();
+    }
 
-    std::vector<LinkInfo> vchLinkInfo = pLinkManager->GetCompletedLinkInfo(entry.vchFullObjectPath());
     std::vector<CDataRecord> vchRecords;
-    if (!pHashTableSession->SubmitGetAllRecords(vchLinkInfo, getKey.GetDHTPrivSeed(), strOperationType, vchRecords))
+    if (!pHashTableSession->SubmitGetAllRecords(vchLinkInfo, strOperationType, vchRecords))
         throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
-    // loop through records
-    for (CDataRecord& record : vchRecords)
+    results.push_back(Pair("get_operation", strOperationType));
+    int nRecordItem = 1;
+    for (CDataRecord& record : vchRecords) // loop through records
     {
-        LogPrintf("%s -- %s\n", __func__, record.ErrorMessage());
-        /*
-        result.push_back(Pair("get_seq", iSequence));
+        UniValue result(UniValue::VOBJ);
+        result.push_back(Pair("account", stringFromVch(record.vchOwnerFQDN)));
         result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
         result.push_back(Pair("data_version", record.GetHeader().nVersion));
         result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
         result.push_back(Pair("get_value", record.Value()));
         result.push_back(Pair("get_value_size", (int)record.Value().size()));
-        */
+        results.push_back(Pair("record_" + std::to_string(nRecordItem), result));
+        nRecordItem++;
     }
-
     int64_t nEnd = GetTimeMillis();
-    result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+    results.push_back(Pair("get_milliseconds", (nEnd - nStart)));
 
-    return result;
+    return results;
 }
 
 UniValue putbdaplinkdata(const JSONRPCRequest& request)

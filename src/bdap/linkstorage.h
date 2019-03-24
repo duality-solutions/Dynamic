@@ -10,9 +10,6 @@
 
 #include <vector>
 
-// Used to store account FQDN and public key
-typedef std::pair<std::vector<unsigned char>, std::vector<unsigned char>> LinkInfo;
-
 namespace BDAP {
 
     enum LinkType : std::uint8_t
@@ -102,6 +99,39 @@ public:
     inline bool IsNull() const { return (vchRawData.empty()); }
     bool Encrypted() const;
     int DataVersion() const;
+
+};
+
+class CLinkInfo {
+public:
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    std::vector<unsigned char> vchFullObjectPath;
+    std::vector<unsigned char> vchSenderPubKey;
+    std::vector<unsigned char> vchReceivePubKey;
+    std::array<char, 32> arrReceivePrivateSeed;
+
+    CLinkInfo() 
+    {
+        SetNull();
+    }
+
+    CLinkInfo(const std::vector<unsigned char>& fqdn, const std::vector<unsigned char>& send_pubkey, const std::vector<unsigned char>& receive_pubkey)
+                    : vchFullObjectPath(fqdn), vchSenderPubKey(send_pubkey), vchReceivePubKey(receive_pubkey) 
+    {
+        arrReceivePrivateSeed.fill(0);
+    }
+
+    inline void SetNull()
+    {
+        nVersion = CLinkStorage::CURRENT_VERSION;
+        vchFullObjectPath.clear();
+        vchSenderPubKey.clear();
+        vchReceivePubKey.clear();
+        arrReceivePrivateSeed.fill(0);
+    }
+
+    std::string ToString() const;
 
 };
 
