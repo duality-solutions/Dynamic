@@ -150,11 +150,13 @@ static void DHTEventListener(session* dhtSession)
                     if (pGet == nullptr)
                         continue;
 
-                    const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
+                    if (pGet->item.to_string() != "<uninitialized>") {
+                        const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
-                    std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
-                    AddToDHTGetEventMap(infoHash, event);
+                        std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
+                        AddToDHTGetEventMap(infoHash, event);
+                    }
                 }
             }
             else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
