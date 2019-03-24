@@ -320,8 +320,6 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
     //TODO: DHT add locks
-    LogPrintf("CHashTableSession::%s -- started.\n", __func__);
-
     if (!pHashTableSession->Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pHashTableSession->Session is null.";
         return false;
@@ -338,12 +336,9 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
         }
     }
-    else {
-        LogPrintf("CHashTableSession::%s -- GetDHTMutableData DHT already running.  Bootstrap not needed.\n", __func__);
-    }
 
     Session->dht_get_item(public_key, recordSalt);
-    LogPrintf("CHashTableSession::%s -- MGET: %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
+    LogPrintf("CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
 
     return true;
 }
@@ -375,7 +370,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             LogPrintf("CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
             return true;
         }
-        MilliSleep(40);
+        MilliSleep(10);
     }
     return false;
 }
@@ -452,10 +447,10 @@ bool CHashTableSession::SubmitGetAllRecords(const std::vector<CLinkInfo>& vchLin
         std::string strHeaderHex;
         std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
         SubmitGet(EncodedVectorCharToArray32(linkInfo.vchSenderPubKey), strHeaderSalt);
-        MilliSleep(1);
+        MilliSleep(10);
     }
 
-    MilliSleep(333); // Wait for headers data
+    MilliSleep(300); // Wait for headers data
     std::vector<std::pair<CLinkInfo, CMutableGetEvent>> eventHeaders;
     for (const CLinkInfo& linkInfo : vchLinkInfo) {
         std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
@@ -480,12 +475,12 @@ bool CHashTableSession::SubmitGetAllRecords(const std::vector<CLinkInfo>& vchLin
                 std::array <char, 32> arrPubKey;
                 aux::from_hex(eventHeader.second.PublicKey(), arrPubKey.data());
                 SubmitGet(arrPubKey, strChunkSalt);
-                MilliSleep(1);
+                MilliSleep(20);
             }
         }
     }
     if (eventHeaders.size() > 0) {
-        MilliSleep(333); // Wait for records data
+        MilliSleep(350); // Wait for records data
         for (const std::pair<CLinkInfo, CMutableGetEvent>& eventHeader: eventHeaders)
         {
             std::string strHeaderHex = eventHeader.second.Value();
@@ -510,8 +505,18 @@ bool CHashTableSession::SubmitGetAllRecords(const std::vector<CLinkInfo>& vchLin
                         vChunks.push_back(chunk);
                     }
                     else {
-                        fSkip = true;
-                        i = header.nChunks + 1;
+                        bool fAuthoritative;
+                        int64_t iSequence;
+                        std::string strHeaderHex;
+                        if (SubmitGet(arrPubKey, strChunkSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                            CDataChunk chunk(i, i + 1, strChunkSalt, strHeaderHex);
+                            vChunks.push_back(chunk);
+                        }
+                        else {
+                            LogPrintf("%s -- Skipped %s record for %s, chunk salt = %s\n", __func__, strOperationType, stringFromVch(eventHeader.first.vchFullObjectPath), strChunkSalt);
+                            fSkip = true;
+                            i = header.nChunks + 1; 
+                        }
                     }
                 }
                 if (!fSkip) {
