@@ -57,7 +57,7 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     ui->pushButtonImportMnemonicCancel->setStyleSheet(restyleSheet);
     ui->pushButtonCreateMnemonic_Validate->setStyleSheet(styleSheet);
 
-    ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Reimport' button.")+"</p>");
+    ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.")+"</p>");
 
 
 
