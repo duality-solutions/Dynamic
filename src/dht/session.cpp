@@ -430,6 +430,33 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
     return false;
 }
 
+bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event)
+{
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
+    if (FindDHTGetEvent(infoHash, event)) {
+        //LogPrintf("CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
+        return true;
+    }
+    return false;
+}
+
+bool CHashTableSession::SubmitGetAllRecordsSync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
+{
+    std::vector<std::pair<CLinkInfo, std::string>> headerValues;
+    for (const CLinkInfo& linkInfo : vchLinkInfo) {
+        int64_t iSequence;
+        std::array <char, 32> arrPubKey;
+        aux::from_hex(stringFromVch(linkInfo.vchSenderPubKey), arrPubKey.data());
+        CDataRecord record;
+        if (SubmitGetRecord(arrPubKey, linkInfo.arrReceivePrivateSeed, strOperationType, iSequence, record))
+        {
+            record.vchOwnerFQDN = linkInfo.vchFullObjectPath;
+            vchRecords.push_back(record);
+        }
+    }
+    return true;
+}
+
 static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigned char>& vchKey)
 {
     std::string strSeed = stringFromVch(vchKey);
@@ -438,7 +465,7 @@ static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigne
     return array32;
 }
 
-bool CHashTableSession::SubmitGetAllRecords(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
+bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
     uint16_t nTotalSlots = 32;
     strPutErrorMessage = "";
@@ -535,14 +562,4 @@ bool CHashTableSession::SubmitGetAllRecords(const std::vector<CLinkInfo>& vchLin
         }
     }
     return true;
-}
-
-bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event)
-{
-    std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
-    if (FindDHTGetEvent(infoHash, event)) {
-        LogPrintf("CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
-        return true;
-    }
-    return false;
 }

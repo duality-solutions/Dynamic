@@ -923,7 +923,7 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     }
 
     std::vector<CDataRecord> vchRecords;
-    if (!pHashTableSession->SubmitGetAllRecords(vchLinkInfo, strOperationType, vchRecords))
+    if (!pHashTableSession->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
         throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
     results.push_back(Pair("get_operation", strOperationType));
