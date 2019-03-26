@@ -68,7 +68,9 @@ public:
     CRecordHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, 
                         const uint32_t format, const uint16_t indexLocation, const uint32_t size, const uint32_t timestamp);
 
-    CRecordHeader(const std::string strHex);
+    CRecordHeader(const std::string& hex);
+
+    bool LoadHex(const std::string& hex);
 
     inline void SetNull()
     {
