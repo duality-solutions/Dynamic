@@ -408,7 +408,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         }
     }
     header.LoadHex(strHeaderHex);
-    if (!header.IsNull()) {
+    if (!header.IsNull() && header.nChunks > 0) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
