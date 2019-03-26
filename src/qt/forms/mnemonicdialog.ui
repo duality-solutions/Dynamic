@@ -456,7 +456,7 @@ Wallet wil restart after mnemonic has been imported.</string>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer">
+            <spacer name="horizontalSpacer1">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -642,19 +642,6 @@ Wallet wil restart after mnemonic has been imported.</string>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <spacer name="horizontalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Input single privatekey</string>
@@ -676,6 +663,16 @@ Wallet wil restart after mnemonic has been imported.</string>
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxPrivateKeyForceRescan">
+             <property name="text">
+              <string>Force Rescan</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -737,15 +734,9 @@ Wallet wil restart after mnemonic has been imported.</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="reimportPrivatekey">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+            <widget class="QPushButton" name="pushButtonPrivatekeyCancel">
              <property name="text">
-              <string>Reimport</string>
+              <string>Cancel</string>
              </property>
             </widget>
            </item>
@@ -778,19 +769,6 @@ Wallet wil restart after mnemonic has been imported.</string>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <spacer name="horizontalSpacer_12">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>Input privatekey file</string>
@@ -812,6 +790,16 @@ Wallet wil restart after mnemonic has been imported.</string>
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxPrivateKeyFileForceRescan">
+             <property name="text">
+              <string>Force Rescan</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -900,15 +888,9 @@ Wallet wil restart after mnemonic has been imported.</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="reimportWallet">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+            <widget class="QPushButton" name="pushButtonPrivateKeyFileCancel">
              <property name="text">
-              <string>Reimport</string>
+              <string>Cancel</string>
              </property>
             </widget>
            </item>
