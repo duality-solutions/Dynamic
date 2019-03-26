@@ -185,3 +185,8 @@ bool ShutdownRequested()
 {
   return false;
 }
+
+void StartMnemonicRestart()
+{
+  exit(0);
+}

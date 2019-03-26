@@ -49,16 +49,11 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     ui->reimportMnemonic->setStyleSheet(restyleSheet);
     ui->reimportMnemonic->setVisible(false);
     ui->importPrivatekey->setStyleSheet(styleSheet);
-    //ui->reimportPrivatekey->setStyleSheet(restyleSheet);
     ui->importWallet->setStyleSheet(styleSheet);
-    //ui->reimportWallet->setStyleSheet(restyleSheet);
     ui->pushButtonCreateMnemonic_Generate->setStyleSheet(styleSheet);
     ui->pushButtonCreateMnemonic_Cancel->setStyleSheet(restyleSheet);
     ui->pushButtonImportMnemonicCancel->setStyleSheet(restyleSheet);
     ui->pushButtonCreateMnemonic_Validate->setStyleSheet(styleSheet);
-
-    //ui->reimportPrivatekey->setVisible(false);
-    //ui->reimportWallet->setVisible(false);
 
     ui->pushButtonPrivatekeyCancel->setStyleSheet(restyleSheet);
     ui->pushButtonPrivateKeyFileCancel->setStyleSheet(restyleSheet);
@@ -208,19 +203,6 @@ void MnemonicDialog::on_reimportMnemonic_clicked()
     importMnemonic(true);
 }
 
-/*
-void MnemonicDialog::on_reimportWallet_clicked()
-{
-    importWallet(true);
-}
-*/
-
-/*
-void MnemonicDialog::on_reimportPrivatekey_clicked()
-{
-    importPrivatekey(true);
-}
-*/
 
 void MnemonicDialog::createMnemonic() {
     ui->textEditNewRecoveryPhrase->clear();
@@ -275,7 +257,6 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
     QString passPhrase = ui->lineEditPassPhrase->text();
     languageValue.replace(QString(" "),QString(""));
     languageValue = languageValue.toLower();
-    //forceRescan = ui->checkBoxForceRescan->isChecked();
 
     std::string outputmessage = "";
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
@@ -304,13 +285,6 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
     languageValue.prepend(QString(" "));
     RPCstr.append(languageValue);
     if (passPhrase.length() > 0) RPCstr.append(QString(" \"") + passPhrase + QString("\""));
-
-    //RPCstr.append(QString(" \"") + passPhrase + QString("\" 0 100"));
-
-    //if(forceRescan)
-        //RPCstr.append(QString(" true"));
-
-    //QMessageBox::information(0,"RPCCmd",RPCstr);
 
     try {
         Q_EMIT cmdToConsole(RPCstr);

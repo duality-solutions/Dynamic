@@ -5258,8 +5258,7 @@ std::string CWallet::GetWalletHelpString(bool showDebug)
 
 CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool fImportMnemonic)
 {
-    LogPrintf("DEBUGGER %s made it here: %s\n", __func__, walletFile);
-    
+   
     // needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
