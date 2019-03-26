@@ -53,9 +53,12 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     }
     oLink.push_back(Pair("time", nTime));
     expired_time = link.nExpireTime;
-    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    if (expired_time != 0)
     {
-        expired = true;
+        if (expired_time <= (int64_t)chainActive.Tip()->GetMedianTimePast())
+        {
+            expired = true;
+        }
     }
     oLink.push_back(Pair("expires_on", expired_time));
     oLink.push_back(Pair("expired", expired));
@@ -83,9 +86,12 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     }
     oLink.push_back(Pair("time", nTime));
     expired_time = link.nExpireTime;
-    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    if (expired_time != 0)
     {
-        expired = true;
+        if (expired_time <= (int64_t)chainActive.Tip()->GetMedianTimePast())
+        {
+            expired = true;
+        }
     }
     oLink.push_back(Pair("expires_on", expired_time));
     oLink.push_back(Pair("expired", expired));
@@ -414,9 +420,12 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                 }
                 oLink.push_back(Pair("time", nTime)); // TODO: rename to request_time
                 expired_time = link.nExpireTimeRequest;
-                if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+                if (expired_time != 0)
                 {
-                    expired = true;
+                    if (expired_time <= (int64_t)chainActive.Tip()->GetMedianTimePast())
+                    {
+                        expired = true;
+                    }
                 }
                 oLink.push_back(Pair("expires_on", expired_time)); // TODO: rename to request_expires_on
                 oLink.push_back(Pair("expired", expired)); // TODO: rename to request_expired
@@ -431,9 +440,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                     }
                     oLink.push_back(Pair("accept_time", nTime));
                     expired_time = link.nExpireTimeRequest;
-                    if(expired_time != 0 || expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+                    expired = false;
+                    if (expired_time != 0)
                     {
-                        expired = true;
+                        if (expired_time <= (int64_t)chainActive.Tip()->GetMedianTimePast())
+                        {
+                            expired = true;
+                        }
                     }
                     oLink.push_back(Pair("accept_expires_on", expired_time));
                     oLink.push_back(Pair("accept_expired", expired));
