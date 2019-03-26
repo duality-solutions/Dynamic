@@ -48,6 +48,9 @@ public:
     uint16_t TotalSlots() const { return nTotalSlots; }
     std::vector<unsigned char> RawData() const { return vchData; }
     CRecordHeader GetHeader() { return dataHeader; }
+    bool Encrypted() { return dataHeader.Encrypted(); }
+    uint16_t Version() { return dataHeader.nVersion; }
+
     std::vector<CDataChunk> GetChunks() const { return vChunks; }
     std::string Value() const;
     std::string ErrorMessage() { return strErrorMessage; }

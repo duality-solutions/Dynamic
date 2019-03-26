@@ -932,8 +932,8 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     {
         UniValue result(UniValue::VOBJ);
         result.push_back(Pair("account", stringFromVch(record.vchOwnerFQDN)));
-        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", record.GetHeader().nVersion));
+        result.push_back(Pair("data_encrypted", record.Encrypted() ? "true" : "false"));
+        result.push_back(Pair("data_version", record.Version()));
         result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
         result.push_back(Pair("get_value", record.Value()));
         result.push_back(Pair("get_value_size", (int)record.Value().size()));
