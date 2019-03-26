@@ -926,12 +926,12 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     if (!pHashTableSession->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
         throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
-    results.push_back(Pair("get_operation", strOperationType));
     int nRecordItem = 1;
     for (CDataRecord& record : vchRecords) // loop through records
     {
         UniValue result(UniValue::VOBJ);
         result.push_back(Pair("account", stringFromVch(record.vchOwnerFQDN)));
+        result.push_back(Pair("get_operation", strOperationType));
         result.push_back(Pair("data_encrypted", record.Encrypted() ? "true" : "false"));
         result.push_back(Pair("data_version", record.Version()));
         result.push_back(Pair("data_chunks", record.GetHeader().nChunks));

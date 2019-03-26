@@ -388,25 +388,26 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
 {
     bool fAuthoritative = false;
     uint16_t nTotalSlots = 32;
+    uint16_t nHeaderAttempts = 3;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    CRecordHeader header;
     if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
-        strPutErrorMessage = "Failed to get header.";
-    }
-    iSequence++;
-    CRecordHeader header(strHeaderHex);
-    unsigned int i = 0;
-    while (i < 5) {
-        strHeaderHex = "";
-        if (header.IsNull()) {
-            if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
-                strPutErrorMessage = "Failed to get header.";
+        unsigned int i = 0;
+        while (i < nHeaderAttempts) {
+            strHeaderHex = "";
+            if (header.IsNull()) {
+                if (SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                    break;
+                }
             }
-            CRecordHeader headerTemp(strHeaderHex);
-            header = headerTemp;
+            else {
+                break;
+            }
+            i++;
         }
-        i++;
     }
+    header.LoadHex(strHeaderHex);
     if (!header.IsNull()) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
