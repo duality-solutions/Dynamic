@@ -813,14 +813,8 @@ UniValue importmnemonic(const JSONRPCRequest& request)
         compareLanguage = request.params[1].get_str();
 
         selectLanguage = CMnemonic::getLanguageEnumFromLabel(compareLanguage);
-
-        //if (compareLanguage == "english") selectLanguage = CMnemonic::Language::ENGLISH;
-        //else if (compareLanguage == "french") selectLanguage = CMnemonic::Language::FRENCH;
-
     } //if language
 
-    LogPrintf("DEBUGGER %s - %s\n", __func__, compareLanguage);
-    LogPrintf("DEBUGGER %s - %s\n", __func__, strSecureMnemonic);
 
 
     if (!mnemonic.Check(strSecureMnemonic,selectLanguage))
@@ -828,20 +822,16 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
 
-    LogPrintf("DEBUGGER %s - Passphrase before: %s\n", __func__, strMnemonicPassphrase);  
 
 
     if (!request.params[2].isNull()) {
         strMnemonicPassphrase = request.params[2].get_str();
     }
 
-    LogPrintf("DEBUGGER %s - Passphrase after: %s\n", __func__, strMnemonicPassphrase);    
 
     if (strMnemonicPassphrase.size() > 24)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
 
-    LogPrintf("DEBUGGER %s - strMnemonicPassphrase: [%s]\n", __func__, strMnemonicPassphrase); //NEWLY ADDED
-    LogPrintf("DEBUGGER %s - strMnemonic: [%s]\n", __func__, strMnemonic); //NEWLY ADDED
 
     pwalletMain->ShowProgress(_("Importing... Wallet will restart when complete."), 0); // show progress dialog in GUI
     pwalletMain->ShowProgress("", 25); //show we're working in the background...
@@ -879,19 +869,6 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     ForceRemoveArg("-skipmnemoniccheck");
 
     return entry;
-
-//---------------------------------------------------------------------------------------------------------------------------------
-/*
-    SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
-    if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true, selectLanguage))
-        throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
-
-    newHdChain.Debug(__func__);
-
-    if (!pwalletMain->SetHDChain(newHdChain, false))
-        throw std::runtime_error(std::string(__func__) + ": SetHDChain failed");
-*/
-//
 
 }
 
