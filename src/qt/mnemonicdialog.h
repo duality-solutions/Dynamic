@@ -31,7 +31,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void on_importPrivatekey_clicked();
-    void on_reimportPrivatekey_clicked();
+    //void on_reimportPrivatekey_clicked();
     void on_importMnemonic_clicked();
     void on_pushButtonImportMnemonicCancel_clicked();
     void on_pushButtonCreateMnemonic_Generate_clicked();
@@ -43,10 +43,15 @@ private Q_SLOTS:
     void on_toolButtonImportMnemonic_Paste_clicked();
     void on_toolButtonImportMnemonic_Clear_clicked();
     void on_importWallet_clicked();
-    void on_reimportWallet_clicked();
+    //void on_reimportWallet_clicked();
     void on_fileButton_clicked();
     void combobox1ItemChanged(int input);
     void combobox2ItemChanged(int input);
+
+    void on_pushButtonPrivatekeyCancel_clicked();
+    void on_pushButtonPrivateKeyFileCancel_clicked();
+
+
 private:
     Ui::MnemonicDialog *ui;
 };

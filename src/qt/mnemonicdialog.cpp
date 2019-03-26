@@ -49,13 +49,19 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     ui->reimportMnemonic->setStyleSheet(restyleSheet);
     ui->reimportMnemonic->setVisible(false);
     ui->importPrivatekey->setStyleSheet(styleSheet);
-    ui->reimportPrivatekey->setStyleSheet(restyleSheet);
+    //ui->reimportPrivatekey->setStyleSheet(restyleSheet);
     ui->importWallet->setStyleSheet(styleSheet);
-    ui->reimportWallet->setStyleSheet(restyleSheet);
+    //ui->reimportWallet->setStyleSheet(restyleSheet);
     ui->pushButtonCreateMnemonic_Generate->setStyleSheet(styleSheet);
     ui->pushButtonCreateMnemonic_Cancel->setStyleSheet(restyleSheet);
     ui->pushButtonImportMnemonicCancel->setStyleSheet(restyleSheet);
     ui->pushButtonCreateMnemonic_Validate->setStyleSheet(styleSheet);
+
+    //ui->reimportPrivatekey->setVisible(false);
+    //ui->reimportWallet->setVisible(false);
+
+    ui->pushButtonPrivatekeyCancel->setStyleSheet(restyleSheet);
+    ui->pushButtonPrivateKeyFileCancel->setStyleSheet(restyleSheet);
 
     ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.")+"</p>");
 
@@ -114,7 +120,9 @@ void MnemonicDialog::combobox2ItemChanged(int input)
 
 void MnemonicDialog::on_importPrivatekey_clicked()
 {
-    importPrivatekey(false);
+    bool ForceRescan = ui->checkBoxPrivateKeyForceRescan->isChecked();
+    
+    importPrivatekey(ForceRescan);
 }
 
 void MnemonicDialog::on_importMnemonic_clicked()
@@ -129,6 +137,17 @@ void MnemonicDialog::on_pushButtonImportMnemonicCancel_clicked()
 
 
 void MnemonicDialog::on_pushButtonCreateMnemonic_Cancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_pushButtonPrivatekeyCancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+void MnemonicDialog::on_pushButtonPrivateKeyFileCancel_clicked()
 {
     QDialog::reject(); //cancelled
 }
@@ -171,7 +190,9 @@ void MnemonicDialog::on_pushButtonCreateMnemonic_Generate_clicked()
 
 void MnemonicDialog::on_importWallet_clicked()
 {
-    importWallet(false);
+    bool ForceRescan = ui->checkBoxPrivateKeyFileForceRescan->isChecked();
+
+    importWallet(ForceRescan);
 }
 
 void MnemonicDialog::on_fileButton_clicked()
@@ -187,15 +208,19 @@ void MnemonicDialog::on_reimportMnemonic_clicked()
     importMnemonic(true);
 }
 
+/*
 void MnemonicDialog::on_reimportWallet_clicked()
 {
     importWallet(true);
 }
+*/
 
+/*
 void MnemonicDialog::on_reimportPrivatekey_clicked()
 {
     importPrivatekey(true);
 }
+*/
 
 void MnemonicDialog::createMnemonic() {
     ui->textEditNewRecoveryPhrase->clear();
