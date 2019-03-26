@@ -297,8 +297,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     std::vector<std::vector<unsigned char>> vPubKeys;
     std::string strSalt = record.GetHeader().Salt;
     DHT::vPutValues.push_back(std::make_pair(strSalt, record.HeaderHex));
-    //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
-    LogPrintf("CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
+
+    LogPrint("dht", "CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
                                                                 strSalt, record.Value(), lastSequence, DHT::vPutValues.size());
     for(const CDataChunk& chunk: record.GetChunks()) {
         DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
@@ -307,8 +307,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     for(const std::pair<std::string, std::string>& pair: DHT::vPutValues) {
         Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_string, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
                                 public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
-        //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
-        LogPrintf("CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
+
+        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
     }
     nPutRecords++;
     if (nPutRecords % 32 == 0)
@@ -338,7 +338,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     }
 
     Session->dht_get_item(public_key, recordSalt);
-    LogPrintf("CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
+    LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
 
     return true;
 }
@@ -367,7 +367,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             }
             lastSequence = data.SequenceNumber();
             fAuthoritative = data.Authoritative();
-            LogPrintf("CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
+            LogPrint("dht", "CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
             return true;
         }
         MilliSleep(10);
@@ -435,7 +435,7 @@ bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, c
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
     if (FindDHTGetEvent(infoHash, event)) {
-        //LogPrintf("CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
+        LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
         return true;
     }
     return false;

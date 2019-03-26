@@ -101,12 +101,12 @@ void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& ev
     LOCK(cs_DHTGetEventMap);
     if (m_DHTGetEventMap.find(infoHash) == m_DHTGetEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        LogPrintf("AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
+        LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
         m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
         // event found. Update entry in DHT event map
-        LogPrintf("AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
+        LogPrint("dht", "AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
         m_DHTGetEventMap[infoHash] = event;
     }
 }
@@ -147,7 +147,7 @@ static void DHTEventListener(session* dhtSession)
                     dht_mutable_item_alert* pGet = alert_cast<dht_mutable_item_alert>((*iAlert));
                     if (pGet == nullptr)
                         continue;
-                    LogPrintf("%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
+                    LogPrint("dht", "%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
                         , __func__, aux::to_hex(pGet->key), pGet->salt, pGet->item.to_string(), strAlertMessage, strAlertTypeName, iAlertCategory);
 
                     if (pGet->item.to_string() != "<uninitialized>") {
