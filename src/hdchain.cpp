@@ -89,9 +89,11 @@ bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& s
         }
         // NOTE: default mnemonic passphrase is an empty string
 
-        // printf("mnemonic: %s\n", ssMnemonicTmp.c_str());
-        if (!CMnemonic::Check(ssMnemonicTmp,selectLanguage)) {
-            throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+        //if importing mnemonic, mnemonic and mnemonic wallet file has already been checked. don't check again
+        if (!GetBoolArg("-skipmnemoniccheck", false)) {
+            if (!CMnemonic::Check(ssMnemonicTmp,selectLanguage)) {
+                throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+            }
         }
 
         CMnemonic::ToSeed(ssMnemonicTmp, ssMnemonicPassphrase, vchSeed);
@@ -100,6 +102,9 @@ bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& s
 
     vchMnemonic = SecureVector(ssMnemonicTmp.begin(), ssMnemonicTmp.end());
     vchMnemonicPassphrase = SecureVector(ssMnemonicPassphrase.begin(), ssMnemonicPassphrase.end());
+
+    //cleanup
+    ForceRemoveArg("-skipmnemoniccheck");
 
     return !IsNull();
 }

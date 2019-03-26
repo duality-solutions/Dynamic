@@ -278,6 +278,8 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
 
     languageValue.prepend(QString(" "));
     RPCstr.append(languageValue);
+    if (passPhrase.length() > 0) RPCstr.append(QString(" \"") + passPhrase + QString("\""));
+
     //RPCstr.append(QString(" \"") + passPhrase + QString("\" 0 100"));
 
     //if(forceRescan)

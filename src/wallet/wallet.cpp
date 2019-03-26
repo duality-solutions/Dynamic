@@ -5322,8 +5322,8 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
     if (fFirstRun) {
         // Create new keyUser and set as default key
         if (GetBoolArg("-usehd", DEFAULT_USE_HD_WALLET) && !walletInstance->IsHDEnabled()) {
-            if (GetArg("-mnemonicpassphrase", "").size() > 512) { //RESTRICTION REMOVED: was 256
-                InitError(_("Mnemonic passphrase is too long, must be at most 256 characters"));
+            if (GetArg("-mnemonic", "").size() > 512) { //RESTRICTION REMOVED: was 256 
+                InitError(_("Mnemonic is too long, must be at most 256 characters")); //these were checking passphrase but think it should be mnemonic
                 return NULL;
             }
             // generate a new master key
@@ -5331,6 +5331,11 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
 
             // ensure this wallet.dat can only be opened by clients supporting HD
             walletInstance->SetMinVersion(FEATURE_HD);
+        }
+
+
+        if (fImportMnemonic) {
+            pwalletMain->ShowProgress("", 50); //show we're working in the background...
         }
 
         CPubKey newDefaultKey;
@@ -5342,11 +5347,20 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
             }
         }
 
+
+        if (fImportMnemonic) pwalletMain->ShowProgress("", 75); //show we're working in the background...
+
+
+
         walletInstance->SetBestChain(chainActive.GetLocator());
+
 
         // Try to create wallet backup right after new wallet was created
         std::string strBackupWarning;
         std::string strBackupError;
+
+        ForceRemoveArg("-skipmnemonicbackup"); //reset so backup occurs next time
+
         if (!AutoBackupWallet(walletInstance, "", strBackupWarning, strBackupError)) {
             if (!strBackupWarning.empty()) {
                 InitWarning(strBackupWarning);
@@ -5380,6 +5394,9 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
+
+    if (fImportMnemonic) pwalletMain->ShowProgress("", 90); //show we're working in the background...
+
 
     RegisterValidationInterface(walletInstance);
 
@@ -5638,6 +5655,13 @@ bool CWallet::BackupWallet(const std::string& strDest)
 // either supply "wallet" (if already loaded) or "strWalletFile" (if wallet wasn't loaded yet)
 bool AutoBackupWallet(CWallet* wallet, std::string strWalletFile, std::string& strBackupWarning, std::string& strBackupError)
 {
+
+    //don't do an initial backup if importing mnemonic 
+    if (GetBoolArg("-skipmnemonicbackup", false)) {
+        ForceRemoveArg("-skipmnemonicbackup"); //reset, so backup next time
+        return true;
+    } //end skipmnemonicbackup
+
     namespace fs = boost::filesystem;
 
     strBackupWarning = strBackupError = "";
