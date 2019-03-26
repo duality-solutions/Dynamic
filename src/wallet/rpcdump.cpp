@@ -805,9 +805,9 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
     CMnemonic mnemonic;
-    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH;
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //default language is ENGLISH
 
-    std::string compareLanguage = "";
+    std::string compareLanguage = "english"; //default language is ENGLISH
 
     if (!request.params[1].isNull()) {
         compareLanguage = request.params[1].get_str();
@@ -861,7 +861,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     }
 
     ForceSetArg("-mnemonic", strMnemonic);
+    ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
+    ForceSetArg("-mnemoniclanguage", compareLanguage);
     SoftSetBoolArg("-importmnemonic", true);
+    SoftSetBoolArg("-skipmnemoniccheck", true);
 
     CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
     pwalletMain = pwallet;
@@ -872,6 +875,8 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     //cleanup
     ForceRemoveArg("-mnemonic");
     ForceRemoveArg("-importmnemonic");
+    ForceRemoveArg("-mnemoniclanguage");
+    ForceRemoveArg("-skipmnemoniccheck");
 
     return entry;
 

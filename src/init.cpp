@@ -1108,8 +1108,11 @@ bool AppInitParameterInteraction()
 
     if (FileExists(pathWalletMnemonic.string())) {
         SoftSetBoolArg("-zapwallettxes", true);
+        SoftSetBoolArg("-skipmnemoniccheck", true);
+        SoftSetBoolArg("-skipmnemonicbackup", true);
         //SoftSetBoolArg("-reindex", true);
         SwapMnemonicWalletFile();
+        MilliSleep(333); //pause slightly in case wallet is .locked from restarting
     }
 
     const CChainParams& chainparams = Params();
