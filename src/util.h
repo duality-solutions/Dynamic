@@ -296,4 +296,6 @@ std::string IntVersionToString(uint32_t nVersion);
  */
 std::string SafeIntVersionToString(uint32_t nVersion);
 
+bool FileExists(const std::string& strFilePath);
+
 #endif // DYNAMIC_UTIL_H

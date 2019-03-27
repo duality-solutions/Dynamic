@@ -146,6 +146,7 @@ public:
     bool ListMyPendingRequests(std::vector<CLink>& vchLinks);
     bool ListMyPendingAccepts(std::vector<CLink>& vchLinks);
     bool ListMyCompleted(std::vector<CLink>& vchLinks);
+    std::vector<CLinkInfo> GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath);
 
 private:
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);

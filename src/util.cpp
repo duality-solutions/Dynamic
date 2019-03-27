@@ -1029,3 +1029,13 @@ std::string SafeIntVersionToString(uint32_t nVersion)
         return "invalid_version";
     }
 }
+
+bool FileExists(const std::string& strFilePath)
+{
+    if (FILE *file = fopen(strFilePath.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
+}

@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "serialize.h"
 #include "streams.h"
+#include "tinyformat.h"
 #include "version.h"
 
 void ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly)
@@ -63,3 +64,10 @@ bool CLinkStorage::Encrypted() const
 
     return true;
 }
+
+std::string CLinkInfo::ToString() const
+{
+    return strprintf("CLinkInfo(version=%u, full_path=%s, sender_pubkey=%s, receive_pubkey=%s)\n", 
+                        nVersion, stringFromVch(vchFullObjectPath), stringFromVch(vchSenderPubKey), stringFromVch(vchReceivePubKey));
+}
+

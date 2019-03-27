@@ -4,6 +4,8 @@
 
 #include "dht/session.h"
 
+#include "bdap/linkstorage.h"
+#include "bdap/utils.h"
 #include "dht/sessionevents.h"
 #include "chainparams.h"
 #include "dht/datachunk.h"
@@ -284,7 +286,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     strPutErrorMessage = "";
     HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
     int64_t nLastUpdate = (int64_t)GetLastPutDate(recordKey);
-    if (DHT_RECORD_LOCK_SECONDS > GetTime() - nLastUpdate) {
+    if (DHT_RECORD_LOCK_SECONDS >= (GetTime() - nLastUpdate))
+    {
         strPutErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
         return false;
     }
@@ -294,8 +297,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     std::vector<std::vector<unsigned char>> vPubKeys;
     std::string strSalt = record.GetHeader().Salt;
     DHT::vPutValues.push_back(std::make_pair(strSalt, record.HeaderHex));
-    //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
-    LogPrintf("CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
+
+    LogPrint("dht", "CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
                                                                 strSalt, record.Value(), lastSequence, DHT::vPutValues.size());
     for(const CDataChunk& chunk: record.GetChunks()) {
         DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
@@ -304,8 +307,8 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     for(const std::pair<std::string, std::string>& pair: DHT::vPutValues) {
         Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_string, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
                                 public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
-        //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
-        LogPrintf("CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
+
+        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
     }
     nPutRecords++;
     if (nPutRecords % 32 == 0)
@@ -317,8 +320,6 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
     //TODO: DHT add locks
-    LogPrintf("CHashTableSession::%s -- started.\n", __func__);
-
     if (!pHashTableSession->Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pHashTableSession->Session is null.";
         return false;
@@ -335,12 +336,9 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
         }
     }
-    else {
-        LogPrintf("CHashTableSession::%s -- GetDHTMutableData DHT already running.  Bootstrap not needed.\n", __func__);
-    }
 
     Session->dht_get_item(public_key, recordSalt);
-    LogPrintf("CHashTableSession::%s -- MGET: %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
+    LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
 
     return true;
 }
@@ -369,10 +367,200 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             }
             lastSequence = data.SequenceNumber();
             fAuthoritative = data.Authoritative();
-            LogPrintf("CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
+            LogPrint("dht", "CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
             return true;
         }
-        MilliSleep(40);
+        MilliSleep(10);
     }
     return false;
+}
+
+static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& key32)
+{
+    std::vector<unsigned char> vchKey;
+    for(unsigned int i = 0; i < sizeof(key32); i++) {
+        vchKey.push_back(key32[i]);
+    }
+    return vchKey;
+}
+
+bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
+{
+    bool fAuthoritative = false;
+    uint16_t nTotalSlots = 32;
+    uint16_t nHeaderAttempts = 3;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    CRecordHeader header;
+    if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+        unsigned int i = 0;
+        while (i < nHeaderAttempts) {
+            strHeaderHex = "";
+            if (header.IsNull()) {
+                if (SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+            i++;
+        }
+    }
+    header.LoadHex(strHeaderHex);
+    if (!header.IsNull() && header.nChunks > 0) {
+        std::vector<CDataChunk> vChunks;
+        for(unsigned int i = 0; i < header.nChunks; i++) {
+            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+            std::string strChunk;
+            if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
+                strPutErrorMessage = "Failed to get record chunk.";
+                return false;
+            }
+            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+            vChunks.push_back(chunk);
+        }
+        CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
+        if (record.HasError()) {
+            strPutErrorMessage = strprintf("Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+            return false;
+        }
+        record = getRecord;
+        return true;
+    }
+    return false;
+}
+
+bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event)
+{
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
+    if (FindDHTGetEvent(infoHash, event)) {
+        LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
+        return true;
+    }
+    return false;
+}
+
+bool CHashTableSession::SubmitGetAllRecordsSync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
+{
+    std::vector<std::pair<CLinkInfo, std::string>> headerValues;
+    for (const CLinkInfo& linkInfo : vchLinkInfo) {
+        int64_t iSequence;
+        std::array <char, 32> arrPubKey;
+        aux::from_hex(stringFromVch(linkInfo.vchSenderPubKey), arrPubKey.data());
+        CDataRecord record;
+        if (SubmitGetRecord(arrPubKey, linkInfo.arrReceivePrivateSeed, strOperationType, iSequence, record))
+        {
+            record.vchOwnerFQDN = linkInfo.vchFullObjectPath;
+            vchRecords.push_back(record);
+        }
+    }
+    return true;
+}
+
+static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigned char>& vchKey)
+{
+    std::string strSeed = stringFromVch(vchKey);
+    std::array<char, 32> array32;
+    aux::from_hex(strSeed, array32.data());
+    return array32;
+}
+
+bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
+{
+    uint16_t nTotalSlots = 32;
+    strPutErrorMessage = "";
+    // Get the headers first
+    for (const CLinkInfo& linkInfo : vchLinkInfo) {
+        std::string strHeaderHex;
+        std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+        SubmitGet(EncodedVectorCharToArray32(linkInfo.vchSenderPubKey), strHeaderSalt);
+        MilliSleep(10);
+    }
+
+    MilliSleep(300); // Wait for headers data
+    std::vector<std::pair<CLinkInfo, CMutableGetEvent>> eventHeaders;
+    for (const CLinkInfo& linkInfo : vchLinkInfo) {
+        std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+        const std::array<char, 32>& public_key = EncodedVectorCharToArray32(linkInfo.vchSenderPubKey);
+        CMutableGetEvent mutableGetData;
+        if (GetDataFromMap(public_key, strHeaderSalt, mutableGetData))
+        {
+            eventHeaders.push_back(std::make_pair(linkInfo, mutableGetData));
+        }
+    }
+    for (const std::pair<CLinkInfo, CMutableGetEvent>& eventHeader: eventHeaders)
+    {
+        std::string strHeaderHex = eventHeader.second.Value();
+        if (strHeaderHex.substr(0, 1) == "'") {
+            strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
+        }
+        CRecordHeader header(strHeaderHex);
+        if (!header.IsNull() && nTotalSlots >= header.nChunks) {
+            std::vector<CDataChunk> vChunks;
+            for(unsigned int i = 0; i < header.nChunks; i++) {
+                std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+                std::array <char, 32> arrPubKey;
+                aux::from_hex(eventHeader.second.PublicKey(), arrPubKey.data());
+                SubmitGet(arrPubKey, strChunkSalt);
+                MilliSleep(20);
+            }
+        }
+    }
+    if (eventHeaders.size() > 0) {
+        MilliSleep(350); // Wait for records data
+        for (const std::pair<CLinkInfo, CMutableGetEvent>& eventHeader: eventHeaders)
+        {
+            std::string strHeaderHex = eventHeader.second.Value();
+            if (strHeaderHex.substr(0, 1) == "'") {
+                strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
+            }
+            CRecordHeader header(strHeaderHex);
+            if (!header.IsNull() && nTotalSlots >= header.nChunks) {
+                bool fSkip = false;
+                std::vector<CDataChunk> vChunks;
+                for(unsigned int i = 0; i < header.nChunks; i++) {
+                    std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+                    std::array <char, 32> arrPubKey;
+                    aux::from_hex(eventHeader.second.PublicKey(), arrPubKey.data());
+                    CMutableGetEvent eventData;
+                    if (GetDataFromMap(arrPubKey, strChunkSalt, eventData)) {
+                        std::string strHexValue = eventData.Value();
+                        if (strHexValue.substr(0, 1) == "'") {
+                            strHexValue = strHexValue.substr(1, strHexValue.size() - 2);
+                        }
+                        CDataChunk chunk(i, i + 1, strChunkSalt, strHexValue);
+                        vChunks.push_back(chunk);
+                    }
+                    else {
+                        bool fAuthoritative;
+                        int64_t iSequence;
+                        std::string strHeaderHex;
+                        if (SubmitGet(arrPubKey, strChunkSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                            CDataChunk chunk(i, i + 1, strChunkSalt, strHeaderHex);
+                            vChunks.push_back(chunk);
+                        }
+                        else {
+                            LogPrintf("%s -- Skipped %s record for %s, chunk salt = %s\n", __func__, strOperationType, stringFromVch(eventHeader.first.vchFullObjectPath), strChunkSalt);
+                            fSkip = true;
+                            i = header.nChunks + 1; 
+                        }
+                    }
+                }
+                if (!fSkip) {
+                    // TODO: make sure all chunks and header have the same sequence number.
+                    CDataRecord record(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(eventHeader.first.arrReceivePrivateSeed));
+                    if (record.HasError()) {
+                        strPutErrorMessage = strPutErrorMessage + strprintf("\nRecord has errors: %s\n", __func__, record.ErrorMessage());
+                    }
+                    else {
+                        LogPrintf("%s -- Found %s record for %s\n", __func__, strOperationType, stringFromVch(eventHeader.first.vchFullObjectPath));
+                        record.vchOwnerFQDN = eventHeader.first.vchFullObjectPath;
+                        vchRecords.push_back(record);
+                    }
+                }
+            }
+        }
+    }
+    return true;
 }

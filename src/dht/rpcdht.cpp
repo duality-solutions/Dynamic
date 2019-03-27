@@ -159,7 +159,8 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
     record.GetHeader().Salt = strOperationType;
-    pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5402 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -530,7 +531,9 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5516 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
@@ -600,51 +603,17 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
-    std::string strHeaderHex;
-    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) 
-            throw std::runtime_error("getbdapdata: ERRCODE: 5604 - Failed to get header.");
+    CDataRecord record;
+    if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
-    iSequence++;
-    CRecordHeader header(strHeaderHex);
-    unsigned int i = 0;
-    while (i < 5) {
-        strHeaderHex = "";
-        if (header.IsNull()) {
-            if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdapdata: ERRCODE: 5628 - Failed to get header.");
+    result.push_back(Pair("get_seq", iSequence));
+    result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+    result.push_back(Pair("data_version", record.GetHeader().nVersion));
+    result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+    result.push_back(Pair("get_value", record.Value()));
+    result.push_back(Pair("get_value_size", (int)record.Value().size()));
 
-            CRecordHeader headerTemp(strHeaderHex);
-            header = headerTemp;
-        }
-        i++;
-    }
-    if (!header.IsNull()) {
-        std::vector<CDataChunk> vChunks;
-        for(unsigned int i = 0; i < header.nChunks; i++) {
-            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
-            std::string strChunk;
-            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdapdata: ERRCODE: 5606 - Failed to get chunk.");
-            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
-            vChunks.push_back(chunk);
-        }
-        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
-        if (!record.Valid())
-            throw std::runtime_error("getbdapdata: ERRCODE: 5607 - Invalid data. Size returned does not match size in header.");
-
-        result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", record.GetHeader().nVersion));
-        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
-        result.push_back(Pair("get_value", record.Value()));
-        result.push_back(Pair("get_value_size", (int)record.Value().size()));
-    }
-    else {
-        throw std::runtime_error("getbdapdata: ERRCODE: 5608 - Header is null.");
-    }
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
 
@@ -799,6 +768,9 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     if (!CheckDomainEntryDB())
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5621 - Can not access BDAP domain entry database.\n");
 
+    if (!pLinkManager)
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
@@ -821,7 +793,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     ToLowerCase(strOperationType);
 
     if (!pLinkManager)
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5624 - Can not open link request in memory map");
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CLink link;
     std::string strPubKey;
@@ -867,56 +839,111 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
-    std::string strHeaderHex;
-    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5627 - Failed to get header.");
+    CDataRecord record;
+    if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
 
-    iSequence++;
-    CRecordHeader header(strHeaderHex);
-    unsigned int i = 0;
-    while (i < 5) {
-        strHeaderHex = "";
-        if (header.IsNull()) {
-            if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get header.");
+    result.push_back(Pair("get_seq", iSequence));
+    result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+    result.push_back(Pair("data_version", record.GetHeader().nVersion));
+    result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+    result.push_back(Pair("get_value", record.Value()));
+    result.push_back(Pair("get_value_size", (int)record.Value().size()));
 
-            CRecordHeader headerTemp(strHeaderHex);
-            header = headerTemp;
-        }
-        i++;
-    }
-
-    if (!header.IsNull()) {
-        std::vector<CDataChunk> vChunks;
-        for(unsigned int i = 0; i < header.nChunks; i++) {
-            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
-            std::string strChunk;
-            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5629 - Failed to get chunk.");
-            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
-            vChunks.push_back(chunk);
-        }
-        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
-        if (!record.Valid())
-            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5630 - Invalid data. Size returned does not match size in header.");
-
-        result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", record.GetHeader().nVersion));
-        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
-        result.push_back(Pair("get_value", record.Value()));
-        result.push_back(Pair("get_value_size", (int)record.Value().size()));
-    }
-    else {
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5631 - Header is null.");
-    }
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
 
     return result;
+}
+
+UniValue getallbdaplinkdata(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 2)
+        throw std::runtime_error(
+            "getallbdaplinkdata \"account\" \"operation\"\n"
+            "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
+            "\nArguments:\n"
+            "1. account                (string)      BDAP account used to get all data for this operation\n"
+            "2. operation              (string)      Mutable data operation code\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "  \"link_acceptor\"       (string)      BDAP account that accepted the link\n"
+            "  \"get_pubkey\"          (string)      BDAP account DHT public key for account1\n"
+            "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
+            "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("getallbdaplinkdata", "duality pshare-offer") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("getallbdaplinkdata", "duality pshare-offer"));
+
+    EnsureWalletIsUnlocked();
+
+    int64_t nStart = GetTimeMillis();
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+
+    UniValue results(UniValue::VOBJ);
+   
+    if (!pHashTableSession->Session)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
+
+    if (!CheckDomainEntryDB())
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5721 - Can not access BDAP domain entry database.\n");
+
+    if (!pLinkManager)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
+    entry.ObjectID = vchObjectID;
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5722 - " + entry.GetFullObjectPath() + _(" can not be found.  Get BDAP entry failed!\n"));
+
+    std::string strOperationType = request.params[1].get_str();
+    ToLowerCase(strOperationType);
+
+    if (!pLinkManager)
+        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+
+    std::vector<CLinkInfo> vchLinkInfo = pLinkManager->GetCompletedLinkInfo(entry.vchFullObjectPath());
+    for (CLinkInfo& linkInfo : vchLinkInfo) {
+        CKeyEd25519 getKey;
+        std::vector<unsigned char> vchDHTPublicKey = linkInfo.vchReceivePubKey;
+        CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+           throw std::runtime_error(strprintf("%s: ERRCODE: 5725 - Failed to get DHT private key for account %s (pubkey = %s)\n", __func__, entry.GetFullObjectPath(), entry.DHTPubKeyString()));
+
+       linkInfo.arrReceivePrivateSeed = getKey.GetDHTPrivSeed();
+    }
+
+    std::vector<CDataRecord> vchRecords;
+    if (!pHashTableSession->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+
+    int nRecordItem = 1;
+    for (CDataRecord& record : vchRecords) // loop through records
+    {
+        UniValue result(UniValue::VOBJ);
+        result.push_back(Pair("account", stringFromVch(record.vchOwnerFQDN)));
+        result.push_back(Pair("get_operation", strOperationType));
+        result.push_back(Pair("data_encrypted", record.Encrypted() ? "true" : "false"));
+        result.push_back(Pair("data_version", record.Version()));
+        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+        result.push_back(Pair("get_value", record.Value()));
+        result.push_back(Pair("get_value_size", (int)record.Value().size()));
+        results.push_back(Pair("record_" + std::to_string(nRecordItem), result));
+        nRecordItem++;
+    }
+    int64_t nEnd = GetTimeMillis();
+    results.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+
+    return results;
 }
 
 UniValue putbdaplinkdata(const JSONRPCRequest& request)
@@ -956,6 +983,9 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     if (!CheckDomainEntryDB())
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5641 - Can not access BDAP domain entry database.\n");
+
+    if (!pLinkManager)
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
@@ -1028,9 +1058,11 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
@@ -1072,6 +1104,9 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
 
     if (!CheckDomainEntryDB())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5651 - Can not access BDAP domain entry database.\n");
+
+    if (!pLinkManager)
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CharString vchObjectID1 = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID1);
@@ -1144,7 +1179,9 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
@@ -1167,6 +1204,7 @@ static const CRPCCommand commands[] =
     { "dht",             "putbdaplinkdata",          &putbdaplinkdata,              true,    {"account1", "account2", "operation", "value"} },
     { "dht",             "clearbdapdata",            &clearbdapdata,                true,    {"account1", "account2", "operation"} },
     { "dht",             "clearbdaplinkdata",        &clearbdaplinkdata,            true,    {"account1", "account2", "operation"} },
+    { "dht",             "getallbdaplinkdata",       &getallbdaplinkdata,           true,    {"account1", "operation"} },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)

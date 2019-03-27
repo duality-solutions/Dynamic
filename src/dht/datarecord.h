@@ -42,10 +42,15 @@ public:
 
     CDataRecord(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey);
 
+    std::vector<unsigned char> vchOwnerFQDN;
+
     std::string OperationCode() const { return strOperationCode; }
     uint16_t TotalSlots() const { return nTotalSlots; }
     std::vector<unsigned char> RawData() const { return vchData; }
     CRecordHeader GetHeader() { return dataHeader; }
+    bool Encrypted() { return dataHeader.Encrypted(); }
+    uint16_t Version() { return dataHeader.nVersion; }
+
     std::vector<CDataChunk> GetChunks() const { return vChunks; }
     std::string Value() const;
     std::string ErrorMessage() { return strErrorMessage; }

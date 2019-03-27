@@ -96,19 +96,18 @@ CPutRequest::CPutRequest(const CKeyEd25519 _key, const std::string _salt, const 
     timestamp = GetTimeMillis();
 }
 
-static void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
+void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
 {
     LOCK(cs_DHTGetEventMap);
-    std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
-    if (iMutableEvent == m_DHTGetEventMap.end()) {
+    if (m_DHTGetEventMap.find(infoHash) == m_DHTGetEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        LogPrintf("AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
+        LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
         m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
         // event found. Update entry in DHT event map
-        LogPrintf("AddToDHTGetEventMap Found -- infohash = %s\n", infoHash);
-        iMutableEvent->second = event;
+        LogPrint("dht", "AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
+        m_DHTGetEventMap[infoHash] = event;
     }
 }
 
@@ -143,18 +142,21 @@ static void DHTEventListener(session* dhtSession)
             const int iAlertType = (*iAlert)->type();
             const std::string strAlertTypeName = alert_name(iAlertType);
             if (iAlertType == DHT_GET_ALERT_TYPE_CODE || iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
-                LogPrint("dht", "DHTEventListener -- DHT Alert Message = %s, Alert Type =%s, Alert Category = %u\n", strAlertMessage, strAlertTypeName, iAlertCategory);
                 if (iAlertType == DHT_GET_ALERT_TYPE_CODE) {
                     // DHT Get Mutable Event
                     dht_mutable_item_alert* pGet = alert_cast<dht_mutable_item_alert>((*iAlert));
                     if (pGet == nullptr)
                         continue;
+                    LogPrint("dht", "%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
+                        , __func__, aux::to_hex(pGet->key), pGet->salt, pGet->item.to_string(), strAlertMessage, strAlertTypeName, iAlertCategory);
 
-                    const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
+                    if (pGet->item.to_string() != "<uninitialized>") {
+                        const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
-                    std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
-                    AddToDHTGetEventMap(infoHash, event);
+                        std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
+                        AddToDHTGetEventMap(infoHash, event);
+                    }
                 }
             }
             else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {

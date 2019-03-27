@@ -200,7 +200,7 @@ void CLinkManager::ProcessQueue()
 
 bool CLinkManager::ListMyPendingRequests(std::vector<CLink>& vchLinks)
 {
-    for(const std::pair<uint256, CLink>& link : m_Links)
+    for (const std::pair<uint256, CLink>& link : m_Links)
     {
         if (link.second.nLinkState == 1 && link.second.fRequestFromMe) // pending request
         {
@@ -212,10 +212,10 @@ bool CLinkManager::ListMyPendingRequests(std::vector<CLink>& vchLinks)
 
 bool CLinkManager::ListMyPendingAccepts(std::vector<CLink>& vchLinks)
 {
-
-    for(const std::pair<uint256, CLink>& link : m_Links)
+    for (const std::pair<uint256, CLink>& link : m_Links)
     {
-        if (link.second.nLinkState == 1 && !link.second.fRequestFromMe) // pending accept
+        //LogPrintf("%s -- link:\n%s\n", __func__, link.second.ToString());
+        if (link.second.nLinkState == 1 && (!link.second.fRequestFromMe || (link.second.fRequestFromMe && link.second.fAcceptFromMe))) // pending accept
         {
             vchLinks.push_back(link.second);
         }
@@ -225,9 +225,9 @@ bool CLinkManager::ListMyPendingAccepts(std::vector<CLink>& vchLinks)
 
 bool CLinkManager::ListMyCompleted(std::vector<CLink>& vchLinks)
 {
-    for(const std::pair<uint256, CLink>& link : m_Links)
+    for (const std::pair<uint256, CLink>& link : m_Links)
     {
-        if (link.second.nLinkState == 2) // completed link
+        if (link.second.nLinkState == 2 && !link.second.txHashRequest.IsNull()) // completed link
         {
             vchLinks.push_back(link.second);
         }
@@ -255,7 +255,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
                     bool fIsLinkFromMe = IsLinkFromMe(storage.vchLinkPubKey);
-                    //bool fIsLinkForMe = IsLinkForMe(storage.vchLinkPubKey, storage.vchSharedPubKey);
+                    bool fIsLinkForMe = IsLinkForMe(storage.vchLinkPubKey, storage.vchSharedPubKey);
                     LogPrintf("%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
                     uint256 linkID = GetLinkID(link);
                     CLink record;
@@ -279,6 +279,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightRequest = link.nHeight;
                     record.nExpireTimeRequest = link.nExpireTime;
                     record.txHashRequest = link.txHash;
+                    record.fAcceptFromMe = fIsLinkForMe;
                     LogPrint("bdap", "%s -- CLear text link request added to map id = %s\n", __func__, linkID.ToString());
                     m_Links[linkID] = record;
                 }
@@ -343,7 +344,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
 
         if (storage.nType == 1 && fIsLinkFromMe) // Encrypted link request from me
         {
-            LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
+            //LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
             CKeyEd25519 privDHTKey;
             CKeyID keyID(Hash160(storage.vchLinkPubKey.begin(), storage.vchLinkPubKey.end()));
             if (pwalletMain->GetDHTKey(keyID, privDHTKey)) {
@@ -367,7 +368,6 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         link.nHeight = storage.nHeight;
                         link.nExpireTime = storage.nExpireTime;
-                        LogPrintf("%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                         uint256 linkID = GetLinkID(link);
                         CLink record;
                         std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -390,9 +390,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
+                        record.fAcceptFromMe = fIsLinkForMe;
                         LogPrint("bdap", "%s -- Encrypted link request from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
-                        
                     }
                     else {
                         LogPrintf("%s -- Link request GetBDAPData failed.\n", __func__);
@@ -411,7 +411,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         }
         else if (storage.nType == 1 && !fIsLinkFromMe && fIsLinkForMe) // Encrypted link request for me
         {
-            LogPrintf("%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
+            //LogPrintf("%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
             CKeyEd25519 sharedDHTKey;
             std::array<char, 32> sharedSeed;
             std::string strErrorMessage;
@@ -437,7 +437,6 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         link.nHeight = storage.nHeight;
                         link.nExpireTime = storage.nExpireTime;
-                        LogPrintf("%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                         uint256 linkID = GetLinkID(link);
                         CLink record;
                         std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -453,7 +452,6 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         else {
                             record.nLinkState = 1;
                         }
-                        
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                         record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                         record.RequestorPubKey = link.RequestorPubKey;
@@ -462,6 +460,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
+                        record.fAcceptFromMe = fIsLinkForMe;
                         LogPrint("bdap", "%s -- Encrypted link request for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
@@ -482,7 +481,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         }
         else if (storage.nType == 2 && fIsLinkFromMe) // Link accept from me
         {
-            LogPrintf("%s -- Version 1 encrypted link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
+            //LogPrintf("%s -- Version 1 encrypted link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
             CKeyEd25519 privDHTKey;
             CKeyID keyID(Hash160(storage.vchLinkPubKey.begin(), storage.vchLinkPubKey.end()));
             if (pwalletMain->GetDHTKey(keyID, privDHTKey)) {
@@ -506,7 +505,6 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         link.nHeight = storage.nHeight;
                         link.nExpireTime = storage.nExpireTime;
-                        LogPrintf("%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                         uint256 linkID = GetLinkID(link);
                         CLink record;
                         std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -543,7 +541,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         }
         else if (storage.nType == 2 && !fIsLinkFromMe && fIsLinkForMe) // Link accept for me
         {
-            LogPrintf("%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
+            //LogPrintf("%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
             CKeyEd25519 sharedDHTKey;
             std::array<char, 32> sharedSeed;
             std::string strErrorMessage;
@@ -569,7 +567,6 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         link.nHeight = storage.nHeight;
                         link.nExpireTime = storage.nExpireTime;
-                        LogPrintf("%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                         uint256 linkID = GetLinkID(link);
                         CLink record;
                         std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -610,6 +607,28 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         }
     }
     return true;
+}
+
+std::vector<CLinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath)
+{
+    std::vector<CLinkInfo> vchLinkInfo;
+    for(const std::pair<uint256, CLink>& link : m_Links)
+    {
+        if (link.second.nLinkState == 2) // completed link
+        {
+            if (link.second.RequestorFullObjectPath == vchFullObjectPath)
+            {
+                CLinkInfo linkInfo(link.second.RecipientFullObjectPath, link.second.RecipientPubKey, link.second.RequestorPubKey);
+                vchLinkInfo.push_back(linkInfo);
+            }
+            else if (link.second.RecipientFullObjectPath == vchFullObjectPath)
+            {
+                CLinkInfo linkInfo(link.second.RequestorFullObjectPath, link.second.RequestorPubKey, link.second.RecipientPubKey);
+                vchLinkInfo.push_back(linkInfo);
+            }
+        }
+    }
+    return vchLinkInfo;
 }
 
 uint256 GetLinkID(const CLinkRequest& request)

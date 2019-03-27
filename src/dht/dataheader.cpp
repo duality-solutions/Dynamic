@@ -18,10 +18,16 @@ CRecordHeader::CRecordHeader(const uint16_t version, const uint32_t expireTime, 
     strHex = ToHex();
 }
 
-CRecordHeader::CRecordHeader(const std::string strHex)
+CRecordHeader::CRecordHeader(const std::string& hex)
 {
-    std::vector<unsigned char> vchData = HexStringToCharVector(strHex);
-    UnserializeFromData(vchData);
+    LoadHex(hex);
+}
+
+bool CRecordHeader::LoadHex(const std::string& hex)
+{
+    strHex = hex;
+    std::vector<unsigned char> vchData = HexStringToCharVector(hex);
+    return UnserializeFromData(vchData);
 }
 
 void CRecordHeader::Serialize(std::vector<unsigned char>& vchData) 

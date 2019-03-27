@@ -8,6 +8,7 @@
 #include "serialize.h"
 #include "uint256.h"
 
+#include <array>
 #include <vector>
 
 namespace BDAP {
@@ -99,6 +100,39 @@ public:
     inline bool IsNull() const { return (vchRawData.empty()); }
     bool Encrypted() const;
     int DataVersion() const;
+
+};
+
+class CLinkInfo {
+public:
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    std::vector<unsigned char> vchFullObjectPath;
+    std::vector<unsigned char> vchSenderPubKey;
+    std::vector<unsigned char> vchReceivePubKey;
+    std::array<char, 32> arrReceivePrivateSeed;
+
+    CLinkInfo() 
+    {
+        SetNull();
+    }
+
+    CLinkInfo(const std::vector<unsigned char>& fqdn, const std::vector<unsigned char>& send_pubkey, const std::vector<unsigned char>& receive_pubkey)
+                    : vchFullObjectPath(fqdn), vchSenderPubKey(send_pubkey), vchReceivePubKey(receive_pubkey) 
+    {
+        arrReceivePrivateSeed.fill(0);
+    }
+
+    inline void SetNull()
+    {
+        nVersion = CLinkStorage::CURRENT_VERSION;
+        vchFullObjectPath.clear();
+        vchSenderPubKey.clear();
+        vchReceivePubKey.clear();
+        arrReceivePrivateSeed.fill(0);
+    }
+
+    std::string ToString() const;
 
 };
 
