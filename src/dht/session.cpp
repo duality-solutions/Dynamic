@@ -320,14 +320,14 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
     //TODO: DHT add locks
-    if (!pHashTableSession->Session) {
-        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pHashTableSession->Session is null.";
+    if (!Session) {
+        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
         return false;
     }
 
-    if (!pHashTableSession->Session->is_dht_running()) {
+    if (!Session->is_dht_running()) {
         LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
-        if (!LoadSessionState(pHashTableSession->Session)) {
+        if (!LoadSessionState(Session)) {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
             if (!Bootstrap())
                 return false;
