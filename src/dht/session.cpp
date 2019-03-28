@@ -37,11 +37,12 @@
 using namespace libtorrent;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
-
+static std::shared_ptr<std::thread> pThreadGet;
 static bool fShutdown;
 static bool fStarted;
 
 CHashTableSession* pHashTableSession;
+//CHashTableSession* pHashTableSessionPut;
 
 namespace DHT {
     std::vector<std::pair<std::string, std::string>> vPutValues;
@@ -72,9 +73,81 @@ namespace DHT {
             sig = sign.bytes;
         }
     }
-}   
+}
 
-bool Bootstrap()
+void StopEventListener()
+{
+    fShutdown = true;
+    LogPrintf("%s -- stopping.\n", __func__);
+    MilliSleep(2100);
+}
+
+void StartEventListener(CHashTableSession* dhtSession)
+{
+    LogPrintf("%s -- Starting.\n", __func__);
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    RenameThread("dht-events");
+    unsigned int counter = 0;
+    while(!fShutdown)
+    {
+        LogPrintf("%s -- 3\n", __func__);
+        if (!dhtSession->Session->is_dht_running()) {
+            LogPrint("dht", "%s -- DHT is not running yet\n", __func__);
+            MilliSleep(2000);
+            continue;
+        }
+
+        dhtSession->Session->wait_for_alert(seconds(1));
+        std::vector<alert*> alerts;
+        dhtSession->Session->pop_alerts(&alerts);
+        for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
+            if ((*iAlert) == nullptr)
+                continue;
+
+            const uint32_t iAlertCategory = (*iAlert)->category();
+            const std::string strAlertMessage = (*iAlert)->message();
+            const int iAlertType = (*iAlert)->type();
+            const std::string strAlertTypeName = alert_name(iAlertType);
+            if (iAlertType == DHT_GET_ALERT_TYPE_CODE || iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
+                if (iAlertType == DHT_GET_ALERT_TYPE_CODE) {
+                    // DHT Get Mutable Event
+                    dht_mutable_item_alert* pGet = alert_cast<dht_mutable_item_alert>((*iAlert));
+                    if (pGet == nullptr)
+                        continue;
+                    LogPrint("dht", "%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
+                        , __func__, aux::to_hex(pGet->key), pGet->salt, pGet->item.to_string(), strAlertMessage, strAlertTypeName, iAlertCategory);
+
+                    if (pGet->item.to_string() != "<uninitialized>") {
+                        const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
+                          aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
+
+                        std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
+                        dhtSession->AddToDHTGetEventMap(infoHash, event);
+                    }
+                }
+            }
+            else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
+                // TODO (dht): handle stats 
+                //dht_stats_alert* pAlert = alert_cast<dht_stats_alert>((*iAlert));
+                LogPrintf("%s -- DHT Alert Message: AlertType = %s\n", __func__, strAlertTypeName); 
+            }
+            else {
+                const CEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName);
+                dhtSession->AddToEventMap(iAlertType, event);
+            }
+        }
+        if (fShutdown)
+            return;
+        
+        counter++;
+        if (counter % 60 == 0) {
+            LogPrint("dht", "DHTEventListener -- Before CleanUpEventMap. counter = %u\n", counter);
+            dhtSession->CleanUpEventMap(300000);
+        }
+    }
+}
+
+bool CHashTableSession::Bootstrap()
 {
     LogPrintf("dht", "DHTTorrentNetwork -- bootstrapping.\n");
     const int64_t timeout = 30000; // 30 seconds
@@ -95,16 +168,16 @@ bool Bootstrap()
     return false;
 }
 
-std::string GetSessionStatePath()
+std::string CHashTableSession::GetSessionStatePath()
 {
     boost::filesystem::path path = GetDataDir() / "dht_state.dat";
     return path.string();
 }
 
-int SaveSessionState(session* dhtSession)
+int CHashTableSession::SaveSessionState()
 {
     entry torrentEntry;
-    dhtSession->save_state(torrentEntry, session::save_dht_state);
+    Session->save_state(torrentEntry, session::save_dht_state);
     std::vector<char> state;
     bencode(std::back_inserter(state), torrentEntry);
     std::fstream f(GetSessionStatePath().c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
@@ -113,7 +186,7 @@ int SaveSessionState(session* dhtSession)
     return 0;
 }
 
-bool LoadSessionState(session* dhtSession)
+bool CHashTableSession::LoadSessionState()
 {
     std::fstream f(GetSessionStatePath().c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
 
@@ -141,19 +214,17 @@ bool LoadSessionState(session* dhtSession)
     else
     {
         LogPrint("dht", "DHTTorrentNetwork -- LoadSessionState load dht state from dht-state.log\n");
-        dhtSession->load_state(e);
+        Session->load_state(e);
     }
     return true;
 }
 
-void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman)
+void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrint("dht", "DHTTorrentNetwork -- starting\n");
+    LogPrintf("%s -- starting\n", __func__);
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dht-session");
-    
     try {
-        CDHTSettings settings;
         // Busy-wait for the network to come online so we get a full list of Dynodes
         do {
             bool fvNodesEmpty = connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
@@ -166,17 +237,23 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
                 return;
 
         } while (true);
-        
+        CDHTSettings settingsGet(1);
+        CDHTSettings settingsPut(2);
+
         fStarted = true;
-        LogPrintf("DHTTorrentNetwork -- started\n");
         // with current peers and Dynodes
-        settings.LoadSettings();
-        pHashTableSession->Session = settings.GetSession();
-        
+        settingsGet.LoadSettings();
+        pHashTableSession->Session = settingsGet.GetSession();
         if (!pHashTableSession->Session)
             throw std::runtime_error("DHT Torrent network bootstraping error.");
-        
-        StartEventListener(pHashTableSession->Session);
+
+        settingsPut.LoadSettings();
+        //pHashTableSessionPut->Session = settingsPut.GetSession();
+        //if (!pHashTableSessionPut->Session)
+        //    throw std::runtime_error("DHT Torrent network bootstraping error.");
+        pThreadGet = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSession)));
+        //std::shared_ptr<std::thread> pThreadPut;
+        //pThreadPut = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSessionPut)));
     }
     catch (const std::runtime_error& e)
     {
@@ -184,6 +261,11 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         LogPrintf("DHTTorrentNetwork -- runtime error: %s\n", e.what());
         return;
     }
+}
+
+void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
+{
+    pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&StartDHTNetwork, std::cref(chainparams), std::ref(connman)));
 }
 
 void StopTorrentDHTNetwork()
@@ -204,6 +286,7 @@ void StopTorrentDHTNetwork()
             pHashTableSession->Session->abort();
         }
         pDHTTorrentThread->join();
+        pThreadGet->join();
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
     }
     else {
@@ -213,29 +296,18 @@ void StopTorrentDHTNetwork()
     LogPrintf("DHTTorrentNetwork -- Stopped.\n");
 }
 
-void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
-{
-    LogPrint("dht", "DHTTorrentNetwork -- Log file = %s.\n", GetSessionStatePath());
-    fShutdown = false;
-    fStarted = false;
-    if (pDHTTorrentThread != NULL)
-         StopTorrentDHTNetwork();
-
-    pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&DHTTorrentNetwork, std::cref(chainparams), std::ref(connman)));
-}
-
-void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
+void CHashTableSession::GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
 {
     LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats started.\n");
 
-    if (!pHashTableSession->Session) {
+    if (!Session) {
         return;
     }
 
-    if (!pHashTableSession->Session->is_dht_running()) {
+    if (!Session->is_dht_running()) {
         return;
         //LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        //if (!LoadSessionState(pHashTableSession->Session)) {
+        //if (!LoadSessionState(Session)) {
         //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
         //    Bootstrap();
         //}
@@ -247,13 +319,13 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
         LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
     }
 
-    pHashTableSession->Session->post_dht_stats();
+    Session->post_dht_stats();
     //get alert from map
-    //alert* dhtAlert = WaitForResponse(pHashTableSession->Session, dht_stats_alert::alert_type);
+    //alert* dhtAlert = WaitForResponse(Session, dht_stats_alert::alert_type);
     //dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
     //vchDHTLookup = dhtStatsAlert->active_requests;
     //vchDHTBuckets = dhtStatsAlert->routing_table;
-    stats = pHashTableSession->Session->status();
+    stats = Session->status();
 }
 
 void CHashTableSession::CleanUpPutCommandMap()
@@ -327,7 +399,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
 
     if (!Session->is_dht_running()) {
         LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
-        if (!LoadSessionState(Session)) {
+        if (!LoadSessionState()) {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
             if (!Bootstrap())
                 return false;
@@ -561,6 +633,90 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
                 }
             }
         }
+    }
+    return true;
+}
+
+void CHashTableSession::AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
+{
+    LOCK(cs_DHTGetEventMap);
+    if (m_DHTGetEventMap.find(infoHash) == m_DHTGetEventMap.end()) {
+        // event not found. Add a new entry to DHT event map
+        LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
+        m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
+    }
+    else {
+        // event found. Update entry in DHT event map
+        LogPrint("dht", "AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
+        m_DHTGetEventMap[infoHash] = event;
+    }
+}
+
+void CHashTableSession::AddToEventMap(const int type, const CEvent& event)
+{
+    LOCK(cs_EventMap);
+    m_EventTypeMap.insert(std::make_pair(type, std::make_pair(event.Timestamp(), event)));
+}
+
+void CHashTableSession::CleanUpEventMap(const uint32_t timeout)
+{
+    unsigned int deleted = 0;
+    unsigned int counter = 0;
+    int64_t iTime = GetTimeMillis();
+    LOCK(cs_EventMap);
+    for (auto it = m_EventTypeMap.begin(); it != m_EventTypeMap.end(); ) {
+        CEvent event = it->second.second;
+        if ((iTime - event.Timestamp()) > timeout) {
+            it = m_EventTypeMap.erase(it);
+            deleted++;
+        }
+        else {
+            ++it;
+        }
+        counter++;
+    }
+    LogPrint("dht", "DHTEventListener -- CleanUpEventMap. deleted = %u, count = %u\n", deleted, counter);
+}
+
+bool CHashTableSession::GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events)
+{
+    //LOCK(cs_EventMap);
+    LogPrint("dht", "GetLastTypeEvent -- m_EventTypeMap.size = %u, type = %u.\n", m_EventTypeMap.size(), type);
+    std::multimap<int, EventPair>::iterator iEvents = m_EventTypeMap.find(type);
+    while (iEvents != m_EventTypeMap.end()) {
+        if (iEvents->second.first >= startTime) {
+            events.push_back(iEvents->second.second);
+        }
+        iEvents++;
+    }
+    LogPrint("dht", "GetLastTypeEvent -- events.size() = %u\n", events.size());
+    return events.size() > 0;
+}
+
+bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
+{
+    //LOCK(cs_DHTGetEventMap);
+    std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
+    if (iMutableEvent != m_DHTGetEventMap.end()) {
+        // event found.
+        event = iMutableEvent->second;
+        return true;
+    }
+    return false;
+}
+
+bool CHashTableSession::RemoveDHTGetEvent(const std::string& infoHash)
+{
+    LOCK(cs_DHTGetEventMap);
+    m_DHTGetEventMap.erase(infoHash);
+    return true;
+}
+
+bool CHashTableSession::GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
+{
+    //LOCK(cs_DHTGetEventMap);
+    for (std::map<std::string, CMutableGetEvent>::iterator it=m_DHTGetEventMap.begin(); it!=m_DHTGetEventMap.end(); ++it) {
+        vchGetEvents.push_back(it->second);
     }
     return true;
 }

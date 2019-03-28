@@ -223,7 +223,7 @@ UniValue dhtinfo(const JSONRPCRequest& request)
     libtorrent::session_status stats;
     std::vector<libtorrent::dht_lookup> vchDHTLookup; 
     std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
-    GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    pHashTableSession->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("num_peers", stats.num_peers));
@@ -703,7 +703,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutableGetEvent> vchMutableData;
-    bool fRet = GetAllDHTGetEvents(vchMutableData);
+    bool fRet = pHashTableSession->GetAllDHTGetEvents(vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutableGetEvent& data : vchMutableData) {

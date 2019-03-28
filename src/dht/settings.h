@@ -19,7 +19,7 @@ private:
     uint16_t nPort;
 
 public:
-    CDHTSettings();
+    CDHTSettings(const uint16_t nSessionNumber);
 
     void LoadSettings();
 

@@ -2096,7 +2096,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         StartMiners();
     }
 
-    // Start the DHT Torrent network in the background
+    // Start the DHT Torrent networks in the background
     StartTorrentDHTNetwork(chainparams, connman);
     // ********************************************************* Step 13: finished
 
