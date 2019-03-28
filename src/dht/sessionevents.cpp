@@ -33,7 +33,7 @@ static bool fShutdown;
 static EventTypeMap m_EventTypeMap;
 static DHTGetEventMap m_DHTGetEventMap;
 
-CEvent::CEvent(std::string _message, int _type, uint32_t _category, std::string _what)
+CEvent::CEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what)
 {
     message = _message;
     type = _type;
@@ -48,7 +48,7 @@ std::string CEvent::ToString() const
         Message(), Type(), Category(), What(), Timestamp());
 }
 
-std::string GetInfoHash(const std::string pubkey, const std::string salt)
+std::string GetInfoHash(const std::string& pubkey, const std::string& salt)
 {
     std::array<char, 32> arrPubKey;
     aux::from_hex(pubkey, arrPubKey.data());
@@ -62,8 +62,8 @@ std::string GetInfoHash(const std::string pubkey, const std::string salt)
 CMutableGetEvent::CMutableGetEvent() : CEvent()
 {
 }
-CMutableGetEvent::CMutableGetEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
-                                   std::string _pubkey, std::string _salt, int64_t _seq, std::string _value, std::string _signature, bool _authoritative)
+CMutableGetEvent::CMutableGetEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what, 
+                                   const std::string& _pubkey, const std::string& _salt, const int64_t& _seq, const std::string& _value, const std::string& _signature, const bool _authoritative)
                 : CEvent(_message, _type, _category, _what)
 {
     pubkey = _pubkey;
@@ -75,8 +75,8 @@ CMutableGetEvent::CMutableGetEvent(std::string _message, int _type, uint32_t _ca
     infohash = GetInfoHash(pubkey, salt);
 }
 
-CMutablePutEvent::CMutablePutEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
-                                   std::string _pubkey, std::string _salt, int64_t _seq, std::string _signature, uint32_t _success_count)
+CMutablePutEvent::CMutablePutEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what, 
+                                   const std::string& _pubkey, const std::string& _salt, const int64_t& _seq, const std::string& _signature, const uint32_t _success_count)
                 : CEvent(_message, _type, _category, _what)
 {
     pubkey = _pubkey;
@@ -87,7 +87,7 @@ CMutablePutEvent::CMutablePutEvent(std::string _message, int _type, uint32_t _ca
     infohash = GetInfoHash(pubkey, salt);
 }
 
-CPutRequest::CPutRequest(const CKeyEd25519 _key, const std::string _salt, const int64_t _sequence, const std::string _value)
+CPutRequest::CPutRequest(const CKeyEd25519& _key, const std::string& _salt, const int64_t& _sequence, const std::string& _value)
 {
     key = _key;
     salt = _salt;
@@ -180,7 +180,7 @@ static void DHTEventListener(session* dhtSession)
     }
 }
 
-void CleanUpEventMap(uint32_t timeout)
+void CleanUpEventMap(const uint32_t timeout)
 {
     unsigned int deleted = 0;
     unsigned int counter = 0;
