@@ -154,16 +154,6 @@ public:
     }
 };
 
-void CleanUpEventMap(const uint32_t timeout = 300000);  //default to 5 minutes.
-void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event);
-
-void StopEventListener();
-void StartEventListener(libtorrent::session* dhtSession);
-
-bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
-bool RemoveDHTGetEvent(const std::string& infoHash);
-bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
 std::string GetInfoHash(const std::string& pubkey, const std::string& salt);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H
