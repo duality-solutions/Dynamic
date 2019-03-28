@@ -9,6 +9,8 @@
 #include "key.h"
 #include "sync.h"
 
+#include "bip39.h"
+
 /* hd account data model */
 class CHDAccount
 {
@@ -101,8 +103,8 @@ public:
 
     void Debug(std::string strName) const;
 
-    bool SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID);
-    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID);
+    bool SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH);
+    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH);
     bool GetMnemonic(SecureVector& vchMnemonicRet, SecureVector& vchMnemonicPassphraseRet) const;
     bool GetMnemonic(SecureString& ssMnemonicRet, SecureString& ssMnemonicPassphraseRet) const;
 

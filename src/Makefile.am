@@ -91,10 +91,13 @@ DYNAMIC_CORE_H = \
   bip39_chinese_traditional.h \
   bip39_english.h \
   bip39_french.h \
+  bip39_german.h \
   bip39_italian.h \
   bip39_japanese.h \
   bip39_korean.h \
+  bip39_russian.h \
   bip39_spanish.h \
+  bip39_ukrainian.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -242,7 +245,6 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
-  wallet/mnemonic/mnemonic.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
@@ -387,7 +389,6 @@ libdynamic_wallet_a_SOURCES = \
   privatesend-util.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
-  wallet/mnemonic/mnemonic.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \

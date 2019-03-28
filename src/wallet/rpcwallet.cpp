@@ -2979,7 +2979,7 @@ static const CRPCCommand commands[] =
         {"wallet", "dumpbdapkeys", &dumpbdapkeys, true, {"bdap_id"}},
         {"wallet", "importbdapkeys", &importbdapkeys,true, {"bdap_id", "wallet_privkey", "link_privkey", "DHT_privkey", "rescan"}},
         {"wallet", "importelectrumwallet", &importelectrumwallet, true, {"filename", "index"}},
-        {"wallet", "importmnemonic", &importmnemonic, true, {"mnemonic", "begin", "end", "forcerescan"}},
+        {"wallet", "importmnemonic", &importmnemonic, true, {"mnemonic", "passphrase", "begin", "end", "forcerescan"}},
 };
 
 void RegisterWalletRPCCommands(CRPCTable& t)

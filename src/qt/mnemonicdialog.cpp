@@ -9,15 +9,16 @@
 
 #include "rpcserver.h"
 #include "rpcclient.h"
-#include "wallet/mnemonic/mnemonic.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #include "init.h"
 #include "util.h"
 #include "guiutil.h"
 #include "base58.h"
+#include "bip39.h"
 
 #include <QApplication>
+#include <QClipboard>
 #include <QMessageBox>
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -46,12 +47,50 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
 
     ui->importMnemonic->setStyleSheet(styleSheet);
     ui->reimportMnemonic->setStyleSheet(restyleSheet);
+    ui->reimportMnemonic->setVisible(false);
     ui->importPrivatekey->setStyleSheet(styleSheet);
-    ui->reimportPrivatekey->setStyleSheet(restyleSheet);
     ui->importWallet->setStyleSheet(styleSheet);
-    ui->reimportWallet->setStyleSheet(restyleSheet);
+    ui->pushButtonCreateMnemonic_Generate->setStyleSheet(styleSheet);
+    ui->pushButtonCreateMnemonic_Cancel->setStyleSheet(restyleSheet);
+    ui->pushButtonImportMnemonicCancel->setStyleSheet(restyleSheet);
+    ui->pushButtonCreateMnemonic_Validate->setStyleSheet(styleSheet);
 
-    ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Reimport' button.")+"</p>");
+    ui->pushButtonPrivatekeyCancel->setStyleSheet(restyleSheet);
+    ui->pushButtonPrivateKeyFileCancel->setStyleSheet(restyleSheet);
+
+    ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.")+"</p>");
+
+
+
+    //initialize Language dropdowns
+    std::vector<std::string> languageOptions = {
+        "English", 
+        "Chinese Simplified",
+        "Chinese Traditional",
+        "French", 
+        //"German",
+        "Italian",
+        "Japanese",
+        "Korean",
+        //"Russian",
+        "Spanish"
+        //"Ukrainian",
+        };
+
+    for (auto & element : languageOptions) {
+        ui->comboBoxImportMnemonic_Language->addItem(QObject::tr(element.c_str()));
+        ui->comboBoxLanguage->addItem(QObject::tr(element.c_str()));
+
+    }
+
+
+    connect(ui->comboBoxImportMnemonic_Language, SIGNAL(currentIndexChanged(int)), this, SLOT(combobox1ItemChanged(int)));
+    connect(ui->comboBoxLanguage, SIGNAL(currentIndexChanged(int)), this, SLOT(combobox2ItemChanged(int)));
+
+
+
+
+
 }
 
 MnemonicDialog::~MnemonicDialog()
@@ -62,18 +101,93 @@ MnemonicDialog::~MnemonicDialog()
 }
 
 
+void MnemonicDialog::combobox1ItemChanged(int input)
+{
+    ui->comboBoxLanguage->setCurrentIndex(input);
+
+}; //combobox1ItemChanged
+
+void MnemonicDialog::combobox2ItemChanged(int input)
+{
+    ui->comboBoxImportMnemonic_Language->setCurrentIndex(input);
+
+}; //combobox1ItemChanged
+
 void MnemonicDialog::on_importPrivatekey_clicked()
 {
-    importPrivatekey(false);
+    bool ForceRescan = ui->checkBoxPrivateKeyForceRescan->isChecked();
+    
+    importPrivatekey(ForceRescan);
 }
 
 void MnemonicDialog::on_importMnemonic_clicked()
 {
     importMnemonic(false);
 }
+
+void MnemonicDialog::on_pushButtonImportMnemonicCancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Cancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_pushButtonPrivatekeyCancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+void MnemonicDialog::on_pushButtonPrivateKeyFileCancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_toolButtonCreateMnemonic_Copy_clicked()
+{
+    GUIUtil::setClipboard(ui->textEditNewRecoveryPhrase->toPlainText());
+}
+
+
+void MnemonicDialog::on_toolButtonImportMnemonic_Paste_clicked()
+{
+    ui->mnemonicEdit->setText(QApplication::clipboard()->text());
+}
+
+
+void MnemonicDialog::on_toolButtonImportMnemonic_Clear_clicked()
+{
+    ui->mnemonicEdit->setText("");  
+}
+
+
+
+void MnemonicDialog::on_toolButtonCreateMnemonic_Clear_clicked()
+{
+    ui->textEditNewRecoveryPhrase->setText("");  
+}
+
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Validate_clicked()
+{
+    validateMnemonic();
+}
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Generate_clicked()
+{
+    createMnemonic();
+}
+
 void MnemonicDialog::on_importWallet_clicked()
 {
-    importWallet(false);
+    bool ForceRescan = ui->checkBoxPrivateKeyFileForceRescan->isChecked();
+
+    importWallet(ForceRescan);
 }
 
 void MnemonicDialog::on_fileButton_clicked()
@@ -89,35 +203,98 @@ void MnemonicDialog::on_reimportMnemonic_clicked()
     importMnemonic(true);
 }
 
-void MnemonicDialog::on_reimportWallet_clicked()
-{
-    importWallet(true);
-}
 
-void MnemonicDialog::on_reimportPrivatekey_clicked()
-{
-    importPrivatekey(true);
-}
+void MnemonicDialog::createMnemonic() {
+    ui->textEditNewRecoveryPhrase->clear();
+    
+    int value = std::stoi(ui->comboBoxBytesOfEntropy->currentText().toStdString());
+    QString languageValue = ui->comboBoxLanguage->currentText();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
+
+    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
+
+    SecureString recoveryPhrase = CMnemonic::Generate(value,selectLanguage);
+
+    
+    ui->textEditNewRecoveryPhrase->setText(recoveryPhrase.c_str());
+
+
+} //createMnemonic
+
+
+void MnemonicDialog::validateMnemonic() {
+
+    bool isValid = false;
+
+    std::string mnemonicValue = ui->textEditNewRecoveryPhrase->toPlainText().toStdString();
+    QString languageValue = ui->comboBoxLanguage->currentText();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
+
+    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
+
+
+    isValid = CMnemonic::Check(mnemonicValue.c_str(),selectLanguage);
+
+    if (isValid) {
+        QMessageBox::information(this, "Validate Mnemonic", "Mnemonic is valid");
+    } else {
+        QMessageBox::critical(this, "Validate Mnemonic", "Mnemonic is invalid");
+    }
+
+
+} //createMnemonic
 
 void MnemonicDialog::importMnemonic(bool forceRescan){
     QString mnemonicstr = ui->mnemonicEdit->toPlainText();
-    mnemonicstr.replace(QString(" "),QString("-"));
-    mnemonicstr.insert(0,QString("importmnemonic "));
-    
-    if(forceRescan)
-        mnemonicstr.append(QString(" 0 100 true"));
-    
+    QString RPCstr = (QString("importmnemonic "));
+    QString languageValue = ui->comboBoxImportMnemonic_Language->currentText();
+    QString passPhrase = ui->lineEditPassPhrase->text();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+
+    std::string outputmessage = "";
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
+    bool isValid = false;
+
+   selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
+
+    isValid = CMnemonic::Check(mnemonicstr.toStdString().c_str(),selectLanguage);
+
     if(mnemonicstr.isEmpty())
     {
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("mnemonics is null"));
         return;
     }
-    if(mnemonicstr.count(QRegExp("-")) < 11 || mnemonicstr.count(QRegExp("-")) >= 24){
+
+    if  (mnemonicstr.count(QRegExp(" ")) < 11 || mnemonicstr.count(QRegExp(" ")) >= 24 || !isValid){
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("input correct mnemonics"));
         return;
     }
+
+
+
+    mnemonicstr.replace(QString(" "),QString("-"));
+    RPCstr.append(mnemonicstr);
+
+    languageValue.prepend(QString(" "));
+    RPCstr.append(languageValue);
+    if (passPhrase.length() > 0) RPCstr.append(QString(" \"") + passPhrase + QString("\""));
+
+    try {
+        Q_EMIT cmdToConsole(RPCstr);
+    } catch (const std::exception& e) {
+        outputmessage = e.what();
+        QMessageBox::critical(0, "Import Mnemonic Error", QObject::tr(outputmessage.c_str()));
+        return;
+    }
+
     ui->mnemonicEdit->clear();
-    Q_EMIT cmdToConsole(mnemonicstr);
 }
 
 void MnemonicDialog::importWallet(bool forceRescan){

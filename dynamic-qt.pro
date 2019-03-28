@@ -651,4 +651,5 @@ FORMS += \
     src/qt/forms/bdapuserdetaildialog.ui \
     src/qt/forms/bdapupdateaccountdialog.ui \
     src/qt/forms/bdaplinkdetaildialog.ui \
-    src/qt/forms/bdapaddlinkdialog.ui
+    src/qt/forms/bdapaddlinkdialog.ui \
+    src/qt/forms/mnemonicdialog.ui
