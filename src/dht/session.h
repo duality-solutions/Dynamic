@@ -40,6 +40,7 @@ typedef std::pair<std::array<char, 32>, std::string> HashRecordKey; // public ke
 
 class CHashTableSession {
 public:
+    std::string strName;
     CDataRecordBuffer vDataEntries;
     libtorrent::session* Session = NULL;
     std::map<HashRecordKey, int64_t> mPutCommands;
@@ -90,6 +91,7 @@ void StopTorrentDHTNetwork();
 void StartEventListener(CHashTableSession* dhtSession);
 void StopEventListener();
 
-extern CHashTableSession* pHashTableSession;
+extern CHashTableSession* pHashTableSessionGet;
+extern CHashTableSession* pHashTableSessionPut;
 
 #endif // DYNAMIC_DHT_SESSION_H
