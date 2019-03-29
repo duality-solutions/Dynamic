@@ -837,18 +837,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     pwalletMain->ShowProgress("", 25); //show we're working in the background...
 
     //CREATE BACKUP OF WALLET before importing mnemonic and swapping files
-    std::string strBackupWarning;
-    std::string strBackupError;
-    if (!AutoBackupWallet(pwalletMain, "", strBackupWarning, strBackupError)) {
-        if (!strBackupWarning.empty()) {
-            InitWarning(strBackupWarning);
-        }
-        if (!strBackupError.empty()) {
-            InitError(strBackupError);
-            entry.push_back(Pair("Error", "Failed backing up wallet."));
-            return entry;
-        }
-    }
+    //wallat.dat.before-mnemonic-import.isodate
+    std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M-%S", GetTime());
+    boost::filesystem::path backupFile = GetDataDir() / ("wallet.dat.before-mnemonic-import" + dateTimeStr);
+    pwalletMain->BackupWallet(backupFile.string());
 
     ForceSetArg("-mnemonic", strMnemonic);
     ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
