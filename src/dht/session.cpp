@@ -38,11 +38,12 @@ using namespace libtorrent;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
 static std::shared_ptr<std::thread> pThreadGet;
+static std::shared_ptr<std::thread> pThreadPut;
 static bool fShutdown;
 static bool fStarted;
 
-CHashTableSession* pHashTableSession;
-//CHashTableSession* pHashTableSessionPut;
+CHashTableSession* pHashTableSessionGet;
+CHashTableSession* pHashTableSessionPut;
 
 namespace DHT {
     std::vector<std::pair<std::string, std::string>> vPutValues;
@@ -84,13 +85,17 @@ void StopEventListener()
 
 void StartEventListener(CHashTableSession* dhtSession)
 {
-    LogPrintf("%s -- Starting.\n", __func__);
+    if (!dhtSession) {
+        LogPrintf("%s -- session pointer is null.  Can not listen to events.\n", __func__);
+        return;
+    }
+    LogPrintf("%s -- Starting %s session.\n", __func__, dhtSession->strName);
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("dht-events");
+    std::string strThreadName = "dht-events:" + dhtSession->strName;
+    RenameThread(strThreadName.c_str());
     unsigned int counter = 0;
     while(!fShutdown)
     {
-        LogPrintf("%s -- 3\n", __func__);
         if (!dhtSession->Session->is_dht_running()) {
             LogPrint("dht", "%s -- DHT is not running yet\n", __func__);
             MilliSleep(2000);
@@ -242,18 +247,21 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 
         fStarted = true;
         // with current peers and Dynodes
+        pHashTableSessionGet->strName = "get1";
         settingsGet.LoadSettings();
-        pHashTableSession->Session = settingsGet.GetSession();
-        if (!pHashTableSession->Session)
+        pHashTableSessionGet->Session = settingsGet.GetSession();
+        if (!pHashTableSessionGet->Session)
             throw std::runtime_error("DHT Torrent network bootstraping error.");
 
+        pThreadGet = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSessionGet)));
+
+        pHashTableSessionPut->strName = "put1";
         settingsPut.LoadSettings();
-        //pHashTableSessionPut->Session = settingsPut.GetSession();
-        //if (!pHashTableSessionPut->Session)
-        //    throw std::runtime_error("DHT Torrent network bootstraping error.");
-        pThreadGet = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSession)));
-        //std::shared_ptr<std::thread> pThreadPut;
-        //pThreadPut = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSessionPut)));
+        pHashTableSessionPut->Session = settingsPut.GetSession();
+        if (!pHashTableSessionPut->Session)
+            throw std::runtime_error("DHT Torrent network bootstraping error.");
+
+        pThreadPut = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pHashTableSessionPut)));
     }
     catch (const std::runtime_error& e)
     {
@@ -282,11 +290,14 @@ void StopTorrentDHTNetwork()
             libtorrent::session_params params;
             params.settings.set_bool(settings_pack::enable_dht, false);
             params.settings.set_int(settings_pack::alert_mask, 0x0);
-            pHashTableSession->Session->apply_settings(params.settings);
-            pHashTableSession->Session->abort();
+            pHashTableSessionGet->Session->apply_settings(params.settings);
+            pHashTableSessionGet->Session->abort();
+            pHashTableSessionPut->Session->apply_settings(params.settings);
+            pHashTableSessionPut->Session->abort();
         }
         pDHTTorrentThread->join();
         pThreadGet->join();
+        pThreadPut->join();
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
     }
     else {

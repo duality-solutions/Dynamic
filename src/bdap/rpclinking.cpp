@@ -794,7 +794,7 @@ static UniValue DenyLink(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!pHashTableSession->Session)
+    if (!pHashTableSessionGet->Session)
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -821,7 +821,7 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     bool fNotFound = false;
     CDataRecord record;
-    if (!pHashTableSession->SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+    if (!pHashTableSessionGet->SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
         fNotFound = true;
 
     std::vector<unsigned char> vchSerializedList;
@@ -855,8 +855,8 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     if (vchSerializedList.size() > 7000)
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
 
-    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord))
-        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + pHashTableSessionGet->strPutErrorMessage + _("\n"));
 
     oLink.push_back(Pair("recipient_fqdn", strRecipientFQDN));
     oLink.push_back(Pair("requestor_fqdn", strRequestorFQDN));
@@ -884,7 +884,7 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!pHashTableSession->Session)
+    if (!pHashTableSessionGet->Session)
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -906,8 +906,8 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
     std::string strOperationType = "denylink";
     int64_t iSequence = 0;
     CDataRecord record;
-    if (!pHashTableSession->SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+    if (!pHashTableSessionGet->SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, pHashTableSessionGet->strPutErrorMessage));
 
     UniValue oDeniedLink(UniValue::VOBJ);
     CLinkDenyList denyList(record.RawData());

@@ -1700,7 +1700,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pLinkAcceptDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
-                delete pHashTableSession;
+                delete pHashTableSessionGet;
+                delete pHashTableSessionPut;
                 delete pMutableDataDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
@@ -1721,7 +1722,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pLinkAcceptDB = new CLinkAcceptDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
-                pHashTableSession = new CHashTableSession();
+                pHashTableSessionGet = new CHashTableSession();
+                pHashTableSessionPut = new CHashTableSession();
                 pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
