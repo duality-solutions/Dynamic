@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "bdap/utils.h"
+#include "bdap/vgp/include/encryption.h" // for VGP DecryptBDAPData
 #include "clientversion.h"
 #include "hash.h"
 #include "key.h"
@@ -17,10 +18,11 @@
 #include "timedata.h"
 #include "util.h"
 
-void CUnsignedRelayMessage::SetNull()
+void CUnsignedVGPMessage::SetNull()
 {
     nVersion = CURRENT_VERSION;
     SubjectID.SetNull();
+    MessageID.SetNull();
     fEncrypted = false;
     nDataFormatVersion = 0;
     vchRelayWallet.clear();
@@ -29,12 +31,13 @@ void CUnsignedRelayMessage::SetNull()
     nRelayUntil = 0;
 }
 
-std::string CUnsignedRelayMessage::ToString() const
+std::string CUnsignedVGPMessage::ToString() const
 {
     return strprintf(
-        "CUnsignedRelayMessage(\n"
+        "CUnsignedVGPMessage(\n"
         "    nVersion             = %d\n"
         "    SubjectID            = %s\n"
+        "    MessageID            = %s\n"
         "    Encrypted            = %s\n"
         "    nDataFormatVersion   = %d\n"
         "    RelayWallet          = %s\n"
@@ -44,6 +47,7 @@ std::string CUnsignedRelayMessage::ToString() const
         ")\n",
         nVersion,
         SubjectID.ToString(),
+        MessageID.ToString(),
         fEncrypted ? "true" : "false",
         nDataFormatVersion,
         stringFromVch(vchRelayWallet),
@@ -52,37 +56,60 @@ std::string CUnsignedRelayMessage::ToString() const
         nRelayUntil);
 }
 
-void CRelayMessage::SetNull()
+bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage)
 {
-    CUnsignedRelayMessage::SetNull();
+    if (!EncryptBDAPData(vvchPubKeys, vchMessage, vchMessageData, strErrorMessage))
+    {
+        return false;
+    }
+    return true;
+}
+
+bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage)
+{
+    std::vector<unsigned char> vchRawPrivSeed;
+    for (unsigned int i = 0; i < sizeof(arrPrivateSeed); i++)
+    {
+        vchRawPrivSeed.push_back(arrPrivateSeed[i]);
+    }
+    if (!DecryptBDAPData(vchRawPrivSeed, vchMessageData, vchMessage, strErrorMessage))
+    {
+        return false;
+    }
+    return true;
+}
+
+void CVGPMessage::SetNull()
+{
+    CUnsignedVGPMessage::SetNull();
     vchMsg.clear();
     vchSig.clear();
 }
 
-bool CRelayMessage::IsNull() const
+bool CVGPMessage::IsNull() const
 {
     return (nTimeStamp == 0);
 }
 
-uint256 CRelayMessage::GetHash() const
+uint256 CVGPMessage::GetHash() const
 {
     return Hash(this->vchMsg.begin(), this->vchMsg.end());
 }
 
-bool CRelayMessage::IsInEffect() const
+bool CVGPMessage::IsInEffect() const
 {
 	// only keep for 1 minute
     return (nTimeStamp + 60 >= GetAdjustedTime());
 }
 
-bool CRelayMessage::AppliesTo(const int nVersion, const std::string& strSubVerIn) const
+bool CVGPMessage::AppliesTo(const int nVersion, const std::string& strSubVerIn) const
 {
     return false;
     // convert nVersion and subversion to client version format 2041400
     //return (IsInEffect() && nClientVersion >= MIN_CLIENT_VERSION && nProtoVersion >= MIN_PROTOCOL_VERSION);
 }
 
-bool CRelayMessage::RelayMessage(CNode* pnode, CConnman& connman) const
+bool CVGPMessage::RelayMessage(CNode* pnode, CConnman& connman) const
 {
     if (!IsInEffect())
         return false;
@@ -100,50 +127,50 @@ bool CRelayMessage::RelayMessage(CNode* pnode, CConnman& connman) const
     return false;
 }
 
-bool CRelayMessage::Sign()
+bool CVGPMessage::Sign()
 {
     CDataStream sMsg(SER_NETWORK, CLIENT_VERSION);
-    sMsg << *(CUnsignedRelayMessage*)this;
+    sMsg << *(CUnsignedVGPMessage*)this;
     vchMsg = std::vector<unsigned char>(sMsg.begin(), sMsg.end());
     CDynamicSecret vchSecret;
     if (!vchSecret.SetString(stringFromVch(vchRelayWallet))) {
-        LogPrintf("CRelayMessage::%s -- vchSecret.SetString failed\n", __func__);
+        LogPrintf("CVGPMessage::%s -- vchSecret.SetString failed\n", __func__);
         return false;
     }
     CKey key = vchSecret.GetKey();
     if (!key.Sign(Hash(vchMsg.begin(), vchMsg.end()), vchSig)) {
-        LogPrintf("CRelayMessage::%s -- Failed to sign relay message.\n", __func__);
+        LogPrintf("CVGPMessage::%s -- Failed to sign relay message.\n", __func__);
         return false;
     }
 
     return true;
 }
 
-bool CRelayMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) const
+bool CVGPMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) const
 {
     CPubKey key(vchPubKey);
     if (!key.Verify(Hash(vchMsg.begin(), vchMsg.end()), vchSig))
-        return error("CRelayMessage::%s(): verify signature failed", __func__);
+        return error("CVGPMessage::%s(): verify signature failed", __func__);
 
     // Now unserialize the data
     CDataStream sRelayMsg(vchMsg, SER_NETWORK, PROTOCOL_VERSION);
-    sRelayMsg >> *(CUnsignedRelayMessage*)this;
+    sRelayMsg >> *(CUnsignedVGPMessage*)this;
     return true;
 }
 
-CRelayMessage CRelayMessage::getAlertByHash(const uint256& hash)
+CVGPMessage CVGPMessage::getAlertByHash(const uint256& hash)
 {
-    CRelayMessage retval;
+    CVGPMessage retval;
     {
-        LOCK(cs_mapRelayMessages);
-        std::map<uint256, CRelayMessage>::iterator mi = mapRelayMessages.find(hash);
+        LOCK(cs_mapVGPMessages);
+        std::map<uint256, CVGPMessage>::iterator mi = mapRelayMessages.find(hash);
         if (mi != mapRelayMessages.end())
             retval = mi->second;
     }
     return retval;
 }
 
-bool CRelayMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread) const
+bool CVGPMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread) const
 {
     if (!CheckSignature(vchPubKey))
         return false;
@@ -172,10 +199,10 @@ bool CRelayMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPub
     }
 
     {
-        LOCK(cs_mapRelayMessages);
+        LOCK(cs_mapVGPMessages);
         // Cancel previous alerts
-        for (std::map<uint256, CRelayMessage>::iterator mi = mapRelayMessages.begin(); mi != mapRelayMessages.end();) {
-            const CRelayMessage& alert = (*mi).second;
+        for (std::map<uint256, CVGPMessage>::iterator mi = mapRelayMessages.begin(); mi != mapRelayMessages.end();) {
+            const CVGPMessage& alert = (*mi).second;
             if (Cancels(alert)) {
                 LogPrint("alert", "cancelling alert %d\n", alert.nID);
                 uiInterface.NotifyAlertChanged((*mi).first, CT_DELETED);
@@ -190,8 +217,8 @@ bool CRelayMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPub
 
 
         // Check if this alert has been cancelled
-        BOOST_FOREACH (PAIRTYPE(const uint256, CRelayMessage) & item, mapRelayMessages) {
-            const CRelayMessage& alert = item.second;
+        BOOST_FOREACH (PAIRTYPE(const uint256, CVGPMessage) & item, mapRelayMessages) {
+            const CVGPMessage& alert = item.second;
             if (alert.Cancels(*this)) {
                 LogPrintf("relay message already cancelled by %d\n", alert.nID);
                 return false;
@@ -207,11 +234,11 @@ bool CRelayMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPub
         }
     }
 	*/
-    //LogPrintf("CRelayMessage::%s() -- accepted alert %d, AppliesToMe()=%d\n", nID, AppliesToMe());
+    //LogPrintf("CVGPMessage::%s() -- accepted alert %d, AppliesToMe()=%d\n", nID, AppliesToMe());
     return true;
 }
 
-void CRelayMessage::Notify(const std::string& strMessage, bool fThread)
+void CVGPMessage::Notify(const std::string& strMessage, bool fThread)
 {
 	/*
     std::string strCmd = GetArg("-alertnotify", "");

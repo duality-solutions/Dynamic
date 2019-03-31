@@ -17,15 +17,15 @@
 #include <stdint.h>
 #include <vector>
 
-class CRelayMessage;
+class CVGPMessage;
 class CConnman;
 class CNode;
 class uint256;
 
-extern std::map<uint256, CRelayMessage> mapRelayMessages;
-extern CCriticalSection cs_mapRelayMessages;
+extern std::map<uint256, CVGPMessage> mapRelayMessages;
+extern CCriticalSection cs_mapVGPMessages;
 
-class CUnsignedRelayMessage
+class CUnsignedVGPMessage
 {
 public:
     static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
@@ -34,6 +34,7 @@ public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
     uint256 SubjectID;
+    uint256 MessageID;
     bool fEncrypted;
     uint16_t nDataFormatVersion;
     std::vector<unsigned char> vchRelayWallet;
@@ -48,6 +49,7 @@ public:
     {
         READWRITE(this->nVersion);
         READWRITE(SubjectID);
+        READWRITE(MessageID);
         READWRITE(fEncrypted);
         READWRITE(nDataFormatVersion);
         READWRITE(vchRelayWallet);
@@ -58,17 +60,20 @@ public:
 
     void SetNull();
 
+    bool EncryptMessage(const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
+    bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage);
+
     std::string ToString() const;
 };
 
-/** An relay message is a combination of a serialized CUnsignedRelayMessage and a signature. */
-class CRelayMessage : public CUnsignedRelayMessage
+/** A relay message is a combination of a serialized CUnsignedVGPMessage and a signature. */
+class CVGPMessage : public CUnsignedVGPMessage
 {
 public:
     std::vector<unsigned char> vchMsg;
     std::vector<unsigned char> vchSig;
 
-    CRelayMessage()
+    CVGPMessage()
     {
         SetNull();
     }
@@ -97,7 +102,7 @@ public:
     /*
      * Get copy of (active) relay message object by hash. Returns a null relay message if it is not found.
      */
-    static CRelayMessage getAlertByHash(const uint256& hash);
+    static CVGPMessage getAlertByHash(const uint256& hash);
 };
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H
