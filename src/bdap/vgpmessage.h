@@ -28,6 +28,8 @@ extern CCriticalSection cs_mapRelayMessages;
 class CUnsignedRelayMessage
 {
 public:
+    static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
+    static constexpr uint32_t MIN_PROTOCOL_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
     static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
     static const int CURRENT_VERSION = 1;
     int nVersion;
@@ -84,16 +86,16 @@ public:
     bool IsNull() const;
     uint256 GetHash() const;
     bool IsInEffect() const;
-    //bool AppliesTo(int nVersion, const std::string& strSubVerIn) const;
+    bool AppliesTo(int nVersion, const std::string& strSubVerIn) const;
     //bool AppliesToMe() const;
-    bool RelayTo(CNode* pnode, CConnman& connman) const;
+    bool RelayMessage(CNode* pnode, CConnman& connman) const;
     bool Sign();
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread = true) const; // fThread means run -alertnotify in a free-running thread
     static void Notify(const std::string& strMessage, bool fThread = true);
 
     /*
-     * Get copy of (active) alert object by hash. Returns a null alert if it is not found.
+     * Get copy of (active) relay message object by hash. Returns a null relay message if it is not found.
      */
     static CRelayMessage getAlertByHash(const uint256& hash);
 };

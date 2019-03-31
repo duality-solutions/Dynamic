@@ -268,6 +268,8 @@ extern const char* DNGOVERNANCESYNC;
 extern const char* DNGOVERNANCEOBJECT;
 extern const char* DNGOVERNANCEOBJECTVOTE;
 extern const char* DNVERIFY;
+// BDAP VGP Secure Message
+extern const char* VGPMESSAGE;
 }; // namespace NetMsgType
 
 /* Get a vector of all valid message types (see above) */

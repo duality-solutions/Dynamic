@@ -5,13 +5,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/relaymessage.h"
+#include "bdap/vgpmessage.h"
 
 #include "base58.h"
 #include "bdap/utils.h"
 #include "clientversion.h"
 #include "hash.h"
 #include "key.h"
+#include "netmessagemaker.h"
 #include "streams.h"
 #include "timedata.h"
 #include "util.h"
@@ -74,24 +75,28 @@ bool CRelayMessage::IsInEffect() const
     return (nTimeStamp + 60 >= GetAdjustedTime());
 }
 
-bool CRelayMessage::RelayTo(CNode* pnode, CConnman& connman) const
+bool CRelayMessage::AppliesTo(const int nVersion, const std::string& strSubVerIn) const
+{
+    return false;
+    // convert nVersion and subversion to client version format 2041400
+    //return (IsInEffect() && nClientVersion >= MIN_CLIENT_VERSION && nProtoVersion >= MIN_PROTOCOL_VERSION);
+}
+
+bool CRelayMessage::RelayMessage(CNode* pnode, CConnman& connman) const
 {
     if (!IsInEffect())
         return false;
-    /*
+
     // don't relay to nodes which haven't sent their version message
     if (pnode->nVersion == 0)
         return false;
     // returns true if wasn't already contained in the set
     if (pnode->setKnown.insert(GetHash()).second) {
-        if (AppliesTo(pnode->nVersion, pnode->strSubVer) ||
-            AppliesToMe() ||
-            GetAdjustedTime() < nRelayUntil) {
-            connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::ALERT, *this));
+        if (AppliesTo(pnode->nVersion, pnode->strSubVer) || GetAdjustedTime() < nRelayUntil) {
+            connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::VGPMESSAGE, *this, GetHash(), SubjectID));
             return true;
         }
     }
-    */
     return false;
 }
 
