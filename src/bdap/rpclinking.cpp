@@ -731,7 +731,7 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
             if (GetDomainEntry(link.RequestorFullObjectPath, entryRequestor) && GetDomainEntry(link.RecipientFullObjectPath, entryRecipient)) {
                 // Create BDAP operation script
                 scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
-                             << link.RecipientPubKey << link.SharedLinkPubKey << OP_2DROP << OP_2DROP;
+                             << link.RecipientPubKey << link.SharedAcceptPubKey << OP_2DROP << OP_2DROP;
                 scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
                 scriptPubKey += scriptDest;
                 scriptSend = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
