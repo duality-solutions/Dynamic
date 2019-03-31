@@ -85,9 +85,9 @@ DYNAMIC_CORE_H = \
   bdap/linkingdb.h \
   bdap/linkmanager.h \
   bdap/linkstorage.h \
-  bdap/relaymessage.h \
   bdap/sidechain.h \
   bdap/utils.h \
+  bdap/vgpmessage.h \
   bip39_chinese_simplified.h \
   bip39_chinese_traditional.h \
   bip39_english.h \
@@ -284,12 +284,12 @@ libdynamic_server_a_SOURCES = \
   bdap/linkingdb.cpp \
   bdap/linkmanager.cpp \
   bdap/linkstorage.cpp \
-  bdap/relaymessage.cpp \
   bdap/rpcdomainentry.cpp \
   bdap/rpclinking.cpp \
   bdap/rpcrawbdap.cpp \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
+  bdap/vgpmessage.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \
