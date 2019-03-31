@@ -113,19 +113,17 @@ public:
      */
     std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> GetDHTPubKey() const { return publicKey; }
 
-    //void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
-
     //! Get the 256-bit hash of this public key.
     uint256 GetHash() const
     {
-        std::vector<unsigned char> vch = GetPubKey();
+        std::vector<unsigned char> vch = GetPubKey();  // TODO (DHT): change to use GetPubKeyBytes()
         return Hash(vch.begin(), vch.end());
     }
 
-    //! Get the 256-bit hash of this public key.
+    //! Get the KeyID of this public key (hash of its serialization)
     CKeyID GetID() const
     {
-        std::vector<unsigned char> vch = GetPubKey();
+        std::vector<unsigned char> vch = GetPubKey(); // TODO (DHT): change to use GetPubKeyBytes()
         return CKeyID(Hash160(vch.begin(), vch.end()));
     }
 
