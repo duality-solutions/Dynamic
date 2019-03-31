@@ -134,6 +134,7 @@ public:
     bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
     CharString LinkPath() const;
     std::string LinkPathString() const;
+    std::string ToString() const;
 
 };
 
@@ -236,6 +237,7 @@ public:
     bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
     CharString LinkPath() const;
     std::string LinkPathString() const;
+    std::string ToString() const;
 
 };
 
