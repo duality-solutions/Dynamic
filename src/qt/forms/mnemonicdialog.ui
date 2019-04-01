@@ -921,7 +921,7 @@ Wallet wil restart after mnemonic has been imported.</string>
       <string>Wallet already has an HD account loaded.
 By importing another recovery phrase a new account will be created and set as the default.
 The wallet will receive on addresses from the new imported account only.
-Your old account wallet file will be renamed to wallet.old.dat in your data directory
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </string>
      </property>
      <property name="textFormat">
