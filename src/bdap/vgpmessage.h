@@ -15,11 +15,13 @@
 #include <map>
 #include <set>
 #include <stdint.h>
+#include <string>
 #include <vector>
 
-class CVGPMessage;
 class CConnman;
+class CKeyEd25519;
 class CNode;
+class CVGPMessage;
 class uint256;
 
 extern std::map<uint256, CVGPMessage> mapRelayMessages;
@@ -34,13 +36,24 @@ public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
     uint256 SubjectID;
-    uint256 MessageID;
+    uint256 MessageID; // derived by hashing the public key + nTimestamp
     bool fEncrypted;
-    uint16_t nDataFormatVersion;
     std::vector<unsigned char> vchRelayWallet;
-    std::vector<unsigned char> vchMessageData;
     int64_t nTimeStamp;
     int64_t nRelayUntil; // when newer nodes stop relaying to newer nodes
+    std::vector<unsigned char> vchMessageData;
+
+    CUnsignedVGPMessage(const uint256& subjectID, const uint256& messageID, const std::vector<unsigned char> wallet, int64_t timestamp, int64_t stoptime)
+        : SubjectID(subjectID), MessageID(messageID), vchRelayWallet(wallet), nTimeStamp(timestamp), nRelayUntil(stoptime)
+    {
+        nVersion = CUnsignedVGPMessage::CURRENT_VERSION;
+        vchMessageData.clear();
+    }
+
+    CUnsignedVGPMessage()
+    {
+        SetNull();
+    }
 
     ADD_SERIALIZE_METHODS;
 
@@ -51,22 +64,21 @@ public:
         READWRITE(SubjectID);
         READWRITE(MessageID);
         READWRITE(fEncrypted);
-        READWRITE(nDataFormatVersion);
         READWRITE(vchRelayWallet);
-        READWRITE(vchMessageData);
         READWRITE(nTimeStamp);
         READWRITE(nRelayUntil);
+        READWRITE(vchMessageData);
     }
 
     void SetNull();
 
-    bool EncryptMessage(const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
-    bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage);
+    bool EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
+    bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage);
 
     std::string ToString() const;
 };
 
-/** A relay message is a combination of a serialized CUnsignedVGPMessage and a signature. */
+/** A VGP message is a combination of a serialized CUnsignedVGPMessage and a signature. */
 class CVGPMessage : public CUnsignedVGPMessage
 {
 public:
@@ -77,6 +89,8 @@ public:
     {
         SetNull();
     }
+
+    CVGPMessage(const CUnsignedVGPMessage& unsignedMessage);
 
     ADD_SERIALIZE_METHODS;
 
@@ -102,7 +116,11 @@ public:
     /*
      * Get copy of (active) relay message object by hash. Returns a null relay message if it is not found.
      */
-    static CVGPMessage getAlertByHash(const uint256& hash);
+    //static CVGPMessage getAlertByHash(const uint256& hash);
 };
+
+bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage);
+uint256 GetSubjectIDFromKey(const CKeyEd25519& key);
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp);
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H

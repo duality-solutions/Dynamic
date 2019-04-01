@@ -8,15 +8,89 @@
 #include "bdap/vgpmessage.h"
 
 #include "base58.h"
+#include "bdap/linkmanager.h"
 #include "bdap/utils.h"
 #include "bdap/vgp/include/encryption.h" // for VGP DecryptBDAPData
 #include "clientversion.h"
+#include "dht/ed25519.h"
 #include "hash.h"
 #include "key.h"
 #include "netmessagemaker.h"
+#include "script/script.h"
 #include "streams.h"
 #include "timedata.h"
 #include "util.h"
+
+class CMessage
+{
+public:
+    static const int CURRENT_VERSION = 1;
+    int nMessageVersion;
+    std::vector<unsigned char> vchMessageType;
+    std::vector<unsigned char> vchMessage;
+
+    CMessage()
+    {
+        SetNull();
+    }
+
+    CMessage(const int& version, const std::vector<unsigned char>& type, const std::vector<unsigned char>& message) 
+                : nMessageVersion(version), vchMessageType(type), vchMessage(message) {}
+
+    CMessage(const std::vector<unsigned char>& vchData)
+    {
+        UnserializeFromData(vchData);
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(nMessageVersion);
+        READWRITE(vchMessageType);
+        READWRITE(vchMessage);
+    }
+
+    void SetNull()
+    {
+        nMessageVersion = -1;
+        vchMessageType.clear();
+        vchMessage.clear();
+    }
+
+    inline bool IsNull() const { return (nMessageVersion == -1); }
+
+    inline CMessage operator=(const CMessage& b)
+    {
+        nMessageVersion = b.nMessageVersion;
+        vchMessageType = b.vchMessageType;
+        vchMessage = b.vchMessage;
+        return *this;
+    }
+
+    void Serialize(std::vector<unsigned char>& vchData);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
+};
+
+void CMessage::Serialize(std::vector<unsigned char>& vchData) 
+{
+    CDataStream dsMessageData(SER_NETWORK, PROTOCOL_VERSION);
+    dsMessageData << *this;
+    vchData = std::vector<unsigned char>(dsMessageData.begin(), dsMessageData.end());
+}
+
+bool CMessage::UnserializeFromData(const std::vector<unsigned char>& vchData)
+{
+    try {
+        CDataStream dsMessageData(vchData, SER_NETWORK, PROTOCOL_VERSION);
+        dsMessageData >> *this;
+    } catch (std::exception &e) {
+        SetNull();
+        return false;
+    }
+    return true;
+}
 
 void CUnsignedVGPMessage::SetNull()
 {
@@ -24,11 +98,10 @@ void CUnsignedVGPMessage::SetNull()
     SubjectID.SetNull();
     MessageID.SetNull();
     fEncrypted = false;
-    nDataFormatVersion = 0;
     vchRelayWallet.clear();
-    vchMessageData.clear();
     nTimeStamp = 0;
     nRelayUntil = 0;
+    vchMessageData.clear();
 }
 
 std::string CUnsignedVGPMessage::ToString() const
@@ -39,43 +112,52 @@ std::string CUnsignedVGPMessage::ToString() const
         "    SubjectID            = %s\n"
         "    MessageID            = %s\n"
         "    Encrypted            = %s\n"
-        "    nDataFormatVersion   = %d\n"
         "    RelayWallet          = %s\n"
-        "    Data Size            = %d\n"
         "    nTimeStamp           = %d\n"
         "    nRelayUntil          = %d\n"
+        "    Message Size         = %d\n"
         ")\n",
         nVersion,
         SubjectID.ToString(),
         MessageID.ToString(),
         fEncrypted ? "true" : "false",
-        nDataFormatVersion,
         stringFromVch(vchRelayWallet),
-        vchMessageData.size(),
         nTimeStamp,
-        nRelayUntil);
+        nRelayUntil,
+        vchMessageData.size());
 }
 
-bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage)
+bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage)
 {
-    if (!EncryptBDAPData(vvchPubKeys, vchMessage, vchMessageData, strErrorMessage))
+    CMessage message(CMessage::CURRENT_VERSION, vchType, vchMessage);
+    std::vector<unsigned char> vchData;
+    message.Serialize(vchData);
+    if (!EncryptBDAPData(vvchPubKeys, vchMessage, vchData, strErrorMessage))
     {
         return false;
     }
+    fEncrypted = true;
     return true;
 }
 
-bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage)
+bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage)
 {
+    if (!fEncrypted)
+        return false;
+
     std::vector<unsigned char> vchRawPrivSeed;
     for (unsigned int i = 0; i < sizeof(arrPrivateSeed); i++)
     {
         vchRawPrivSeed.push_back(arrPrivateSeed[i]);
     }
-    if (!DecryptBDAPData(vchRawPrivSeed, vchMessageData, vchMessage, strErrorMessage))
+    std::vector<unsigned char> vchDecryptMessage;
+    if (!DecryptBDAPData(vchRawPrivSeed, vchMessageData, vchDecryptMessage, strErrorMessage))
     {
         return false;
     }
+    CMessage message(vchDecryptMessage);
+    vchType = message.vchMessageType;
+    vchMessage = message.vchMessage;
     return true;
 }
 
@@ -157,7 +239,7 @@ bool CVGPMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) co
     sRelayMsg >> *(CUnsignedVGPMessage*)this;
     return true;
 }
-
+/*
 CVGPMessage CVGPMessage::getAlertByHash(const uint256& hash)
 {
     CVGPMessage retval;
@@ -169,7 +251,7 @@ CVGPMessage CVGPMessage::getAlertByHash(const uint256& hash)
     }
     return retval;
 }
-
+*/
 bool CVGPMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread) const
 {
     if (!CheckSignature(vchPubKey))
@@ -258,4 +340,43 @@ void CVGPMessage::Notify(const std::string& strMessage, bool fThread)
     else
         runCommand(strCmd);
     */
+}
+
+bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage)
+{
+    if (!pLinkManager)
+    {
+        strErrorMessage = "Link manager is null.";
+        return false;
+    }
+
+    uint256 id = GetLinkID(strSenderFQDN, strRecipientFQDN);
+    CLink link;
+    if (!pLinkManager->FindLink(id, link))
+    {
+        strErrorMessage = "Link not found.";
+        return false;
+    }
+
+    std::array<char, 32> seed;
+    if (!GetSharedPrivateSeed(link, seed, strErrorMessage))
+    {
+        strErrorMessage = "Failed to get shared secret link key.";
+        return false;
+    }
+
+    return true;
+}
+
+uint256 GetSubjectIDFromKey(const CKeyEd25519& key)
+{
+    std::vector<unsigned char> vchPubKey = key.GetPubKeyBytes();
+    return Hash(vchPubKey.begin(), vchPubKey.end());
+}
+
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp)
+{
+    CScript scriptMessage;
+    scriptMessage << key.GetPubKeyBytes() << timestamp;
+    return Hash(scriptMessage.begin(), scriptMessage.end());
 }

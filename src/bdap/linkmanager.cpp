@@ -716,7 +716,7 @@ uint256 GetLinkID(const std::string& account1, const std::string& account2)
     return Hash(vchLink1.begin(), vchLink1.end());
 }
 
-bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
+bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage)
 {
     if (!pwalletMain)
         return false;
@@ -852,12 +852,20 @@ bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
     // third key exchange: shared link request pubkey + shared link accept pubkey
     // Only the link recipient and requestor can derive this secret key.
     // the third shared public key is not on the blockchain and should only be known by the participants.
-    std::array<char, 32> sharedSeed3 = GetLinkSharedPrivateKey(sharedKey1, sharedKey2.GetPubKey());
-    CKeyEd25519 sharedKey3(sharedSeed3);
-    // TODO (BDAP): Add sharedKey3 to local wallet.
-    std::vector<unsigned char> vchSharedIDPubKey = sharedKey3.GetPubKey(); // TODO (DHT): change to use GetPubKeyBytes()
+    seed = GetLinkSharedPrivateKey(sharedKey1, sharedKey2.GetPubKey());
+    return true;
+}
+
+bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
+{
+    std::array<char, 32> seed;
+    if (!GetSharedPrivateSeed(link, seed, strErrorMessage))
+    {
+        return false;
+    }
+    CKeyEd25519 key(seed);
+    std::vector<unsigned char> vchSharedIDPubKey = key.GetPubKeyBytes();
     id = Hash(vchSharedIDPubKey.begin(), vchSharedIDPubKey.end());
-    LogPrintf("%s -- SubjectID %s found for link between %s and %s\n", __func__, id.ToString(), stringFromVch(link.RequestorFullObjectPath), stringFromVch(link.RecipientFullObjectPath));
     return true;
 }
 //#endif // ENABLE_WALLET

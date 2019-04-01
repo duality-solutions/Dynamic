@@ -162,6 +162,8 @@ private:
 uint256 GetLinkID(const CLinkRequest& request);
 uint256 GetLinkID(const CLinkAccept& accept);
 uint256 GetLinkID(const std::string& account1, const std::string& account2);
+
+bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage);
 bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage);
 
 extern CLinkManager* pLinkManager;
