@@ -19,10 +19,14 @@
 #include <vector>
 
 class CConnman;
+class CKey;
 class CKeyEd25519;
 class CNode;
 class CVGPMessage;
 class uint256;
+
+static const unsigned int MAX_MESSAGE_SIZE = 8192;
+static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
 
 extern std::map<uint256, CVGPMessage> mapRelayMessages;
 extern CCriticalSection cs_mapVGPMessages;
@@ -31,7 +35,6 @@ class CUnsignedVGPMessage
 {
 public:
     static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
-    static constexpr uint32_t MIN_PROTOCOL_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
     static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
     static const int CURRENT_VERSION = 1;
     int nVersion;
@@ -48,6 +51,11 @@ public:
     {
         nVersion = CUnsignedVGPMessage::CURRENT_VERSION;
         vchMessageData.clear();
+    }
+
+    CUnsignedVGPMessage(const std::vector<unsigned char>& vchData)
+    {
+       UnserializeFromData(vchData);
     }
 
     CUnsignedVGPMessage()
@@ -70,6 +78,22 @@ public:
         READWRITE(vchMessageData);
     }
 
+    inline CUnsignedVGPMessage operator=(const CUnsignedVGPMessage& b)
+    {
+        nVersion = b.nVersion;
+        SubjectID = b.SubjectID;
+        MessageID = b.MessageID;
+        fEncrypted = b.fEncrypted;
+        vchRelayWallet = b.vchRelayWallet;
+        nTimeStamp = b.nTimeStamp;
+        nRelayUntil = b.nRelayUntil;
+        vchMessageData = b.vchMessageData;
+        return *this;
+    }
+
+    void Serialize(std::vector<unsigned char>& vchData);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
+
     void SetNull();
 
     bool EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
@@ -79,7 +103,7 @@ public:
 };
 
 /** A VGP message is a combination of a serialized CUnsignedVGPMessage and a signature. */
-class CVGPMessage : public CUnsignedVGPMessage
+class CVGPMessage
 {
 public:
     std::vector<unsigned char> vchMsg;
@@ -90,7 +114,7 @@ public:
         SetNull();
     }
 
-    CVGPMessage(const CUnsignedVGPMessage& unsignedMessage);
+    CVGPMessage(CUnsignedVGPMessage& unsignedMessage);
 
     ADD_SERIALIZE_METHODS;
 
@@ -105,10 +129,8 @@ public:
     bool IsNull() const;
     uint256 GetHash() const;
     bool IsInEffect() const;
-    bool AppliesTo(int nVersion, const std::string& strSubVerIn) const;
-    //bool AppliesToMe() const;
-    bool RelayMessage(CNode* pnode, CConnman& connman) const;
-    bool Sign();
+    bool RelayMessage(CConnman& connman) const;
+    bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread = true) const; // fThread means run -alertnotify in a free-running thread
     static void Notify(const std::string& strMessage, bool fThread = true);

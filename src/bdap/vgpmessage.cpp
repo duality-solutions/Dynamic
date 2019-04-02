@@ -15,6 +15,7 @@
 #include "dht/ed25519.h"
 #include "hash.h"
 #include "key.h"
+#include "net.h" // for g_connman
 #include "netmessagemaker.h"
 #include "script/script.h"
 #include "streams.h"
@@ -161,16 +162,39 @@ bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateS
     return true;
 }
 
+void CUnsignedVGPMessage::Serialize(std::vector<unsigned char>& vchData) 
+{
+    CDataStream dsMessageData(SER_NETWORK, PROTOCOL_VERSION);
+    dsMessageData << *this;
+    vchData = std::vector<unsigned char>(dsMessageData.begin(), dsMessageData.end());
+}
+
+bool CUnsignedVGPMessage::UnserializeFromData(const std::vector<unsigned char>& vchData)
+{
+    try {
+        CDataStream dsMessageData(vchData, SER_NETWORK, PROTOCOL_VERSION);
+        dsMessageData >> *this;
+    } catch (std::exception &e) {
+        SetNull();
+        return false;
+    }
+    return true;
+}
+
+CVGPMessage::CVGPMessage(CUnsignedVGPMessage& unsignedMessage)
+{
+    unsignedMessage.Serialize(vchMsg);
+}
+
 void CVGPMessage::SetNull()
 {
-    CUnsignedVGPMessage::SetNull();
     vchMsg.clear();
     vchSig.clear();
 }
 
 bool CVGPMessage::IsNull() const
 {
-    return (nTimeStamp == 0);
+    return (vchMsg.size() == 0);
 }
 
 uint256 CVGPMessage::GetHash() const
@@ -180,48 +204,38 @@ uint256 CVGPMessage::GetHash() const
 
 bool CVGPMessage::IsInEffect() const
 {
-	// only keep for 1 minute
-    return (nTimeStamp + 60 >= GetAdjustedTime());
+    if (vchMsg.size() == 0)
+        return false;
+    // only keep for 1 minute
+    CUnsignedVGPMessage unsignedMessage(vchMsg);
+    return (unsignedMessage.nTimeStamp + 60 >= GetAdjustedTime());
 }
 
-bool CVGPMessage::AppliesTo(const int nVersion, const std::string& strSubVerIn) const
+bool CVGPMessage::RelayMessage(CConnman& connman) const
 {
-    return false;
-    // convert nVersion and subversion to client version format 2041400
-    //return (IsInEffect() && nClientVersion >= MIN_CLIENT_VERSION && nProtoVersion >= MIN_PROTOCOL_VERSION);
-}
-
-bool CVGPMessage::RelayMessage(CNode* pnode, CConnman& connman) const
-{
+    CUnsignedVGPMessage unsignedMessage(vchMsg);
     if (!IsInEffect())
         return false;
 
-    // don't relay to nodes which haven't sent their version message
-    if (pnode->nVersion == 0)
-        return false;
-    // returns true if wasn't already contained in the set
-    if (pnode->setKnown.insert(GetHash()).second) {
-        if (AppliesTo(pnode->nVersion, pnode->strSubVer) || GetAdjustedTime() < nRelayUntil) {
-            connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::VGPMESSAGE, *this, GetHash(), SubjectID));
-            return true;
+    connman.ForEachNode([&connman, this, unsignedMessage](CNode* pnode) {
+        if (pnode->nVersion != 0 && pnode->nVersion >= MIN_VGP_MESSAGE_PEER_PROTO_VERSION)
+        {
+            CNetMsgMaker msgMaker(pnode->GetSendVersion());
+            // returns true if wasn't already contained in the set
+            if (pnode->setKnown.insert(unsignedMessage.MessageID).second) {
+                if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
+                    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
+                }
+            }
         }
-    }
-    return false;
+    });
+    return true;
 }
 
-bool CVGPMessage::Sign()
+bool CVGPMessage::Sign(const CKey& key)
 {
-    CDataStream sMsg(SER_NETWORK, CLIENT_VERSION);
-    sMsg << *(CUnsignedVGPMessage*)this;
-    vchMsg = std::vector<unsigned char>(sMsg.begin(), sMsg.end());
-    CDynamicSecret vchSecret;
-    if (!vchSecret.SetString(stringFromVch(vchRelayWallet))) {
-        LogPrintf("CVGPMessage::%s -- vchSecret.SetString failed\n", __func__);
-        return false;
-    }
-    CKey key = vchSecret.GetKey();
     if (!key.Sign(Hash(vchMsg.begin(), vchMsg.end()), vchSig)) {
-        LogPrintf("CVGPMessage::%s -- Failed to sign relay message.\n", __func__);
+        LogPrintf("CVGPMessage::%s -- Failed to sign VGP message.\n", __func__);
         return false;
     }
 
@@ -234,9 +248,6 @@ bool CVGPMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) co
     if (!key.Verify(Hash(vchMsg.begin(), vchMsg.end()), vchSig))
         return error("CVGPMessage::%s(): verify signature failed", __func__);
 
-    // Now unserialize the data
-    CDataStream sRelayMsg(vchMsg, SER_NETWORK, PROTOCOL_VERSION);
-    sRelayMsg >> *(CUnsignedVGPMessage*)this;
     return true;
 }
 /*
@@ -315,14 +326,14 @@ bool CVGPMessage::ProcessRelayMessage(const std::vector<unsigned char>& vchPubKe
             Notify(strStatusBar, fThread);
         }
     }
-	*/
+    */
     //LogPrintf("CVGPMessage::%s() -- accepted alert %d, AppliesToMe()=%d\n", nID, AppliesToMe());
     return true;
 }
 
 void CVGPMessage::Notify(const std::string& strMessage, bool fThread)
 {
-	/*
+    /*
     std::string strCmd = GetArg("-alertnotify", "");
     if (strCmd.empty())
         return;

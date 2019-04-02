@@ -288,7 +288,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         {
                             LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                         }
-                        LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                        //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                     }
                     LogPrint("bdap", "%s -- Clear text link request added to map id = %s\n", __func__, linkID.ToString());
                     m_Links[linkID] = record;
@@ -338,7 +338,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         {
                             LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                         }
-                        LogPrintf("%s -- link accept = %s\n", __func__, record.ToString());
+                        //LogPrintf("%s -- link accept = %s\n", __func__, record.ToString());
                     }
                     LogPrint("bdap", "%s -- Clear text accept added to map id = %s, %s\n", __func__, linkID.ToString(), record.ToString());
                     m_Links[linkID] = record;
@@ -418,7 +418,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                             }
-                            LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                            //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link request from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
@@ -497,7 +497,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                             }
-                            LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                            //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link request for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
@@ -567,7 +567,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                             }
-                            LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
+                            //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link accept from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
@@ -639,7 +639,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
                             }
-                            LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
+                            //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link accept for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;

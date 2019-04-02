@@ -993,10 +993,23 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     {
         throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
     }
-    // TODO: check size before sending.
-    // TODO: Sign with wallet address
-    // TODO: send message
-    // TODO: Populate oLink data.
+    CVGPMessage vpgMessage(unsignedMessage);
+    if (vpgMessage.vchMsg.size() > MAX_MESSAGE_SIZE)
+    {
+        throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
+    }
+    CKey walletKey;
+    if (!pwalletMain->GetKey(keyID, walletKey))
+    {
+        throw std::runtime_error(strprintf("%s -- Failed to get wallet private key\n", __func__));
+    }
+    vpgMessage.Sign(walletKey);
+    vpgMessage.RelayMessage(*g_connman);
+    oLink.push_back(Pair("timestamp_epoch", timestamp));
+    oLink.push_back(Pair("subject_id", unsignedMessage.SubjectID.ToString()));
+    oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+    oLink.push_back(Pair("message_size", vpgMessage.vchMsg.size()));
+    oLink.push_back(Pair("signature_size", vpgMessage.vchSig.size()));
     return oLink;
 }
 
