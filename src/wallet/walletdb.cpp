@@ -617,6 +617,14 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             ssValue >> storage;
 
             ProcessLink(storage, true);
+        } else if (strType == "linkid") {
+            uint256 SubjectID;
+            ssKey >> SubjectID;
+
+            std::vector<unsigned char> vchPubKey;
+            ssValue >> vchPubKey;
+
+            LoadLinkMessageInfo(SubjectID, vchPubKey);
         }
     } catch (...) {
         if (strType != "keymeta")
@@ -1048,7 +1056,7 @@ bool CWalletDB::WriteLink(const CLinkStorage& link)
     vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
     LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
-    return Write(std::make_pair(std::string("link"), linkID), link);
+    return Write(std::make_pair(std::string("link"), linkID), link); 
 }
 
 bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey)
@@ -1058,4 +1066,16 @@ bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
     LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
     return Erase(std::make_pair(std::string("link"), linkID));
+}
+
+bool CWalletDB::WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
+    return Write(std::make_pair(std::string("linkid"), subjectID), vchPubKey); 
+}
+
+bool CWalletDB::EraseLinkMessageInfo(const uint256& subjectID)
+{
+    LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
+    return Erase(std::make_pair(std::string("linkid"), subjectID)); 
 }

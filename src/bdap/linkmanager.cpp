@@ -288,10 +288,16 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         {
                             LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                         }
+                        else
+                        {
+                            pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                            m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                        }
                         //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                     }
                     LogPrint("bdap", "%s -- Clear text link request added to map id = %s\n", __func__, linkID.ToString());
                     m_Links[linkID] = record;
+
                 }
                 else
                     LogPrintf("%s ***** Warning. Link request found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
@@ -337,6 +343,11 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (!GetMessageInfo(record, strErrorMessage))
                         {
                             LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                        }
+                        else
+                        {
+                            pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                            m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
                         }
                         //LogPrintf("%s -- link accept = %s\n", __func__, record.ToString());
                     }
@@ -418,6 +429,11 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
                             //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link request from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
@@ -497,6 +513,11 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
                             //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link request for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
@@ -566,6 +587,11 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             if (!GetMessageInfo(record, strErrorMessage))
                             {
                                 LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                            }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
                             }
                             //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
@@ -639,6 +665,11 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             {
                                 LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
                             //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
                         LogPrint("bdap", "%s -- Encrypted link accept for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
@@ -691,24 +722,10 @@ std::vector<CLinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsi
 
 int CLinkManager::IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp)
 {
-    bool fFoundSubjectID = false;
-    CLink myLink;
-    // TODO (BDAP): Make finding the subjectID more efficient.
-    for(const std::pair<uint256, CLink>& link : m_Links)
+    std::vector<unsigned char> vchPubKey;
+    if (GetLinkMessageInfo(subjectID, vchPubKey))
     {
-        if (link.second.nLinkState == 2) // completed link
-        {
-            if (link.second.SubjectID == subjectID)
-            {
-                fFoundSubjectID = true;
-                myLink = link.second;
-                break;
-            }
-        }
-    }
-    if (fFoundSubjectID)
-    {
-        if (messageID != GetMessageID(myLink.vchSecretPubKeyBytes, timestamp))
+        if (messageID != GetMessageID(vchPubKey, timestamp))
         {
             // Incorrect message id. Might be spoofed.
             return -100;
@@ -716,6 +733,22 @@ int CLinkManager::IsMyMessage(const uint256& subjectID, const uint256& messageID
         return 1;
     }
     return 0;
+}
+
+void CLinkManager::LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    if (m_LinkMessageInfo.count(subjectID) == 0)
+        m_LinkMessageInfo[subjectID] = vchPubKey;
+}
+
+bool CLinkManager::GetLinkMessageInfo(const uint256& subjectID, std::vector<unsigned char>& vchPubKey)
+{
+    std::map<uint256, std::vector<unsigned char>>::iterator it = m_LinkMessageInfo.find(subjectID);
+    if (it != m_LinkMessageInfo.end()) {
+        vchPubKey = it->second;
+        return true; // found subjectID
+    }
+    return false; // doesn't exist
 }
 
 uint256 GetLinkID(const CLinkRequest& request)

@@ -132,6 +132,7 @@ class CLinkManager {
 private:
     std::queue<CLinkStorage> linkQueue;
     std::map<uint256, CLink> m_Links;
+    std::map<uint256, std::vector<unsigned char>> m_LinkMessageInfo;
 
 public:
     CLinkManager() {
@@ -157,6 +158,9 @@ public:
     bool ListMyCompleted(std::vector<CLink>& vchLinks);
     std::vector<CLinkInfo> GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath);
     int IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp);
+    void LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool GetLinkMessageInfo(const uint256& subjectID, std::vector<unsigned char>& vchPubKey);
+    bool GetAllMessagesByType(const std::vector<unsigned char> vchMessageType);
 
 private:
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);

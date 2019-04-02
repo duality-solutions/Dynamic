@@ -151,6 +151,8 @@ public:
 
     bool WriteLink(const CLinkStorage& link);
     bool EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey);
+    bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool EraseLinkMessageInfo(const uint256& subjectID);
 
 private:
     CWalletDB(const CWalletDB&);

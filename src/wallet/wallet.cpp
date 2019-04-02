@@ -1758,6 +1758,18 @@ bool CWallet::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubK
     return CBasicKeyStore::GetDHTPubKeys(vvchDHTPubKeys);
 }
 
+bool CWallet::WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    CWalletDB walletdb(strWalletFile);
+    return walletdb.WriteLinkMessageInfo(subjectID, vchPubKey);
+}
+
+bool CWallet::EraseLinkMessageInfo(const uint256& subjectID)
+{
+    CWalletDB walletdb(strWalletFile);
+    return walletdb.EraseLinkMessageInfo(subjectID);
+}
+
 bool CWallet::IsHDEnabled()
 {
     CHDChain hdChainCurrent;
