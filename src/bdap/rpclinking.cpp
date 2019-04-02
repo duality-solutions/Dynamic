@@ -980,15 +980,15 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     int64_t timestamp = GetAdjustedTime();
     int64_t stoptime = timestamp + 60; // stop relaying after 1 minute.
     uint256 messageID = GetMessageID(key, timestamp);
-    CPubKey newKey;
-    if (!pwalletMain->GetKeyFromPool(newKey, false))
+    CPubKey newPubKey;
+    if (!pwalletMain->GetKeyFromPool(newPubKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
-    CKeyID keyID = newKey.GetID();
+    CKeyID keyID = newPubKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyID);
-    std::vector<unsigned char> wallet = vchFromString(walletAddress.ToString());
+    std::vector<unsigned char> vchWalletPubKey(newPubKey.begin(), newPubKey.end());
 
-    CUnsignedVGPMessage unsignedMessage(subjectID, messageID, wallet, timestamp, stoptime);
+    CUnsignedVGPMessage unsignedMessage(subjectID, messageID, vchWalletPubKey, timestamp, stoptime);
     if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vvchPubKeys, strErrorMessage))
     {
         throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
