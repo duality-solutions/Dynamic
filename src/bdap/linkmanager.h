@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+class CKeyEd25519;
 class CLinkRequest;
 class CLinkAccept;
 
@@ -152,6 +153,7 @@ public:
     bool ListMyPendingAccepts(std::vector<CLink>& vchLinks);
     bool ListMyCompleted(std::vector<CLink>& vchLinks);
     std::vector<CLinkInfo> GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath);
+    int IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp);
 
 private:
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);
@@ -165,6 +167,7 @@ uint256 GetLinkID(const std::string& account1, const std::string& account2);
 
 bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage);
 bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage);
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp);
 
 extern CLinkManager* pLinkManager;
 

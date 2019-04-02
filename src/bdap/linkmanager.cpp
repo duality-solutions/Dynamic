@@ -689,6 +689,46 @@ std::vector<CLinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsi
     return vchLinkInfo;
 }
 
+int CLinkManager::IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp)
+{
+    bool fFoundSubjectID = false;
+    CLink myLink;
+    // TODO (BDAP): Make finding the subjectID more efficient.
+    for(const std::pair<uint256, CLink>& link : m_Links)
+    {
+        if (link.second.nLinkState == 2) // completed link
+        {
+            if (link.second.SubjectID == subjectID)
+            {
+                fFoundSubjectID = true;
+                myLink = link.second;
+                break;
+            }
+        }
+    }
+    if (fFoundSubjectID)
+    {
+        std::string strErrorMessage = "";
+        std::array<char, 32> seed;
+        if (GetSharedPrivateSeed(myLink, seed, strErrorMessage))
+        {
+            CKeyEd25519 key(seed);
+            if (messageID != GetMessageID(key, timestamp))
+            {
+                // Incorrect message id. Might be spoofed.
+                return -100;
+            }
+            return 1;
+        }
+        else
+        {
+            // Can not derive shared private seed for this link
+            return 0;
+        }
+    }
+    return 0;
+}
+
 uint256 GetLinkID(const CLinkRequest& request)
 {
     std::vector<unsigned char> vchLinkPath = request.LinkPath();
@@ -868,4 +908,12 @@ bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
     id = Hash(vchSharedIDPubKey.begin(), vchSharedIDPubKey.end());
     return true;
 }
+
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp)
+{
+    CScript scriptMessage;
+    scriptMessage << key.GetPubKeyBytes() << timestamp;
+    return Hash(scriptMessage.begin(), scriptMessage.end());
+}
+
 //#endif // ENABLE_WALLET

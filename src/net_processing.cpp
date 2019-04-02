@@ -2700,7 +2700,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         int statusBan = message.ProcessMessage(strErrorMessage);
         if (strErrorMessage.size() > 0)
         {
-            LogPrintf("%s -- Error processing message. Hash %s,  MessageID %s, SubjectID %s, Error %s\n", __func__, 
+            LogPrint("bdap", "%s -- Error processing message. Hash %s,  MessageID %s, SubjectID %s, Error %s\n", __func__, 
                                 message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString(), strErrorMessage);
         }
         if (statusBan == 0)

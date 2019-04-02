@@ -29,9 +29,6 @@ static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP):
 static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
 static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
 
-extern std::map<uint256, CVGPMessage> mapRelayMessages;
-extern CCriticalSection cs_mapVGPMessages;
-
 class CUnsignedVGPMessage
 {
 public:
@@ -138,6 +135,11 @@ public:
 
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage);
 uint256 GetSubjectIDFromKey(const CKeyEd25519& key);
-uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp);
+
+bool ReceivedMessage(const uint256& messageHash);
+void CleanupRecentMessageLog();
+void CleanupMyMessageMap();
+void AddMyMessage(const CVGPMessage& message);
+void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages);
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H

@@ -21,6 +21,16 @@
 #include "timedata.h"
 #include "util.h"
 
+#include <cstdlib>
+
+static std::map<uint256, CVGPMessage> mapMyVGPMessages;
+static CCriticalSection cs_mapMyVGPMessages;
+static int nMyMessageCounter = 0;
+
+static std::map<uint256, int64_t> mapRecentMessageLog;
+static CCriticalSection cs_mapRecentMessageLog;
+static int nMessageCounter = 0;
+
 class CMessage
 {
 public:
@@ -254,9 +264,15 @@ bool CVGPMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) co
 
 int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
 {
+    CUnsignedVGPMessage unsignedMessage(vchMsg);
     // TODO (BDAP): Check pubkey is allowed to broadcast VGP messages, set ban score if not.
     // TODO (BDAP): Check number of messages from this pubkey. make sure it isn't spamming, set ban if too many messages per minute.
-    CUnsignedVGPMessage unsignedMessage(vchMsg);
+    //std::std::vector<unsigned char> vchWalletPubKey = unsignedMessage.vchWalletPubKey;
+    if (ReceivedMessage(GetHash()))
+    {
+        strErrorMessage = "Message already received.";
+        return -1; // do not relay message again
+    }
     if (unsignedMessage.vchMessageData.size() > MAX_MESSAGE_DATA_LENGTH)
     {
         strErrorMessage = "Message length exceeds limit. Adding 10 to ban score.";
@@ -282,8 +298,16 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "VGP message has an invalid signature. Adding 100 to ban score.";
         return 100; // this will add 100 to the peer's ban score
     }
-    // Add message hash to map that stored relayed message hashes.
     // check if message is for me. if, validate MessageID. If MessageID validates okay, store in memory map.
+    int nMyLinkStatus = pLinkManager->IsMyMessage(unsignedMessage.SubjectID, unsignedMessage.MessageID, unsignedMessage.nTimeStamp);
+    if (nMyLinkStatus == 1)
+    {
+        AddMyMessage((*this));
+    }
+    else if (nMyLinkStatus < 0)
+    {   
+        return std::abs(nMyLinkStatus);
+    }
     return 0; // All checks okay, relay message to peers.
 }
 
@@ -343,9 +367,83 @@ uint256 GetSubjectIDFromKey(const CKeyEd25519& key)
     return Hash(vchPubKey.begin(), vchPubKey.end());
 }
 
-uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp)
+void CleanupRecentMessageLog()
 {
-    CScript scriptMessage;
-    scriptMessage << key.GetPubKeyBytes() << timestamp;
-    return Hash(scriptMessage.begin(), scriptMessage.end());
+    std::map<uint256, int64_t>::iterator itr = mapRecentMessageLog.begin();
+    while (itr != mapRecentMessageLog.end())
+    {
+        int64_t nTimeStamp = (*itr).second;
+        if (nTimeStamp + 600 > GetAdjustedTime())
+        {
+           itr = mapRecentMessageLog.erase(itr);
+        }
+        else
+        {
+           ++itr;
+        }
+    }
+}
+
+bool ReceivedMessage(const uint256& messageHash)
+{
+    LOCK(cs_mapRecentMessageLog);
+    std::map<uint256, int64_t>::iterator iMessage = mapRecentMessageLog.find(messageHash);
+    if (iMessage != mapRecentMessageLog.end()) 
+    {
+        return true;
+    }
+    else
+    {
+        int64_t nTimeStamp =  GetAdjustedTime();
+        mapRecentMessageLog[messageHash] = nTimeStamp;
+        nMessageCounter++;
+        if ((nMessageCounter % 100) == 0)
+            CleanupRecentMessageLog();
+    }
+    return false;
+}
+
+void CleanupMyMessageMap()
+{
+    int64_t nCurrentTimeStamp =  GetAdjustedTime();
+    std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
+    while (itr != mapMyVGPMessages.end())
+    {
+        CVGPMessage message = (*itr).second;
+        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        if (unsignedMessage.nTimeStamp + 1800 > nCurrentTimeStamp)
+        {
+            itr = mapMyVGPMessages.erase(itr);
+        }
+        else
+        {
+           ++itr;
+        }
+    }
+}
+
+void AddMyMessage(const CVGPMessage& message)
+{
+    CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+    LogPrintf("%s -- Hash = %s, Link SubjectID = %s\n", __func__, message.GetHash().ToString(), unsignedMessage.SubjectID.ToString());
+    LOCK(cs_mapMyVGPMessages);
+    mapMyVGPMessages[message.GetHash()] = message;
+    nMyMessageCounter++;
+    if ((nMyMessageCounter % 100) == 0)
+        CleanupMyMessageMap();
+}
+
+void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages)
+{
+    LOCK(cs_mapMyVGPMessages);
+    std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
+    while (itr != mapMyVGPMessages.end())
+    {
+        CVGPMessage message = (*itr).second;
+        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        if (unsignedMessage.SubjectID == subjectID)
+        {
+            vchMessages.push_back(unsignedMessage);
+        }
+    }
 }
