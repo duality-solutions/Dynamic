@@ -1,5 +1,4 @@
 // Copyright (c) 2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT software license, see the accompanying
@@ -132,13 +131,7 @@ public:
     bool RelayMessage(CConnman& connman) const;
     bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
-    bool ProcessRelayMessage(const std::vector<unsigned char>& vchPubKey, bool fThread = true) const; // fThread means run -alertnotify in a free-running thread
-    static void Notify(const std::string& strMessage, bool fThread = true);
 
-    /*
-     * Get copy of (active) relay message object by hash. Returns a null relay message if it is not found.
-     */
-    //static CVGPMessage getAlertByHash(const uint256& hash);
 };
 
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage);
