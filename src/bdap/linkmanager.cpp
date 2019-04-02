@@ -284,9 +284,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                     {
                         std::string strErrorMessage = "";
-                        if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                        if (!GetMessageInfo(record, strErrorMessage))
                         {
-                            LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                            LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                         }
                         //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                     }
@@ -334,9 +334,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                     {
                         std::string strErrorMessage = "";
-                        if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                        if (!GetMessageInfo(record, strErrorMessage))
                         {
-                            LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                            LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                         }
                         //LogPrintf("%s -- link accept = %s\n", __func__, record.ToString());
                     }
@@ -414,9 +414,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
-                            if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                            if (!GetMessageInfo(record, strErrorMessage))
                             {
-                                LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
                             //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
@@ -493,9 +493,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
-                            if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                            if (!GetMessageInfo(record, strErrorMessage))
                             {
-                                LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
                             //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
                         }
@@ -563,9 +563,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
-                            if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                            if (!GetMessageInfo(record, strErrorMessage))
                             {
-                                LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
                             //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
@@ -635,9 +635,9 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
-                            if (!GetSubjectID(record, record.SubjectID, strErrorMessage))
+                            if (!GetMessageInfo(record, strErrorMessage))
                             {
-                                LogPrintf("%s -- Error getting subject id %s\n", __func__, strErrorMessage);
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
                             }
                             //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
                         }
@@ -708,23 +708,12 @@ int CLinkManager::IsMyMessage(const uint256& subjectID, const uint256& messageID
     }
     if (fFoundSubjectID)
     {
-        std::string strErrorMessage = "";
-        std::array<char, 32> seed;
-        if (GetSharedPrivateSeed(myLink, seed, strErrorMessage))
+        if (messageID != GetMessageID(myLink.vchSecretPubKeyBytes, timestamp))
         {
-            CKeyEd25519 key(seed);
-            if (messageID != GetMessageID(key, timestamp))
-            {
-                // Incorrect message id. Might be spoofed.
-                return -100;
-            }
-            return 1;
+            // Incorrect message id. Might be spoofed.
+            return -100;
         }
-        else
-        {
-            // Can not derive shared private seed for this link
-            return 0;
-        }
+        return 1;
     }
     return 0;
 }
@@ -896,7 +885,7 @@ bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::st
     return true;
 }
 
-bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
+bool GetMessageInfo(CLink& link, std::string& strErrorMessage)
 {
     std::array<char, 32> seed;
     if (!GetSharedPrivateSeed(link, seed, strErrorMessage))
@@ -904,16 +893,21 @@ bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage)
         return false;
     }
     CKeyEd25519 key(seed);
-    std::vector<unsigned char> vchSharedIDPubKey = key.GetPubKeyBytes();
-    id = Hash(vchSharedIDPubKey.begin(), vchSharedIDPubKey.end());
+    link.vchSecretPubKeyBytes = key.GetPubKeyBytes();
+    link.SubjectID = Hash(link.vchSecretPubKeyBytes.begin(), link.vchSecretPubKeyBytes.end());
     return true;
+}
+
+uint256 GetMessageID(const std::vector<unsigned char>& vchPubKey, const int64_t& timestamp)
+{
+    CScript scriptMessage;
+    scriptMessage << vchPubKey << timestamp;
+    return Hash(scriptMessage.begin(), scriptMessage.end());
 }
 
 uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp)
 {
-    CScript scriptMessage;
-    scriptMessage << key.GetPubKeyBytes() << timestamp;
-    return Hash(scriptMessage.begin(), scriptMessage.end());
+    return GetMessageID(key.GetPubKeyBytes(), timestamp);
 }
 
 //#endif // ENABLE_WALLET

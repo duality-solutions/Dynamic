@@ -53,8 +53,9 @@ public:
     uint64_t nExpireTimeAccept;
     uint256 txHashAccept;
 
-    // Used to tell when a VGP message is for this link
-    uint256 SubjectID;
+    
+    uint256 SubjectID; // Used to tell when a VGP message is for this link
+    std::vector<unsigned char> vchSecretPubKeyBytes; // Used to derive the VGP message id for this link
 
     CLink() {
         SetNull();
@@ -81,6 +82,7 @@ public:
         nExpireTimeAccept = 0;
         txHashAccept.SetNull();
         SubjectID.SetNull();
+        vchSecretPubKeyBytes.clear();
     }
 
     inline friend bool operator==(const CLink &a, const CLink &b) {
@@ -111,6 +113,7 @@ public:
         nExpireTimeAccept = b.nExpireTimeAccept;
         txHashAccept = b.txHashAccept;
         SubjectID = b.SubjectID;
+        vchSecretPubKeyBytes = b.vchSecretPubKeyBytes;
         return *this;
     }
  
@@ -166,7 +169,8 @@ uint256 GetLinkID(const CLinkAccept& accept);
 uint256 GetLinkID(const std::string& account1, const std::string& account2);
 
 bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage);
-bool GetSubjectID(const CLink& link, uint256& id, std::string& strErrorMessage);
+bool GetMessageInfo(CLink& link, std::string& strErrorMessage);
+uint256 GetMessageID(const std::vector<unsigned char>& vchPubKey, const int64_t& timestamp);
 uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp);
 
 extern CLinkManager* pLinkManager;
