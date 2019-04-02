@@ -284,6 +284,7 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
     }
     // Add message hash to map that stored relayed message hashes.
     // check if message is for me. if, validate MessageID. If MessageID validates okay, store in memory map.
+    return 0; // All checks okay, relay message to peers.
 }
 
 bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
@@ -296,8 +297,18 @@ bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
             if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
                 connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
             }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
         }
     }
+    else {
+        return false;
+    }
+    return true;
 }
 
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage)
