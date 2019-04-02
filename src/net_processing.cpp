@@ -2693,7 +2693,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         vRecv >> message;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
 
-        LogPrintf("%s -- Received VGP message. \n", __func__, message.vchMsg.size());
+        LogPrintf("%s -- Received VGP message. %d \n", __func__, message.vchMsg.size());
+        LogPrintf("%s -- SubjectID = %s, MessageID = %s \n", __func__, unsignedMessage.SubjectID.ToString(), unsignedMessage.MessageID.ToString());
         // check if already received/relayed message (status check)
         // check pubkey is allowed to broadcast VGP messages
         // check number of messages from this pubkey. make sure it isn't spamming
