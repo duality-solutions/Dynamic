@@ -10,6 +10,7 @@
 #include "addrman.h"
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/vgpmessage.h"
 #include "blockencodings.h"
 #include "chainparams.h"
 #include "consensus/validation.h"
@@ -2687,6 +2688,20 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
     }
 
+    else if (strCommand == NetMsgType::VGPMESSAGE) {
+        CVGPMessage message;
+        vRecv >> message;
+        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+
+        LogPrintf("%s -- Received VGP message. \n", __func__, message.vchMsg.size());
+        // check if already received/relayed message (status check)
+        // check pubkey is allowed to broadcast VGP messages
+        // check number of messages from this pubkey. make sure it isn't spamming
+        // check vectors data size do not exceed limits.
+        // check message signature
+        // relay message to peers if no errors. Add message hash to map that stored relayed message hashes.
+        // check if message is for me. if yes, validate MessageID. If MessageID validates okay, store in memory map.
+    }
 
     else if (strCommand == NetMsgType::FILTERLOAD) {
         CBloomFilter filter;
