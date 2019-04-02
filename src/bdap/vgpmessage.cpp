@@ -360,7 +360,6 @@ bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& str
         strErrorMessage = "Link manager is null.";
         return false;
     }
-
     uint256 id = GetLinkID(strSenderFQDN, strRecipientFQDN);
     CLink link;
     if (!pLinkManager->FindLink(id, link))
@@ -368,13 +367,14 @@ bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& str
         strErrorMessage = "Link not found.";
         return false;
     }
-
     std::array<char, 32> seed;
     if (!GetSharedPrivateSeed(link, seed, strErrorMessage))
     {
         strErrorMessage = "Failed to get shared secret link key.";
         return false;
     }
+    CKeyEd25519 getKey(seed);
+    key = getKey;
 
     return true;
 }
