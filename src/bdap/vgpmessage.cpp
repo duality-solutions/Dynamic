@@ -133,11 +133,13 @@ bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchTy
     CMessage message(CMessage::CURRENT_VERSION, vchType, vchMessage);
     std::vector<unsigned char> vchData;
     message.Serialize(vchData);
-    if (!EncryptBDAPData(vvchPubKeys, vchMessage, vchData, strErrorMessage))
+    std::vector<unsigned char> vchCipherText;
+    if (!EncryptBDAPData(vvchPubKeys, vchData, vchCipherText, strErrorMessage))
     {
         return false;
     }
     fEncrypted = true;
+    vchMessageData = vchCipherText;
     return true;
 }
 
