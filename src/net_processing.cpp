@@ -2693,15 +2693,40 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         vRecv >> message;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
 
-        LogPrintf("%s -- Received VGP message. %d \n", __func__, message.vchMsg.size());
-        LogPrintf("%s -- SubjectID = %s, MessageID = %s \n", __func__, unsignedMessage.SubjectID.ToString(), unsignedMessage.MessageID.ToString());
-        // check if already received/relayed message (status check)
-        // check pubkey is allowed to broadcast VGP messages
-        // check number of messages from this pubkey. make sure it isn't spamming
-        // check vectors data size do not exceed limits.
-        // check message signature
-        // relay message to peers if no errors. Add message hash to map that stored relayed message hashes.
-        // check if message is for me. if yes, validate MessageID. If MessageID validates okay, store in memory map.
+        LogPrintf("%s -- VGP message received: size = %d, SubjectID = %s, MessageID = %s, HashID = %s \n", 
+                        __func__, message.vchMsg.size(), unsignedMessage.SubjectID.ToString(), unsignedMessage.MessageID.ToString(), message.GetHash().ToString());
+
+        std::string strErrorMessage = "";
+        int statusBan = message.ProcessMessage(strErrorMessage);
+        if (strErrorMessage.size() > 0)
+        {
+            LogPrintf("%s -- Error processing message. Hash %s,  MessageID %s, SubjectID %s, Error %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString(), strErrorMessage);
+        }
+        if (statusBan == 0)
+        {
+            // Relay
+            pfrom->setKnown.insert(message.GetHash());
+            {
+                connman.ForEachNode([&message, &connman](CNode* pnode) {
+                    message.RelayTo(pnode, connman);
+                });
+            }
+        }
+        else if (statusBan > 0)
+        {
+            Misbehaving(pfrom->GetId(), statusBan);
+        }
+        else if (statusBan == -1)
+        {
+            LogPrintf("%s -- Duplicate message recieved. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+        else
+        {
+            LogPrintf("%s -- Unkown ProcessMessage status. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
     }
 
     else if (strCommand == NetMsgType::FILTERLOAD) {

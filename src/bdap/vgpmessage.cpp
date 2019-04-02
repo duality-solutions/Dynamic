@@ -98,7 +98,7 @@ void CUnsignedVGPMessage::SetNull()
     SubjectID.SetNull();
     MessageID.SetNull();
     fEncrypted = false;
-    vchRelayWallet.clear();
+    vchWalletPubKey.clear();
     nTimeStamp = 0;
     nRelayUntil = 0;
     vchMessageData.clear();
@@ -121,7 +121,7 @@ std::string CUnsignedVGPMessage::ToString() const
         SubjectID.ToString(),
         MessageID.ToString(),
         fEncrypted ? "true" : "false",
-        stringFromVch(vchRelayWallet),
+        stringFromVch(vchWalletPubKey),
         nTimeStamp,
         nRelayUntil,
         vchMessageData.size());
@@ -223,7 +223,7 @@ bool CVGPMessage::RelayMessage(CConnman& connman) const
         {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
             // returns true if wasn't already contained in the set
-            if (pnode->setKnown.insert(unsignedMessage.MessageID).second) {
+            if (pnode->setKnown.insert(GetHash()).second) {
                 if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
                     connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
                 }
@@ -250,6 +250,54 @@ bool CVGPMessage::CheckSignature(const std::vector<unsigned char>& vchPubKey) co
         return error("CVGPMessage::%s(): verify signature failed", __func__);
 
     return true;
+}
+
+int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
+{
+    // TODO (BDAP): Check pubkey is allowed to broadcast VGP messages, set ban score if not.
+    // TODO (BDAP): Check number of messages from this pubkey. make sure it isn't spamming, set ban if too many messages per minute.
+    CUnsignedVGPMessage unsignedMessage(vchMsg);
+    if (unsignedMessage.vchMessageData.size() > MAX_MESSAGE_DATA_LENGTH)
+    {
+        strErrorMessage = "Message length exceeds limit. Adding 10 to ban score.";
+        return 10; // this will add 100 to the peer's ban score
+    }
+    if (vchMsg.size() > MAX_MESSAGE_DATA_LENGTH) // create a const for this.
+    {
+        strErrorMessage = "Message length exceeds limit. Adding 10 to ban score.";
+        return 10; // this will add 100 to the peer's ban score
+    }
+    if (vchSig.size() > 80) // create a const for this.
+    {
+        strErrorMessage = "Signature size is too large. Adding 100 to ban score.";
+        return 100; // this will add 100 to the peer's ban score
+    }
+    if (unsignedMessage.vchWalletPubKey.size() > 178)
+    {
+        strErrorMessage = "Wallet pubkey is too large. Adding 100 to ban score.";
+        return 100; // this will add 100 to the peer's ban score
+    }
+    if (!CheckSignature(unsignedMessage.vchWalletPubKey))
+    {
+        strErrorMessage = "VGP message has an invalid signature. Adding 100 to ban score.";
+        return 100; // this will add 100 to the peer's ban score
+    }
+    // Add message hash to map that stored relayed message hashes.
+    // check if message is for me. if, validate MessageID. If MessageID validates okay, store in memory map.
+}
+
+bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
+{
+    if (pnode->nVersion != 0 && pnode->nVersion >= MIN_VGP_MESSAGE_PEER_PROTO_VERSION)
+    {
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
+        CUnsignedVGPMessage unsignedMessage(vchMsg);
+        if (pnode->setKnown.insert(GetHash()).second) {
+            if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
+                connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
+            }
+        }
+    }
 }
 
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage)

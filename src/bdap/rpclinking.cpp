@@ -1003,8 +1003,6 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     {
         throw std::runtime_error(strprintf("%s -- Failed to get wallet private key\n", __func__));
     }
-    vpgMessage.Sign(walletKey);
-    vpgMessage.RelayMessage(*g_connman);
     oLink.push_back(Pair("timestamp_epoch", timestamp));
     oLink.push_back(Pair("shared_pubkey", key.GetPubKeyString()));
     oLink.push_back(Pair("subject_id", unsignedMessage.SubjectID.ToString()));
@@ -1012,6 +1010,15 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
     oLink.push_back(Pair("message_size", vpgMessage.vchMsg.size()));
     oLink.push_back(Pair("signature_size", vpgMessage.vchSig.size()));
+    vpgMessage.Sign(walletKey);
+    if (vpgMessage.CheckSignature(vchWalletPubKey)) {
+        oLink.push_back(Pair("check_signature", "valid"));
+        vpgMessage.RelayMessage(*g_connman);
+    }
+    else {
+        oLink.push_back(Pair("check_signature", "invalid"));
+        oLink.push_back(Pair("error_message", "failed to relay message"));
+    }
     return oLink;
 }
 

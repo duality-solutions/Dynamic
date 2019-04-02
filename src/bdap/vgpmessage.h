@@ -26,6 +26,8 @@ class uint256;
 
 static const unsigned int MAX_MESSAGE_SIZE = 8192;
 static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
+static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
+static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
 
 extern std::map<uint256, CVGPMessage> mapRelayMessages;
 extern CCriticalSection cs_mapVGPMessages;
@@ -33,20 +35,18 @@ extern CCriticalSection cs_mapVGPMessages;
 class CUnsignedVGPMessage
 {
 public:
-    static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
-    static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
     static const int CURRENT_VERSION = 1;
     int nVersion;
     uint256 SubjectID;
     uint256 MessageID; // derived by hashing the public key + nTimestamp
     bool fEncrypted;
-    std::vector<unsigned char> vchRelayWallet;
+    std::vector<unsigned char> vchWalletPubKey;
     int64_t nTimeStamp;
     int64_t nRelayUntil; // when newer nodes stop relaying to newer nodes
     std::vector<unsigned char> vchMessageData;
 
     CUnsignedVGPMessage(const uint256& subjectID, const uint256& messageID, const std::vector<unsigned char> wallet, int64_t timestamp, int64_t stoptime)
-        : SubjectID(subjectID), MessageID(messageID), vchRelayWallet(wallet), nTimeStamp(timestamp), nRelayUntil(stoptime)
+        : SubjectID(subjectID), MessageID(messageID), vchWalletPubKey(wallet), nTimeStamp(timestamp), nRelayUntil(stoptime)
     {
         nVersion = CUnsignedVGPMessage::CURRENT_VERSION;
         vchMessageData.clear();
@@ -71,7 +71,7 @@ public:
         READWRITE(SubjectID);
         READWRITE(MessageID);
         READWRITE(fEncrypted);
-        READWRITE(vchRelayWallet);
+        READWRITE(vchWalletPubKey);
         READWRITE(nTimeStamp);
         READWRITE(nRelayUntil);
         READWRITE(vchMessageData);
@@ -83,7 +83,7 @@ public:
         SubjectID = b.SubjectID;
         MessageID = b.MessageID;
         fEncrypted = b.fEncrypted;
-        vchRelayWallet = b.vchRelayWallet;
+        vchWalletPubKey = b.vchWalletPubKey;
         nTimeStamp = b.nTimeStamp;
         nRelayUntil = b.nRelayUntil;
         vchMessageData = b.vchMessageData;
@@ -131,6 +131,8 @@ public:
     bool RelayMessage(CConnman& connman) const;
     bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
+    int ProcessMessage(std::string& strErrorMessage) const;
+    bool RelayTo(CNode* pnode, CConnman& connman) const;
 
 };
 
