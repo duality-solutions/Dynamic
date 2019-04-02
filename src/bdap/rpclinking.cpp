@@ -1006,8 +1006,10 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     vpgMessage.Sign(walletKey);
     vpgMessage.RelayMessage(*g_connman);
     oLink.push_back(Pair("timestamp_epoch", timestamp));
+    oLink.push_back(Pair("shared_pubkey", key.GetPubKeyString()));
     oLink.push_back(Pair("subject_id", unsignedMessage.SubjectID.ToString()));
     oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+    oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
     oLink.push_back(Pair("message_size", vpgMessage.vchMsg.size()));
     oLink.push_back(Pair("signature_size", vpgMessage.vchSig.size()));
     return oLink;
@@ -1034,7 +1036,6 @@ UniValue link(const JSONRPCRequest& request)
         if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
             throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP link transactions until spork is active."));
     }
-
     if (strCommand == "request") {
         return SendLinkRequest(request);
     }
