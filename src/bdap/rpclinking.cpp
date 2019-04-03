@@ -1082,20 +1082,23 @@ static UniValue GetAccountMessages(const JSONRPCRequest& request)
     if (request.params.size() > 3)
         vchMessageType = vchFromValue(request.params[3]);
 
-    std::vector<CUnsignedVGPMessage> vMessages;
+    std::vector<CVGPMessage> vMessages;
     GetMyLinkMessagesBySubjectAndSender(link.SubjectID, vchSenderFQDN, vchMessageType, vMessages);
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CUnsignedVGPMessage& message : vMessages)
+        for (CVGPMessage& message : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            oMessage.push_back(Pair("sender_fqdn", stringFromVch(message.SenderFQDN())));
-            oMessage.push_back(Pair("type", stringFromVch(message.Type())));
-            oMessage.push_back(Pair("message", stringFromVch(message.Value())));
-            oMessage.push_back(Pair("message_size", message.Value().size()));
-            oMessage.push_back(Pair("timestamp_epoch", message.nTimeStamp));
+            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
+            oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
+            oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
+            oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
+            oMessage.push_back(Pair("message_size", unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             std::string strMessageNumber = "message_" + std::to_string(nCounter);
             oMessages.push_back(Pair(strMessageNumber, oMessage));
             nCounter++;
@@ -1138,20 +1141,23 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     if (request.params.size() > 2)
         vchMessageType = vchFromValue(request.params[2]);
 
-    std::vector<CUnsignedVGPMessage> vMessages;
+    std::vector<CVGPMessage> vMessages;
     GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CUnsignedVGPMessage& message : vMessages)
+        for (CVGPMessage& message : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            oMessage.push_back(Pair("sender_fqdn", stringFromVch(message.SenderFQDN())));
-            oMessage.push_back(Pair("type", stringFromVch(message.Type())));
-            oMessage.push_back(Pair("message", stringFromVch(message.Value())));
-            oMessage.push_back(Pair("message_size", message.Value().size()));
-            oMessage.push_back(Pair("timestamp_epoch", message.nTimeStamp));
+            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
+            oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
+            oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
+            oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
+            oMessage.push_back(Pair("message_size", unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             std::string strMessageNumber = "message_" + std::to_string(nCounter);
             oMessages.push_back(Pair(strMessageNumber, oMessage));
             nCounter++;

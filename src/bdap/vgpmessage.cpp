@@ -434,7 +434,7 @@ bool ReceivedMessage(const uint256& messageHash)
         int64_t nTimeStamp =  GetAdjustedTime();
         mapRecentMessageLog[messageHash] = nTimeStamp;
         nMessageCounter++;
-        if ((nMessageCounter % 100) == 0)
+        if ((nMessageCounter % 10) == 0)
             CleanupRecentMessageLog();
     }
     return false;
@@ -498,7 +498,7 @@ void AddMyMessage(const CVGPMessage& message)
 {
     bool fFound = false;
     CUnsignedVGPMessage unsignedMessage(message.vchMsg);
-    LogPrintf("%s -- Hash = %s, Link SubjectID = %s\n", __func__, message.GetHash().ToString(), unsignedMessage.SubjectID.ToString());
+    LogPrint("bdap", "%s -- Message hash = %s, Link MessageID = %s\n", __func__, message.GetHash().ToString(), unsignedMessage.MessageID.ToString());
     CVGPMessage storeMessage;
     if (pwalletMain && pLinkManager && !pwalletMain->IsLocked() && unsignedMessage.fEncrypted)
     {
@@ -517,7 +517,7 @@ void AddMyMessage(const CVGPMessage& message)
     LOCK(cs_mapMyVGPMessages);
     mapMyVGPMessages[storeMessage.GetHash()] = storeMessage;
     nMyMessageCounter++;
-    if ((nMyMessageCounter % 100) == 0)
+    if ((nMyMessageCounter % 10) == 0)
         CleanupMyMessageMap();
 }
 
@@ -546,7 +546,7 @@ void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage
     }
 }
 
-void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CUnsignedVGPMessage>& vMessages)
+void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages)
 {
     LOCK(cs_mapMyVGPMessages);
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
@@ -567,7 +567,7 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const st
 }
 
 void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::vector<unsigned char>& vchSenderFQDN, 
-                                            const std::vector<unsigned char>& vchType, std::vector<CUnsignedVGPMessage>& vchMessages)
+                                            const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages)
 {
     LOCK(cs_mapMyVGPMessages);
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
@@ -577,7 +577,7 @@ void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::ve
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
         if (unsignedMessage.SubjectID == subjectID && unsignedMessage.SenderFQDN() == vchSenderFQDN && (vchType.size() == 0 || vchType == unsignedMessage.Type()))
         {
-            vchMessages.push_back(unsignedMessage);
+            vchMessages.push_back(message);
         }
         itr++;
     }
