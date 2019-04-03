@@ -959,6 +959,16 @@ static UniValue SendMessage(const JSONRPCRequest& request)
 
     std::string strSenderFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strSenderFQDN);
+    // Make sure this wallet owns the sending address
+    std::vector<unsigned char> vchSenderFQDN = vchFromString(strSenderFQDN);
+    CDomainEntry entry;
+    if (!GetDomainEntry(vchSenderFQDN, entry))
+        throw std::runtime_error(strprintf("%s -- sender account (%s) not found.\n", __func__, strSenderFQDN));
+
+    CKeyEd25519 getKey;
+    CKeyID senderKeyID(Hash160(entry.DHTPublicKey.begin(), entry.DHTPublicKey.end()));
+    if (!pwalletMain->GetDHTKey(senderKeyID, getKey))
+        throw std::runtime_error(strprintf("%s -- Error getting ed25519 private key for the sender (%s) BDAP account.\n", __func__, strSenderFQDN));
 
     std::string strRecipientFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRecipientFQDN);
@@ -1056,6 +1066,7 @@ static UniValue GetMessage(const JSONRPCRequest& request)
     ToLowerCase(strRecipient);
     std::string strSender = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strSender);
+    std::vector<unsigned char> vchSenderFQDN = vchFromString(strSender);
 
     uint256 linkID = GetLinkID(strRecipient, strSender);
     CLink link;
@@ -1072,7 +1083,7 @@ static UniValue GetMessage(const JSONRPCRequest& request)
         vchMessageType = vchFromValue(request.params[3]);
 
     std::vector<CUnsignedVGPMessage> vMessages;
-    GetMyLinkMessagesBySubject(link.SubjectID, vchMessageType, vMessages);
+    GetMyLinkMessagesBySubjectAndSender(link.SubjectID, vchSenderFQDN, vchMessageType, vMessages);
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
@@ -1121,11 +1132,12 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     // Get BDAP recipient account
     std::string strRecipient = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRecipient);
+    std::vector<unsigned char> vchRecipientFQDN = vchFromString(strRecipient);
     // Get message type parameter
     std::vector<unsigned char> vchMessageType = vchFromValue(request.params[2]);
 
     std::vector<CUnsignedVGPMessage> vMessages;
-    GetMyLinkMessagesByType(vchMessageType, vMessages);
+    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
