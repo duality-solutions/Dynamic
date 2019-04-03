@@ -150,6 +150,6 @@ bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage);
 void AddMyMessage(const CVGPMessage& message);
 void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vMessages);
 void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, std::vector<CUnsignedVGPMessage>& vMessages);
-void GetMyLinkMessagesBySubject(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages);
+void GetMyLinkMessagesBySubject(const uint256& subjectID, const std::vector<unsigned char>& vchType, std::vector<CUnsignedVGPMessage>& vchMessages);
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H

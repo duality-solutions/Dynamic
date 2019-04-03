@@ -566,7 +566,7 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, std::vec
     }
 }
 
-void GetMyLinkMessagesBySubject(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages)
+void GetMyLinkMessagesBySubject(const uint256& subjectID, const std::vector<unsigned char>& vchType, std::vector<CUnsignedVGPMessage>& vchMessages)
 {
     LOCK(cs_mapMyVGPMessages);
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
@@ -574,7 +574,7 @@ void GetMyLinkMessagesBySubject(const uint256& subjectID, std::vector<CUnsignedV
     {
         CVGPMessage message = (*itr).second;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
-        if (unsignedMessage.SubjectID == subjectID)
+        if (unsignedMessage.SubjectID == subjectID && (vchType.size() == 0 || vchType == unsignedMessage.Type()))
         {
             vchMessages.push_back(unsignedMessage);
         }
