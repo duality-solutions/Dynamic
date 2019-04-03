@@ -1005,7 +1005,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     CVGPMessage vpgMessage(unsignedMessage);
     if (vpgMessage.vchMsg.size() > MAX_MESSAGE_SIZE)
     {
-        throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
+        throw std::runtime_error(strprintf("%s --Message size (%d) too large to send.\n", __func__, vpgMessage.vchMsg.size()));
     }
     CKey walletKey;
     if (!pwalletMain->GetKey(keyID, walletKey))

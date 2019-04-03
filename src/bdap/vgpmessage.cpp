@@ -320,12 +320,12 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "Message length exceeds limit. Adding 10 to ban score.";
         return 10; // this will add 100 to the peer's ban score
     }
-    if (vchSig.size() > 80) // create a const for this.
+    if (vchSig.size() > MAX_SIGNATURE_SIZE) // create a const for this.
     {
         strErrorMessage = "Signature size is too large. Adding 100 to ban score.";
         return 100; // this will add 100 to the peer's ban score
     }
-    if (unsignedMessage.vchWalletPubKey.size() > 178)
+    if (unsignedMessage.vchWalletPubKey.size() > MAX_WALLET_PUBKEY_SIZE)
     {
         strErrorMessage = "Wallet pubkey is too large. Adding 100 to ban score.";
         return 100; // this will add 100 to the peer's ban score
@@ -471,7 +471,7 @@ bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage)
             std::vector<unsigned char> vchType, vchMessage, vchSenderFQDN;
             if (unsignedMessage.DecryptMessage(seed, vchType, vchMessage, vchSenderFQDN, strErrorMessage))
             {
-                LogPrintf("%s -- Found and decrypted type = %s, message = %s, sender = %s\n", __func__, stringFromVch(vchType), stringFromVch(vchMessage), stringFromVch(vchSenderFQDN));
+                LogPrint("bdap", "%s -- Found and decrypted type = %s, message = %s, sender = %s\n", __func__, stringFromVch(vchType), stringFromVch(vchMessage), stringFromVch(vchSenderFQDN));
                 CMessage message(1, vchType, vchMessage, vchSenderFQDN);
                 unsignedMessage.fEncrypted = false;
                 message.Serialize(unsignedMessage.vchMessageData);

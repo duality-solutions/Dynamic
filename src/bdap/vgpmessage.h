@@ -24,10 +24,12 @@ class CNode;
 class CVGPMessage;
 class uint256;
 
-static const unsigned int MAX_MESSAGE_SIZE = 8192;
+static const size_t MAX_MESSAGE_SIZE = 8192;
 static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
 static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
 static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
+static constexpr size_t MAX_SIGNATURE_SIZE = 72;
+static constexpr size_t MAX_WALLET_PUBKEY_SIZE = 40;
 
 class CUnsignedVGPMessage
 {
