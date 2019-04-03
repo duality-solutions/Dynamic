@@ -132,6 +132,14 @@ bool CKey::Check(const unsigned char* vch)
     return secp256k1_ec_seckey_verify(secp256k1_context_sign, vch);
 }
 
+
+void CKey::SetCompressedBoolean(bool fCompressedIn)
+{
+    fCompressed = fCompressedIn;
+}
+
+
+
 void CKey::MakeNewKey(bool fCompressedIn)
 {
     do {

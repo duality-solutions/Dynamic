@@ -746,22 +746,37 @@ UniValue makekeypair(const JSONRPCRequest& request)
     uint32_t nCount = 0;
     do
     {
-        key.MakeNewKey(false);
+        key.MakeNewKey(true);
         nCount++;
     } while (nCount < 10000 && strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()));
 
     if (strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()))
         return NullUniValue;
 
+    UniValue result(UniValue::VOBJ);
+
+    //key.SetCompressedBoolean(true);
+   //get compressed versions
+    CPrivKey vchPrivKeyC = key.GetPrivKey();
+    CKeyID keyIDC = key.GetPubKey().GetID();
+    CKey vchSecretC = CKey();
+    vchSecretC.SetPrivKey(vchPrivKeyC, true);    
+    result.push_back(Pair("private_key", HexStr<CPrivKey::iterator>(vchPrivKeyC.begin(), vchPrivKeyC.end())));
+    result.push_back(Pair("public_key", HexStr(key.GetPubKey())));
+    result.push_back(Pair("address", CDynamicAddress(keyIDC).ToString()));
+    result.push_back(Pair("address_private_key", CDynamicSecret(vchSecretC).ToString()));
+
+   //get uncompressed versions
+    key.SetCompressedBoolean(false); //toggle to false
     CPrivKey vchPrivKey = key.GetPrivKey();
     CKeyID keyID = key.GetPubKey().GetID();
     CKey vchSecret = CKey();
     vchSecret.SetPrivKey(vchPrivKey, false);
-    UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
-    result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
-    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
-    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
+    //result.push_back(Pair("private_key_uncompressed", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
+    result.push_back(Pair("public_key_uncompressed", HexStr(key.GetPubKey())));
+    result.push_back(Pair("address_uncompressed", CDynamicAddress(keyID).ToString()));
+    result.push_back(Pair("address_private_key_uncompressed", CDynamicSecret(vchSecret).ToString()));
+ 
     return result;
 }
 
