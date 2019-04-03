@@ -2693,7 +2693,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         vRecv >> message;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
 
-        LogPrintf("%s -- VGP message received: size = %d, SubjectID = %s, MessageID = %s, HashID = %s \n", 
+        LogPrint("bdap", "%s -- VGP message received: size = %d, SubjectID = %s, MessageID = %s, HashID = %s \n", 
                         __func__, message.vchMsg.size(), unsignedMessage.SubjectID.ToString(), unsignedMessage.MessageID.ToString(), message.GetHash().ToString());
 
         std::string strErrorMessage = "";
@@ -2719,7 +2719,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
         else if (statusBan == -1)
         {
-            LogPrintf("%s -- Duplicate message recieved. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+            LogPrint("bdap", "%s -- Duplicate message recieved. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
                                 message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
         }
         else
