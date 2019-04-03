@@ -558,7 +558,7 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const st
         {
             DecryptMessage(unsignedMessage);
         }
-        if (!unsignedMessage.fEncrypted && vchType == unsignedMessage.Type() && unsignedMessage.SenderFQDN() != vchRecipientFQDN)
+        if (!unsignedMessage.fEncrypted && (vchType.size() == 0 || vchType == unsignedMessage.Type()) && unsignedMessage.SenderFQDN() != vchRecipientFQDN)
         {
             vMessages.push_back(unsignedMessage);
         }

@@ -1031,12 +1031,12 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     return oLink;
 }
 
-static UniValue GetMessage(const JSONRPCRequest& request)
+static UniValue GetAccountMessages(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 4 || request.params.size() < 3)
         throw std::runtime_error(
-            "link getmessage \"account\" \"sender\" \"type\"\n"
-            "Gets realtime messages from the account for the specified sender and message type"
+            "link getaccountmessages \"account\" \"sender\" \"type\"\n"
+            "Gets realtime messages for the account from the specified sender and message type"
             + HelpRequiringPassphrase() +
             "\nLink Send Message Arguments:\n"
             "1. account          (string)             Your BDAP recipient account\n"
@@ -1049,9 +1049,9 @@ static UniValue GetMessage(const JSONRPCRequest& request)
             "  \"timestamp_epoch\"            (int)     Epoch time message was created\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("link getmessages", "superman batman status") +
+            + HelpExampleCli("link getaccountmessages", "superman batman status") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("link getmessages", "superman batman status"));
+            + HelpExampleRpc("link getaccountmessages", "superman batman status"));
 
     if (!pwalletMain)
         throw std::runtime_error(strprintf("%s -- wallet pointer is null.\n", __func__));
@@ -1106,14 +1106,14 @@ static UniValue GetMessage(const JSONRPCRequest& request)
 
 static UniValue GetMessages(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 3)
+    if (request.fHelp || request.params.size() > 3 || request.params.size() < 2)
         throw std::runtime_error(
             "link getmessages \"account\" \"type\"\n"
             "Gets realtime messages from the account for the specified message type"
             + HelpRequiringPassphrase() +
             "\nLink Send Message Arguments:\n"
             "1. account          (string)             Your BDAP recipient account\n"
-            "2. type             (string)             Message type\n"
+            "2. type             (string, optional)   Message type\n"
             "\nResult:\n"
             "{(json objects)\n"
             "  \"sender_fqdn\"                (string)  Sender's BDAP full path\n"
@@ -1134,7 +1134,9 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     ToLowerCase(strRecipient);
     std::vector<unsigned char> vchRecipientFQDN = vchFromString(strRecipient);
     // Get message type parameter
-    std::vector<unsigned char> vchMessageType = vchFromValue(request.params[2]);
+    std::vector<unsigned char> vchMessageType;
+    if (request.params.size() > 2)
+        vchMessageType = vchFromValue(request.params[2]);
 
     std::vector<CUnsignedVGPMessage> vMessages;
     GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
@@ -1169,7 +1171,7 @@ UniValue link(const JSONRPCRequest& request)
         throw std::runtime_error(
             "link\n"
             + HelpRequiringPassphrase() +
-            "\nLink commands are request, accept, pending, complete, deny, and denied.\n"
+            "\nLink commands are request, accept, pending, complete, deny, denied, getaccountmessages, getmessages, and sendmessage\n"
             "\nExamples:\n"
             + HelpExampleCli("link accept", "superman batman") +
             "\nAs a JSON-RPC call\n"
@@ -1199,8 +1201,8 @@ UniValue link(const JSONRPCRequest& request)
     else if (strCommand == "denied") {
         return DeniedLinkList(request);
     }
-    else if (strCommand == "getmessage") {
-        return GetMessage(request);
+    else if (strCommand == "getaccountmessages") {
+        return GetAccountMessages(request);
     }
     else if (strCommand == "getmessages") {
         return GetMessages(request);
