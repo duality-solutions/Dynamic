@@ -177,6 +177,19 @@ bool CLinkManager::FindLink(const uint256& id, CLink& link)
     return false;
 }
 
+bool CLinkManager::FindLinkBySubjectID(const uint256& subjectID, CLink& getLink)
+{
+    for (const std::pair<uint256, CLink>& link : m_Links)
+    {
+        if (link.second.SubjectID == subjectID) // pending request
+        {
+            getLink = link.second;
+            return true;
+        }
+    }
+    return false;
+}
+
 void CLinkManager::ProcessQueue()
 {
     if (!pwalletMain)

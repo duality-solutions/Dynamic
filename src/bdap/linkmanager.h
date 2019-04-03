@@ -153,6 +153,7 @@ public:
     void ProcessQueue();
 
     bool FindLink(const uint256& id, CLink& link);
+    bool FindLinkBySubjectID(const uint256& subjectID, CLink& getLink);
     bool ListMyPendingRequests(std::vector<CLink>& vchLinks);
     bool ListMyPendingAccepts(std::vector<CLink>& vchLinks);
     bool ListMyCompleted(std::vector<CLink>& vchLinks);

@@ -989,7 +989,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     std::vector<unsigned char> vchWalletPubKey(newPubKey.begin(), newPubKey.end());
 
     CUnsignedVGPMessage unsignedMessage(subjectID, messageID, vchWalletPubKey, timestamp, stoptime);
-    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vvchPubKeys, strErrorMessage))
+    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, strErrorMessage))
     {
         throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
     }
@@ -1020,6 +1020,58 @@ static UniValue SendMessage(const JSONRPCRequest& request)
         oLink.push_back(Pair("error_message", "failed to relay message"));
     }
     return oLink;
+}
+
+static UniValue GetMessages(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "link getmessages \"account\" \"type\"\n"
+            "Gets realtime messages from the account for the specified message type"
+            + HelpRequiringPassphrase() +
+            "\nLink Send Message Arguments:\n"
+            "1. account          (string)             Your BDAP recipient account\n"
+            "2. type             (string)             Message type\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"sender_fqdn\"                (string)  Sender's BDAP full path\n"
+            "  \"message\"                    (string)  Message from sender\n"
+            "  \"timestamp_epoch\"            (int)     Epoch time message was created\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link getmessages", "superman status") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link getmessages", "superman status"));
+
+    if (!pwalletMain)
+        throw std::runtime_error(strprintf("%s -- wallet pointer is null.\n", __func__));
+
+    EnsureWalletIsUnlocked();
+    // Get BDAP recipient account
+    std::string strRecipient = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipient);
+    // Get message type parameter
+    std::vector<unsigned char> vchMessageType = vchFromValue(request.params[2]);
+
+    std::vector<CUnsignedVGPMessage> vMessages;
+    GetMyLinkMessagesByType(vchMessageType, vMessages);
+    UniValue oMessages(UniValue::VOBJ);
+    if (vMessages.size() > 0)
+    {
+        size_t nCounter = 1;
+        for (CUnsignedVGPMessage& message : vMessages)
+        {
+            UniValue oMessage(UniValue::VOBJ);
+            oMessage.push_back(Pair("sender_fqdn", stringFromVch(message.SenderFQDN())));
+            oMessage.push_back(Pair("type", stringFromVch(message.Type())));
+            oMessage.push_back(Pair("message", stringFromVch(message.Value())));
+            oMessage.push_back(Pair("timestamp_epoch", message.nTimeStamp));
+            std::string strMessageNumber = "message_" + std::to_string(nCounter);
+            oMessages.push_back(Pair(strMessageNumber, oMessage));
+            nCounter++;
+        }
+    }
+    return oMessages;
 }
 
 UniValue link(const JSONRPCRequest& request) 
@@ -1063,11 +1115,9 @@ UniValue link(const JSONRPCRequest& request)
     else if (strCommand == "denied") {
         return DeniedLinkList(request);
     }
-    /*
     else if (strCommand == "getmessages") {
         return GetMessages(request);
     }
-    */
     else if (strCommand == "pending") {
         if (request.params.size() == 1) {
             return ListPendingLinks(request);

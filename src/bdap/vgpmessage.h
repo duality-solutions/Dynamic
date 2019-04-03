@@ -92,10 +92,17 @@ public:
 
     void SetNull();
 
-    bool EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
-    bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, std::vector<unsigned char>& vchMessage, std::string& strErrorMessage);
+    bool EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<unsigned char>& vchSenderFQDN, 
+                        const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
 
+    bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, 
+                        std::vector<unsigned char>& vchMessage, std::vector<unsigned char>& vchSenderFQDN, std::string& strErrorMessage);
+
+    std::vector<unsigned char> Type();
+    std::vector<unsigned char> Value();
+    std::vector<unsigned char> SenderFQDN();
     std::string ToString() const;
+
 };
 
 /** A VGP message is a combination of a serialized CUnsignedVGPMessage and a signature. */
@@ -139,7 +146,10 @@ uint256 GetSubjectIDFromKey(const CKeyEd25519& key);
 bool ReceivedMessage(const uint256& messageHash);
 void CleanupRecentMessageLog();
 void CleanupMyMessageMap();
+bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage);
 void AddMyMessage(const CVGPMessage& message);
-void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages);
+void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vMessages);
+void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, std::vector<CUnsignedVGPMessage>& vMessages);
+void GetMyLinkMessagesBySubject(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vchMessages);
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H
