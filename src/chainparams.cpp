@@ -501,7 +501,7 @@ public:
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
 
-        vSporkAddresses = {"D5uFBBHBe11nmYPmSNNTC1iR6V6bPkhJwe"};
+        vSporkAddresses = {"ygUqnUfyRnRfBUks3EBc937tgmYBwQYE2S"}; //private key: cT21Wm3oozS7HpP9K9g1SDxdgr2vw9TBPSTxjxeArLjYxGastsf9
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
