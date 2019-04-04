@@ -145,7 +145,7 @@ std::string CUnsignedVGPMessage::ToString() const
 bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<unsigned char>& vchSenderFQDN, 
                                          const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage)
 {
-    CMessage message(CMessage::CURRENT_VERSION, vchType, vchMessage, vchSenderFQDN);
+    CMessage message(1, vchType, vchMessage, vchSenderFQDN);
     std::vector<unsigned char> vchData;
     message.Serialize(vchData);
     std::vector<unsigned char> vchCipherText;
