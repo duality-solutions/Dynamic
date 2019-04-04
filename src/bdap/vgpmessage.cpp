@@ -406,11 +406,12 @@ uint256 GetSubjectIDFromKey(const CKeyEd25519& key)
 
 void CleanupRecentMessageLog()
 {
+    int64_t nCurrentTimeStamp =  GetAdjustedTime();
     std::map<uint256, int64_t>::iterator itr = mapRecentMessageLog.begin();
     while (itr != mapRecentMessageLog.end())
     {
         int64_t nTimeStamp = (*itr).second;
-        if (nTimeStamp + 600 > GetAdjustedTime())
+        if (nCurrentTimeStamp > nTimeStamp + KEEP_MESSAGE_LOG_ALIVE_SECONDS)
         {
            itr = mapRecentMessageLog.erase(itr);
         }
@@ -448,7 +449,7 @@ void CleanupMyMessageMap()
     {
         CVGPMessage message = (*itr).second;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
-        if (unsignedMessage.nTimeStamp + 1800 > nCurrentTimeStamp)
+        if (nCurrentTimeStamp > unsignedMessage.nTimeStamp + KEEP_MY_MESSAGE_ALIVE_SECONDS)
         {
             itr = mapMyVGPMessages.erase(itr);
         }
