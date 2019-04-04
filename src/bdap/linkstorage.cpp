@@ -28,6 +28,14 @@ void ProcessLinkQueue()
     pLinkManager->ProcessQueue();
 }
 
+void LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    if (!pLinkManager)
+        throw std::runtime_error("pLinkManager is null.\n");
+
+    pLinkManager->LoadLinkMessageInfo(subjectID, vchPubKey);
+}
+
 void CLinkStorage::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsLinkStorage(SER_NETWORK, PROTOCOL_VERSION);

@@ -87,6 +87,7 @@ DYNAMIC_CORE_H = \
   bdap/linkstorage.h \
   bdap/sidechain.h \
   bdap/utils.h \
+  bdap/vgpmessage.h \
   bip39_chinese_simplified.h \
   bip39_chinese_traditional.h \
   bip39_english.h \
@@ -288,6 +289,7 @@ libdynamic_server_a_SOURCES = \
   bdap/rpcrawbdap.cpp \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
+  bdap/vgpmessage.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \

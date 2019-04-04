@@ -48,7 +48,7 @@ std::string CLink::ToString() const
             "    RequestorPubKey            = %s\n"
             "    RecipientPubKey            = %s\n"
             "    SharedRequestPubKey        = %s\n"
-            "    SharedLinkPubKey           = %s\n"
+            "    SharedAcceptPubKey         = %s\n"
             "    LinkMessage                = %s\n"
             "    nHeightRequest             = %d\n"
             "    nExpireTimeRequest         = %d\n"
@@ -56,6 +56,7 @@ std::string CLink::ToString() const
             "    nHeightAccept              = %d\n"
             "    nExpireTimeAccept          = %d\n"
             "    txHashAccept               = %s\n"
+            "    SubjectID                  = %s\n"
             ")\n",
             nVersion,
             LinkID.ToString(),
@@ -67,14 +68,15 @@ std::string CLink::ToString() const
             stringFromVch(RequestorPubKey),
             stringFromVch(RecipientPubKey),
             stringFromVch(SharedRequestPubKey),
-            stringFromVch(SharedLinkPubKey),
+            stringFromVch(SharedAcceptPubKey),
             stringFromVch(LinkMessage),
             nHeightRequest,
             nExpireTimeRequest,
             txHashRequest.ToString(),
             nHeightAccept,
             nExpireTimeAccept,
-            txHashAccept.ToString()
+            txHashAccept.ToString(),
+            SubjectID.ToString()
         );
 }
 
@@ -143,7 +145,7 @@ bool CLinkManager::GetLinkPrivateKey(const std::vector<unsigned char>& vchSender
 
     std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
     if (!pwalletMain->GetDHTPubKeys(vvchDHTPubKeys)) {
-        strErrorMessage = "Error getting DHT key vector.";
+        strErrorMessage = "Failed to get DHT key vector.";
         return false;
     }
     // loop through each account key to check if it matches the shared key
@@ -171,6 +173,19 @@ bool CLinkManager::FindLink(const uint256& id, CLink& link)
     if (m_Links.count(id) > 0) {
         link = m_Links.at(id);
         return true;
+    }
+    return false;
+}
+
+bool CLinkManager::FindLinkBySubjectID(const uint256& subjectID, CLink& getLink)
+{
+    for (const std::pair<uint256, CLink>& link : m_Links)
+    {
+        if (link.second.SubjectID == subjectID) // pending request
+        {
+            getLink = link.second;
+            return true;
+        }
     }
     return false;
 }
@@ -248,6 +263,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         {
             std::vector<unsigned char> vchData = RemoveVersionFromLinkData(storage.vchRawData, nDataVersion);
             CLinkRequest link(vchData, storage.txHash);
+            LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
             link.nHeight = storage.nHeight;
             link.txHash = storage.txHash;
             link.nExpireTime = storage.nExpireTime;
@@ -255,8 +271,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
                     bool fIsLinkFromMe = IsLinkFromMe(storage.vchLinkPubKey);
-                    bool fIsLinkForMe = IsLinkForMe(storage.vchLinkPubKey, storage.vchSharedPubKey);
-                    LogPrintf("%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
+                    LogPrint("bdap", "%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
                     uint256 linkID = GetLinkID(link);
                     CLink record;
                     std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -279,9 +294,23 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightRequest = link.nHeight;
                     record.nExpireTimeRequest = link.nExpireTime;
                     record.txHashRequest = link.txHash;
-                    record.fAcceptFromMe = fIsLinkForMe;
-                    LogPrint("bdap", "%s -- CLear text link request added to map id = %s\n", __func__, linkID.ToString());
+                    if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                    {
+                        std::string strErrorMessage = "";
+                        if (!GetMessageInfo(record, strErrorMessage))
+                        {
+                            LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                        }
+                        else
+                        {
+                            pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                            m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                        }
+                        //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                    }
+                    LogPrint("bdap", "%s -- Clear text link request added to map id = %s\n", __func__, linkID.ToString());
                     m_Links[linkID] = record;
+
                 }
                 else
                     LogPrintf("%s ***** Warning. Link request found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
@@ -294,7 +323,8 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         else if (storage.nType == 2) // Clear text accept
         {
             std::vector<unsigned char> vchData = RemoveVersionFromLinkData(storage.vchRawData, nDataVersion);
-            CLinkAccept link(vchData, storage.txHash);;
+            CLinkAccept link(vchData, storage.txHash);
+            LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
             link.nHeight = storage.nHeight;
             link.txHash = storage.txHash;
             link.nExpireTime = storage.nExpireTime;
@@ -303,7 +333,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
                     bool fIsLinkFromMe = IsLinkFromMe(storage.vchLinkPubKey);
                     //bool fIsLinkForMe = IsLinkForMe(storage.vchLinkPubKey, storage.vchSharedPubKey);
-                    LogPrintf("%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
+                    LogPrint("bdap", "%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(storage.vchLinkPubKey));
                     uint256 linkID = GetLinkID(link);
                     CLink record;
                     std::map<uint256, CLink>::iterator it = m_Links.find(linkID);
@@ -316,10 +346,24 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                     record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                     record.RecipientPubKey = link.RecipientPubKey;
-                    record.SharedLinkPubKey = link.SharedPubKey;
+                    record.SharedAcceptPubKey = link.SharedPubKey;
                     record.nHeightAccept = link.nHeight;
                     record.nExpireTimeAccept = link.nExpireTime;
                     record.txHashAccept = link.txHash;
+                    if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                    {
+                        std::string strErrorMessage = "";
+                        if (!GetMessageInfo(record, strErrorMessage))
+                        {
+                            LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                        }
+                        else
+                        {
+                            pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                            m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                        }
+                        //LogPrintf("%s -- link accept = %s\n", __func__, record.ToString());
+                    }
                     LogPrint("bdap", "%s -- Clear text accept added to map id = %s, %s\n", __func__, linkID.ToString(), record.ToString());
                     m_Links[linkID] = record;
                 }
@@ -357,6 +401,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     scriptData << OP_RETURN << dataDecrypted;
                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                         CLinkRequest link(dataDecrypted, storage.txHash);
+                        LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
                         CDomainEntry entry;
                         if (!GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                             LogPrintf("%s -- Failed to get link requestor %s\n", __func__, stringFromVch(link.RequestorFullObjectPath));
@@ -390,7 +435,20 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
-                        record.fAcceptFromMe = fIsLinkForMe;
+                        if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                        {
+                            std::string strErrorMessage = "";
+                            if (!GetMessageInfo(record, strErrorMessage))
+                            {
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                            }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
+                            //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                        }
                         LogPrint("bdap", "%s -- Encrypted link request from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
@@ -426,6 +484,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     scriptData << OP_RETURN << dataDecrypted;
                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                         CLinkRequest link(dataDecrypted, storage.txHash);
+                        LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
                         CDomainEntry entry;
                         if (!GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                             LogPrintf("%s -- Failed to get link requestor %s\n", __func__, stringFromVch(link.RequestorFullObjectPath));
@@ -460,7 +519,20 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
-                        record.fAcceptFromMe = fIsLinkForMe;
+                        if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                        {
+                            std::string strErrorMessage = "";
+                            if (!GetMessageInfo(record, strErrorMessage))
+                            {
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                            }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
+                            //LogPrintf("%s -- link request = %s\n", __func__, record.ToString());
+                        }
                         LogPrint("bdap", "%s -- Encrypted link request for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
@@ -494,6 +566,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     scriptData << OP_RETURN << dataDecrypted;
                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                         CLinkAccept link(dataDecrypted, storage.txHash);
+                        LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
                         CDomainEntry entry;
                         if (!GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                             LogPrintf("%s -- Failed to get link recipient %s\n", __func__, stringFromVch(link.RecipientFullObjectPath));
@@ -517,10 +590,24 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                         record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                         record.RecipientPubKey = link.RecipientPubKey;
-                        record.SharedLinkPubKey = link.SharedPubKey;
+                        record.SharedAcceptPubKey = link.SharedPubKey;
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
+                        if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                        {
+                            std::string strErrorMessage = "";
+                            if (!GetMessageInfo(record, strErrorMessage))
+                            {
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                            }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
+                            //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
+                        }
                         LogPrint("bdap", "%s -- Encrypted link accept from me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
@@ -556,6 +643,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     scriptData << OP_RETURN << dataDecrypted;
                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                         CLinkAccept link(dataDecrypted, storage.txHash);
+                        LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
                         CDomainEntry entry;
                         if (!GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                             LogPrintf("%s -- Failed to get link recipient %s\n", __func__, stringFromVch(link.RecipientFullObjectPath));
@@ -579,10 +667,24 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
                         record.RecipientFullObjectPath = link.RecipientFullObjectPath;
                         record.RecipientPubKey = link.RecipientPubKey;
-                        record.SharedLinkPubKey = link.SharedPubKey;
+                        record.SharedAcceptPubKey = link.SharedPubKey;
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
+                        if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
+                        {
+                            std::string strErrorMessage = "";
+                            if (!GetMessageInfo(record, strErrorMessage))
+                            {
+                                LogPrintf("%s -- Error getting message info %s\n", __func__, strErrorMessage);
+                            }
+                            else
+                            {
+                                pwalletMain->WriteLinkMessageInfo(record.SubjectID, record.vchSecretPubKeyBytes);
+                                m_LinkMessageInfo[record.SubjectID] = record.vchSecretPubKeyBytes;
+                            }
+                            //LogPrintf("%s -- accept request = %s\n", __func__, record.ToString());
+                        }
                         LogPrint("bdap", "%s -- Encrypted link accept for me added to map id = %s\n%s\n", __func__, linkID.ToString(), record.ToString());
                         m_Links[linkID] = record;
                     }
@@ -631,6 +733,37 @@ std::vector<CLinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsi
     return vchLinkInfo;
 }
 
+int CLinkManager::IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp)
+{
+    std::vector<unsigned char> vchPubKey;
+    if (GetLinkMessageInfo(subjectID, vchPubKey))
+    {
+        if (messageID != GetMessageID(vchPubKey, timestamp))
+        {
+            // Incorrect message id. Might be spoofed.
+            return -100;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void CLinkManager::LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    if (m_LinkMessageInfo.count(subjectID) == 0)
+        m_LinkMessageInfo[subjectID] = vchPubKey;
+}
+
+bool CLinkManager::GetLinkMessageInfo(const uint256& subjectID, std::vector<unsigned char>& vchPubKey)
+{
+    std::map<uint256, std::vector<unsigned char>>::iterator it = m_LinkMessageInfo.find(subjectID);
+    if (it != m_LinkMessageInfo.end()) {
+        vchPubKey = it->second;
+        return true; // found subjectID
+    }
+    return false; // doesn't exist
+}
+
 uint256 GetLinkID(const CLinkRequest& request)
 {
     std::vector<unsigned char> vchLinkPath = request.LinkPath();
@@ -656,6 +789,171 @@ uint256 GetLinkID(const std::string& account1, const std::string& account2)
     vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
     vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
     return Hash(vchLink1.begin(), vchLink1.end());
+}
+
+bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage)
+{
+    if (!pwalletMain)
+        return false;
+
+    if (link.nLinkState != 2)
+        return false;
+
+    //LogPrint("bdap", "%s -- %s\n", __func__, link.ToString());
+    std::array<char, 32> sharedSeed1;
+    std::array<char, 32> sharedSeed2;
+    CDomainEntry entry;
+    if (pDomainEntryDB->GetDomainEntryInfo(link.RecipientFullObjectPath, entry)) {
+        if (link.fRequestFromMe) // Requestor
+        {
+            // first key exchange: requestor link pubkey + recipient account pubkey
+            std::vector<unsigned char> vchRecipientPubKey = entry.DHTPublicKey;
+            std::vector<unsigned char> vchRequestorPubKey = link.RequestorPubKey;
+            CKeyEd25519 reqKey;
+            CKeyID reqKeyID(Hash160(vchRequestorPubKey.begin(), vchRequestorPubKey.end()));
+            if (pwalletMain->GetDHTKey(reqKeyID, reqKey)) {
+                std::vector<unsigned char> vchGetLinkSharedPubKey = GetLinkSharedPubKey(reqKey, vchRecipientPubKey);
+                if (link.SharedRequestPubKey == vchGetLinkSharedPubKey)
+                {
+                    sharedSeed1 = GetLinkSharedPrivateKey(reqKey, vchRecipientPubKey);
+                }
+                else
+                {
+                    strErrorMessage = strprintf("Requestor SharedRequestPubKey (%s) does not match derived shared request public key (%s).", 
+                                            stringFromVch(link.SharedRequestPubKey), stringFromVch(vchGetLinkSharedPubKey));
+                    return false;
+                }
+            }
+            else {
+                strErrorMessage = strprintf("Failed to get reqKey %s DHT private key.", stringFromVch(vchRequestorPubKey));
+                return false;
+            }
+            // second key exchange: recipient link pubkey + requestor account pubkey
+            CDomainEntry entryRequestor;
+            if (pDomainEntryDB->GetDomainEntryInfo(link.RequestorFullObjectPath, entryRequestor))
+            {
+                std::vector<unsigned char> vchReqPubKey = entryRequestor.DHTPublicKey;
+                std::vector<unsigned char> vchLinkPubKey = link.RecipientPubKey;
+                CKeyEd25519 linkKey;
+                CKeyID linkKeyID(Hash160(vchReqPubKey.begin(), vchReqPubKey.end()));
+                if (pwalletMain->GetDHTKey(linkKeyID, linkKey)) {
+                    std::vector<unsigned char> vchGetLinkSharedPubKey = GetLinkSharedPubKey(linkKey, vchLinkPubKey);
+                    if (link.SharedAcceptPubKey == vchGetLinkSharedPubKey)
+                    {
+                        sharedSeed2 = GetLinkSharedPrivateKey(linkKey, vchLinkPubKey);
+                    }
+                    else
+                    {
+                        strErrorMessage = strprintf("Requestor SharedAcceptPubKey (%s) does not match derived shared link public key (%s).", 
+                                                stringFromVch(link.SharedAcceptPubKey), stringFromVch(vchGetLinkSharedPubKey));
+                        return false;
+                    }
+                }
+                else {
+                    strErrorMessage = strprintf("Failed to get requestor link Key %s DHT private key.", stringFromVch(vchLinkPubKey));
+                    return false;
+                }
+            }
+            else
+            {
+                strErrorMessage = strprintf("Can not find %s link requestor record.", stringFromVch(link.RequestorFullObjectPath));
+                return false;
+            }
+        }
+        else // Recipient
+        {
+            // first key exchange: requestor link pubkey + recipient account pubkey
+            std::vector<unsigned char> vchRecipientPubKey = entry.DHTPublicKey;
+            std::vector<unsigned char> vchRequestorPubKey = link.RequestorPubKey;
+            CKeyEd25519 recKey;
+            CKeyID recKeyID(Hash160(vchRecipientPubKey.begin(), vchRecipientPubKey.end()));
+            if (pwalletMain->GetDHTKey(recKeyID, recKey))
+            {
+                std::vector<unsigned char> vchGetLinkSharedPubKey = GetLinkSharedPubKey(recKey, vchRequestorPubKey);
+                if (link.SharedRequestPubKey == vchGetLinkSharedPubKey) {
+                    sharedSeed1 = GetLinkSharedPrivateKey(recKey, vchRequestorPubKey);
+                }
+                else
+                {
+                    strErrorMessage = strprintf("Recipient SharedRequestPubKey (%s) does not match derived shared request public key (%s).",
+                                        stringFromVch(link.SharedRequestPubKey), stringFromVch(vchGetLinkSharedPubKey));
+                    return false;
+                }
+            }
+            else {
+                strErrorMessage = strprintf("Failed to get recKey %s DHT private key.", stringFromVch(vchRecipientPubKey));
+                return false;
+            }
+            // second key exchange: recipient link pubkey + requestor account pubkey
+            CDomainEntry entryRequestor;
+            if (pDomainEntryDB->GetDomainEntryInfo(link.RequestorFullObjectPath, entryRequestor))
+            {
+                std::vector<unsigned char> vchLinkPubKey = link.RecipientPubKey;
+                std::vector<unsigned char> vchReqPubKey = entryRequestor.DHTPublicKey;
+                CKeyEd25519 linkKey;
+                CKeyID linkKeyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+                if (pwalletMain->GetDHTKey(linkKeyID, linkKey))
+                {
+                    std::vector<unsigned char> vchGetLinkSharedPubKey = GetLinkSharedPubKey(linkKey, vchReqPubKey);
+                    if (link.SharedAcceptPubKey == vchGetLinkSharedPubKey) {
+                        sharedSeed2 = GetLinkSharedPrivateKey(linkKey, vchReqPubKey);
+                    }
+                    else
+                    {
+                        strErrorMessage = strprintf("Recipient SharedAcceptPubKey (%s) does not match derived shared link public key (%s).",
+                                            stringFromVch(link.SharedAcceptPubKey), stringFromVch(vchGetLinkSharedPubKey));
+                        return false;
+                    }
+                }
+                else {
+                    strErrorMessage = strprintf("Failed to get recipient linkKey %s DHT private key.", stringFromVch(vchLinkPubKey));
+                    return false;
+                }
+            }
+            else
+            {
+                strErrorMessage = strprintf("Can not find %s link requestor record.", stringFromVch(link.RequestorFullObjectPath));
+                return false;
+            }
+        }
+    }
+    else
+    {
+        strErrorMessage = strprintf("Can not find %s link recipient record.", stringFromVch(link.RecipientFullObjectPath));
+        return false;
+    }
+    CKeyEd25519 sharedKey1(sharedSeed1);
+    CKeyEd25519 sharedKey2(sharedSeed2);
+    // third key exchange: shared link request pubkey + shared link accept pubkey
+    // Only the link recipient and requestor can derive this secret key.
+    // the third shared public key is not on the blockchain and should only be known by the participants.
+    seed = GetLinkSharedPrivateKey(sharedKey1, sharedKey2.GetPubKey());
+    return true;
+}
+
+bool GetMessageInfo(CLink& link, std::string& strErrorMessage)
+{
+    std::array<char, 32> seed;
+    if (!GetSharedPrivateSeed(link, seed, strErrorMessage))
+    {
+        return false;
+    }
+    CKeyEd25519 key(seed);
+    link.vchSecretPubKeyBytes = key.GetPubKeyBytes();
+    link.SubjectID = Hash(link.vchSecretPubKeyBytes.begin(), link.vchSecretPubKeyBytes.end());
+    return true;
+}
+
+uint256 GetMessageID(const std::vector<unsigned char>& vchPubKey, const int64_t& timestamp)
+{
+    CScript scriptMessage;
+    scriptMessage << vchPubKey << timestamp;
+    return Hash(scriptMessage.begin(), scriptMessage.end());
+}
+
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp)
+{
+    return GetMessageID(key.GetPubKeyBytes(), timestamp);
 }
 
 //#endif // ENABLE_WALLET

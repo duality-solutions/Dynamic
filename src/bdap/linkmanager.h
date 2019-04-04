@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+class CKeyEd25519;
 class CLinkRequest;
 class CLinkAccept;
 
@@ -41,7 +42,7 @@ public:
     std::vector<unsigned char> RequestorPubKey; // ed25519 public key new/unique for this link
     std::vector<unsigned char> RecipientPubKey; // ed25519 public key new/unique for this link
     std::vector<unsigned char> SharedRequestPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
-    std::vector<unsigned char> SharedLinkPubKey; // ed25519 shared public key. RecipientPubKey + RequestorPubKey's BDAP DHT PubKey
+    std::vector<unsigned char> SharedAcceptPubKey; // ed25519 shared public key. RecipientPubKey + RequestorPubKey's BDAP DHT PubKey
     std::vector<unsigned char> LinkMessage; // Link message to recipient
 
     uint64_t nHeightRequest;
@@ -51,6 +52,10 @@ public:
     uint64_t nHeightAccept;
     uint64_t nExpireTimeAccept;
     uint256 txHashAccept;
+
+    
+    uint256 SubjectID; // Used to tell when a VGP message is for this link
+    std::vector<unsigned char> vchSecretPubKeyBytes; // Used to derive the VGP message id for this link
 
     CLink() {
         SetNull();
@@ -68,7 +73,7 @@ public:
         RequestorPubKey.clear();
         RecipientPubKey.clear();
         SharedRequestPubKey.clear();
-        SharedLinkPubKey.clear();
+        SharedAcceptPubKey.clear();
         LinkMessage.clear();
         nHeightRequest = 0;
         nExpireTimeRequest = 0;
@@ -76,6 +81,8 @@ public:
         nHeightAccept = 0;
         nExpireTimeAccept = 0;
         txHashAccept.SetNull();
+        SubjectID.SetNull();
+        vchSecretPubKeyBytes.clear();
     }
 
     inline friend bool operator==(const CLink &a, const CLink &b) {
@@ -97,7 +104,7 @@ public:
         RequestorPubKey = b.RequestorPubKey;
         RecipientPubKey = b.RecipientPubKey;
         SharedRequestPubKey = b.SharedRequestPubKey;
-        SharedLinkPubKey = b.SharedLinkPubKey;
+        SharedAcceptPubKey = b.SharedAcceptPubKey;
         LinkMessage = b.LinkMessage;
         nHeightRequest = b.nHeightRequest;
         nExpireTimeRequest = b.nExpireTimeRequest;
@@ -105,6 +112,8 @@ public:
         nHeightAccept = b.nHeightAccept;
         nExpireTimeAccept = b.nExpireTimeAccept;
         txHashAccept = b.txHashAccept;
+        SubjectID = b.SubjectID;
+        vchSecretPubKeyBytes = b.vchSecretPubKeyBytes;
         return *this;
     }
  
@@ -123,6 +132,7 @@ class CLinkManager {
 private:
     std::queue<CLinkStorage> linkQueue;
     std::map<uint256, CLink> m_Links;
+    std::map<uint256, std::vector<unsigned char>> m_LinkMessageInfo;
 
 public:
     CLinkManager() {
@@ -143,10 +153,15 @@ public:
     void ProcessQueue();
 
     bool FindLink(const uint256& id, CLink& link);
+    bool FindLinkBySubjectID(const uint256& subjectID, CLink& getLink);
     bool ListMyPendingRequests(std::vector<CLink>& vchLinks);
     bool ListMyPendingAccepts(std::vector<CLink>& vchLinks);
     bool ListMyCompleted(std::vector<CLink>& vchLinks);
     std::vector<CLinkInfo> GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath);
+    int IsMyMessage(const uint256& subjectID, const uint256& messageID, const int64_t& timestamp);
+    void LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool GetLinkMessageInfo(const uint256& subjectID, std::vector<unsigned char>& vchPubKey);
+    bool GetAllMessagesByType(const std::vector<unsigned char> vchMessageType);
 
 private:
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);
@@ -157,6 +172,11 @@ private:
 uint256 GetLinkID(const CLinkRequest& request);
 uint256 GetLinkID(const CLinkAccept& accept);
 uint256 GetLinkID(const std::string& account1, const std::string& account2);
+
+bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage);
+bool GetMessageInfo(CLink& link, std::string& strErrorMessage);
+uint256 GetMessageID(const std::vector<unsigned char>& vchPubKey, const int64_t& timestamp);
+uint256 GetMessageID(const CKeyEd25519& key, const int64_t& timestamp);
 
 extern CLinkManager* pLinkManager;
 

@@ -1148,6 +1148,9 @@ public:
     // Returns local BDAP DHT Public keys
     bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
 
+    bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool EraseLinkMessageInfo(const uint256& subjectID);
+
 };
 
 /** A key allocated from the key pool. */

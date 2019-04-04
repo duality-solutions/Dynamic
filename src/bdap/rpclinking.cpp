@@ -10,6 +10,7 @@
 #include "bdap/linkingdb.h"
 #include "bdap/linkmanager.h"
 #include "bdap/utils.h"
+#include "bdap/vgpmessage.h"
 #include "dht/ed25519.h"
 #include "dht/datarecord.h" // for CDataRecord
 #include "dht/session.h" // for CDataRecord
@@ -731,7 +732,7 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
             if (GetDomainEntry(link.RequestorFullObjectPath, entryRequestor) && GetDomainEntry(link.RecipientFullObjectPath, entryRecipient)) {
                 // Create BDAP operation script
                 scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
-                             << link.RecipientPubKey << link.SharedLinkPubKey << OP_2DROP << OP_2DROP;
+                             << link.RecipientPubKey << link.SharedAcceptPubKey << OP_2DROP << OP_2DROP;
                 scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
                 scriptPubKey += scriptDest;
                 scriptSend = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
@@ -930,6 +931,243 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
     return oLink;
 }
 
+static UniValue SendMessage(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 5)
+        throw std::runtime_error(
+            "link sendmessage \"account\" \"recipient\" \"type\" \"message\"\n"
+            "Sends a realtime message from the account to the recipient. A link must be established before sending a secure message."
+            + HelpRequiringPassphrase() +
+            "\nLink Send Message Arguments:\n"
+            "1. account          (string)             Your BDAP sending account\n"
+            "2. recipient        (string)             Your link's recipient BDAP account\n"
+            "3. type             (string)             Message type\n"
+            "4. message          (string)             String message value\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link sendmessage", "superman batman status \"I am online\"") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link sendmessage", "superman batman status \"I am online\""));
+
+    if (!pwalletMain)
+        throw std::runtime_error(strprintf("%s -- wallet pointer is null.\n", __func__));
+
+    EnsureWalletIsUnlocked();
+
+    std::string strSenderFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strSenderFQDN);
+    // Make sure this wallet owns the sending address
+    std::vector<unsigned char> vchSenderFQDN = vchFromString(strSenderFQDN);
+    CDomainEntry entry;
+    if (!GetDomainEntry(vchSenderFQDN, entry))
+        throw std::runtime_error(strprintf("%s -- sender account (%s) not found.\n", __func__, strSenderFQDN));
+
+    CKeyEd25519 getKey;
+    CKeyID senderKeyID(Hash160(entry.DHTPublicKey.begin(), entry.DHTPublicKey.end()));
+    if (!pwalletMain->GetDHTKey(senderKeyID, getKey))
+        throw std::runtime_error(strprintf("%s -- Error getting ed25519 private key for the sender (%s) BDAP account.\n", __func__, strSenderFQDN));
+
+    std::string strRecipientFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipientFQDN);
+
+    std::vector<unsigned char> vchMessageType = vchFromValue(request.params[3]);
+    std::vector<unsigned char> vchMessage = vchFromValue(request.params[4]);
+
+    UniValue oLink(UniValue::VOBJ);
+    // get third shared key, derive subjectID and messageID.
+    CKeyEd25519 key;
+    std::string strErrorMessage = "";
+    if (!GetSecretSharedKey(strSenderFQDN, strRecipientFQDN, key, strErrorMessage))
+        throw std::runtime_error(strprintf("%s -- GetSecretSharedKey failed: %s\n", __func__, strErrorMessage));
+
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(key.GetPubKeyBytes());
+    uint256 subjectID = GetSubjectIDFromKey(key);
+    int64_t timestamp = GetAdjustedTime();
+    int64_t stoptime = timestamp + 60; // stop relaying after 1 minute.
+    uint256 messageID = GetMessageID(key, timestamp);
+    CPubKey newPubKey;
+    if (!pwalletMain->GetKeyFromPool(newPubKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID keyID = newPubKey.GetID();
+    CDynamicAddress walletAddress = CDynamicAddress(keyID);
+    std::vector<unsigned char> vchWalletPubKey(newPubKey.begin(), newPubKey.end());
+
+    CUnsignedVGPMessage unsignedMessage(subjectID, messageID, vchWalletPubKey, timestamp, stoptime);
+    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, strErrorMessage))
+    {
+        throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
+    }
+    CVGPMessage vpgMessage(unsignedMessage);
+    if (vpgMessage.vchMsg.size() > MAX_MESSAGE_SIZE)
+    {
+        throw std::runtime_error(strprintf("%s --Message size (%d) too large to send.\n", __func__, vpgMessage.vchMsg.size()));
+    }
+    CKey walletKey;
+    if (!pwalletMain->GetKey(keyID, walletKey))
+    {
+        throw std::runtime_error(strprintf("%s -- Failed to get wallet private key\n", __func__));
+    }
+    oLink.push_back(Pair("timestamp_epoch", timestamp));
+    oLink.push_back(Pair("shared_pubkey", key.GetPubKeyString()));
+    oLink.push_back(Pair("subject_id", unsignedMessage.SubjectID.ToString()));
+    oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+    oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
+    oLink.push_back(Pair("message_size", vpgMessage.vchMsg.size()));
+    vpgMessage.Sign(walletKey);
+    oLink.push_back(Pair("signature_size", vpgMessage.vchSig.size()));
+    if (vpgMessage.CheckSignature(vchWalletPubKey)) {
+        oLink.push_back(Pair("check_signature", "valid"));
+        vpgMessage.RelayMessage(*g_connman);
+    }
+    else {
+        oLink.push_back(Pair("check_signature", "invalid"));
+        oLink.push_back(Pair("error_message", "failed to relay message"));
+    }
+    return oLink;
+}
+
+static UniValue GetAccountMessages(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 4 || request.params.size() < 3)
+        throw std::runtime_error(
+            "link getaccountmessages \"account\" \"sender\" \"type\"\n"
+            "Gets realtime messages for the account from the specified sender and message type"
+            + HelpRequiringPassphrase() +
+            "\nLink Send Message Arguments:\n"
+            "1. account          (string)             Your BDAP recipient account\n"
+            "2. sender           (string)             The account sending the message\n"
+            "3. type             (string, optional)   Filter by message type\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"sender_fqdn\"                (string)  Sender's BDAP full path\n"
+            "  \"message\"                    (string)  Message from sender\n"
+            "  \"timestamp_epoch\"            (int)     Epoch time message was created\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link getaccountmessages", "superman batman status") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link getaccountmessages", "superman batman status"));
+
+    if (!pwalletMain)
+        throw std::runtime_error(strprintf("%s -- wallet pointer is null.\n", __func__));
+
+    EnsureWalletIsUnlocked();
+
+    if (!pLinkManager)
+        throw std::runtime_error(strprintf("%s -- link manager pointer is null.\n", __func__));
+
+    // Get BDAP recipient account
+    std::string strRecipient = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipient);
+    std::string strSender = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strSender);
+    std::vector<unsigned char> vchSenderFQDN = vchFromString(strSender);
+
+    uint256 linkID = GetLinkID(strRecipient, strSender);
+    CLink link;
+    if (!pLinkManager->FindLink(linkID, link))
+        throw std::runtime_error(strprintf("%s -- link not found.\n", __func__));
+
+    std::string strErrorMessage = "";
+    if (!GetMessageInfo(link, strErrorMessage))
+        throw std::runtime_error(strprintf("%s -- Could not get message info %s.\n", __func__, strErrorMessage));
+
+    // Get message type parameter
+    std::vector<unsigned char> vchMessageType;
+    if (request.params.size() > 3)
+        vchMessageType = vchFromValue(request.params[3]);
+
+    std::vector<CVGPMessage> vMessages;
+    GetMyLinkMessagesBySubjectAndSender(link.SubjectID, vchSenderFQDN, vchMessageType, vMessages);
+    std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
+    UniValue oMessages(UniValue::VOBJ);
+    if (vMessages.size() > 0)
+    {
+        size_t nCounter = 1;
+        for (CVGPMessage& message : vMessages)
+        {
+            UniValue oMessage(UniValue::VOBJ);
+            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
+            oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
+            oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
+            oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
+            oMessage.push_back(Pair("message_size", unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
+            std::string strMessageNumber = "message_" + std::to_string(nCounter);
+            oMessages.push_back(Pair(strMessageNumber, oMessage));
+            nCounter++;
+        }
+    }
+    return oMessages;
+}
+
+static UniValue GetMessages(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 3 || request.params.size() < 2)
+        throw std::runtime_error(
+            "link getmessages \"account\" \"type\"\n"
+            "Gets realtime messages from the account for the specified message type"
+            + HelpRequiringPassphrase() +
+            "\nLink Send Message Arguments:\n"
+            "1. account          (string)             Your BDAP recipient account\n"
+            "2. type             (string, optional)   Message type\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"sender_fqdn\"                (string)  Sender's BDAP full path\n"
+            "  \"message\"                    (string)  Message from sender\n"
+            "  \"timestamp_epoch\"            (int)     Epoch time message was created\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link getmessages", "superman status") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link getmessages", "superman status"));
+
+    if (!pwalletMain)
+        throw std::runtime_error(strprintf("%s -- wallet pointer is null.\n", __func__));
+
+    EnsureWalletIsUnlocked();
+    // Get BDAP recipient account
+    std::string strRecipient = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipient);
+    std::vector<unsigned char> vchRecipientFQDN = vchFromString(strRecipient);
+    // Get message type parameter
+    std::vector<unsigned char> vchMessageType;
+    if (request.params.size() > 2)
+        vchMessageType = vchFromValue(request.params[2]);
+
+    std::vector<CVGPMessage> vMessages;
+    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
+    std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
+    UniValue oMessages(UniValue::VOBJ);
+    if (vMessages.size() > 0)
+    {
+        size_t nCounter = 1;
+        for (CVGPMessage& message : vMessages)
+        {
+            UniValue oMessage(UniValue::VOBJ);
+            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
+            oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
+            oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
+            oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
+            oMessage.push_back(Pair("message_size", unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
+            std::string strMessageNumber = "message_" + std::to_string(nCounter);
+            oMessages.push_back(Pair(strMessageNumber, oMessage));
+            nCounter++;
+        }
+    }
+    return oMessages;
+}
+
 UniValue link(const JSONRPCRequest& request) 
 {
     std::string strCommand;
@@ -941,7 +1179,7 @@ UniValue link(const JSONRPCRequest& request)
         throw std::runtime_error(
             "link\n"
             + HelpRequiringPassphrase() +
-            "\nLink commands are request, accept, pending, complete, deny, and denied.\n"
+            "\nLink commands are request, accept, pending, complete, deny, denied, getaccountmessages, getmessages, and sendmessage\n"
             "\nExamples:\n"
             + HelpExampleCli("link accept", "superman batman") +
             "\nAs a JSON-RPC call\n"
@@ -951,7 +1189,6 @@ UniValue link(const JSONRPCRequest& request)
         if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
             throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP link transactions until spork is active."));
     }
-
     if (strCommand == "request") {
         return SendLinkRequest(request);
     }
@@ -971,6 +1208,12 @@ UniValue link(const JSONRPCRequest& request)
     }
     else if (strCommand == "denied") {
         return DeniedLinkList(request);
+    }
+    else if (strCommand == "getaccountmessages") {
+        return GetAccountMessages(request);
+    }
+    else if (strCommand == "getmessages") {
+        return GetMessages(request);
     }
     else if (strCommand == "pending") {
         if (request.params.size() == 1) {
@@ -1006,6 +1249,9 @@ UniValue link(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link pending request", ""));
         }
+    }
+    else if (strCommand == "sendmessage") {
+        return SendMessage(request);
     }
     else {
         throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 4010 - " + strCommand + _(" is an unknown link command."));
