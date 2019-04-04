@@ -1097,11 +1097,10 @@ static UniValue GetAccountMessages(const JSONRPCRequest& request)
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
             oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
-            std::string strMessageNumber = "message_" + std::to_string(nCounter);
-            oMessages.push_back(Pair(strMessageNumber, oMessage));
+            oMessage.push_back(Pair("record_num", (int)nCounter));
+            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }
@@ -1157,11 +1156,10 @@ static UniValue GetMessages(const JSONRPCRequest& request)
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_hash", message.GetHash().ToString()));
             oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
-            std::string strMessageNumber = "message_" + std::to_string(nCounter);
-            oMessages.push_back(Pair(strMessageNumber, oMessage));
+            oMessage.push_back(Pair("record_num", (int)nCounter));
+            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }
