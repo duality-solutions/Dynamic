@@ -17,18 +17,18 @@
 #include <boost/test/unit_test.hpp>
 
 
-//ed25519_key_tests
+//dht_key_tests
 
-BOOST_FIXTURE_TEST_SUITE(ed25519_key_tests, BasicTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(dht_key_tests, BasicTestingSetup)
 
-BOOST_AUTO_TEST_CASE(ed25519_key_getlinksharedpubkey_test)
+BOOST_AUTO_TEST_CASE(dht_key_getlinksharedpubkey_test)
 {
     CKeyEd25519 dhtKey1;
     CKeyEd25519 dhtKey2;
     std::vector<unsigned char> vchSharedPubKey1 = GetLinkSharedPubKey(dhtKey1, dhtKey2.GetPubKey());
     std::vector<unsigned char> vchSharedPubKey2 = GetLinkSharedPubKey(dhtKey2, dhtKey1.GetPubKey());
     BOOST_CHECK(vchSharedPubKey1 == vchSharedPubKey2);
-    std::cout << "Success: ed25519_key_getlinksharedpubkey_test\n";
+    std::cout << "Exit: dht_key_getlinksharedpubkey_test\n";
 
 }
 

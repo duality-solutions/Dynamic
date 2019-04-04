@@ -57,8 +57,8 @@ DYNAMIC_TESTS =\
   test/coins_tests.cpp \
   test/compress_tests.cpp \
   test/crypto_tests.cpp \
+  test/dht_key_tests \
   test/DoS_tests.cpp \
-  test/ed25519_key_tests.cpp \
   test/getarg_tests.cpp \
   test/governance_validators_tests.cpp \
   test/hash_tests.cpp \
