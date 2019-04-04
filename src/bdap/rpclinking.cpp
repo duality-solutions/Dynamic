@@ -1084,6 +1084,7 @@ static UniValue GetAccountMessages(const JSONRPCRequest& request)
 
     std::vector<CVGPMessage> vMessages;
     GetMyLinkMessagesBySubjectAndSender(link.SubjectID, vchSenderFQDN, vchMessageType, vMessages);
+    std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
@@ -1143,6 +1144,7 @@ static UniValue GetMessages(const JSONRPCRequest& request)
 
     std::vector<CVGPMessage> vMessages;
     GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
+    std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {

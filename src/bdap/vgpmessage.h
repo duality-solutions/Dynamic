@@ -91,6 +91,16 @@ public:
         return *this;
     }
 
+    friend bool operator<(const CUnsignedVGPMessage& a, const CUnsignedVGPMessage& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CUnsignedVGPMessage& a, const CUnsignedVGPMessage& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 
@@ -130,6 +140,20 @@ public:
     {
         READWRITE(vchMsg);
         READWRITE(vchSig);
+    }
+
+    friend bool operator<(const CVGPMessage& a, const CVGPMessage& b)
+    {
+        CUnsignedVGPMessage ua(a.vchMsg);
+        CUnsignedVGPMessage ub(b.vchMsg);
+        return (ua.nTimeStamp < ub.nTimeStamp);
+    }
+
+    friend bool operator>(const CVGPMessage& a, const CVGPMessage& b)
+    {
+        CUnsignedVGPMessage ua(a.vchMsg);
+        CUnsignedVGPMessage ub(b.vchMsg);
+        return (ua.nTimeStamp > ub.nTimeStamp);
     }
 
     void SetNull();
