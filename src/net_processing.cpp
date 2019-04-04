@@ -2722,6 +2722,23 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             LogPrint("bdap", "%s -- Duplicate message recieved. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
                                 message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
         }
+        else if (statusBan == -2)
+        {
+            LogPrint("bdap", "%s -- Message either too old or timestamp is in the future. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+        else if (statusBan == -3)
+        {
+            LogPrint("bdap", "%s -- Timestamp is greater than relay until time. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have a timestamp greater than the relay until time so ban node.
+        }
+        else if (statusBan == -4)
+        {
+            LogPrint("bdap", "%s -- Relay time is too much.  max relay is 120 seconds. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have longer relay until time span so ban node.
+        }
         else
         {
             LogPrintf("%s -- Unkown ProcessMessage status. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 

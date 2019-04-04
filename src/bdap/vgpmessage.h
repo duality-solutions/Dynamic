@@ -31,7 +31,9 @@ static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update m
 static constexpr size_t MAX_SIGNATURE_SIZE = 72;
 static constexpr size_t MAX_WALLET_PUBKEY_SIZE = 40;
 static constexpr int KEEP_MESSAGE_LOG_ALIVE_SECONDS = 300; // 5 minutes.
-static constexpr int KEEP_MY_MESSAGE_ALIVE_SECONDS = 60; // 1 minute for testing.  Update to 600 or 10 minutes.
+static constexpr int KEEP_MY_MESSAGE_ALIVE_SECONDS = 240; // 4 minutes.
+static constexpr int MAX_MESAGGE_DRIFT_SECONDS = 90; // 1.5 minutes.
+static constexpr int MAX_MESAGGE_RELAY_SECONDS = 120; // 2 minutes.
 
 class CUnsignedVGPMessage
 {
