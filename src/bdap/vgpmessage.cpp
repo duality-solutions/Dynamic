@@ -311,7 +311,7 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "Message already received.";
         return -1; // do not relay message again
     }
-    if (std::abs((nCurrentTimeStamp - unsignedMessage.nTimeStamp) > MAX_MESAGGE_DRIFT_SECONDS))
+    if (std::abs(nCurrentTimeStamp - unsignedMessage.nTimeStamp) > MAX_MESAGGE_DRIFT_SECONDS)
     {
         strErrorMessage = "Message exceeds maximum time drift.";
         return -2; // message too old or into the future (time drift exceeds maximum allowed)
@@ -321,7 +321,7 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "Timestamp is greater than relay until time. Malformed message.";
         return -3; // timestamp is greater than relay until time
     }
-    if (std::abs((unsignedMessage.nTimeStamp - unsignedMessage.nRelayUntil) > MAX_MESAGGE_RELAY_SECONDS))
+    if (std::abs(unsignedMessage.nTimeStamp - unsignedMessage.nRelayUntil) > MAX_MESAGGE_RELAY_SECONDS)
     {
         strErrorMessage = "Too much span between timestamp and relay until time.";
         return -4; // relay time is too much.  max relay is 120 seconds
