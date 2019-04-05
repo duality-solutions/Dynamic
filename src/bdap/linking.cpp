@@ -157,6 +157,34 @@ std::string CLinkRequest::LinkPathString() const
     return stringFromVch(LinkPath());
 }
 
+std::string CLinkRequest::ToString() const
+{
+    return strprintf(
+        "CLinkRequest(\n"
+        "    nVersion                   = %d\n"
+        "    RequestorFullObjectPath    = %s\n"
+        "    RecipientFullObjectPath    = %s\n"
+        "    RequestorPubKey            = %s\n"
+        "    SharedRequestPubKey        = %s\n"
+        "    LinkMessage                = %s\n"
+        "    SignatureProof             = %s\n"
+        "    nHeight                    = %d\n"
+        "    nExpireTime                = %d\n"
+        "    txHash                     = %s\n"
+        ")\n",
+        nVersion,
+        stringFromVch(RequestorFullObjectPath),
+        stringFromVch(RecipientFullObjectPath),
+        stringFromVch(RequestorPubKey),
+        stringFromVch(SharedPubKey),
+        stringFromVch(LinkMessage),
+        CharVectorToHexString(SignatureProof),
+        nHeight,
+        nExpireTime,
+        txHash.ToString()
+    );
+}
+
 bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
@@ -288,6 +316,34 @@ CharString CLinkAccept::LinkPath() const
 std::string CLinkAccept::LinkPathString() const
 {
     return stringFromVch(LinkPath());
+}
+
+std::string CLinkAccept::ToString() const
+{
+    return strprintf(
+        "CLinkAccept(\n"
+        "    nVersion                   = %d\n"
+        "    RequestorFullObjectPath    = %s\n"
+        "    RecipientFullObjectPath    = %s\n"
+        "    txLinkRequestHash          = %s\n"
+        "    RecipientPubKey            = %s\n"
+        "    SharedPubKey               = %s\n"
+        "    SignatureProof             = %s\n"
+        "    nHeight                    = %d\n"
+        "    nExpireTime                = %d\n"
+        "    txHash                     = %s\n"
+        ")\n",
+        nVersion,
+        stringFromVch(RequestorFullObjectPath),
+        stringFromVch(RecipientFullObjectPath),
+        txLinkRequestHash.ToString(),
+        stringFromVch(RecipientPubKey),
+        stringFromVch(SharedPubKey),
+        CharVectorToHexString(SignatureProof),
+        nHeight,
+        nExpireTime,
+        txHash.ToString()
+    );
 }
 
 CLinkDenyList::CLinkDenyList(const std::vector<unsigned char>& vchData)

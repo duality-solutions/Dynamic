@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue libtorrent
+DIST_SUBDIRS = secp256k1 univalue
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -87,14 +87,18 @@ DYNAMIC_CORE_H = \
   bdap/linkstorage.h \
   bdap/sidechain.h \
   bdap/utils.h \
+  bdap/vgpmessage.h \
   bip39_chinese_simplified.h \
   bip39_chinese_traditional.h \
   bip39_english.h \
   bip39_french.h \
+  bip39_german.h \
   bip39_italian.h \
   bip39_japanese.h \
   bip39_korean.h \
+  bip39_russian.h \
   bip39_spanish.h \
+  bip39_ukrainian.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -242,7 +246,6 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
-  wallet/mnemonic/mnemonic.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
@@ -286,6 +289,7 @@ libdynamic_server_a_SOURCES = \
   bdap/rpcrawbdap.cpp \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
+  bdap/vgpmessage.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \
@@ -387,7 +391,6 @@ libdynamic_wallet_a_SOURCES = \
   privatesend-util.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
-  wallet/mnemonic/mnemonic.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \

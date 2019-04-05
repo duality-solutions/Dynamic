@@ -23,18 +23,35 @@ public:
     void importMnemonic(bool forceRescan);
     void importWallet(bool forceRescan);
     void importPrivatekey(bool forceRescan);
+    void createMnemonic();
+    void validateMnemonic();
     
 Q_SIGNALS:
     void cmdToConsole(const QString &command);  
 
 private Q_SLOTS:
     void on_importPrivatekey_clicked();
-    void on_reimportPrivatekey_clicked();
+    //void on_reimportPrivatekey_clicked();
     void on_importMnemonic_clicked();
+    void on_pushButtonImportMnemonicCancel_clicked();
+    void on_pushButtonCreateMnemonic_Generate_clicked();
     void on_reimportMnemonic_clicked();
+    void on_pushButtonCreateMnemonic_Cancel_clicked();
+    void on_pushButtonCreateMnemonic_Validate_clicked();
+    void on_toolButtonCreateMnemonic_Clear_clicked();
+    void on_toolButtonCreateMnemonic_Copy_clicked();
+    void on_toolButtonImportMnemonic_Paste_clicked();
+    void on_toolButtonImportMnemonic_Clear_clicked();
     void on_importWallet_clicked();
-    void on_reimportWallet_clicked();
+    //void on_reimportWallet_clicked();
     void on_fileButton_clicked();
+    void combobox1ItemChanged(int input);
+    void combobox2ItemChanged(int input);
+
+    void on_pushButtonPrivatekeyCancel_clicked();
+    void on_pushButtonPrivateKeyFileCancel_clicked();
+
+
 private:
     Ui::MnemonicDialog *ui;
 };

@@ -9,6 +9,7 @@
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/utils.h"
+#include "bip39.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
@@ -770,114 +771,97 @@ UniValue importmnemonic(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
+    
     LOCK2(cs_main, pwalletMain->cs_wallet);
     UniValue entry(UniValue::VOBJ);
-    if (request.fHelp || request.params.size() > 4)
+    if (request.fHelp || request.params.size() > 6 || request.params.size() == 0)
         throw std::runtime_error(
             "importmnemonic \"mnemonic\"\n"
             "\nImports mnemonic\n"
             "\nArguments:\n"
-            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-)\n"
-            "2. \"begin\"       (int, optional) begin\n"
-            "3. \"end\"         (int, optional) end\n"
-            "4. forcerescan               (boolean, optional, default=true) forcerescan the wallet for transactions\n"
+            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
+            "2. \"language\"    (english|french|chinesesimplified|chinesetraditional|italian|japanese|korean|spanish, optional)\n"
+            "3. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
+    
+    
+    LogPrintf("DEBUGGER %s - NUMBER OF PARAMS %s\n", __func__, std::to_string(request.params.size()));
+    
     if (fPruneMode)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Importing wallets is disabled in pruned mode");
-    
-    std::string mnemonicstr = "";
-    
+        throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");
+
+    std::string strMnemonic = "", strMnemonicPassphrase = "";
     if (!request.params[0].isNull())
-        mnemonicstr = request.params[0].get_str();
-    
-    uint32_t begin = 0, end = 100;
-    
-    if (!request.params[1].isNull())
-        begin = (uint32_t)request.params[1].get_int();
-    
-    if (!request.params[2].isNull())
-        end = (uint32_t)request.params[2].get_int();
-    
-    bool forcerescan = false;
-    
-    if(!request.params[3].isNull())
-        forcerescan = request.params[3].get_bool();
-    
-    Mnemonic mnemonic(mnemonicstr);
-    
-    if(mnemonic.getMnemonic().size() <= 0){
-        entry.push_back(Pair("error", "mnemonic size is error"));
-        return entry;
+        strMnemonic = request.params[0].get_str();
+
+    // Mnemonic can be delimited by dash ('-') or space(' ') character
+    std::replace(strMnemonic.begin(), strMnemonic.end(), '-', ' ');
+
+    if (strMnemonic.size() > 512) //RESTRICTION REMOVED: was 256
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
+
+    SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
+    CMnemonic mnemonic;
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //default language is ENGLISH
+
+    std::string compareLanguage = "english"; //default language is ENGLISH
+
+    if (!request.params[1].isNull()) {
+        compareLanguage = request.params[1].get_str();
+
+        selectLanguage = CMnemonic::getLanguageEnumFromLabel(compareLanguage);
+    } //if language
+
+
+
+    if (!mnemonic.Check(strSecureMnemonic,selectLanguage))
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic check failed.");
+
+    SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+
+
+
+    if (!request.params[2].isNull()) {
+        strMnemonicPassphrase = request.params[2].get_str();
     }
-    
-    int64_t nCreationTime = 1230912000;
-    uint32_t nInternalChainCounter = begin;
-    uint32_t nExternalChainCounter = begin;
-    int skipcount = 0;
-    pwalletMain->ShowProgress(_("Importing..."), 0); // show progress dialog in GUI
-    bool intenal = false;
-    unsigned char *seedkey = mnemonic.MnemonicToSeed();
-    
-    // for now we use a fixed keypath scheme of m/44‘/0'/0'/0/k
-    CExtKey masterKey;             //hd master key
-    CExtKey bip44Key;              //bip44 key m/44'
-    CExtKey coinTypeKey;           //coin_type key m/44'/0'
-    CExtKey accountKey;            //key at m/44'/0'/0'
-    CExtKey chainChildKeyexternal;         //key at m/44'/0'/0'/0 (external) or m/44'/0'/0'/1 (internal)
-    CExtKey chainChildKeyinternal;
-    
-    masterKey.SetMaster(seedkey, SEED_KEY_SIZE);
-    
-    // derive purpose m/44'
-    masterKey.Derive(bip44Key, 0x80000000 + 44);
-     // derive coin_type(dynamic) m/44'/0'
-    bip44Key.Derive(coinTypeKey, 0x80000000);
-    // derive account m/44'/0'/0'
-    // use hardened derivation (child keys >= 0x80000000 are hardened after bip32)
-    coinTypeKey.Derive(accountKey, 0x80000000);
-    accountKey.Derive(chainChildKeyexternal, 0);
-    accountKey.Derive(chainChildKeyinternal, 1);
-    while(nInternalChainCounter <= end || nExternalChainCounter <= end){
-        //pwalletMain->ShowProgress("", std::max(1, std::min(99, (int)(((double)file.tellg() / (double)nFilesize) * 100))));
-        pwalletMain->ShowProgress("", std::max(1, std::min(99,  (int)(((double)(nInternalChainCounter+nExternalChainCounter) / (double)end)* (double)100 / (double)2))));
-        
-        if(nExternalChainCounter > end)
-            intenal = true;
-        
-        CKey key;
-        pwalletMain->DeriveNewChildKeyBIP44BychainChildKey((intenal?chainChildKeyinternal:chainChildKeyexternal),key,intenal,&nInternalChainCounter,&nExternalChainCounter);
-        
-        CPubKey pubkey = key.GetPubKey();
-        assert(key.VerifyPubKey(pubkey));
-        CKeyID keyid = pubkey.GetID();
-        if (pwalletMain->HaveKey(keyid)) {
-            LogPrintf("Skipping import of %s (key already present)\n", CDynamicAddress(keyid).ToString());
-            skipcount++;
-            continue;
-        }
-        std::string strLabel="";
-        
-        LogPrintf("Importing %s...\n", CDynamicAddress(keyid).ToString());
-        if (!pwalletMain->AddKeyPubKey(key, pubkey)) {
-            
-        }
-        pwalletMain->mapKeyMetadata[keyid].nCreateTime = nCreationTime;
-        
-        pwalletMain->SetAddressBook(keyid, strLabel, "receive");
-        //MilliSleep(30);
-    }
-    int64_t nEndTime = GetTime();
+
+
+    if (strMnemonicPassphrase.size() > 24)
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
+
+
+    pwalletMain->ShowProgress(_("Importing... Wallet will restart when complete."), 0); // show progress dialog in GUI
+    pwalletMain->ShowProgress("", 25); //show we're working in the background...
+
+    //CREATE BACKUP OF WALLET before importing mnemonic and swapping files
+    //wallat.dat.before-mnemonic-import.isodate
+    std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M-%S", GetTime());
+    boost::filesystem::path backupFile = GetDataDir() / ("wallet.dat.before-mnemonic-import" + dateTimeStr);
+    pwalletMain->BackupWallet(backupFile.string());
+
+    ForceSetArg("-mnemonic", strMnemonic);
+    ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
+    ForceSetArg("-mnemoniclanguage", compareLanguage);
+    SoftSetBoolArg("-importmnemonic", true);
+    SoftSetBoolArg("-skipmnemoniccheck", true);
+
+    CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
+    pwalletMain = pwallet;
     pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
-    if(skipcount < ((int)end * 2 + 2) || forcerescan ){
-        pwalletMain->UpdateTimeFirstKey(nCreationTime);
-        pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
-        pwalletMain->MarkDirty();
-    }
-     entry.push_back(Pair("nEndTime", nEndTime - nCreationTime));
+    StartMnemonicRestart();
+    entry.push_back(Pair("Done", "Stopping daemon... Please restart dynamic..."));
+
+    //cleanup
+    ForceRemoveArg("-mnemonic");
+    ForceRemoveArg("-importmnemonic");
+    ForceRemoveArg("-mnemoniclanguage");
+    ForceRemoveArg("-skipmnemoniccheck");
+
     return entry;
+
 }
 
 UniValue dumpprivkey(const JSONRPCRequest& request)

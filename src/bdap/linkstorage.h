@@ -138,5 +138,6 @@ public:
 
 void ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly = false);
 void ProcessLinkQueue();
+void LoadLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
 
 #endif // DYNAMIC_BDAP_LINKSTORAGE_H

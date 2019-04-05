@@ -2114,3 +2114,28 @@ QDialog#BdapUpdateAccountDialog .QLabel#labelErrorMsg {
 QDialog#BdapUpdateAccountDialog .QPushButton#pushButtonOK {
     margin-top: 10px;
 }
+
+/*******************************************************/
+/* MNEMONICDIALOG */
+QDialog#MnemonicDialog .QLabel#labelWarning {
+    color: red;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+
+QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate {
+    background-color:rgb(255,149,0);
+    color: black;
+    border-radius: 2px;
+    border-style: outset;
+    border: 1px groove gray;
+}
+
+/*
+QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate:pressed {
+    background-color:rgb(112, 170, 245);
+    border-style: inset;
+    border: 1px groove gray
+}
+*/
