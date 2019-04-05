@@ -8,6 +8,7 @@
 #include "bdap/utils.h"
 #include "rpcclient.h"
 #include "rpcserver.h"
+#include "primitives/block.h"
 #include "txmempool.h"
 #include "serialize.h"
 #include "streams.h"
@@ -253,13 +254,61 @@ bool CDomainEntry::TxUsesPreviousUTXO(const CTransactionRef& tx)
     return false;
 }
 
+/** Generate unique OID when using the root BDAP OID prefix */
+std::string CDomainEntry::GenerateOID() const
+{
+    std::string strOID;
+    if (RootOID == vchDefaultOIDPrefix)
+    {
+        // BDAP generated OID: 2.16.840.1.114564.block-height.tx-ordinal
+        std::string strTxOrdinal = "?";
+        std::string strHeight = "?";
+        if (nHeight > 0)
+        {
+            strHeight = std::to_string(nHeight);
+        }
+        if (!txHash.IsNull())
+        {
+            CTransactionRef txRef;
+            uint256 hashBlock;
+            const Consensus::Params& consensusParams = Params().GetConsensus();
+            if (GetTransaction(txHash, txRef, consensusParams, hashBlock, true))
+            {
+                if (!hashBlock.IsNull())
+                {
+                    CBlock block;
+                    CBlockIndex* pblockindex = mapBlockIndex[hashBlock];
+                    if (pblockindex && ReadBlockFromDisk(block, pblockindex, consensusParams))
+                    {
+                        int nTxOrdinal = 0;
+                        for (const auto& tx : block.vtx) {
+                            if (tx->GetHash() == txHash)
+                            {
+                                strTxOrdinal = std::to_string(nTxOrdinal);
+                                break;
+                            }
+                            nTxOrdinal++;
+                        }
+                    } 
+                }
+            }
+        }
+        strOID = strprintf("%s.%s.%s", stringFromVch(RootOID), strHeight, strTxOrdinal);
+    }
+    else
+    {
+        strOID = stringFromVch(RootOID);
+    }
+    return strOID;
+}
+
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
 {
     bool expired = false;
     int64_t expired_time = 0;
     int64_t nTime = 0;
     if (!fAbridged) {
-        oName.push_back(Pair("_id", stringFromVch(entry.OID)));
+        oName.push_back(Pair("oid", entry.GenerateOID()));
         oName.push_back(Pair("version", entry.nVersion));
         oName.push_back(Pair("domain_component", stringFromVch(entry.DomainComponent)));
         oName.push_back(Pair("common_name", stringFromVch(entry.CommonName)));
