@@ -25,7 +25,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 {
     EnsureWalletIsUnlocked();
 
-    // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
+    // Adds a new name to channel zero.  OID = 2.16.840.1.114564.block-height.tx-ordinal
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
     ToLowerCase(strObjectID);
@@ -35,7 +35,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchCommonName = vchFromValue(request.params[1]);
 
     CDomainEntry txDomainEntry;
-    txDomainEntry.OID = vchDefaultOIDPrefix;
+    txDomainEntry.RootOID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
     txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     txDomainEntry.CommonName = vchCommonName;

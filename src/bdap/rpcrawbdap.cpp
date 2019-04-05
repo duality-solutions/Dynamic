@@ -71,7 +71,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     }
 
     CDomainEntry txDomainEntry;
-    txDomainEntry.OID = vchDefaultOIDPrefix;
+    txDomainEntry.RootOID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
     txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     txDomainEntry.CommonName = vchCommonName;

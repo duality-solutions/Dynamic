@@ -55,7 +55,7 @@ class CDomainEntry {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
-    CharString OID; // Canonical Object ID
+    CharString RootOID; // Canonical Object ID
     //CN=John Smith,OU=Public,DC=BDAP,DC=IO, O=Duality Blockchain Solutions, UID=johnsmith21
     CharString DomainComponent; // DC. Like DC=bdap.io. required. controls child objects
     CharString CommonName; // CN. Like CN=John Smith
@@ -73,7 +73,7 @@ public:
     unsigned int nHeight;
     uint64_t nExpireTime;
 
-    CDomainEntry() { 
+    CDomainEntry() {
         SetNull();
     }
 
@@ -85,7 +85,7 @@ public:
     inline void SetNull()
     {
         nVersion = CDomainEntry::CURRENT_VERSION;
-        OID.clear();
+        RootOID.clear();
         DomainComponent.clear();
         CommonName.clear();
         OrganizationalUnit.clear();
@@ -106,7 +106,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
-        READWRITE(OID);
+        READWRITE(RootOID);
         READWRITE(DomainComponent);
         READWRITE(CommonName);
         READWRITE(OrganizationalUnit);
@@ -122,16 +122,16 @@ public:
         READWRITE(VARINT(nExpireTime));
     }
 
-    inline friend bool operator==(const CDomainEntry &a, const CDomainEntry &b) {
-        return (a.OID == b.OID && a.DomainComponent == b.DomainComponent && a.OrganizationalUnit == b.OrganizationalUnit && a.nObjectType == b.nObjectType);
+    inline friend bool operator==(const CDomainEntry& a, const CDomainEntry& b) {
+        return (a.RootOID == b.RootOID && a.DomainComponent == b.DomainComponent && a.OrganizationalUnit == b.OrganizationalUnit && a.nObjectType == b.nObjectType);
     }
 
-    inline friend bool operator!=(const CDomainEntry &a, const CDomainEntry &b) {
+    inline friend bool operator!=(const CDomainEntry& a, const CDomainEntry& b) {
         return !(a == b);
     }
 
-    inline CDomainEntry operator=(const CDomainEntry &b) {
-        OID = b.OID;
+    inline CDomainEntry operator=(const CDomainEntry& b) {
+        RootOID = b.RootOID;
         DomainComponent = b.DomainComponent;
         CommonName = b.CommonName;
         OrganizationalUnit = b.OrganizationalUnit;
@@ -150,8 +150,8 @@ public:
     }
  
     inline bool IsNull() const { return (DomainComponent.empty()); }
-    bool UnserializeFromTx(const CTransactionRef &tx);
-    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+    bool UnserializeFromTx(const CTransactionRef& tx);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 
     CDynamicAddress GetWalletAddress() const;
@@ -166,6 +166,8 @@ public:
     bool TxUsesPreviousUTXO(const CTransactionRef& tx);
     BDAP::ObjectType ObjectType() const { return (BDAP::ObjectType)nObjectType; }
     std::string ObjectTypeString() const { return BDAP::GetObjectTypeString(nObjectType); };
+    std::string GenerateOID() const;
+
 };
 
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged = false);
