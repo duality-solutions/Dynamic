@@ -375,10 +375,6 @@ void PrepareShutdown()
         delete pLinkManager;
         pLinkManager = NULL;
         // LibTorrent DHT Netowrk Services
-        delete pHashTableSessionGet;
-        pHashTableSessionGet = NULL;
-        delete pHashTableSessionPut;
-        pHashTableSessionPut = NULL;
         delete pMutableDataDB;
         pMutableDataDB = NULL;
     }
@@ -1728,8 +1724,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
-                delete pHashTableSessionGet;
-                delete pHashTableSessionPut;
                 delete pMutableDataDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
@@ -1749,8 +1743,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
-                pHashTableSessionGet = new CHashTableSession();
-                pHashTableSessionPut = new CHashTableSession();
                 pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {

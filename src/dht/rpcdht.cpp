@@ -54,7 +54,8 @@ static UniValue GetMutable(const JSONRPCRequest& request)
            HelpExampleRpc("dht getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSessionGet->Session)
+
+    if (!DHT::GetStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     const std::string strPubKey = request.params[1].get_str();
@@ -66,7 +67,7 @@ static UniValue GetMutable(const JSONRPCRequest& request)
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     bool fAuthoritative;
-    fRet = pHashTableSessionGet->SubmitGet(pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
+    fRet = DHT::SubmitGet(0, pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
@@ -106,7 +107,8 @@ static UniValue PutMutable(const JSONRPCRequest& request)
            HelpExampleRpc("dht putmutable", "\"https://duality.solutions/duality/logos/dual.png\" \"avatar\" \"517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a\" \"bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0\""));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSessionGet->Session)
+
+    if (!DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -139,7 +141,7 @@ static UniValue PutMutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        pHashTableSessionGet->SubmitGet(pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
+        DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
     uint16_t nTotalSlots = 32;
@@ -153,8 +155,9 @@ static UniValue PutMutable(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     record.GetHeader().Salt = strOperationType;
-    if (!pHashTableSessionGet->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSessionGet->strPutErrorMessage));
+
+    if (!DHT::SubmitPut(0, key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -208,13 +211,13 @@ static UniValue GetDHTStatus(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtinfo", ""));
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     libtorrent::session_status stats;
     std::vector<libtorrent::dht_lookup> vchDHTLookup; 
     std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
-    pHashTableSessionGet->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    DHT::GetDHTStats(0, stats, vchDHTLookup, vchDHTBuckets);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("num_peers", stats.num_peers));
@@ -363,8 +366,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     UniValue result(UniValue::VOBJ);
-   
-    if (!pHashTableSessionGet->Session)
+
+    if (!DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -404,7 +407,7 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -430,8 +433,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSessionPut->strPutErrorMessage));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -466,7 +469,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -506,7 +509,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -522,8 +525,8 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -558,8 +561,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
 
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
-
-    if (!pHashTableSessionGet->Session)
+   
+    if (!DHT::GetStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -593,8 +596,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSessionGet->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record"));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -692,7 +695,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutableGetEvent> vchMutableData;
-    bool fRet = pHashTableSessionGet->GetAllDHTGetEvents(vchMutableData);
+    bool fRet = DHT::GetAllDHTGetEvents(0, vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutableGetEvent& data : vchMutableData) {
@@ -748,7 +751,7 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -820,8 +823,8 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSessionGet->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record"));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -865,7 +868,7 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VOBJ);
    
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -898,8 +901,8 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
     }
 
     std::vector<CDataRecord> vchRecords;
-    if (!pHashTableSessionGet->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get records: %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetAllRecordsSync(0, vchLinkInfo, strOperationType, vchRecords))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get records"));
 
     int nRecordItem = 1;
     for (CDataRecord& record : vchRecords) // loop through records
@@ -951,7 +954,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -1013,7 +1016,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -1041,8 +1044,8 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1077,7 +1080,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::PutStatus(0))
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -1140,7 +1143,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -1157,8 +1160,8 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));

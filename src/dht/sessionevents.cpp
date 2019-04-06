@@ -21,10 +21,6 @@
 
 using namespace libtorrent;
 
-
-
-
-
 CEvent::CEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what)
 {
     message = _message;
