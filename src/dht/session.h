@@ -68,6 +68,7 @@ public:
     void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event);
     void AddToEventMap(const int type, const CEvent& event);
     void CleanUpEventMap(const uint32_t timeout);
+    void StopEventListener();
 
 private:
     void CleanUpPutCommandMap();
@@ -77,7 +78,6 @@ private:
     int SaveSessionState();
     std::string GetSessionStatePath();
     bool RemoveDHTGetEvent(const std::string& infoHash);
-    void StopEventListener();
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
     bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 
@@ -87,10 +87,22 @@ private:
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
-void StartEventListener(CHashTableSession* dhtSession);
-void StopEventListener();
+void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 
-extern CHashTableSession* pHashTableSessionGet;
-extern CHashTableSession* pHashTableSessionPut;
 
+namespace DHT
+{
+    bool PutStatus(const size_t nSessionThread);
+    bool GetStatus(const size_t nSessionThread);
+    bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record);
+    bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
+    bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
+    bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
+                            const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
+    bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
+    bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
+    bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents);
+    void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
+}
 #endif // DYNAMIC_DHT_SESSION_H

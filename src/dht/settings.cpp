@@ -18,7 +18,7 @@ using namespace libtorrent;
 
 CDHTSettings::CDHTSettings(const uint16_t nSessionNumber)
 {
-    nPort = Params().GetDefaultPort() + (nSessionNumber + 10);
+    nPort = Params().GetDefaultPort() + (nSessionNumber + 11);
     user_agent = "Dynamic v" + FormatFullVersion();
     // Uses UDP port 33311 for mainnet, 333411 for testnet, 33511 for regtest, or 33611 for privatenet
     listen_interfaces = "0.0.0.0:" + std::to_string(nPort) + ",[::]:" + std::to_string(nPort);

@@ -57,7 +57,7 @@ UniValue getmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw std::runtime_error("getdhtmutable failed. DHT session not started.\n");
 
     const std::string strPubKey = request.params[0].get_str();
@@ -69,7 +69,7 @@ UniValue getmutable(const JSONRPCRequest& request)
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     bool fAuthoritative;
-    fRet = pHashTableSessionGet->SubmitGet(pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
+    fRet = DHT::SubmitGet(0, pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
@@ -112,7 +112,7 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::PutStatus(0))
         throw std::runtime_error("putmutable failed. DHT session not started.\n");
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -145,7 +145,7 @@ UniValue putmutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        pHashTableSessionGet->SubmitGet(pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
+        DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
     uint16_t nTotalSlots = 32;
@@ -159,8 +159,8 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
     record.GetHeader().Salt = strOperationType;
-    if (!pHashTableSessionGet->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5402 - - Put failed. " + pHashTableSessionGet->strPutErrorMessage + _("\n"));
+    if (!DHT::SubmitPut(0, key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5402 - - Put failed. " + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -217,13 +217,13 @@ UniValue dhtinfo(const JSONRPCRequest& request)
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
 
     libtorrent::session_status stats;
     std::vector<libtorrent::dht_lookup> vchDHTLookup; 
     std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
-    pHashTableSessionGet->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    DHT::GetDHTStats(0, stats, vchDHTLookup, vchDHTBuckets);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("num_peers", stats.num_peers));
@@ -377,7 +377,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
    
     EnsureWalletIsUnlocked();
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::PutStatus(0))
         throw std::runtime_error("putbdapdata: ERRCODE: 5500 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -419,7 +419,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -436,7 +436,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
@@ -475,7 +475,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
    
     EnsureWalletIsUnlocked();
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw std::runtime_error("clearbdapdata: ERRCODE: 5510 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -515,7 +515,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -531,8 +531,8 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5516 - - Put failed. " + pHashTableSessionGet->strPutErrorMessage + _("\n"));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5516 - - Put failed. " + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -571,7 +571,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw std::runtime_error("getbdapdata: ERRCODE: 5600 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -604,8 +604,8 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSessionGet->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record\n", __func__));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -703,7 +703,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutableGetEvent> vchMutableData;
-    bool fRet = pHashTableSessionGet->GetAllDHTGetEvents(vchMutableData);
+    bool fRet = DHT::GetAllDHTGetEvents(0, vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutableGetEvent& data : vchMutableData) {
@@ -762,7 +762,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5620 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -840,8 +840,8 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSessionGet->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record: %s\n", __func__, pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record\n", __func__));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -887,7 +887,7 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VOBJ);
    
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0))
         throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -923,8 +923,8 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     }
 
     std::vector<CDataRecord> vchRecords;
-    if (!pHashTableSessionGet->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSessionGet->strPutErrorMessage));
+    if (!DHT::SubmitGetAllRecordsSync(0, vchLinkInfo, strOperationType, vchRecords))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records\n", __func__));
 
     int nRecordItem = 1;
     for (CDataRecord& record : vchRecords) // loop through records
@@ -978,7 +978,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5640 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -1041,7 +1041,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -1060,8 +1060,8 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSessionGet->strPutErrorMessage + _("\n"));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5548 - - Put failed. " + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1099,7 +1099,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSessionGet->Session)
+    if (!DHT::PutStatus(0))
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5650 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -1162,7 +1162,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSessionGet->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -1179,8 +1179,8 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    if (!pHashTableSessionGet->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSessionGet->strPutErrorMessage + _("\n"));
+    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5548 - - Put failed. " + _("\n"));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
