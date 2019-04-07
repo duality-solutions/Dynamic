@@ -83,7 +83,7 @@ void CHashTableSession::StopEventListener()
 {
     fShutdown = true;
     LogPrintf("%s -- stopping.\n", __func__);
-    MilliSleep(30);
+    MilliSleep(333);
 }
 
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
@@ -105,7 +105,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
             continue;
         }
 
-        dhtSession->Session->wait_for_alert(seconds(1));
+        dhtSession->Session->wait_for_alert(std::chrono::milliseconds(333));
         std::vector<alert*> alerts;
         dhtSession->Session->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
@@ -427,12 +427,12 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
+    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
     //TODO: DHT add locks
     if (!Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
         return false;
     }
-
     if (!Session->is_dht_running()) {
         LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
         if (!LoadSessionState()) {
@@ -444,7 +444,6 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
         }
     }
-
     Session->dht_get_item(public_key, recordSalt);
     LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
 
@@ -458,7 +457,6 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     RemoveDHTGetEvent(infoHash);
     if (!SubmitGet(public_key, recordSalt))
         return false;
-
     MilliSleep(40);
     CMutableGetEvent data;
     int64_t startTime = GetTimeMillis();
