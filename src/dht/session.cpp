@@ -36,7 +36,7 @@
 
 using namespace libtorrent;
 
-static constexpr size_t nThreads = 17;
+static constexpr size_t nThreads = 7;
 
 typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>>, nThreads> SessionThreadGroup;
 
