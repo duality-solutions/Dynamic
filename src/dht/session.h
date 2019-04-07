@@ -43,18 +43,16 @@ public:
     std::string strName;
     CDataRecordBuffer vDataEntries;
     libtorrent::session* Session = NULL;
-    std::map<HashRecordKey, int64_t> mPutCommands;
-    std::string strPutErrorMessage;
-    uint64_t nPutRecords;
+    std::string strErrorMessage;
     bool fShutdown;
     EventTypeMap m_EventTypeMap;
     DHTGetEventMap m_DHTGetEventMap;
     CCriticalSection cs_EventMap;
     CCriticalSection cs_DHTGetEventMap;
 
-    CHashTableSession() : vDataEntries(CDataRecordBuffer(32)), strPutErrorMessage(""), nPutRecords(0) {};
+    CHashTableSession() : vDataEntries(CDataRecordBuffer(32)), strErrorMessage("") {};
 
-    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record);
+    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const std::string& strSalt, const libtorrent::entry& entryValue);
 
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
@@ -72,8 +70,7 @@ public:
     void StopEventListener();
 
 private:
-    void CleanUpPutCommandMap();
-    int64_t GetLastPutDate(const HashRecordKey& recordKey);
+    
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
     bool LoadSessionState();
     int SaveSessionState();
@@ -83,6 +80,9 @@ private:
     bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 
 };
+
+uint32_t GetLastPutDate(const HashRecordKey& recordKey);
+void CleanUpPutCommandMap();
 
 /** Start the DHT libtorrent network threads */
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
@@ -94,7 +94,7 @@ namespace DHT
 {
     bool PutStatus(const size_t nSessionThread);
     bool GetStatus(const size_t nSessionThread);
-    bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record);
+    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataRecord& record, std::string& strErrorMessage);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);

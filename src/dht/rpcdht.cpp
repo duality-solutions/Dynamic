@@ -155,9 +155,9 @@ static UniValue PutMutable(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     record.GetHeader().Salt = strOperationType;
-
-    if (!DHT::SubmitPut(0, key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -433,8 +433,9 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -525,8 +526,9 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed"));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1044,8 +1046,9 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1160,8 +1163,9 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed."));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));

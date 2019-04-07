@@ -47,7 +47,7 @@ public:
     std::string OperationCode() const { return strOperationCode; }
     uint16_t TotalSlots() const { return nTotalSlots; }
     std::vector<unsigned char> RawData() const { return vchData; }
-    CRecordHeader GetHeader() { return dataHeader; }
+    CRecordHeader GetHeader() const { return dataHeader; }
     bool Encrypted() { return dataHeader.Encrypted(); }
     uint16_t Version() { return dataHeader.nVersion; }
 

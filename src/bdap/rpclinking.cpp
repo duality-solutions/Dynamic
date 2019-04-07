@@ -919,8 +919,9 @@ static UniValue DenyLink(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
 
     iSequence++;
-    if (!DHT::SubmitPut(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord))
-         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + _("\n"));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord, strErrorMessage))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + strErrorMessage + _("\n"));
 
     oLink.push_back(Pair("recipient_fqdn", strRecipientFQDN));
     oLink.push_back(Pair("requestor_fqdn", strRequestorFQDN));

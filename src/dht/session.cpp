@@ -36,7 +36,7 @@
 
 using namespace libtorrent;
 
-static constexpr size_t nThreads = 17;
+static constexpr size_t nThreads = 7;
 
 typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>>, nThreads> SessionThreadGroup;
 
@@ -44,12 +44,13 @@ static SessionThreadGroup arrayGetSessionThreads;
 static SessionThreadGroup arrayPutSessionThreads;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
+static std::map<HashRecordKey, uint32_t> mPutCommands;
+static uint64_t nPutRecords = 0;
 
 static bool fStarted;
 static bool fRun;
 
 namespace DHT {
-
     typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
     std::vector<std::pair<int64_t, PutBytes>> vPutBytes;
 
@@ -101,7 +102,7 @@ void CHashTableSession::StopEventListener()
 {
     fShutdown = true;
     LogPrintf("%s -- stopping.\n", __func__);
-    MilliSleep(30);
+    MilliSleep(333);
 }
 
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
@@ -123,7 +124,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
             continue;
         }
 
-        dhtSession->Session->wait_for_alert(seconds(1));
+        dhtSession->Session->wait_for_alert(std::chrono::milliseconds(333));
         std::vector<alert*> alerts;
         dhtSession->Session->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
@@ -332,7 +333,6 @@ void StopTorrentDHTNetwork()
                 pairSession.second->Session->apply_settings(params.settings);
                 pairSession.second->Session->abort();
             }
-
         }
         pDHTTorrentThread->join();
         // join all DHT Get threads
@@ -382,10 +382,10 @@ void CHashTableSession::GetDHTStats(session_status& stats, std::vector<dht_looku
     stats = Session->status();
 }
 
-void CHashTableSession::CleanUpPutCommandMap()
+void CleanUpPutCommandMap()
 {
-    int64_t nCurrentTime = GetAdjustedTime();
-    std::map<HashRecordKey, int64_t>::iterator it;
+    int64_t nCurrentTime = GetTime();
+    std::map<HashRecordKey, uint32_t>::iterator it;
     for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
         if (nCurrentTime > it->second + DHT_RECORD_LOCK_SECONDS) {
             //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
@@ -395,69 +395,33 @@ void CHashTableSession::CleanUpPutCommandMap()
     }
 }
 
-int64_t CHashTableSession::GetLastPutDate(const HashRecordKey& recordKey)
+uint32_t GetLastPutDate(const HashRecordKey& recordKey)
 {
     if (mPutCommands.find(recordKey) != mPutCommands.end() ) {
-        std::map<HashRecordKey, int64_t>::iterator it;
+        std::map<HashRecordKey, uint32_t>::iterator it;
         for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
             if (it->first == recordKey)
                 return it->second;
-        }
+        }     
     }
     return 0;
 }
 
-bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record)
+bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const std::string& strSalt, const libtorrent::entry& entryValue)
 {
-    strPutErrorMessage = "";
-    HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
-    int64_t nLastUpdate = GetLastPutDate(recordKey);
-    int64_t nCurrentTime = GetAdjustedTime();
-    if (DHT_RECORD_LOCK_SECONDS >= (nCurrentTime - nLastUpdate))
-    {
-        strPutErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
-        return false;
-    }
-    mPutCommands[recordKey] = nCurrentTime;
-    vDataEntries.push_back(record);
-    const std::string strHeaderSalt = record.GetHeader().Salt;
-
-    libtorrent::entry entryHeaderHex(record.HeaderHex);
-    DHT::PutBytes newPut;
-    newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
-    for (const CDataChunk& chunk : record.GetChunks()) {
-        libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
-        newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
-        LogPrint("dht", "CHashTableSession::%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
-    }
-    DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
-    for (const std::pair<std::string, libtorrent::entry>& pair : newPut) {
-        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
-                                public_key, private_key, pair.second, lastSequence), pair.first);
-        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
-
-    }
-    nPutRecords++;
-    if (nPutRecords % 32 == 0)
-    {
-        CleanUpPutCommandMap();
-    }
-    if (nPutRecords % 10 == 0)
-    {
-        DHT::CleanUpPutBuffer();
-    }
-
+    Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+                          public_key, private_key, entryValue, lastSequence), strSalt);
     return true;
 }
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
+    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
     //TODO: DHT add locks
     if (!Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
         return false;
     }
-
     if (!Session->is_dht_running()) {
         LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
         if (!LoadSessionState()) {
@@ -469,7 +433,6 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
         }
     }
-
     Session->dht_get_item(public_key, recordSalt);
     LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
 
@@ -483,7 +446,6 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     RemoveDHTGetEvent(infoHash);
     if (!SubmitGet(public_key, recordSalt))
         return false;
-
     MilliSleep(40);
     CMutableGetEvent data;
     int64_t startTime = GetTimeMillis();
@@ -547,7 +509,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
             if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
-                strPutErrorMessage = "Failed to get record chunk.";
+                strErrorMessage = "Failed to get record chunk.";
                 return false;
             }
             CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
@@ -555,7 +517,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         }
         CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
         if (record.HasError()) {
-            strPutErrorMessage = strprintf("Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+            strErrorMessage = strprintf("Record has errors: %s\n", __func__, getRecord.ErrorMessage());
             return false;
         }
         record = getRecord;
@@ -602,7 +564,7 @@ static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigne
 bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
     uint16_t nTotalSlots = 32;
-    strPutErrorMessage = "";
+    strErrorMessage = "";
     // Get the headers first
     for (const CLinkInfo& linkInfo : vchLinkInfo) {
         std::string strHeaderHex;
@@ -684,7 +646,7 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
                     // TODO: make sure all chunks and header have the same sequence number.
                     CDataRecord record(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(eventHeader.first.arrReceivePrivateSeed));
                     if (record.HasError()) {
-                        strPutErrorMessage = strPutErrorMessage + strprintf("\nRecord has errors: %s\n", __func__, record.ErrorMessage());
+                        strErrorMessage = strErrorMessage + strprintf("\nRecord has errors: %s\n", __func__, record.ErrorMessage());
                     }
                     else {
                         LogPrintf("%s -- Found %s record for %s\n", __func__, strOperationType, stringFromVch(eventHeader.first.vchFullObjectPath));
@@ -809,16 +771,51 @@ bool GetStatus(const size_t nSessionThread)
     return true;
 }
 
-bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record)
+bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataRecord& record, std::string& strErrorMessage)
 {
-    if (nSessionThread >= nThreads)
+    if (record.GetChunks().size() > nThreads - 1) {
+        strErrorMessage = strprintf("Data is too large to put with %d DHT sessions", nThreads);
         return false;
+    }
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[nSessionThread];
-    if (!arrayPutSessionThreads[nSessionThread].second)
+    HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
+    int64_t nLastUpdate = GetLastPutDate(recordKey);
+    int64_t nCurrentTime = GetAdjustedTime();
+    if (DHT_RECORD_LOCK_SECONDS >= (nCurrentTime - nLastUpdate)) {
+        strErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
         return false;
+    }
 
-    return arrayPutSessionThreads[nSessionThread].second->SubmitPut(public_key, private_key, lastSequence, record);
+    mPutCommands[recordKey] = nCurrentTime;
+    const std::string strHeaderSalt = record.GetHeader().Salt;
+    libtorrent::entry entryHeaderHex(record.HeaderHex);
+    DHT::PutBytes newPut;
+    newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
+    for (const CDataChunk& chunk : record.GetChunks()) {
+        libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
+        newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        LogPrintf("%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
+    }
+    DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
+    size_t nCounter = 0;
+    for (const std::pair<std::string, libtorrent::entry>& pair : newPut) {
+        if (!arrayPutSessionThreads[nCounter].second) {
+            strErrorMessage = strprintf("Session %d null.", nCounter);
+            return false;
+        }
+        arrayPutSessionThreads[nCounter].second->SubmitPut(public_key, private_key, lastSequence, pair.first, pair.second);
+        LogPrintf("%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
+        nCounter++;
+    }
+    nPutRecords++;
+
+    if (nPutRecords % 32 == 0)
+        CleanUpPutCommandMap();
+
+    if (nPutRecords % 10 == 0)
+        DHT::CleanUpPutBuffer();
+
+    return true;
 }
 
 bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt)
