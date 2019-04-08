@@ -604,8 +604,9 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record\n", __func__));
+    std::string strErrorMessage = "";
+    if (!DHT::SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record, strErrorMessage))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, strErrorMessage));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -840,8 +841,9 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record\n", __func__));
+    std::string strErrorMessage = "";
+    if (!DHT::SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record, strErrorMessage))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record: %s\n", __func__, strErrorMessage));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));

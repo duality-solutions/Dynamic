@@ -408,16 +408,17 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
     LogPrint("dht", "CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
                                                                 strSalt, record.Value(), lastSequence, DHT::vPutValues.size());
-    for(const CDataChunk& chunk: record.GetChunks()) {
+    for (const CDataChunk& chunk : record.GetChunks()) {
         DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
     }
 
-    for(const std::pair<std::string, std::string>& pair: DHT::vPutValues) {
+    for (const std::pair<std::string, std::string>& pair : DHT::vPutValues) {
         Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_string, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
                                 public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
 
         LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
     }
+
     nPutRecords++;
     if (nPutRecords % 32 == 0)
         CleanUpPutCommandMap();
@@ -427,7 +428,7 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
-    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
+    LogPrint("dht", "CHashTableSession::%s -- Start.\n", __func__);
     //TODO: DHT add locks
     if (!Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
@@ -819,8 +820,7 @@ bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_k
     return arrayGetSessionThreads[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
 }
 
-bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
-                        const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
+bool FindDHTGetEvent(const size_t nSessionThread, const std::string& infoHash, CMutableGetEvent& event)
 {
     if (nSessionThread >= nThreads)
         return false;
@@ -829,7 +829,125 @@ bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& pu
     if (!arrayGetSessionThreads[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetRecord(public_key, private_seed, strOperationType, iSequence, record);
+    return arrayGetSessionThreads[nSessionThread].second->FindDHTGetEvent(infoHash, event);
+}
+
+bool RemoveDHTGetEvent(const size_t nSessionThread, const std::string& infoHash)
+{
+    if (nSessionThread >= nThreads)
+        return false;
+
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
+    if (!arrayGetSessionThreads[nSessionThread].second)
+        return false;
+
+    return arrayGetSessionThreads[nSessionThread].second->RemoveDHTGetEvent(infoHash);
+}
+
+bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record, std::string& strErrorMessage)
+{
+    bool fAuthoritative = false;
+    uint16_t nTotalSlots = 32;
+    uint16_t nHeaderAttempts = 3;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    CRecordHeader header;
+    std::string strPubKey = aux::to_hex(public_key);
+    if (!DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+        uint16_t i = 0;
+        LogPrintf("%s -- Failed to find header for %s.\n", __func__, strOperationType);
+        while (i < nHeaderAttempts) {
+            strHeaderHex = "";
+            if (header.IsNull()) {
+                if (DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+            i++;
+        }
+    }
+    if (!header.IsNull())
+    {
+        header.LoadHex(strHeaderHex);
+        if (!header.IsNull() && header.nChunks > 0) {
+            size_t nCounter1 = 0; 
+            size_t nCounter2 = 0;
+            std::vector<CDataChunk> vChunks;
+            for (unsigned int x = 0; x < header.nChunks; x++) {
+                
+                for (unsigned int i = 0; i < nThreads; i++) {
+                    std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter1+1);
+                    if (!DHT::SubmitGet(i % nThreads, public_key, strChunkSalt)) {
+                        strErrorMessage = "Failed to submit get for record chunk.";
+                        LogPrintf("%s -- PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
+                        return false;
+                    }
+                    nCounter1++;
+                    if (nCounter1 >= header.nChunks)
+                        break;
+                }
+                MilliSleep(40);
+                for (unsigned int i = 0; i < nThreads; i++) {
+                    CMutableGetEvent event;
+                    const std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter2+1);
+                    const std::string infoHash = GetInfoHash(strPubKey, strChunkSalt);
+                    bool fFound = false;
+                    uint16_t attempt = 0;
+                    uint16_t nTotalAttempts = 5;
+                    while (attempt < nTotalAttempts) {
+                        if (DHT::FindDHTGetEvent(i % nThreads, infoHash, event)) {
+                            fFound = true;
+                            DHT::RemoveDHTGetEvent(i % nThreads, infoHash);
+                            break;
+                        }
+                        if (iSequence != event.SequenceNumber())
+                        {
+                            LogPrintf("%s -- PubKey %s, Sequence number for chunk (%s) %s, iSequence = %d, this = %d\n", __func__, strPubKey, strChunkSalt, infoHash, iSequence, event.SequenceNumber());
+                        }
+                        attempt++;
+                        LogPrintf("%s -- PubKey %s, Failed to find chunk (%s) %s, attempt = %d\n", __func__, strPubKey, strChunkSalt, infoHash, attempt);
+                        MilliSleep(10);
+                    }
+                    if (!fFound)
+                    {
+                        strErrorMessage = "Failed to get record chunk.";
+                        LogPrintf("%s --PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
+                        return false;
+                    }
+                    std::string strValue;
+                    if (event.Value().substr(0, 1) == "'") {
+                        strValue = event.Value().substr(1, event.Value().size() - 2);
+                    }
+                    else {
+                        strValue = event.Value();
+                    }
+                    CDataChunk chunk(x, x + 1, strChunkSalt, strValue);
+                    vChunks.push_back(chunk);
+                    nCounter2++;
+                    if (nCounter2 >= header.nChunks)
+                    {
+                        x = header.nChunks;
+                        i = nThreads;
+                    }
+                }
+            }
+            CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
+            if (record.HasError()) {
+                strErrorMessage = strprintf("%s Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+                return false;
+            }
+            record = getRecord;
+            return true;
+        }
+    }
+    else
+    {
+        LogPrintf("%s -- Header is null. Record not found for PubKey %s, Salt %s\n", __func__, strPubKey, strOperationType);
+    }
+    return false;
 }
 
 bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)

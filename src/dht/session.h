@@ -69,6 +69,8 @@ public:
     void AddToEventMap(const int type, const CEvent& event);
     void CleanUpEventMap(const uint32_t timeout);
     void StopEventListener();
+    bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
+    bool RemoveDHTGetEvent(const std::string& infoHash);
 
 private:
     void CleanUpPutCommandMap();
@@ -77,9 +79,8 @@ private:
     bool LoadSessionState();
     int SaveSessionState();
     std::string GetSessionStatePath();
-    bool RemoveDHTGetEvent(const std::string& infoHash);
+    
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-    bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 
 };
 
@@ -98,8 +99,9 @@ namespace DHT
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
-    bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
-                            const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
+    bool FindDHTGetEvent(const size_t nSessionThread, const std::string& infoHash, CMutableGetEvent& event);
+    bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
+                            const std::string& strOperationType, int64_t& iSequence, CDataRecord& record, std::string& strErrorMessage);
     bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
     bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
     bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents);

@@ -821,7 +821,8 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     bool fNotFound = false;
     CDataRecord record;
-    if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+    std::string strErrorMessage = "";
+    if (!DHT::SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record, strErrorMessage))
         fNotFound = true;
 
     std::vector<unsigned char> vchSerializedList;
@@ -906,8 +907,9 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
     std::string strOperationType = "denylink";
     int64_t iSequence = 0;
     CDataRecord record;
-    if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record\n", __func__));
+    std::string strErrorMessage = "";
+    if (!DHT::SubmitGetRecord(getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record, strErrorMessage))
+        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, strErrorMessage));
 
     UniValue oDeniedLink(UniValue::VOBJ);
     CLinkDenyList denyList(record.RawData());
