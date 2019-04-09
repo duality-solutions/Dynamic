@@ -50,7 +50,9 @@ static bool fRun;
 
 namespace DHT {
 
-    std::vector<std::pair<std::string, libtorrent::entry>> vPutBytes;
+    typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
+    std::vector<std::pair<uint32_t, PutBytes>> vPutBytes;
+
     void put_mutable_bytes
     (
         libtorrent::entry& e
@@ -76,6 +78,23 @@ namespace DHT {
         sig = sign.bytes;
     }
 
+    void CleanUpPutBuffer()
+    {
+        uint32_t nCurrentTimeStamp = GetAdjustedTime();
+        std::vector<std::pair<uint32_t, PutBytes>>::iterator it = vPutBytes.begin();
+        while (it != vPutBytes.end())
+        {
+            int64_t nTimeStamp = (*it).first;
+            if (nCurrentTimeStamp > nTimeStamp + DHT_KEEP_PUT_BUFFER_SECONDS)
+            {
+               it = vPutBytes.erase(it);
+            }
+            else
+            {
+               ++it;
+            }
+        }
+    }
 }
 
 void CHashTableSession::StopEventListener()
@@ -388,7 +407,7 @@ uint32_t CHashTableSession::GetLastPutDate(const HashRecordKey& recordKey)
     return 0;
 }
 
-bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record)
+bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record)
 {
     strPutErrorMessage = "";
     HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
@@ -400,25 +419,31 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     }
     mPutCommands[recordKey] = GetTime();
     vDataEntries.push_back(record);
-    std::string strHeaderSalt = record.GetHeader().Salt;
-    DHT::vPutBytes.clear();
+    const std::string strHeaderSalt = record.GetHeader().Salt;
+
     libtorrent::entry entryHeaderHex(record.HeaderHex);
-    DHT::vPutBytes.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
+    DHT::PutBytes newPut;
+    newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
     for (const CDataChunk& chunk : record.GetChunks()) {
         libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
-        DHT::vPutBytes.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
         LogPrint("dht", "CHashTableSession::%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
     }
-
-    for (const std::pair<std::string, libtorrent::entry>& pair : DHT::vPutBytes) {
+    DHT::vPutBytes.push_back(std::make_pair(GetAdjustedTime(), newPut));
+    for (const std::pair<std::string, libtorrent::entry>& pair : newPut) {
         Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
                                 public_key, private_key, pair.second, lastSequence), pair.first);
-
         LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
     }
     nPutRecords++;
     if (nPutRecords % 32 == 0)
+    {
         CleanUpPutCommandMap();
+    }
+    if (nPutRecords % 10 == 0)
+    {
+        DHT::CleanUpPutBuffer();
+    }
 
     return true;
 }
@@ -780,7 +805,7 @@ bool GetStatus(const size_t nSessionThread)
     return true;
 }
 
-bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record)
+bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record)
 {
     if (nSessionThread >= nThreads)
         return false;

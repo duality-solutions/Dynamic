@@ -34,6 +34,7 @@ static constexpr int DHT_BOOTSTRAP_ALERT_TYPE_CODE = 62;
 static constexpr int DHT_STATS_ALERT_TYPE_CODE = 83;
 static constexpr int DHT_ERROR_ALERT_TYPE_CODE = 73;
 static constexpr int64_t DHT_RECORD_LOCK_SECONDS = 16;
+static constexpr uint32_t DHT_KEEP_PUT_BUFFER_SECONDS = 300;
 
 typedef std::pair<std::array<char, 32>, std::string> HashRecordKey; // public key and salt pair
 
@@ -53,7 +54,7 @@ public:
 
     CHashTableSession() : vDataEntries(CDataRecordBuffer(32)), strPutErrorMessage(""), nPutRecords(0) {};
 
-    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataRecord record);
+    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record);
 
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
@@ -95,7 +96,7 @@ namespace DHT
 {
     bool PutStatus(const size_t nSessionThread);
     bool GetStatus(const size_t nSessionThread);
-    bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record);
+    bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
