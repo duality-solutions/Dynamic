@@ -424,6 +424,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         }
                         record.LinkID = linkID;
                         record.fRequestFromMe = fIsLinkFromMe;
+                        record.fAcceptFromMe =  (fIsLinkFromMe && fIsLinkForMe);
                         if (record.nHeightAccept > 0) {
                             record.nLinkState = 2;
                         }
@@ -588,6 +589,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                             record = it->second;
                         }
                         record.LinkID = linkID;
+                        record.fRequestFromMe = (fIsLinkFromMe && fIsLinkForMe);
                         record.fAcceptFromMe = fIsLinkFromMe;
                         record.nLinkState = 2;
                         record.RequestorFullObjectPath = link.RequestorFullObjectPath;
