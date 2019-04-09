@@ -7,6 +7,7 @@
 #include "bdap/utils.h"
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "util.h"
+#include "utilstrencodings.h"
 
 #include <string>
 #include <vector>
@@ -66,50 +67,64 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
 bool CDataRecord::InitPut()
 {
     std::vector<unsigned char> vchRaw;
-    if (dataHeader.nVersion == 1) {
-        if (!Encrypt(vPubKeys, vchData, vchRaw, strErrorMessage)) {
+    if (dataHeader.nVersion == 1)
+    {
+        if (!Encrypt(vPubKeys, vchData, vchRaw, strErrorMessage))
+        {
             LogPrintf("CDataRecord::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
             return false;
         }
     }
-    else if (dataHeader.nVersion == 0) {
+    else if (dataHeader.nVersion == 0)
+    {
        vchRaw = vchData;
     }
-    else {
+    else
+    {
         strErrorMessage = "Unknown and unsupported version.";
         return false;
     }
-
-    std::string strHexData = CharVectorToHexString(vchRaw);
-    if (strHexData.size() > DHT_DATA_MAX_CHUNK_SIZE * nTotalSlots) {
+    if (vchRaw.size() > DHT_DATA_MAX_CHUNK_SIZE * nTotalSlots) {
         strErrorMessage = "Data is too large for this operation code.";
         return false;
     }
-    if (strHexData.size() > DHT_DATA_MAX_CHUNK_SIZE) {
+
+    if (vchRaw.size() > DHT_DATA_MAX_CHUNK_SIZE) {
         // We need to chunk into many pieces.
         uint32_t size = 0;
-        uint16_t total_chunks = (strHexData.size() / DHT_DATA_MAX_CHUNK_SIZE) + 1;
-        for(unsigned int i = 0; i < total_chunks; i++) {
+        uint16_t total_chunks = (vchRaw.size() / DHT_DATA_MAX_CHUNK_SIZE) + 1;
+        for (unsigned int i = 0; i < total_chunks; i++) {
             uint16_t nPlacement = i + 1;
-            std::string strHexChunk = strHexData.substr(i * DHT_DATA_MAX_CHUNK_SIZE, DHT_DATA_MAX_CHUNK_SIZE);
+            std::vector<unsigned char>::const_iterator first = vchRaw.begin() + (i * DHT_DATA_MAX_CHUNK_SIZE);
+            std::vector<unsigned char>::const_iterator last;
+            if (i + 1 == total_chunks)
+            {
+                last = vchRaw.end();
+            }
+            else
+            {
+                last = vchRaw.begin() + (i * DHT_DATA_MAX_CHUNK_SIZE) + DHT_DATA_MAX_CHUNK_SIZE;
+            }
+            std::vector<unsigned char> vchChunk(first, last);
             std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
-            CDataChunk chunk(i, nPlacement, strSalt, strHexChunk);
+            CDataChunk chunk(i, nPlacement, strSalt, vchChunk);
             vChunks.push_back(chunk);
-            size = size + strHexChunk.size();
+            size = size + vchChunk.size();
         }
         dataHeader.nChunks = total_chunks;
         dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
         dataHeader.nDataSize = size;
     }
-    else {
+    else
+    {
         std::string strSalt = strOperationCode + ":" + std::to_string(1);
-        CDataChunk chunk(1, 1, strSalt, strHexData);
+        CDataChunk chunk(1, 1, strSalt, vchRaw);
         vChunks.push_back(chunk);
         dataHeader.nChunks = 1;
-        dataHeader.nChunkSize = strHexData.size();
+        dataHeader.nChunkSize = vchRaw.size();
         dataHeader.nIndexLocation = 0;
-        dataHeader.nDataSize = strHexData.size();
+        dataHeader.nDataSize = vchRaw.size();
     }
     return true;
 }
@@ -148,22 +163,24 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
 
 bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
 {
-    std::string strHexChunks;
+    std::vector<unsigned char> vchChunks;
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
-        strHexChunks += vChunks[i].Value;
+        vchChunks.insert(vchChunks.end(), vChunks[i].vchValue.begin(), vChunks[i].vchValue.end());
     }
-    if (strHexChunks.size() != dataHeader.nDataSize)
+    LogPrintf("CDataRecord::%s -- vchChunks.size() %d\n", __func__, vchChunks.size());
+    std::vector<unsigned char> vchUnHexValue = ParseHex(stringFromVch(vchChunks));
+    LogPrintf("CDataRecord::%s -- vchUnHexValue.size() %d\n", __func__, vchUnHexValue.size());
+    if (vchUnHexValue.size() != dataHeader.nDataSize)
     {
-        LogPrintf("CDataRecord::%s -- Failed due to the data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, strHexChunks.size(), dataHeader.nChunks);
+        LogPrintf("CDataRecord::%s -- Failed due to the data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
         return false;
     }
-
-    std::vector<unsigned char> vchUnHex = HexStringToCharVector(strHexChunks);
     if (dataHeader.nVersion == 0) {
-        vchData = vchUnHex;
+        vchData = vchChunks;
     }
     else if (dataHeader.nVersion == 1) {
-        if (!Decrypt(privateKey, vchUnHex, vchData, strErrorMessage)) {
+
+        if (!Decrypt(privateKey, vchUnHexValue, vchData, strErrorMessage)) {
             return false;
         }
     }

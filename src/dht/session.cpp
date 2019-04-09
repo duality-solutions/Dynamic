@@ -49,9 +49,9 @@ static bool fStarted;
 static bool fRun;
 
 namespace DHT {
-    std::vector<std::pair<std::string, std::string>> vPutValues;
 
-    void put_mutable_string
+    std::vector<std::pair<std::string, libtorrent::entry>> vPutBytes;
+    void put_mutable_bytes
     (
         libtorrent::entry& e
         ,std::array<char, 64>& sig
@@ -59,24 +59,23 @@ namespace DHT {
         ,std::string const& salt
         ,std::array<char, 32> const& pk
         ,std::array<char, 64> const& sk
-        ,char const* str
+        ,libtorrent::entry const& entry
         ,std::int64_t const& iSeq
     )
     {
         using dht::sign_mutable_item;
-        if (str != NULL) {
-            e = std::string(str);
-            std::vector<char> buf;
-            bencode(std::back_inserter(buf), e);
-            dht::signature sign;
-            seq = iSeq;
-            LogPrintf("%s --\nSalt = %s\nValue = %s\nSequence = %li\n", __func__, salt, std::string(str), seq);
-            sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
-                , dht::public_key(pk.data())
-                , dht::secret_key(sk.data()));
-            sig = sign.bytes;
-        }
+        e = entry;
+        std::vector<char> bufSign;
+        bencode(std::back_inserter(bufSign), e);
+        dht::signature sign;
+        seq = iSeq;
+        LogPrintf("%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
+        sign = sign_mutable_item(bufSign, salt, dht::sequence_number(seq)
+            , dht::public_key(pk.data())
+            , dht::secret_key(sk.data()));
+        sig = sign.bytes;
     }
+
 }
 
 void CHashTableSession::StopEventListener()
@@ -401,24 +400,22 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     }
     mPutCommands[recordKey] = GetTime();
     vDataEntries.push_back(record);
-    DHT::vPutValues.clear();
-    std::vector<std::vector<unsigned char>> vPubKeys;
-    std::string strSalt = record.GetHeader().Salt;
-    DHT::vPutValues.push_back(std::make_pair(strSalt, record.HeaderHex));
-
-    LogPrint("dht", "CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
-                                                                strSalt, record.Value(), lastSequence, DHT::vPutValues.size());
+    std::string strHeaderSalt = record.GetHeader().Salt;
+    DHT::vPutBytes.clear();
+    libtorrent::entry entryHeaderHex(record.HeaderHex);
+    DHT::vPutBytes.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
     for (const CDataChunk& chunk : record.GetChunks()) {
-        DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
+        libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
+        DHT::vPutBytes.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        LogPrint("dht", "CHashTableSession::%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
     }
 
-    for (const std::pair<std::string, std::string>& pair : DHT::vPutValues) {
-        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_string, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
-                                public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
+    for (const std::pair<std::string, libtorrent::entry>& pair : DHT::vPutBytes) {
+        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+                                public_key, private_key, pair.second, lastSequence), pair.first);
 
-        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
+        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
     }
-
     nPutRecords++;
     if (nPutRecords % 32 == 0)
         CleanUpPutCommandMap();
@@ -872,6 +869,7 @@ bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<ch
     if (!header.IsNull())
     {
         header.LoadHex(strHeaderHex);
+        LogPrint("dht", "%s -- PubKey %s, Header %s\n", __func__, strPubKey, header.ToString());
         if (!header.IsNull() && header.nChunks > 0) {
             size_t nCounter1 = 0; 
             size_t nCounter2 = 0;
@@ -900,6 +898,7 @@ bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<ch
                     while (attempt < nTotalAttempts) {
                         if (DHT::FindDHTGetEvent(i % nThreads, infoHash, event)) {
                             fFound = true;
+                            LogPrint("dht", "%s -- PubKey %s, Found chunk (%s) %s, value = %s\n", __func__, strPubKey, strChunkSalt, infoHash, event.Value());
                             DHT::RemoveDHTGetEvent(i % nThreads, infoHash);
                             break;
                         }

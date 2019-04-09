@@ -4,7 +4,9 @@
 
 #include "dht/datarecord.h"
 #include "utiltime.h"
+#include "bdap/utils.h"
 
+#include "libtorrent/entry.hpp"
 #include "libtorrent/session.hpp"
 #include "libtorrent/hex.hpp" // for from_hex
 #include "libtorrent/alert_types.hpp"
@@ -29,7 +31,7 @@ using namespace std::placeholders;
 using lt::aux::from_hex;
 using lt::aux::to_hex;
 
-std::vector<std::pair<std::string, std::string>> vDynamicValues;
+std::vector<std::pair<std::string, libtorrent::entry>> vPutBytes;
 
 std::string LongString()
 {
@@ -165,7 +167,32 @@ alert* WaitForAlert(lt::session& s, int alert_type)
     return ret;
 }
 
-void PutString(entry& e
+void put_mutable_bytes
+(
+    libtorrent::entry& e
+    ,std::array<char, 64>& sig
+    ,std::int64_t& seq
+    ,std::string const& salt
+    ,std::array<char, 32> const& pk
+    ,std::array<char, 64> const& sk
+    ,libtorrent::entry const& entry
+)
+{
+    using dht::sign_mutable_item;
+    e = entry;
+    std::vector<char> bufSign;
+    bencode(std::back_inserter(bufSign), e);
+    dht::signature sign;
+    seq = 1;
+    sign = sign_mutable_item(bufSign, salt, dht::sequence_number(seq)
+        , dht::public_key(pk.data())
+        , dht::secret_key(sk.data()));
+    sig = sign.bytes;
+}
+
+void PutString
+(
+    libtorrent::entry& e
     , std::array<char, 64>& sig
     , std::int64_t& seq
     , std::string const& salt
@@ -489,6 +516,7 @@ int main(int argc, char* argv[])
                 std::fstream f(strPath.c_str(), std::ios_base::in | std::ios_base::binary);
                 f.read(seed.data(), seed.size());
                 std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
                 public_key pk;
                 secret_key sk;
                 std::tie(pk, sk) = ed25519_create_keypair(seed);
@@ -498,24 +526,27 @@ int main(int argc, char* argv[])
                     fBootStrap = true;
                 }
                 int64_t nStartTime = GetTimeMillis();
-
+                
                 std::string strSalt = "chunk";
                 uint16_t nTotalSlots = 24;
-                vDynamicValues.clear();
+                vPutBytes.clear();
                 std::vector<std::vector<unsigned char>> vPubKeys;
                 vPubKeys.push_back(GetPubKeyBytes(pk));
                 std::vector<unsigned char> data = ConvertStringToCharVector(LongString());
                 CDataRecord dataEntry(strSalt, nTotalSlots, vPubKeys, data, 1, 1741050000, DHT::DataFormat::BinaryBlob);
                 dataEntry.GetHeader().Salt = strSalt + ":" + std::to_string(0);
-                vDynamicValues.push_back(std::make_pair(dataEntry.GetHeader().Salt, dataEntry.HeaderHex));
+                libtorrent::entry entryHeader(dataEntry.HeaderHex);
+                vPutBytes.push_back(std::make_pair(dataEntry.GetHeader().Salt, entryHeader));
                 for(const CDataChunk& chunk: dataEntry.GetChunks()) {
-                    vDynamicValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
+                    libtorrent::entry entryChunk(stringFromVch(chunk.vchValue));
+                    vPutBytes.push_back(std::make_pair(chunk.Salt, entryChunk));
                 }
 
-                for(const std::pair<std::string, std::string>& pair: vDynamicValues) {
-                    s.dht_put_item(pk.bytes, std::bind(&PutString, _1, _2, _3, _4, pk.bytes, sk.bytes, pair.second.c_str()), pair.first);
-                    std::printf("putstatic salt: %s, value: %s\n", pair.first.c_str(), pair.second.c_str());
+                for(const std::pair<std::string, libtorrent::entry>& pair: vPutBytes) {
+                    s.dht_put_item(pk.bytes, std::bind(&put_mutable_bytes, _1, _2, _3, _4, pk.bytes, sk.bytes, pair.second), pair.first);
+                    //std::printf("putstatic salt: %s, value: %s\n", pair.first, pair.second.to_string().c_str());
                 }
+
                 std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
                 int64_t nEndTime = GetTimeMillis();
                 std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
