@@ -36,15 +36,15 @@
 
 using namespace libtorrent;
 
-static constexpr size_t nThreads = 7;
+static constexpr uint16_t nSessions = 8;
 
-typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>>, nThreads> SessionThreadGroup;
+typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>>, nSessions> SessionThreadGroup;
 
-static SessionThreadGroup arrayGetSessionThreads;
-static SessionThreadGroup arrayPutSessionThreads;
+static SessionThreadGroup arraySessions;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
 
+static bool fMultiSessions;
 static bool fStarted;
 static bool fRun;
 
@@ -263,27 +263,35 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
                 return;
 
         } while (true);
-        // start all DHT Get sessions
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
-            CDHTSettings settings(i);
-            pDHTSession->strName = strprintf("get%d", std::to_string(i));
-            settings.LoadSettings();
-            pDHTSession->Session = settings.GetSession();
-            std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
-            arrayGetSessionThreads[i] = std::make_pair(pSessionThread, pDHTSession);
-            MilliSleep(30);
+
+        size_t nRunningSessions = fMultiSessions ? nSessions : 1;
+        // start all DHT sessions
+        if (nRunningSessions > 1)
+        {
+            for (unsigned int i = 0; i < nRunningSessions; i++)
+            {
+                LogPrintf("%s -- starting session #%d\n", __func__, i);
+                std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
+                CDHTSettings settings(i);
+                pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
+                settings.LoadSettings();
+                pDHTSession->Session = settings.GetSession();
+                std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
+                arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
+                MilliSleep(30);
+            }
         }
-        // start all DHT Put sessions
-        for (unsigned int i = 0; i < nThreads; i++) {
+        else
+        {
+            unsigned int i = 0;
+            LogPrintf("%s -- starting session #%d\n", __func__, i);
             std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
-            CDHTSettings settings(i + nThreads);
-            pDHTSession->strName = strprintf("put%d", std::to_string(i));
+            CDHTSettings settings(i, nSessions);
+            pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
             settings.LoadSettings();
             pDHTSession->Session = settings.GetSession();
             std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
-            arrayPutSessionThreads[i] = std::make_pair(pSessionThread, pDHTSession);
-            MilliSleep(30);
+            arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
         }
         fStarted = true;
     }
@@ -295,13 +303,13 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
     }
 }
 
-void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
+void StartTorrentDHTNetwork(const bool fAllowMultiSessions, const CChainParams& chainparams, CConnman& connman)
 {
     fRun = true;
     fStarted = false;
     if (pDHTTorrentThread != NULL)
          StopTorrentDHTNetwork();
-
+    fMultiSessions = fAllowMultiSessions;
     pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&StartDHTNetwork, std::cref(chainparams), std::ref(connman)));
 }
 
@@ -312,37 +320,24 @@ void StopTorrentDHTNetwork()
     if (pDHTTorrentThread != NULL)
     {
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
+        size_t nRunningSessions = fMultiSessions ? nSessions : 1;
         if (fStarted) {
             libtorrent::session_params params;
             params.settings.set_bool(settings_pack::enable_dht, false);
             params.settings.set_int(settings_pack::alert_mask, 0x0);
-            // stop all DHT Get sessions
-            for (unsigned int i = 0; i < nThreads; i++) {
-                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[i];
+            // stop all DHT sessions
+            for (unsigned int i = 0; i < nRunningSessions; i++) {
+                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
                 pairSession.second->StopEventListener();
                 MilliSleep(30);
                 pairSession.second->Session->apply_settings(params.settings);
                 pairSession.second->Session->abort();
             }
-            // stop all DHT Put sessions
-            for (unsigned int i = 0; i < nThreads; i++) {
-                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[i];
-                pairSession.second->StopEventListener();
-                MilliSleep(30);
-                pairSession.second->Session->apply_settings(params.settings);
-                pairSession.second->Session->abort();
-            }
-
         }
         pDHTTorrentThread->join();
-        // join all DHT Get threads
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[i];
-            pairSession.first->join();
-        }
-        // join all DHT Put threads
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[i];
+        // join all DHT threads
+        for (unsigned int i = 0; i < nRunningSessions; i++) {
+            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
             pairSession.first->join();
         }
     }
@@ -507,7 +502,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
 static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& key32)
 {
     std::vector<unsigned char> vchKey;
-    for(unsigned int i = 0; i < sizeof(key32); i++) {
+    for (unsigned int i = 0; i < sizeof(key32); i++) {
         vchKey.push_back(key32[i]);
     }
     return vchKey;
@@ -516,7 +511,7 @@ static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& ke
 bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
 {
     bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = 8;
     uint16_t nHeaderAttempts = 3;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
@@ -539,7 +534,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
     header.LoadHex(strHeaderHex);
     if (!header.IsNull() && header.nChunks > 0) {
         std::vector<CDataChunk> vChunks;
-        for(unsigned int i = 0; i < header.nChunks; i++) {
+        for (unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
             if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
@@ -597,7 +592,7 @@ static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigne
 
 bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = 8;
     strPutErrorMessage = "";
     // Get the headers first
     for (const CLinkInfo& linkInfo : vchLinkInfo) {
@@ -627,7 +622,7 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
         CRecordHeader header(strHeaderHex);
         if (!header.IsNull() && nTotalSlots >= header.nChunks) {
             std::vector<CDataChunk> vChunks;
-            for(unsigned int i = 0; i < header.nChunks; i++) {
+            for (unsigned int i = 0; i < header.nChunks; i++) {
                 std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
                 std::array <char, 32> arrPubKey;
                 aux::from_hex(eventHeader.second.PublicKey(), arrPubKey.data());
@@ -648,7 +643,7 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
             if (!header.IsNull() && nTotalSlots >= header.nChunks) {
                 bool fSkip = false;
                 std::vector<CDataChunk> vChunks;
-                for(unsigned int i = 0; i < header.nChunks; i++) {
+                for (unsigned int i = 0; i < header.nChunks; i++) {
                     std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
                     std::array <char, 32> arrPubKey;
                     aux::from_hex(eventHeader.second.PublicKey(), arrPubKey.data());
@@ -781,245 +776,237 @@ bool CHashTableSession::GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGet
 namespace DHT
 {
 
-bool PutStatus(const size_t nSessionThread)
+bool SessionStatus()
 {
-    if (nSessionThread >= nThreads)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[nSessionThread];
-    if (!arrayPutSessionThreads[nSessionThread].second)
-        return false;
-
-    return true;
-}
-
-bool GetStatus(const size_t nSessionThread)
-{
-    if (nSessionThread >= nThreads)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
-        return false;
-
+    size_t nRunningSessions = fMultiSessions ? nSessions : 1;
+    for (unsigned int i = 0; i < nRunningSessions; i++) {
+        if (!arraySessions[i].second)
+            return false;
+    }
     return true;
 }
 
 bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[nSessionThread];
-    if (!arrayPutSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayPutSessionThreads[nSessionThread].second->SubmitPut(public_key, private_key, lastSequence, record);
+    return arraySessions[nSessionThread].second->SubmitPut(public_key, private_key, lastSequence, record);
 }
 
 bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGet(public_key, recordSalt);
+    return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt);
 }
 
 bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
+    return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
 }
 
 bool FindDHTGetEvent(const size_t nSessionThread, const std::string& infoHash, CMutableGetEvent& event)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->FindDHTGetEvent(infoHash, event);
+    return arraySessions[nSessionThread].second->FindDHTGetEvent(infoHash, event);
 }
 
 bool RemoveDHTGetEvent(const size_t nSessionThread, const std::string& infoHash)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->RemoveDHTGetEvent(infoHash);
+    return arraySessions[nSessionThread].second->RemoveDHTGetEvent(infoHash);
 }
 
 bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record, std::string& strErrorMessage)
 {
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
-    uint16_t nHeaderAttempts = 3;
-    std::string strHeaderHex;
-    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    CRecordHeader header;
-    std::string strPubKey = aux::to_hex(public_key);
-    if (!DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
-        uint16_t i = 0;
-        LogPrintf("%s -- Failed to find header for %s.\n", __func__, strOperationType);
-        while (i < nHeaderAttempts) {
-            strHeaderHex = "";
-            if (header.IsNull()) {
-                if (DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
-                    break;
-                }
-            }
-            else {
-                break;
-            }
-            i++;
-        }
-    }
-    if (!header.IsNull())
+    if (!fMultiSessions)
     {
-        header.LoadHex(strHeaderHex);
-        LogPrint("dht", "%s -- PubKey %s, Header %s\n", __func__, strPubKey, header.ToString());
-        if (!header.IsNull() && header.nChunks > 0) {
-            size_t nCounter1 = 0; 
-            size_t nCounter2 = 0;
-            std::vector<CDataChunk> vChunks;
-            for (unsigned int x = 0; x < header.nChunks; x++) {
-                
-                for (unsigned int i = 0; i < nThreads; i++) {
-                    std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter1+1);
-                    if (!DHT::SubmitGet(i % nThreads, public_key, strChunkSalt)) {
-                        strErrorMessage = "Failed to submit get for record chunk.";
-                        LogPrintf("%s -- PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
-                        return false;
-                    }
-                    nCounter1++;
-                    if (nCounter1 >= header.nChunks)
-                        break;
-                }
-                MilliSleep(40);
-                for (unsigned int i = 0; i < nThreads; i++) {
-                    CMutableGetEvent event;
-                    const std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter2+1);
-                    const std::string infoHash = GetInfoHash(strPubKey, strChunkSalt);
-                    bool fFound = false;
-                    uint16_t attempt = 0;
-                    uint16_t nTotalAttempts = 5;
-                    while (attempt < nTotalAttempts) {
-                        if (DHT::FindDHTGetEvent(i % nThreads, infoHash, event)) {
-                            fFound = true;
-                            LogPrint("dht", "%s -- PubKey %s, Found chunk (%s) %s, value = %s\n", __func__, strPubKey, strChunkSalt, infoHash, event.Value());
-                            DHT::RemoveDHTGetEvent(i % nThreads, infoHash);
-                            break;
-                        }
-                        if (iSequence != event.SequenceNumber())
-                        {
-                            LogPrintf("%s -- PubKey %s, Sequence number for chunk (%s) %s, iSequence = %d, this = %d\n", __func__, strPubKey, strChunkSalt, infoHash, iSequence, event.SequenceNumber());
-                        }
-                        attempt++;
-                        LogPrintf("%s -- PubKey %s, Failed to find chunk (%s) %s, attempt = %d\n", __func__, strPubKey, strChunkSalt, infoHash, attempt);
-                        MilliSleep(10);
-                    }
-                    if (!fFound)
-                    {
-                        strErrorMessage = "Failed to get record chunk.";
-                        LogPrintf("%s --PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
-                        return false;
-                    }
-                    std::string strValue;
-                    if (event.Value().substr(0, 1) == "'") {
-                        strValue = event.Value().substr(1, event.Value().size() - 2);
-                    }
-                    else {
-                        strValue = event.Value();
-                    }
-                    CDataChunk chunk(x, x + 1, strChunkSalt, strValue);
-                    vChunks.push_back(chunk);
-                    nCounter2++;
-                    if (nCounter2 >= header.nChunks)
-                    {
-                        x = header.nChunks;
-                        i = nThreads;
-                    }
-                }
-            }
-            CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
-            if (record.HasError()) {
-                strErrorMessage = strprintf("%s Record has errors: %s\n", __func__, getRecord.ErrorMessage());
-                return false;
-            }
-            record = getRecord;
-            return true;
-        }
+        return arraySessions[0].second->SubmitGetRecord(public_key, private_seed, strOperationType, iSequence, record);
     }
     else
     {
-        LogPrintf("%s -- Header is null. Record not found for PubKey %s, Salt %s\n", __func__, strPubKey, strOperationType);
+        bool fAuthoritative = false;
+        uint16_t nTotalSlots = 8;
+        uint16_t nHeaderAttempts = 3;
+        std::string strHeaderHex;
+        std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+        CRecordHeader header;
+        std::string strPubKey = aux::to_hex(public_key);
+        if (!DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+            uint16_t i = 0;
+            LogPrintf("%s -- Failed to find header for %s.\n", __func__, strOperationType);
+            while (i < nHeaderAttempts) {
+                strHeaderHex = "";
+                if (header.IsNull()) {
+                    if (DHT::SubmitGet(0, public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+                i++;
+            }
+        }
+        if (!header.IsNull())
+        {
+            header.LoadHex(strHeaderHex);
+            LogPrint("dht", "%s -- PubKey %s, Header %s\n", __func__, strPubKey, header.ToString());
+            if (!header.IsNull() && header.nChunks > 0) {
+                size_t nCounter1 = 0; 
+                size_t nCounter2 = 0;
+                std::vector<CDataChunk> vChunks;
+                for (unsigned int x = 0; x < header.nChunks; x++) {
+                    for (unsigned int i = 0; i < nSessions; i++) {
+                        std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter1+1);
+                        if (!DHT::SubmitGet(i % nSessions, public_key, strChunkSalt)) {
+                            strErrorMessage = "Failed to submit get for record chunk.";
+                            LogPrintf("%s -- PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
+                            return false;
+                        }
+                        nCounter1++;
+                        if (nCounter1 >= header.nChunks)
+                            break;
+                    }
+                    MilliSleep(40);
+                    for (unsigned int i = 0; i < nSessions; i++) {
+                        CMutableGetEvent event;
+                        const std::string strChunkSalt = strOperationType + ":" + std::to_string(nCounter2+1);
+                        const std::string infoHash = GetInfoHash(strPubKey, strChunkSalt);
+                        bool fFound = false;
+                        uint16_t attempt = 0;
+                        uint16_t nTotalAttempts = 5;
+                        while (attempt < nTotalAttempts) {
+                            if (DHT::FindDHTGetEvent(i % nSessions, infoHash, event)) {
+                                fFound = true;
+                                LogPrint("dht", "%s -- PubKey %s, Found chunk (%s) %s, value = %s\n", __func__, strPubKey, strChunkSalt, infoHash, event.Value());
+                                DHT::RemoveDHTGetEvent(i % nSessions, infoHash);
+                                break;
+                            }
+                            if (iSequence != event.SequenceNumber())
+                            {
+                                LogPrintf("%s -- PubKey %s, Sequence number for chunk (%s) %s, iSequence = %d, this = %d\n", __func__, strPubKey, strChunkSalt, infoHash, iSequence, event.SequenceNumber());
+                            }
+                            attempt++;
+                            LogPrintf("%s -- PubKey %s, Failed to find chunk (%s) %s, attempt = %d\n", __func__, strPubKey, strChunkSalt, infoHash, attempt);
+                            MilliSleep(10);
+                        }
+                        if (!fFound)
+                        {
+                            strErrorMessage = "Failed to get record chunk.";
+                            LogPrintf("%s --PubKey %s, Salt %s Error: %s\n", __func__, strPubKey, strOperationType, strErrorMessage);
+                            return false;
+                        }
+                        std::string strValue;
+                        if (event.Value().substr(0, 1) == "'") {
+                            strValue = event.Value().substr(1, event.Value().size() - 2);
+                        }
+                        else {
+                            strValue = event.Value();
+                        }
+                        CDataChunk chunk(x, x + 1, strChunkSalt, strValue);
+                        vChunks.push_back(chunk);
+                        nCounter2++;
+                        if (nCounter2 >= header.nChunks)
+                        {
+                            x = header.nChunks;
+                            i = nSessions;
+                        }
+                    }
+                    CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
+                    if (record.HasError()) {
+                        strErrorMessage = strprintf("%s Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+                        return false;
+                    }
+                    record = getRecord;
+                }
+                return true;
+            }
+        }
+        else
+        {
+            LogPrintf("%s -- Header is null. Record not found for PubKey %s, Salt %s\n", __func__, strPubKey, strOperationType);
+        }
     }
     return false;
 }
 
 bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
+    return arraySessions[nSessionThread].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
 }
 
 bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetAllRecordsAsync(vchLinkInfo, strOperationType, vchRecords);
+    return arraySessions[nSessionThread].second->SubmitGetAllRecordsAsync(vchLinkInfo, strOperationType, vchRecords);
 }
 
 bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->GetAllDHTGetEvents(vchGetEvents);
+    return arraySessions[nSessionThread].second->GetAllDHTGetEvents(vchGetEvents);
 }
 
 void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets)
 {
-    if (nSessionThread >= nThreads)
+    if (nSessionThread >= nSessions)
         return;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
+    if (!arraySessions[nSessionThread].second)
         return;
 
-    arrayGetSessionThreads[nSessionThread].second->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    arraySessions[nSessionThread].second->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
 }
 
 } // end DHT namespace

@@ -86,7 +86,7 @@ private:
 };
 
 /** Start the DHT libtorrent network threads */
-void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
+void StartTorrentDHTNetwork(const bool fAllowMultiSessions, const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
@@ -94,8 +94,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 
 namespace DHT
 {
-    bool PutStatus(const size_t nSessionThread);
-    bool GetStatus(const size_t nSessionThread);
+    bool SessionStatus();
     bool SubmitPut(const size_t nSessionThread, const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 

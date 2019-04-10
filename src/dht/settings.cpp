@@ -16,12 +16,30 @@
 
 using namespace libtorrent;
 
-CDHTSettings::CDHTSettings(const uint16_t nSessionNumber)
+CDHTSettings::CDHTSettings(const uint16_t ordinal)
 {
-    nPort = Params().GetDefaultPort() + (nSessionNumber + 11);
+    nTotalSessions = 1;
+    nPort = Params().GetDefaultPort() + (ordinal + 11);
     user_agent = "Dynamic v" + FormatFullVersion();
     // Uses UDP port 33311 for mainnet, 333411 for testnet, 33511 for regtest, or 33611 for privatenet
     listen_interfaces = "0.0.0.0:" + std::to_string(nPort) + ",[::]:" + std::to_string(nPort);
+}
+
+CDHTSettings::CDHTSettings(const uint16_t ordinal, const uint16_t sessions)
+{
+    nTotalSessions = sessions;
+    nPort = Params().GetDefaultPort() + (ordinal + 11);
+    user_agent = "Dynamic v" + FormatFullVersion();
+    // Uses UDP port 33311 for mainnet, 333411 for testnet, 33511 for regtest, or 33611 for privatenet
+    listen_interfaces = "";
+    for (unsigned int i = 0; i < nTotalSessions; i++) {
+        uint16_t nListenPort = Params().GetDefaultPort() + (ordinal + i + 11);
+        listen_interfaces += "0.0.0.0:" + std::to_string(nListenPort) + ",[::]:" + std::to_string(nListenPort) + ",";
+    }
+    if (listen_interfaces.size() > 1) {
+        listen_interfaces.pop_back(); // removes trailing comma
+    }
+    LogPrintf("%s -- listening interfaces: %s\n", __func__, listen_interfaces);
 }
 
 void CDHTSettings::LoadPeerList()
@@ -29,23 +47,29 @@ void CDHTSettings::LoadPeerList()
     std::string strPeerList = "";
     // get all Dynodes above the minimum protocol version
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
-    for (auto& dnpair : mapDynodes) {
+    for (auto& dnpair : mapDynodes)
+    {
         CDynode dn = dnpair.second;
         if (dn.nProtocolVersion >= MIN_DHT_PROTO_VERSION) {
             std::string strDynodeIP = dn.addr.ToString();
             size_t pos = strDynodeIP.find(":");
-            if (pos != std::string::npos && strDynodeIP.size() > 5) {
+            if (pos != std::string::npos && strDynodeIP.size() > 5)
+            {
                 // remove port from IP address string
                 strDynodeIP = strDynodeIP.substr(0, pos);
             }
             pos = strPeerList.find(strDynodeIP);
             if (pos == std::string::npos) {
-                strPeerList += strDynodeIP + ":" + std::to_string(nPort) + ",";
+                for (unsigned int i = 0; i < nTotalSessions; i++)
+                {
+                    strPeerList += strDynodeIP + ":" + std::to_string(nPort + i) + ",";
+                }
             }
         }
     }
     if (strPeerList.size() > 1) {
-        dht_bootstrap_nodes = strPeerList.substr(0, strPeerList.size()-1);
+        strPeerList.pop_back();
+        dht_bootstrap_nodes = strPeerList;
     }
     LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
 }

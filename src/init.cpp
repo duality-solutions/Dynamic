@@ -2095,7 +2095,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // Start the DHT Torrent networks in the background
-    StartTorrentDHTNetwork(chainparams, connman);
+    const bool fMultiSessions = GetArg("-multidhtsessions", false);
+    StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
     // ********************************************************* Step 13: finished
 
     SetRPCWarmupFinished();

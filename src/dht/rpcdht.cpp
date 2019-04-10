@@ -57,7 +57,7 @@ UniValue getmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("getdhtmutable failed. DHT session not started.\n");
 
     const std::string strPubKey = request.params[0].get_str();
@@ -112,7 +112,7 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("putmutable failed. DHT session not started.\n");
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -217,7 +217,7 @@ UniValue dhtinfo(const JSONRPCRequest& request)
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
 
     libtorrent::session_status stats;
@@ -377,7 +377,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
    
     EnsureWalletIsUnlocked();
 
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("putbdapdata: ERRCODE: 5500 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -475,7 +475,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
    
     EnsureWalletIsUnlocked();
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("clearbdapdata: ERRCODE: 5510 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -571,7 +571,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("getbdapdata: ERRCODE: 5600 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -763,7 +763,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5620 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -889,7 +889,7 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VOBJ);
    
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -980,7 +980,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5640 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -1101,7 +1101,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5650 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())

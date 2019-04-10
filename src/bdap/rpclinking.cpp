@@ -794,7 +794,7 @@ static UniValue DenyLink(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -885,7 +885,7 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
