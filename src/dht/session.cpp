@@ -961,28 +961,29 @@ bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<ch
     return false;
 }
 
-bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
+bool SubmitGetAllRecordsSync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    if (nSessionThread >= nSessions)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
-    if (!arraySessions[nSessionThread].second)
-        return false;
-
-    return arraySessions[nSessionThread].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
-}
-
-bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
-{
-    if (nSessionThread >= nSessions)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[nSessionThread];
-    if (!arraySessions[nSessionThread].second)
-        return false;
-
-    return arraySessions[nSessionThread].second->SubmitGetAllRecordsAsync(vchLinkInfo, strOperationType, vchRecords);
+    if (!fMultiSessions)
+    {
+        return arraySessions[0].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
+    }
+    else
+    {
+        std::vector<std::pair<CLinkInfo, std::string>> headerValues;
+        for (const CLinkInfo& linkInfo : vchLinkInfo) {
+            int64_t iSequence;
+            std::array <char, 32> arrPubKey;
+            aux::from_hex(stringFromVch(linkInfo.vchSenderPubKey), arrPubKey.data());
+            CDataRecord record;
+            std::string strErrorMessage = "";
+            if (SubmitGetRecord(arrPubKey, linkInfo.arrReceivePrivateSeed, strOperationType, iSequence, record, strErrorMessage))
+            {
+                record.vchOwnerFQDN = linkInfo.vchFullObjectPath;
+                vchRecords.push_back(record);
+            }
+        }
+    }
+    return true;
 }
 
 bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents)

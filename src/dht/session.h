@@ -102,8 +102,7 @@ namespace DHT
     bool FindDHTGetEvent(const size_t nSessionThread, const std::string& infoHash, CMutableGetEvent& event);
     bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
                             const std::string& strOperationType, int64_t& iSequence, CDataRecord& record, std::string& strErrorMessage);
-    bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
-    bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
+    bool SubmitGetAllRecordsSync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
     bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents);
     void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
 }

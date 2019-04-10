@@ -925,7 +925,7 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     }
 
     std::vector<CDataRecord> vchRecords;
-    if (!DHT::SubmitGetAllRecordsSync(0, vchLinkInfo, strOperationType, vchRecords))
+    if (!DHT::SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
         throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records\n", __func__));
 
     int nRecordItem = 1;
