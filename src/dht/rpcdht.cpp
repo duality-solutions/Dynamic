@@ -421,7 +421,6 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     // we need the last sequence number to update an existing DHT entry. 
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-
     if (header.nUnlockTime  > GetTime())
         throw std::runtime_error(strprintf("%s:  ERRCODE: 5505 - DHT data entry is locked for another %lli seconds\n", __func__, (header.nUnlockTime  - GetTime())));
 
@@ -434,9 +433,11 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     vvchPubKeys.push_back(getKey.GetPubKeyBytes());
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5506 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
+        throw std::runtime_error(strprintf("%s:  ERRCODE: 5507 - Put error %s\n", __func__, pHashTableSession->strPutErrorMessage));
+
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;

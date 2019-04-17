@@ -37,7 +37,7 @@ class CHashTableSession {
 public:
     CDataRecordBuffer vDataEntries;
     libtorrent::session* Session = NULL;
-    std::map<HashRecordKey, uint32_t> mPutCommands;
+    std::map<HashRecordKey, int64_t> mPutCommands;
     std::string strPutErrorMessage;
     uint64_t nPutRecords;
 
@@ -54,7 +54,7 @@ public:
 
 private:
     void CleanUpPutCommandMap();
-    uint32_t GetLastPutDate(const HashRecordKey& recordKey);
+    int64_t GetLastPutDate(const HashRecordKey& recordKey);
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
 
 };
