@@ -48,15 +48,13 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
-    // TODO: Add ability to pass in the wallet address
-    CKey privWalletKey;
-    privWalletKey.MakeNewKey(true);
-    CPubKey pubWalletKey = privWalletKey.GetPubKey();
+    //now using GetKeyFromPool instead of MakeNewKey
+    CPubKey pubWalletKey;
+    if (!pwalletMain->GetKeyFromPool(pubWalletKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key to wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
@@ -75,13 +73,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
-    CKey privLinkKey;
-    privLinkKey.MakeNewKey(true);
-    CPubKey pubLinkKey = privLinkKey.GetPubKey();
+    //now using GetKeyFromPool instead of MakeNewKey
+    CPubKey pubLinkKey;
+    if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key to wallet for BDAP"));
+
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
