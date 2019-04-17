@@ -20,6 +20,7 @@
 #include "dht/dataheader.h"
 #include "dht/datachunk.h"
 
+#include "bdap/bdap.h"
 #include "bdap/vgpmessage.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
@@ -54,10 +55,8 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
 
     CharString vchObjectID = vchFromValue("test1");
     CharString vchCommonName = vchFromValue("test user 1");
-    CharString vchDefaultOIDPrefix = vchFromValue("0.0.0"); 
-    CharString vchDefaultDomainName = vchFromValue("bdap.io");
-    CharString vchDefaultPublicOU = vchFromValue("public");
-    CharString vchDefaultOrganizationName = vchFromValue("bdap.io");
+
+    //retrieve vchDefault* values from bdap.h
 
     CharString vchRequestorFQDN = vchFromValue("test1@public.bdap.io");
     CharString vchRecipientFQDN = vchFromValue("test2@public.bdap.io");
@@ -65,7 +64,7 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
 
     //Domain Entry 1 (Sender)
     CDomainEntry senderDomainEntry;
-    senderDomainEntry.OID = vchDefaultOIDPrefix;
+    senderDomainEntry.RootOID = vchDefaultOIDPrefix;
     senderDomainEntry.DomainComponent = vchDefaultDomainName;
     senderDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     senderDomainEntry.CommonName = vchCommonName;
@@ -80,7 +79,7 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
 
     //Domain Entry 2 (Receiver)
     CDomainEntry receiverDomainEntry;
-    receiverDomainEntry.OID = vchDefaultOIDPrefix;
+    receiverDomainEntry.RootOID = vchDefaultOIDPrefix;
     receiverDomainEntry.DomainComponent = vchDefaultDomainName;
     receiverDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     receiverDomainEntry.CommonName = vchCommonName2;
