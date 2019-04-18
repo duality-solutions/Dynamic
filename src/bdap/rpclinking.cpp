@@ -620,7 +620,7 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
 
 static UniValue ListCompletedLinks(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3)
         throw std::runtime_error(
             "lists completed links\n"
             "\nLink Completed Arguments:\n"
@@ -648,12 +648,12 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
             + HelpExampleRpc("link complete", ""));
 
     std::string strFromAccountFQDN, strToAccountFQDN;
-    if (request.params.size() > 2) {
-        strFromAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 1) {
+        strFromAccountFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strFromAccountFQDN);
     }
-    if (request.params.size() > 3) {
-        strToAccountFQDN = request.params[3].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 2) {
+        strToAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strToAccountFQDN);
     }
 
