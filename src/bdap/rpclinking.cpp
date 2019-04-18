@@ -411,6 +411,10 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
             if (strToAccount.empty() || strToAccount == stringFromVch(link.RecipientFullObjectPath)) {
                 oLink.push_back(Pair("requestor_fqdn", stringFromVch(link.RequestorFullObjectPath)));
                 oLink.push_back(Pair("recipient_fqdn", stringFromVch(link.RecipientFullObjectPath)));
+
+                if (stringFromVch(link.SharedRequestPubKey).length() > 0) oLink.push_back(Pair("shared_request_pubkey", stringFromVch(link.SharedRequestPubKey)));
+                if (stringFromVch(link.SharedAcceptPubKey).length() > 0) oLink.push_back(Pair("shared_accept_pubkey", stringFromVch(link.SharedAcceptPubKey)));
+
                 oLink.push_back(Pair("requestor_link_pubkey", stringFromVch(link.RequestorPubKey)));
                 oLink.push_back(Pair("txid", link.txHashRequest.GetHex())); // TODO: rename to request_txid
                 if ((unsigned int)chainActive.Height() >= link.nHeightRequest-1) {

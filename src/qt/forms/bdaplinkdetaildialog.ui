@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>863</width>
-    <height>482</height>
+    <height>669</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,145 +53,205 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="label_12">
          <property name="text">
           <string>Link Public Key (Requestor):</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="4" column="1">
         <widget class="QLineEdit" name="lineEditRequestorPublicKey">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="label_13">
          <property name="text">
           <string>Link Public Key (Recipient):</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="5" column="1">
         <widget class="QLineEdit" name="lineEditRecipientPublicKey">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Requestor Link Address:</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="6" column="1">
         <widget class="QLineEdit" name="lineEditRequestorLinkAddress">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Recipient Link Address:</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="7" column="1">
         <widget class="QLineEdit" name="lineEditRecipientLinkAddress">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="8" column="0">
         <widget class="QLabel" name="label_10">
          <property name="text">
           <string>Signature Proof:</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
+       <item row="8" column="1">
         <widget class="QLineEdit" name="lineEditSignatureProof">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="label_11">
          <property name="text">
           <string>Link Message:</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="9" column="1">
         <widget class="QLineEdit" name="lineEditLinkMessage">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="10" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>TXID:</string>
+          <string>Request TXID:</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
+       <item row="10" column="1">
         <widget class="QLineEdit" name="lineEditTXID">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="12" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Time:</string>
+          <string>Request Time:</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
+       <item row="12" column="1">
         <widget class="QLineEdit" name="lineEditTime">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
+       <item row="14" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Expiration Date:</string>
+          <string>Request Expiration Date:</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="1">
+       <item row="14" column="1">
         <widget class="QLineEdit" name="lineEditExpirationDate">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="11" column="0">
+       <item row="16" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Expired:</string>
+          <string>Request Expired:</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="1">
+       <item row="16" column="1">
         <widget class="QLineEdit" name="lineEditExpired">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Shared Request PubKey:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEditSharedRequestPubKey"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Shared Accept PubKey:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEditSharedAcceptPubKey"/>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Accept TXID:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1">
+        <widget class="QLineEdit" name="lineEditAcceptTXID"/>
+       </item>
+       <item row="13" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Accept Time:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
+        <widget class="QLineEdit" name="lineEditAcceptTime"/>
+       </item>
+       <item row="15" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Accept Expiration Date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="1">
+        <widget class="QLineEdit" name="lineEditAcceptExpirationDate"/>
+       </item>
+       <item row="17" column="0">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Accept Expired:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="1">
+        <widget class="QLineEdit" name="lineEditAcceptExpired"/>
        </item>
       </layout>
      </item>

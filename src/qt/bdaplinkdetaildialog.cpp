@@ -55,6 +55,12 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     std::string expired = "";
     std::string timeValue = "";
     std::string outputmessage = "";
+    std::string sharedRequestPubKey = "N/A";
+    std::string sharedAcceptPubKey = "N/A";
+    std::string acceptTXID = "N/A";
+    std::string acceptTime = "N/A";
+    std::string acceptExpirationDate = "N/A";
+    std::string acceptexpired = "N/A";
 
     UniValue result = UniValue(UniValue::VOBJ);
  
@@ -79,11 +85,24 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
         if (keyName == "signature_proof") signatureProof = result.getValues()[i].get_str();
         if (keyName == "link_message") linkMessage = result.getValues()[i].get_str();
 
+        if (keyName == "shared_request_pubkey") sharedRequestPubKey = result.getValues()[i].get_str();
+        if (keyName == "shared_accept_pubkey") sharedAcceptPubKey = result.getValues()[i].get_str();
+
+
 
         if (keyName == "txid") txId = result.getValues()[i].get_str();
+        if (keyName == "accept_txid") acceptTXID = result.getValues()[i].get_str();
+
+
         if (keyName == "expires_on") expirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
+        if (keyName == "accept_expires_on") acceptExpirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
+
         if (keyName == "expired") expired = ((result.getValues()[i].get_bool())?"true":"false");
+        if (keyName == "accept_expired") acceptexpired = ((result.getValues()[i].get_bool())?"true":"false");
+
         if (keyName == "time") timeValue = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
+        if (keyName == "accept_time") acceptTime = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
+
     } //for i
 
     ui->lineEditRequestor->setText(QString::fromStdString(getRequestor));
@@ -98,9 +117,25 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     ui->lineEditLinkMessage->setText(QString::fromStdString(linkMessage));
 
     ui->lineEditTXID->setText(QString::fromStdString(txId));
+    ui->lineEditAcceptTXID->setText(QString::fromStdString(acceptTXID));
+
+
     ui->lineEditExpirationDate->setText(QString::fromStdString(expirationDate));
+    ui->lineEditAcceptExpirationDate->setText(QString::fromStdString(acceptExpirationDate));
+
+
     ui->lineEditExpired->setText(QString::fromStdString(expired));
+    ui->lineEditAcceptExpired->setText(QString::fromStdString(acceptexpired));
+
     ui->lineEditTime->setText(QString::fromStdString(timeValue));
+    ui->lineEditAcceptTime->setText(QString::fromStdString(acceptTime));
+
+    ui->lineEditSharedRequestPubKey->setText(QString::fromStdString(sharedRequestPubKey));
+    ui->lineEditSharedAcceptPubKey->setText(QString::fromStdString(sharedAcceptPubKey));
+
+
+
+
 } //populateValues
 
 
