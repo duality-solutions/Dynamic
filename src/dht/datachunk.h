@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-static constexpr unsigned int DHT_DATA_MAX_CHUNK_SIZE = 450;
+static constexpr unsigned int DHT_DATA_MAX_CHUNK_SIZE = 900;
 
 class CDataChunk
 {
@@ -18,19 +18,25 @@ public:
     uint16_t nOrdinal;
     uint16_t nPlacement;
     std::string Salt;
-    std::string Value;
+    std::vector<unsigned char> vchValue;
 
-    CDataChunk() : nOrdinal(0), nPlacement(0), Salt(""), Value("")  {}
+    CDataChunk() : nOrdinal(0), nPlacement(0), Salt("")
+    { 
+        vchValue.clear();
+    }
 
     CDataChunk(const uint16_t ordinal, const uint16_t placement, const std::string& salt, const std::string& value) : 
-                    nOrdinal(ordinal), nPlacement(placement), Salt(salt), Value(value)  {}
+                    nOrdinal(ordinal), nPlacement(placement), Salt(salt), vchValue(value.begin(), value.end()) {}
+
+    CDataChunk(const uint16_t ordinal, const uint16_t placement, const std::string& salt, const std::vector<unsigned char>& vch) : 
+                    nOrdinal(ordinal), nPlacement(placement), Salt(salt), vchValue(vch) {}
 
     inline void SetNull()
     {
         nOrdinal = 0;
         nPlacement = 0;
         Salt = "";
-        Value = "";
+        vchValue.clear();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -40,11 +46,11 @@ public:
         READWRITE(nOrdinal);
         READWRITE(nPlacement);
         READWRITE(Salt);
-        READWRITE(Value);
+        READWRITE(vchValue);
     }
 
     inline friend bool operator==(const CDataChunk& a, const CDataChunk& b) {
-        return (a.nOrdinal == b.nOrdinal && a.nPlacement == b.nPlacement && a.Salt == b.Salt && a.Value == b.Value);
+        return (a.nOrdinal == b.nOrdinal && a.nPlacement == b.nPlacement && a.Salt == b.Salt && a.vchValue == b.vchValue);
     }
 
     inline friend bool operator!=(const CDataChunk& a, const CDataChunk& b) {
@@ -55,11 +61,11 @@ public:
         nOrdinal = b.nOrdinal;
         nPlacement = b.nPlacement;
         Salt = b.Salt;
-        Value = b.Value;
+        vchValue = b.vchValue;
         return *this;
     }
  
-    inline bool IsNull() const { return (nOrdinal == 0 && nPlacement == 0 && Salt == "" && Value == ""); }
+    inline bool IsNull() const { return (nOrdinal == 0 && nPlacement == 0 && Salt == "" && vchValue.size() == 0); }
 
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData);
