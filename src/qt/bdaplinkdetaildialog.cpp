@@ -29,6 +29,7 @@ BdapLinkDetailDialog::BdapLinkDetailDialog(QWidget *parent, LinkActions actionTy
 
     populateValues(actionType,requestor,recipient,resultinput);
 
+    this->adjustSize(); //reside widget to accomodate hidden objects
 }
 
 BdapLinkDetailDialog::~BdapLinkDetailDialog()
@@ -88,11 +89,8 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
         if (keyName == "shared_request_pubkey") sharedRequestPubKey = result.getValues()[i].get_str();
         if (keyName == "shared_accept_pubkey") sharedAcceptPubKey = result.getValues()[i].get_str();
 
-
-
         if (keyName == "txid") txId = result.getValues()[i].get_str();
         if (keyName == "accept_txid") acceptTXID = result.getValues()[i].get_str();
-
 
         if (keyName == "expires_on") expirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
         if (keyName == "accept_expires_on") acceptExpirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
@@ -119,10 +117,8 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     ui->lineEditTXID->setText(QString::fromStdString(txId));
     ui->lineEditAcceptTXID->setText(QString::fromStdString(acceptTXID));
 
-
     ui->lineEditExpirationDate->setText(QString::fromStdString(expirationDate));
     ui->lineEditAcceptExpirationDate->setText(QString::fromStdString(acceptExpirationDate));
-
 
     ui->lineEditExpired->setText(QString::fromStdString(expired));
     ui->lineEditAcceptExpired->setText(QString::fromStdString(acceptexpired));
@@ -133,8 +129,70 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     ui->lineEditSharedRequestPubKey->setText(QString::fromStdString(sharedRequestPubKey));
     ui->lineEditSharedAcceptPubKey->setText(QString::fromStdString(sharedAcceptPubKey));
 
+    if (sharedRequestPubKey == "N/A") {
+        ui->lineEditSharedRequestPubKey->setVisible(false);
+        ui->label_sharedRequestPubKey->setVisible(false);
+    }
 
+    if (sharedAcceptPubKey == "N/A") {
+        ui->lineEditSharedAcceptPubKey->setVisible(false);
+        ui->label_sharedAcceptPubKey->setVisible(false);
+    }
 
+    if (acceptTXID == "N/A") {
+        ui->lineEditAcceptTXID->setVisible(false);
+        ui->label_acceptTXID->setVisible(false);
+    }
+
+    if (acceptTime == "N/A") {
+        ui->lineEditAcceptTime->setVisible(false);
+        ui->label_acceptTime->setVisible(false);
+    }
+
+    if (acceptExpirationDate == "N/A") {
+        ui->lineEditAcceptExpirationDate->setVisible(false);
+        ui->label_acceptExpirationDate->setVisible(false);
+    }
+
+    if (acceptexpired == "N/A") {
+        ui->lineEditAcceptExpired->setVisible(false);
+        ui->label_acceptExpired->setVisible(false);
+    }
+
+    if (requstorLinkAddress == "N/A") {
+        ui->lineEditRequestorLinkAddress->setVisible(false);
+        ui->label_requestorLinkAddress->setVisible(false);
+    }
+
+    if (recipientLinkAddress == "N/A") {
+        ui->lineEditRecipientLinkAddress->setVisible(false);
+        ui->label_recipientLinkAddress->setVisible(false);
+    }
+
+    if (signatureProof == "N/A") {
+        ui->lineEditSignatureProof->setVisible(false);
+        ui->label_signatureProof->setVisible(false);
+    }
+
+    if (linkRecipientPublicKey == "N/A") {
+        ui->lineEditRecipientPublicKey->setVisible(false);
+        ui->label_linkPubKeyRecipient->setVisible(false);
+    }
+
+    if (linkRecipientPublicKey == "N/A") {
+        ui->lineEditRecipientPublicKey->setVisible(false);
+        ui->label_linkPubKeyRecipient->setVisible(false);
+    }
+
+    if (linkRequestorPublicKey == "N/A") {
+        ui->lineEditRequestorPublicKey->setVisible(false);
+        ui->label_linkPubKeyRequestor->setVisible(false);
+    }
+
+    if (linkMessage == "N/A") {
+        ui->lineEditLinkMessage->setVisible(false);
+        ui->label_linkMessage->setVisible(false);
+    }
 
 } //populateValues
 

@@ -7,8 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>863</width>
-    <height>669</height>
+    <height>676</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>863</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>BDAP Link Detail</string>
@@ -54,7 +66,7 @@
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="label_linkPubKeyRequestor">
          <property name="text">
           <string>Link Public Key (Requestor):</string>
          </property>
@@ -68,7 +80,7 @@
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="label_linkPubKeyRecipient">
          <property name="text">
           <string>Link Public Key (Recipient):</string>
          </property>
@@ -82,7 +94,7 @@
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="label_requestorLinkAddress">
          <property name="text">
           <string>Requestor Link Address:</string>
          </property>
@@ -96,7 +108,7 @@
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_recipientLinkAddress">
          <property name="text">
           <string>Recipient Link Address:</string>
          </property>
@@ -110,7 +122,7 @@
         </widget>
        </item>
        <item row="8" column="0">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="label_signatureProof">
          <property name="text">
           <string>Signature Proof:</string>
          </property>
@@ -124,7 +136,7 @@
         </widget>
        </item>
        <item row="9" column="0">
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="label_linkMessage">
          <property name="text">
           <string>Link Message:</string>
          </property>
@@ -194,7 +206,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="label_sharedRequestPubKey">
          <property name="text">
           <string>Shared Request PubKey:</string>
          </property>
@@ -204,7 +216,7 @@
         <widget class="QLineEdit" name="lineEditSharedRequestPubKey"/>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="label_sharedAcceptPubKey">
          <property name="text">
           <string>Shared Accept PubKey:</string>
          </property>
@@ -214,7 +226,7 @@
         <widget class="QLineEdit" name="lineEditSharedAcceptPubKey"/>
        </item>
        <item row="11" column="0">
-        <widget class="QLabel" name="label_15">
+        <widget class="QLabel" name="label_acceptTXID">
          <property name="text">
           <string>Accept TXID:</string>
          </property>
@@ -224,7 +236,7 @@
         <widget class="QLineEdit" name="lineEditAcceptTXID"/>
        </item>
        <item row="13" column="0">
-        <widget class="QLabel" name="label_16">
+        <widget class="QLabel" name="label_acceptTime">
          <property name="text">
           <string>Accept Time:</string>
          </property>
@@ -234,7 +246,7 @@
         <widget class="QLineEdit" name="lineEditAcceptTime"/>
        </item>
        <item row="15" column="0">
-        <widget class="QLabel" name="label_17">
+        <widget class="QLabel" name="label_acceptExpirationDate">
          <property name="text">
           <string>Accept Expiration Date:</string>
          </property>
@@ -244,7 +256,7 @@
         <widget class="QLineEdit" name="lineEditAcceptExpirationDate"/>
        </item>
        <item row="17" column="0">
-        <widget class="QLabel" name="label_18">
+        <widget class="QLabel" name="label_acceptExpired">
          <property name="text">
           <string>Accept Expired:</string>
          </property>

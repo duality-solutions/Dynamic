@@ -415,6 +415,9 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                 if (stringFromVch(link.SharedRequestPubKey).length() > 0) oLink.push_back(Pair("shared_request_pubkey", stringFromVch(link.SharedRequestPubKey)));
                 if (stringFromVch(link.SharedAcceptPubKey).length() > 0) oLink.push_back(Pair("shared_accept_pubkey", stringFromVch(link.SharedAcceptPubKey)));
 
+                if (stringFromVch(link.RequestorWalletAddress).length() > 0) oLink.push_back(Pair("requestor_link_address", stringFromVch(link.RequestorWalletAddress)));
+                if (stringFromVch(link.RecipientWalletAddress).length() > 0) oLink.push_back(Pair("recipient_link_address", stringFromVch(link.RecipientWalletAddress)));
+
                 oLink.push_back(Pair("requestor_link_pubkey", stringFromVch(link.RequestorPubKey)));
                 oLink.push_back(Pair("txid", link.txHashRequest.GetHex())); // TODO: rename to request_txid
                 if ((unsigned int)chainActive.Height() >= link.nHeightRequest-1) {
@@ -438,13 +441,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                     oLink.push_back(Pair("recipient_link_pubkey", stringFromVch(link.RecipientPubKey)));
                     oLink.push_back(Pair("accept_txid", link.txHashAccept.GetHex()));
                     if ((unsigned int)chainActive.Height() >= link.nHeightAccept-1) {
-                        CBlockIndex *pindex = chainActive[link.nHeightRequest-1];
+                        CBlockIndex *pindex = chainActive[link.nHeightAccept-1]; //changed from Request to Accept
                         if (pindex) {
                             nTime = pindex->GetMedianTimePast();
                         }
                     }
                     oLink.push_back(Pair("accept_time", nTime));
-                    expired_time = link.nExpireTimeRequest;
+                    expired_time = link.nExpireTimeAccept; //changed from Request to Accept
                     expired = false;
                     if (expired_time != 0)
                     {

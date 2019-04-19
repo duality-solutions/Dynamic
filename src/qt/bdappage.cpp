@@ -501,6 +501,8 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
             dlg.setWindowTitle(QObject::tr("BDAP Complete Link Detail"));
         }; //end actionType if
 
+        //dlg.layout()->setSizeConstraint(QLayout::SetFixedSize);
+
         dlg.exec();
 
         if (actionType == LinkActions::LINK_ACCEPT) bdapLinkTableModel->refreshAll();
