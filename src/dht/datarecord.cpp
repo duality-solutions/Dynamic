@@ -167,13 +167,10 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
         vchChunks.insert(vchChunks.end(), vChunks[i].vchValue.begin(), vChunks[i].vchValue.end());
     }
-    LogPrintf("CDataRecord::%s -- vchChunks.size() %d\n", __func__, vchChunks.size());
     std::vector<unsigned char> vchUnHexValue = ParseHex(stringFromVch(vchChunks));
-    LogPrintf("CDataRecord::%s -- vchUnHexValue.size() %d\n", __func__, vchUnHexValue.size());
     if (vchUnHexValue.size() != dataHeader.nDataSize)
     {
-        LogPrintf("CDataRecord::%s -- Failed due to the data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
-        return false;
+        LogPrintf("CDataRecord::%s --Warning, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
     }
     if (dataHeader.nVersion == 0) {
         vchData = vchChunks;
