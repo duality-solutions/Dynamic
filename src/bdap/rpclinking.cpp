@@ -855,6 +855,7 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     if (vchSerializedList.size() > 7000)
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
 
+    iSequence++;
     if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord))
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
 
