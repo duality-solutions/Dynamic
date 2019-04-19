@@ -57,6 +57,8 @@ std::string CLink::ToString() const
             "    nExpireTimeAccept          = %d\n"
             "    txHashAccept               = %s\n"
             "    SubjectID                  = %s\n"
+            "    RequestorWalletAddress     = %s\n"
+            "    RecipientWalletAddress     = %s\n"
             ")\n",
             nVersion,
             LinkID.ToString(),
@@ -76,7 +78,9 @@ std::string CLink::ToString() const
             nHeightAccept,
             nExpireTimeAccept,
             txHashAccept.ToString(),
-            SubjectID.ToString()
+            SubjectID.ToString(),
+            stringFromVch(RequestorWalletAddress),
+            stringFromVch(RecipientWalletAddress)
         );
 }
 
@@ -294,6 +298,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightRequest = link.nHeight;
                     record.nExpireTimeRequest = link.nExpireTime;
                     record.txHashRequest = link.txHash;
+                    record.RequestorWalletAddress = entry.WalletAddress;
                     if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                     {
                         std::string strErrorMessage = "";
@@ -350,6 +355,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                     record.nHeightAccept = link.nHeight;
                     record.nExpireTimeAccept = link.nExpireTime;
                     record.txHashAccept = link.txHash;
+                    record.RecipientWalletAddress = entry.WalletAddress;
                     if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                     {
                         std::string strErrorMessage = "";
@@ -436,6 +442,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
+                        record.RequestorWalletAddress = entry.WalletAddress;
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
@@ -520,6 +527,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightRequest = link.nHeight;
                         record.nExpireTimeRequest = link.nExpireTime;
                         record.txHashRequest = link.txHash;
+                        record.RequestorWalletAddress = entry.WalletAddress;
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
@@ -596,6 +604,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
+                        record.RecipientWalletAddress = entry.WalletAddress;
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
@@ -673,6 +682,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
                         record.nHeightAccept = link.nHeight;
                         record.nExpireTimeAccept = link.nExpireTime;
                         record.txHashAccept = link.txHash;
+                        record.RecipientWalletAddress = entry.WalletAddress;
                         if (record.SharedAcceptPubKey.size() > 0 && record.SharedRequestPubKey.size() > 0)
                         {
                             std::string strErrorMessage = "";
