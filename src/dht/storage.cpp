@@ -95,6 +95,16 @@ bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number&
     return true;
 }
 
+template<class T>
+static entry get_bdecode(T start, T end)
+{
+    entry e;
+    bool err = false;
+    detail::bdecode_recursive(start, end, e, err, 0);
+    if (err) return entry();
+    return e;
+}
+
 bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number const seq, bool const force_fill, entry& item) const
 {
     if (!fDynodeMode) // Only try to get DHT data if Dynode
@@ -113,7 +123,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     if (force_fill || (sequence_number(0) <= seq && seq < sequence_number(mutableData.SequenceNumber)))
     {
         LogPrintf("********** CDHTStorage -- get_mutable_item data found.\n");
-        item["v"] = bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
+        item["v"] = get_bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
         std::array<char, 64> sig;
         aux::from_hex(mutableData.Signature(), sig.data());
         item["sig"] = sig;
