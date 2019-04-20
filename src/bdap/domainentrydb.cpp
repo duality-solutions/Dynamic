@@ -162,7 +162,6 @@ void CDomainEntryDB::WriteDomainEntryIndex(const CDomainEntry& entry, const int 
 {
     if (IsArgSet("-zmqpubbdaprecord")) {
         UniValue oName(UniValue::VOBJ);
-        oName.push_back(Pair("_id", stringFromVch(entry.OID)));
         CDynamicAddress address(EncodeBase58(entry.WalletAddress));
         oName.push_back(Pair("address", address.ToString()));
         oName.push_back(Pair("expires_on", entry.nExpireTime));

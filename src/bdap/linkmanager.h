@@ -44,6 +44,8 @@ public:
     std::vector<unsigned char> SharedRequestPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
     std::vector<unsigned char> SharedAcceptPubKey; // ed25519 shared public key. RecipientPubKey + RequestorPubKey's BDAP DHT PubKey
     std::vector<unsigned char> LinkMessage; // Link message to recipient
+    std::vector<unsigned char> RequestorWalletAddress; // Requestor's BDAP wallet address
+    std::vector<unsigned char> RecipientWalletAddress; // Recipient's BDAP wallet address
 
     uint64_t nHeightRequest;
     uint64_t nExpireTimeRequest;
@@ -83,6 +85,8 @@ public:
         txHashAccept.SetNull();
         SubjectID.SetNull();
         vchSecretPubKeyBytes.clear();
+        RequestorWalletAddress.clear();
+        RecipientWalletAddress.clear();
     }
 
     inline friend bool operator==(const CLink &a, const CLink &b) {
@@ -114,6 +118,8 @@ public:
         txHashAccept = b.txHashAccept;
         SubjectID = b.SubjectID;
         vchSecretPubKeyBytes = b.vchSecretPubKeyBytes;
+        RequestorWalletAddress = b.RequestorWalletAddress;
+        RecipientWalletAddress = b.RecipientWalletAddress;
         return *this;
     }
  

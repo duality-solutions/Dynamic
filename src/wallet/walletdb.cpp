@@ -615,7 +615,8 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
 
             CLinkStorage storage;
             ssValue >> storage;
-
+            if (!pwalletMain)
+                pwalletMain = pwallet;
             ProcessLink(storage, true);
         } else if (strType == "linkid") {
             uint256 SubjectID;

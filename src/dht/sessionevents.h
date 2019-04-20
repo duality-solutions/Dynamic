@@ -25,7 +25,7 @@ private:
 
 public:
     CEvent() {};
-    CEvent(std::string _message, int _type, uint32_t _category, std::string _what);
+    CEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what);
 
     std::string Message() const { return message; }
     int Type() const { return type; }
@@ -56,8 +56,8 @@ private:
 
 public:
     CMutableGetEvent();
-    CMutableGetEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
-                     std::string _pubkey, std::string _salt, int64_t _seq, std::string _value, std::string _signature, bool _authoritative);
+    CMutableGetEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what, 
+                     const std::string& _pubkey, const std::string& _salt, const int64_t& _seq, const std::string& _value, const std::string& _signature, const bool _authoritative);
 
     std::string PublicKey() const { return pubkey; }
     std::string Salt() const { return salt; }
@@ -98,8 +98,8 @@ private:
 
 public:
     CMutablePutEvent();
-    CMutablePutEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
-                     std::string _pubkey, std::string _salt, int64_t _seq, std::string _signature, uint32_t _success_count);
+    CMutablePutEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what, 
+                     const std::string& _pubkey, const std::string& _salt, const int64_t& _seq, const std::string& _signature, const uint32_t _success_count);
 
     std::string PublicKey() const { return pubkey; }
     std::string Salt() const { return salt; }
@@ -136,7 +136,7 @@ private:
     std::int64_t timestamp;
 
 public:
-    CPutRequest(const CKeyEd25519 _key, const std::string _salt, const int64_t _sequence, const std::string _value);
+    CPutRequest(const CKeyEd25519& _key, const std::string& _salt, const int64_t& _sequence, const std::string& _value);
 
     CKeyEd25519 Key() const { return key; }
     std::string Salt() const { return salt; }
@@ -154,7 +154,7 @@ public:
     }
 };
 
-void CleanUpEventMap(uint32_t timeout = 300000);  //default to 5 minutes.
+void CleanUpEventMap(const uint32_t timeout = 300000);  //default to 5 minutes.
 void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event);
 
 void StopEventListener();
@@ -164,6 +164,6 @@ bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEv
 bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 bool RemoveDHTGetEvent(const std::string& infoHash);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
-std::string GetInfoHash(const std::string pubkey, const std::string salt);
+std::string GetInfoHash(const std::string& pubkey, const std::string& salt);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

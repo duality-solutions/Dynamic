@@ -25,7 +25,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 {
     EnsureWalletIsUnlocked();
 
-    // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
+    // Adds a new name to channel zero.  OID = 2.16.840.1.114564.block-height.tx-ordinal
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
     ToLowerCase(strObjectID);
@@ -35,7 +35,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchCommonName = vchFromValue(request.params[1]);
 
     CDomainEntry txDomainEntry;
-    txDomainEntry.OID = vchDefaultOIDPrefix;
+    txDomainEntry.RootOID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
     txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     txDomainEntry.CommonName = vchCommonName;
@@ -48,15 +48,13 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
-    // TODO: Add ability to pass in the wallet address
-    CKey privWalletKey;
-    privWalletKey.MakeNewKey(true);
-    CPubKey pubWalletKey = privWalletKey.GetPubKey();
+    //now using GetKeyFromPool instead of MakeNewKey
+    CPubKey pubWalletKey;
+    if (!pwalletMain->GetKeyFromPool(pubWalletKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key to wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
@@ -75,13 +73,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
-    CKey privLinkKey;
-    privLinkKey.MakeNewKey(true);
-    CPubKey pubLinkKey = privLinkKey.GetPubKey();
+    //now using GetKeyFromPool instead of MakeNewKey
+    CPubKey pubLinkKey;
+    if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key to wallet for BDAP"));
+
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
@@ -746,22 +745,37 @@ UniValue makekeypair(const JSONRPCRequest& request)
     uint32_t nCount = 0;
     do
     {
-        key.MakeNewKey(false);
+        key.MakeNewKey(true);
         nCount++;
     } while (nCount < 10000 && strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()));
 
     if (strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()))
         return NullUniValue;
 
+    UniValue result(UniValue::VOBJ);
+
+    //key.SetCompressedBoolean(true);
+   //get compressed versions
+    CPrivKey vchPrivKeyC = key.GetPrivKey();
+    CKeyID keyIDC = key.GetPubKey().GetID();
+    CKey vchSecretC = CKey();
+    vchSecretC.SetPrivKey(vchPrivKeyC, true);    
+    result.push_back(Pair("private_key", HexStr<CPrivKey::iterator>(vchPrivKeyC.begin(), vchPrivKeyC.end())));
+    result.push_back(Pair("public_key", HexStr(key.GetPubKey())));
+    result.push_back(Pair("address", CDynamicAddress(keyIDC).ToString()));
+    result.push_back(Pair("address_private_key", CDynamicSecret(vchSecretC).ToString()));
+
+   //get uncompressed versions
+    key.SetCompressedBoolean(false); //toggle to false
     CPrivKey vchPrivKey = key.GetPrivKey();
     CKeyID keyID = key.GetPubKey().GetID();
     CKey vchSecret = CKey();
     vchSecret.SetPrivKey(vchPrivKey, false);
-    UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
-    result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
-    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
-    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
+    //result.push_back(Pair("private_key_uncompressed", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
+    result.push_back(Pair("public_key_uncompressed", HexStr(key.GetPubKey())));
+    result.push_back(Pair("address_uncompressed", CDynamicAddress(keyID).ToString()));
+    result.push_back(Pair("address_private_key_uncompressed", CDynamicSecret(vchSecret).ToString()));
+ 
     return result;
 }
 

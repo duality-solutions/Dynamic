@@ -44,9 +44,11 @@ static bool fStarted;
 CHashTableSession* pHashTableSession;
 
 namespace DHT {
-    std::vector<std::pair<std::string, std::string>> vPutValues;
 
-    void put_mutable_string
+    typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
+    std::vector<std::pair<int64_t, PutBytes>> vPutBytes;
+
+    void put_mutable_bytes
     (
         libtorrent::entry& e
         ,std::array<char, 64>& sig
@@ -54,25 +56,41 @@ namespace DHT {
         ,std::string const& salt
         ,std::array<char, 32> const& pk
         ,std::array<char, 64> const& sk
-        ,char const* str
+        ,libtorrent::entry const& entry
         ,std::int64_t const& iSeq
     )
     {
         using dht::sign_mutable_item;
-        if (str != NULL) {
-            e = std::string(str);
-            std::vector<char> buf;
-            bencode(std::back_inserter(buf), e);
-            dht::signature sign;
-            seq = iSeq;
-            LogPrintf("%s --\nSalt = %s\nValue = %s\nSequence = %li\n", __func__, salt, std::string(str), seq);
-            sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
-                , dht::public_key(pk.data())
-                , dht::secret_key(sk.data()));
-            sig = sign.bytes;
+        e = entry;
+        std::vector<char> bufSign;
+        bencode(std::back_inserter(bufSign), e);
+        dht::signature sign;
+        seq = iSeq;
+        LogPrintf("%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
+        sign = sign_mutable_item(bufSign, salt, dht::sequence_number(seq)
+            , dht::public_key(pk.data())
+            , dht::secret_key(sk.data()));
+        sig = sign.bytes;
+    }
+
+    void CleanUpPutBuffer()
+    {
+        uint32_t nCurrentTimeStamp = GetAdjustedTime();
+        std::vector<std::pair<int64_t, PutBytes>>::iterator it = vPutBytes.begin();
+        while (it != vPutBytes.end())
+        {
+            int64_t nTimeStamp = (*it).first;
+            if (nCurrentTimeStamp > nTimeStamp + DHT_KEEP_PUT_BUFFER_SECONDS)
+            {
+               it = vPutBytes.erase(it);
+            }
+            else
+            {
+               ++it;
+            }
         }
     }
-}   
+}
 
 bool Bootstrap()
 {
@@ -258,8 +276,8 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
 
 void CHashTableSession::CleanUpPutCommandMap()
 {
-    int64_t nCurrentTime = GetTime();
-    std::map<HashRecordKey, uint32_t>::iterator it;
+    int64_t nCurrentTime = GetAdjustedTime();
+    std::map<HashRecordKey, int64_t>::iterator it;
     for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
         if (nCurrentTime > it->second + DHT_RECORD_LOCK_SECONDS) {
             //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
@@ -269,50 +287,57 @@ void CHashTableSession::CleanUpPutCommandMap()
     }
 }
 
-uint32_t CHashTableSession::GetLastPutDate(const HashRecordKey& recordKey)
+int64_t CHashTableSession::GetLastPutDate(const HashRecordKey& recordKey)
 {
     if (mPutCommands.find(recordKey) != mPutCommands.end() ) {
-        std::map<HashRecordKey, uint32_t>::iterator it;
+        std::map<HashRecordKey, int64_t>::iterator it;
         for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
             if (it->first == recordKey)
                 return it->second;
-        }     
+        }
     }
     return 0;
 }
 
-bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record)
+bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord& record)
 {
     strPutErrorMessage = "";
     HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
-    int64_t nLastUpdate = (int64_t)GetLastPutDate(recordKey);
-    if (DHT_RECORD_LOCK_SECONDS >= (GetTime() - nLastUpdate))
+    int64_t nLastUpdate = GetLastPutDate(recordKey);
+    int64_t nCurrentTime = GetAdjustedTime();
+    if (DHT_RECORD_LOCK_SECONDS >= (nCurrentTime - nLastUpdate))
     {
         strPutErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
         return false;
     }
-    mPutCommands[recordKey] = GetTime();
+    mPutCommands[recordKey] = nCurrentTime;
     vDataEntries.push_back(record);
-    DHT::vPutValues.clear();
-    std::vector<std::vector<unsigned char>> vPubKeys;
-    std::string strSalt = record.GetHeader().Salt;
-    DHT::vPutValues.push_back(std::make_pair(strSalt, record.HeaderHex));
+    const std::string strHeaderSalt = record.GetHeader().Salt;
 
-    LogPrint("dht", "CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
-                                                                strSalt, record.Value(), lastSequence, DHT::vPutValues.size());
-    for(const CDataChunk& chunk: record.GetChunks()) {
-        DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
+    libtorrent::entry entryHeaderHex(record.HeaderHex);
+    DHT::PutBytes newPut;
+    newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
+    for (const CDataChunk& chunk : record.GetChunks()) {
+        libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
+        newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        LogPrint("dht", "CHashTableSession::%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
     }
+    DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
+    for (const std::pair<std::string, libtorrent::entry>& pair : newPut) {
+        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+                                public_key, private_key, pair.second, lastSequence), pair.first);
+        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
 
-    for(const std::pair<std::string, std::string>& pair: DHT::vPutValues) {
-        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable_string, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
-                                public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
-
-        LogPrint("dht", "CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
     }
     nPutRecords++;
     if (nPutRecords % 32 == 0)
+    {
         CleanUpPutCommandMap();
+    }
+    if (nPutRecords % 10 == 0)
+    {
+        DHT::CleanUpPutBuffer();
+    }
 
     return true;
 }
@@ -320,14 +345,14 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
     //TODO: DHT add locks
-    if (!pHashTableSession->Session) {
-        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pHashTableSession->Session is null.";
+    if (!Session) {
+        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
         return false;
     }
 
-    if (!pHashTableSession->Session->is_dht_running()) {
+    if (!Session->is_dht_running()) {
         LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
-        if (!LoadSessionState(pHashTableSession->Session)) {
+        if (!LoadSessionState(Session)) {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
             if (!Bootstrap())
                 return false;
