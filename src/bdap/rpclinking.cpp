@@ -1176,7 +1176,7 @@ UniValue link(const JSONRPCRequest& request)
     }
     else {
         throw std::runtime_error(
-            "link\n"
+            "link \"command\"...\n"
             + HelpRequiringPassphrase() +
             "\nLink commands are request, accept, pending, complete, deny, denied, getaccountmessages, getmessages, and sendmessage\n"
             "\nExamples:\n"
