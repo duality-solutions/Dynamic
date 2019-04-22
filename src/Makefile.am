@@ -88,6 +88,7 @@ DYNAMIC_CORE_H = \
   bdap/linkmanager.h \
   bdap/linkstorage.h \
   bdap/sidechain.h \
+  bdap/stealth.h \
   bdap/utils.h \
   bdap/vgpmessage.h \
   bip39_chinese_simplified.h \
@@ -373,6 +374,7 @@ endif
 libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
+  bdap/stealth.cpp \
   keepass.cpp \
   policy/rbf.cpp \
   privatesend-client.cpp \
@@ -463,6 +465,7 @@ libdynamic_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_common_a_SOURCES = \
   base58.cpp \
+  bdap/stealth.cpp \
   bip39.cpp \
   chainparams.cpp \
   coins.cpp \

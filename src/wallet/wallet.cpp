@@ -12,6 +12,7 @@
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/linkstorage.h"
+#include "bdap/stealth.h"
 #include "bdap/utils.h"
 #include "chain.h"
 #include "checkpoints.h"
@@ -4855,6 +4856,9 @@ public:
     }
 
     void operator()(const CNoDestination& none) {}
+
+    void operator()(const CStealthAddress& sxAddr) {}
+
 };
 
 void CWallet::GetKeyBirthTimes(std::map<CTxDestination, int64_t>& mapKeyBirth) const

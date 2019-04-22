@@ -16,6 +16,7 @@
 #ifndef DYNAMIC_BASE58_H
 #define DYNAMIC_BASE58_H
 
+#include "bdap/stealth.h"
 #include "chainparams.h"
 #include "key.h"
 #include "pubkey.h"
@@ -109,8 +110,11 @@ public:
     bool Set(const CKeyID& id);
     bool Set(const CScriptID& id);
     bool Set(const CTxDestination& dest);
+    bool Set(const CStealthAddress& sxAddr);
     bool IsValid() const;
     bool IsValid(const CChainParams& params) const;
+    bool IsValidStealthAddress() const;
+    bool IsValidStealthAddress(const CChainParams& params) const;
 
     CDynamicAddress() {}
     CDynamicAddress(const CTxDestination& dest) { Set(dest); }

@@ -7,10 +7,12 @@
 
 #include "base58.h"
 
+#include "bdap/stealth.h"
 #include "hash.h"
 #include "uint256.h"
 
 #include <assert.h>
+#include <cmath>
 #include <stdint.h>
 #include <string.h>
 #include <string>
@@ -227,6 +229,7 @@ public:
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
     bool operator()(const CNoDestination& no) const { return false; }
+    bool operator()(const CStealthAddress& sxAddr) const { return addr->Set(sxAddr); }
 };
 
 } // namespace
@@ -248,6 +251,16 @@ bool CDynamicAddress::Set(const CTxDestination& dest)
     return boost::apply_visitor(CDynamicAddressVisitor(this), dest);
 }
 
+bool CDynamicAddress::Set(const CStealthAddress& sxAddr)
+{
+    std::vector<uint8_t> raw;
+    if (0 != sxAddr.ToRaw(raw))
+        return false;
+
+    SetData(Params().Base58Prefix(CChainParams::STEALTH_ADDRESS), &raw[0], raw.size());
+    return true;
+}
+
 bool CDynamicAddress::IsValid() const
 {
     return IsValid(Params());
@@ -259,6 +272,36 @@ bool CDynamicAddress::IsValid(const CChainParams& params) const
     bool fKnownVersion = vchVersion == params.Base58Prefix(CChainParams::PUBKEY_ADDRESS) ||
                          vchVersion == params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
     return fCorrectSize && fKnownVersion;
+}
+
+bool CDynamicAddress::IsValidStealthAddress() const
+{
+    return IsValidStealthAddress(Params());
+}
+
+bool CDynamicAddress::IsValidStealthAddress(const CChainParams& params) const
+{
+    if (vchVersion != params.Base58Prefix(CChainParams::STEALTH_ADDRESS))
+        return false;
+
+    if (vchData.size() < MIN_STEALTH_RAW_SIZE)
+        return false;
+
+    size_t nPkSpend = vchData[34];
+
+    if (nPkSpend != 1) // TODO: allow multi
+        return false;
+
+    size_t nBits = vchData[35 + EC_COMPRESSED_SIZE * nPkSpend + 1];
+    if (nBits > 32)
+        return false;
+
+    size_t nPrefixBytes = std::ceil((float)nBits / 8.0);
+
+    if (vchData.size() != MIN_STEALTH_RAW_SIZE + EC_COMPRESSED_SIZE * (nPkSpend-1) + nPrefixBytes)
+        return false;
+
+    return true;
 }
 
 CTxDestination CDynamicAddress::Get() const

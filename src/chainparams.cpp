@@ -219,6 +219,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         // Dynamic BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'd'
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 90);
         // Dynamic BIP44 coin type is '5'
         nExtCoinType = 5;
 
@@ -363,6 +365,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'T'
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 65);
         // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
@@ -524,6 +528,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Regtest Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'R'
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 60);
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
     }
@@ -635,6 +641,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'P'
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 56);
         // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 

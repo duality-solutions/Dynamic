@@ -4,6 +4,7 @@
 
 #include "data/script_tests.json.h"
 
+#include "bdap/stealth.h"
 #include "core_io.h"
 #include "key.h"
 #include "keystore.h"
