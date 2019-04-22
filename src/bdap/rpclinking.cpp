@@ -41,8 +41,8 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("requestor_link_pubkey", link.RequestorPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
@@ -75,8 +75,8 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
@@ -415,8 +415,8 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                 if (stringFromVch(link.SharedRequestPubKey).length() > 0) oLink.push_back(Pair("shared_request_pubkey", stringFromVch(link.SharedRequestPubKey)));
                 if (stringFromVch(link.SharedAcceptPubKey).length() > 0) oLink.push_back(Pair("shared_accept_pubkey", stringFromVch(link.SharedAcceptPubKey)));
 
-                if (stringFromVch(link.RequestorWalletAddress).length() > 0) oLink.push_back(Pair("requestor_link_address", stringFromVch(link.RequestorWalletAddress)));
-                if (stringFromVch(link.RecipientWalletAddress).length() > 0) oLink.push_back(Pair("recipient_link_address", stringFromVch(link.RecipientWalletAddress)));
+                if (stringFromVch(link.RequestorWalletAddress).length() > 0) oLink.push_back(Pair("requestor_wallet_address", stringFromVch(link.RequestorWalletAddress)));
+                if (stringFromVch(link.RecipientWalletAddress).length() > 0) oLink.push_back(Pair("recipient_wallet_address", stringFromVch(link.RecipientWalletAddress)));
 
                 oLink.push_back(Pair("requestor_link_pubkey", stringFromVch(link.RequestorPubKey)));
                 oLink.push_back(Pair("txid", link.txHashRequest.GetHex())); // TODO: rename to request_txid

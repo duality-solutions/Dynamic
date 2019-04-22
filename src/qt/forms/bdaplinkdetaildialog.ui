@@ -94,28 +94,28 @@
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_requestorLinkAddress">
+        <widget class="QLabel" name="label_requestorWalletAddress">
          <property name="text">
-          <string>Requestor Link Address:</string>
+          <string>Requestor Wallet Address:</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="lineEditRequestorLinkAddress">
+        <widget class="QLineEdit" name="lineEditRequestorWalletAddress">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="label_recipientLinkAddress">
+        <widget class="QLabel" name="label_recipientWalletAddress">
          <property name="text">
-          <string>Recipient Link Address:</string>
+          <string>Recipient Wallet Address:</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="lineEditRecipientLinkAddress">
+        <widget class="QLineEdit" name="lineEditRecipientWalletAddress">
          <property name="readOnly">
           <bool>true</bool>
          </property>

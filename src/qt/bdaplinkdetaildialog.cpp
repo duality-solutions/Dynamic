@@ -47,8 +47,8 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     std::string linkPublicKey = "N/A";
     std::string linkRequestorPublicKey = "N/A";
     std::string linkRecipientPublicKey = "N/A";
-    std::string requstorLinkAddress = "N/A";
-    std::string recipientLinkAddress = "N/A";
+    std::string requstorWalletAddress = "N/A";
+    std::string recipientWalletAddress = "N/A";
     std::string signatureProof = "N/A";
     std::string linkMessage = "N/A";
     std::string txId = "";
@@ -81,8 +81,8 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
         if (keyName == "recipient_fqdn") getRecipient = result.getValues()[i].get_str();
         if (keyName == "requestor_link_pubkey") linkRequestorPublicKey = result.getValues()[i].get_str();
         if (keyName == "recipient_link_pubkey") linkRecipientPublicKey = result.getValues()[i].get_str();
-        if (keyName == "requestor_link_address") requstorLinkAddress = result.getValues()[i].get_str();
-        if (keyName == "recipient_link_address") recipientLinkAddress = result.getValues()[i].get_str();
+        if (keyName == "requestor_wallet_address") requstorWalletAddress = result.getValues()[i].get_str();
+        if (keyName == "recipient_wallet_address") recipientWalletAddress = result.getValues()[i].get_str();
         if (keyName == "signature_proof") signatureProof = result.getValues()[i].get_str();
         if (keyName == "link_message") linkMessage = result.getValues()[i].get_str();
 
@@ -109,8 +109,8 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     ui->lineEditRequestorPublicKey->setText(QString::fromStdString(linkRequestorPublicKey));
     ui->lineEditRecipientPublicKey->setText(QString::fromStdString(linkRecipientPublicKey));
 
-    ui->lineEditRequestorLinkAddress->setText(QString::fromStdString(requstorLinkAddress));
-    ui->lineEditRecipientLinkAddress->setText(QString::fromStdString(recipientLinkAddress));
+    ui->lineEditRequestorWalletAddress->setText(QString::fromStdString(requstorWalletAddress));
+    ui->lineEditRecipientWalletAddress->setText(QString::fromStdString(recipientWalletAddress));
     ui->lineEditSignatureProof->setText(QString::fromStdString(signatureProof));
     ui->lineEditLinkMessage->setText(QString::fromStdString(linkMessage));
 
@@ -159,14 +159,14 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
         ui->label_acceptExpired->setVisible(false);
     }
 
-    if (requstorLinkAddress == "N/A") {
-        ui->lineEditRequestorLinkAddress->setVisible(false);
-        ui->label_requestorLinkAddress->setVisible(false);
+    if (requstorWalletAddress == "N/A") {
+        ui->lineEditRequestorWalletAddress->setVisible(false);
+        ui->label_requestorWalletAddress->setVisible(false);
     }
 
-    if (recipientLinkAddress == "N/A") {
-        ui->lineEditRecipientLinkAddress->setVisible(false);
-        ui->label_recipientLinkAddress->setVisible(false);
+    if (recipientWalletAddress == "N/A") {
+        ui->lineEditRecipientWalletAddress->setVisible(false);
+        ui->label_recipientWalletAddress->setVisible(false);
     }
 
     if (signatureProof == "N/A") {
