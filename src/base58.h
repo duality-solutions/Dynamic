@@ -28,6 +28,14 @@
 #include <vector>
 
 /**
+ * Encode a tx destination as a base58-encoded string.
+ */
+std::string EncodeDestination(const CTxDestination& dest);
+/**
+ * Decode a tx destination as a base58-encoded string.
+ */
+CTxDestination DecodeDestination(const std::string& str);
+/**
  * Encode a byte sequence as a base58-encoded string.
  * pbegin and pend cannot be NULL, unless both are.
  */

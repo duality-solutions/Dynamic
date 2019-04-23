@@ -50,6 +50,29 @@ static bool VerifyChecksum(const std::vector<uint8_t> &data)
     return Checksum((uint8_t*)&data[0], data.size()-4) == checksum;
 };
 
+CStealthAddress::CStealthAddress(const CKey& scanKey, const CKey& spendKey)
+{
+    options = 0;
+    //uint8_t tmp32[32];
+    //CSHA256().Write(scanKey.begin(), 32).Finalize(tmp32);
+    //memcpy(&prefix.number_bits, tmp32, 4);
+    //CSHA256().Write(spendKey.begin(), 32).Finalize(tmp32);
+    //size_t nPrefixBytes = std::ceil((float)prefix.number_bits / 8.0);
+    //memcpy(&prefix.bitfield, tmp32, nPrefixBytes);
+    prefix.number_bits = 0;
+    prefix.bitfield = 0;
+    number_signatures = 1;
+
+    scan_pubkey.resize(scanKey.GetPubKey().size());
+    memcpy(&scan_pubkey[0], scanKey.GetPubKey().begin(), scanKey.GetPubKey().size());
+
+    spend_pubkey.resize(spendKey.GetPubKey().size());
+    memcpy(&spend_pubkey[0], spendKey.GetPubKey().begin(), spendKey.GetPubKey().size());
+
+    scan_secret = scanKey;
+    spend_secret_id = spendKey.GetPubKey().GetID();
+}
+
 bool CStealthAddress::SetEncoded(const std::string &encodedAddress)
 {
     std::vector<uint8_t> raw;
@@ -147,7 +170,7 @@ int CStealthAddress::ToRaw(std::vector<uint8_t> &raw) const
     return 0;
 };
 
-std::string CStealthAddress::Encoded(bool fBech32) const
+std::string CStealthAddress::Encoded() const
 {
     return CDynamicAddress(*this).ToString();
 };

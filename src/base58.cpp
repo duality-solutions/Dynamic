@@ -24,6 +24,68 @@
 /** All alphanumeric characters except for "0", "I", "O", and "l" */
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+
+namespace
+{
+class DestinationEncoder : public boost::static_visitor<std::string>
+{
+private:
+    const CChainParams& m_params;
+
+public:
+    explicit DestinationEncoder(const CChainParams& params) : m_params(params) {}
+
+    std::string operator()(const CKeyID& id) const
+    {
+        std::vector<unsigned char> data = m_params.Base58Prefix(CChainParams::PUBKEY_ADDRESS);
+        data.insert(data.end(), id.begin(), id.end());
+        return EncodeBase58Check(data);
+    }
+
+    std::string operator()(const CScriptID& id) const
+    {
+        std::vector<unsigned char> data = m_params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
+        data.insert(data.end(), id.begin(), id.end());
+        return EncodeBase58Check(data);
+    }
+
+    std::string operator()(const CNoDestination& no) const { return {}; }
+    std::string operator()(const CStealthAddress& sxAddr) const { return CDynamicAddress(sxAddr).ToString(); }
+
+};
+
+static CTxDestination DecodeDestination(const std::string& str, const CChainParams& params)
+{
+    CDynamicAddress addr(str);
+    if (addr.IsValid()) {
+        return addr.Get();
+    }
+
+    std::vector<unsigned char> data;
+    if (DecodeBase58Check(str, data)) {
+        const std::vector<unsigned char>& stealth_prefix = params.Base58Prefix(CChainParams::STEALTH_ADDRESS);
+        if (data.size() > stealth_prefix.size() && std::equal(stealth_prefix.begin(), stealth_prefix.end(), data.begin())) {
+            CStealthAddress sxAddr;
+            if (0 == sxAddr.FromRaw(data.data() + stealth_prefix.size(), data.size()))
+                return sxAddr;
+            return CNoDestination();
+        }
+    }
+    data.clear();
+    return CNoDestination();
+}
+} // namespace
+
+CTxDestination DecodeDestination(const std::string& str)
+{
+    return DecodeDestination(str, Params());
+}
+
+std::string EncodeDestination(const CTxDestination& dest)
+{
+    return boost::apply_visitor(DestinationEncoder(Params()), dest);
+}
+
 bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
 {
     // Skip leading spaces.

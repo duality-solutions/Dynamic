@@ -41,9 +41,9 @@ public:
         options = 0;
         number_signatures = 0;
         prefix.number_bits = 0;
-
-        //index = 0;
     };
+
+    CStealthAddress(const CKey& scanKey, const CKey& spendKey);
 
     uint8_t options;
     stealth_prefix prefix;
@@ -51,16 +51,12 @@ public:
     ec_point scan_pubkey;
     ec_point spend_pubkey;
 
-    mutable std::string label;
-
     CKey scan_secret;       // Better to store the scan secret here as it's needed often
     CKeyID spend_secret_id; // store the spend secret in a keystore
-    //CKey spend_secret;
-    //uint32_t index;
 
     bool SetEncoded(const std::string &encodedAddress);
-    std::string Encoded(bool fBech32=false) const;
-    std::string ToString(bool fBech32=false) const {return Encoded(fBech32);};
+    std::string Encoded() const;
+    std::string ToString() const {return Encoded();};
 
     int FromRaw(const uint8_t *p, size_t nSize);
     int ToRaw(std::vector<uint8_t> &raw) const;
@@ -90,7 +86,6 @@ public:
 
         s << scan_pubkey;
         s << spend_pubkey;
-        s << label;
 
         bool fHaveScanSecret = scan_secret.IsValid();
         s << fHaveScanSecret;
@@ -109,7 +104,6 @@ public:
 
         s >> scan_pubkey;
         s >> spend_pubkey;
-        s >> label;
 
         bool fHaveScanSecret;
         s >> fHaveScanSecret;

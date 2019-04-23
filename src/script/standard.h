@@ -70,6 +70,9 @@ public:
  */
 typedef boost::variant<CNoDestination, CKeyID, CScriptID, CStealthAddress> CTxDestination;
 
+/** Check whether a CTxDestination is a CNoDestination. */
+bool IsValidDestination(const CTxDestination& dest);
+
 const char* GetTxnOutputType(txnouttype t);
 
 bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet);

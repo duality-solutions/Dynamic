@@ -144,6 +144,47 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     return CDynamicAddress(keyID).ToString();
 }
 
+static UniValue getnewstealthaddress(const JSONRPCRequest &request)
+{
+    EnsureWalletIsUnlocked();
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "getnewstealthaddress\n"
+            "\nReturns a new stealth address for receiving links.\n"
+            "\nArguments:\n"
+            "\nResult:\n"
+            "\"stealthaddress\"    (string) The new Dynamic stealth address\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getnewstealthaddress", "") + HelpExampleRpc("getnewstealthaddress", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    // Get a new scan key from pool.
+    CPubKey scanPubKey;
+    if (!pwalletMain->GetKeyFromPool(scanPubKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CKeyID scanKeyID = scanPubKey.GetID();
+    CKey scanKey;
+    if (!pwalletMain->GetKey(scanKeyID, scanKey))
+        throw std::runtime_error(strprintf("%s -- Failed to get scan private key for stealth address\n", __func__));
+
+    // Get a new spend key from pool.
+    CPubKey spendPubKey;
+    if (!pwalletMain->GetKeyFromPool(spendPubKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CKeyID spendKeyID = spendPubKey.GetID();
+    CKey spendKey;
+    if (!pwalletMain->GetKey(spendKeyID, spendKey))
+        throw std::runtime_error(strprintf("%s -- Failed to get spend private key for stealth address\n", __func__));
+
+    CStealthAddress sxAddr(scanKey, spendKey);
+
+    return sxAddr.ToString();
+}
 
 CDynamicAddress GetAccountAddress(std::string strAccount, bool bForceNew = false)
 {
@@ -584,9 +625,9 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    CDynamicAddress address(request.params[0].get_str());
-    if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
 
     // Amount
     CAmount nAmount = AmountFromValue(request.params[1]);
@@ -613,7 +654,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -2980,6 +3021,8 @@ static const CRPCCommand commands[] =
         {"wallet", "importbdapkeys", &importbdapkeys,true, {"bdap_id", "wallet_privkey", "link_privkey", "DHT_privkey", "rescan"}},
         {"wallet", "importelectrumwallet", &importelectrumwallet, true, {"filename", "index"}},
         {"wallet", "importmnemonic", &importmnemonic, true, {"mnemonic", "passphrase", "begin", "end", "forcerescan"}},
+
+        {"wallet", "getnewstealthaddress", &getnewstealthaddress, true, {}},
 };
 
 void RegisterWalletRPCCommands(CRPCTable& t)
