@@ -439,28 +439,50 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
         rawTx.vin.push_back(in);
     }
 
-    std::set<CDynamicAddress> setAddress;
+    std::set<CTxDestination> setDestAddress;
     std::vector<std::string> addrList = sendTo.getKeys();
-    BOOST_FOREACH (const std::string& name_, addrList) {
+    for (const std::string& name_ : addrList) {
+        CScript scriptPubKey;
+        bool fStealthAddress = false;
+        std::vector<uint8_t> vStealthData;
         if (name_ == "data") {
             std::vector<unsigned char> data = ParseHexV(sendTo[name_].getValStr(), "Data");
-
             CTxOut out(0, CScript() << OP_RETURN << data);
             rawTx.vout.push_back(out);
         } else {
-            CDynamicAddress address(name_);
-            if (!address.IsValid())
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dynamic address: ") + name_);
+            CTxDestination dest = DecodeDestination(name_);
+            if (!IsValidDestination(dest))
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid Dynamic address:  %s", name_ ));
 
-            if (setAddress.count(address))
-                throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, duplicated address: ") + name_);
-            setAddress.insert(address);
+            if (setDestAddress.count(dest))
+                throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Invalid parameter, duplicated address:  %s", name_));
+            setDestAddress.insert(dest);
 
-            CScript scriptPubKey = GetScriptForDestination(address.Get());
+            if (dest.type() == typeid(CStealthAddress))
+            {
+                CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+                std::string sError;
+                if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("PrepareStealthOutput failed for address =") + name_ + ". Error: " + sError);
+                }
+                fStealthAddress = true;
+                CTxDestination newDest;
+                if (ExtractDestination(scriptPubKey, newDest))
+                    LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+            } else
+            {
+                scriptPubKey = GetScriptForDestination(dest);
+            }
             CAmount nAmount = AmountFromValue(sendTo[name_]);
 
             CTxOut out(nAmount, scriptPubKey);
             rawTx.vout.push_back(out);
+            if (fStealthAddress) {
+                CScript scriptData;
+                scriptData << OP_RETURN << vStealthData;
+                CTxOut txOutData(0, scriptData);
+                rawTx.vout.push_back(txOutData);
+            }
         }
     }
 
