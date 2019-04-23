@@ -86,6 +86,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidgetPendingAccept, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
     connect(ui->tableWidgetPendingRequest, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
+    connect(ui->tableWidgetComplete, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
 
     connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
 
@@ -308,7 +309,7 @@ void BdapPage::getLinkDetails(int row, int column)
 
     if (tableSource == ui->tableWidgetPendingAccept) actionType = LinkActions::LINK_PENDING_ACCEPT_DETAIL;
     else if (tableSource == ui->tableWidgetPendingRequest) actionType = LinkActions::LINK_PENDING_REQUEST_DETAIL;
-
+    else if (tableSource == ui->tableWidgetComplete) actionType = LinkActions::LINK_COMPLETE_DETAIL;
 
     //excuteAcceptLink
     executeLinkTransaction(actionType, requestor, recipient);
@@ -462,6 +463,13 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
             jreq.params = RPCConvertValues("link", params);
             jreq.strMethod = "link";
             break;
+        case (LinkActions::LINK_COMPLETE_DETAIL):
+            params.push_back("complete");
+            params.push_back(requestor);            
+            params.push_back(recipient);            
+            jreq.params = RPCConvertValues("link", params);
+            jreq.strMethod = "link";
+            break;
         default:
             params.push_back("complete");
             jreq.params = RPCConvertValues("link", params);
@@ -489,7 +497,11 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
             dlg.setWindowTitle(QObject::tr("BDAP Pending Accept Link Detail"));
         } else if (actionType == LinkActions::LINK_PENDING_REQUEST_DETAIL) {
             dlg.setWindowTitle(QObject::tr("BDAP Pending Request Link Detail"));
+        } else if (actionType == LinkActions::LINK_COMPLETE_DETAIL) {
+            dlg.setWindowTitle(QObject::tr("BDAP Complete Link Detail"));
         }; //end actionType if
+
+        //dlg.layout()->setSizeConstraint(QLayout::SetFixedSize);
 
         dlg.exec();
 
