@@ -1,5 +1,7 @@
 // Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2014 The ShadowCoin developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -9,6 +11,7 @@
 
 #include "base58.h"
 #include "bdap/linkstorage.h"
+#include "bdap/stealth.h"
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
@@ -1079,4 +1082,68 @@ bool CWalletDB::EraseLinkMessageInfo(const uint256& subjectID)
 {
     LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
     return Erase(std::make_pair(std::string("linkid"), subjectID)); 
+}
+
+bool CWalletDB::LoadStealthKeyAddresses(std::vector<std::pair<CKeyID, CStealthAddress>>& vStealthAddresses)
+{
+    try {
+        // Get cursor
+        Dbc* pcursor = GetCursor();
+        if (!pcursor)
+            throw std::runtime_error(std::string(__func__) + ": cannot create DB cursor");
+
+        while (true) {
+            // Read next record
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+            int ret = ReadAtCursor(pcursor, ssKey, ssValue);
+            if (ret == DB_NOTFOUND) {
+                break;
+            }
+            else if (ret != 0) {
+                LogPrintf("%s -- Error reading next record from wallet database\n", __func__);
+                return false;
+            }
+
+            std::string strType;
+            ssKey >> strType;
+
+            if (strType == "sxaddr1") {
+                CKeyID idAccount;
+                ssKey >> idAccount;
+                LogPrintf("%s -- Loading shared stealth address %s\n", __func__, idAccount.ToString());
+                CStealthAddress sx;
+                ssValue >> sx;
+                LogPrintf("%s -- Loading stealth address %s\n", __func__, sx.Encoded());
+                std::pair<CKeyID, CStealthAddress> pairStealthAdresss(idAccount, sx);
+                vStealthAddresses.push_back(pairStealthAdresss);
+            }
+        }
+        pcursor->close();
+    } catch (const boost::thread_interrupted&) {
+        throw;
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
+bool CWalletDB::WriteStealthAddress(const CStealthAddress& sxAddr)
+{
+    return Write(std::make_pair(std::string("sxaddr1"), sxAddr.GetSpendKeyID()), sxAddr);
+}
+
+bool CWalletDB::WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta)
+{
+    return Write(std::make_pair(std::string("sxkm"), keyId), sxKeyMeta);
+}
+
+bool CWalletDB::EraseStealthKeyQueue(const CKeyID& keyId)
+{
+    return Erase(std::make_pair(std::string("sxkm"), keyId));
+}
+
+bool CWalletDB::ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta)
+{
+    return Read(std::make_pair(std::string("sxkm"), keyId), sxKeyMeta);
 }

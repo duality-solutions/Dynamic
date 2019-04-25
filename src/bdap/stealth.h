@@ -36,6 +36,17 @@ struct stealth_prefix
 class CStealthAddress
 {
 public:
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    uint8_t options;
+    stealth_prefix prefix;
+    int number_signatures;
+    ec_point scan_pubkey;
+    ec_point spend_pubkey;
+
+    CKey scan_secret;       // Better to store the scan secret here as it's needed often
+    CKeyID spend_secret_id; // store the spend secret in a keystore
+
     CStealthAddress()
     {
         options = 0;
@@ -45,14 +56,7 @@ public:
 
     CStealthAddress(const CKey& scanKey, const CKey& spendKey);
 
-    uint8_t options;
-    stealth_prefix prefix;
-    int number_signatures;
-    ec_point scan_pubkey;
-    ec_point spend_pubkey;
-
-    CKey scan_secret;       // Better to store the scan secret here as it's needed often
-    CKeyID spend_secret_id; // store the spend secret in a keystore
+    bool IsNull() const { return (scan_pubkey.size() == 0 || spend_pubkey.size() == 0 || spend_secret_id.IsNull() || !scan_secret.IsValid()); }
 
     bool SetEncoded(const std::string &encodedAddress);
     std::string Encoded() const;
@@ -65,57 +69,51 @@ public:
 
     CKeyID GetSpendKeyID() const;
 
+    std::string GetAddressString(const CKeyID& keyid);
+
     bool operator <(const CStealthAddress &y) const
     {
         return memcmp(&scan_pubkey[0], &y.scan_pubkey[0], EC_COMPRESSED_SIZE) < 0;
-    };
+    }
 
     bool operator ==(const CStealthAddress &y) const
     {
         return memcmp(&scan_pubkey[0], &y.scan_pubkey[0], EC_COMPRESSED_SIZE) == 0;
-    };
-
-    template<typename Stream>
-    void Serialize(Stream &s) const
-    {
-        s << options;
-
-        s << number_signatures;
-        s << prefix.number_bits;
-        s << prefix.bitfield;
-
-        s << scan_pubkey;
-        s << spend_pubkey;
-
-        bool fHaveScanSecret = scan_secret.IsValid();
-        s << fHaveScanSecret;
-        if (fHaveScanSecret) {
-            s.write((char*)scan_secret.begin(), EC_SECRET_SIZE);
-        }
     }
-    template <typename Stream>
-    void Unserialize(Stream &s)
-    {
-        s >> options;
 
-        s >> number_signatures;
-        s >> prefix.number_bits;
-        s >> prefix.bitfield;
+    //std::string GetAddress(const CKeyID& keyid);
 
-        s >> scan_pubkey;
-        s >> spend_pubkey;
+    inline CStealthAddress operator=(const CStealthAddress& b) {
+        nVersion = b.nVersion;
+        options = b.options;
+        prefix = b.prefix;
+        number_signatures = b.number_signatures;
+        scan_pubkey = b.scan_pubkey;
+        spend_pubkey = b.spend_pubkey;
+        scan_secret = b.scan_secret;
+        spend_secret_id = b.spend_secret_id;
+        return *this;
+    }
 
-        bool fHaveScanSecret;
-        s >> fHaveScanSecret;
+    ADD_SERIALIZE_METHODS;
 
-        if (fHaveScanSecret) {
-            s.read((char*)scan_secret.begin(), EC_SECRET_SIZE);
-            scan_secret.SetFlags(true, true);
-
-            // Only derive spend_secret_id if also have the scan secret.
-            if (spend_pubkey.size() == EC_COMPRESSED_SIZE) { // TODO: won't work for multiple spend pubkeys
-                spend_secret_id = GetSpendKeyID();
-            }
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(this->nVersion);
+        READWRITE(options);
+        READWRITE(prefix.number_bits);
+        READWRITE(prefix.bitfield);
+        READWRITE(number_signatures);
+        READWRITE(scan_pubkey);
+        READWRITE(spend_pubkey);
+        spend_secret_id = GetSpendKeyID();
+        if (ser_action.ForRead()) {
+            std::vector<unsigned char> vchScanKey;
+            READWRITE(vchScanKey);
+            scan_secret.Set(vchScanKey.begin(), vchScanKey.end(), true);
+        } else {
+            std::vector<unsigned char> vchScanKey(scan_secret.begin(), scan_secret.end());
+            READWRITE(vchScanKey);
         }
     }
 };

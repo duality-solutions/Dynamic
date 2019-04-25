@@ -1,5 +1,7 @@
 // Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2014 The ShadowCoin developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -626,6 +628,47 @@ private:
     std::vector<char> _ssExtra;
 };
 
+class CStealthKeyQueueData
+{
+// Used to get secret for keys created by stealth transaction with wallet locked
+public:
+    CStealthKeyQueueData() {}
+
+    CStealthKeyQueueData(CPubKey pkEphem_, CPubKey pkScan_)
+    {
+        pkEphem = pkEphem_;
+        pkScan = pkScan_;
+    };
+
+    CPubKey pkEphem;
+    CPubKey pkScan;
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(pkEphem);
+        READWRITE(pkScan);
+    };
+};
+
+class CStealthAddressRaw
+{
+// Used to keep a list of stealth addresses used by this wallet by storing the raw format.
+public:
+    CStealthAddressRaw() {};
+
+    CStealthAddressRaw(std::vector<uint8_t>& addrRaw_) : addrRaw(addrRaw_) {};
+    std::vector<uint8_t> addrRaw;
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(addrRaw);
+    };
+};
+
 /** 
  * A CWallet is an extension of a keystore, which also maintains a set of transactions and balances,
  * and provides the ability to create new transactions.
@@ -767,6 +810,7 @@ public:
         fAnonymizableTallyCachedNonDenom = false;
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
+        nFoundStealth = 0;
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -788,6 +832,8 @@ public:
     int64_t nKeysLeftSinceAutoBackup;
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
+    std::map<CKeyID, CStealthAddress> mapstealthAddresses; //<! memory map of stealth addresses
+    uint32_t nFoundStealth; // for reporting, zero before use
 
     const CWalletTx* GetWalletTx(const uint256& hash) const;
 
@@ -1150,6 +1196,16 @@ public:
 
     bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
     bool EraseLinkMessageInfo(const uint256& subjectID);
+
+    // Stealth Address Support
+    bool GetStealthAddress(const CKeyID& keyid, CStealthAddress& sxAddr) const;
+    bool ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared);
+    int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
+    bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
+    bool ScanForOwnedOutputs(const CTransaction& tx);
+    bool AddStealthAddress(const CStealthAddress& sxAddr, const CKey& skSpend);
+    int LoadStealthAddresses();
+    CWalletDB* GetWalletDB();
 
 };
 

@@ -36,7 +36,7 @@ static uint32_t Checksum(uint8_t *p, uint32_t nBytes)
     memcpy(&checksum, &hash2[0], 4);
 
     return checksum;
-};
+}
 
 static bool VerifyChecksum(const std::vector<uint8_t> &data)
 {
@@ -48,7 +48,7 @@ static bool VerifyChecksum(const std::vector<uint8_t> &data)
     memcpy(&checksum, &(*(data.end() - 4)), 4);
 
     return Checksum((uint8_t*)&data[0], data.size()-4) == checksum;
-};
+}
 
 CStealthAddress::CStealthAddress(const CKey& scanKey, const CKey& spendKey)
 {
@@ -101,7 +101,7 @@ bool CStealthAddress::SetEncoded(const std::string &encodedAddress)
     }
 
     return 0 == FromRaw(p, raw.size()-1);
-};
+}
 
 int CStealthAddress::FromRaw(const uint8_t *p, size_t nSize)
 {
@@ -168,24 +168,29 @@ int CStealthAddress::ToRaw(std::vector<uint8_t> &raw) const
     }
 
     return 0;
-};
+}
 
 std::string CStealthAddress::Encoded() const
 {
     return CDynamicAddress(*this).ToString();
-};
+}
 
 int CStealthAddress::SetScanPubKey(const CPubKey &pk)
 {
     scan_pubkey.resize(pk.size());
     memcpy(&scan_pubkey[0], pk.begin(), pk.size());
     return 0;
-};
+}
 
 CKeyID CStealthAddress::GetSpendKeyID() const
 {
     return CKeyID(Hash160(spend_pubkey.begin(), spend_pubkey.end()));
-};
+}
+
+std::string CStealthAddress::GetAddressString(const CKeyID& keyid)
+{
+    return CDynamicAddress(keyid).ToString();
+}
 
 int SecretToPublicKey(const CKey &secret, ec_point &out)
 {
@@ -195,7 +200,8 @@ int SecretToPublicKey(const CKey &secret, ec_point &out)
     out.resize(EC_COMPRESSED_SIZE);
     memcpy(&out[0], pkTemp.begin(), EC_COMPRESSED_SIZE);
     return 0;
-};
+}
+
 ////StealthShared(sx.scan_secret    , vchEphemPK            , sShared
 int StealthShared(const CKey &secret, const ec_point &pubkey, CKey &sharedSOut)
 {
@@ -214,7 +220,8 @@ int StealthShared(const CKey &secret, const ec_point &pubkey, CKey &sharedSOut)
     }
 
     return 0;
-};
+}
+
 ////StealthSecret(r.sEphem          , sx.scan_pubkey        , sx.spend_pubkey        , sShared         , pkSendTo
 int StealthSecret(const CKey &secret, const ec_point &pubkey, const ec_point &pkSpend, CKey &sharedSOut, ec_point &pkOut)
 {
@@ -247,8 +254,7 @@ int StealthSecret(const CKey &secret, const ec_point &pubkey, const ec_point &pk
     test 0 and infinity?
     */
 
-    if (pubkey.size() != EC_COMPRESSED_SIZE
-        || pkSpend.size() != EC_COMPRESSED_SIZE) {
+    if (pubkey.size() != EC_COMPRESSED_SIZE || pkSpend.size() != EC_COMPRESSED_SIZE) {
         return errorN(1, "%s: sanity checks failed.", __func__);
     }
 
@@ -279,10 +285,11 @@ int StealthSecret(const CKey &secret, const ec_point &pubkey, const ec_point &pk
 
     size_t len = 33;
     secp256k1_ec_pubkey_serialize(secp256k1_ctx_stealth, &pkOut[0], &len, &R, SECP256K1_EC_COMPRESSED); // Returns: 1 always.
-
+    sharedSOut.SetFlags(1, 1);
+    LogPrint("stealth", "%s address from id %s, address from key %s\n", __func__, 
+                                CDynamicAddress(CPubKey(pkOut).GetID()).ToString(), CDynamicAddress(sharedSOut.GetPubKey().GetID()).ToString());
     return 0;
-};
-
+}
 
 int StealthSecretSpend(const CKey &scanSecret, const ec_point &ephemPubkey, const CKey &spendSecret, CKey &secretOut)
 {
@@ -313,8 +320,7 @@ int StealthSecretSpend(const CKey &scanSecret, const ec_point &ephemPubkey, cons
     }
 
     return 0;
-};
-
+}
 
 int StealthSharedToSecretSpend(const CKey &sharedS, const CKey &spendSecret, CKey &secretOut)
 {
@@ -328,7 +334,7 @@ int StealthSharedToSecretSpend(const CKey &sharedS, const CKey &spendSecret, CKe
     }
 
     return 0;
-};
+}
 
 int StealthSharedToPublicKey(const ec_point &pkSpend, const CKey &sharedS, ec_point &pkOut)
 {
@@ -355,7 +361,7 @@ int StealthSharedToPublicKey(const ec_point &pkSpend, const CKey &sharedS, ec_po
     secp256k1_ec_pubkey_serialize(secp256k1_ctx_stealth, &pkOut[0], &len, &R, SECP256K1_EC_COMPRESSED); // Returns: 1 always.
 
     return 0;
-};
+}
 
 bool IsStealthAddress(const std::string &encodedAddress)
 {
@@ -385,7 +391,7 @@ bool IsStealthAddress(const std::string &encodedAddress)
     }
 
     return true;
-};
+}
 
 uint32_t FillStealthPrefix(uint8_t nBits, uint32_t nBitfield)
 {
@@ -395,7 +401,7 @@ uint32_t FillStealthPrefix(uint8_t nBits, uint32_t nBitfield)
     prefix &= (~mask);
     prefix |= nBitfield & mask;
     return prefix;
-};
+}
 
 bool ExtractStealthPrefix(const char *pPrefix, uint32_t &nPrefix)
 {
@@ -421,7 +427,7 @@ bool ExtractStealthPrefix(const char *pPrefix, uint32_t &nPrefix)
         return error("%s strtol failed.", __func__);
     }
     return true;
-};
+}
 
 int MakeStealthData(const stealth_prefix& prefix, const CKey& sShared, const CPubKey& pkEphem, std::vector<uint8_t>& vData, uint32_t& nStealthPrefix, std::string& sError)
 {
@@ -440,30 +446,44 @@ int MakeStealthData(const stealth_prefix& prefix, const CKey& sShared, const CPu
     }
 
     return 0;
-};
+}
 
 int PrepareStealthOutput(const CStealthAddress &sx, CScript& scriptPubKey, std::vector<uint8_t>& vData, std::string& sError)
 {
+    LogPrint("stealth", "%s -- scan_pubkey %d, spend_pubkey %d, spend_secret_id %s, scan_secret valid %s, spend_secret_id isnull = %s\n", __func__, 
+                                 sx.scan_pubkey.size(), sx.spend_pubkey.size(), CDynamicAddress(sx.spend_secret_id).ToString(), 
+                                 sx.scan_secret.IsValid() ? "True" : "False", sx.spend_secret_id.IsNull() ? "Yes" : "No");
+    if (sx.IsNull()) {
+        sError = "Stealth address is null.";
+        return -1;
+    }
+
     CKey sShared, sEphem;
     ec_point pkSendTo;
     int k, nTries = 24;
     for (k = 0; k < nTries; ++k) { // if StealthSecret fails try again with new ephem key
         sEphem.MakeNewKey(true);
         if (StealthSecret(sEphem, sx.scan_pubkey, sx.spend_pubkey, sShared, pkSendTo) == 0)
+        {
+            LogPrint("stealth", "%s -- Shared wallet address (%s) created for stealth tx\n", __func__, CDynamicAddress(sShared.GetPubKey().GetID()).ToString());
             break;
+        }
+        else {
+            LogPrintf("%s -- StealthSecret failed for sEphem %s\n", __func__, CDynamicAddress(sEphem.GetPubKey().GetID()).ToString());
+            return -1;
+        }
     }
     if (k >= nTries) {
         return errorN(1, sError, __func__, "Could not generate receiving public key.");
     }
     CPubKey pkEphem = sEphem.GetPubKey();
     scriptPubKey = GetScriptForDestination(CPubKey(pkSendTo).GetID());
-
     uint32_t nStealthPrefix;
     if (0 != MakeStealthData(sx.prefix, sShared, pkEphem, vData, nStealthPrefix, sError)) {
         return 1;
     }
     return 0;
-};
+}
 
 void ECC_Start_Stealth()
 {
@@ -481,7 +501,7 @@ void ECC_Start_Stealth()
     }
 
     secp256k1_ctx_stealth = ctx;
-};
+}
 
 void ECC_Stop_Stealth()
 {
@@ -491,5 +511,5 @@ void ECC_Stop_Stealth()
     if (ctx) {
         secp256k1_context_destroy(ctx);
     }
-};
+}
 

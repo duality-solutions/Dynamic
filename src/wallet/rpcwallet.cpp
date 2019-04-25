@@ -182,6 +182,8 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
         throw std::runtime_error(strprintf("%s -- Failed to get spend private key for stealth address\n", __func__));
 
     CStealthAddress sxAddr(scanKey, spendKey);
+    if (!pwalletMain->AddStealthAddress(sxAddr, spendKey))
+        throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
 
     return sxAddr.ToString();
 }
@@ -382,14 +384,17 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     if (address.type() == typeid(CStealthAddress))
     {
         CStealthAddress sxAddr = boost::get<CStealthAddress>(address);
-        std::string sError;
-        if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
-            throw JSONRPCError(RPC_INTERNAL_ERROR, std::string("SendMoney failed after PrepareStealthOutput(): ") + sError);
+        if (pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr)) {
+            std::string sError;
+            // get sxAddr from wallet map stealthAddresses
+            if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                throw JSONRPCError(RPC_INTERNAL_ERROR, std::string("SendMoney failed after PrepareStealthOutput(): ") + sError);
+            }
+            fStealthAddress = true;
+            CTxDestination newDest;
+            if (ExtractDestination(scriptPubKey, newDest))
+                LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
         }
-        fStealthAddress = true;
-        CTxDestination newDest;
-        if (ExtractDestination(scriptPubKey, newDest))
-            LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
     } else
     {
         // Parse Dynamic address
@@ -1265,14 +1270,17 @@ UniValue sendmany(const JSONRPCRequest& request)
         if (dest.type() == typeid(CStealthAddress))
         {
             CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
-            std::string sError;
-            if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError))
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("PrepareStealthOutput failed for address:  %s, Error: %s", name_, sError));
+            // get sxAddr from wallet map stealthAddresses
+            if (pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr)) {
+                std::string sError;
+                if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError))
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("PrepareStealthOutput failed for address:  %s, Error: %s", name_, sError));
 
-            fStealthAddress = true;
-            CTxDestination newDest;
-            if (ExtractDestination(scriptPubKey, newDest))
-                LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+                fStealthAddress = true;
+                CTxDestination newDest;
+                if (ExtractDestination(scriptPubKey, newDest))
+                    LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+            }
         } else
         {
             scriptPubKey = GetScriptForDestination(dest);

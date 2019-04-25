@@ -461,14 +461,16 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             if (dest.type() == typeid(CStealthAddress))
             {
                 CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
-                std::string sError;
-                if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
-                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("PrepareStealthOutput failed for address =") + name_ + ". Error: " + sError);
+                if (pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr)) {
+                    std::string sError;
+                    if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("PrepareStealthOutput failed for address =") + name_ + ". Error: " + sError);
+                    }
+                    fStealthAddress = true;
+                    CTxDestination newDest;
+                    if (ExtractDestination(scriptPubKey, newDest))
+                        LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
                 }
-                fStealthAddress = true;
-                CTxDestination newDest;
-                if (ExtractDestination(scriptPubKey, newDest))
-                    LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
             } else
             {
                 scriptPubKey = GetScriptForDestination(dest);
