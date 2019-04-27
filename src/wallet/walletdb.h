@@ -161,6 +161,7 @@ public:
     bool WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta);
     bool EraseStealthKeyQueue(const CKeyID& keyId);
     bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
+    bool GetStealthQueue(std::vector<std::pair<CKeyID,CStealthKeyQueueData>>& vStealthKeyQueue);
 
 private:
     CWalletDB(const CWalletDB&);

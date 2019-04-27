@@ -535,8 +535,8 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                     nWalletBackups = GetArg("-createwalletbackups", 10);
                 }
                 if (!fForMixingOnly) {
-                    // Process encrypted links in queue
-                    ProcessLinkQueue();
+                    RunProcessStealthQueue(); // Process stealth transactions in queue
+                    ProcessLinkQueue(); // Process encrypted links in queue
                 }
                 return true;
             }
@@ -5238,8 +5238,9 @@ bool CWallet::InitLoadWallet()
         return false;
     }
     pwalletMain = pwallet;
-    // Process link queue.
-    ProcessLinkQueue();
+
+    RunProcessStealthQueue(); // Process stealth transactions in queue
+    ProcessLinkQueue(); // Process links in queue.
 
     return true;
 }
@@ -5434,11 +5435,59 @@ inline bool MatchPrefix(uint32_t nAddrBits, uint32_t addrPrefix, uint32_t output
     return (addrPrefix & mask) == (outputPrefix & mask);
 }
 
+bool CWallet::ProcessStealthQueue()
+{
+    CWalletDB* pwdb = GetWalletDB();
+    if (!pwdb)
+        return false;
+
+    std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
+    if (pwdb->GetStealthQueue(vStealthKeyQueue)) {
+        for (const std::pair<CKeyID, CStealthKeyQueueData>& data : vStealthKeyQueue) {
+            CStealthKeyQueueData stealthData = data.second;
+            CKey sSpend;
+            if (!GetKey(stealthData.pkSpend.GetID(), sSpend)) {
+                LogPrintf("%s: Error getting spend private key (%s) for stealth transaction.\n", __func__,  CDynamicAddress(stealthData.pkSpend.GetID()).ToString());
+                continue;
+            }
+            CKey sSpendR;
+            if (StealthSharedToSecretSpend(stealthData.SharedKey, sSpend, sSpendR) != 0) {
+                LogPrintf("%s: StealthSharedToSecretSpend() failed.\n", __func__);
+                continue;
+            }
+            CPubKey pkT = sSpendR.GetPubKey();
+            if (!pkT.IsValid()) {
+                LogPrintf("%s: pkT is invalid.\n", __func__);
+                continue;
+            }
+            CKeyID keyID = pkT.GetID();
+            if (keyID != data.first) {
+                LogPrintf("%s: Spend key mismatch!\n", __func__);
+                continue;
+            }
+
+            if (!AddKeyPubKey(sSpendR, pkT)) {
+                continue;
+            }
+            nFoundStealth++;
+        }
+    }
+    return true;
+}
+
+bool RunProcessStealthQueue()
+{
+    if (!pwalletMain)
+        return false;
+
+    return pwalletMain->ProcessStealthQueue();
+}
+
 bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared)
 {
     CWalletDB* pwdb = GetWalletDB();
     if (!pwdb)
-        return errorN(1, "%s: GetWalletDB failed.", __func__);
+        return false;
 
     CKeyID idMatchShared = boost::get<CKeyID>(address);
     ec_point pkExtracted;
@@ -5479,8 +5528,9 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
             AddCryptedKey(pkE, vchEmpty);
             CPubKey cpkEphem(vchEphemPK);
             CPubKey cpkScan(sxAddr.scan_pubkey);
-            CStealthKeyQueueData lockedSkQueueData(cpkEphem, cpkScan);
-            if (!pwdb->WriteStealthKeyQueue(idExtracted, lockedSkQueueData)) {
+            CPubKey cpkSpend(sxAddr.spend_pubkey);
+            CStealthKeyQueueData lockedSkQueueData(cpkEphem, cpkScan, cpkSpend, sShared);
+            if (!pwdb->WriteStealthKeyQueue(idMatchShared, lockedSkQueueData)) {
                 LogPrintf("%s: Error WriteStealthKeyQueue failed for %s.\n", __func__, CDynamicAddress(idExtracted).ToString());
                 return false;
             }

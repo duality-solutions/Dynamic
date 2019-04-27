@@ -634,14 +634,26 @@ class CStealthKeyQueueData
 public:
     CStealthKeyQueueData() {}
 
-    CStealthKeyQueueData(CPubKey pkEphem_, CPubKey pkScan_)
+    CStealthKeyQueueData(const CPubKey& pkEphem_, const CPubKey& pkScan_, const CPubKey& pkSpend_, const CKey& SharedKey_)
     {
         pkEphem = pkEphem_;
         pkScan = pkScan_;
+        pkSpend = pkSpend_;
+        SharedKey = SharedKey_;
     };
 
     CPubKey pkEphem;
     CPubKey pkScan;
+    CPubKey pkSpend;
+    CKey SharedKey;
+
+    inline CStealthKeyQueueData operator=(const CStealthKeyQueueData& b) {
+        pkEphem = b.pkEphem;
+        pkScan = b.pkScan;
+        pkSpend = b.pkSpend;
+        SharedKey = b.SharedKey;
+        return *this;
+    }
 
     ADD_SERIALIZE_METHODS;
     template <typename Stream, typename Operation>
@@ -649,6 +661,15 @@ public:
     {
         READWRITE(pkEphem);
         READWRITE(pkScan);
+        READWRITE(pkSpend);
+        if (ser_action.ForRead()) {
+            std::vector<unsigned char> vchSharedKey;
+            READWRITE(vchSharedKey);
+            SharedKey.Set(vchSharedKey.begin(), vchSharedKey.end(), true);
+        } else {
+            std::vector<unsigned char> vchSharedKey(SharedKey.begin(), SharedKey.end());
+            READWRITE(vchSharedKey);
+        }
     };
 };
 
@@ -1199,6 +1220,7 @@ public:
 
     // Stealth Address Support
     bool GetStealthAddress(const CKeyID& keyid, CStealthAddress& sxAddr) const;
+    bool ProcessStealthQueue();
     bool ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared);
     int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
     bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
@@ -1268,5 +1290,7 @@ public:
         READWRITE(vchPubKey);
     }
 };
+
+bool RunProcessStealthQueue();
 
 #endif // DYNAMIC_WALLET_WALLET_H

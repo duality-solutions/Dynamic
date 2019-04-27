@@ -1108,7 +1108,7 @@ bool CWalletDB::LoadStealthKeyAddresses(std::vector<std::pair<CKeyID, CStealthAd
             std::string strType;
             ssKey >> strType;
 
-            if (strType == "sxaddr1") {
+            if (strType == "stealth") {
                 CKeyID idAccount;
                 ssKey >> idAccount;
                 LogPrintf("%s -- Loading shared stealth address %s\n", __func__, idAccount.ToString());
@@ -1130,20 +1130,61 @@ bool CWalletDB::LoadStealthKeyAddresses(std::vector<std::pair<CKeyID, CStealthAd
 
 bool CWalletDB::WriteStealthAddress(const CStealthAddress& sxAddr)
 {
-    return Write(std::make_pair(std::string("sxaddr1"), sxAddr.GetSpendKeyID()), sxAddr);
+    return Write(std::make_pair(std::string("stealth"), sxAddr.GetSpendKeyID()), sxAddr);
 }
 
 bool CWalletDB::WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta)
 {
-    return Write(std::make_pair(std::string("sxkm"), keyId), sxKeyMeta);
+    return Write(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
 }
 
 bool CWalletDB::EraseStealthKeyQueue(const CKeyID& keyId)
 {
-    return Erase(std::make_pair(std::string("sxkm"), keyId));
+    return Erase(std::make_pair(std::string("sxqueue"), keyId));
 }
 
 bool CWalletDB::ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta)
 {
-    return Read(std::make_pair(std::string("sxkm"), keyId), sxKeyMeta);
+    return Read(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
+}
+
+bool CWalletDB::GetStealthQueue(std::vector<std::pair<CKeyID,CStealthKeyQueueData>>& vStealthKeyQueue)
+{
+    try {
+        // Get cursor
+        Dbc* pcursor = GetCursor();
+        if (!pcursor)
+            throw std::runtime_error(std::string(__func__) + ": cannot create DB cursor");
+
+        while (true) {
+            // Read next record
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+            int ret = ReadAtCursor(pcursor, ssKey, ssValue);
+            if (ret == DB_NOTFOUND) {
+                break;
+            }
+            else if (ret != 0) {
+                LogPrintf("%s -- Error reading next record from wallet database\n", __func__);
+                return false;
+            }
+
+            std::string strType;
+            ssKey >> strType;
+
+            if (strType == "sxqueue") {
+                CKeyID idAccount;
+                ssKey >> idAccount;
+                CStealthKeyQueueData stealthData;
+                ssValue >> stealthData;
+                vStealthKeyQueue.push_back(std::make_pair(idAccount, stealthData));
+            }
+        }
+        pcursor->close();
+    } catch (const boost::thread_interrupted&) {
+        throw;
+    } catch (...) {
+        return false;
+    }
+    return (vStealthKeyQueue.size() > 0);
 }
