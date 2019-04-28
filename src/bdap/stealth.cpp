@@ -120,6 +120,7 @@ int CStealthAddress::FromRaw(const uint8_t *p, size_t nSize)
     }
 
     spend_pubkey.resize(EC_COMPRESSED_SIZE * spend_pubkeys);
+    spend_secret_id = CPubKey(spend_pubkey).GetID();
     memcpy(&spend_pubkey[0], p, EC_COMPRESSED_SIZE * spend_pubkeys);
     p += EC_COMPRESSED_SIZE * spend_pubkeys;
     number_signatures = *p++;

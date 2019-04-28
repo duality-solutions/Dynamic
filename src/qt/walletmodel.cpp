@@ -274,17 +274,15 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             if (dest.type() == typeid(CStealthAddress))
             {
                 CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
-                if (wallet->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr)) {
-                    std::string sError;
-                    if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
-                        LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
-                        return InvalidAddress;
-                    }
-                    fStealthAddress = true;
+                std::string sError;
+                if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                    LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+                    return InvalidAddress;
                 }
-                else {
-                    LogPrintf("%s -- Stealth address not found. %s\n", __func__, CDynamicAddress(sxAddr.GetSpendKeyID()).ToString());
-                }
+                fStealthAddress = true;
+                CTxDestination newDest;
+                if (ExtractDestination(scriptPubKey, newDest))
+                    LogPrint("stealth", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
             } 
             else {
                 scriptPubKey = GetScriptForDestination(dest);

@@ -56,7 +56,7 @@ public:
 
     CStealthAddress(const CKey& scanKey, const CKey& spendKey);
 
-    bool IsNull() const { return (scan_pubkey.size() == 0 || spend_pubkey.size() == 0 || spend_secret_id.IsNull() || !scan_secret.IsValid()); }
+    bool IsNull() const { return (scan_pubkey.size() == 0 || spend_pubkey.size() == 0 || spend_secret_id.IsNull()); }
 
     bool SetEncoded(const std::string &encodedAddress);
     std::string Encoded() const;
