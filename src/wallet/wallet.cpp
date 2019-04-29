@@ -5441,6 +5441,9 @@ bool CWallet::ProcessStealthQueue()
     if (!pwdb)
         return false;
 
+    if (IsLocked())
+        return false;
+
     std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
     if (pwdb->GetStealthQueue(vStealthKeyQueue)) {
         for (const std::pair<CKeyID, CStealthKeyQueueData>& data : vStealthKeyQueue) {
@@ -5470,6 +5473,7 @@ bool CWallet::ProcessStealthQueue()
                 continue;
             }
             nFoundStealth++;
+            pwdb->EraseStealthKeyQueue(data.first);
         }
     }
     return true;

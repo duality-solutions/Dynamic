@@ -333,10 +333,12 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixin
         }
         if (keyPass && keyFail) {
             LogPrintf("The wallet is probably corrupted: Some keys decrypt but not all.\n");
-            assert(false);
+            // TODO (BDAP): Fix locked stealth address
+            //assert(false);
         }
-        if (keyFail || (!keyPass && cryptedHDChain.IsNull()))
-            return false;
+        // TODO (BDAP): Fix locked stealth address
+        //if (keyFail || (!keyPass && cryptedHDChain.IsNull()))
+        //    return false;
 
         vMasterKey = vMasterKeyIn;
 
