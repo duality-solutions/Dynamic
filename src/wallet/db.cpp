@@ -424,8 +424,6 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
                 return fSuccess;
             }
         }
-        // TODO (BDAP): Why is this needed?  Worked without before adding stealth
-        --bitdb.mapFileUseCount[strFile];
         MilliSleep(100);
     }
     return false;

@@ -5434,11 +5434,11 @@ inline bool MatchPrefix(uint32_t nAddrBits, uint32_t addrPrefix, uint32_t output
 bool CWallet::ProcessStealthQueue()
 {
     CWalletDB* pwdb = GetWalletDB();
-    if (!pwdb)
-        return false;
 
-    if (IsLocked())
+    if (IsLocked()) {
+        delete pwdb;
         return false;
+    }
 
     for (const std::pair<CKeyID, CStealthKeyQueueData>& data : vStealthKeyQueue) {
         CStealthKeyQueueData stealthData = data.second;
@@ -5472,6 +5472,7 @@ bool CWallet::ProcessStealthQueue()
     }
     // TODO (Stealth): Add lock for vector.
     vStealthKeyQueue.clear();
+    delete pwdb;
     return true;
 }
 
@@ -5486,8 +5487,6 @@ bool RunProcessStealthQueue()
 bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared)
 {
     CWalletDB* pwdb = GetWalletDB();
-    if (!pwdb)
-        return false;
 
     CKeyID idMatchShared = boost::get<CKeyID>(address);
     ec_point pkExtracted;
@@ -5532,15 +5531,18 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
             CStealthKeyQueueData lockedSkQueueData(cpkEphem, cpkScan, cpkSpend, sShared);
             if (!pwdb->WriteStealthKeyQueue(idMatchShared, lockedSkQueueData)) {
                 LogPrintf("%s: Error WriteStealthKeyQueue failed for %s.\n", __func__, CDynamicAddress(idExtracted).ToString());
+                delete pwdb;
                 return false;
             }
             vStealthKeyQueue.push_back(std::make_pair(cpkSpend.GetID(), lockedSkQueueData));
             nFoundStealth++;
+            delete pwdb;
             return true;
         }
 
         if (!GetKey(sxAddr.GetSpendKeyID(), sSpend)) {
             LogPrintf("%s: Error getting spend private key (%s) for stealth transaction.\n", __func__,  CDynamicAddress(sxAddr.GetSpendKeyID()).ToString());
+            delete pwdb;
             return false;
         }
         CKey sSpendR;
@@ -5563,8 +5565,10 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
             continue;
         }
         nFoundStealth++;
+        delete pwdb;
         return true;
     }
+    delete pwdb;
     return false;
 }
 
@@ -5717,14 +5721,14 @@ bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr, const CKey& skSpe
 {
     LogPrintf("%s: %s\n", __func__, sxAddr.Encoded());
     CWalletDB* pwdb = GetWalletDB();
-    if (!pwdb)
-        return false;
 
     LOCK(cs_wallet);
     if (!pwdb->WriteStealthAddress(sxAddr)) {
+        delete pwdb;
         return error("%s: WriteStealthAddress failed.", __func__);
     }
     mapstealthAddresses[sxAddr.GetSpendKeyID()] = sxAddr;
+    delete pwdb;
     return true;
 }
 
@@ -5742,13 +5746,7 @@ bool CWallet::AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& p
 
 CWalletDB* CWallet::GetWalletDB()
 {
-    CWalletDB* pwdb;
-    if (IsCrypted() && pwalletdbEncryption) {
-        pwdb = pwalletdbEncryption;
-    }
-    else {
-        pwdb = new CWalletDB(strWalletFile, "r+");
-    }
+    CWalletDB* pwdb = new CWalletDB(strWalletFile, "r+");
     assert(pwdb);
     return pwdb;
 }
