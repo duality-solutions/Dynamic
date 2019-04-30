@@ -19,7 +19,6 @@
 class CScript;
 
 typedef std::vector<uint8_t> ec_point;
-typedef uint32_t stealth_bitfield;
 
 const uint32_t MAX_STEALTH_NARRATION_SIZE = 48;
 const uint32_t MIN_STEALTH_RAW_SIZE = 1 + 33 + 1 + 33 + 1 + 1; // without checksum (4bytes) or version (1byte)
@@ -30,7 +29,7 @@ const size_t EC_UNCOMPRESSED_SIZE = 65;
 struct stealth_prefix
 {
     uint8_t number_bits;
-    stealth_bitfield bitfield;
+    uint32_t bitfield;
 };
 
 class CStealthAddress

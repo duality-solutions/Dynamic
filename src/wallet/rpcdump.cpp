@@ -886,16 +886,41 @@ UniValue dumpprivkey(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     std::string strAddress = request.params[0].get_str();
-    CDynamicAddress address;
-    if (!address.SetString(strAddress))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
-    CKeyID keyID;
-    if (!address.GetKeyID(keyID))
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
-    CKey vchSecret;
-    if (!pwalletMain->GetKey(keyID, vchSecret))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
-    return CDynamicSecret(vchSecret).ToString();
+    CTxDestination dest = DecodeDestination(strAddress);
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address " + strAddress);
+
+    if (dest.type() == typeid(CStealthAddress)) {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+        if (!pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
+
+        UniValue result(UniValue::VOBJ);
+
+        result.push_back(Pair("scan_private_key", CDynamicSecret(sxAddr.scan_secret).ToString()));
+
+        CKey vchSpendSecret;
+        if (!pwalletMain->GetKey(sxAddr.spend_secret_id, vchSpendSecret))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for spend address " + CDynamicAddress(sxAddr.spend_secret_id).ToString() + " is not known");
+
+        result.push_back(Pair("spend_private_key", CDynamicSecret(vchSpendSecret).ToString()));
+        result.push_back(Pair("prefix_number_bits", (int)sxAddr.prefix.number_bits));
+        result.push_back(Pair("prefix_bitfield", (int)sxAddr.prefix.bitfield));
+
+        return result;
+    } else {
+        CDynamicAddress address;
+        if (!address.SetString(strAddress))
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+        CKeyID keyID;
+        if (!address.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+        CKey vchSecret;
+        if (!pwalletMain->GetKey(keyID, vchSecret))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
+        return CDynamicSecret(vchSecret).ToString();
+    }
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type: " + strAddress + " Must be a standard or stealth address.");
 }
 
 UniValue dumpbdapkeys(const JSONRPCRequest& request)
