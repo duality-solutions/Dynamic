@@ -1226,10 +1226,11 @@ public:
     int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
     bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
     bool ScanForOwnedOutputs(const CTransaction& tx);
-    bool AddStealthAddress(const CStealthAddress& sxAddr, const CKey& skSpend);
+    bool AddStealthAddress(const CStealthAddress& sxAddr);
     bool AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress);
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
+    bool HaveStealthAddress(const CKeyID& address) const;
 
 };
 

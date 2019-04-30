@@ -55,12 +55,29 @@ CStealthAddress::CStealthAddress(const CKey& scanKey, const CKey& spendKey)
     options = 0;
     //uint8_t tmp32[32];
     //CSHA256().Write(scanKey.begin(), 32).Finalize(tmp32);
-    //memcpy(&prefix.number_bits, tmp32, 4);
+    //memcpy(&prefix_number_bits, tmp32, 4);
     //CSHA256().Write(spendKey.begin(), 32).Finalize(tmp32);
-    //size_t nPrefixBytes = std::ceil((float)prefix.number_bits / 8.0);
-    //memcpy(&prefix.bitfield, tmp32, nPrefixBytes);
-    prefix.number_bits = 0;
-    prefix.bitfield = 0;
+    //size_t nPrefixBytes = std::ceil((float)prefix_number_bits / 8.0);
+    //memcpy(&prefix_bitfield, tmp32, nPrefixBytes);
+    prefix_number_bits = 0;
+    prefix_bitfield = 0;
+    number_signatures = 1;
+
+    scan_pubkey.resize(scanKey.GetPubKey().size());
+    memcpy(&scan_pubkey[0], scanKey.GetPubKey().begin(), scanKey.GetPubKey().size());
+
+    spend_pubkey.resize(spendKey.GetPubKey().size());
+    memcpy(&spend_pubkey[0], spendKey.GetPubKey().begin(), spendKey.GetPubKey().size());
+
+    scan_secret = scanKey;
+    spend_secret_id = spendKey.GetPubKey().GetID();
+}
+
+CStealthAddress::CStealthAddress(const CKey& scanKey, const CKey& spendKey, const uint8_t bits, const uint32_t prefix)
+{
+    options = 0;
+    prefix_number_bits = bits;
+    prefix_bitfield = prefix;
     number_signatures = 1;
 
     scan_pubkey.resize(scanKey.GetPubKey().size());
@@ -124,16 +141,16 @@ int CStealthAddress::FromRaw(const uint8_t *p, size_t nSize)
     memcpy(&spend_pubkey[0], p, EC_COMPRESSED_SIZE * spend_pubkeys);
     p += EC_COMPRESSED_SIZE * spend_pubkeys;
     number_signatures = *p++;
-    prefix.number_bits = *p++;
-    prefix.bitfield = 0;
-    size_t nPrefixBytes = std::ceil((float)prefix.number_bits / 8.0);
+    prefix_number_bits = *p++;
+    prefix_bitfield = 0;
+    size_t nPrefixBytes = std::ceil((float)prefix_number_bits / 8.0);
 
     if (nSize < MIN_STEALTH_RAW_SIZE + EC_COMPRESSED_SIZE * (spend_pubkeys-1) + nPrefixBytes) {
         return 1;
     }
 
     if (nPrefixBytes) {
-        memcpy(&prefix.bitfield, p, nPrefixBytes);
+        memcpy(&prefix_bitfield, p, nPrefixBytes);
     }
 
     return 0;
@@ -144,7 +161,7 @@ int CStealthAddress::ToRaw(std::vector<uint8_t> &raw) const
     // https://wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
     // [version] [options] [scan_key] [N] ... [Nsigs] [prefix_length] ...
 
-    size_t nPrefixBytes = std::ceil((float)prefix.number_bits / 8.0);
+    size_t nPrefixBytes = std::ceil((float)prefix_number_bits / 8.0);
     size_t nPkSpend = spend_pubkey.size() / EC_COMPRESSED_SIZE;
     if (scan_pubkey.size() != EC_COMPRESSED_SIZE
         || spend_pubkey.size() < EC_COMPRESSED_SIZE
@@ -163,9 +180,9 @@ int CStealthAddress::ToRaw(std::vector<uint8_t> &raw) const
     raw[o] = nPkSpend; o++;
     memcpy(&raw[o], &spend_pubkey[0], EC_COMPRESSED_SIZE * nPkSpend); o += EC_COMPRESSED_SIZE * nPkSpend;
     raw[o] = number_signatures; o++;
-    raw[o] = prefix.number_bits; o++;
+    raw[o] = prefix_number_bits; o++;
     if (nPrefixBytes) {
-        memcpy(&raw[o], &prefix.bitfield, nPrefixBytes); o += nPrefixBytes;
+        memcpy(&raw[o], &prefix_bitfield, nPrefixBytes); o += nPrefixBytes;
     }
 
     return 0;
@@ -475,7 +492,8 @@ int PrepareStealthOutput(const CStealthAddress &sx, CScript& scriptPubKey, std::
     CPubKey pkEphem = sEphem.GetPubKey();
     scriptPubKey = GetScriptForDestination(CPubKey(pkSendTo).GetID());
     uint32_t nStealthPrefix;
-    if (0 != MakeStealthData(sx.prefix, sShared, pkEphem, vData, nStealthPrefix, sError)) {
+    stealth_prefix prefix {sx.prefix_number_bits, sx.prefix_bitfield};
+    if (0 != MakeStealthData(prefix, sShared, pkEphem, vData, nStealthPrefix, sError)) {
         return 1;
     }
     return 0;

@@ -38,7 +38,8 @@ public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     uint8_t options;
-    stealth_prefix prefix;
+    uint8_t prefix_number_bits;
+    uint32_t prefix_bitfield;
     int number_signatures;
     ec_point scan_pubkey;
     ec_point spend_pubkey;
@@ -50,10 +51,11 @@ public:
     {
         options = 0;
         number_signatures = 0;
-        prefix.number_bits = 0;
+        prefix_number_bits = 0;
     };
 
     CStealthAddress(const CKey& scanKey, const CKey& spendKey);
+    CStealthAddress(const CKey& scanKey, const CKey& spendKey, const uint8_t bits, const uint32_t prefix);
 
     bool IsNull() const { return (scan_pubkey.size() == 0 || spend_pubkey.size() == 0 || spend_secret_id.IsNull()); }
 
@@ -81,7 +83,8 @@ public:
     inline CStealthAddress operator=(const CStealthAddress& b) {
         nVersion = b.nVersion;
         options = b.options;
-        prefix = b.prefix;
+        prefix_number_bits = b.prefix_number_bits;
+        prefix_bitfield = b.prefix_bitfield;
         number_signatures = b.number_signatures;
         scan_pubkey = b.scan_pubkey;
         spend_pubkey = b.spend_pubkey;
@@ -96,8 +99,8 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
         READWRITE(options);
-        READWRITE(prefix.number_bits);
-        READWRITE(prefix.bitfield);
+        READWRITE(prefix_number_bits);
+        READWRITE(prefix_bitfield);
         READWRITE(number_signatures);
         READWRITE(scan_pubkey);
         READWRITE(spend_pubkey);

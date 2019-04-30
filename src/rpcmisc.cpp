@@ -220,8 +220,8 @@ public:
     UniValue operator()(const CStealthAddress& sxAddr) const {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isstealthaddress", true);
-        obj.pushKV("prefix_num_bits", sxAddr.prefix.number_bits);
-        obj.pushKV("prefix_bitfield", strprintf("0x%04x", sxAddr.prefix.bitfield));
+        obj.pushKV("prefix_num_bits", sxAddr.prefix_number_bits);
+        obj.pushKV("prefix_bitfield", strprintf("0x%04x", sxAddr.prefix_bitfield));
         return obj;
     }
 

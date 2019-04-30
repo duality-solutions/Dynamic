@@ -182,7 +182,7 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
         throw std::runtime_error(strprintf("%s -- Failed to get spend private key for stealth address\n", __func__));
 
     CStealthAddress sxAddr(scanKey, spendKey);
-    if (!pwalletMain->AddStealthAddress(sxAddr, spendKey))
+    if (!pwalletMain->AddStealthAddress(sxAddr))
         throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
 
     return sxAddr.ToString();
@@ -2997,6 +2997,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
 
 extern UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
 extern UniValue importprivkey(const JSONRPCRequest& request);
+extern UniValue importstealthaddress(const JSONRPCRequest& request);
 extern UniValue importaddress(const JSONRPCRequest& request);
 extern UniValue importpubkey(const JSONRPCRequest& request);
 extern UniValue dumpwallet(const JSONRPCRequest& request);
@@ -3039,6 +3040,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getwalletinfo", &getwalletinfo, false, {}},
         {"wallet", "importmulti", &importmulti, true, {"requests", "options"}},
         {"wallet", "importprivkey", &importprivkey, true, {"privkey", "label", "rescan"}},
+        {"wallet", "importstealthaddress", &importstealthaddress, true, {"privkey", "label", "rescan"}},
         {"wallet", "importwallet",  &importwallet,  true, {"filename", "forcerescan"}},
         {"wallet", "importaddress", &importaddress, true, {"address", "label", "rescan", "p2sh"}},
         {"wallet", "importprunedfunds", &importprunedfunds, true, {"rawtransaction", "txoutproof"}},

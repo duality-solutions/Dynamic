@@ -5498,7 +5498,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
         if (sxAddr.IsNull())
             continue;
 
-        if (!MatchPrefix(sxAddr.prefix.number_bits, sxAddr.prefix.bitfield, prefix, fHavePrefix)) {
+        if (!MatchPrefix(sxAddr.prefix_number_bits, sxAddr.prefix_bitfield, prefix, fHavePrefix)) {
             continue;
         }
         if (!sxAddr.scan_secret.IsValid()) {
@@ -5717,7 +5717,7 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
     return fIsMine;
 }
 
-bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr, const CKey& skSpend)
+bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr)
 {
     LogPrintf("%s: %s\n", __func__, sxAddr.Encoded());
     CWalletDB* pwdb = GetWalletDB();
@@ -5750,6 +5750,14 @@ CWalletDB* CWallet::GetWalletDB()
     assert(pwdb);
     return pwdb;
 }
+
+bool CWallet::HaveStealthAddress(const CKeyID& address) const
+{
+    if (mapstealthAddresses.count(address) > 0)
+        return true;
+    return false;
+}
+
 //! End Stealth Address Support
 
 // This should be called carefully:
