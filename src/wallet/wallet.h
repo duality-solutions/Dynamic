@@ -854,7 +854,9 @@ public:
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
     std::map<CKeyID, CStealthAddress> mapstealthAddresses; //<! memory map of stealth addresses
+    mutable CCriticalSection cs_mapstealthAddresses;
     std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
+    mutable CCriticalSection cs_vStealthKeyQueue;
     uint32_t nFoundStealth; // for reporting, zero before use
 
     const CWalletTx* GetWalletTx(const uint256& hash) const;

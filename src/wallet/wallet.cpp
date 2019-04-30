@@ -5407,6 +5407,7 @@ bool CWallet::BackupWallet(const std::string& strDest)
 //! Stealth Address Support
 bool CWallet::GetStealthAddress(const CKeyID& keyid, CStealthAddress& sxAddr) const
 {
+    LOCK(cs_mapstealthAddresses);
     std::map<CKeyID, CStealthAddress>::const_iterator it = mapstealthAddresses.find(keyid);
     if (it != mapstealthAddresses.end()) {
         LogPrintf("CWallet::%s -- found %s\n", __func__, CDynamicAddress(keyid).ToString());
@@ -5440,6 +5441,7 @@ bool CWallet::ProcessStealthQueue()
         return false;
     }
 
+    LOCK(cs_vStealthKeyQueue);
     for (const std::pair<CKeyID, CStealthKeyQueueData>& data : vStealthKeyQueue) {
         CStealthKeyQueueData stealthData = data.second;
         CKey sSpend;
@@ -5470,7 +5472,6 @@ bool CWallet::ProcessStealthQueue()
         nFoundStealth++;
         pwdb->EraseStealthKeyQueue(data.first);
     }
-    // TODO (Stealth): Add lock for vector.
     vStealthKeyQueue.clear();
     delete pwdb;
     return true;
@@ -5491,7 +5492,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
     CKeyID idMatchShared = boost::get<CKeyID>(address);
     ec_point pkExtracted;
     CKey sSpend;
-    LOCK(cs_wallet);
+    LOCK(cs_mapstealthAddresses);
     std::map<CKeyID, CStealthAddress>::const_iterator it;
     for (it = mapstealthAddresses.begin(); it != mapstealthAddresses.end(); ++it) {
         CStealthAddress sxAddr = (*it).second;
@@ -5534,6 +5535,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
                 delete pwdb;
                 return false;
             }
+            LOCK(cs_vStealthKeyQueue);
             vStealthKeyQueue.push_back(std::make_pair(idExtracted, lockedSkQueueData));
             nFoundStealth++;
             delete pwdb;
@@ -5722,7 +5724,7 @@ bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr)
     LogPrintf("%s: %s\n", __func__, sxAddr.Encoded());
     CWalletDB* pwdb = GetWalletDB();
 
-    LOCK(cs_wallet);
+    LOCK(cs_mapstealthAddresses);
     if (!pwdb->WriteStealthAddress(sxAddr)) {
         delete pwdb;
         return error("%s: WriteStealthAddress failed.", __func__);
@@ -5734,12 +5736,14 @@ bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr)
 
 bool CWallet::AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress)
 {
+    LOCK(cs_mapstealthAddresses);
     mapstealthAddresses[pairStealthAddress.first] = pairStealthAddress.second;
     return true;
 }
 
 bool CWallet::AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue)
 {
+    LOCK(cs_vStealthKeyQueue);
     vStealthKeyQueue.push_back(pairStealthQueue);
     return true;
 }
@@ -5753,6 +5757,7 @@ CWalletDB* CWallet::GetWalletDB()
 
 bool CWallet::HaveStealthAddress(const CKeyID& address) const
 {
+    LOCK(cs_mapstealthAddresses);
     if (mapstealthAddresses.count(address) > 0)
         return true;
     return false;
