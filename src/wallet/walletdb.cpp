@@ -99,17 +99,13 @@ bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned c
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
 {
     nWalletDBUpdateCounter++;
-
-    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey),
-            keyMeta, false))
+    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, false))
         return false;
-
     // hash pubkey/privkey to accelerate wallet load
     std::vector<unsigned char> vchKey;
     vchKey.reserve(vchPubKey.size() + vchPrivKey.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
-
     return Write(std::make_pair(std::string("key"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
@@ -621,6 +617,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             if (!pwalletMain)
                 pwalletMain = pwallet;
             ProcessLink(storage, true);
+
         } else if (strType == "linkid") {
             uint256 SubjectID;
             ssKey >> SubjectID;
@@ -629,6 +626,23 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             ssValue >> vchPubKey;
 
             LoadLinkMessageInfo(SubjectID, vchPubKey);
+
+        } else if (strType == "stealth") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthAddress sxAddr;
+            ssValue >> sxAddr;
+            LogPrintf("%s -- AddStealthToMap \n", __func__);
+            pwallet->AddStealthToMap(std::make_pair(keyID, sxAddr));
+
+        } else if (strType == "sxqueue") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthKeyQueueData stealthData;
+            ssValue >> stealthData;
+            LogPrintf("%s -- AddToStealthQueue \n", __func__);
+            pwallet->AddToStealthQueue(std::make_pair(keyID, stealthData));
+
         }
     } catch (...) {
         if (strType != "keymeta")
@@ -1084,50 +1098,6 @@ bool CWalletDB::EraseLinkMessageInfo(const uint256& subjectID)
     return Erase(std::make_pair(std::string("linkid"), subjectID)); 
 }
 
-bool CWalletDB::LoadStealthKeyAddresses(std::vector<std::pair<CKeyID, CStealthAddress>>& vStealthAddresses)
-{
-    try {
-        // Get cursor
-        Dbc* pcursor = GetCursor();
-        if (!pcursor)
-            throw std::runtime_error(std::string(__func__) + ": cannot create DB cursor");
-
-        while (true) {
-            // Read next record
-            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-            int ret = ReadAtCursor(pcursor, ssKey, ssValue);
-            if (ret == DB_NOTFOUND) {
-                break;
-            }
-            else if (ret != 0) {
-                LogPrintf("%s -- Error reading next record from wallet database\n", __func__);
-                return false;
-            }
-
-            std::string strType;
-            ssKey >> strType;
-
-            if (strType == "stealth") {
-                CKeyID idAccount;
-                ssKey >> idAccount;
-                LogPrintf("%s -- Loading shared stealth address %s\n", __func__, idAccount.ToString());
-                CStealthAddress sx;
-                ssValue >> sx;
-                LogPrintf("%s -- Loading stealth address %s\n", __func__, sx.Encoded());
-                std::pair<CKeyID, CStealthAddress> pairStealthAdresss(idAccount, sx);
-                vStealthAddresses.push_back(pairStealthAdresss);
-            }
-        }
-        pcursor->close();
-    } catch (const boost::thread_interrupted&) {
-        throw;
-    } catch (...) {
-        return false;
-    }
-    return true;
-}
-
 bool CWalletDB::WriteStealthAddress(const CStealthAddress& sxAddr)
 {
     return Write(std::make_pair(std::string("stealth"), sxAddr.GetSpendKeyID()), sxAddr);
@@ -1146,45 +1116,4 @@ bool CWalletDB::EraseStealthKeyQueue(const CKeyID& keyId)
 bool CWalletDB::ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta)
 {
     return Read(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
-}
-
-bool CWalletDB::GetStealthQueue(std::vector<std::pair<CKeyID,CStealthKeyQueueData>>& vStealthKeyQueue)
-{
-    try {
-        // Get cursor
-        Dbc* pcursor = GetCursor();
-        if (!pcursor)
-            throw std::runtime_error(std::string(__func__) + ": cannot create DB cursor");
-
-        while (true) {
-            // Read next record
-            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-            int ret = ReadAtCursor(pcursor, ssKey, ssValue);
-            if (ret == DB_NOTFOUND) {
-                break;
-            }
-            else if (ret != 0) {
-                LogPrintf("%s -- Error reading next record from wallet database\n", __func__);
-                return false;
-            }
-
-            std::string strType;
-            ssKey >> strType;
-
-            if (strType == "sxqueue") {
-                CKeyID idAccount;
-                ssKey >> idAccount;
-                CStealthKeyQueueData stealthData;
-                ssValue >> stealthData;
-                vStealthKeyQueue.push_back(std::make_pair(idAccount, stealthData));
-            }
-        }
-        pcursor->close();
-    } catch (const boost::thread_interrupted&) {
-        throw;
-    } catch (...) {
-        return false;
-    }
-    return (vStealthKeyQueue.size() > 0);
 }

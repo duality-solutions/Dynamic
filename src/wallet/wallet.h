@@ -854,6 +854,7 @@ public:
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
     std::map<CKeyID, CStealthAddress> mapstealthAddresses; //<! memory map of stealth addresses
+    std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
     uint32_t nFoundStealth; // for reporting, zero before use
 
     const CWalletTx* GetWalletTx(const uint256& hash) const;
@@ -1226,7 +1227,8 @@ public:
     bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
     bool ScanForOwnedOutputs(const CTransaction& tx);
     bool AddStealthAddress(const CStealthAddress& sxAddr, const CKey& skSpend);
-    int LoadStealthAddresses();
+    bool AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress);
+    bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
 
 };

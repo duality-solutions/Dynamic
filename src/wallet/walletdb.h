@@ -156,12 +156,10 @@ public:
     bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
     bool EraseLinkMessageInfo(const uint256& subjectID);
 
-    bool LoadStealthKeyAddresses(std::vector<std::pair<CKeyID, CStealthAddress>>& vStealthAddresses);
     bool WriteStealthAddress(const CStealthAddress& sxAddr);
     bool WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta);
     bool EraseStealthKeyQueue(const CKeyID& keyId);
     bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
-    bool GetStealthQueue(std::vector<std::pair<CKeyID,CStealthKeyQueueData>>& vStealthKeyQueue);
 
 private:
     CWalletDB(const CWalletDB&);
