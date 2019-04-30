@@ -5534,7 +5534,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
                 delete pwdb;
                 return false;
             }
-            vStealthKeyQueue.push_back(std::make_pair(cpkSpend.GetID(), lockedSkQueueData));
+            vStealthKeyQueue.push_back(std::make_pair(idExtracted, lockedSkQueueData));
             nFoundStealth++;
             delete pwdb;
             return true;

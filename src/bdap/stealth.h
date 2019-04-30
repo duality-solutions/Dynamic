@@ -69,8 +69,6 @@ public:
 
     CKeyID GetSpendKeyID() const;
 
-    std::string GetAddressString(const CKeyID& keyid);
-
     bool operator <(const CStealthAddress &y) const
     {
         return memcmp(&scan_pubkey[0], &y.scan_pubkey[0], EC_COMPRESSED_SIZE) < 0;
@@ -80,8 +78,6 @@ public:
     {
         return memcmp(&scan_pubkey[0], &y.scan_pubkey[0], EC_COMPRESSED_SIZE) == 0;
     }
-
-    //std::string GetAddress(const CKeyID& keyid);
 
     inline CStealthAddress operator=(const CStealthAddress& b) {
         nVersion = b.nVersion;

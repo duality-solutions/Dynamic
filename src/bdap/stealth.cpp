@@ -188,11 +188,6 @@ CKeyID CStealthAddress::GetSpendKeyID() const
     return CKeyID(Hash160(spend_pubkey.begin(), spend_pubkey.end()));
 }
 
-std::string CStealthAddress::GetAddressString(const CKeyID& keyid)
-{
-    return CDynamicAddress(keyid).ToString();
-}
-
 int SecretToPublicKey(const CKey &secret, ec_point &out)
 {
     // Public key = private * G
