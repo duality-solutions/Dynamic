@@ -219,8 +219,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         // Dynamic BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
-        // Dynamic Stealth Address start with 'd'
-        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 90);
+        // Dynamic Stealth Address start with 'L'
+        base58Prefixes[STEALTH_ADDRESS] = {0x0F};
         // Dynamic BIP44 coin type is '5'
         nExtCoinType = 5;
 
@@ -366,7 +366,7 @@ public:
         // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
         // Dynamic Stealth Address start with 'T'
-        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 65);
+        base58Prefixes[STEALTH_ADDRESS] = {0x15};
         // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
@@ -529,7 +529,7 @@ public:
         // Regtest Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
         // Dynamic Stealth Address start with 'R'
-        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 60);
+        base58Prefixes[STEALTH_ADDRESS] = {0x13};
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
     }
@@ -631,19 +631,19 @@ public:
         //vSeeds.push_back(CDNSSeedData("",  ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
 
-        // Testnet Dynamic addresses start with 'y'
+        // Privatenet Dynamic addresses start with 'y'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 30);
-        // Testnet Dynamic script addresses start with '8' or '9'
+        // Privatenet Dynamic script addresses start with '8' or '9'
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 10);
-        // Testnet private keys start with '9' or 'c' (Bitcoin defaults)
+        // Privatenet private keys start with '9' or 'c' (Bitcoin defaults)
         base58Prefixes[SECRET_KEY] = std::vector<unsigned char>(1, 158);
-        // Testnet Dynamic BIP32 pubkeys start with 'tpub' (Bitcoin defaults)
+        // Privatenet Dynamic BIP32 pubkeys start with 'tpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
-        // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
+        // Privatenet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
-        // Dynamic Stealth Address start with 'P'
-        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 56);
-        // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
+        // Privatenet Stealth Address start with 'P'
+        base58Prefixes[STEALTH_ADDRESS] = {0x12};
+        // Privatenet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_privatenet, pnSeed6_privatenet + ARRAYLEN(pnSeed6_privatenet));
