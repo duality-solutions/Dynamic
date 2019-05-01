@@ -144,6 +144,55 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     return CDynamicAddress(keyID).ToString();
 }
 
+UniValue getnewed25519address(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "getnewed25519address ( \"account\" )\n"
+            "\nReturns a new Dynamic address for receiving payments.\n"
+            "If 'account' is specified (DEPRECATED), it is added to the address book \n"
+            "so payments received with the address will be credited to 'account'.\n"
+            "\nArguments:\n"
+            "1. \"account\"        (string, optional) DEPRECATED. The account name for the address to be linked to. If not provided, the default account \"\" is used. It can also be set to the empty string \"\" to represent the default account. The account does not need to exist, it will be created if there is no account by the given name.\n"
+            "\nResult:\n"
+            "\"dynamicaddress\"    (string) The new dynamic address\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getnewed25519address", "") + HelpExampleRpc("getnewed25519address", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    // Parse the account first so we don't generate a key if there's an error
+    std::string strAccount;
+    if (request.params.size() > 0)
+        strAccount = AccountFromValue(request.params[0]);
+
+    if (!pwalletMain->IsLocked(true))
+        pwalletMain->TopUpEdKeyPool();
+
+    // Generate a new key that is added to wallet
+    CPubKey newKey;
+    std::vector<unsigned char> newEdKey;
+    if (!pwalletMain->GetEdKeyFromPool(newKey, newEdKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+    CKeyID keyID = newKey.GetID();
+
+    pwalletMain->SetAddressBook(keyID, strAccount, "receive");
+
+    std::string newEdKeyString(newEdKey.begin(), newEdKey.end());
+
+    UniValue returnvalue(UniValue::VOBJ);
+
+    returnvalue.push_back(Pair("walletaddress:",CDynamicAddress(keyID).ToString()));
+    returnvalue.push_back(Pair("ed25519 PubKey:",newEdKeyString));
+
+    return returnvalue;
+
+
+} //getnewed25519address
+
 
 CDynamicAddress GetAccountAddress(std::string strAccount, bool bForceNew = false)
 {
@@ -2936,6 +2985,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getaddressesbyaccount", &getaddressesbyaccount, true, {"account"}},
         {"wallet", "getbalance", &getbalance, false, {"account", "minconf", "addlocked", "include_watchonly"}},
         {"wallet", "getnewaddress", &getnewaddress, true, {"account"}},
+        {"wallet", "getnewed25519address", &getnewed25519address, true, {"account"}},
         {"wallet", "getrawchangeaddress", &getrawchangeaddress, true, {}},
         {"wallet", "getreceivedbyaccount", &getreceivedbyaccount, false, {"account", "minconf", "addlocked"}},
         {"wallet", "getreceivedbyaddress", &getreceivedbyaddress, false, {"address", "minconf", "addlocked"}},

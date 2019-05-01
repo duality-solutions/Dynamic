@@ -231,6 +231,26 @@ bool CWalletDB::ErasePool(int64_t nPool)
     return Erase(std::make_pair(std::string("pool"), nPool));
 }
 
+bool CWalletDB::ReadEdPool(int64_t nPool, CEdKeyPool& edkeypool)
+{
+    return Read(std::make_pair(std::string("edpool"), nPool), edkeypool);
+}
+
+bool CWalletDB::WriteEdPool(int64_t nPool, const CEdKeyPool& edkeypool)
+{
+    nWalletDBUpdateCounter++;
+    return Write(std::make_pair(std::string("edpool"), nPool), edkeypool);
+}
+
+bool CWalletDB::EraseEdPool(int64_t nPool)
+{
+    nWalletDBUpdateCounter++;
+    return Erase(std::make_pair(std::string("edpool"), nPool));
+}
+
+
+
+
 bool CWalletDB::WriteMinVersion(int nVersion)
 {
     return Write(std::string("minversion"), nVersion);
@@ -556,6 +576,12 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             CKeyPool keypool;
             ssValue >> keypool;
             pwallet->LoadKeyPool(nIndex, keypool);
+        } else if (strType == "edpool") {
+            int64_t nIndex;
+            ssKey >> nIndex;
+            CEdKeyPool edkeypool;
+            ssValue >> edkeypool;
+            pwallet->LoadEdKeyPool(nIndex, edkeypool);
         } else if (strType == "version") {
             ssValue >> wss.nFileVersion;
             if (wss.nFileVersion == 10300)
