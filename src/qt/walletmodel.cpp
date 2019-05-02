@@ -208,8 +208,8 @@ void WalletModel::updateWatchOnlyFlag(bool fHaveWatchonly)
 
 bool WalletModel::validateAddress(const QString& address)
 {
-    CDynamicAddress addressParsed(address.toStdString());
-    return addressParsed.IsValid();
+    CTxDestination dest = DecodeDestination(address.toStdString());
+    return IsValidDestination(dest);
 }
 
 WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
@@ -264,10 +264,37 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             setAddress.insert(rcp.address);
             ++nAddresses;
 
-            CScript scriptPubKey = GetScriptForDestination(CDynamicAddress(rcp.address.toStdString()).Get());
+            CScript scriptPubKey;
+            std::vector<uint8_t> vStealthData;
+            bool fStealthAddress = false;
+            CTxDestination dest = DecodeDestination(rcp.address.toStdString());
+            if (!IsValidDestination(dest))
+                return InvalidAddress;
+
+            if (dest.type() == typeid(CStealthAddress))
+            {
+                CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+                std::string sError;
+                if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                    LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+                    return InvalidAddress;
+                }
+                fStealthAddress = true;
+                CTxDestination newDest;
+                if (ExtractDestination(scriptPubKey, newDest))
+                    LogPrint("stealth", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+            } 
+            else {
+                scriptPubKey = GetScriptForDestination(dest);
+            }
             CRecipient recipient = {scriptPubKey, rcp.amount, rcp.fSubtractFeeFromAmount};
             vecSend.push_back(recipient);
-
+            if (fStealthAddress) {
+                CScript scriptData;
+                scriptData << OP_RETURN << vStealthData;
+                CRecipient sendData = {scriptData, 0, fSubtractFeeFromAmount};
+                vecSend.push_back(sendData);
+            }
             total += rcp.amount;
         }
     }

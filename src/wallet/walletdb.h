@@ -29,6 +29,8 @@ class CKeyPool;
 class CLinkStorage;
 class CMasterKey;
 class CScript;
+class CStealthAddress;
+class CStealthKeyQueueData;
 class CWallet;
 class CWalletTx;
 class uint160;
@@ -153,6 +155,11 @@ public:
     bool EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey);
     bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
     bool EraseLinkMessageInfo(const uint256& subjectID);
+
+    bool WriteStealthAddress(const CStealthAddress& sxAddr);
+    bool WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta);
+    bool EraseStealthKeyQueue(const CKeyID& keyId);
+    bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
 
 private:
     CWalletDB(const CWalletDB&);

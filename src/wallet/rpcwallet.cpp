@@ -144,6 +144,49 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     return CDynamicAddress(keyID).ToString();
 }
 
+static UniValue getnewstealthaddress(const JSONRPCRequest &request)
+{
+    EnsureWalletIsUnlocked();
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "getnewstealthaddress\n"
+            "\nReturns a new stealth address for receiving links.\n"
+            "\nArguments:\n"
+            "\nResult:\n"
+            "\"stealthaddress\"    (string) The new Dynamic stealth address\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getnewstealthaddress", "") + HelpExampleRpc("getnewstealthaddress", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    // Get a new scan key from pool.
+    CPubKey scanPubKey;
+    if (!pwalletMain->GetKeyFromPool(scanPubKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CKeyID scanKeyID = scanPubKey.GetID();
+    CKey scanKey;
+    if (!pwalletMain->GetKey(scanKeyID, scanKey))
+        throw std::runtime_error(strprintf("%s -- Failed to get scan private key for stealth address\n", __func__));
+
+    // Get a new spend key from pool.
+    CPubKey spendPubKey;
+    if (!pwalletMain->GetKeyFromPool(spendPubKey, false))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CKeyID spendKeyID = spendPubKey.GetID();
+    CKey spendKey;
+    if (!pwalletMain->GetKey(spendKeyID, spendKey))
+        throw std::runtime_error(strprintf("%s -- Failed to get spend private key for stealth address\n", __func__));
+
+    CStealthAddress sxAddr(scanKey, spendKey);
+    if (!pwalletMain->AddStealthAddress(sxAddr))
+        throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
+
+    return sxAddr.ToString();
+}
 
 CDynamicAddress GetAccountAddress(std::string strAccount, bool bForceNew = false)
 {
@@ -335,8 +378,28 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     if (pwalletMain->GetBroadcastTransactions() && !g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    // Parse Dynamic address
-    CScript scriptPubKey = GetScriptForDestination(address);
+    CScript scriptPubKey;
+    std::vector<uint8_t> vStealthData;
+    bool fStealthAddress = false;
+    if (address.type() == typeid(CStealthAddress))
+    {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(address);
+        if (pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr)) {
+            std::string sError;
+            // get sxAddr from wallet map stealthAddresses
+            if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                throw JSONRPCError(RPC_INTERNAL_ERROR, std::string("SendMoney failed after PrepareStealthOutput(): ") + sError);
+            }
+            fStealthAddress = true;
+            CTxDestination newDest;
+            if (ExtractDestination(scriptPubKey, newDest))
+                LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+        }
+    } else
+    {
+        // Parse Dynamic address
+        scriptPubKey = GetScriptForDestination(address);
+    }
 
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
@@ -346,6 +409,12 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     int nChangePosRet = -1;
     CRecipient recipient = {scriptPubKey, nValue, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
+    if (fStealthAddress) {
+        CScript scriptData;
+        scriptData << OP_RETURN << vStealthData;
+        CRecipient sendData = {scriptData, 0, fSubtractFeeFromAmount};
+        vecSend.push_back(sendData);
+    }
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
             strError, NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
@@ -584,9 +653,9 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    CDynamicAddress address(request.params[0].get_str());
-    if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
 
     // Amount
     CAmount nAmount = AmountFromValue(request.params[1]);
@@ -613,7 +682,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -645,8 +714,8 @@ UniValue instantsendtoaddress(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    CDynamicAddress address(request.params[0].get_str());
-    if (!address.IsValid())
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
     // Amount
@@ -667,7 +736,7 @@ UniValue instantsendtoaddress(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx, true);
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, true);
 
     return wtx.GetHash().GetHex();
 }
@@ -1087,9 +1156,11 @@ UniValue sendfrom(const JSONRPCRequest& request)
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string strAccount = AccountFromValue(request.params[0]);
-    CDynamicAddress address(request.params[1].get_str());
+
+    const CDynamicAddress address(request.params[1].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+
     CAmount nAmount = AmountFromValue(request.params[2]);
     if (nAmount <= 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
@@ -1123,7 +1194,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 8)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 9)
         throw std::runtime_error(
             "sendmany \"fromaccount\" {\"address\":amount,...} ( minconf addlocked \"comment\" [\"address\",...] subtractfeefromamount use_is use_ps )\n"
             "\nSend multiple times. Amounts are double-precision floating point numbers." +
@@ -1179,21 +1250,39 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (request.params.size() > 5)
         subtractFeeFromAmount = request.params[5].get_array();
 
-    std::set<CDynamicAddress> setAddress;
+    std::set<CTxDestination> setDestAddress;
     std::vector<CRecipient> vecSend;
 
     CAmount totalAmount = 0;
     std::vector<std::string> keys = sendTo.getKeys();
-    BOOST_FOREACH (const std::string& name_, keys) {
-        CDynamicAddress address(name_);
-        if (!address.IsValid())
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dynamic address: ") + name_);
+    for (const std::string& name_ : keys) {
+        bool fStealthAddress = false;
+        CTxDestination dest = DecodeDestination(name_);
+        if (!IsValidDestination(dest))
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid Dynamic address %s", name_));
 
-        if (setAddress.count(address))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, duplicated address: ") + name_);
-        setAddress.insert(address);
+        if (setDestAddress.count(dest))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Invalid parameter, duplicated address:  %s", name_));
+        setDestAddress.insert(dest);
 
-        CScript scriptPubKey = GetScriptForDestination(address.Get());
+        std::vector<uint8_t> vStealthData;
+        CScript scriptPubKey;
+        if (dest.type() == typeid(CStealthAddress))
+        {
+            CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+            std::string sError;
+            if (0 != PrepareStealthOutput(sxAddr, scriptPubKey, vStealthData, sError)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("PrepareStealthOutput failed for address:  %s, Error: %s", name_, sError));
+            }
+            fStealthAddress = true;
+            CTxDestination newDest;
+            if (ExtractDestination(scriptPubKey, newDest))
+                LogPrintf("%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+
+        } else
+        {
+            scriptPubKey = GetScriptForDestination(dest);
+        }
         CAmount nAmount = AmountFromValue(sendTo[name_]);
         if (nAmount <= 0)
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
@@ -1208,6 +1297,12 @@ UniValue sendmany(const JSONRPCRequest& request)
 
         CRecipient recipient = {scriptPubKey, nAmount, fSubtractFeeFromAmount};
         vecSend.push_back(recipient);
+        if (fStealthAddress) {
+            CScript scriptData;
+            scriptData << OP_RETURN << vStealthData;
+            CRecipient sendData = {scriptData, 0, fSubtractFeeFromAmount};
+            vecSend.push_back(sendData);
+        }
     }
 
     EnsureWalletIsUnlocked();
@@ -2902,6 +2997,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
 
 extern UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
 extern UniValue importprivkey(const JSONRPCRequest& request);
+extern UniValue importstealthaddress(const JSONRPCRequest& request);
 extern UniValue importaddress(const JSONRPCRequest& request);
 extern UniValue importpubkey(const JSONRPCRequest& request);
 extern UniValue dumpwallet(const JSONRPCRequest& request);
@@ -2944,6 +3040,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getwalletinfo", &getwalletinfo, false, {}},
         {"wallet", "importmulti", &importmulti, true, {"requests", "options"}},
         {"wallet", "importprivkey", &importprivkey, true, {"privkey", "label", "rescan"}},
+        {"wallet", "importstealthaddress", &importstealthaddress, true, {"privkey", "label", "rescan"}},
         {"wallet", "importwallet",  &importwallet,  true, {"filename", "forcerescan"}},
         {"wallet", "importaddress", &importaddress, true, {"address", "label", "rescan", "p2sh"}},
         {"wallet", "importprunedfunds", &importprunedfunds, true, {"rawtransaction", "txoutproof"}},
@@ -2980,6 +3077,8 @@ static const CRPCCommand commands[] =
         {"wallet", "importbdapkeys", &importbdapkeys,true, {"bdap_id", "wallet_privkey", "link_privkey", "DHT_privkey", "rescan"}},
         {"wallet", "importelectrumwallet", &importelectrumwallet, true, {"filename", "index"}},
         {"wallet", "importmnemonic", &importmnemonic, true, {"mnemonic", "passphrase", "begin", "end", "forcerescan"}},
+
+        {"wallet", "getnewstealthaddress", &getnewstealthaddress, true, {}},
 };
 
 void RegisterWalletRPCCommands(CRPCTable& t)

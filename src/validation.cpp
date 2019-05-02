@@ -80,8 +80,9 @@ CCriticalSection cs_main;
 BlockMap mapBlockIndex;
 CChain chainActive;
 CBlockIndex* pindexBestHeader = NULL;
-CWaitableCriticalSection csBestBlock;
-CConditionVariable cvBlockChange;
+Mutex g_best_block_mutex;
+std::condition_variable g_best_block_cv;
+uint256 g_best_block;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 bool fReindex = false;
@@ -2711,7 +2712,11 @@ void static UpdateTip(CBlockIndex* pindexNew, const CChainParams& chainParams)
     // New best block
     mempool.AddTransactionsUpdated(1);
 
-    cvBlockChange.notify_all();
+    {
+        LOCK(g_best_block_mutex);
+        g_best_block = pindexNew->GetBlockHash();
+        g_best_block_cv.notify_all();
+    }
 
     static bool fWarned = false;
     std::vector<std::string> warningMessages;

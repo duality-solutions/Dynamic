@@ -306,15 +306,17 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixin
         for (; mi != mapCryptedKeys.end(); ++mi) {
             const CPubKey& vchPubKey = (*mi).second.first;
             const std::vector<unsigned char>& vchCryptedSecret = (*mi).second.second;
-            CKey key;
-            if (!DecryptKey(vMasterKeyIn, vchCryptedSecret, vchPubKey, key)) {
-                LogPrint("dht", "CCryptoKeyStore Unlock error after DecryptKey for a standard key.\n");
-                keyFail = true;
-                break;
+            if (vchCryptedSecret.size() > 0) {
+                CKey key;
+                if (!DecryptKey(vMasterKeyIn, vchCryptedSecret, vchPubKey, key)) {
+                    LogPrint("dht", "CCryptoKeyStore Unlock error after DecryptKey for a standard key.\n");
+                    keyFail = true;
+                    break;
+                }
+                keyPass = true;
+                if (fDecryptionThoroughlyChecked)
+                    break;
             }
-            keyPass = true;
-            if (fDecryptionThoroughlyChecked)
-                break;
         }
 
         CryptedDHTKeyMap::const_iterator miDHT = mapCryptedDHTKeys.begin();
