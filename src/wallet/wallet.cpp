@@ -4473,6 +4473,29 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal)
     LogPrintf("keypool return %d\n", nIndex);
 }
 
+bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& sxAddr, bool fInternal)
+{
+    if (IsLocked())
+        return false;
+
+    if (!GetKeyFromPool(pubkeyWallet, fInternal))
+        return false;
+
+    CKey walletKey, spendKey, scanKey;
+    if (!GetKey(pubkeyWallet.GetID(), walletKey))
+        return false;
+
+    if (!walletKey.DeriveChildKey(spendKey))
+        return false;
+
+    if (!spendKey.DeriveChildKey(scanKey))
+        return false;
+
+    CStealthAddress sx(scanKey, spendKey);
+    sxAddr = sx;
+    return true;
+}
+
 bool CWallet::GetKeyFromPool(CPubKey& result, bool fInternal)
 {
     int64_t nIndex = 0;

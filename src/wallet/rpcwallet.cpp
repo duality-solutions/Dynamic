@@ -163,25 +163,11 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    // Get a new scan key from pool.
-    CPubKey scanPubKey;
-    if (!pwalletMain->GetKeyFromPool(scanPubKey, false))
+    CPubKey walletPubKey;
+    CStealthAddress sxAddr;
+    if (!pwalletMain->GetStealthAddressFromPool(walletPubKey, sxAddr, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-    CKeyID scanKeyID = scanPubKey.GetID();
-    CKey scanKey;
-    if (!pwalletMain->GetKey(scanKeyID, scanKey))
-        throw std::runtime_error(strprintf("%s -- Failed to get scan private key for stealth address\n", __func__));
 
-    // Get a new spend key from pool.
-    CPubKey spendPubKey;
-    if (!pwalletMain->GetKeyFromPool(spendPubKey, false))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-    CKeyID spendKeyID = spendPubKey.GetID();
-    CKey spendKey;
-    if (!pwalletMain->GetKey(spendKeyID, spendKey))
-        throw std::runtime_error(strprintf("%s -- Failed to get spend private key for stealth address\n", __func__));
-
-    CStealthAddress sxAddr(scanKey, spendKey);
     if (!pwalletMain->AddStealthAddress(sxAddr))
         throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
 
