@@ -53,12 +53,7 @@ static bool VerifyChecksum(const std::vector<uint8_t> &data)
 CStealthAddress::CStealthAddress(const CKey& scanKey, const CKey& spendKey)
 {
     options = 0;
-    //uint8_t tmp32[32];
-    //CSHA256().Write(scanKey.begin(), 32).Finalize(tmp32);
-    //memcpy(&prefix_number_bits, tmp32, 4);
-    //CSHA256().Write(spendKey.begin(), 32).Finalize(tmp32);
-    //size_t nPrefixBytes = std::ceil((float)prefix_number_bits / 8.0);
-    //memcpy(&prefix_bitfield, tmp32, nPrefixBytes);
+    // TODO (Stealth): Set determinalistic prefix based on spendKey
     prefix_number_bits = 0;
     prefix_bitfield = 0;
     number_signatures = 1;

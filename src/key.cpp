@@ -267,6 +267,17 @@ bool CKey::Derive(CKey& keyChild, ChainCode& ccChild, unsigned int nChild, const
     return ret;
 }
 
+bool CKey::DeriveChildKey(CKey& keyChild) const
+{
+    assert(IsValid());
+    assert(IsCompressed());
+    SecureVector newkeyData(32);
+    CSHA256().Write(&keydata[0], 32).Finalize(&newkeyData[0]);
+    keyChild.Set(newkeyData.begin(), newkeyData.end(), true);
+    keyChild.fCompressed = true;
+    return keyChild.fValid;
+}
+
 bool CExtKey::Derive(CExtKey& out, unsigned int _nChild) const
 {
     out.nDepth = nDepth + 1;
