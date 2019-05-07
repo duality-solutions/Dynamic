@@ -142,4 +142,7 @@ bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();
 void ECC_Ed25519_Stop();
 
+CKeyID GetIdFromCharVector(const std::vector<unsigned char>& vchIn);
+uint256 GetHashFromCharVector(const std::vector<unsigned char>& vchIn);
+
 #endif // DYNAMIC_DHT_ED25519_H

@@ -156,8 +156,6 @@ public:
     }
 };
 
-
-
 /** An Ed key pool entry */
 class CEdKeyPool
 {
@@ -730,8 +728,6 @@ private:
     std::set<int64_t> setInternalEdKeyPool;
     std::set<int64_t> setExternalEdKeyPool;
 
-
-
     int64_t nTimeFirstKey;
 
     /**
@@ -790,8 +786,6 @@ public:
             mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
         */    
     }
-
-
 
     // Map from Key ID (for regular keys) or Script ID (for watch-only keys) to
     // key metadata.
@@ -917,7 +911,7 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
-    std::vector<unsigned char> GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal);
+    std::vector<unsigned char> GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn = CKey());
     //! HaveDHTKey implementation that also checks the mapHdPubKeys
     bool HaveDHTKey(const CKeyID &address) const override;
     //! HaveKey implementation that also checks the mapHdPubKeys
@@ -1063,7 +1057,8 @@ public:
     size_t EdKeypoolCountExternalKeys();
     size_t EdKeypoolCountInternalKeys();
     bool TopUpKeyPool(unsigned int kpSize = 0);
-    bool TopUpEdKeyPool(unsigned int kpSize = 0);    
+    bool TopUpEdKeyPool(unsigned int kpSize = 0); 
+    bool TopUpKeyPoolCombo(unsigned int kpSize = 0);       
     void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal);
     void KeepKey(int64_t nIndex);
     void KeepEdKey(int64_t nIndex);

@@ -170,7 +170,7 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
         strAccount = AccountFromValue(request.params[0]);
 
     if (!pwalletMain->IsLocked(true))
-        pwalletMain->TopUpEdKeyPool();
+        pwalletMain->TopUpKeyPoolCombo(); //TopUpEdKeyPool();
 
     // Generate a new key that is added to wallet
     CPubKey newKey;
@@ -189,7 +189,6 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
     returnvalue.push_back(Pair("ed25519 PubKey:",newEdKeyString));
 
     return returnvalue;
-
 
 } //getnewed25519address
 
@@ -2183,7 +2182,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     if (!pwalletMain->Unlock(strWalletPass, fForMixingOnly))
         throw JSONRPCError(RPC_WALLET_PASSPHRASE_INCORRECT, "Error: The wallet passphrase entered was incorrect.");
 
-    pwalletMain->TopUpKeyPool();
+    pwalletMain->TopUpKeyPoolCombo(); //TopUpKeyPool();
 
     LOCK(cs_nWalletUnlockTime);
     nWalletUnlockTime = GetTime() + nSleepTime;

@@ -92,8 +92,6 @@ public:
 
     const std::vector<unsigned char, secure_allocator<unsigned char> > getKeyData() const { return keydata; }
 
-
-
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }
 

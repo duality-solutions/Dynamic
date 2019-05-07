@@ -146,21 +146,38 @@ CPubKey CWallet::GenerateNewKey(uint32_t nAccountIndex, bool fInternal)
     return pubkey;
 }
 
-
-std::vector<unsigned char> CWallet::GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal)
+std::vector<unsigned char> CWallet::GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn)
 {
+ 
+    
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
     CKey secretRet;
     secretRet.MakeNewKey(fCompressed);
 
+    // Create new metadata
+    int64_t nCreationTime = GetTime();
+    CKeyMetadata metadata(nCreationTime);
+
     CKeyEd25519 secretEdRet;
 
-    DeriveEd25519ChildKey(secretRet,secretEdRet);
+    if (!seedIn.IsValid())
+    {
+        LogPrintf("DEBUGGER ED %s - seedIn is false\n",__func__);
+        DeriveEd25519ChildKey(secretRet,secretEdRet);
+    }
+    else
+    {
+        LogPrintf("DEBUGGER ED %s - seedIn is true\n",__func__);
+        DeriveEd25519ChildKey(seedIn,secretEdRet);
+    };
+
+    // Create new metadata
+    mapKeyMetadata[secretEdRet.GetID()] = metadata;
+    UpdateTimeFirstKey(nCreationTime);
+
 
     return secretEdRet.GetPubKey();
-
 } //GenerateNewEdKey
-
 
 std::array<char, 32> CWallet::ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn)
 {
@@ -171,17 +188,19 @@ std::array<char, 32> CWallet::ConvertSecureVector32ToArray(const std::vector<uns
     return arrReturn;
 }
 
-
 void CWallet::DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet)
 {
     std::array<char, 32> edSeed = ConvertSecureVector32ToArray(seed.getKeyData());
     CKeyEd25519 childKey(edSeed);
 
-    AddDHTKey(childKey, childKey.GetPubKey());
+    LogPrintf("DEBUGGER ED %s - GetPubKeyString [%s]\n",__func__,childKey.GetPubKeyString());
+
+    if (!AddDHTKey(childKey, childKey.GetPubKey()))
+        LogPrintf("DEBUGGER ED %s - returns false\n",__func__);
+
     secretEdRet = childKey; //return Ed25519 key
 
 } //DeriveEd25519ChildKey
-
 
 void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal)
 {
@@ -210,6 +229,10 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
         nChildIndex++;
     } while (HaveKey(childKey.key.GetPubKey().GetID()));
     secretRet = childKey.key;
+
+    LogPrintf("DEBUGGER ED %s - WalletAddress [%s]\n",__func__,CDynamicAddress(secretRet.GetPubKey().GetID()).ToString());
+
+    
 
     CKeyEd25519 secretEdRet;
     DeriveEd25519ChildKey(secretRet,secretEdRet); //Derive Ed25519 key
@@ -567,8 +590,9 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
                 if (nWalletBackups == -2) {
-                    TopUpKeyPool();
-                    TopUpEdKeyPool();
+                    TopUpKeyPoolCombo();
+                    //TopUpKeyPool();
+                    //TopUpEdKeyPool();
                     LogPrintf("Keypool replenished, re-initializing automatic backups.\n");
                     nWalletBackups = GetArg("-createwalletbackups", 10);
                 }
@@ -962,8 +986,9 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
 
         // if we are not using HD, generate new keypool
         if (IsHDEnabled()) {
-            TopUpKeyPool();
-            TopUpEdKeyPool();
+            TopUpKeyPoolCombo();
+            //TopUpKeyPool();
+            //TopUpEdKeyPool();
         } else {
             NewKeyPool();
             NewEdKeyPool();
@@ -4370,14 +4395,13 @@ bool CWallet::NewKeyPool()
         privateSendClient.fEnablePrivateSend = false;
         nKeysLeftSinceAutoBackup = 0;
 
-        if (!TopUpKeyPool())
+        if (!TopUpKeyPoolCombo()) //was TopUpKeyPool
             return false;
 
         LogPrintf("CWallet::NewKeyPool rewrote keypool\n");
     }
     return true;
 }
-
 
 bool CWallet::NewEdKeyPool()
 {
@@ -4395,14 +4419,13 @@ bool CWallet::NewEdKeyPool()
         //privateSendClient.fEnablePrivateSend = false;
         //nKeysLeftSinceAutoBackup = 0;
 
-        if (!TopUpEdKeyPool())
+        if (!TopUpKeyPoolCombo()) //was topupedkeypool
             return false;
 
         LogPrintf("CWallet::NewEdKeyPool rewrote edkeypool\n");
     }
     return true;
 }
-
 
 size_t CWallet::KeypoolCountExternalKeys()
 {
@@ -4427,10 +4450,6 @@ size_t CWallet::EdKeypoolCountInternalKeys()
     AssertLockHeld(cs_wallet); // setInternalEdKeyPool
     return setInternalEdKeyPool.size();
 }
-
-
-
-
 
 bool CWallet::TopUpKeyPool(unsigned int kpSize)
 {
@@ -4491,6 +4510,99 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize)
     }
     return true;
 }
+
+bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
+{
+    {
+        LOCK(cs_wallet);
+
+        if (IsLocked(true))
+            return false;
+
+        // Top up key pool
+        unsigned int nTargetSize;
+        if (kpSize > 0)
+            nTargetSize = kpSize;
+        else
+            nTargetSize = std::max(GetArg("-keypool", DEFAULT_KEYPOOL_SIZE), (int64_t)0);
+
+        // count amount of available keys (internal, external)
+        // make sure the keypool of external and internal keys fits the user selected target (-keypool)
+        int64_t amountExternal = setExternalKeyPool.size();
+        int64_t amountInternal = setInternalKeyPool.size();
+        int64_t missingExternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountExternal, (int64_t)0);
+        int64_t missingInternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountInternal, (int64_t)0);
+
+        if (!IsHDEnabled()) {
+            // don't create extra internal keys
+            missingInternal = 0;
+        } else {
+            nTargetSize *= 2;
+        }
+        bool fInternal = false;
+        CWalletDB walletdb(strWalletFile);
+        for (int64_t i = missingInternal + missingExternal; i--;) {
+            int64_t nEnd = 1;
+            int64_t nEdEnd = 1;
+            if (i < missingInternal) {
+                fInternal = true;
+            }
+            if (!setInternalKeyPool.empty()) {
+                nEnd = *(--setInternalKeyPool.end()) + 1;
+            }
+            if (!setExternalKeyPool.empty()) {
+                nEnd = std::max(nEnd, *(--setExternalKeyPool.end()) + 1);
+            }
+            // TODO: implement keypools for all accounts?
+
+            //get seed for ed29915 keys
+            CPubKey retrievedPubKey;
+            CKey retrievedKey;
+            
+            retrievedPubKey = GenerateNewKey(0, fInternal);
+            GetKey(retrievedPubKey.GetID(), retrievedKey);
+
+
+            if (!walletdb.WritePool(nEnd, CKeyPool(retrievedPubKey, fInternal)))
+                throw std::runtime_error("TopUpKeyPoolCombo(): writing generated key failed");
+
+            if (fInternal) {
+                setInternalKeyPool.insert(nEnd);
+            } else {
+                setExternalKeyPool.insert(nEnd);
+            }
+            LogPrintf("keypool added key %d, size=%u, internal=%d\n", nEnd, setInternalKeyPool.size() + setExternalKeyPool.size(), fInternal);
+
+            //Ed25519 Keypool
+            if (!setInternalEdKeyPool.empty()) {
+                nEdEnd = *(--setInternalEdKeyPool.end()) + 1;
+            }
+            if (!setExternalEdKeyPool.empty()) {
+                nEdEnd = std::max(nEdEnd, *(--setExternalEdKeyPool.end()) + 1);
+            }
+            // TODO: implement keypools for all accounts?
+            //if (!walletdb.WritePool(nEnd, CKeyPool(GenerateNewKey(0, fInternal), fInternal)))
+            if (!walletdb.WriteEdPool(nEdEnd, CEdKeyPool(GenerateNewEdKey(0, fInternal, retrievedKey), fInternal)))
+                throw std::runtime_error("TopUpEdKeyPool(): writing generated key failed");
+
+            if (fInternal) {
+                setInternalEdKeyPool.insert(nEdEnd);
+            } else {
+                setExternalEdKeyPool.insert(nEdEnd);
+            }
+            LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nEdEnd, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), fInternal);
+
+            double dProgress = 100.f * nEnd / (nTargetSize + 1);
+            std::string strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
+            uiInterface.InitMessage(strMsg);
+        }
+    }
+    return true;
+} //TopUpKeyPoolCombo
+
+
+
+
 
 bool CWallet::TopUpEdKeyPool(unsigned int kpSize)
 {
@@ -4553,10 +4665,6 @@ bool CWallet::TopUpEdKeyPool(unsigned int kpSize)
     return true;
 } //TopUpEdKeyPool
 
-
-
-
-
 void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal)
 {
     nIndex = -1;
@@ -4565,7 +4673,7 @@ void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fIn
         LOCK(cs_wallet);
 
         if (!IsLocked(true))
-            TopUpKeyPool();
+            TopUpKeyPoolCombo(); //was TopUpKeyPool();
 
         fInternal = fInternal && IsHDEnabled();
         std::set<int64_t>& setKeyPool = fInternal ? setInternalKeyPool : setExternalKeyPool;
@@ -4601,7 +4709,7 @@ void CWallet::ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bo
         LOCK(cs_wallet);
 
         if (!IsLocked(true))
-            TopUpEdKeyPool();
+            TopUpKeyPoolCombo(); //TopUpEdKeyPool();
 
         fInternal = fInternal && IsHDEnabled();
         std::set<int64_t>& setEdKeyPool = fInternal ? setInternalEdKeyPool : setExternalEdKeyPool;
@@ -4628,8 +4736,6 @@ void CWallet::ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bo
         LogPrintf("edkeypool reserve %d\n", nIndex);
     }
 } //ReserveEdKeyFromKeyPool
-
-
 
 void CWallet::KeepKey(int64_t nIndex)
 {
@@ -4671,7 +4777,6 @@ bool CWallet::GetKeyFromPool(CPubKey& result, bool fInternal)
 {
     int64_t nIndex = 0;
     CKeyPool keypool;
-
     {
         LOCK(cs_wallet);
         ReserveKeyFromKeyPool(nIndex, keypool, fInternal);
@@ -4690,33 +4795,47 @@ bool CWallet::GetKeyFromPool(CPubKey& result, bool fInternal)
 
 bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edresult, bool fInternal)
 {
+    LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
+    
     int64_t nIndex = 0;
+    int64_t nEdIndex = 0;
     CKeyPool keypool;
     CEdKeyPool edkeypool;
-
     {
         LOCK(cs_wallet);
         ReserveKeyFromKeyPool(nIndex, keypool, fInternal);
-        ReserveEdKeyFromKeyPool(nIndex, edkeypool, fInternal);
+        ReserveEdKeyFromKeyPool(nEdIndex, edkeypool, fInternal);
+        LogPrintf("DEBUGGER ED %s - nIndex [%d]\n",__func__,nIndex);
+        LogPrintf("DEBUGGER ED %s - nEdIndex [%d]\n",__func__,nEdIndex);
         if (nIndex == -1) {
             if (IsLocked(true))
                 return false;
             // TODO: implement keypool for all accouts?
+            LogPrintf("DEBUGGER ED %s - made it here! generatekey portion\n",__func__);
             result = GenerateNewKey(0, fInternal);
-            edresult = GenerateNewEdKey(0, fInternal);
-            return true;
         }
-        KeepKey(nIndex);
-        KeepEdKey(nIndex);
-        result = keypool.vchPubKey;
-        edresult = edkeypool.edPubKey;
+        else {
+            KeepKey(nIndex);
+            result = keypool.vchPubKey;
+        }
+
+        CKey keyRetrieved;
+        GetKey(result.GetID(), keyRetrieved);
+
+        if (nEdIndex == -1) {
+            if (IsLocked(true))
+                return false;
+            // TODO: implement keypool for all accouts?
+            LogPrintf("DEBUGGER ED %s - made it here! generatekey ed portion\n",__func__);
+            edresult = GenerateNewEdKey(0, fInternal, keyRetrieved);
+        }
+        else {
+            KeepEdKey(nEdIndex);
+            edresult = edkeypool.edPubKey;
+        }
     }
     return true;
 }
-
-
-
-
 
 static int64_t GetOldestKeyInPool(const std::set<int64_t>& setKeyPool, CWalletDB& walletdb)
 {
@@ -5307,17 +5426,14 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
             walletInstance->SetMinVersion(FEATURE_HD);
         }
 
-
         if (fImportMnemonic) {
             pwalletMain->ShowProgress("", 50); //show we're working in the background...
         }
 
         CPubKey newDefaultKey;
         std::vector<unsigned char> newDefaultEdKey;
-        LogPrintf("DEBUGGER ED %s - made it here! BEFORE\n", __func__);
         //if (walletInstance->GetKeyFromPool(newDefaultKey, false)) {
         if (walletInstance->GetEdKeyFromPool(newDefaultKey, newDefaultEdKey, false)) {
-            LogPrintf("DEBUGGER ED %s - made it here! AFTER\n", __func__);
             walletInstance->SetDefaultKey(newDefaultKey);
             if (!walletInstance->SetAddressBook(walletInstance->vchDefaultKey.GetID(), "", "receive")) {
                 InitError(_("Cannot write default address") += "\n");
@@ -5325,13 +5441,9 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
             }
         }
 
-
         if (fImportMnemonic) pwalletMain->ShowProgress("", 75); //show we're working in the background...
 
-
-
         walletInstance->SetBestChain(chainActive.GetLocator());
-
 
         // Try to create wallet backup right after new wallet was created
         std::string strBackupWarning;
@@ -5374,7 +5486,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
 
     if (fImportMnemonic) pwalletMain->ShowProgress("", 90); //show we're working in the background...
-
 
     RegisterValidationInterface(walletInstance);
 
@@ -5781,8 +5892,6 @@ CEdKeyPool::CEdKeyPool(const std::vector<unsigned char>& edPubKeyIn, bool fInter
     edPubKey = edPubKeyIn;
     fInternal = fInternalIn;
 }
-
-
 
 CWalletKey::CWalletKey(int64_t nExpires)
 {

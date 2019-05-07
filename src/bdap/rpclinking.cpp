@@ -154,10 +154,22 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
     txLink.LinkMessage = vchFromString(strLinkMessage);
+
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchDHTPubKey;
     CKeyEd25519 privReqDHTKey;
-    CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
-    if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
+    if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privReqDHTKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+    else LogPrintf("DEBUGGER ED %s - got request privatekey [%s]\n",__func__,privReqDHTKey.GetPrivKeyString());
+
+    //CKeyEd25519 privReqDHTKey;
+    //CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
+    //if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
+    //    throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
  
     txLink.RequestorPubKey = vchDHTPubKey;
 
@@ -306,10 +318,22 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
+
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchDHTPubKey;
     CKeyEd25519 privAcceptDHTKey;
-    CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
-    if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
+    if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privAcceptDHTKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+    else LogPrintf("DEBUGGER ED %s - got accept privatekey [%s]\n",__func__,privAcceptDHTKey.GetPrivKeyString());
+
+    //CKeyEd25519 privAcceptDHTKey;
+    //CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
+    //if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
+    //    throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP link"));
  
     txLinkAccept.RecipientPubKey = vchDHTPubKey;
 
