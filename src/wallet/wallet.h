@@ -853,8 +853,8 @@ public:
     int64_t nKeysLeftSinceAutoBackup;
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
-    std::map<CKeyID, CStealthAddress> mapstealthAddresses; //<! memory map of stealth addresses
-    mutable CCriticalSection cs_mapstealthAddresses;
+    std::map<CKeyID, CStealthAddress> mapStealthAddresses; //<! memory map of stealth addresses
+    mutable CCriticalSection cs_mapStealthAddresses;
     std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
     mutable CCriticalSection cs_vStealthKeyQueue;
     uint32_t nFoundStealth; // for reporting, zero before use
