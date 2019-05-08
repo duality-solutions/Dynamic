@@ -54,7 +54,13 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CPubKey pubWalletKey;
     CharString vchDHTPubKey;
     if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+
+    while (pDomainEntryDB->DomainEntryExistsPubKey(vchDHTPubKey)) {
+        if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+    };
+
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
@@ -84,8 +90,12 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     // TODO: Use stealth address for the link address so linking will be private
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubLinkKey;
-    if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CharString NAvchDHTPubKey; //not really used
+    if (!pwalletMain->GetEdKeyFromPool(pubLinkKey, NAvchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+
+    // if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
+    //     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
@@ -879,7 +889,7 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     uint32_t nCount = 1;
     for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
         CDomainEntry entry;
-        LogPrintf("DEBUGGER ED %s - PubKey [%s]\n",__func__,stringFromVch(vchPubKey));
+        //LogPrintf("DEBUGGER ED %s - PubKey [%s]\n",__func__,stringFromVch(vchPubKey));
         if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
             UniValue oAccount(UniValue::VOBJ);
             if (BuildBDAPJson(entry, oAccount, false)) {

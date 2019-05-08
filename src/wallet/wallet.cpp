@@ -4382,6 +4382,8 @@ bool CWallet::SetDefaultKey(const CPubKey& vchPubKey)
 bool CWallet::NewKeyPool()
 {
     {
+        LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
+
         LOCK(cs_wallet);
         CWalletDB walletdb(strWalletFile);
         BOOST_FOREACH (int64_t nIndex, setInternalKeyPool) {
@@ -4406,6 +4408,8 @@ bool CWallet::NewKeyPool()
 bool CWallet::NewEdKeyPool()
 {
     {
+        LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
+
         LOCK(cs_wallet);
         CWalletDB walletdb(strWalletFile);
         BOOST_FOREACH (int64_t nIndex, setInternalEdKeyPool) {
