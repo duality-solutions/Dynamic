@@ -3706,7 +3706,10 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 
     // TODO : ENABLE BLOCK CACHE IN SPECIFIC CASES
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
-        if (miSelf != mapBlockIndex.end()) {
+        if (miSelf != mapBlockIndex.end() && !miSelf->second) {
+            mapBlockIndex.erase(hash);
+        }
+        if (miSelf != mapBlockIndex.end() && miSelf->second) {
             // Block header is already known.
             pindex = miSelf->second;
             if (ppindex)
