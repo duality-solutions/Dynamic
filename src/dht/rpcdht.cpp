@@ -336,14 +336,15 @@ UniValue dhtdb(const JSONRPCRequest& request)
 
 static UniValue PutRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 4)
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
         throw std::runtime_error(
             "dht putrecord \"account id\" \"operation\" \"data value\"\n"
             "\nSaves mutable data in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
-            "1. account id             (string)      BDAP account id\n"
-            "2. operation              (string)      Mutable data operation used for DHT entry\n"
-            "3. data value             (string)      Mutable data value to save in the DHT\n"
+            "1. account id             (string)           BDAP account id\n"
+            "2. operation              (string)           Mutable data operation used for DHT entry\n"
+            "3. data value             (string)           Mutable data value to save in the DHT\n"
+            "4. encrypt                (bool, optional)   Encrypt the data with the user's public key\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"entry_path\"          (string)      BDAP account FQDN\n"
@@ -355,9 +356,9 @@ static UniValue PutRecord(const JSONRPCRequest& request)
             "  \"put_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-            HelpExampleCli("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\"") +
+            HelpExampleCli("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0") +
             "\nAs a JSON-RPC call\n" + 
-            HelpExampleRpc("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\""));
+            HelpExampleRpc("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0"));
 
     EnsureWalletIsUnlocked();
 
@@ -396,7 +397,6 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
-    //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
@@ -410,12 +410,22 @@ static UniValue PutRecord(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
 
     iSequence++;
-    uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
+    uint16_t nVersion = 1;
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
     uint16_t nTotalSlots = 32;
     const std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
+    bool fEncrypt = true;
+    if (request.params.size() > 4)
+        fEncrypt = request.params[4].getBool();
+
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    if (fEncrypt) {
+        vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    }
+    else {
+        nVersion = 0; // clear text
+    }
+
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
@@ -573,10 +583,11 @@ static UniValue GetRecord(const JSONRPCRequest& request)
     result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
     std::vector<unsigned char> vchDHTPublicKey = entry.DHTPublicKey;
-    CKeyEd25519 getKey;
+    CKeyEd25519 getKey(true);
     CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Failed to get DHT private key for account %s (pubkey = %s)", entry.GetFullObjectPath(), stringFromVch(vchDHTPublicKey)));
+    if (!pwalletMain->GetDHTKey(keyID, getKey)) {
+        getKey.SetNull();
+    }
 
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
@@ -912,15 +923,16 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
 
 static UniValue PutLinkRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 5)
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 6)
         throw std::runtime_error(
             "dht putlinkrecord \"account1\" \"account2\" \"operation\" \"value\"\n"
             "\nSaves a link mutable data entry in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
-            "1. account1               (string)      BDAP link account 1, gets the value for this account\n"
-            "2. account2               (string)      BDAP link account 2, other account in the link\n"
-            "3. operation              (string)      Mutable data operation code\n"
-            "4. value                  (string)                                 \n"
+            "1. account1               (string)           BDAP link account 1, gets the value for this account\n"
+            "2. account2               (string)           BDAP link account 2, other account in the link\n"
+            "3. operation              (string)           Mutable data operation code\n"
+            "4. value                  (string)           Mutable data value to save in the DHT\n"
+            "5. encrypt                (bool, optional)   Encrypt the data with the user's public key\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
@@ -974,7 +986,6 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
     if (!pLinkManager->FindLink(linkID, link))
         throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Link id %s for %s and %s not found. Get BDAP link failed!", linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
 
-    LogPrintf("%s -- req: %s, rec: %s \n", __func__, link.RequestorFQDN(), link.RecipientFQDN());
     std::vector<unsigned char> vchDHTPublicKey;
     if (entry1.GetFullObjectPath() == link.RequestorFQDN()) {
         vchDHTPublicKey = link.RequestorPubKey;
@@ -1014,8 +1025,18 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 32;
     std::vector<unsigned char> vchValue = vchFromValue(request.params[4]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RequestorPubKey));
-    vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
+    bool fEncrypt = true;
+    if (request.params.size() > 5)
+        fEncrypt = request.params[5].getBool();
+
+    if (fEncrypt) {
+        vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RequestorPubKey));
+        vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
+    }
+    else {
+        nVersion = 0; // clear text
+    }
+
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
