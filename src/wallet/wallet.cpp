@@ -148,8 +148,6 @@ CPubKey CWallet::GenerateNewKey(uint32_t nAccountIndex, bool fInternal)
 
 std::vector<unsigned char> CWallet::GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn)
 {
- 
-    
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
     CKey secretRet;
     secretRet.MakeNewKey(fCompressed);
@@ -162,19 +160,16 @@ std::vector<unsigned char> CWallet::GenerateNewEdKey(uint32_t nAccountIndex, boo
 
     if (!seedIn.IsValid())
     {
-        LogPrintf("DEBUGGER ED %s - seedIn is false\n",__func__);
         DeriveEd25519ChildKey(secretRet,secretEdRet);
     }
     else
     {
-        LogPrintf("DEBUGGER ED %s - seedIn is true\n",__func__);
         DeriveEd25519ChildKey(seedIn,secretEdRet);
     };
 
     // Create new metadata
     mapKeyMetadata[secretEdRet.GetID()] = metadata;
     UpdateTimeFirstKey(nCreationTime);
-
 
     return secretEdRet.GetPubKey();
 } //GenerateNewEdKey
@@ -193,10 +188,7 @@ void CWallet::DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet)
     std::array<char, 32> edSeed = ConvertSecureVector32ToArray(seed.getKeyData());
     CKeyEd25519 childKey(edSeed);
 
-    LogPrintf("DEBUGGER ED %s - GetPubKeyString [%s]\n",__func__,childKey.GetPubKeyString());
-
-    if (!AddDHTKey(childKey, childKey.GetPubKey()))
-        LogPrintf("DEBUGGER ED %s - returns false\n",__func__);
+    AddDHTKey(childKey, childKey.GetPubKey()); //TODO
 
     secretEdRet = childKey; //return Ed25519 key
 
@@ -229,10 +221,6 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
         nChildIndex++;
     } while (HaveKey(childKey.key.GetPubKey().GetID()));
     secretRet = childKey.key;
-
-    LogPrintf("DEBUGGER ED %s - WalletAddress [%s]\n",__func__,CDynamicAddress(secretRet.GetPubKey().GetID()).ToString());
-
-    
 
     CKeyEd25519 secretEdRet;
     DeriveEd25519ChildKey(secretRet,secretEdRet); //Derive Ed25519 key
@@ -591,8 +579,6 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
                 if (nWalletBackups == -2) {
                     TopUpKeyPoolCombo();
-                    //TopUpKeyPool();
-                    //TopUpEdKeyPool();
                     LogPrintf("Keypool replenished, re-initializing automatic backups.\n");
                     nWalletBackups = GetArg("-createwalletbackups", 10);
                 }
@@ -987,8 +973,6 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
         // if we are not using HD, generate new keypool
         if (IsHDEnabled()) {
             TopUpKeyPoolCombo();
-            //TopUpKeyPool();
-            //TopUpEdKeyPool();
         } else {
             NewKeyPool();
             NewEdKeyPool();
@@ -1151,7 +1135,8 @@ bool CWallet::GetAccountPubkey(CPubKey& pubKey, std::string strAccount, bool bFo
 
     // Generate a new key
     if (bForceNew) {
-        if (!GetKeyFromPool(account.vchPubKey, false))
+        std::vector<unsigned char> newEdKey;
+        if (!GetEdKeyFromPool(account.vchPubKey, newEdKey, false))
             return false;
 
         SetAddressBook(account.vchPubKey.GetID(), strAccount, "receive");
@@ -2080,12 +2065,9 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
             }
             pindex = chainActive.Next(pindex);
         }
-        LogPrintf("DEBUGGER ED %s - updatekeypoolvectorsize [%d]\n",__func__,reservedEd25519PubKeys.size());
         ReserveEdKeyForTransactions();
         TopUpKeyPoolCombo();
-        LogPrintf("DEBUGGER ED %s - AFTER2 internaledkeypoolbegin [%d], internaledkeypoolsize [%d]\n", __func__, *setInternalEdKeyPool.begin(), setInternalEdKeyPool.size());
-        LogPrintf("DEBUGGER ED %s - AFTER2 internalkeypoolbegin [%d], internalkeypoolsize [%d]\n", __func__, *setInternalKeyPool.begin(), setInternalKeyPool.size());
-
+        ProcessLinkQueue();
         ShowProgress(_("Rescanning..."), 100); // hide progress dialog in GUI
     }
     return ret;
@@ -4391,8 +4373,6 @@ bool CWallet::SetDefaultKey(const CPubKey& vchPubKey)
 bool CWallet::NewKeyPool()
 {
     {
-        LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
-
         LOCK(cs_wallet);
         CWalletDB walletdb(strWalletFile);
         BOOST_FOREACH (int64_t nIndex, setInternalKeyPool) {
@@ -4417,8 +4397,6 @@ bool CWallet::NewKeyPool()
 bool CWallet::NewEdKeyPool()
 {
     {
-        LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
-
         LOCK(cs_wallet);
         CWalletDB walletdb(strWalletFile);
         BOOST_FOREACH (int64_t nIndex, setInternalEdKeyPool) {
@@ -4429,8 +4407,6 @@ bool CWallet::NewEdKeyPool()
             walletdb.EraseEdPool(nIndex);
         }
         setExternalEdKeyPool.clear();
-        //privateSendClient.fEnablePrivateSend = false;
-        //nKeysLeftSinceAutoBackup = 0;
 
         if (!TopUpKeyPoolCombo()) //was topupedkeypool
             return false;
@@ -4575,7 +4551,6 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
             retrievedPubKey = GenerateNewKey(0, fInternal);
             GetKey(retrievedPubKey.GetID(), retrievedKey);
 
-
             if (!walletdb.WritePool(nEnd, CKeyPool(retrievedPubKey, fInternal)))
                 throw std::runtime_error("TopUpKeyPoolCombo(): writing generated key failed");
 
@@ -4586,15 +4561,7 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
             }
             LogPrintf("keypool added key %d, size=%u, internal=%d\n", nEnd, setInternalKeyPool.size() + setExternalKeyPool.size(), fInternal);
 
-            //Ed25519 Keypool
-            // if (!setInternalEdKeyPool.empty()) {
-            //     nEdEnd = *(--setInternalEdKeyPool.end()) + 1;
-            // }
-            // if (!setExternalEdKeyPool.empty()) {
-            //     nEdEnd = std::max(nEdEnd, *(--setExternalEdKeyPool.end()) + 1);
-            // }
             // TODO: implement keypools for all accounts?
-            //if (!walletdb.WritePool(nEnd, CKeyPool(GenerateNewKey(0, fInternal), fInternal)))
             if (!walletdb.WriteEdPool(nEnd, CEdKeyPool(GenerateNewEdKey(0, fInternal, retrievedKey), fInternal)))
                 throw std::runtime_error("TopUpEdKeyPool(): writing generated key failed");
 
@@ -4612,10 +4579,6 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
     }
     return true;
 } //TopUpKeyPoolCombo
-
-
-
-
 
 bool CWallet::TopUpEdKeyPool(unsigned int kpSize)
 {
@@ -4659,7 +4622,6 @@ bool CWallet::TopUpEdKeyPool(unsigned int kpSize)
                 nEnd = std::max(nEnd, *(--setExternalEdKeyPool.end()) + 1);
             }
             // TODO: implement keypools for all accounts?
-            //if (!walletdb.WritePool(nEnd, CKeyPool(GenerateNewKey(0, fInternal), fInternal)))
             if (!walletdb.WriteEdPool(nEnd, CEdKeyPool(GenerateNewEdKey(0, fInternal), fInternal)))
                 throw std::runtime_error("TopUpEdKeyPool(): writing generated key failed");
 
@@ -4670,37 +4632,22 @@ bool CWallet::TopUpEdKeyPool(unsigned int kpSize)
             }
             LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nEnd, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), fInternal);
 
-            //double dProgress = 100.f * nEnd / (nTargetSize + 1);
-            //std::string strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
-            //uiInterface.InitMessage(strMsg);
         }
     }
     return true;
 } //TopUpEdKeyPool
 
-
 void CWallet::UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters)
 {
-    LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
     std::vector<unsigned char> key0 = vvchOpParameters[0];
     std::vector<unsigned char> key1 = vvchOpParameters[1];
-
-    std::string key0String(key0.begin(), key0.end());
-    std::string key1String(key1.begin(), key1.end());
-
-    LogPrintf("DEBUGGER ED %s - OpType [%s]\n",__func__,strOpType);
-    LogPrintf("DEBUGGER ED %s - key0 [%s]\n",__func__,key0String);
-    LogPrintf("DEBUGGER ED %s - key1 [%s]\n",__func__,key1String);
 
     if (strOpType == "bdap_new_account")
         reservedEd25519PubKeys.push_back(key1);
     else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept")
         reservedEd25519PubKeys.push_back(key0);
 
-
-
 } //UpdateKeyPoolsFromTransactions
-
 
 void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal)
 {
@@ -4741,7 +4688,6 @@ void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fIn
 void CWallet::ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal)
 {
     nIndex = -1;
-    //keypool.vchPubKey = CPubKey();
     {
         LOCK(cs_wallet);
 
@@ -4762,31 +4708,20 @@ void CWallet::ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bo
         if (!walletdb.ReadEdPool(nIndex, edkeypool)) {
             throw std::runtime_error(std::string(__func__) + ": read failed");
         }
-        // if (!HaveKey(setEdKeyPool.vchPubKey.GetID())) {
-        //     throw std::runtime_error(std::string(__func__) + ": unknown key in key pool");
-        // }
         if (edkeypool.fInternal != fInternal) {
             throw std::runtime_error(std::string(__func__) + ": keypool entry misclassified");
         }
 
-        //assert(keypool.vchPubKey.IsValid());
         LogPrintf("edkeypool reserve %d\n", nIndex);
     }
 } //ReserveEdKeyFromKeyPool
 
-
 void CWallet::ReserveEdKeyForTransactions()
 {
-    LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
-
         CWalletDB walletdb(strWalletFile);
         CEdKeyPool edkeypool;
         std::vector<unsigned char> edPubKey;
         std::vector<int64_t> keypoolIndexes;
-
-        LogPrintf("DEBUGGER ED %s - BEFORE internaledkeypoolbegin [%d], internaledkeypoolsize [%d]\n", __func__, *setInternalEdKeyPool.begin(), setInternalEdKeyPool.size());
-        LogPrintf("DEBUGGER ED %s - BEFORE internalkeypoolbegin [%d], internalkeypoolsize [%d]\n", __func__, *setInternalKeyPool.begin(), setInternalKeyPool.size());
-
 
         for (int64_t nIndex : setInternalEdKeyPool) {
             if (!walletdb.ReadEdPool(nIndex, edkeypool)) {
@@ -4795,23 +4730,11 @@ void CWallet::ReserveEdKeyForTransactions()
             edPubKey = edkeypool.edPubKey;
 
             if(std::find(reservedEd25519PubKeys.begin(), reservedEd25519PubKeys.end(), edPubKey) != reservedEd25519PubKeys.end()) {
-                /* v contains x */
                 KeepKey(nIndex);
                 KeepEdKey(nIndex);
                 keypoolIndexes.push_back(nIndex);
-                LogPrintf("DEBUGGER ED %s - found and reserving key at [%d]\n",__func__,nIndex);
             }
-
-            std::string pubKeyString(edPubKey.begin(), edPubKey.end());
-            LogPrintf("DEBUGGER ED %s - index [%d], pubkey [%s]\n",__func__,nIndex, pubKeyString);
         }
-
-        //for (std::vector<int64_t>::iterator it = keypoolIndexes.begin() ; it != keypoolIndexes.end(); ++it) {
-          //  LogPrintf("DEBUGGER ED %s - indextoerase [%d]\n",__func__,*it);
-            //setInternalEdKeyPool.erase(*it);
-            //setInternalKeyPool.erase(*it);
-        //}
-
 
         if (keypoolIndexes.size() > 0) {
             std::set<int64_t>::iterator startEd = setInternalEdKeyPool.find(*keypoolIndexes.begin());
@@ -4827,13 +4750,7 @@ void CWallet::ReserveEdKeyForTransactions()
             setInternalEdKeyPool.erase(*setInternalEdKeyPool.begin());
         }
 
-
-        LogPrintf("DEBUGGER ED %s - AFTER internaledkeypoolbegin [%d], internaledkeypoolsize [%d]\n", __func__, *setInternalEdKeyPool.begin(), setInternalEdKeyPool.size());
-        LogPrintf("DEBUGGER ED %s - AFTER internalkeypoolbegin [%d], internalkeypoolsize [%d]\n", __func__, *setInternalKeyPool.begin(), setInternalKeyPool.size());
-
-
 } //ReserveEdKeyForTransactions
-
 
 void CWallet::KeepKey(int64_t nIndex)
 {
@@ -4852,7 +4769,6 @@ void CWallet::KeepEdKey(int64_t nIndex)
     if (fFileBacked) {
         CWalletDB walletdb(strWalletFile);
         walletdb.EraseEdPool(nIndex);
-        //nKeysLeftSinceAutoBackup = nWalletBackups ? nKeysLeftSinceAutoBackup - 1 : 0;
     }
     LogPrintf("edkeypool keep %d\n", nIndex);
 }
@@ -4893,8 +4809,6 @@ bool CWallet::GetKeyFromPool(CPubKey& result, bool fInternal)
 
 bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edresult, bool fInternal)
 {
-    LogPrintf("DEBUGGER ED %s - made it here!\n",__func__);
-    
     int64_t nIndex = 0;
     int64_t nEdIndex = 0;
     CKeyPool keypool;
@@ -4903,13 +4817,10 @@ bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edre
         LOCK(cs_wallet);
         ReserveKeyFromKeyPool(nIndex, keypool, fInternal);
         ReserveEdKeyFromKeyPool(nEdIndex, edkeypool, fInternal);
-        LogPrintf("DEBUGGER ED %s - nIndex [%d]\n",__func__,nIndex);
-        LogPrintf("DEBUGGER ED %s - nEdIndex [%d]\n",__func__,nEdIndex);
         if (nIndex == -1) {
             if (IsLocked(true))
                 return false;
             // TODO: implement keypool for all accouts?
-            LogPrintf("DEBUGGER ED %s - made it here! generatekey portion\n",__func__);
             result = GenerateNewKey(0, fInternal);
         }
         else {
@@ -4924,7 +4835,6 @@ bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edre
             if (IsLocked(true))
                 return false;
             // TODO: implement keypool for all accouts?
-            LogPrintf("DEBUGGER ED %s - made it here! generatekey ed portion\n",__func__);
             edresult = GenerateNewEdKey(0, fInternal, keyRetrieved);
         }
         else {
@@ -5530,7 +5440,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
 
         CPubKey newDefaultKey;
         std::vector<unsigned char> newDefaultEdKey;
-        //if (walletInstance->GetKeyFromPool(newDefaultKey, false)) {
         if (walletInstance->GetEdKeyFromPool(newDefaultKey, newDefaultEdKey, false)) {
             walletInstance->SetDefaultKey(newDefaultKey);
             if (!walletInstance->SetAddressBook(walletInstance->vchDefaultKey.GetID(), "", "receive")) {

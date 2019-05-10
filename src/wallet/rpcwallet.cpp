@@ -135,7 +135,8 @@ UniValue getnewaddress(const JSONRPCRequest& request)
 
     // Generate a new key that is added to wallet
     CPubKey newKey;
-    if (!pwalletMain->GetKeyFromPool(newKey, false))
+    std::vector<unsigned char> newEdKey; //not really using this here, keeps keypools synced
+    if (!pwalletMain->GetEdKeyFromPool(newKey, newEdKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyID = newKey.GetID();
 

@@ -88,8 +88,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
 
     // TODO: Add ability to pass in the wallet address
     //now using GetKeyFromPool instead of MakeNewKey
+    std::vector<unsigned char> newEdKey;
     CPubKey pubWalletKey;
-    if (!pwalletMain->GetKeyFromPool(pubWalletKey, true))
+    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, newEdKey, true))
         throw std::runtime_error("Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
@@ -114,7 +115,8 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     // TODO: Use stealth address for the link address so linking will be private
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubLinkKey;
-    if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
+    std::vector<unsigned char> newEdKey2;
+    if (!pwalletMain->GetEdKeyFromPool(pubLinkKey, newEdKey2, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);

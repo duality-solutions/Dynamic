@@ -164,13 +164,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
     if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privReqDHTKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
-    else LogPrintf("DEBUGGER ED %s - got request privatekey [%s]\n",__func__,privReqDHTKey.GetPrivKeyString());
 
-    //CKeyEd25519 privReqDHTKey;
-    //CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
-    //if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
-    //    throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
- 
     txLink.RequestorPubKey = vchDHTPubKey;
 
     pwalletMain->SetAddressBook(privReqDHTKey.GetID(), strRequestorFQDN, "bdap-dht-key");
@@ -318,7 +312,6 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
-
     CPubKey pubWalletKey; //won't be needing this
     CharString vchDHTPubKey;
     CKeyEd25519 privAcceptDHTKey;
@@ -328,12 +321,6 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
     if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privAcceptDHTKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
-    else LogPrintf("DEBUGGER ED %s - got accept privatekey [%s]\n",__func__,privAcceptDHTKey.GetPrivKeyString());
-
-    //CKeyEd25519 privAcceptDHTKey;
-    //CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
-    //if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
-    //    throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP link"));
  
     txLinkAccept.RecipientPubKey = vchDHTPubKey;
 
@@ -1015,7 +1002,8 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     int64_t stoptime = timestamp + 60; // stop relaying after 1 minute.
     uint256 messageID = GetMessageID(key, timestamp);
     CPubKey newPubKey;
-    if (!pwalletMain->GetKeyFromPool(newPubKey, false))
+    std::vector<unsigned char> newEdKey;
+    if (!pwalletMain->GetEdKeyFromPool(newPubKey, newEdKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyID = newPubKey.GetID();
