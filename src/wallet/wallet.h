@@ -718,6 +718,8 @@ private:
 
     void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
 
+    void ReserveEdKeyForTransactions();    
+
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 
     bool fFileBacked;
@@ -727,6 +729,8 @@ private:
 
     std::set<int64_t> setInternalEdKeyPool;
     std::set<int64_t> setExternalEdKeyPool;
+
+    std::vector<std::vector<unsigned char>> reservedEd25519PubKeys;
 
     int64_t nTimeFirstKey;
 
@@ -990,7 +994,7 @@ public:
     bool AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose = true);
     bool LoadToWallet(const CWalletTx& wtxIn);
     void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock) override;
-    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate);
+    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate, bool fUpdateKeyPool = false);
     CBlockIndex* ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false);
     void ReacceptWalletTransactions();
     void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) override;
@@ -1067,6 +1071,7 @@ public:
     bool GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edresult, bool fInternal);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
+    void UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters);
 
     std::set<std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, CAmount> GetAddressBalances();
