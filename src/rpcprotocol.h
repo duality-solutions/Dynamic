@@ -76,6 +76,22 @@ enum RPCErrorCode {
     RPC_WALLET_WRONG_ENC_STATE = -15,      //! Command given in wrong wallet encryption state (encrypting an encrypted wallet etc.)
     RPC_WALLET_ENCRYPTION_FAILED = -16,    //! Failed to encrypt the wallet
     RPC_WALLET_ALREADY_UNLOCKED = -17,     //! Wallet is already unlocked
+    //! BDAP errors
+    RPC_BDAP_ERROR = -300,                 //! Unspecified BDAP error
+    RPC_BDAP_SPORK_INACTIVE = -301,        //! BDAP spork is not active
+    RPC_BDAP_DB_ERROR = -302,              //! BDAP database error
+    RPC_BDAP_LINK_MNGR_ERROR = -303,       //! BDAP link manager error
+    RPC_BDAP_ACCOUNT_NOT_FOUND = -304,     //! BDAP link manager error
+    //! DHT errors
+    RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT
+    RPC_DHT_NOT_STARTED = -401,            //! DHT session not started
+    RPC_DHT_GET_KEY_FAILED = -402,         //! Get DHT private key failed
+    RPC_DHT_GET_FAILED = -403,             //! Get DHT data failed
+    RPC_DHT_PUT_FAILED = -404,             //! Put DHT data failed
+    RPC_DHT_INVALID_HEADER = -405,         //! Invalid DHT header information
+    RPC_DHT_INVALID_RECORD = -406,         //! Invalid DHT record information
+    RPC_DHT_RECORD_LOCKED = -407,          //! DHT record locked
+    RPC_DHT_PUBKEY_MISMATCH = -408,        //! DHT public key mismatch
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);

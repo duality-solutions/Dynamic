@@ -41,8 +41,8 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("requestor_link_pubkey", link.RequestorPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
@@ -75,8 +75,8 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
@@ -422,6 +422,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
             if (strToAccount.empty() || strToAccount == stringFromVch(link.RecipientFullObjectPath)) {
                 oLink.push_back(Pair("requestor_fqdn", stringFromVch(link.RequestorFullObjectPath)));
                 oLink.push_back(Pair("recipient_fqdn", stringFromVch(link.RecipientFullObjectPath)));
+
+                if (stringFromVch(link.SharedRequestPubKey).length() > 0) oLink.push_back(Pair("shared_request_pubkey", stringFromVch(link.SharedRequestPubKey)));
+                if (stringFromVch(link.SharedAcceptPubKey).length() > 0) oLink.push_back(Pair("shared_accept_pubkey", stringFromVch(link.SharedAcceptPubKey)));
+
+                if (stringFromVch(link.RequestorWalletAddress).length() > 0) oLink.push_back(Pair("requestor_wallet_address", stringFromVch(link.RequestorWalletAddress)));
+                if (stringFromVch(link.RecipientWalletAddress).length() > 0) oLink.push_back(Pair("recipient_wallet_address", stringFromVch(link.RecipientWalletAddress)));
+
                 oLink.push_back(Pair("requestor_link_pubkey", stringFromVch(link.RequestorPubKey)));
                 oLink.push_back(Pair("txid", link.txHashRequest.GetHex())); // TODO: rename to request_txid
                 if ((unsigned int)chainActive.Height() >= link.nHeightRequest-1) {
@@ -445,13 +452,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                     oLink.push_back(Pair("recipient_link_pubkey", stringFromVch(link.RecipientPubKey)));
                     oLink.push_back(Pair("accept_txid", link.txHashAccept.GetHex()));
                     if ((unsigned int)chainActive.Height() >= link.nHeightAccept-1) {
-                        CBlockIndex *pindex = chainActive[link.nHeightRequest-1];
+                        CBlockIndex *pindex = chainActive[link.nHeightAccept-1]; //changed from Request to Accept
                         if (pindex) {
                             nTime = pindex->GetMedianTimePast();
                         }
                     }
                     oLink.push_back(Pair("accept_time", nTime));
-                    expired_time = link.nExpireTimeRequest;
+                    expired_time = link.nExpireTimeAccept; //changed from Request to Accept
                     expired = false;
                     if (expired_time != 0)
                     {
@@ -631,7 +638,7 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
 
 static UniValue ListCompletedLinks(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3)
         throw std::runtime_error(
             "lists completed links\n"
             "\nLink Completed Arguments:\n"
@@ -659,12 +666,12 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
             + HelpExampleRpc("link complete", ""));
 
     std::string strFromAccountFQDN, strToAccountFQDN;
-    if (request.params.size() > 2) {
-        strFromAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 1) {
+        strFromAccountFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strFromAccountFQDN);
     }
-    if (request.params.size() > 3) {
-        strToAccountFQDN = request.params[3].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 2) {
+        strToAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strToAccountFQDN);
     }
 
@@ -1188,7 +1195,7 @@ UniValue link(const JSONRPCRequest& request)
     }
     else {
         throw std::runtime_error(
-            "link\n"
+            "link \"command\"...\n"
             + HelpRequiringPassphrase() +
             "\nLink commands are request, accept, pending, complete, deny, denied, getaccountmessages, getmessages, and sendmessage\n"
             "\nExamples:\n"

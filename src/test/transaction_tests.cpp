@@ -6,6 +6,7 @@
 #include "data/tx_valid.json.h"
 #include "test/test_dynamic.h"
 
+#include "bdap/stealth.h"
 #include "clientversion.h"
 #include "consensus/validation.h"
 #include "core_io.h"

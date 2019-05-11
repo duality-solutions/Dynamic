@@ -1,5 +1,7 @@
 // Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2014 The ShadowCoin developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -9,6 +11,7 @@
 
 #include "base58.h"
 #include "bdap/linkstorage.h"
+#include "bdap/stealth.h"
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
@@ -96,17 +99,13 @@ bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned c
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
 {
     nWalletDBUpdateCounter++;
-
-    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey),
-            keyMeta, false))
+    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, false))
         return false;
-
     // hash pubkey/privkey to accelerate wallet load
     std::vector<unsigned char> vchKey;
     vchKey.reserve(vchPubKey.size() + vchPrivKey.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
-
     return Write(std::make_pair(std::string("key"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
@@ -644,6 +643,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             if (!pwalletMain)
                 pwalletMain = pwallet;
             ProcessLink(storage, true);
+
         } else if (strType == "linkid") {
             uint256 SubjectID;
             ssKey >> SubjectID;
@@ -652,6 +652,23 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             ssValue >> vchPubKey;
 
             LoadLinkMessageInfo(SubjectID, vchPubKey);
+
+        } else if (strType == "stealth") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthAddress sxAddr;
+            ssValue >> sxAddr;
+            LogPrintf("%s -- AddStealthToMap \n", __func__);
+            pwallet->AddStealthToMap(std::make_pair(keyID, sxAddr));
+
+        } else if (strType == "sxqueue") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthKeyQueueData stealthData;
+            ssValue >> stealthData;
+            LogPrintf("%s -- AddToStealthQueue \n", __func__);
+            pwallet->AddToStealthQueue(std::make_pair(keyID, stealthData));
+
         }
     } catch (...) {
         if (strType != "keymeta")
@@ -1105,4 +1122,24 @@ bool CWalletDB::EraseLinkMessageInfo(const uint256& subjectID)
 {
     LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
     return Erase(std::make_pair(std::string("linkid"), subjectID)); 
+}
+
+bool CWalletDB::WriteStealthAddress(const CStealthAddress& sxAddr)
+{
+    return Write(std::make_pair(std::string("stealth"), sxAddr.GetSpendKeyID()), sxAddr);
+}
+
+bool CWalletDB::WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta)
+{
+    return Write(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
+}
+
+bool CWalletDB::EraseStealthKeyQueue(const CKeyID& keyId)
+{
+    return Erase(std::make_pair(std::string("sxqueue"), keyId));
+}
+
+bool CWalletDB::ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta)
+{
+    return Read(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
 }

@@ -85,10 +85,17 @@ public:
         }
     }
 
+    void SetFlags(bool fValidIn, bool fCompressedIn)
+    {
+        fValid = fValidIn;
+        fCompressed = fCompressedIn;
+    };
+
     //! Simple read-only vector-like interface.
     unsigned int size() const { return (fValid ? keydata.size() : 0); }
     const unsigned char* begin() const { return keydata.data(); }
     const unsigned char* end() const { return keydata.data() + size(); }
+    unsigned char* begin_nc() { return keydata.data(); }
 
     const std::vector<unsigned char, secure_allocator<unsigned char> > getKeyData() const { return keydata; }
 
@@ -145,6 +152,8 @@ public:
 
     //! Load private key and check that public key matches.
     bool Load(CPrivKey& privkey, CPubKey& vchPubKey, bool fSkipCheck);
+
+    bool DeriveChildKey(CKey& keyChild) const;
 };
 
 struct CExtKey {

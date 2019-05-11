@@ -31,11 +31,11 @@
 
 #include <univalue.h>
 
-UniValue getmutable(const JSONRPCRequest& request)
+static UniValue GetMutable(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "getmutable \"pubkey\" \"operation\"\n"
+            "dht getmutable \"pubkey\" \"operation\"\n"
             "\nArguments:\n"
             "1. pubkey             (string)             DHT public key\n"
             "2. operation          (string)             DHT data operation\n"
@@ -49,19 +49,16 @@ UniValue getmutable(const JSONRPCRequest& request)
             "  \"DHT Entry Value\"            (string)  Mutable entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar") +
+           HelpExampleCli("dht getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
-
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+           HelpExampleRpc("dht getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
 
     UniValue result(UniValue::VOBJ);
     if (!pHashTableSession->Session)
-        throw std::runtime_error("getdhtmutable failed. DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
-    const std::string strPubKey = request.params[0].get_str();
-    const std::string strSalt = request.params[1].get_str();
+    const std::string strPubKey = request.params[1].get_str();
+    const std::string strSalt = request.params[2].get_str();
 
     bool fRet = false;
     int64_t iSequence = 0;
@@ -78,17 +75,17 @@ UniValue getmutable(const JSONRPCRequest& request)
         result.push_back(Pair("DHT Entry Value", strValue));
     }
     else {
-        throw std::runtime_error("getmutable failed.  Check the debug.log for details.\n");
+        throw JSONRPCError(RPC_DHT_ERROR, strprintf("dht %s failed. Check the debug.log for details.", request.params[0].get_str()));
     }
 
     return result;
 }
 
-UniValue putmutable(const JSONRPCRequest& request)
+static UniValue PutMutable(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 5 || request.params.size() == 4)
         throw std::runtime_error(
-            "putmutable \"data value\" \"operation\" \"pubkey\" \"privkey\"\n"
+            "dht putmutable \"data value\" \"operation\" \"pubkey\" \"privkey\"\n"
             "\nArguments:\n"
             "1. data value                    (string)  Put data value for the DHT entry\n"
             "2. operation                     (string)  DHT data operation\n"
@@ -104,34 +101,31 @@ UniValue putmutable(const JSONRPCRequest& request)
             "  \"DHT Entry Value\"            (string)  Mutable entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("putmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0") +
+           HelpExampleCli("dht putmutable", "\"https://duality.solutions/duality/logos/dual.png\" \"avatar\" \"517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a\" \"bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0\"") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("getmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0"));
-
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+           HelpExampleRpc("dht putmutable", "\"https://duality.solutions/duality/logos/dual.png\" \"avatar\" \"517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a\" \"bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0\""));
 
     UniValue result(UniValue::VOBJ);
     if (!pHashTableSession->Session)
-        throw std::runtime_error("putmutable failed. DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     //TODO: Check putValue is not > 1000 bytes.
     bool fNewEntry = false;
     const std::string strValue = request.params[1].get_str();
-    const std::string strOperationType = request.params[1].get_str();
+    const std::string strOperationType = request.params[2].get_str();
     std::string strPrivKey;
     std::string strPubKey;
     CKeyEd25519 key;
-    if (request.params.size() == 4) {
-        strPubKey = request.params[2].get_str();
-        strPrivKey = request.params[3].get_str();
+    if (request.params.size() == 5) {
+        strPubKey = request.params[3].get_str();
+        strPrivKey = request.params[4].get_str();
         std::vector<unsigned char> vch = vchFromString(strPubKey);
         CKeyID keyID(Hash160(vch.begin(), vch.end()));
         if (pwalletMain && !pwalletMain->GetDHTKey(keyID, key)) {
-            throw std::runtime_error("putmutable: ERRCODE: 5400 - Error getting ed25519 private key for " + strPubKey + "\n");
+            throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for %s", strPubKey));
         }
     }
-    else if (request.params.size() == 2) {
+    else if (request.params.size() == 3) {
         strPubKey = stringFromVch(key.GetPubKey());
         strPrivKey = stringFromVch(key.GetPrivKey());
         fNewEntry = true;
@@ -156,22 +150,22 @@ UniValue putmutable(const JSONRPCRequest& request)
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     record.GetHeader().Salt = strOperationType;
     if (!pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5402 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
 
-UniValue dhtinfo(const JSONRPCRequest& request)
+static UniValue GetDHTStatus(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 0)
+    if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "dhtinfo"
+            "dht status"
             "\nGets DHT network stats and info.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -214,11 +208,8 @@ UniValue dhtinfo(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtinfo", ""));
 
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
-
     if (!pHashTableSession->Session)
-        throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     libtorrent::session_status stats;
     std::vector<libtorrent::dht_lookup> vchDHTLookup; 
@@ -343,16 +334,17 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue putbdapdata(const JSONRPCRequest& request)
+static UniValue PutRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 3)
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
         throw std::runtime_error(
-            "putbdapdata \"account id\" \"operation\" \"data value\"\n"
+            "dht putrecord \"account id\" \"operation\" \"data value\"\n"
             "\nSaves mutable data in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
-            "1. account id             (string)      BDAP account id\n"
-            "2. operation              (string)      Mutable data operation used for DHT entry\n"
-            "3. data value             (string)      Mutable data value to save in the DHT\n"
+            "1. account id             (string)           BDAP account id\n"
+            "2. operation              (string)           Mutable data operation used for DHT entry\n"
+            "3. data value             (string)           Mutable data value to save in the DHT\n"
+            "4. encrypt                (bool, optional)   Encrypt the data with the user's public key\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"entry_path\"          (string)      BDAP account FQDN\n"
@@ -364,45 +356,39 @@ UniValue putbdapdata(const JSONRPCRequest& request)
             "  \"put_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-            HelpExampleCli("putbdapdata", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\"") +
+            HelpExampleCli("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0") +
             "\nAs a JSON-RPC call\n" + 
-            HelpExampleRpc("putbdapdata", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\""));
+            HelpExampleRpc("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0"));
 
     EnsureWalletIsUnlocked();
-
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
    
-    EnsureWalletIsUnlocked();
-
     if (!pHashTableSession->Session)
-        throw std::runtime_error("putbdapdata: ERRCODE: 5500 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
-    CharString vchObjectID = vchFromValue(request.params[0]);
-    std::string strOperationType = request.params[1].get_str();
+    CharString vchObjectID = vchFromValue(request.params[1]);
+    ToLowerCase(vchObjectID);
+
+    std::string strOperationType = request.params[2].get_str();
     ToLowerCase(strOperationType);
 
-    const std::string strValue = request.params[2].get_str();
-
-    ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
     entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5502 - " + strFullObjectPath + _(" can not be found.  Get BDAP info failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strFullObjectPath));
 
     CKeyEd25519 getKey;
     std::vector<unsigned char> vch = entry.DHTPublicKey;
     CKeyID keyID(Hash160(vch.begin(), vch.end()));
     if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5503 - Error getting ed25519 private key for the " + strFullObjectPath + _(" BDAP entry.\n"));
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Failed to get DHT private key for account %s (pubkey = %s)", strFullObjectPath, stringFromVch(vch)));
 
     if (getKey.GetPubKey() != entry.DHTPublicKey)
         throw std::runtime_error("putbdapdata: ERRCODE: 5504 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
@@ -411,7 +397,6 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
-    //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
@@ -422,32 +407,42 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error(strprintf("%s:  ERRCODE: 5505 - DHT data entry is locked for another %lli seconds\n", __func__, (header.nUnlockTime  - GetTime())));
+        throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
 
     iSequence++;
-    uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
+    uint16_t nVersion = 1;
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
     uint16_t nTotalSlots = 32;
-    std::vector<unsigned char> vchValue = vchFromValue(request.params[2]);
+    const std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
+    bool fEncrypt = true;
+    if (request.params.size() > 4)
+        fEncrypt = request.params[4].getBool();
+
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    if (fEncrypt) {
+        vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    }
+    else {
+        nVersion = 0; // clear text
+    }
+
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5506 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error(strprintf("%s:  ERRCODE: 5507 - Put error %s\n", __func__, pHashTableSession->strPutErrorMessage));
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
 
-UniValue clearbdapdata(const JSONRPCRequest& request)
+static UniValue ClearRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "clearbdapdata \"account id\" \"operation\"\n"
+            "dht clearrecord \"account id\" \"operation\"\n"
             "\nClears mutable data entry in the DHT for a BDAP account and operation code.\n"
             "\nArguments:\n"
             "1. account id             (string)      BDAP account id\n"
@@ -463,28 +458,23 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
             "  \"put_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-            HelpExampleCli("clearbdapdata", "duality auth") +
+            HelpExampleCli("dht clearrecord", "duality auth") +
             "\nAs a JSON-RPC call\n" + 
-            HelpExampleRpc("clearbdapdata", "duality auth"));
+            HelpExampleRpc("dht clearrecord", "duality auth"));
 
     EnsureWalletIsUnlocked();
-
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-   
-    EnsureWalletIsUnlocked();
 
     if (!pHashTableSession->Session)
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5510 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5511 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
-    CharString vchObjectID = vchFromValue(request.params[0]);
+    CharString vchObjectID = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID);
-    std::string strOperationType = request.params[1].get_str();
+    std::string strOperationType = request.params[2].get_str();
     ToLowerCase(strOperationType);
 
     CDomainEntry entry;
@@ -493,16 +483,16 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5512 - " + strFullObjectPath + _(" can not be found.  Get BDAP info failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strFullObjectPath));
 
     CKeyEd25519 getKey;
     std::vector<unsigned char> vch = entry.DHTPublicKey;
     CKeyID keyID(Hash160(vch.begin(), vch.end()));
     if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5513 - Error getting ed25519 private key for the " + strFullObjectPath + _(" BDAP entry.\n"));
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Failed to get DHT private key for account %s (pubkey = %s)", entry.GetFullObjectPath(), stringFromVch(vch)));
 
     if (getKey.GetPubKey() != entry.DHTPublicKey)
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5514 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
+        throw JSONRPCError(RPC_DHT_PUBKEY_MISMATCH, strprintf(" Error getting ed25519. Public key from wallet doesn't match entry for %s BDAP entry", strFullObjectPath));
 
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
@@ -520,7 +510,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error(strprintf("%s:  ERRCODE: 5505 - DHT data entry is locked for another %lli seconds\n", __func__, (header.nUnlockTime  - GetTime())));
+        throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
 
     iSequence++;
     uint16_t nVersion = 0;
@@ -530,21 +520,21 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
     if (record.HasError())
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdapdata: ERRCODE: 5516 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
 
-UniValue getbdapdata(const JSONRPCRequest& request)
+static UniValue GetRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "getbdapdata \"account id\" \"operation\"\n"
+            "dht getrecord \"account id\" \"operation\"\n"
             "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account id             (string)      BDAP account id\n"
@@ -560,25 +550,22 @@ UniValue getbdapdata(const JSONRPCRequest& request)
             "  \"get_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("getbdapdata", "Duality avatar") +
+           HelpExampleCli("dht getrecord", "Duality avatar") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("getbdapdata", "Duality avatar"));
+           HelpExampleRpc("dht getrecord", "Duality avatar"));
 
     EnsureWalletIsUnlocked();
 
     int64_t nStart = GetTimeMillis();
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
-
     UniValue result(UniValue::VOBJ);
-   
+
     if (!pHashTableSession->Session)
-        throw std::runtime_error("getbdapdata: ERRCODE: 5600 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("getbdapdata: ERRCODE: 5601 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
-    CharString vchObjectID = vchFromValue(request.params[0]);
+    CharString vchObjectID = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
@@ -586,9 +573,9 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
-        throw std::runtime_error("getbdapdata: ERRCODE: 5602 - " + strFullObjectPath + _(" can not be found.  Get BDAP entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strFullObjectPath));
 
-    const std::string strOperationType = request.params[1].get_str();
+    const std::string strOperationType = request.params[2].get_str();
     std::string strPubKey = stringFromVch(entry.DHTPublicKey);
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
@@ -596,17 +583,18 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
     std::vector<unsigned char> vchDHTPublicKey = entry.DHTPublicKey;
-    CKeyEd25519 getKey;
+    CKeyEd25519 getKey(true);
     CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting ed25519 private key for the " + entry.GetFullObjectPath() + _(" BDAP entry.\n"));
+    if (!pwalletMain->GetDHTKey(keyID, getKey)) {
+        getKey.SetNull();
+    }
 
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
     if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -731,11 +719,11 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue getbdaplinkdata(const JSONRPCRequest& request)
+static UniValue GetLinkRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 3)
+    if (request.fHelp || request.params.size() != 4)
         throw std::runtime_error(
-            "getbdaplinkdata \"account1\" \"account2\" \"operation\"\n"
+            "dht getlinkrecord \"account1\" \"account2\" \"operation\"\n"
             "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account1               (string)      BDAP link account 1, gets the value for this account\n"
@@ -751,57 +739,51 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
             "  \"get_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("getbdaplinkdata", "duality bob auth") +
+           HelpExampleCli("dht getlinkrecord", "duality bob auth") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("getbdaplinkdata", "duality bob auth"));
+           HelpExampleRpc("dht getlinkrecord", "duality bob auth"));
 
     EnsureWalletIsUnlocked();
 
     int64_t nStart = GetTimeMillis();
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
-
     UniValue result(UniValue::VOBJ);
-   
+
     if (!pHashTableSession->Session)
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5620 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5621 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
     if (!pLinkManager)
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Can not open link request in memory map"));
 
-    CharString vchObjectID1 = vchFromValue(request.params[0]);
+    CharString vchObjectID1 = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
     entry1.DomainComponent = vchDefaultDomainName;
     entry1.OrganizationalUnit = vchDefaultPublicOU;
     entry1.ObjectID = vchObjectID1;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry1.vchFullObjectPath(), entry1))
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5622 - " + entry1.GetFullObjectPath() + _(" can not be found.  Get BDAP entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry1.GetFullObjectPath()));
 
-    CharString vchObjectID2 = vchFromValue(request.params[1]);
+    CharString vchObjectID2 = vchFromValue(request.params[2]);
     ToLowerCase(vchObjectID2);
     CDomainEntry entry2;
     entry2.DomainComponent = vchDefaultDomainName;
     entry2.OrganizationalUnit = vchDefaultPublicOU;
     entry2.ObjectID = vchObjectID2;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry2.vchFullObjectPath(), entry2))
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5623 - " + entry2.GetFullObjectPath() + _(" can not be found.  Get BDAP entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry2.GetFullObjectPath()));
 
-    std::string strOperationType = request.params[2].get_str();
+    std::string strOperationType = request.params[3].get_str();
     ToLowerCase(strOperationType);
-
-    if (!pLinkManager)
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     CLink link;
     std::string strPubKey;
     std::vector<unsigned char> vchDHTPublicKey;
     uint256 linkID = GetLinkID(entry1.GetFullObjectPath(), entry2.GetFullObjectPath());
     if (!pLinkManager->FindLink(linkID, link))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5625 - Link id %s for %s and %s not found. Get BDAP link failed!", __func__, linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Link id %s for %s and %s not found. Get BDAP link failed!", linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
 
     CKeyEd25519 getKey;
     if (entry1.GetFullObjectPath() == link.RequestorFQDN()) {
@@ -811,10 +793,8 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
         if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey)) {
             std::vector<unsigned char> vchPublicKey = link.RecipientPubKey;
             CKeyID keyID2(Hash160(vchPublicKey.begin(), vchPublicKey.end()));
-            if (pwalletMain && !pwalletMain->GetDHTKey(keyID2, getKey)) {
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5625 - DHT link private key for " + entry1.GetFullObjectPath() + " or " + entry2.GetFullObjectPath() +
-                                             _(" not found. Get BDAP link entry failed!\n"));
-            }
+            if (pwalletMain && !pwalletMain->GetDHTKey(keyID2, getKey))
+                throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Failed to get DHT private key for account %s (pubkey = %s)", link.RequestorFQDN(), stringFromVch(vchDHTPublicKey)));
         }
     }
     else if (entry1.GetFullObjectPath() == link.RecipientFQDN()) {
@@ -825,8 +805,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
             std::vector<unsigned char> vchPublicKey = link.RequestorPubKey;
             CKeyID keyID2(Hash160(vchPublicKey.begin(), vchPublicKey.end()));
             if (pwalletMain && !pwalletMain->GetDHTKey(keyID2, getKey)) {
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5625 - DHT link private key for " + entry1.GetFullObjectPath() + " or " + entry2.GetFullObjectPath() +
-                                             _(" not found. Get BDAP link entry failed!\n"));
+                throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("DHT link private key for %s or %s not found.", entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
             }
         }
     }
@@ -842,7 +821,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
     if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5626 - Failed to get record: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -857,11 +836,11 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue getallbdaplinkdata(const JSONRPCRequest& request)
+static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "getallbdaplinkdata \"account\" \"operation\"\n"
+            "dht getalllinkrecords \"account\" \"operation\"\n"
             "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account                (string)      BDAP account used to get all data for this operation\n"
@@ -876,41 +855,36 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
             "  \"get_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("getallbdaplinkdata", "duality pshare-offer") +
+           HelpExampleCli("dht getalllinkrecords", "duality pshare-offer") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("getallbdaplinkdata", "duality pshare-offer"));
+           HelpExampleRpc("dht getalllinkrecords", "duality pshare-offer"));
 
     EnsureWalletIsUnlocked();
 
     int64_t nStart = GetTimeMillis();
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue results(UniValue::VOBJ);
    
     if (!pHashTableSession->Session)
-        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5720 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5721 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
     if (!pLinkManager)
-        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Can not open link request in memory map"));
 
-    CharString vchObjectID = vchFromValue(request.params[0]);
+    CharString vchObjectID = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
     entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
-        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5722 - " + entry.GetFullObjectPath() + _(" can not be found.  Get BDAP entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry.GetFullObjectPath()));
 
-    std::string strOperationType = request.params[1].get_str();
+    std::string strOperationType = request.params[2].get_str();
     ToLowerCase(strOperationType);
-
-    if (!pLinkManager)
-        throw std::runtime_error("getallbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
 
     std::vector<CLinkInfo> vchLinkInfo = pLinkManager->GetCompletedLinkInfo(entry.vchFullObjectPath());
     for (CLinkInfo& linkInfo : vchLinkInfo) {
@@ -918,14 +892,14 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
         std::vector<unsigned char> vchDHTPublicKey = linkInfo.vchReceivePubKey;
         CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
         if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-           throw std::runtime_error(strprintf("%s: ERRCODE: 5725 - Failed to get DHT private key for account %s (pubkey = %s)\n", __func__, entry.GetFullObjectPath(), entry.DHTPubKeyString()));
+            throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Failed to get DHT private key for account %s (pubkey = %s)", stringFromVch(linkInfo.vchFullObjectPath), stringFromVch(vchDHTPublicKey)));
 
        linkInfo.arrReceivePrivateSeed = getKey.GetDHTPrivSeed();
     }
 
     std::vector<CDataRecord> vchRecords;
     if (!pHashTableSession->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5726 - Failed to get records: %s\n", __func__, pHashTableSession->strPutErrorMessage));
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get records: %s", pHashTableSession->strPutErrorMessage));
 
     int nRecordItem = 1;
     for (CDataRecord& record : vchRecords) // loop through records
@@ -947,17 +921,18 @@ UniValue getallbdaplinkdata(const JSONRPCRequest& request)
     return results;
 }
 
-UniValue putbdaplinkdata(const JSONRPCRequest& request)
+static UniValue PutLinkRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 4)
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 6)
         throw std::runtime_error(
-            "putbdaplinkdata \"account1\" \"account2\" \"operation\" \"value\"\n"
+            "dht putlinkrecord \"account1\" \"account2\" \"operation\" \"value\"\n"
             "\nSaves a link mutable data entry in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
-            "1. account1               (string)      BDAP link account 1, gets the value for this account\n"
-            "2. account2               (string)      BDAP link account 2, other account in the link\n"
-            "3. operation              (string)      Mutable data operation code\n"
-            "4. value                  (string)                                 \n"
+            "1. account1               (string)           BDAP link account 1, gets the value for this account\n"
+            "2. account2               (string)           BDAP link account 2, other account in the link\n"
+            "3. operation              (string)           Mutable data operation code\n"
+            "4. value                  (string)           Mutable data value to save in the DHT\n"
+            "5. encrypt                (bool, optional)   Encrypt the data with the user's public key\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
@@ -968,53 +943,49 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
             "  \"put_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("putbdaplinkdata", "duality bob auth \"save this auth data\"") +
+           HelpExampleCli("dht putlinkrecord", "duality bob auth \"save this auth data\"") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("putbdaplinkdata", "duality bob auth \"save this auth data\""));
+           HelpExampleRpc("dht putlinkrecord", "duality bob auth \"save this auth data\""));
 
     EnsureWalletIsUnlocked();
-
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
 
     if (!pHashTableSession->Session)
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5640 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5641 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
     if (!pLinkManager)
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Can not open link request in memory map"));
 
-    CharString vchObjectID1 = vchFromValue(request.params[0]);
+    CharString vchObjectID1 = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
     entry1.DomainComponent = vchDefaultDomainName;
     entry1.OrganizationalUnit = vchDefaultPublicOU;
     entry1.ObjectID = vchObjectID1;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry1.vchFullObjectPath(), entry1))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5642 - " + entry1.GetFullObjectPath() + _(" can not be found.  Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry1.GetFullObjectPath()));
 
-    CharString vchObjectID2 = vchFromValue(request.params[1]);
+    CharString vchObjectID2 = vchFromValue(request.params[2]);
     ToLowerCase(vchObjectID2);
     CDomainEntry entry2;
     entry2.DomainComponent = vchDefaultDomainName;
     entry2.OrganizationalUnit = vchDefaultPublicOU;
     entry2.ObjectID = vchObjectID2;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry2.vchFullObjectPath(), entry2))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5643 - " + entry2.GetFullObjectPath() + _(" can not be found.  Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry2.GetFullObjectPath()));
 
-    std::string strOperationType = request.params[2].get_str();
+    std::string strOperationType = request.params[3].get_str();
     ToLowerCase(strOperationType);
 
     CLink link;
     uint256 linkID = GetLinkID(entry1.GetFullObjectPath(), entry2.GetFullObjectPath());
     if (!pLinkManager->FindLink(linkID, link))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5644 - Link id %s for %s and %s not found. Get BDAP link failed!", __func__, linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Link id %s for %s and %s not found. Get BDAP link failed!", linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
 
-    LogPrintf("%s -- req: %s, rec: %s \n", __func__, link.RequestorFQDN(), link.RecipientFQDN());
     std::vector<unsigned char> vchDHTPublicKey;
     if (entry1.GetFullObjectPath() == link.RequestorFQDN()) {
         vchDHTPublicKey = link.RequestorPubKey;
@@ -1023,7 +994,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
         vchDHTPublicKey = link.RecipientPubKey;
     }
     else {
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5645 - DHT link public key for " + entry1.GetFullObjectPath() + _(" not found. Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("DHT link public key for %s not found", entry1.GetFullObjectPath()));
     }
     result.push_back(Pair("link_requestor", link.RequestorFQDN()));
     result.push_back(Pair("link_acceptor", link.RecipientFQDN()));
@@ -1034,7 +1005,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     CKeyEd25519 getKey;
     CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
     if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5546 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
@@ -1044,25 +1015,34 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error(strprintf("%s:  ERRCODE: 5505 - DHT data entry is locked for another %lli seconds\n", __func__, (header.nUnlockTime  - GetTime())));
+        throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
 
     iSequence++;
 
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
     uint16_t nTotalSlots = 32;
-    std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
+    std::vector<unsigned char> vchValue = vchFromValue(request.params[4]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RequestorPubKey));
-    vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
+    bool fEncrypt = true;
+    if (request.params.size() > 5)
+        fEncrypt = request.params[5].getBool();
+
+    if (fEncrypt) {
+        vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RequestorPubKey));
+        vvchPubKeys.push_back(EncodedPubKeyToBytes(link.RecipientPubKey));
+    }
+    else {
+        nVersion = 0; // clear text
+    }
+
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
     if (record.HasError())
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1070,11 +1050,11 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue clearbdaplinkdata(const JSONRPCRequest& request)
+static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 3)
+    if (request.fHelp || request.params.size() != 4)
         throw std::runtime_error(
-            "clearbdaplinkdata \"account1\" \"account2\" \"operation\"\n"
+            "dht clearlinkrecord \"account1\" \"account2\" \"operation\"\n"
             "\nClears a link mutable data entry from the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account1               (string)      BDAP link account 1, gets the value for this account\n"
@@ -1089,51 +1069,47 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
             "  \"put_seq\"             (string)      Mutable data sequence number\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("clearbdaplinkdata", "duality bob auth") +
+           HelpExampleCli("dht clearlinkrecord", "duality bob auth") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("clearbdaplinkdata", "duality bob auth"));
+           HelpExampleRpc("dht clearlinkrecord", "duality bob auth"));
 
     EnsureWalletIsUnlocked();
 
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
-
     UniValue result(UniValue::VOBJ);
-
     if (!pHashTableSession->Session)
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5650 - DHT session not started.\n");
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5651 - Can not access BDAP domain entry database.\n");
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access BDAP domain entry database."));
 
     if (!pLinkManager)
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5700 - Can not open link request in memory map");
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Can not open link request in memory map"));
 
-    CharString vchObjectID1 = vchFromValue(request.params[0]);
+    CharString vchObjectID1 = vchFromValue(request.params[1]);
     ToLowerCase(vchObjectID1);
     CDomainEntry entry1;
     entry1.DomainComponent = vchDefaultDomainName;
     entry1.OrganizationalUnit = vchDefaultPublicOU;
     entry1.ObjectID = vchObjectID1;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry1.vchFullObjectPath(), entry1))
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5642 - " + entry1.GetFullObjectPath() + _(" can not be found.  Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry1.GetFullObjectPath()));
 
-    CharString vchObjectID2 = vchFromValue(request.params[1]);
+    CharString vchObjectID2 = vchFromValue(request.params[2]);
     ToLowerCase(vchObjectID2);
     CDomainEntry entry2;
     entry2.DomainComponent = vchDefaultDomainName;
     entry2.OrganizationalUnit = vchDefaultPublicOU;
     entry2.ObjectID = vchObjectID2;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry2.vchFullObjectPath(), entry2))
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5643 - " + entry2.GetFullObjectPath() + _(" can not be found.  Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", entry2.GetFullObjectPath()));
 
-    std::string strOperationType = request.params[2].get_str();
+    std::string strOperationType = request.params[3].get_str();
     ToLowerCase(strOperationType);
 
     CLink link;
     uint256 linkID = GetLinkID(entry1.GetFullObjectPath(), entry2.GetFullObjectPath());
     if (!pLinkManager->FindLink(linkID, link))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5644 - Link id %s for %s and %s not found. Get BDAP link failed!", __func__, linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("Link id %s for %s and %s not found. Get BDAP link failed!", linkID.ToString(), entry1.GetFullObjectPath(), entry2.GetFullObjectPath()));
 
     LogPrintf("%s -- req: %s, rec: %s \n", __func__, link.RequestorFQDN(), link.RecipientFQDN());
     std::vector<unsigned char> vchDHTPublicKey;
@@ -1144,7 +1120,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
         vchDHTPublicKey = link.RecipientPubKey;
     }
     else {
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5645 - DHT link public key for " + entry1.GetFullObjectPath() + _(" not found. Put BDAP DHT entry failed!\n"));
+        throw JSONRPCError(RPC_BDAP_LINK_MNGR_ERROR, strprintf("DHT link public key for %s not found", entry1.GetFullObjectPath()));
     }
     result.push_back(Pair("link_requestor", link.RequestorFQDN()));
     result.push_back(Pair("link_acceptor", link.RecipientFQDN()));
@@ -1155,7 +1131,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     CKeyEd25519 getKey;
     CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
     if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5546 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
@@ -1167,7 +1143,7 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error(strprintf("%s:  ERRCODE: 5505 - DHT data entry is locked for another %lli seconds\n", __func__, (header.nUnlockTime  - GetTime())));
+        throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
 
     iSequence++;
 
@@ -1178,10 +1154,10 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
     if (record.HasError())
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
+        throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5548 - - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1189,23 +1165,84 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue dht_rpc(const JSONRPCRequest& request) 
+{
+    std::string strCommand;
+    if (request.params.size() >= 1) {
+        strCommand = request.params[0].get_str();
+        ToLowerCase(strCommand);
+    }
+    else {
+        throw std::runtime_error(
+            "dht \"command\"...\n"
+            "\nAvailable commands:\n"
+            "  getmutable         - Get mutable entry\n"
+            "  putmutable         - Put mutable entry\n"
+            "  getrecord          - Get DHT record\n"
+            "  putrecord          - Put DHT record\n"
+            "  clearrecord        - Clear DHT record\n"
+            "  getlinkrecord      - Get DHT link record\n"
+            "  putlinkrecord      - Put DHT link record\n"
+            "  clearlinkrecord    - Clear DHT link record\n"
+            "  getalllinkrecords  - Get all DHT link records\n"
+            "  status             - DHT status\n"
+            "\nExamples:\n"
+            + HelpExampleCli("dht getrecord", "superman avatar") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("dht getrecord", "superman avatar"));
+    }
+    if (strCommand == "getmutable" || strCommand == "putmutable" || 
+            strCommand == "getrecord" || strCommand == "putrecord" || strCommand == "clearrecord" || 
+            strCommand == "getlinkrecord" || strCommand == "putlinkrecord" || strCommand == "clearlinkrecord" || strCommand == "getalllinkrecords" ||
+            strCommand == "status") 
+    {
+        if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+            throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the DHT until the BDAP spork is active."));
+    }
+    if (strCommand == "getmutable") {
+        return GetMutable(request);
+    }
+    else if (strCommand == "putmutable") {
+        return PutMutable(request);
+    }
+    else if (strCommand == "getrecord") {
+        return GetRecord(request);
+    }
+    else if (strCommand == "putrecord") {
+        return PutRecord(request);
+    }
+    else if (strCommand == "clearrecord") {
+        return ClearRecord(request);
+    }
+    else if (strCommand == "getlinkrecord") {
+        return GetLinkRecord(request);
+    }
+    else if (strCommand == "putlinkrecord") {
+        return PutLinkRecord(request);
+    }
+    else if (strCommand == "clearlinkrecord") {
+        return ClearLinkRecord(request);
+    }
+    else if (strCommand == "getalllinkrecords") {
+        return GetAllLinkRecords(request);
+    }
+    else if (strCommand == "status") {
+        return GetDHTStatus(request);
+    }
+    else {
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, strprintf("%s is an unknown DHT method command.", strCommand));
+    }
+    return NullUniValue;
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe   argNames
   //  --------------------- ------------------------ -----------------------        ------   --------------------
     /* DHT */
-    { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey", "operation"}  },
-    { "dht",             "putmutable",               &putmutable,                   true,    {"data value", "operation", "pubkey", "privkey"} },
-    { "dht",             "dhtinfo",                  &dhtinfo,                      true,    {} },
+    { "dht",             "dht",                      &dht_rpc,                      true,    {"command", "param1", "param2", "param3"}  },
     { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
-    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"account id", "operation", "data value"} },
-    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"account id", "operation"} },
     { "dht",             "dhtputmessages",           &dhtputmessages,               true,    {} },
     { "dht",             "dhtgetmessages",           &dhtgetmessages,               true,    {} },
-    { "dht",             "getbdaplinkdata",          &getbdaplinkdata,              true,    {"account1", "account2", "operation"} },
-    { "dht",             "putbdaplinkdata",          &putbdaplinkdata,              true,    {"account1", "account2", "operation", "value"} },
-    { "dht",             "clearbdapdata",            &clearbdapdata,                true,    {"account1", "account2", "operation"} },
-    { "dht",             "clearbdaplinkdata",        &clearbdaplinkdata,            true,    {"account1", "account2", "operation"} },
-    { "dht",             "getallbdaplinkdata",       &getallbdaplinkdata,           true,    {"account1", "operation"} },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
