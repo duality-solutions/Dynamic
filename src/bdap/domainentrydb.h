@@ -44,11 +44,11 @@ bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEn
 bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);
-bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                std::string& errorMessage, bool fJustCheck);
 bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);
-bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                   std::string& errorMessage, bool fJustCheck);
 bool CheckMoveDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                 std::string& errorMessage, bool fJustCheck);

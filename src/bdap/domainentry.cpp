@@ -277,7 +277,7 @@ std::string CDomainEntry::GenerateOID() const
         {
             strHeight = std::to_string(nHeight);
         }
-        if (!txHash.IsNull())
+        if (!txHash.IsNull() && !IsInitialBlockDownload())
         {
             CTransactionRef txRef;
             uint256 hashBlock;
