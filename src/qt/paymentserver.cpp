@@ -617,7 +617,7 @@ void PaymentServer::fetchPaymentACK(CWallet* wallet, SendCoinsRecipient recipien
     } else {
         CPubKey newKey;
         std::vector<unsigned char> newEdKey;
-        if (wallet->GetEdKeyFromPool(newKey, newEdKey, false)) {
+        if (wallet->GetKeysFromPool(newKey, newEdKey, false)) {
             CKeyID keyID = newKey.GetID();
             wallet->SetAddressBook(keyID, strAccount, "refund");
 

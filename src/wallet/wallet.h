@@ -1137,8 +1137,7 @@ public:
     void KeepKey(int64_t nIndex);
     void KeepEdKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
-    bool GetKeyFromPool(CPubKey& key, bool fInternal /*= false*/);
-    bool GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edresult, bool fInternal);
+    bool GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
     void UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters);

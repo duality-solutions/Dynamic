@@ -336,14 +336,14 @@ QString AddressTableModel::addRow(const QString& type, const QString& label, con
         // Generate a new address to associate with given label
         CPubKey newKey;
         std::vector<unsigned char> newEdKey;
-        if (!wallet->GetEdKeyFromPool(newKey, newEdKey, false)) {
+        if (!wallet->GetKeysFromPool(newKey, newEdKey, false)) {
             WalletModel::UnlockContext ctx(walletModel->requestUnlock());
             if (!ctx.isValid()) {
                 // Unlock wallet failed or was cancelled
                 editStatus = WALLET_UNLOCK_FAILURE;
                 return QString();
             }
-            if (!wallet->GetEdKeyFromPool(newKey, newEdKey, false)) {
+            if (!wallet->GetKeysFromPool(newKey, newEdKey, false)) {
                 editStatus = KEY_GENERATION_FAILURE;
                 return QString();
             }

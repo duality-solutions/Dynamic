@@ -1139,7 +1139,7 @@ bool CWallet::GetAccountPubkey(CPubKey& pubKey, std::string strAccount, bool bFo
     // Generate a new key
     if (bForceNew) {
         std::vector<unsigned char> newEdKey;
-        if (!GetEdKeyFromPool(account.vchPubKey, newEdKey, false))
+        if (!GetKeysFromPool(account.vchPubKey, newEdKey, false))
             return false;
 
         SetAddressBook(account.vchPubKey.GetID(), strAccount, "receive");
@@ -4798,7 +4798,8 @@ bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& 
     if (IsLocked())
         return false;
 
-    if (!GetKeyFromPool(pubkeyWallet, fInternal))
+    std::vector<unsigned char> vchEd25519PubKey;
+    if (!GetKeysFromPool(pubkeyWallet, vchEd25519PubKey, fInternal))
         return false;
 
     CKey walletKey, spendKey, scanKey;
@@ -4822,27 +4823,7 @@ bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& 
     return true;
 }
 
-bool CWallet::GetKeyFromPool(CPubKey& result, bool fInternal)
-{
-    int64_t nIndex = 0;
-    CKeyPool keypool;
-    {
-        LOCK(cs_wallet);
-        ReserveKeyFromKeyPool(nIndex, keypool, fInternal);
-        if (nIndex == -1) {
-            if (IsLocked(true))
-                return false;
-            // TODO: implement keypool for all accouts?
-            result = GenerateNewKey(0, fInternal);
-            return true;
-        }
-        KeepKey(nIndex);
-        result = keypool.vchPubKey;
-    }
-    return true;
-}
-
-bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edresult, bool fInternal)
+bool CWallet::GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal)
 {
     int64_t nIndex = 0;
     int64_t nEdIndex = 0;
@@ -4869,12 +4850,11 @@ bool CWallet::GetEdKeyFromPool(CPubKey& result, std::vector<unsigned char>& edre
         if (nEdIndex == -1) {
             if (IsLocked(true))
                 return false;
-            // TODO: implement keypool for all accouts?
-            edresult = GenerateNewEdKey(0, fInternal, keyRetrieved);
+            vchEd25519PubKey = GenerateNewEdKey(0, fInternal, keyRetrieved);
         }
         else {
             KeepEdKey(nEdIndex);
-            edresult = edkeypool.edPubKey;
+            vchEd25519PubKey = edkeypool.edPubKey;
         }
     }
     return true;
@@ -5477,7 +5457,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
 
         CPubKey newDefaultKey;
         std::vector<unsigned char> newDefaultEdKey;
-        if (walletInstance->GetEdKeyFromPool(newDefaultKey, newDefaultEdKey, false)) {
+        if (walletInstance->GetKeysFromPool(newDefaultKey, newDefaultEdKey, false)) {
             walletInstance->SetDefaultKey(newDefaultKey);
             if (!walletInstance->SetAddressBook(walletInstance->vchDefaultKey.GetID(), "", "receive")) {
                 InitError(_("Cannot write default address") += "\n");

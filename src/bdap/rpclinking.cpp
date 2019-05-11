@@ -158,7 +158,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CPubKey pubWalletKey; //won't be needing this
     CharString vchDHTPubKey;
     CKeyEd25519 privReqDHTKey;
-    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
@@ -315,7 +315,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CPubKey pubWalletKey; //won't be needing this
     CharString vchDHTPubKey;
     CKeyEd25519 privAcceptDHTKey;
-    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
@@ -1010,7 +1010,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     uint256 messageID = GetMessageID(key, timestamp);
     CPubKey newPubKey;
     std::vector<unsigned char> newEdKey;
-    if (!pwalletMain->GetEdKeyFromPool(newPubKey, newEdKey, false))
+    if (!pwalletMain->GetKeysFromPool(newPubKey, newEdKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyID = newPubKey.GetID();

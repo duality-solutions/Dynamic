@@ -51,8 +51,8 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubWalletKey;
     CharString vchDHTPubKey;
-    if (!pwalletMain->GetEdKeyFromPool(pubWalletKey, vchDHTPubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
@@ -71,8 +71,8 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubLinkKey;
     CharString NAvchDHTPubKey; //not really used
-    if (!pwalletMain->GetEdKeyFromPool(pubLinkKey, NAvchDHTPubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: EdKeypool ran out, please call edkeypoolrefill first");
+    if (!pwalletMain->GetKeysFromPool(pubLinkKey, NAvchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
