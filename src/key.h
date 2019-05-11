@@ -97,6 +97,8 @@ public:
     const unsigned char* end() const { return keydata.data() + size(); }
     unsigned char* begin_nc() { return keydata.data(); }
 
+    const std::vector<unsigned char, secure_allocator<unsigned char> > getKeyData() const { return keydata; }
+
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }
 

@@ -158,6 +158,41 @@ public:
     }
 };
 
+/** An Ed key pool entry */
+class CEdKeyPool
+{
+public:
+    int64_t nTime;
+    std::vector<unsigned char> edPubKey;
+    bool fInternal; // for change outputs
+
+    CEdKeyPool();
+    CEdKeyPool(const std::vector<unsigned char>& edPubKeyIn, bool fInternalIn);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        int nVersion = s.GetVersion();
+        if (!(s.GetType() & SER_GETHASH))
+            READWRITE(nVersion);
+        READWRITE(nTime);
+        READWRITE(edPubKey);
+        if (ser_action.ForRead()) {
+            try {
+                READWRITE(fInternal);
+            } catch (std::ios_base::failure&) {
+                /* flag as external address if we can't read the internal boolean
+                   (this will be the case for any wallet before the HD chain split version) */
+                fInternal = false;
+            }
+        } else {
+            READWRITE(fInternal);
+        }
+    }
+};
+
 /** Address book data */
 class CAddressBookData
 {
@@ -743,10 +778,23 @@ private:
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal /*= false*/);
 
+    void DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet);
+
+    void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
+
+    void ReserveEdKeyForTransactions();    
+
+    std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
+
     bool fFileBacked;
 
     std::set<int64_t> setInternalKeyPool;
     std::set<int64_t> setExternalKeyPool;
+
+    std::set<int64_t> setInternalEdKeyPool;
+    std::set<int64_t> setExternalEdKeyPool;
+
+    std::vector<std::vector<unsigned char>> reservedEd25519PubKeys;
 
     int64_t nTimeFirstKey;
 
@@ -787,6 +835,24 @@ public:
         CKeyID keyid = keypool.vchPubKey.GetID();
         if (mapKeyMetadata.count(keyid) == 0)
             mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
+    }
+
+    void LoadEdKeyPool(int nIndex, const CEdKeyPool& edkeypool)
+    {
+        if (edkeypool.fInternal) {
+            setInternalEdKeyPool.insert(nIndex);
+        } else {
+            setExternalEdKeyPool.insert(nIndex);
+        }
+
+        /*
+        // If no metadata exists yet, create a default with the pool key's
+        // creation time. Note that this may be overwritten by actually
+        // stored metadata for that key later, which is fine.
+        CKeyID keyid = keypool.vchPubKey.GetID();
+        if (mapKeyMetadata.count(keyid) == 0)
+            mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
+        */    
     }
 
     // Map from Key ID (for regular keys) or Script ID (for watch-only keys) to
@@ -919,6 +985,7 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
+    std::vector<unsigned char> GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn = CKey());
     //! HaveDHTKey implementation that also checks the mapHdPubKeys
     bool HaveDHTKey(const CKeyID &address) const override;
     //! HaveKey implementation that also checks the mapHdPubKeys
@@ -997,7 +1064,7 @@ public:
     bool AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose = true);
     bool LoadToWallet(const CWalletTx& wtxIn);
     void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock) override;
-    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate);
+    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate, bool fUpdateKeyPool = false);
     CBlockIndex* ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false);
     void ReacceptWalletTransactions();
     void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) override;
@@ -1058,15 +1125,22 @@ public:
     static CAmount GetRequiredFee(unsigned int nTxBytes);
 
     bool NewKeyPool();
+    bool NewEdKeyPool();
     size_t KeypoolCountExternalKeys();
     size_t KeypoolCountInternalKeys();
+    size_t EdKeypoolCountExternalKeys();
+    size_t EdKeypoolCountInternalKeys();
     bool TopUpKeyPool(unsigned int kpSize = 0);
+    bool TopUpEdKeyPool(unsigned int kpSize = 0); 
+    bool TopUpKeyPoolCombo(unsigned int kpSize = 0);       
     void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal);
     void KeepKey(int64_t nIndex);
+    void KeepEdKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
-    bool GetKeyFromPool(CPubKey& key, bool fInternal /*= false*/);
+    bool GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
+    void UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters);
 
     std::set<std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, CAmount> GetAddressBalances();

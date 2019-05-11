@@ -26,6 +26,7 @@ class CAccountingEntry;
 class CKeyEd25519;
 struct CBlockLocator;
 class CKeyPool;
+class CEdKeyPool;
 class CLinkStorage;
 class CMasterKey;
 class CScript;
@@ -118,6 +119,10 @@ public:
     bool ReadPool(int64_t nPool, CKeyPool& keypool);
     bool WritePool(int64_t nPool, const CKeyPool& keypool);
     bool ErasePool(int64_t nPool);
+
+    bool ReadEdPool(int64_t nPool, CEdKeyPool& edkeypool);
+    bool WriteEdPool(int64_t nPool, const CEdKeyPool& edkeypool);
+    bool EraseEdPool(int64_t nPool);    
 
     bool WriteMinVersion(int nVersion);
 
