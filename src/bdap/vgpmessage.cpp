@@ -40,14 +40,15 @@ public:
     std::vector<unsigned char> vchMessageType;
     std::vector<unsigned char> vchMessage;
     std::vector<unsigned char> vchSenderFQDN;
+    bool fKeepLast;
 
     CMessage()
     {
         SetNull();
     }
 
-    CMessage(const int& version, const std::vector<unsigned char>& type, const std::vector<unsigned char>& message, const std::vector<unsigned char>& sender) 
-                : nMessageVersion(version), vchMessageType(type), vchMessage(message), vchSenderFQDN(sender) {}
+    CMessage(const int& version, const std::vector<unsigned char>& type, const std::vector<unsigned char>& message, const std::vector<unsigned char>& sender, bool keeplast) 
+                : nMessageVersion(version), vchMessageType(type), vchMessage(message), vchSenderFQDN(sender), fKeepLast(keeplast) {}
 
     CMessage(const std::vector<unsigned char>& vchData)
     {
@@ -63,6 +64,7 @@ public:
         READWRITE(vchMessageType);
         READWRITE(vchMessage);
         READWRITE(vchSenderFQDN);
+        READWRITE(fKeepLast);
     }
 
     void SetNull()
@@ -71,6 +73,7 @@ public:
         vchMessageType.clear();
         vchMessage.clear();
         vchSenderFQDN.clear();
+        fKeepLast = false;
     }
 
     inline bool IsNull() const { return (nMessageVersion == -1); }
@@ -81,6 +84,7 @@ public:
         vchMessageType = b.vchMessageType;
         vchMessage = b.vchMessage;
         vchSenderFQDN = b.vchSenderFQDN;
+        fKeepLast = b.fKeepLast;
         return *this;
     }
 
@@ -143,9 +147,9 @@ std::string CUnsignedVGPMessage::ToString() const
 }
 
 bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<unsigned char>& vchSenderFQDN, 
-                                         const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage)
+                                         const std::vector<std::vector<unsigned char>>& vvchPubKeys, const bool fKeepLast, std::string& strErrorMessage)
 {
-    CMessage message(1, vchType, vchMessage, vchSenderFQDN);
+    CMessage message(1, vchType, vchMessage, vchSenderFQDN, fKeepLast);
     std::vector<unsigned char> vchData;
     message.Serialize(vchData);
     std::vector<unsigned char> vchCipherText;
@@ -158,7 +162,7 @@ bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchTy
     return true;
 }
 
-bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, std::vector<unsigned char>& vchMessage, std::vector<unsigned char>& vchSenderFQDN, std::string& strErrorMessage)
+bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, std::vector<unsigned char>& vchMessage, std::vector<unsigned char>& vchSenderFQDN, bool& fKeepLast, std::string& strErrorMessage)
 {
     if (!fEncrypted)
         return false;
@@ -177,6 +181,7 @@ bool CUnsignedVGPMessage::DecryptMessage(const std::array<char, 32>& arrPrivateS
     vchType = message.vchMessageType;
     vchMessage = message.vchMessage;
     vchSenderFQDN = message.vchSenderFQDN;
+    fKeepLast = message.fKeepLast;
     return true;
 }
 
@@ -227,6 +232,16 @@ std::vector<unsigned char> CUnsignedVGPMessage::SenderFQDN()
 
     CMessage message(vchMessageData);
     return message.vchSenderFQDN;
+}
+
+bool CUnsignedVGPMessage::KeepLast()
+{
+    bool keepLast = false;
+    if (fEncrypted)
+        return keepLast;
+
+    CMessage message(vchMessageData);
+    return message.fKeepLast;
 }
 
 CVGPMessage::CVGPMessage(CUnsignedVGPMessage& unsignedMessage)
@@ -485,11 +500,12 @@ bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage)
         std::string strErrorMessage = "";
         if (GetSharedPrivateSeed(link, seed, strErrorMessage))
         {
+            bool fKeepLast;
             std::vector<unsigned char> vchType, vchMessage, vchSenderFQDN;
-            if (unsignedMessage.DecryptMessage(seed, vchType, vchMessage, vchSenderFQDN, strErrorMessage))
+            if (unsignedMessage.DecryptMessage(seed, vchType, vchMessage, vchSenderFQDN, fKeepLast, strErrorMessage))
             {
                 LogPrint("bdap", "%s -- Found and decrypted type = %s, message = %s, sender = %s\n", __func__, stringFromVch(vchType), stringFromVch(vchMessage), stringFromVch(vchSenderFQDN));
-                CMessage message(1, vchType, vchMessage, vchSenderFQDN);
+                CMessage message(1, vchType, vchMessage, vchSenderFQDN, fKeepLast);
                 unsignedMessage.fEncrypted = false;
                 message.Serialize(unsignedMessage.vchMessageData);
                 return true;
@@ -560,10 +576,11 @@ void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage
                 vMessages.push_back(unsignedMessage);
             }
         }
+        itr++;
     }
 }
 
-void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages)
+void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages, bool& fKeepLast)
 {
     LOCK(cs_mapMyVGPMessages);
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
@@ -577,6 +594,9 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const st
         }
         if (!unsignedMessage.fEncrypted && (vchType.size() == 0 || vchType == unsignedMessage.Type()) && unsignedMessage.SenderFQDN() != vchRecipientFQDN)
         {
+            if (unsignedMessage.KeepLast())
+                fKeepLast = true;
+
             vMessages.push_back(unsignedMessage);
         }
         itr++;
@@ -596,6 +616,32 @@ void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::ve
         {
             vchMessages.push_back(message);
         }
+        itr++;
+    }
+}
+
+void KeepLastBySender(std::vector<CVGPMessage>& vMessages)
+{
+    std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> > mapFromMessageTime;
+    for (const CVGPMessage& message : vMessages)
+    {
+        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        if (!unsignedMessage.fEncrypted)
+        {
+            std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> >::iterator itFind = mapFromMessageTime.find(unsignedMessage.SenderFQDN());
+            if (itFind == mapFromMessageTime.end()) {
+                mapFromMessageTime[unsignedMessage.SenderFQDN()] = std::make_pair(message, unsignedMessage.nTimeStamp);
+            }
+            else if (unsignedMessage.nTimeStamp > itFind->second.second) {
+                mapFromMessageTime[unsignedMessage.SenderFQDN()] = std::make_pair(message, unsignedMessage.nTimeStamp);
+            }
+        }
+    }
+    vMessages.clear();
+    std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> >::iterator itr = mapFromMessageTime.begin();
+    while (itr != mapFromMessageTime.end())
+    {
+        vMessages.push_back(itr->second.first);
         itr++;
     }
 }

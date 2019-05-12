@@ -952,9 +952,9 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
 static UniValue SendMessage(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 5)
+    if (request.fHelp || request.params.size() < 5 || request.params.size() > 6)
         throw std::runtime_error(
-            "link sendmessage \"account\" \"recipient\" \"type\" \"message\"\n"
+            "link sendmessage \"account\" \"recipient\" \"type\" \"message\" \"keep_last\"\n"
             "Sends a realtime message from the account to the recipient. A link must be established before sending a secure message."
             + HelpRequiringPassphrase() +
             "\nLink Send Message Arguments:\n"
@@ -962,6 +962,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
             "2. recipient        (string)             Your link's recipient BDAP account\n"
             "3. type             (string)             Message type\n"
             "4. message          (string)             String message value\n"
+            "5. keep_last        (bool, optional)     Only store the last message for this type. Default is false.\n"
             "\nResult:\n"
             "{(json objects)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -995,6 +996,11 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     std::vector<unsigned char> vchMessageType = vchFromValue(request.params[3]);
     std::vector<unsigned char> vchMessage = vchFromValue(request.params[4]);
 
+    bool fKeepLast = false;
+    if (request.params.size() > 5 && request.params[5].get_str() == "1") {
+        fKeepLast = true;
+    }
+
     UniValue oLink(UniValue::VOBJ);
     // get third shared key, derive subjectID and messageID.
     CKeyEd25519 key;
@@ -1018,7 +1024,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     std::vector<unsigned char> vchWalletPubKey(newPubKey.begin(), newPubKey.end());
 
     CUnsignedVGPMessage unsignedMessage(subjectID, messageID, vchWalletPubKey, timestamp, stoptime);
-    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, strErrorMessage))
+    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, fKeepLast, strErrorMessage))
     {
         throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
     }
@@ -1038,6 +1044,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
     oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
     oLink.push_back(Pair("message_size", (int)vpgMessage.vchMsg.size()));
+
     vpgMessage.Sign(walletKey);
     oLink.push_back(Pair("signature_size", (int)vpgMessage.vchSig.size()));
     if (vpgMessage.CheckSignature(vchWalletPubKey)) {
@@ -1048,6 +1055,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
         oLink.push_back(Pair("check_signature", "invalid"));
         oLink.push_back(Pair("error_message", "failed to relay message"));
     }
+    oLink.push_back(Pair("keep_last", fKeepLast ? "True" : "False"));
     return oLink;
 }
 
@@ -1109,18 +1117,18 @@ static UniValue GetAccountMessages(const JSONRPCRequest& request)
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CVGPMessage& message : vMessages)
+        for (CVGPMessage& messageWrapper : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
             oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("message_size", (int)messageWrapper.vchMsg.size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             oMessage.push_back(Pair("record_num", (int)nCounter));
-            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
+            oMessages.push_back(Pair(messageWrapper.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }
@@ -1161,25 +1169,29 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     if (request.params.size() > 2)
         vchMessageType = vchFromValue(request.params[2]);
 
+    bool fKeepLast = false;
     std::vector<CVGPMessage> vMessages;
-    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
+    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages, fKeepLast);
     std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
+    if (fKeepLast)
+        KeepLastBySender(vMessages);
+
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CVGPMessage& message : vMessages)
+        for (CVGPMessage& messageWrapper : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
             oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("message_size", (int)messageWrapper.vchMsg.size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             oMessage.push_back(Pair("record_num", (int)nCounter));
-            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
+            oMessages.push_back(Pair(messageWrapper.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }

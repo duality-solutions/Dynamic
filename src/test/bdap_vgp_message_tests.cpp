@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
     CUnsignedVGPMessage unsignedMessage(subjectID, messageID, bcastvchWalletPubKey, timestamp, stoptime);
 
     //test that we can encrypt the message
-    BOOST_CHECK(unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchRequestorFQDN, vvchPubKeys, strErrorMessage));
+    BOOST_CHECK(unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchRequestorFQDN, vvchPubKeys, false, strErrorMessage));
 
     //setup message for broadcast
     CVGPMessage vpgMessage(unsignedMessage);
@@ -247,12 +247,12 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
 
     std::vector<unsigned char> retrievedvchType, retrievedvchMessage, retrievedvchSenderFQDN;
 
-
+    bool fKeepLast = false;
     //shouldn't decrypt with wrong seed
-    BOOST_CHECK(unsignedMessage.DecryptMessage(invalidseed, retrievedvchType, retrievedvchMessage, retrievedvchSenderFQDN, strErrorMessage2) == false);
+    BOOST_CHECK(unsignedMessage.DecryptMessage(invalidseed, retrievedvchType, retrievedvchMessage, retrievedvchSenderFQDN, fKeepLast, strErrorMessage2) == false);
 
     //decrypt with proper seed
-    BOOST_CHECK(unsignedMessage.DecryptMessage(seed1, retrievedvchType, retrievedvchMessage, retrievedvchSenderFQDN, strErrorMessage2));
+    BOOST_CHECK(unsignedMessage.DecryptMessage(seed1, retrievedvchType, retrievedvchMessage, retrievedvchSenderFQDN, fKeepLast, strErrorMessage2));
 
     //message values should match (original vs decrypted retrieved value)
     BOOST_CHECK(vchMessage == retrievedvchMessage);

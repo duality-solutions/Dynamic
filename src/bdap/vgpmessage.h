@@ -47,6 +47,7 @@ public:
     int64_t nTimeStamp;
     int64_t nRelayUntil; // when newer nodes stop relaying to newer nodes
     std::vector<unsigned char> vchMessageData;
+    
 
     CUnsignedVGPMessage(const uint256& subjectID, const uint256& messageID, const std::vector<unsigned char> wallet, int64_t timestamp, int64_t stoptime)
         : SubjectID(subjectID), MessageID(messageID), vchWalletPubKey(wallet), nTimeStamp(timestamp), nRelayUntil(stoptime)
@@ -109,14 +110,15 @@ public:
     void SetNull();
 
     bool EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<unsigned char>& vchSenderFQDN, 
-                        const std::vector<std::vector<unsigned char>>& vvchPubKeys, std::string& strErrorMessage);
+                        const std::vector<std::vector<unsigned char>>& vvchPubKeys, const bool fKeepLast, std::string& strErrorMessage);
 
     bool DecryptMessage(const std::array<char, 32>& arrPrivateSeed, std::vector<unsigned char>& vchType, 
-                        std::vector<unsigned char>& vchMessage, std::vector<unsigned char>& vchSenderFQDN, std::string& strErrorMessage);
+                        std::vector<unsigned char>& vchMessage, std::vector<unsigned char>& vchSenderFQDN, bool& fKeepLast, std::string& strErrorMessage);
 
     std::vector<unsigned char> Type();
     std::vector<unsigned char> Value();
     std::vector<unsigned char> SenderFQDN();
+    bool KeepLast();
     std::string ToString() const;
 
 };
@@ -179,8 +181,9 @@ void CleanupMyMessageMap();
 bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage);
 void AddMyMessage(const CVGPMessage& message);
 void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vMessages);
-void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages);
+void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages, bool& fKeepLast);
 void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::vector<unsigned char>& vchSenderFQDN, 
                                             const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages);
+void KeepLastBySender(std::vector<CVGPMessage>& vMessages);
 
 #endif // DYNAMIC_BDAP_RELAYMESSAGE_H
