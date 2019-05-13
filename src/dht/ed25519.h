@@ -73,10 +73,15 @@ public:
     std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> publicKey;
 
 public:
-    //! Construct a new private key.
-    CKeyEd25519()
+
+    CKeyEd25519(const bool fNull = false)
     {
-        MakeNewKeyPair();
+        if (fNull) {
+            SetNull();
+        }
+        else {
+            MakeNewKeyPair();
+        }
     }
 
     CKeyEd25519(const std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH>& _seed);
@@ -102,6 +107,23 @@ public:
     std::string GetPrivSeedString() const;
 
     int PubKeySize() const { return sizeof(GetPubKey()); }
+
+    void SetNull()
+    {
+        seed.fill(0);
+        privateKey.fill(0);
+        publicKey.fill(0);
+    }
+
+    bool IsNull()
+    {
+        std::array<char, 32> null32;
+        null32.fill(0);
+        if (seed == null32)
+            return true;
+
+        return false;
+    }
 
     std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> GetDHTPrivSeed() const { return seed; }
     /**
@@ -141,5 +163,8 @@ std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchDat
 bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();
 void ECC_Ed25519_Stop();
+
+CKeyID GetIdFromCharVector(const std::vector<unsigned char>& vchIn);
+uint256 GetHashFromCharVector(const std::vector<unsigned char>& vchIn);
 
 #endif // DYNAMIC_DHT_ED25519_H

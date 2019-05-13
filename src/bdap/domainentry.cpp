@@ -196,10 +196,20 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
     else {
         if (LinkAddress.size() > 0) {
             std::string strLinkAddress = stringFromVch(LinkAddress);
-            CDynamicAddress entryLinkAddress(strLinkAddress);
-            if (!entryLinkAddress.IsValid()) {
-                errorMessage = "Invalid BDAP link address. Link wallet address failed IsValid check.";
-                return false;
+            CTxDestination destLink = DecodeDestination(strLinkAddress);
+            if (destLink.type() == typeid(CKeyID)) {
+                CDynamicAddress entryLinkAddress(strLinkAddress);
+                if (!entryLinkAddress.IsValid()) {
+                    errorMessage = "Invalid BDAP public link address. Link wallet address failed IsValid check.";
+                    return false;
+                }
+            }
+            else if (destLink.type() == typeid(CStealthAddress)) {
+                CStealthAddress sxAddr;
+                if (!sxAddr.SetEncoded(strLinkAddress)) {
+                    errorMessage = "Invalid BDAP stealth link address. Link wallet address failed SetEncoded check.";
+                    return false;
+                }
             }
         }
     }
@@ -267,7 +277,7 @@ std::string CDomainEntry::GenerateOID() const
         {
             strHeight = std::to_string(nHeight);
         }
-        if (!txHash.IsNull())
+        if (!txHash.IsNull() && !IsInitialBlockDownload())
         {
             CTransactionRef txRef;
             uint256 hashBlock;

@@ -26,9 +26,12 @@ class CAccountingEntry;
 class CKeyEd25519;
 struct CBlockLocator;
 class CKeyPool;
+class CEdKeyPool;
 class CLinkStorage;
 class CMasterKey;
 class CScript;
+class CStealthAddress;
+class CStealthKeyQueueData;
 class CWallet;
 class CWalletTx;
 class uint160;
@@ -117,6 +120,10 @@ public:
     bool WritePool(int64_t nPool, const CKeyPool& keypool);
     bool ErasePool(int64_t nPool);
 
+    bool ReadEdPool(int64_t nPool, CEdKeyPool& edkeypool);
+    bool WriteEdPool(int64_t nPool, const CEdKeyPool& edkeypool);
+    bool EraseEdPool(int64_t nPool);    
+
     bool WriteMinVersion(int nVersion);
 
     /// This writes directly to the database, and will not update the CWallet's cached accounting entries!
@@ -153,6 +160,11 @@ public:
     bool EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey);
     bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
     bool EraseLinkMessageInfo(const uint256& subjectID);
+
+    bool WriteStealthAddress(const CStealthAddress& sxAddr);
+    bool WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta);
+    bool EraseStealthKeyQueue(const CKeyID& keyId);
+    bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
 
 private:
     CWalletDB(const CWalletDB&);

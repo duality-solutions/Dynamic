@@ -41,8 +41,8 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("requestor_link_pubkey", link.RequestorPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
@@ -75,8 +75,8 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
     oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
-    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
-    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("requestor_wallet_address", stringFromVch(requestor.WalletAddress))); //was LinkAddress
+    oLink.push_back(Pair("recipient_wallet_address", stringFromVch(recipient.WalletAddress))); //was LinkAddress
     oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
@@ -154,11 +154,17 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
     txLink.LinkMessage = vchFromString(strLinkMessage);
+
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchDHTPubKey;
     CKeyEd25519 privReqDHTKey;
-    CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
-    if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
- 
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
+    if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privReqDHTKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+
     txLink.RequestorPubKey = vchDHTPubKey;
 
     pwalletMain->SetAddressBook(privReqDHTKey.GetID(), strRequestorFQDN, "bdap-dht-key");
@@ -306,10 +312,15 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchDHTPubKey;
     CKeyEd25519 privAcceptDHTKey;
-    CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
-    if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
+    if (!pwalletMain->GetDHTKey(vchDHTPubKeyID, privAcceptDHTKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
  
     txLinkAccept.RecipientPubKey = vchDHTPubKey;
 
@@ -411,6 +422,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
             if (strToAccount.empty() || strToAccount == stringFromVch(link.RecipientFullObjectPath)) {
                 oLink.push_back(Pair("requestor_fqdn", stringFromVch(link.RequestorFullObjectPath)));
                 oLink.push_back(Pair("recipient_fqdn", stringFromVch(link.RecipientFullObjectPath)));
+
+                if (stringFromVch(link.SharedRequestPubKey).length() > 0) oLink.push_back(Pair("shared_request_pubkey", stringFromVch(link.SharedRequestPubKey)));
+                if (stringFromVch(link.SharedAcceptPubKey).length() > 0) oLink.push_back(Pair("shared_accept_pubkey", stringFromVch(link.SharedAcceptPubKey)));
+
+                if (stringFromVch(link.RequestorWalletAddress).length() > 0) oLink.push_back(Pair("requestor_wallet_address", stringFromVch(link.RequestorWalletAddress)));
+                if (stringFromVch(link.RecipientWalletAddress).length() > 0) oLink.push_back(Pair("recipient_wallet_address", stringFromVch(link.RecipientWalletAddress)));
+
                 oLink.push_back(Pair("requestor_link_pubkey", stringFromVch(link.RequestorPubKey)));
                 oLink.push_back(Pair("txid", link.txHashRequest.GetHex())); // TODO: rename to request_txid
                 if ((unsigned int)chainActive.Height() >= link.nHeightRequest-1) {
@@ -434,13 +452,13 @@ static bool BuildJsonMyLists(const std::vector<CLink>& vchLinkRequests, const st
                     oLink.push_back(Pair("recipient_link_pubkey", stringFromVch(link.RecipientPubKey)));
                     oLink.push_back(Pair("accept_txid", link.txHashAccept.GetHex()));
                     if ((unsigned int)chainActive.Height() >= link.nHeightAccept-1) {
-                        CBlockIndex *pindex = chainActive[link.nHeightRequest-1];
+                        CBlockIndex *pindex = chainActive[link.nHeightAccept-1]; //changed from Request to Accept
                         if (pindex) {
                             nTime = pindex->GetMedianTimePast();
                         }
                     }
                     oLink.push_back(Pair("accept_time", nTime));
-                    expired_time = link.nExpireTimeRequest;
+                    expired_time = link.nExpireTimeAccept; //changed from Request to Accept
                     expired = false;
                     if (expired_time != 0)
                     {
@@ -620,7 +638,7 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
 
 static UniValue ListCompletedLinks(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3)
         throw std::runtime_error(
             "lists completed links\n"
             "\nLink Completed Arguments:\n"
@@ -648,12 +666,12 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
             + HelpExampleRpc("link complete", ""));
 
     std::string strFromAccountFQDN, strToAccountFQDN;
-    if (request.params.size() > 2) {
-        strFromAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 1) {
+        strFromAccountFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strFromAccountFQDN);
     }
-    if (request.params.size() > 3) {
-        strToAccountFQDN = request.params[3].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    if (request.params.size() > 2) {
+        strToAccountFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strToAccountFQDN);
     }
 
@@ -934,9 +952,9 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
 static UniValue SendMessage(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 5)
+    if (request.fHelp || request.params.size() < 5 || request.params.size() > 6)
         throw std::runtime_error(
-            "link sendmessage \"account\" \"recipient\" \"type\" \"message\"\n"
+            "link sendmessage \"account\" \"recipient\" \"type\" \"message\" \"keep_last\"\n"
             "Sends a realtime message from the account to the recipient. A link must be established before sending a secure message."
             + HelpRequiringPassphrase() +
             "\nLink Send Message Arguments:\n"
@@ -944,6 +962,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
             "2. recipient        (string)             Your link's recipient BDAP account\n"
             "3. type             (string)             Message type\n"
             "4. message          (string)             String message value\n"
+            "5. keep_last        (bool, optional)     Only store the last message for this type. Default is false.\n"
             "\nResult:\n"
             "{(json objects)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -977,6 +996,11 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     std::vector<unsigned char> vchMessageType = vchFromValue(request.params[3]);
     std::vector<unsigned char> vchMessage = vchFromValue(request.params[4]);
 
+    bool fKeepLast = false;
+    if (request.params.size() > 5 && request.params[5].get_str() == "1") {
+        fKeepLast = true;
+    }
+
     UniValue oLink(UniValue::VOBJ);
     // get third shared key, derive subjectID and messageID.
     CKeyEd25519 key;
@@ -991,7 +1015,8 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     int64_t stoptime = timestamp + 60; // stop relaying after 1 minute.
     uint256 messageID = GetMessageID(key, timestamp);
     CPubKey newPubKey;
-    if (!pwalletMain->GetKeyFromPool(newPubKey, false))
+    std::vector<unsigned char> newEdKey;
+    if (!pwalletMain->GetKeysFromPool(newPubKey, newEdKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyID = newPubKey.GetID();
@@ -999,7 +1024,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     std::vector<unsigned char> vchWalletPubKey(newPubKey.begin(), newPubKey.end());
 
     CUnsignedVGPMessage unsignedMessage(subjectID, messageID, vchWalletPubKey, timestamp, stoptime);
-    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, strErrorMessage))
+    if (!unsignedMessage.EncryptMessage(vchMessageType, vchMessage, vchFromString(strSenderFQDN), vvchPubKeys, fKeepLast, strErrorMessage))
     {
         throw std::runtime_error(strprintf("%s -- EncryptMessage failed: %s\n", __func__, strErrorMessage));
     }
@@ -1019,6 +1044,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
     oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
     oLink.push_back(Pair("message_size", (int)vpgMessage.vchMsg.size()));
+
     vpgMessage.Sign(walletKey);
     oLink.push_back(Pair("signature_size", (int)vpgMessage.vchSig.size()));
     if (vpgMessage.CheckSignature(vchWalletPubKey)) {
@@ -1029,6 +1055,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
         oLink.push_back(Pair("check_signature", "invalid"));
         oLink.push_back(Pair("error_message", "failed to relay message"));
     }
+    oLink.push_back(Pair("keep_last", fKeepLast ? "True" : "False"));
     return oLink;
 }
 
@@ -1090,18 +1117,18 @@ static UniValue GetAccountMessages(const JSONRPCRequest& request)
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CVGPMessage& message : vMessages)
+        for (CVGPMessage& messageWrapper : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
             oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("message_size", (int)messageWrapper.vchMsg.size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             oMessage.push_back(Pair("record_num", (int)nCounter));
-            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
+            oMessages.push_back(Pair(messageWrapper.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }
@@ -1142,25 +1169,29 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     if (request.params.size() > 2)
         vchMessageType = vchFromValue(request.params[2]);
 
+    bool fKeepLast = false;
     std::vector<CVGPMessage> vMessages;
-    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages);
+    GetMyLinkMessagesByType(vchMessageType, vchRecipientFQDN, vMessages, fKeepLast);
     std::sort(vMessages.begin(), vMessages.end()); //sort entries by TimeStamp
+    if (fKeepLast)
+        KeepLastBySender(vMessages);
+
     UniValue oMessages(UniValue::VOBJ);
     if (vMessages.size() > 0)
     {
         size_t nCounter = 1;
-        for (CVGPMessage& message : vMessages)
+        for (CVGPMessage& messageWrapper : vMessages)
         {
             UniValue oMessage(UniValue::VOBJ);
-            CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+            CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
             oMessage.push_back(Pair("sender_fqdn", stringFromVch(unsignedMessage.SenderFQDN())));
             oMessage.push_back(Pair("type", stringFromVch(unsignedMessage.Type())));
             oMessage.push_back(Pair("message", stringFromVch(unsignedMessage.Value())));
             oMessage.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
-            oMessage.push_back(Pair("message_size", (int)unsignedMessage.Value().size()));
+            oMessage.push_back(Pair("message_size", (int)messageWrapper.vchMsg.size()));
             oMessage.push_back(Pair("timestamp_epoch", unsignedMessage.nTimeStamp));
             oMessage.push_back(Pair("record_num", (int)nCounter));
-            oMessages.push_back(Pair(message.GetHash().ToString(), oMessage));
+            oMessages.push_back(Pair(messageWrapper.GetHash().ToString(), oMessage));
             nCounter++;
         }
     }
@@ -1176,7 +1207,7 @@ UniValue link(const JSONRPCRequest& request)
     }
     else {
         throw std::runtime_error(
-            "link\n"
+            "link \"command\"...\n"
             + HelpRequiringPassphrase() +
             "\nLink commands are request, accept, pending, complete, deny, denied, getaccountmessages, getmessages, and sendmessage\n"
             "\nExamples:\n"

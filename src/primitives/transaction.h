@@ -14,6 +14,13 @@
 #include "serialize.h"
 #include "uint256.h"
 
+enum DataOutputTypes
+{
+    DO_NULL                 = 0, // reserved
+    DO_STEALTH              = 1,
+    DO_STEALTH_PREFIX       = 2,
+};
+
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
 {

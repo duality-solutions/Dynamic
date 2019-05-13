@@ -221,7 +221,9 @@ typedef struct Argon2_Context {
 
 /* Argon2 primitive type */
 typedef enum Argon2_type {
-    Argon2_d = 0
+  Argon2_d = 0,
+  Argon2_i = 1,
+  Argon2_id = 2
 } argon2_type;
 
 /*

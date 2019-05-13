@@ -360,7 +360,7 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
     return true;
 }
 
-bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
@@ -372,8 +372,14 @@ bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scrip
     CDomainEntry getDomainEntry;
     if (GetDomainEntry(entry.vchFullObjectPath(), getDomainEntry))
     {
-        errorMessage = "CheckNewDomainEntryTxInputs: - The entry " + getDomainEntry.GetFullObjectPath() + " already exists.  Add new entry failed!";
-        return error(errorMessage.c_str());
+        if (entry.txHash != txHash) {
+            errorMessage = "CheckNewDomainEntryTxInputs: - The entry " + getDomainEntry.GetFullObjectPath() + " already exists.  Add new entry failed!";
+            return error(errorMessage.c_str());
+        }
+        else {
+            LogPrintf("%s -- Already have entry %s in local database. Skipping add entry step.\n", __func__, entry.GetFullObjectPath());
+            return true;
+        }
     }
 
     if (!pDomainEntryDB)
@@ -449,7 +455,7 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     return FlushLevelDB();
 }
 
-bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //if exists, check for owner's signature
@@ -462,8 +468,14 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     CDomainEntry prevDomainEntry;
     if (!GetDomainEntry(entry.vchFullObjectPath(), prevDomainEntry))
     {
-        errorMessage = "CheckUpdateDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this update operation failed!";
-        return error(errorMessage.c_str());
+        if (entry.txHash != txHash) {
+            errorMessage = "CheckUpdateDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this update operation failed!";
+            return error(errorMessage.c_str());
+        }
+        else {
+            LogPrintf("%s -- Already have entry %s in local database. Skipping update entry step.\n", __func__, entry.GetFullObjectPath());
+            return true;
+        }
     }
 
     CTxDestination bdapDest;
@@ -577,11 +589,11 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         entry.nHeight = nHeight;
     }
     if (strOperationType == "bdap_new_account")
-        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
+        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete_account")
         return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_update_account")
-        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
+        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     else if (strOperationType == "bdap_move_account")
         return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_revoke_account")

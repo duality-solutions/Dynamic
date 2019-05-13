@@ -51,6 +51,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     std::string timeValue = "";
     std::string fullPath = "";
     std::string outputmessage = "";
+    std::string oid = "";
 
     UniValue result = UniValue(UniValue::VOBJ);
  
@@ -106,6 +107,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     for (size_t i {0} ; i < result.size() ; ++i) {
         keyName = "";
         keyName = result.getKeys()[i];
+        if (keyName == "oid") oid = result.getValues()[i].get_str();
         if (keyName == "common_name") commonName = result.getValues()[i].get_str();
         if (keyName == "object_full_path") fullPath = result.getValues()[i].get_str();
         if (keyName == "wallet_address") walletAddress = result.getValues()[i].get_str();
@@ -117,6 +119,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
         if (keyName == "time") timeValue = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
     } //for i
 
+    ui->lineEditOID->setText(QString::fromStdString(oid));
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
     ui->lineEditPath->setText(QString::fromStdString(fullPath));
     ui->lineEditWalletAddress->setText(QString::fromStdString(walletAddress));

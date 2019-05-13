@@ -33,6 +33,7 @@
 #define EXCLUSIVE_LOCKS_REQUIRED(...) __attribute__((exclusive_locks_required(__VA_ARGS__)))
 #define SHARED_LOCKS_REQUIRED(...) __attribute__((shared_locks_required(__VA_ARGS__)))
 #define NO_THREAD_SAFETY_ANALYSIS __attribute__((no_thread_safety_analysis))
+#define ASSERT_EXCLUSIVE_LOCK(...) __attribute((assert_exclusive_lock(__VA_ARGS__)))
 #else
 #define LOCKABLE
 #define SCOPED_LOCKABLE
@@ -52,6 +53,18 @@
 #define EXCLUSIVE_LOCKS_REQUIRED(...)
 #define SHARED_LOCKS_REQUIRED(...)
 #define NO_THREAD_SAFETY_ANALYSIS
+#define ASSERT_EXCLUSIVE_LOCK(...)
 #endif // __GNUC__
+
+// Utility class for indicating to compiler thread analysis that a mutex is
+// locked (when it couldn't be determined otherwise).
+struct SCOPED_LOCKABLE LockAnnotation
+{
+    template <typename Mutex>
+    explicit LockAnnotation(Mutex& mutex) EXCLUSIVE_LOCK_FUNCTION(mutex)
+    {
+    }
+    ~LockAnnotation() UNLOCK_FUNCTION() {}
+};
 
 #endif // DYNAMIC_THREADSAFETY_H

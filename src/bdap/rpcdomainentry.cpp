@@ -50,37 +50,32 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubWalletKey;
-    if (!pwalletMain->GetKeyFromPool(pubWalletKey, true))
+    CharString vchDHTPubKey;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
-
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
     CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
 
-    // TODO: Add ability to pass in the DHT public key
-    CKeyEd25519 privDHTKey;
-    CharString vchDHTPubKey = privDHTKey.GetPubKey();
-    
-    if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
-
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
-    pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "bdap-dht-key");
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey); 
+    pwalletMain->SetAddressBook(vchDHTPubKeyID, strObjectID, "bdap-dht-key"); 
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
     //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubLinkKey;
-    if (!pwalletMain->GetKeyFromPool(pubLinkKey, true))
+    CharString NAvchDHTPubKey; //not really used
+    if (!pwalletMain->GetKeysFromPool(pubLinkKey, NAvchDHTPubKey, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
@@ -147,8 +142,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
             stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
-    std::string strPubKeyHash = privDHTKey.GetHash().ToString();
-    std::string strPubKeyID = privDHTKey.GetID().ToString();
+    std::string strPubKeyHash = GetHashFromCharVector(vchDHTPubKey).ToString();
+    std::string strPubKeyID = GetIdFromCharVector(vchDHTPubKey).ToString();
+
     oName.push_back(Pair("dht_pubkey_hash", strPubKeyHash));
     oName.push_back(Pair("dht_pubkey_id", strPubKeyID));
     return oName;

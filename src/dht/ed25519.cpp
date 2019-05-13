@@ -245,3 +245,13 @@ std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchDat
     }
     return ss.str();
 }
+
+CKeyID GetIdFromCharVector(const std::vector<unsigned char>& vchIn) 
+{
+    return CKeyID(Hash160(vchIn.begin(), vchIn.end()));
+}
+
+uint256 GetHashFromCharVector(const std::vector<unsigned char>& vchIn)
+{
+    return Hash(vchIn.begin(), vchIn.end());
+}

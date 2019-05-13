@@ -16,6 +16,7 @@
 #ifndef DYNAMIC_BASE58_H
 #define DYNAMIC_BASE58_H
 
+#include "bdap/stealth.h"
 #include "chainparams.h"
 #include "key.h"
 #include "pubkey.h"
@@ -26,6 +27,14 @@
 #include <string>
 #include <vector>
 
+/**
+ * Encode a tx destination as a base58-encoded string.
+ */
+std::string EncodeDestination(const CTxDestination& dest);
+/**
+ * Decode a tx destination as a base58-encoded string.
+ */
+CTxDestination DecodeDestination(const std::string& str);
 /**
  * Encode a byte sequence as a base58-encoded string.
  * pbegin and pend cannot be NULL, unless both are.
@@ -109,8 +118,11 @@ public:
     bool Set(const CKeyID& id);
     bool Set(const CScriptID& id);
     bool Set(const CTxDestination& dest);
+    bool Set(const CStealthAddress& sxAddr);
     bool IsValid() const;
     bool IsValid(const CChainParams& params) const;
+    bool IsValidStealthAddress() const;
+    bool IsValidStealthAddress(const CChainParams& params) const;
 
     CDynamicAddress() {}
     CDynamicAddress(const CTxDestination& dest) { Set(dest); }
