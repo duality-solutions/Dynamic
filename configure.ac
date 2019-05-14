@@ -259,9 +259,9 @@ AC_ARG_WITH([utils],
 
 AC_ARG_WITH([libs],
   [AS_HELP_STRING([--with-libs],
-  [build libraries (default=yes)])],
+  [build libraries (default=no)])],
   [build_dynamic_libs=$withval],
-  [build_dynamic_libs=yes])
+  [build_dynamic_libs=no])
 
 AC_ARG_WITH([daemon],
   [AS_HELP_STRING([--with-daemon],
