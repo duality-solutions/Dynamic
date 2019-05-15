@@ -87,40 +87,30 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4503 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address
-    //now using GetKeyFromPool instead of MakeNewKey
-    std::vector<unsigned char> newEdKey;
+    std::vector<unsigned char> vchDHTPubKey;
     CPubKey pubWalletKey;
-    if (!pwalletMain->GetKeysFromPool(pubWalletKey, newEdKey, true))
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
         throw std::runtime_error("Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
-
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
     CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
 
-    // TODO: Add ability to pass in the DHT public key
-    CKeyEd25519 privDHTKey;
-    CharString vchDHTPubKey = privDHTKey.GetPubKey();
-    
-    if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4505 - " + _("Error adding ed25519 key to wallet for BDAP"));
-
+    CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
-    pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "bdap-dht-key");
+    pwalletMain->SetAddressBook(vchDHTPubKeyID, strObjectID, "bdap-dht-key");
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
-    //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubLinkKey;
     std::vector<unsigned char> newEdKey2;
     if (!pwalletMain->GetKeysFromPool(pubLinkKey, newEdKey2, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
