@@ -753,6 +753,10 @@ private:
     int64_t nLastResend;
     bool fBroadcastTransactions;
 
+    //bool fNeedToUpdatePoolsAndLinks = false;
+    bool fNeedToUpdateKeyPools = false;
+    bool fNeedToUpdateLinks = false;
+
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
     mutable bool fAnonymizableTallyCachedNonDenom;
@@ -783,6 +787,7 @@ private:
     void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
 
     void ReserveEdKeyForTransactions();    
+    void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve); //overload   
 
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 
@@ -1064,7 +1069,7 @@ public:
     bool AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose = true);
     bool LoadToWallet(const CWalletTx& wtxIn);
     void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock) override;
-    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate, bool fUpdateKeyPool = false);
+    bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate);
     CBlockIndex* ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false);
     void ReacceptWalletTransactions();
     void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) override;

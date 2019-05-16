@@ -1310,7 +1310,7 @@ bool CWallet::LoadToWallet(const CWalletTx& wtxIn)
  * Abandoned state should probably be more carefuly tracked via different
  * posInBlock signals or by checking mempool presence when necessary.
  */
-bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate, bool fUpdateKeyPool)
+bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex* pIndex, int posInBlock, bool fUpdate)
 {
     {
         AssertLockHeld(cs_wallet);
@@ -1344,9 +1344,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                 std::vector<std::vector<unsigned char>> vvchOpParameters;
                 if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
                     std::string strOpType = GetBDAPOpTypeString(op1, op2);
-                    if (fUpdateKeyPool && vvchOpParameters.size() > 1) {
-                        UpdateKeyPoolsFromTransactions(strOpType,vvchOpParameters);
-                    }
+                    UpdateKeyPoolsFromTransactions(strOpType,vvchOpParameters);
                     if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
                         uint64_t nExpireTime = 0;
                         if (vvchOpParameters.size() > 2) {
@@ -1545,6 +1543,19 @@ void CWallet::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex,
 
     fAnonymizableTallyCached = false;
     fAnonymizableTallyCachedNonDenom = false;
+
+    if (fNeedToUpdateKeyPools) {
+        LogPrintf("DEBUGGER ED %s - fNeedToUpdateKeyPools is TRUE\n",__func__);
+        TopUpKeyPoolCombo();
+        fNeedToUpdateKeyPools = false;
+    }
+
+    if (fNeedToUpdateLinks) {
+        LogPrintf("DEBUGGER ED %s - fNeedToUpdateLinks is TRUE\n",__func__);
+        ProcessLinkQueue();
+        fNeedToUpdateLinks = false;
+    }
+
 }
 
 
@@ -2061,7 +2072,19 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
             CBlock block;
             if (ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
                 for (size_t posInBlock = 0; posInBlock < block.vtx.size(); ++posInBlock) {
-                    AddToWalletIfInvolvingMe(*block.vtx[posInBlock], pindex, posInBlock, fUpdate, true); //need to also update keypool
+                    AddToWalletIfInvolvingMe(*block.vtx[posInBlock], pindex, posInBlock, fUpdate); 
+
+                    if (fNeedToUpdateKeyPools) {
+                        LogPrintf("DEBUGGER ED %s - fNeedToUpdateKeyPools is TRUE\n",__func__);
+                        TopUpKeyPoolCombo();
+                        fNeedToUpdateKeyPools = false;
+                    }
+
+                    if (fNeedToUpdateLinks) {
+                        LogPrintf("DEBUGGER ED %s - fNeedToUpdateLinks is TRUE\n",__func__);
+                        ProcessLinkQueue();
+                        fNeedToUpdateLinks = false;
+                    }
                 }
                 if (!ret) {
                     ret = pindex;
@@ -2070,10 +2093,30 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
                 ret = nullptr;
             }
             pindex = chainActive.Next(pindex);
+
+
         }
-        ReserveEdKeyForTransactions();
-        TopUpKeyPoolCombo();
-        ProcessLinkQueue();
+        //ReserveEdKeyForTransactions();
+
+        // if (fNeedToUpdatePoolsAndLinks) {
+        //     LogPrintf("DEBUGGER ED %s - fNeedToUpdatePoolsAndLinks is TRUE\n",__func__);
+        //     TopUpKeyPoolCombo();
+        //     ProcessLinkQueue();
+        //     fNeedToUpdatePoolsAndLinks = false;
+        // }
+
+        // if (fNeedToUpdateKeyPools) {
+        //     LogPrintf("DEBUGGER ED %s - fNeedToUpdateKeyPools is TRUE\n",__func__);
+        //     TopUpKeyPoolCombo();
+        //     fNeedToUpdateKeyPools = false;
+        // }
+
+        // if (fNeedToUpdateLinks) {
+        //     LogPrintf("DEBUGGER ED %s - fNeedToUpdateLinks is TRUE\n",__func__);
+        //     ProcessLinkQueue();
+        //     fNeedToUpdateLinks = false;
+        // }
+
         ShowProgress(_("Rescanning..."), 100); // hide progress dialog in GUI
     }
     return ret;
@@ -4648,10 +4691,15 @@ void CWallet::UpdateKeyPoolsFromTransactions(const std::string& strOpType, const
     std::vector<unsigned char> key0 = vvchOpParameters[0];
     std::vector<unsigned char> key1 = vvchOpParameters[1];
 
-    if (strOpType == "bdap_new_account")
-        reservedEd25519PubKeys.push_back(key1);
-    else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept")
-        reservedEd25519PubKeys.push_back(key0);
+    if (strOpType == "bdap_new_account") {
+        //reservedEd25519PubKeys.push_back(key1);
+        ReserveEdKeyForTransactions(key1);
+    }
+    else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+        //reservedEd25519PubKeys.push_back(key0);
+        ReserveEdKeyForTransactions(key0);
+        fNeedToUpdateLinks = true;
+    }
 
 } //UpdateKeyPoolsFromTransactions
 
@@ -4739,6 +4787,8 @@ void CWallet::ReserveEdKeyForTransactions()
                 KeepKey(nIndex);
                 KeepEdKey(nIndex);
                 keypoolIndexes.push_back(nIndex);
+
+                LogPrintf("DEBUGGER ED %s - reserving index [%d]\n",__func__,nIndex);
             }
         }
 
@@ -4755,8 +4805,57 @@ void CWallet::ReserveEdKeyForTransactions()
             setInternalKeyPool.erase(*setInternalKeyPool.begin());
             setInternalEdKeyPool.erase(*setInternalEdKeyPool.begin());
         }
+        LogPrintf("DEBUGGER ED %s - keypool now pointing at [%d]\n",__func__,*setInternalKeyPool.begin());
+        LogPrintf("DEBUGGER ED %s - edkeypool now pointing at [%d]\n",__func__,*setInternalEdKeyPool.begin());
+
+
 
 } //ReserveEdKeyForTransactions
+
+void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve)
+{
+        CWalletDB walletdb(strWalletFile);
+        CEdKeyPool edkeypool;
+        std::vector<unsigned char> edPubKey;
+        std::vector<int64_t> keypoolIndexes;
+        bool EraseIndex = false;
+        int64_t IndexToErase = 0;
+        int64_t nIndex = 0;
+        std::set<std::int64_t>::iterator it = setInternalEdKeyPool.begin();
+
+        while ((it != setInternalEdKeyPool.end()) && (!EraseIndex)) {
+        //for (int64_t nIndex : setInternalEdKeyPool) {
+            nIndex = *it;
+            if (!walletdb.ReadEdPool(nIndex, edkeypool)) {
+                throw std::runtime_error(std::string(__func__) + ": read failed");
+            }
+            edPubKey = edkeypool.edPubKey;
+
+            if(pubKeyToReserve == edPubKey) {
+                KeepKey(nIndex);
+                KeepEdKey(nIndex);
+                fNeedToUpdateKeyPools = true;
+                EraseIndex = true;
+                IndexToErase = nIndex;
+                LogPrintf("DEBUGGER ED %s - reserving index [%d]\n",__func__,nIndex);
+            }
+            it++;
+        }
+
+        if (EraseIndex) {
+                std::set<int64_t>::iterator eraseIndexEd = setInternalEdKeyPool.find(IndexToErase);
+                std::set<int64_t>::iterator eraseIndex = setInternalKeyPool.find(IndexToErase);
+
+                setInternalEdKeyPool.erase(eraseIndexEd);
+                setInternalKeyPool.erase(eraseIndex);
+
+        }
+        LogPrintf("DEBUGGER ED %s - keypool now pointing at [%d]\n",__func__,*setInternalKeyPool.begin());
+        LogPrintf("DEBUGGER ED %s - edkeypool now pointing at [%d]\n",__func__,*setInternalEdKeyPool.begin());
+
+
+} //ReserveEdKeyForTransactions OVERLOAD
+
 
 void CWallet::KeepKey(int64_t nIndex)
 {
