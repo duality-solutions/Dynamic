@@ -48,39 +48,25 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
-    //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubWalletKey;
     CharString vchDHTPubKey;
-    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+    CStealthAddress sxAddr;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, sxAddr, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
-    
-    CharString vchWalletAddress = vchFromString(walletAddress.ToString());
-    txDomainEntry.WalletAddress = vchWalletAddress;
+    txDomainEntry.WalletAddress = vchFromString(walletAddress.ToString());
 
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey); 
     pwalletMain->SetAddressBook(vchDHTPubKeyID, strObjectID, "bdap-dht-key"); 
 
-    // TODO: Add ability to pass in the link address
-    // TODO: Use stealth address for the link address so linking will be private
-    //now using GetKeyFromPool instead of MakeNewKey
-    CPubKey pubLinkKey;
-    CharString NAvchDHTPubKey; //not really used
-    if (!pwalletMain->GetKeysFromPool(pubLinkKey, NAvchDHTPubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    //pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
 
-    CKeyID keyLinkID = pubLinkKey.GetID();
-    CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-
-    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
-    
-    CharString vchLinkAddress = vchFromString(linkAddress.ToString());
-    txDomainEntry.LinkAddress = vchLinkAddress;
+    txDomainEntry.LinkAddress = vchFromString(sxAddr.ToString());
 
     int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
     if (request.params.size() >= 3) {

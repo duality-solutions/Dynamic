@@ -780,6 +780,9 @@ private:
 
     void DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet);
 
+    /* HD derive new child stealth key from  */
+    bool DeriveChildStealthKey(const CKey& key);
+
     void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
 
     void ReserveEdKeyForTransactions();    
@@ -1137,7 +1140,8 @@ public:
     void KeepKey(int64_t nIndex);
     void KeepEdKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
-    bool GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
+    bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
+    bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, CStealthAddress& sxAddr, bool fInternal);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
     void UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters);
@@ -1307,7 +1311,6 @@ public:
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
     bool HaveStealthAddress(const CKeyID& address) const;
-    bool GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& sxAddr, bool fInternal);
 
 };
 
