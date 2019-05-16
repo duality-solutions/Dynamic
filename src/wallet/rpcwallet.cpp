@@ -215,11 +215,9 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
 
     CPubKey walletPubKey;
     CStealthAddress sxAddr;
-    if (!pwalletMain->GetStealthAddressFromPool(walletPubKey, sxAddr, false))
+    std::vector<unsigned char> vchEd25519PubKey;
+    if (!pwalletMain->GetKeysFromPool(walletPubKey, vchEd25519PubKey, sxAddr, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-
-    if (!pwalletMain->AddStealthAddress(sxAddr))
-        throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
 
     return sxAddr.ToString();
 }

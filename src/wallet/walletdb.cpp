@@ -658,7 +658,6 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             ssKey >> keyID;
             CStealthAddress sxAddr;
             ssValue >> sxAddr;
-            LogPrintf("%s -- AddStealthToMap \n", __func__);
             pwallet->AddStealthToMap(std::make_pair(keyID, sxAddr));
 
         } else if (strType == "sxqueue") {
@@ -666,7 +665,6 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             ssKey >> keyID;
             CStealthKeyQueueData stealthData;
             ssValue >> stealthData;
-            LogPrintf("%s -- AddToStealthQueue \n", __func__);
             pwallet->AddToStealthQueue(std::make_pair(keyID, stealthData));
 
         }

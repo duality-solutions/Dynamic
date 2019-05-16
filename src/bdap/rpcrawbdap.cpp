@@ -89,7 +89,8 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     // TODO: Add ability to pass in the wallet address
     std::vector<unsigned char> vchDHTPubKey;
     CPubKey pubWalletKey;
-    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+    CStealthAddress sxAddr;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, sxAddr, true))
         throw std::runtime_error("Error: Keypool ran out, please call keypoolrefill first");
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
@@ -103,19 +104,8 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
     pwalletMain->SetAddressBook(vchDHTPubKeyID, strObjectID, "bdap-dht-key");
 
-    // TODO: Add ability to pass in the link address
-    // TODO: Use stealth address for the link address so linking will be private
-    CPubKey pubLinkKey;
-    std::vector<unsigned char> newEdKey2;
-    if (!pwalletMain->GetKeysFromPool(pubLinkKey, newEdKey2, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-    CKeyID keyLinkID = pubLinkKey.GetID();
-    CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
-
-    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
-    
-    CharString vchLinkAddress = vchFromString(linkAddress.ToString());
-    txDomainEntry.LinkAddress = vchLinkAddress;
+    //pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
+    txDomainEntry.LinkAddress = vchFromString(sxAddr.ToString());
 
     CMutableTransaction rawTx;
     rawTx.nVersion = BDAP_TX_VERSION;
@@ -142,8 +132,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Create script to fund link transaction for this account
+    CTxDestination destLinkAddress = DecodeDestination(sxAddr.ToString());
     CScript scriptLinkDestination;
-    scriptLinkDestination = GetScriptForDestination(linkAddress.Get());
+    scriptLinkDestination = GetScriptForDestination(destLinkAddress);
     // TODO (bdap): decrease this amount after BDAP fee structure is implemented.
     CAmount nLinkAmount(30 * COIN);
 
