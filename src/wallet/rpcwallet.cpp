@@ -500,7 +500,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     }
 }
 
-void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
+void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
                                 CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
@@ -524,12 +524,16 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
 
     if (nDataValue > 0) {
         CRecipient recDataScript = {bdapDataScript, 0, false};
-        vecSend.push_back(recDataScript);  
+        vecSend.push_back(recDataScript);
+        if (stealthScript.size() > 0) {
+            CRecipient sendStealthData = {stealthScript, 0, false};
+            vecSend.push_back(sendStealthData);
+            LogPrintf("Sending Stealth Script: %s\n", ScriptToAsmStr(stealthScript));
+        }
     }
-
     CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recOPScript);
-    // TODO (bdap) Make sure sendAddress is used to fund the transaction.
+    // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())

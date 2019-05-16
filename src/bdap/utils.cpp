@@ -104,7 +104,8 @@ bool IsBDAPDataOutput(const CTxOut& out) {
     txnouttype whichType;
     if (!IsStandard(out.scriptPubKey, whichType))
         return false;
-    if (whichType == TX_NULL_DATA)
+    // Do not select stealth OP return which are less than 40 bytes.
+    if (whichType == TX_NULL_DATA && out.scriptPubKey.size() > 40)
         return true;
    return false;
 }
