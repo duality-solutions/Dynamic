@@ -132,20 +132,30 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Create script to fund link transaction for this account
-    CTxDestination destLinkAddress = DecodeDestination(sxAddr.ToString());
-    CScript scriptLinkDestination;
-    scriptLinkDestination = GetScriptForDestination(destLinkAddress);
+    CScript scriptDest;
+    std::vector<uint8_t> vStealthData;
+    std::string sError;
+    if (0 != PrepareStealthOutput(sxAddr, scriptDest, vStealthData, sError)) {
+        LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", sxAddr.ToString()));
+    }  
+    CScript stealthScript;
+    stealthScript << OP_RETURN << vStealthData;
+
     // TODO (bdap): decrease this amount after BDAP fee structure is implemented.
     CAmount nLinkAmount(30 * COIN);
 
-    // Add the BDAP operation output
-    CTxOut outOP(nBDAPDeposit, scriptPubKey);
-    rawTx.vout.push_back(outOP);
+    // Add the Stealth OP return data
+    CTxOut outStealthData(0, stealthScript);
+    rawTx.vout.push_back(outStealthData);
     // Add the BDAP data output
     CTxOut outData(nBDAPRegistrationFee, scriptData);
     rawTx.vout.push_back(outData);
+    // Add the BDAP operation output
+    CTxOut outOP(nBDAPDeposit, scriptPubKey);
+    rawTx.vout.push_back(outOP);
     // Add the BDAP link funds output
-    CTxOut outLinkFunds(nLinkAmount, scriptLinkDestination);
+    CTxOut outLinkFunds(nLinkAmount, scriptDest);
     rawTx.vout.push_back(outLinkFunds);
 
     return EncodeHexTx(rawTx);
