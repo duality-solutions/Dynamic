@@ -753,7 +753,6 @@ private:
     int64_t nLastResend;
     bool fBroadcastTransactions;
 
-    //bool fNeedToUpdatePoolsAndLinks = false;
     bool fNeedToUpdateKeyPools = false;
     bool fNeedToUpdateLinks = false;
 
@@ -786,8 +785,7 @@ private:
 
     void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
 
-    void ReserveEdKeyForTransactions();    
-    void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve); //overload   
+    void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve);   
 
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 

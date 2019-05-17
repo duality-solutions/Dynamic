@@ -12,6 +12,7 @@
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "utilstrencodings.h"
+#include "dynode-sync.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
@@ -41,6 +42,10 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
            HelpExampleRpc("createrawbdapaccount", "jack \"Black, Jack\""));
 
     EnsureWalletIsUnlocked();
+
+    if (!dynodeSync.IsBlockchainSynced()) {
+        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+    }
 
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
@@ -188,6 +193,10 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
            HelpExampleCli("sendandpayrawbdapaccount", "<hexstring>") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("sendandpayrawbdapaccount", "<hexstring>"));
+
+    if (!dynodeSync.IsBlockchainSynced()) {
+        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+    }
 
     CMutableTransaction mtx;
     std::string strHexIn = request.params[0].get_str();
