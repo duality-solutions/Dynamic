@@ -13,6 +13,7 @@
 #include "primitives/transaction.h"
 #include "utilstrencodings.h"
 #include "dynode-sync.h"
+#include "spork.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
@@ -46,6 +47,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
     }
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
 
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
@@ -197,6 +201,9 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
     }
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
 
     CMutableTransaction mtx;
     std::string strHexIn = request.params[0].get_str();
