@@ -82,6 +82,7 @@ DYNAMIC_CORE_H = \
   bdap/domainentrydb.h \
   bdap/certificate.h \
   bdap/entrycheckpoints.h \
+  bdap/globaldata.h \
   bdap/identity.h \
   bdap/linking.h \
   bdap/linkingdb.h \
@@ -268,6 +269,7 @@ libdynamic_server_a_SOURCES = \
   bdap/domainentrydb.cpp \
   bdap/certificate.cpp \
   bdap/entrycheckpoints.cpp \
+  bdap/globaldata.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
   bdap/linkingdb.cpp \

@@ -68,6 +68,8 @@ const char* DNGOVERNANCEOBJECT = "govobj";
 const char* DNGOVERNANCEOBJECTVOTE = "govobjvote";
 const char* DNVERIFY = "dnv";
 const char* VGPMESSAGE = "vgpmessage";
+const char* AVATAR = "avatar";
+const char* PROFILE = "profile";
 }; // namespace NetMsgType
 
 static const char* ppszTypeName[] =
@@ -149,6 +151,8 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::DNGOVERNANCEOBJECTVOTE,
     NetMsgType::DNVERIFY,
     NetMsgType::VGPMESSAGE,
+    NetMsgType::AVATAR,
+    NetMsgType::PROFILE,
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes + ARRAYLEN(allNetMessageTypes));
 

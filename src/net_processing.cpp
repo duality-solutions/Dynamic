@@ -10,6 +10,7 @@
 #include "addrman.h"
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/globaldata.h"
 #include "bdap/vgpmessage.h"
 #include "blockencodings.h"
 #include "chainparams.h"
@@ -2743,6 +2744,110 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         {
             LogPrintf("%s -- Unkown ProcessMessage status. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
                                 message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+    }
+
+    else if (strCommand == NetMsgType::AVATAR) {
+        CGlobalAvatar message;
+        vRecv >> message;
+        CGlobalData avatarMessage(message.vchGlobalData);
+
+        LogPrintf("%s -- Avatar message received: data size = %d, sig size = %d, HashID = %s \n", 
+                        __func__, message.vchGlobalData.size(), message.vchSignature.size(), message.GetHash().ToString());
+
+        std::string strErrorMessage = "";
+        int statusBan = message.ProcessMessage(strErrorMessage);
+        if (strErrorMessage.size() > 0)
+        {
+            LogPrintf("%s -- Error processing message. Hash %s, Error %s\n", __func__, message.GetHash().ToString(), strErrorMessage);
+        }
+        if (statusBan == 0)
+        {
+            // Relay
+            pfrom->setKnown.insert(message.GetHash());
+            {
+                connman.ForEachNode([&message, &connman](CNode* pnode) {
+                    message.RelayTo(pnode, connman);
+                });
+            }
+        }
+        else if (statusBan > 0)
+        {
+            Misbehaving(pfrom->GetId(), statusBan);
+        }
+        else if (statusBan == -1)
+        {
+            LogPrintf("%s -- Duplicate avatar message recieved. Hash %s\n", __func__, message.GetHash().ToString());
+        }
+        else if (statusBan == -2)
+        {
+            LogPrintf("%s -- Avatar message either too old or timestamp is in the future. Hash %s\n", __func__, message.GetHash().ToString());
+        }
+        else if (statusBan == -3)
+        {
+            LogPrintf("%s -- Avatar message timestamp is greater than relay until time. Hash %s\n", __func__, message.GetHash().ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have a timestamp greater than the relay until time so ban node.
+        }
+        else if (statusBan == -4)
+        {
+            LogPrintf("%s -- Avatar message relay time is too much.  max relay is 120 seconds. Hash %s\n", __func__, message.GetHash().ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have longer relay until time span so ban node.
+        }
+        else
+        {
+            LogPrintf("%s -- Unkown ProcessMessage status. Hash %s\n", __func__, message.GetHash().ToString());
+        }
+    }
+
+    else if (strCommand == NetMsgType::PROFILE) {
+        CGlobalProfile message;
+        vRecv >> message;
+        CGlobalData profileMessage(message.vchGlobalData);
+
+        LogPrintf("%s -- Avatar message received: data size = %d, sig size = %d, HashID = %s \n", 
+                        __func__, message.vchGlobalData.size(), message.vchSignature.size(), message.GetHash().ToString());
+
+        std::string strErrorMessage = "";
+        int statusBan = message.ProcessMessage(strErrorMessage);
+        if (strErrorMessage.size() > 0)
+        {
+            LogPrintf("%s -- Error processing message. Hash %s, Error %s\n", __func__, message.GetHash().ToString(), strErrorMessage);
+        }
+        if (statusBan == 0)
+        {
+            // Relay
+            pfrom->setKnown.insert(message.GetHash());
+            {
+                connman.ForEachNode([&message, &connman](CNode* pnode) {
+                    message.RelayTo(pnode, connman);
+                });
+            }
+        }
+        else if (statusBan > 0)
+        {
+            Misbehaving(pfrom->GetId(), statusBan);
+        }
+        else if (statusBan == -1)
+        {
+            LogPrintf("%s -- Duplicate profile message recieved. Hash %s\n", __func__, message.GetHash().ToString());
+        }
+        else if (statusBan == -2)
+        {
+            LogPrintf("%s -- Profile message either too old or timestamp is in the future. Hash %s\n", __func__, message.GetHash().ToString());
+        }
+        else if (statusBan == -3)
+        {
+            LogPrintf("%s -- Profile message timestamp is greater than relay until time. Hash %s\n", __func__, message.GetHash().ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have a timestamp greater than the relay until time so ban node.
+        }
+        else if (statusBan == -4)
+        {
+            LogPrintf("%s -- Profile message relay time is too much.  max relay is 120 seconds. Hash %s\n", __func__, message.GetHash().ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have longer relay until time span so ban node.
+        }
+        else
+        {
+            LogPrintf("%s -- Unkown ProcessMessage status. Hash %s\n", __func__, message.GetHash().ToString());
         }
     }
 
