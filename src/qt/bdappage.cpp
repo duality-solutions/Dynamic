@@ -13,6 +13,7 @@
 #include "walletmodel.h"
 #include "bdapaccounttablemodel.h"
 #include "bdaplinktablemodel.h"
+#include "dynode-sync.h"
 
 #include "rpcregister.h"
 #include "rpcserver.h"
@@ -153,6 +154,11 @@ void BdapPage::listAllGroups()
 
 void BdapPage::addGroup()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
+        return;
+    }
+
     BdapAddUserDialog dlg(this,BDAP::ObjectType::BDAP_GROUP);
     dlg.setWindowTitle(QObject::tr("Add BDAP Group"));
     dlg.exec();
@@ -165,6 +171,11 @@ void BdapPage::addGroup()
 
 void BdapPage::deleteGroup()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create/modify BDAP objects while wallet is not synced."));
+        return;
+    }
+
     QMessageBox::StandardButton reply;
     std::string account = "";
     std::string displayedMessage = "";
@@ -188,6 +199,11 @@ void BdapPage::deleteGroup()
 
 void BdapPage::updateGroup()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create/modify BDAP objects while wallet is not synced."));
+        return;
+    }
+
     std::string account = "";
     std::string commonName = "";
     std::string expirationDate = "";
@@ -235,6 +251,11 @@ void BdapPage::listAllUsers()
 
 void BdapPage::addUser()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
+        return;
+    }
+
     BdapAddUserDialog dlg(this);
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
@@ -255,6 +276,11 @@ void BdapPage::getUserDetails(int row, int column)
 
 void BdapPage::addLink()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
+        return;
+    }
+
     BdapAddLinkDialog dlg(this);
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
@@ -267,6 +293,11 @@ void BdapPage::addLink()
 
 void BdapPage::acceptLink()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
+        return;
+    }
+
     QMessageBox::StandardButton reply;
     std::string requestor = "";
     std::string recipient = "";
@@ -320,6 +351,11 @@ void BdapPage::getLinkDetails(int row, int column)
 
 void BdapPage::deleteUser()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create/modify BDAP objects while wallet is not synced."));
+        return;
+    }
+
     QMessageBox::StandardButton reply;
     std::string account = "";
     std::string displayedMessage = "";
@@ -346,6 +382,11 @@ void BdapPage::deleteUser()
 
 void BdapPage::updateUser()
 {
+    if (!dynodeSync.IsBlockchainSynced())  {
+        QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create/modify BDAP objects while wallet is not synced."));
+        return;
+    }
+
     std::string account = "";
     std::string commonName = "";
     std::string expirationDate = "";
