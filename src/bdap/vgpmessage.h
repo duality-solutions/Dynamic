@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_BDAP_RELAYMESSAGE_H
-#define DYNAMIC_BDAP_RELAYMESSAGE_H
+#ifndef DYNAMIC_BDAP_VGPMESSAGE_H
+#define DYNAMIC_BDAP_VGPMESSAGE_H
 
 #include "serialize.h"
 #include "sync.h"
@@ -183,7 +183,7 @@ void AddMyMessage(const CVGPMessage& message);
 void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vMessages);
 void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages, bool& fKeepLast);
 void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::vector<unsigned char>& vchSenderFQDN, 
-                                            const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages);
-void KeepLastBySender(std::vector<CVGPMessage>& vMessages);
+                                            const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages, bool& fKeepLast);
+void KeepLastTypeBySender(std::vector<CVGPMessage>& vMessages);
 
-#endif // DYNAMIC_BDAP_RELAYMESSAGE_H
+#endif // DYNAMIC_BDAP_VGPMESSAGE_H

@@ -474,21 +474,44 @@ bool ReceivedMessage(const uint256& messageHash)
 
 void CleanupMyMessageMap()
 {
+    // map with message type, message sender and timestamp.  Used to keep last message from a sender/type pair.
+    std::map<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>, int64_t> mapMessageTypeFromTimestamp;
     int64_t nCurrentTimeStamp =  GetAdjustedTime();
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
     while (itr != mapMyVGPMessages.end())
     {
         CVGPMessage message = (*itr).second;
         CUnsignedVGPMessage unsignedMessage(message.vchMsg);
-        if (nCurrentTimeStamp > unsignedMessage.nTimeStamp + KEEP_MY_MESSAGE_ALIVE_SECONDS)
+        if (!unsignedMessage.fEncrypted && nCurrentTimeStamp > unsignedMessage.nTimeStamp + KEEP_MY_MESSAGE_ALIVE_SECONDS)
         {
-            itr = mapMyVGPMessages.erase(itr);
+            CMessage message(unsignedMessage.vchMessageData);
+            std::pair<std::vector<unsigned char>, std::vector<unsigned char>> pairTypeFrom = std::make_pair(message.vchMessageType, message.vchSenderFQDN);
+            if (!message.fKeepLast) {
+                itr = mapMyVGPMessages.erase(itr);
+            }
+            else {
+                std::map<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>, int64_t>::iterator itTypeFrom = mapMessageTypeFromTimestamp.find(pairTypeFrom);
+                if (itTypeFrom != mapMessageTypeFromTimestamp.end()) {
+                    if (itTypeFrom->second > unsignedMessage.nTimeStamp) {
+                        itr = mapMyVGPMessages.erase(itr);
+                    }
+                    else {
+                        mapMessageTypeFromTimestamp[pairTypeFrom] = unsignedMessage.nTimeStamp;
+                        ++itr;
+                    }
+                }
+                else {
+                    mapMessageTypeFromTimestamp[pairTypeFrom] = unsignedMessage.nTimeStamp;
+                    ++itr;
+                }
+            }
         }
         else
         {
            ++itr;
         }
     }
+    LogPrintf("%s -- Size %d\n", __func__, mapMyVGPMessages.size());
 }
 
 bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage)
@@ -586,8 +609,8 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const st
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
     while (itr != mapMyVGPMessages.end())
     {
-        CVGPMessage message = (*itr).second;
-        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        CVGPMessage messageWrapper = (*itr).second;
+        CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
         if (unsignedMessage.fEncrypted && pwalletMain && !pwalletMain->IsLocked())
         {
             DecryptMessage(unsignedMessage);
@@ -604,41 +627,47 @@ void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const st
 }
 
 void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::vector<unsigned char>& vchSenderFQDN, 
-                                            const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages)
+                                            const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages, bool& fKeepLast)
 {
     LOCK(cs_mapMyVGPMessages);
     std::map<uint256, CVGPMessage>::iterator itr = mapMyVGPMessages.begin();
     while (itr != mapMyVGPMessages.end())
     {
-        CVGPMessage message = (*itr).second;
-        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        CVGPMessage messageWrapper = (*itr).second;
+        CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
         if (unsignedMessage.SubjectID == subjectID && unsignedMessage.SenderFQDN() == vchSenderFQDN && (vchType.size() == 0 || vchType == unsignedMessage.Type()))
         {
-            vchMessages.push_back(message);
+            if (unsignedMessage.KeepLast())
+                fKeepLast = true;
+
+            vchMessages.push_back(messageWrapper);
         }
         itr++;
     }
 }
 
-void KeepLastBySender(std::vector<CVGPMessage>& vMessages)
+void KeepLastTypeBySender(std::vector<CVGPMessage>& vMessages)
 {
-    std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> > mapFromMessageTime;
-    for (const CVGPMessage& message : vMessages)
+    std::map<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>, std::pair<CVGPMessage, int64_t> > mapFromMessageTime;
+    for (const CVGPMessage& messageWrapper : vMessages)
     {
-        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+        CUnsignedVGPMessage unsignedMessage(messageWrapper.vchMsg);
         if (!unsignedMessage.fEncrypted)
         {
-            std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> >::iterator itFind = mapFromMessageTime.find(unsignedMessage.SenderFQDN());
+            CMessage message(unsignedMessage.vchMessageData);
+            std::pair<std::vector<unsigned char>, std::vector<unsigned char>> pairTypeFrom = std::make_pair(message.vchMessageType, message.vchSenderFQDN);
+            std::pair<CVGPMessage, int64_t> pairMessageTime = std::make_pair(messageWrapper, unsignedMessage.nTimeStamp);
+            std::map<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>, std::pair<CVGPMessage, int64_t> >::iterator itFind = mapFromMessageTime.find(pairTypeFrom);
             if (itFind == mapFromMessageTime.end()) {
-                mapFromMessageTime[unsignedMessage.SenderFQDN()] = std::make_pair(message, unsignedMessage.nTimeStamp);
+                mapFromMessageTime[pairTypeFrom] = pairMessageTime;
             }
             else if (unsignedMessage.nTimeStamp > itFind->second.second) {
-                mapFromMessageTime[unsignedMessage.SenderFQDN()] = std::make_pair(message, unsignedMessage.nTimeStamp);
+                mapFromMessageTime[pairTypeFrom] = pairMessageTime;
             }
         }
     }
     vMessages.clear();
-    std::map<std::vector<unsigned char>, std::pair<CVGPMessage, int64_t> >::iterator itr = mapFromMessageTime.begin();
+    std::map<std::pair<std::vector<unsigned char>, std::vector<unsigned char>>, std::pair<CVGPMessage, int64_t> >::iterator itr = mapFromMessageTime.begin();
     while (itr != mapFromMessageTime.end())
     {
         vMessages.push_back(itr->second.first);

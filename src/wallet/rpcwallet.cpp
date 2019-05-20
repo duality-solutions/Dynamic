@@ -147,8 +147,6 @@ UniValue getnewaddress(const JSONRPCRequest& request)
 
 UniValue getnewed25519address(const JSONRPCRequest& request)
 {
-    EnsureWalletIsUnlocked();
-  
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
@@ -164,6 +162,8 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
             "\"dynamicaddress\"    (string) The new dynamic address\n"
             "\nExamples:\n" +
             HelpExampleCli("getnewed25519address", "") + HelpExampleRpc("getnewed25519address", ""));
+
+    EnsureWalletIsUnlocked();
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
@@ -196,8 +196,6 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
 
 static UniValue getnewstealthaddress(const JSONRPCRequest &request)
 {
-    EnsureWalletIsUnlocked();
-
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
@@ -210,6 +208,8 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
             "\"stealthaddress\"    (string) The new Dynamic stealth address\n"
             "\nExamples:\n" +
             HelpExampleCli("getnewstealthaddress", "") + HelpExampleRpc("getnewstealthaddress", ""));
+
+    EnsureWalletIsUnlocked();
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
