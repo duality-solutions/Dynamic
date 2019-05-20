@@ -110,34 +110,6 @@ UniValue gettime(const JSONRPCRequest& request)
     return GetTime();
 }
 
-UniValue getrawpubkey(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "getrawpubkey \"address\"\n"
-            "\nGet (un)compressed raw public key of an address of the wallet\n"
-            "\nArguments:\n"
-            "1. \"address\"         (string, required) The Dynamic Address from which the pubkey is to recovered.\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf") + 
-            HelpExampleRpc("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
-
-    UniValue ret(UniValue::VOBJ);
-
-    CDynamicAddress address(request.params[0].get_str());
-    bool isValid = address.IsValid();
-
-    if (isValid) {
-        CTxDestination dest = address.Get();
-        CScript scriptPubKey = GetScriptForDestination(dest);
-        ret.push_back(Pair("pubkey", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
-    } else {
-        ret.push_back(Pair("errors", "Dynamic address is not valid!"));
-    }
-
-    return ret;
-}
-
 UniValue burndynamic(const JSONRPCRequest& request)
 {
 
@@ -678,7 +650,6 @@ static const CRPCCommand commands[] =
         {"fluid", "sendfluidtransaction", &sendfluidtransaction, true, {"opcode", "hexstring"}},
         {"fluid", "signtoken", &signtoken, true, {"address", "tokenkey"}},
         {"fluid", "consenttoken", &consenttoken, true, {"address", "tokenkey"}},
-        {"fluid", "getrawpubkey", &getrawpubkey, true, {"address"}},
         {"fluid", "burndynamic", &burndynamic, true, {"amount", "address"}},
 #endif //ENABLE_WALLET
         {"fluid", "verifyquorum", &verifyquorum, true, {"tokenkey"}},
