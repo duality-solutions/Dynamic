@@ -5,16 +5,16 @@
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/utils.h"
-#include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
+#include "dht/ed25519.h"
 #include "dynodeman.h"
+#include "dynode-sync.h"
+#include "primitives/transaction.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
-#include "primitives/transaction.h"
 #include "spork.h"
-#include "wallet/wallet.h"
 #include "validation.h"
-#include "dynode-sync.h"
+#include "wallet/wallet.h"
 
 #include <univalue.h>
 
@@ -188,7 +188,7 @@ UniValue adduser(const JSONRPCRequest& request)
            HelpExampleRpc("adduser", "Alice \"Wonderland, Alice\""));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -517,7 +517,7 @@ UniValue updateuser(const JSONRPCRequest& request)
            HelpExampleRpc("updateuser", "Alice \"Updated, Alice\" 365"));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -564,7 +564,7 @@ UniValue updategroup(const JSONRPCRequest& request)
            HelpExampleRpc("updategroup", "Duality \"Updated, Duality Blockchain Solutions Group\" 700"));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -679,7 +679,7 @@ UniValue deleteuser(const JSONRPCRequest& request)
            HelpExampleRpc("deleteuser", "Alice"));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -724,7 +724,7 @@ UniValue deletegroup(const JSONRPCRequest& request)
            HelpExampleRpc("deletegroup", "GroupName"));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -833,7 +833,7 @@ UniValue addgroup(const JSONRPCRequest& request)
            HelpExampleRpc("addgroup", "Duality \"Duality Blockchain Solutions Group\""));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))

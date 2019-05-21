@@ -7,17 +7,17 @@
 #include "bdap/utils.h"
 #include "core_io.h" // for EncodeHexTx
 #include "dht/ed25519.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "dynode-sync.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
-#include "utilstrencodings.h"
-#include "dynode-sync.h"
+#include "rpcprotocol.h"
+#include "rpcserver.h"
 #include "spork.h"
+#include "utilstrencodings.h"
+#include "validation.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
-#include "validation.h"
 
 #include <stdint.h>
 
@@ -45,7 +45,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
@@ -199,7 +199,7 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
            HelpExampleRpc("sendandpayrawbdapaccount", "<hexstring>"));
 
     if (!dynodeSync.IsBlockchainSynced()) {
-        throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Cannot create BDAP Objects while wallet is not synced."));
     }
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
