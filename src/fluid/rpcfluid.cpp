@@ -2,8 +2,11 @@
 
 #include "fluid.h"
 
+#include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "chain.h"
 #include "core_io.h"
+#include "dynode-sync.h"
 #include "fluiddb.h"
 #include "fluiddynode.h"
 #include "fluidmining.h"
@@ -14,6 +17,7 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"
+#include "spork.h"
 #include "timedata.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -23,6 +27,8 @@
 #include "wallet/walletdb.h"
 
 #include <univalue.h>
+
+#include <cmath>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
 extern void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
@@ -67,6 +73,8 @@ opcodetype getOpcodeFromString(std::string input)
         return OP_FREEZE_ADDRESS;
     else if (input == "OP_RELEASE_ADDRESS")
         return OP_RELEASE_ADDRESS;
+    else if (input == "OP_BDAP_REVOKE")
+        return OP_BDAP_REVOKE;
     else
         return OP_RETURN;
 
@@ -85,8 +93,8 @@ UniValue maketoken(const JSONRPCRequest& request)
             HelpExampleCli("maketoken", "300000 1558389600 DNsEXkNEdzvNbR3zjaDa3TEVPtwR6Efbmd") + 
             HelpExampleRpc("maketoken", "300000 1558389600 DNsEXkNEdzvNbR3zjaDa3TEVPtwR6Efbmd"));
     }
-    std::string result;
 
+    std::string result = "";
     for (uint32_t iter = 0; iter != request.params.size(); iter++) {
         result += request.params[iter].get_str() + SubDelimiter;
     }
@@ -95,6 +103,46 @@ UniValue maketoken(const JSONRPCRequest& request)
     fluid.ConvertToHex(result);
 
     return result;
+}
+
+UniValue banaccountstoken(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 2) {
+        throw std::runtime_error(
+            "banaccountstoken \"FQDN\"\n"
+            "\nCreates a token to ban a list of BDAP accounts\n"
+            "\nArguments:\n"
+            "1. \"timestamp\"         (int, required) Fluid transaction timestamp.\n"
+            "2. \"account_fqdn1\"     (string, required) The BDAP account fully qualified domain name.\n"
+            "\nExamples:\n" +
+            HelpExampleCli("banaccountstoken", "1558389600 \"badaccount@public.bdap.io\" \"banme@public.bdap.io\"") + 
+            HelpExampleRpc("banaccountstoken", "1558389600 \"badaccount@public.bdap.io\" \"banme@public.bdap.io\""));
+    }
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw JSONRPCError(RPC_SPORK_INACTIVE, strprintf("Can not create BDAP revoke account token until SPORK_30_ACTIVATE_BDAP is active."));
+
+    if (!dynodeSync.IsBlockchainSynced())
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, strprintf("Can not create BDAP revoke account token until the blockchain is fully synced."));
+
+    std::string strResult;
+    for (uint32_t iter = 0; iter != request.params.size(); iter++) {
+        if (iter == 0) {
+            strResult += request.params[iter].get_str() + SubDelimiter;
+        } else {
+            std::string strAccountFQDN = request.params[iter].get_str();
+            ToLowerCase(strAccountFQDN);
+            if (!DomainEntryExists(vchFromString(strAccountFQDN)))
+                throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("The %s BDAP account was not found", strAccountFQDN));
+
+            // base64 encode the BDAP account FQDN so that the @ character doesn't interfere with the standard token delimiter
+            strResult += EncodeBase64(strAccountFQDN) + SubDelimiter;
+        }
+    }
+
+    strResult.pop_back();
+    fluid.ConvertToHex(strResult);
+    return strResult;
 }
 
 UniValue gettime(const JSONRPCRequest& request)
@@ -659,6 +707,7 @@ static const CRPCCommand commands[] =
         {"fluid", "getfluidsovereigns", &getfluidsovereigns, true, {}},
         {"fluid", "gettime", &gettime, true, {}},
         {"fluid", "readfluidtoken", &readfluidtoken, true, {"tokenkey"}},
+        {"fluid", "banaccountstoken", &banaccountstoken, true, {"timestamp", "account1", "account2"}},
 };
 
 void RegisterFluidRPCCommands(CRPCTable& tableRPC)

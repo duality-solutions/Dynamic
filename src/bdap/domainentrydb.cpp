@@ -43,6 +43,14 @@ bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEn
     return !entry.IsNull();
 }
 
+bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    return pDomainEntryDB->DomainEntryExists(vchObjectPath);
+}
+
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
 { 
     bool writeState = false;

@@ -46,6 +46,7 @@ enum RPCErrorCode {
     RPC_OUT_OF_MEMORY = -7,            //! Ran out of memory during operation
     RPC_INVALID_PARAMETER = -8,        //! Invalid, missing or duplicate parameter
     RPC_DATABASE_ERROR = -20,          //! Database error
+    RPC_SPORK_INACTIVE = -21,          //! Required spork inactivate
     RPC_DESERIALIZATION_ERROR = -22,   //! Error parsing or validating structure in raw format
     RPC_VERIFY_ERROR = -25,            //! General error during transaction or block submission
     RPC_VERIFY_REJECTED = -26,         //! Transaction or block was rejected by network rules
@@ -92,6 +93,9 @@ enum RPCErrorCode {
     RPC_DHT_INVALID_RECORD = -406,         //! Invalid DHT record information
     RPC_DHT_RECORD_LOCKED = -407,          //! DHT record locked
     RPC_DHT_PUBKEY_MISMATCH = -408,        //! DHT public key mismatch
+    //! Fluid errors
+    RPC_FLUID_ERROR = -500,                //! Unspecified fluid error
+    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp 
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);
