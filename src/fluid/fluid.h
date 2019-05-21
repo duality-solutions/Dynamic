@@ -49,34 +49,34 @@ public:
     void AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord);
     void ReplaceFluidSovereigns(const CBlockHeader& blockHeader, std::vector<std::string>& fluidSovereigns);
 
-    bool IsGivenKeyMaster(CDynamicAddress inputKey);
+    bool IsGivenKeyMaster(const CDynamicAddress& inputKey);
 
-    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck = false);
+    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck = false);
     bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage);
-    bool CheckIfQuorumExists(const std::string consentToken, std::string& message, bool individual = false);
-    bool CheckNonScriptQuorum(const std::string consentToken, std::string& message, bool individual = false);
-    bool CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex = NULL);
+    bool CheckIfQuorumExists(const std::string& consentToken, std::string& message, const bool individual = false);
+    bool CheckNonScriptQuorum(const std::string& consentToken, std::string& message, const bool individual = false);
+    bool CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex = NULL);
 
-    bool GenericConsentMessage(std::string message, std::string& signedString, CDynamicAddress signer);
+    bool GenericConsentMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& howMuch, bool txCheckPurpose = false);
-    bool GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string& messageTokenKey, int whereToLook = 1);
+    bool GenericVerifyInstruction(const std::string& consentToken, CDynamicAddress& signer, std::string& messageTokenKey, const int& whereToLook = 1);
 
     bool ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp);
-    bool ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose = false);
-    bool ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo);
+    bool ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CAmount& coinAmount, const std::string& uniqueIdentifier, const bool txCheckPurpose = false);
+    bool ProcessFluidToken(const std::string& consentToken, std::vector<std::string>& ptrs, const int& strVecNo);
 
     bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount);
     bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
     bool GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
 
-    bool ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue);
+    bool ValidationProcesses(CValidationState& state, const CScript& txOut, const CAmount& txValue);
 
     bool CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader);
     bool CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash);
 
     bool ProvisionalCheckTransaction(const CTransaction& transaction);
-    bool InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord);
-    CDynamicAddress GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey);
+    bool InsertTransactionToRecord(const CScript& fluidInstruction, std::vector<std::string>& transactionRecord);
+    CDynamicAddress GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey);
 };
 
 /** Standard Reward Payment Determination Functions */

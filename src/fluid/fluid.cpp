@@ -25,7 +25,7 @@ extern CWallet* pwalletMain;
 
 bool IsTransactionFluid(const CScript& txOut)
 {
-    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX));
+    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
 }
 
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
@@ -48,6 +48,8 @@ int GetFluidOpCode(const CScript& fluidScript)
         return OP_REWARD_DYNODE;
     } else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX)) {
         return OP_REWARD_MINING;
+    } else if (fluidScript.IsProtocolInstruction(BDAP_REVOKE_TX)) {
+        return OP_BDAP_REVOKE;
     }
     return 0;
 }
@@ -92,7 +94,7 @@ std::vector<std::string> InitialiseAddresses()
 }
 
 /** Checks if any given address is a current master key (invoked by RPC) */
-bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey)
+bool CFluid::IsGivenKeyMaster(const CDynamicAddress& inputKey)
 {
     if (!inputKey.IsValid()) {
         return false;
@@ -140,7 +142,7 @@ std::vector<std::vector<unsigned char> > CFluidParameters::InitialiseAddressChar
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */
-bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck)
+bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck)
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
@@ -210,7 +212,7 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
 }
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
-bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string& message, bool individual)
+bool CFluid::CheckIfQuorumExists(const std::string& consentToken, std::string& message, const bool individual)
 {
     std::vector<std::string> fluidSovereigns;
     std::pair<CDynamicAddress, bool> keyOne;
@@ -224,32 +226,32 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string& me
 
     if (pindex != NULL) {
         //TODO fluid
-        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
+        fluidSovereigns = InitialiseAddresses();
     } else
         fluidSovereigns = InitialiseAddresses();
 
     for (const std::string& address : fluidSovereigns) {
-        CDynamicAddress attemptKey, xKey(address);
+        CDynamicAddress attemptKey, xAddress(address);
 
-        if (!xKey.IsValid())
+        if (!xAddress.IsValid())
             return false;
 
-        if (GenericVerifyInstruction(consentToken, attemptKey, message, 1) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 1) && xAddress == attemptKey) {
             keyOne = std::make_pair(attemptKey.ToString(), true);
         }
 
-        if (GenericVerifyInstruction(consentToken, attemptKey, message, 2) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 2) && xAddress == attemptKey) {
             keyTwo = std::make_pair(attemptKey.ToString(), true);
         }
 
-        if (GenericVerifyInstruction(consentToken, attemptKey, message, 3) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 3) && xAddress == attemptKey) {
             keyThree = std::make_pair(attemptKey.ToString(), true);
         }
     }
 
     bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString() && keyOne.first.ToString() != keyThree.first.ToString());
 
-    LogPrint("fluid", "CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
+    LogPrintf("CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
 
     if (individual)
         return (keyOne.second || keyTwo.second || keyThree.second);
@@ -261,14 +263,14 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string& me
 
 
 /** Checks whether as to parties have actually signed it - please use this with ones **without** the OP_CODE */
-bool CFluid::CheckNonScriptQuorum(const std::string consentToken, std::string& message, bool individual)
+bool CFluid::CheckNonScriptQuorum(const std::string& consentToken, std::string& message, const bool individual)
 {
     std::string result = "12345 " + consentToken;
     return CheckIfQuorumExists(result, message, individual);
 }
 
 /** It will append a signature of the new information */
-bool CFluid::GenericConsentMessage(std::string message, std::string& signedString, CDynamicAddress signer)
+bool CFluid::GenericConsentMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer)
 {
     std::string token, digest;
 
@@ -280,13 +282,13 @@ bool CFluid::GenericConsentMessage(std::string message, std::string& signedStrin
 
     if (token == "")
         return false;
-
-    ConvertToString(message);
-
+    
     if (!SignTokenMessage(signer, token, digest, false))
         return false;
 
-    signedString = StitchString(message, digest, false);
+    std::string strConvertedMessage = message;
+    ConvertToString(strConvertedMessage);
+    signedString = StitchString(strConvertedMessage, digest, false);
 
     ConvertToHex(signedString);
 
@@ -317,7 +319,7 @@ bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t
     return true;
 }
 
-bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo)
+bool CFluid::ProcessFluidToken(const std::string& consentToken, std::vector<std::string>& ptrs, const int& strVecNo)
 {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
 
@@ -360,13 +362,13 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     return true;
 }
 
-CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey)
+CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey)
 {
     bool fInvalid = false;
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
 
     if (fInvalid) {
-        LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
+        LogPrintf("GetAddressFromDigestSignature(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
         return nullptr;
     }
 
@@ -377,7 +379,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSi
     CPubKey pubkey;
 
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
-        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
+        LogPrintf("GetAddressFromDigestSignature(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
         return nullptr;
     }
     CDynamicAddress newAddress;
@@ -386,7 +388,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSi
 }
 
 /** Individually checks the validity of an instruction */
-bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string& messageTokenKey, int whereToLook)
+bool CFluid::GenericVerifyInstruction(const std::string& consentToken, CDynamicAddress& signer, std::string& messageTokenKey, const int& whereToLook)
 {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     messageTokenKey = "";
@@ -408,7 +410,7 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
     return true;
 }
 
-bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose)
+bool CFluid::ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CAmount& coinAmount, const std::string& uniqueIdentifier, const bool txCheckPurpose)
 {
     std::vector<std::string> ptrs;
 
@@ -528,7 +530,7 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 }
 
 /* Check if transaction exists in record */
-bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex)
+bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex)
 {
     if (IsTransactionFluid(fluidInstruction)) {
         std::string verificationString;
@@ -567,7 +569,7 @@ bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pin
 }
 
 /* Insertion of transaction script to record */
-bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord)
+bool CFluid::InsertTransactionToRecord(const CScript& fluidInstruction, std::vector<std::string>& transactionRecord)
 {
     std::string verificationString;
 
@@ -615,7 +617,7 @@ CAmount GetStandardDynodePayment(const int nHeight)
     }
 }
 
-bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue)
+bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, const CAmount& txValue)
 {
     std::string message;
     CAmount mintAmount;

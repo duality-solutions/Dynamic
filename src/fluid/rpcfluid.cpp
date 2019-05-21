@@ -208,9 +208,6 @@ opcodetype negatif = OP_RETURN;
 
 UniValue sendfluidtransaction(const JSONRPCRequest& request)
 {
-    if (!EnsureWalletIsAvailable(request.fHelp))
-        return NullUniValue;
-
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
             "sendfluidtransaction \"OP_MINT || OP_REWARD_DYNODE || OP_REWARD_MINING\" \"hexstring\"\n"
@@ -219,8 +216,11 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
             "1. \"opcode\"  (string, required) The Fluid operation to be executed.\n"
             "2. \"hexstring\" (string, required) The token for that opearation.\n"
             "\nExamples:\n" +
-            HelpExampleCli("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + 
-            HelpExampleRpc("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
+            HelpExampleCli("sendfluidtransaction", "\"OP_MINT\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + 
+            HelpExampleRpc("sendfluidtransaction", "\"OP_MINT\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
 
     CScript finalScript;
 
@@ -231,16 +231,15 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
         throw std::runtime_error("OP_CODE is either not a Fluid OP_CODE or is invalid");
 
     if (!IsHex(request.params[1].get_str()))
-        throw std::runtime_error("Hex isn't even valid!");
+        throw std::runtime_error("Token hex is invalid");
     else
         finalScript = CScript() << opcode << ParseHex(request.params[1].get_str());
 
     std::string message;
-
     if (!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
-        throw std::runtime_error("Instruction does not meet required quorum for validity");
+        throw std::runtime_error(strprintf("Instruction does not meet required quorum for validity. %s", message));
 
-    if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
+    if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE) {
         CWalletTx wtx;
         SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
