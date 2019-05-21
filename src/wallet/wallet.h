@@ -1133,6 +1133,7 @@ public:
     size_t KeypoolCountInternalKeys();
     size_t EdKeypoolCountExternalKeys();
     size_t EdKeypoolCountInternalKeys();
+    bool SyncEdKeyPool(); 
     bool TopUpKeyPool(unsigned int kpSize = 0);
     bool TopUpEdKeyPool(unsigned int kpSize = 0); 
     bool TopUpKeyPoolCombo(unsigned int kpSize = 0);       

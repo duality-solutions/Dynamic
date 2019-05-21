@@ -4464,6 +4464,67 @@ size_t CWallet::EdKeypoolCountInternalKeys()
     return setInternalEdKeyPool.size();
 }
 
+bool CWallet::SyncEdKeyPool() 
+{
+    CWalletDB walletdb(strWalletFile);
+    CKeyPool keypool;
+    CPubKey retrievedPubKey;
+    CKey retrievedKey;
+
+    CKeyPool keypool2;
+    CPubKey retrievedPubKey2;
+    CKey retrievedKey2;
+
+    LogPrintf("DEBUGGER WALLET %s - made it here!\n", __func__);
+
+
+    for (int64_t nIndex : setInternalKeyPool) {
+        if (!walletdb.ReadPool(nIndex, keypool)) {
+            throw std::runtime_error(std::string(__func__) + ": read failed");
+        }
+        retrievedPubKey = keypool.vchPubKey;
+        GetKey(retrievedPubKey.GetID(), retrievedKey);
+
+        // int64_t nEnd = 1;
+        // if (!setInternalEdKeyPool.empty()) {
+        //     nEnd = *(--setInternalEdKeyPool.end()) + 1;
+        // }
+
+        if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, true, retrievedKey), true)))
+            throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+
+        setInternalEdKeyPool.insert(nIndex);    
+
+        LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
+    }
+
+    for (int64_t nIndex : setExternalKeyPool) {
+        if (!walletdb.ReadPool(nIndex, keypool2)) {
+            throw std::runtime_error(std::string(__func__) + ": read failed");
+        }
+        retrievedPubKey2 = keypool2.vchPubKey;
+        GetKey(retrievedPubKey2.GetID(), retrievedKey2);
+
+        // int64_t nEnd = 1;
+        // if (!setInternalEdKeyPool.empty()) {
+        //     nEnd = *(--setInternalEdKeyPool.end()) + 1;
+        // }
+
+        if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, false, retrievedKey2), false)))
+            throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+
+        setExternalEdKeyPool.insert(nIndex);    
+
+        LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
+    }
+
+    return true;
+
+} //SyncEdKeyPool
+
+
+
+
 bool CWallet::TopUpKeyPool(unsigned int kpSize)
 {
     {
@@ -5624,6 +5685,25 @@ bool CWallet::InitLoadWallet()
         return false;
     }
     pwalletMain = pwallet;
+
+    LogPrintf("DEBUGGER WALLET %s - wallet version [%d]\n", __func__,pwallet->GetVersion());
+
+    if (pwallet->GetVersion() < FEATURE_HD) {
+        if (!pwallet->SyncEdKeyPool()) {
+            LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is false\n", __func__);
+        }
+        else {
+            LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is true\n", __func__);
+            LogPrintf("DEBUGGER WALLET %s - Upgrading wallet version\n", __func__);
+            pwallet->SetMinVersion(FEATURE_HD);
+
+            LogPrintf("setExternalKeyPool.size() = %u\n", pwallet->KeypoolCountExternalKeys());
+            LogPrintf("setInternalKeyPool.size() = %u\n", pwallet->KeypoolCountInternalKeys());
+            LogPrintf("setExternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountExternalKeys());
+            LogPrintf("setInternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountInternalKeys());
+        }
+    }
+
 
     ProcessLinkQueue(); // Process links in queue.
 
