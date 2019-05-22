@@ -57,10 +57,10 @@ public:
 
 void ScrubString(std::string& input, bool forInteger = false);
 void SeparateString(const std::string& input, std::vector<std::string>& output, bool subDelimiter = false);
-void SeparateFluidOpString(std::string input, std::vector<std::string>& output);
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter = false);
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter = false);
-std::string GetRidOfScriptStatement(std::string input, int position = 1);
+void SeparateFluidOpString(const std::string& input, std::vector<std::string>& output);
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const bool subDelimiter = false);
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const std::string& stringThree, const bool subDelimiter = false);
+std::string GetRidOfScriptStatement(const std::string& input, const int& position = 1);
 
 extern std::string PrimaryDelimiter;
 extern std::string SubDelimiter;

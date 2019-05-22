@@ -2,6 +2,9 @@
 
 #include "fluid.h"
 
+#include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "chain.h"
 #include "core_io.h"
 #include "keepass.h"
@@ -148,37 +151,61 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
     std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
     if (!fSkipTimeStampCheck) {
-        if (!ExtractCheckTimestamp(strFluidOpScript, timeStamp)) {
+        if (!ExtractCheckTimestamp(strOperationCode, strFluidOpScript, timeStamp)) {
             errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
             return false;
         }
     }
     if (IsHex(verificationWithoutOpCode)) {
-        std::string strAmount;
         std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
-        if (vecSplitScript.size() > 1) {
-            strAmount = vecSplitScript[0];
-            CAmount fluidAmount;
-            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && fluidAmount < 0) {
-                    errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
-                    return false;
-                } else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
-                    return false;
-                } else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
-                    return false;
-                } else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
-                    return false;
+        if (strOperationCode == "OP_MINT" || strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") {
+            if (vecSplitScript.size() > 1) {
+                std::string strAmount = vecSplitScript[0];
+                CAmount fluidAmount;
+                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                    if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && fluidAmount < 0) {
+                        errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
+                        return false;
+                    } else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
+                        errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
+                        return false;
+                    } else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
+                        errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
+                        return false;
+                    } else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
+                        errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
+                        return false;
+                    }
+                }
+            } else {
+                errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
+                return false;
+            }
+        }
+        else if (strOperationCode == "OP_BDAP_REVOKE") {
+            if (vecSplitScript.size() > 1) {
+                if (!fSkipTimeStampCheck) {
+                    for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
+                        CDomainEntry entry;
+                        std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
+                        std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
+                        if (!DomainEntryExists(vchBanAccountFQDN)) {
+                            LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
+                            errorMessage = strprintf("Can't ban %s account because it was not found.", strBanAccountFQDN);
+                            return false;
+                        }
+                    }
                 }
             }
-        } else {
-            errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
-            return false;
+            else {
+                errorMessage = strprintf("CheckFluidOperationScript fluid OP_BDAP_REVOKE incorrect paramaters %d", vecSplitScript.size());
+                return false;
+            }
+        }
+        else {
+            errorMessage = strprintf("%s -- %s is an unknown fluid operation", __func__, strOperationCode);
         }
     } else {
         errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
@@ -209,6 +236,40 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
     }
 
     return false;
+}
+
+bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::string& strErrorMessage)
+{
+    std::string strFluidOpScript = ScriptToAsmStr(fluidScript);
+    std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
+    if (!IsHex(verificationWithoutOpCode)) {
+        strErrorMessage = "Fluid token is not a valid hexidecimal value.";
+        return false;
+    }
+    std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
+    std::vector<std::string> vecSplitScript;
+    SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
+    for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
+        CDomainEntry entry;
+        std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
+        std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
+        if (GetDomainEntry(vchBanAccountFQDN, entry)) {
+            LogPrintf("%s -- Fluid command banning account %s\n", __func__, strBanAccountFQDN);
+            if (!DeleteDomainEntry(entry))
+                LogPrintf("%s -- Error deleting account %s\n", __func__, strBanAccountFQDN);
+
+            // TODO (Fluid): Keep a local LevelDB database with all banned accounts, txid and block height.
+            //CFluidBanTx fluidBanTx(fluidScript);
+            //fluidBanTx.nHeight = nHeight;
+            //fluidBanTx.txHash = txHashId;
+        }
+        else {
+            LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
@@ -296,23 +357,29 @@ bool CFluid::GenericConsentMessage(const std::string& message, std::string& sign
 }
 
 /** Extract timestamp from a Fluid Transaction */
-bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp)
+bool CFluid::ExtractCheckTimestamp(const std::string& strOpCode, const std::string& consentToken, const int64_t& timeStamp)
 {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
     SeparateString(dehexString, strs, false);
     SeparateString(strs.at(0), ptrs, true);
-
     if (1 >= (int)strs.size())
         return false;
 
-    std::string ls = ptrs.at(1);
-
+    std::string ls;
+    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE") {
+        ls = ptrs.at(1);
+    }
+    else if (strOpCode == "OP_BDAP_REVOKE") {
+        ls = ptrs.at(0);
+    }
+    else {
+        return false;
+    }
     ScrubString(ls, true);
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
-
     if (timeStamp > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT)
         return false;
 
@@ -550,7 +617,6 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
         }
         */
         std::vector<std::string> transactionRecord; //fluidIndex.fluidHistory;
-        verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
@@ -696,4 +762,10 @@ std::string StringFromCharVector(const std::vector<unsigned char>& vch)
         vi++;
     }
     return strReturn;
+}
+
+std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript)
+{
+    std::string fluidOperationString = ScriptToAsmStr(fluidScript);
+    return vchFromString(fluidOperationString);
 }

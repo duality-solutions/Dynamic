@@ -61,7 +61,7 @@ public:
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& howMuch, bool txCheckPurpose = false);
     bool GenericVerifyInstruction(const std::string& consentToken, CDynamicAddress& signer, std::string& messageTokenKey, const int& whereToLook = 1);
 
-    bool ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp);
+    bool ExtractCheckTimestamp(const std::string& strOpCode, const std::string& consentToken, const int64_t& timeStamp);
     bool ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CAmount& coinAmount, const std::string& uniqueIdentifier, const bool txCheckPurpose = false);
     bool ProcessFluidToken(const std::string& consentToken, std::vector<std::string>& ptrs, const int& strVecNo);
 
@@ -77,6 +77,8 @@ public:
     bool ProvisionalCheckTransaction(const CTransaction& transaction);
     bool InsertTransactionToRecord(const CScript& fluidInstruction, std::vector<std::string>& transactionRecord);
     CDynamicAddress GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey);
+    bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::string& strErrorMessage);
+
 };
 
 /** Standard Reward Payment Determination Functions */
@@ -90,6 +92,7 @@ int GetFluidOpCode(const CScript& fluidScript);
 
 std::vector<unsigned char> CharVectorFromString(const std::string& str);
 std::string StringFromCharVector(const std::vector<unsigned char>& vch);
+std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
 
 extern CFluid fluid;
 

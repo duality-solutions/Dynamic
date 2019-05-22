@@ -51,6 +51,16 @@ bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
     return pDomainEntryDB->DomainEntryExists(vchObjectPath);
 }
 
+bool DeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);;
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
 { 
     bool writeState = false;

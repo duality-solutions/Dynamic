@@ -752,7 +752,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 // fluid transaction is already in the mempool.  Reject tx.
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
-            if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
+            std::string strFluidOpScript = ScriptToAsmStr(txout.scriptPubKey);
+            std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
+            std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+            if (strOperationCode == "OP_BDAP_REVOKE" && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                return state.Invalid(false, REJECT_INVALID, "bdap-spork-inactive");
+
+            if (!fluid.ExtractCheckTimestamp(strOperationCode, ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
             }
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
@@ -2505,6 +2511,21 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     }
                     pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }
+            } else if (OpCode == OP_BDAP_REVOKE) {
+                LogPrintf("%s -- Found OP_BDAP_REVOKE transaction.\n", __func__);
+                if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
+                    return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");
+
+                if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
+
+                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, strError))
+                    return state.DoS(100, error("%s -- CheckAccountBanScript failed: %s", __func__, strError), REJECT_INVALID, "fluid-ban-script-invalid");
+            }
+            else {
+                std::string strFluidOpScript = ScriptToAsmStr(scriptFluid);
+                std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+                return state.DoS(100, error("%s -- Invalid fluid operation code %s (%d)", __func__, strOperationCode, OpCode), REJECT_INVALID, "invalid-fluid-operation-code");
             }
         }
     }
