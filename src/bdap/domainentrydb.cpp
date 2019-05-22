@@ -23,7 +23,7 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
         return false;
     }
     
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
+    if (chainActive.Tip() && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
         entry.SetNull();
         return false;
     }

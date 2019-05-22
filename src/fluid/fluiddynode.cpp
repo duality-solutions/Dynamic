@@ -68,8 +68,6 @@ bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut)
 
 bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     int nOut;
     if (!GetFluidDynodeData(tx, *this, nOut)) {
         SetNull();
@@ -80,8 +78,6 @@ bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidDynode::UnserializeFromScript(const CScript& fluidScript)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     if (!GetFluidDynodeData(fluidScript, *this)) {
         SetNull();
         return false;

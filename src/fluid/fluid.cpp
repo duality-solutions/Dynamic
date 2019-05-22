@@ -601,22 +601,7 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
 {
     if (IsTransactionFluid(fluidInstruction)) {
         std::string verificationString;
-        //TODO fluid
-        /*
-        CFluidEntry fluidIndex;
-        if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT) {
-            return false;
-        }
-        else if (pindex == nullptr) {
-            GetLastBlockIndex(chainActive.Tip());
-            //TODO fluid
-            //fluidIndex = chainActive.Tip()->fluidParams;
-        } else {
-            //TODO fluid
-            //fluidIndex = pindex->fluidParams;
-        }
-        */
-        std::vector<std::string> transactionRecord; //fluidIndex.fluidHistory;
+        std::vector<std::string> transactionRecord;
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
