@@ -46,10 +46,7 @@ std::vector<std::string> InitialiseAddresses();
 class CFluid : public CFluidParameters, public COperations
 {
 public:
-    void AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord);
     void ReplaceFluidSovereigns(const CBlockHeader& blockHeader, std::vector<std::string>& fluidSovereigns);
-
-    bool IsGivenKeyMaster(const CDynamicAddress& inputKey);
 
     bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck = false);
     bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage);
@@ -66,16 +63,12 @@ public:
     bool ProcessFluidToken(const std::string& consentToken, std::vector<std::string>& ptrs, const int& strVecNo);
 
     bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount);
-    bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
-    bool GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
-
     bool ValidationProcesses(CValidationState& state, const CScript& txOut, const CAmount& txValue);
 
     bool CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader);
     bool CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash);
 
     bool ProvisionalCheckTransaction(const CTransaction& transaction);
-    bool InsertTransactionToRecord(const CScript& fluidInstruction, std::vector<std::string>& transactionRecord);
     CDynamicAddress GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey);
     bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::string& strErrorMessage);
 
@@ -93,6 +86,7 @@ int GetFluidOpCode(const CScript& fluidScript);
 std::vector<unsigned char> CharVectorFromString(const std::string& str);
 std::string StringFromCharVector(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
+bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block);
 
 extern CFluid fluid;
 

@@ -96,34 +96,6 @@ std::vector<std::string> InitialiseAddresses()
     return params.InitialiseAddresses();
 }
 
-/** Checks if any given address is a current master key (invoked by RPC) */
-bool CFluid::IsGivenKeyMaster(const CDynamicAddress& inputKey)
-{
-    if (!inputKey.IsValid()) {
-        return false;
-    }
-
-    std::vector<std::string> fluidSovereigns;
-    GetLastBlockIndex(chainActive.Tip());
-    CBlockIndex* pindex = chainActive.Tip();
-
-    if (pindex != NULL) {
-        //TODO fluid
-        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
-    }
-
-    else
-        fluidSovereigns = InitialiseAddresses();
-
-    for (const std::string& strAddress : fluidSovereigns) {
-        CDynamicAddress attemptKey(strAddress);
-        if (attemptKey.IsValid() && inputKey == attemptKey)
-            return true;
-    }
-
-    return false;
-}
-
 std::vector<std::string> CFluidParameters::InitialiseAddresses()
 {
     std::vector<std::string> initialSovereignAddresses;
@@ -518,7 +490,7 @@ bool CFluid::ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CA
     return true;
 }
 
-static bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
+bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
 {
     if (pblockindex != nullptr) {
         // Check for invalid block position and file.
@@ -554,56 +526,6 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
     return false;
 }
 
-bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount)
-{
-    CBlock block;
-    if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransactionRef& tx : block.vtx) {
-            for (const CTxOut& txout : tx->vout) {
-                if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
-                    std::string message;
-                    if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                        return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
-                }
-            }
-        }
-    }
-    return false;
-}
-
-bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount)
-{
-    CBlock block;
-    if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransactionRef& tx : block.vtx) {
-            for (const CTxOut& txout : tx->vout) {
-                if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
-                    std::string message;
-                    if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                        return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
-                }
-            }
-        }
-    }
-    return false;
-}
-
-void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord)
-{
-    CBlock block;
-    if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransactionRef& tx : block.vtx) {
-            for (const CTxOut& txout : tx->vout) {
-                if (IsTransactionFluid(txout.scriptPubKey)) {
-                    if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
-                        LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
-                    }
-                }
-            }
-        }
-    }
-}
-
 /* Check if transaction exists in record */
 bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex)
 {
@@ -621,29 +543,6 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
                     return true;
                 }
             }
-        }
-    }
-
-    return false;
-}
-
-/* Insertion of transaction script to record */
-bool CFluid::InsertTransactionToRecord(const CScript& fluidInstruction, std::vector<std::string>& transactionRecord)
-{
-    std::string verificationString;
-
-    if (IsTransactionFluid(fluidInstruction)) {
-        verificationString = ScriptToAsmStr(fluidInstruction);
-
-        std::string message;
-        if (CheckIfQuorumExists(verificationString, message)) {
-            for (const std::string& existingRecord : transactionRecord) {
-                if (existingRecord == verificationString) {
-                    return false;
-                }
-            }
-            transactionRecord.push_back(verificationString);
-            return true;
         }
     }
 
