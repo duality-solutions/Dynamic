@@ -206,6 +206,7 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
         }
         else {
             errorMessage = strprintf("%s -- %s is an unknown fluid operation", __func__, strOperationCode);
+            return false;
         }
     } else {
         errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
@@ -249,6 +250,10 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
     std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
     std::vector<std::string> vecSplitScript;
     SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
+    if (vecSplitScript.size() == 0) {
+        strErrorMessage = "Could not split fluid command script.";
+        return false;
+    }
     for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
         CDomainEntry entry;
         std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
@@ -363,6 +368,9 @@ bool CFluid::ExtractCheckTimestamp(const std::string& strOpCode, const std::stri
     std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
     SeparateString(dehexString, strs, false);
+    if (strs.size() == 0)
+        return false;
+
     SeparateString(strs.at(0), ptrs, true);
     if (1 >= (int)strs.size())
         return false;
@@ -600,7 +608,7 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex)
 {
     if (IsTransactionFluid(fluidInstruction)) {
-        std::string verificationString;
+        std::string verificationString = ScriptToAsmStr(fluidInstruction);
         std::vector<std::string> transactionRecord;
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
