@@ -755,6 +755,7 @@ private:
 
     bool fNeedToUpdateKeyPools = false;
     bool fNeedToUpdateLinks = false;
+    bool fNeedToUpgradeWallet = false;
 
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;

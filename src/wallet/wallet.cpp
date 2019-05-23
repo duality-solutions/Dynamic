@@ -581,6 +581,13 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
+                if (fNeedToUpgradeWallet) {
+                    LogPrintf("DEBUGGER WALLET %s - Made it to unlock portion\n", __func__);
+                    if (SyncEdKeyPool()) {
+                        SetMinVersion(FEATURE_HD);
+                        LogPrintf("DEBUGGER WALLET %s - Upgraded wallet\n", __func__);
+                    }
+                }
                 if (nWalletBackups == -2) {
                     TopUpKeyPoolCombo();
                     LogPrintf("Keypool replenished, re-initializing automatic backups.\n");
@@ -590,10 +597,25 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                     RunProcessStealthQueue(); // Process stealth transactions in queue
                     ProcessLinkQueue(); // Process encrypted links in queue
                 }
-                return true;
+                if (!fNeedToUpgradeWallet) return true;
             }
         }
     }
+
+    if (fNeedToUpgradeWallet) {
+        {
+            LOCK2(cs_main, pwalletMain->cs_wallet);
+            fNeedToUpgradeWallet = false;
+            fNeedToUpdateKeyPools = true;
+            fNeedToUpdateLinks = true;
+            LogPrintf("DEBUGGER WALLET %s - Rescanning transasctions\n", __func__);
+            pwalletMain->UpdateTimeFirstKey(1);
+            pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+            LogPrintf("DEBUGGER WALLET %s - Rescanning transasctions DONE\n", __func__);        
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -4466,7 +4488,11 @@ size_t CWallet::EdKeypoolCountInternalKeys()
 
 bool CWallet::SyncEdKeyPool() 
 {
+    if (pwalletMain->IsLocked())
+        return false;
+    
     CWalletDB walletdb(strWalletFile);
+
     CKeyPool keypool;
     CPubKey retrievedPubKey;
     CKey retrievedKey;
@@ -4477,7 +4503,6 @@ bool CWallet::SyncEdKeyPool()
 
     LogPrintf("DEBUGGER WALLET %s - made it here!\n", __func__);
 
-
     for (int64_t nIndex : setInternalKeyPool) {
         if (!walletdb.ReadPool(nIndex, keypool)) {
             throw std::runtime_error(std::string(__func__) + ": read failed");
@@ -4485,17 +4510,23 @@ bool CWallet::SyncEdKeyPool()
         retrievedPubKey = keypool.vchPubKey;
         GetKey(retrievedPubKey.GetID(), retrievedKey);
 
-        // int64_t nEnd = 1;
-        // if (!setInternalEdKeyPool.empty()) {
-        //     nEnd = *(--setInternalEdKeyPool.end()) + 1;
-        // }
+        std::array<char, 32> edSeed = ConvertSecureVector32ToArray(retrievedKey.getKeyData());
+        CKeyEd25519 childKey(edSeed);
+        CharString vchDHTPubKey = childKey.GetPubKey();
 
-        if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, true, retrievedKey), true)))
-            throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+        CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
 
-        setInternalEdKeyPool.insert(nIndex);    
-
-        LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
+        //only add if doesn't currently exist
+        if (!pwalletMain->HaveDHTKey(vchDHTPubKeyID)) {
+            if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, true, retrievedKey), true)))
+                throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+            else {
+                setInternalEdKeyPool.insert(nIndex);    
+                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
+            }
+        }
+        else
+            LogPrintf("DEBUGGER WALLET %s - internal edkey not added. already exists\n",__func__);
     }
 
     for (int64_t nIndex : setExternalKeyPool) {
@@ -4505,17 +4536,24 @@ bool CWallet::SyncEdKeyPool()
         retrievedPubKey2 = keypool2.vchPubKey;
         GetKey(retrievedPubKey2.GetID(), retrievedKey2);
 
-        // int64_t nEnd = 1;
-        // if (!setInternalEdKeyPool.empty()) {
-        //     nEnd = *(--setInternalEdKeyPool.end()) + 1;
-        // }
+        std::array<char, 32> edSeed2 = ConvertSecureVector32ToArray(retrievedKey2.getKeyData());
+        CKeyEd25519 childKey2(edSeed2);
+        CharString vchDHTPubKey2 = childKey2.GetPubKey();
 
-        if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, false, retrievedKey2), false)))
-            throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+        CKeyID vchDHTPubKeyID2 = GetIdFromCharVector(vchDHTPubKey2);
 
-        setExternalEdKeyPool.insert(nIndex);    
+        //only add if doesn't currently exist
+        if (!pwalletMain->HaveDHTKey(vchDHTPubKeyID2)) {
+            if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, false, retrievedKey2), false)))
+                throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+            else {
+                setExternalEdKeyPool.insert(nIndex);    
+                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
+            }
+        }
+        else
+            LogPrintf("DEBUGGER WALLET %s - external edkey not added. already exists\n",__func__);
 
-        LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
     }
 
     return true;
@@ -5689,19 +5727,27 @@ bool CWallet::InitLoadWallet()
     LogPrintf("DEBUGGER WALLET %s - wallet version [%d]\n", __func__,pwallet->GetVersion());
 
     if (pwallet->GetVersion() < FEATURE_HD) {
-        if (!pwallet->SyncEdKeyPool()) {
-            LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is false\n", __func__);
+        if (!pwalletMain->IsLocked()) {
+            if (!pwallet->SyncEdKeyPool()) {
+                LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is false\n", __func__);
+            }
+            else {
+                LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is true\n", __func__);
+                LogPrintf("DEBUGGER WALLET %s - Upgrading wallet version\n", __func__);
+                pwallet->SetMinVersion(FEATURE_HD);
+                pwallet->fNeedToUpgradeWallet = false;
+
+                LogPrintf("setExternalKeyPool.size() = %u\n", pwallet->KeypoolCountExternalKeys());
+                LogPrintf("setInternalKeyPool.size() = %u\n", pwallet->KeypoolCountInternalKeys());
+                LogPrintf("setExternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountExternalKeys());
+                LogPrintf("setInternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountInternalKeys());
+            }
         }
         else {
-            LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is true\n", __func__);
-            LogPrintf("DEBUGGER WALLET %s - Upgrading wallet version\n", __func__);
-            pwallet->SetMinVersion(FEATURE_HD);
-
-            LogPrintf("setExternalKeyPool.size() = %u\n", pwallet->KeypoolCountExternalKeys());
-            LogPrintf("setInternalKeyPool.size() = %u\n", pwallet->KeypoolCountInternalKeys());
-            LogPrintf("setExternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountExternalKeys());
-            LogPrintf("setInternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountInternalKeys());
+            LogPrintf("DEBUGGER WALLET %s - Upgrade wallet pending unlock\n", __func__);
+            pwallet->fNeedToUpgradeWallet = true; 
         }
+
     }
 
 
