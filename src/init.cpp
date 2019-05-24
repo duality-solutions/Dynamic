@@ -356,6 +356,29 @@ void PrepareShutdown()
         pcoinsdbview = NULL;
         delete pblocktree;
         pblocktree = NULL;
+        // Fluid transaction DB's
+        delete pFluidDynodeDB;
+        pFluidDynodeDB = NULL;
+        delete pFluidMiningDB;
+        pFluidMiningDB = NULL;
+        delete pFluidMintDB;
+        pFluidMintDB = NULL;
+        delete pFluidSovereignDB;
+        pFluidSovereignDB = NULL;
+        // BDAP Services DB's
+        delete pDomainEntryDB;
+        pDomainEntryDB = NULL;
+        delete pLinkRequestDB;
+        pLinkRequestDB = NULL;
+        delete pLinkAcceptDB;
+        pLinkAcceptDB = NULL;
+        delete pLinkManager;
+        pLinkManager = NULL;
+        // LibTorrent DHT Netowrk Services
+        delete pHashTableSession;
+        pHashTableSession = NULL;
+        delete pMutableDataDB;
+        pMutableDataDB = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
