@@ -211,7 +211,7 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
     return false;
 }
 
-bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::string& strErrorMessage)
+bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::string& strErrorMessage)
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScript);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
@@ -226,19 +226,13 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
         strErrorMessage = "Could not split fluid command script.";
         return false;
     }
+    
     for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
         CDomainEntry entry;
         std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
         std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
         if (GetDomainEntry(vchBanAccountFQDN, entry)) {
-            LogPrintf("%s -- Fluid command banning account %s\n", __func__, strBanAccountFQDN);
-            if (!DeleteDomainEntry(entry))
-                LogPrintf("%s -- Error deleting account %s\n", __func__, strBanAccountFQDN);
-
-            // TODO (Fluid): Keep a local LevelDB database with all banned accounts, txid and block height.
-            //CFluidBanTx fluidBanTx(fluidScript);
-            //fluidBanTx.nHeight = nHeight;
-            //fluidBanTx.txHash = txHashId;
+            vBanAccounts.push_back(entry);
         }
         else {
             LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
@@ -660,4 +654,43 @@ std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript)
 {
     std::string fluidOperationString = ScriptToAsmStr(fluidScript);
     return vchFromString(fluidOperationString);
+}
+
+bool CFluid::ExtractTimestampWithAddresses(const std::string& strOpCode, const CScript& fluidScript, int64_t& nTimeStamp, std::vector<std::vector<unsigned char>>& vSovereignAddresses)
+{
+    std::string fluidOperationString = ScriptToAsmStr(fluidScript);
+    std::string consentTokenNoScript = GetRidOfScriptStatement(fluidOperationString);
+    std::string strDehexedToken = HexToString(consentTokenNoScript);
+    std::vector<std::string> strs, ptrs;
+    SeparateString(strDehexedToken, strs, false);
+    if (strs.size() == 0)
+        return false;
+
+    SeparateString(strs.at(0), ptrs, true);
+    if (1 >= (int)strs.size())
+        return false;
+
+    std::string strTimeStamp;
+    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE") {
+        strTimeStamp = ptrs.at(1);
+    } else if (strOpCode == "OP_BDAP_REVOKE") {
+        strTimeStamp = ptrs.at(0);
+    } else {
+        return false;
+    }
+
+    ScrubString(strTimeStamp, true);
+    ParseInt64(strTimeStamp, &nTimeStamp);
+    if (strs.size() > 1) {
+        std::string strToken = strs.at(0);
+        for (uint32_t iter = 1; iter != strs.size(); iter++) {
+            std::string strSignature = strs.at(iter);
+            CDynamicAddress address = GetAddressFromDigestSignature(strSignature, strToken);
+            vSovereignAddresses.push_back(CharVectorFromString(address.ToString()));
+        }
+    }
+    else {
+        return false;
+    }
+    return true;
 }

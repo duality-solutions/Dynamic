@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 
 class CBlock;
+class CDomainEntry;
 class CTxMemPool;
 struct CBlockTemplate;
 class CTransaction;
@@ -70,7 +71,8 @@ public:
 
     bool ProvisionalCheckTransaction(const CTransaction& transaction);
     CDynamicAddress GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey);
-    bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::string& strErrorMessage);
+    bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::string& strErrorMessage);
+    bool ExtractTimestampWithAddresses(const std::string& strOpCode, const CScript& fluidScript, int64_t& nTimeStamp, std::vector<std::vector<unsigned char>>& vSovereignAddresses);
 
 };
 

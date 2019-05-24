@@ -30,6 +30,7 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "flat-database.h"
+#include "fluid/banaccount.h"
 #include "fluid/fluiddynode.h"
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
@@ -1696,6 +1697,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidMiningDB;
                 delete pFluidMintDB;
                 delete pFluidSovereignDB;
+                delete pBanAccountDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
                 delete pLinkRequestDB;
@@ -1716,7 +1718,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
-
+                pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);
