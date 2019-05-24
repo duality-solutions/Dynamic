@@ -24,7 +24,11 @@ namespace Consensus {
     struct Params;
 }
 
-
+namespace BDAP {
+    std::string GetObjectTypeString(unsigned int nObjectType);
+    unsigned int GetObjectTypeInt(BDAP::ObjectType ObjectType);
+    BDAP::ObjectType GetObjectTypeEnum(unsigned int nObjectType);
+}
 
 std::string BDAPFromOp(const int op);
 bool IsBDAPDataOutput(const CTxOut& out);
