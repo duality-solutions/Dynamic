@@ -365,6 +365,8 @@ void PrepareShutdown()
         pFluidMintDB = NULL;
         delete pFluidSovereignDB;
         pFluidSovereignDB = NULL;
+        delete pBanAccountDB;
+        pBanAccountDB = NULL;
         // BDAP Services DB's
         delete pDomainEntryDB;
         pDomainEntryDB = NULL;
