@@ -825,6 +825,11 @@ public:
 
     const std::string strWalletFile;
 
+    bool WalletNeedsUpgrading()
+    {
+        return fNeedToUpgradeWallet;
+    }
+
     void LoadKeyPool(int nIndex, const CKeyPool& keypool)
     {
         if (keypool.fInternal) {

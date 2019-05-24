@@ -582,10 +582,9 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
                 if (fNeedToUpgradeWallet) {
-                    LogPrintf("DEBUGGER WALLET %s - Made it to unlock portion\n", __func__);
                     if (SyncEdKeyPool()) {
                         SetMinVersion(FEATURE_HD);
-                        LogPrintf("DEBUGGER WALLET %s - Upgraded wallet\n", __func__);
+                        LogPrintf("%s - Upgraded wallet\n", __func__);
                     }
                 }
                 if (nWalletBackups == -2) {
@@ -608,10 +607,10 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
             fNeedToUpgradeWallet = false;
             fNeedToUpdateKeyPools = true;
             fNeedToUpdateLinks = true;
-            LogPrintf("DEBUGGER WALLET %s - Rescanning transasctions\n", __func__);
+            LogPrintf("%s - Rescanning transasctions\n", __func__);
             pwalletMain->UpdateTimeFirstKey(1);
             pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
-            LogPrintf("DEBUGGER WALLET %s - Rescanning transasctions DONE\n", __func__);        
+            LogPrintf("%s - Rescanning transasctions DONE\n", __func__);        
         }
         return true;
     }
@@ -4501,8 +4500,6 @@ bool CWallet::SyncEdKeyPool()
     CPubKey retrievedPubKey2;
     CKey retrievedKey2;
 
-    LogPrintf("DEBUGGER WALLET %s - made it here!\n", __func__);
-
     for (int64_t nIndex : setInternalKeyPool) {
         if (!walletdb.ReadPool(nIndex, keypool)) {
             throw std::runtime_error(std::string(__func__) + ": read failed");
@@ -4525,8 +4522,6 @@ bool CWallet::SyncEdKeyPool()
                 LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
             }
         }
-        else
-            LogPrintf("DEBUGGER WALLET %s - internal edkey not added. already exists\n",__func__);
     }
 
     for (int64_t nIndex : setExternalKeyPool) {
@@ -4551,9 +4546,6 @@ bool CWallet::SyncEdKeyPool()
                 LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
             }
         }
-        else
-            LogPrintf("DEBUGGER WALLET %s - external edkey not added. already exists\n",__func__);
-
     }
 
     return true;
@@ -5724,32 +5716,23 @@ bool CWallet::InitLoadWallet()
     }
     pwalletMain = pwallet;
 
-    LogPrintf("DEBUGGER WALLET %s - wallet version [%d]\n", __func__,pwallet->GetVersion());
-
     if (pwallet->GetVersion() < FEATURE_HD) {
+        LogPrintf("%s - Older wallet version detected. Need to upgrade.\n", __func__);
         if (!pwalletMain->IsLocked()) {
             if (!pwallet->SyncEdKeyPool()) {
-                LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is false\n", __func__);
+                LogPrintf("%s - ERROR: Unable to sync Ed25519 Keypool.\n", __func__);
             }
             else {
-                LogPrintf("DEBUGGER WALLET %s - SyncEdKeyPool is true\n", __func__);
-                LogPrintf("DEBUGGER WALLET %s - Upgrading wallet version\n", __func__);
+                LogPrintf("%s - Upgrading wallet version\n", __func__);
                 pwallet->SetMinVersion(FEATURE_HD);
                 pwallet->fNeedToUpgradeWallet = false;
-
-                LogPrintf("setExternalKeyPool.size() = %u\n", pwallet->KeypoolCountExternalKeys());
-                LogPrintf("setInternalKeyPool.size() = %u\n", pwallet->KeypoolCountInternalKeys());
-                LogPrintf("setExternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountExternalKeys());
-                LogPrintf("setInternalEdKeyPool.size() = %u\n", pwallet->EdKeypoolCountInternalKeys());
             }
         }
         else {
-            LogPrintf("DEBUGGER WALLET %s - Upgrade wallet pending unlock\n", __func__);
+            LogPrintf("%s - Upgrade wallet pending unlock\n", __func__);
             pwallet->fNeedToUpgradeWallet = true; 
         }
-
     }
-
 
     ProcessLinkQueue(); // Process links in queue.
 
