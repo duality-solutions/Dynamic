@@ -36,10 +36,10 @@ namespace BDAP {
                 return "Certificate Entry";
             case BDAP::ObjectType::BDAP_AUDIT:
                 return "Audit Entry";
-            case BDAP::ObjectType::BDAP_CHANNEL:
-                return "Channel Entry";
-            case BDAP::ObjectType::BDAP_CHECKPOINT:
-                return "Channel Checkpoint Entry";
+            case BDAP::ObjectType::BDAP_SIDECHAIN:
+                return "Sidechain Entry";
+            case BDAP::ObjectType::BDAP_SIDECHAIN_CHECKPOINT:
+                return "Sidechain Checkpoint Entry";
             case BDAP::ObjectType::BDAP_LINK_REQUEST:
                 return "Link Request Entry";
             case BDAP::ObjectType::BDAP_LINK_ACCEPT:
