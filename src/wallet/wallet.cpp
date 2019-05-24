@@ -198,6 +198,25 @@ void CWallet::DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet)
 
 } //DeriveEd25519ChildKey
 
+bool CWallet::DeriveChildStealthKey(const CKey& key)
+{
+    CKey spendKey, scanKey;
+    if (!key.DeriveChildKey(spendKey))
+        return false;
+
+    if (!spendKey.DeriveChildKey(scanKey))
+        return false;
+
+    if (!AddKeyPubKey(spendKey, spendKey.GetPubKey()))
+        return false;
+
+    if (!AddKeyPubKey(scanKey, scanKey.GetPubKey()))
+        return false;
+
+    CStealthAddress sxAddr(scanKey, spendKey);
+    return AddStealthAddress(sxAddr);
+}
+
 void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal)
 {
     CHDChain hdChainTmp;
@@ -228,6 +247,7 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
 
     CKeyEd25519 secretEdRet;
     DeriveEd25519ChildKey(secretRet,secretEdRet); //Derive Ed25519 key
+    DeriveChildStealthKey(secretRet);
 
     CPubKey pubkey = secretRet.GetPubKey();
     assert(secretRet.VerifyPubKey(pubkey));
@@ -4909,12 +4929,8 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal)
     LogPrintf("keypool return %d\n", nIndex);
 }
 
-bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& sxAddr, bool fInternal)
+bool CWallet::GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, CStealthAddress& sxAddr, bool fInternal)
 {
-    if (IsLocked())
-        return false;
-
-    std::vector<unsigned char> vchEd25519PubKey;
     if (!GetKeysFromPool(pubkeyWallet, vchEd25519PubKey, fInternal))
         return false;
 
@@ -4928,18 +4944,12 @@ bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& 
     if (!spendKey.DeriveChildKey(scanKey))
         return false;
 
-    if (!AddKeyPubKey(spendKey, spendKey.GetPubKey()))
-        return false;
-
-    if (!AddKeyPubKey(scanKey, scanKey.GetPubKey()))
-        return false;
-
     CStealthAddress sx(scanKey, spendKey);
     sxAddr = sx;
     return true;
 }
 
-bool CWallet::GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal)
+bool CWallet::GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal)
 {
     int64_t nIndex = 0;
     int64_t nEdIndex = 0;
@@ -4953,15 +4963,15 @@ bool CWallet::GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd
             if (IsLocked(true))
                 return false;
             // TODO: implement keypool for all accouts?
-            result = GenerateNewKey(0, fInternal);
+            pubkeyWallet = GenerateNewKey(0, fInternal);
         }
         else {
             KeepKey(nIndex);
-            result = keypool.vchPubKey;
+            pubkeyWallet = keypool.vchPubKey;
         }
 
         CKey keyRetrieved;
-        GetKey(result.GetID(), keyRetrieved);
+        GetKey(pubkeyWallet.GetID(), keyRetrieved);
 
         if (nEdIndex == -1) {
             if (IsLocked(true))
@@ -6220,7 +6230,6 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
 
 bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr)
 {
-    LogPrintf("%s: %s\n", __func__, sxAddr.Encoded());
     CWalletDB* pwdb = GetWalletDB();
 
     LOCK(cs_mapStealthAddresses);

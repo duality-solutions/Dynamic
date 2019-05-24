@@ -30,7 +30,7 @@
 
 #ifdef ENABLE_WALLET
 
-extern void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
+extern void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
                                     CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
 
 static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
@@ -212,16 +212,40 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) 
                  << vchDHTPubKey << vchSharedPubKey << txLink.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
+
+    // Create OP Script with destination address
+    bool fStealthAddress = false;
+    CTxDestination dest = DecodeDestination(entryRecipient.GetLinkAddress().ToString());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid destination address %s", entryRecipient.GetLinkAddress().ToString()));
+
+    CScript scriptDest;
+    std::vector<uint8_t> vStealthData;
+    if (dest.type() == typeid(CStealthAddress))
+    {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+        std::string sError;
+        if (0 != PrepareStealthOutput(sxAddr, scriptDest, vStealthData, sError)) {
+            LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", entryRecipient.GetLinkAddress().ToString()));
+        }
+        fStealthAddress = true;
+    }
+    else
+    {
+        scriptDest = GetScriptForDestination(dest);
+    }
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
+    CScript stealthScript;
+    if (fStealthAddress) {
+        stealthScript << OP_RETURN << vStealthData;
+    }
 
     // check BDAP values
     std::string strMessage;
     if (!txLink.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4010 - Error validating link request values: " + strMessage);
 
-    // TODO (bdap): encrypt data before adding it to OP_RETURN.
     // Create BDAP OP_RETURN script
     CharString data;
     txLink.Serialize(data);
@@ -245,10 +269,10 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CWalletTx wtx;
     float fYears = ((float)nDays/365.25);
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+    CAmount nDataFee = (GetBDAPFee(scriptData) * powf(3.1, fYears)) + (GetBDAPFee(stealthScript) * powf(3.1, fYears));
 
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -368,9 +392,34 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
                  << vchDHTPubKey << vchSharedPubKey << txLinkAccept.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
+
+    // Create OP Script with destination address
+    bool fStealthAddress = false;
+    CTxDestination dest = DecodeDestination(entryAcceptor.GetLinkAddress().ToString());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid destination address %s", entryAcceptor.GetLinkAddress().ToString()));
+
+    CScript scriptDest;
+    std::vector<uint8_t> vStealthData;
+    if (dest.type() == typeid(CStealthAddress))
+    {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+        std::string sError;
+        if (0 != PrepareStealthOutput(sxAddr, scriptDest, vStealthData, sError)) {
+            LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", entryAcceptor.GetLinkAddress().ToString()));
+        }
+        fStealthAddress = true;
+    }
+    else
+    {
+        scriptDest = GetScriptForDestination(dest);
+    }
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(entryAcceptor.GetLinkAddress().Get());
+    CScript stealthScript;
+    if (fStealthAddress) {
+        stealthScript << OP_RETURN << vStealthData;
+    }
 
     // check BDAP values
     std::string strMessage;
@@ -398,9 +447,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CWalletTx wtx;
     float fYears = ((float)nDays/365.25);
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+    CAmount nDataFee = (GetBDAPFee(scriptData) * powf(3.1, fYears)) + (GetBDAPFee(stealthScript) * powf(3.1, fYears));
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLinkAccept.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
