@@ -10,14 +10,17 @@
 #include "sync.h"
 #include "uint256.h"
 
+class CScript;
+
 class CBanAccount
 {
 public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
+    std::vector<unsigned char> FluidScript;
     std::vector<unsigned char> vchFullObjectPath;
     int64_t nTimeStamp;
-    std::vector<std::vector<unsigned char> > SovereignAddresses;
+    std::vector<std::vector<unsigned char>> vSovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
@@ -26,19 +29,16 @@ public:
         SetNull();
     }
 
-    CBanAccount(const std::vector<unsigned char>& vchFQDN, const int64_t& timestamp, const std::vector<std::vector<unsigned char> >& addresses, 
-                const uint256& txid, const unsigned int& height)
-        : vchFullObjectPath(vchFQDN), nTimeStamp(timestamp), SovereignAddresses(addresses), txHash(txid), nHeight(height)
-    {
-        nVersion = CBanAccount::CURRENT_VERSION;
-    }
+    CBanAccount(const CScript& fluidScript, const std::vector<unsigned char>& fqdn, const int64_t& timestamp, 
+                const std::vector<std::vector<unsigned char> >& addresses, const uint256& txid, const unsigned int& height);
 
     inline void SetNull()
     {
         nVersion = CBanAccount::CURRENT_VERSION;
+        FluidScript.clear();
         vchFullObjectPath.clear();
         nTimeStamp = 0;
-        SovereignAddresses.clear();
+        vSovereignAddresses.clear();
         txHash.SetNull();
         nHeight = 0;
     }
@@ -49,9 +49,10 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(this->nVersion);
+        READWRITE(FluidScript);
         READWRITE(vchFullObjectPath);
         READWRITE(nTimeStamp);
-        READWRITE(SovereignAddresses);
+        READWRITE(vSovereignAddresses);
         READWRITE(txHash);
         READWRITE(VARINT(nHeight));
     }
@@ -66,14 +67,25 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CBanAccount& a, const CBanAccount& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CBanAccount& a, const CBanAccount& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CBanAccount operator=(const CBanAccount& b)
     {
         nVersion = b.nVersion;
+        FluidScript = b.FluidScript;
         vchFullObjectPath = b.vchFullObjectPath;
         nTimeStamp = b.nTimeStamp;
-        SovereignAddresses.clear(); //clear out previous entries
-        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
-            SovereignAddresses.push_back(vchAddress);
+        vSovereignAddresses.clear(); //clear out previous entries
+        for (const std::vector<unsigned char>& vchAddress : b.vSovereignAddresses) {
+            vSovereignAddresses.push_back(vchAddress);
         }
         txHash = b.txHash;
         nHeight = b.nHeight;
@@ -97,6 +109,7 @@ public:
 
 bool CheckBanAccountDB();
 bool AddBanAccountEntry(const CBanAccount& entry);
+bool GetAllBanAccountRecords(std::vector<CBanAccount>& entries);
 
 extern CBanAccountDB* pBanAccountDB;
 

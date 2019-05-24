@@ -2531,7 +2531,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         if (!DeleteDomainEntry(entry))
                             LogPrintf("%s -- Error deleting account %s\n", __func__, entry.GetFullObjectPath());
 
-                        CBanAccount banAccount(entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
+                        CBanAccount banAccount(scriptFluid, entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
                         AddBanAccountEntry(banAccount);
                     }
                 }

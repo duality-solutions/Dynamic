@@ -5,9 +5,21 @@
 
 #include "fluid/banaccount.h"
 
+#include "core_io.h"
+#include "fluid/fluid.h"
+#include "script/script.h"
+
 #include <boost/thread.hpp>
 
 CBanAccountDB* pBanAccountDB = NULL;
+
+bool CheckBanAccountDB()
+{
+    if (!pBanAccountDB)
+        return false;
+
+    return true;
+}
 
 bool AddBanAccountEntry(const CBanAccount& entry)
 {
@@ -17,12 +29,20 @@ bool AddBanAccountEntry(const CBanAccount& entry)
     return pBanAccountDB->AddBanAccountEntry(entry);
 }
 
-bool CheckBanAccountDB()
+bool GetAllBanAccountRecords(std::vector<CBanAccount>& entries)
 {
-    if (!pBanAccountDB)
+    if (!CheckBanAccountDB())
         return false;
 
-    return true;
+    return pBanAccountDB->GetAllBanAccountRecords(entries);
+}
+
+CBanAccount::CBanAccount(const CScript& fluidScript, const std::vector<unsigned char>& fqdn, const int64_t& timestamp, 
+                const std::vector<std::vector<unsigned char>>& addresses, const uint256& txid, const unsigned int& height)
+        : vchFullObjectPath(fqdn), nTimeStamp(timestamp), vSovereignAddresses(addresses), txHash(txid), nHeight(height)
+{
+    nVersion = CBanAccount::CURRENT_VERSION;
+    FluidScript = CharVectorFromString(ScriptToAsmStr(fluidScript));
 }
 
 CBanAccountDB::CBanAccountDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "banned-accounts", nCacheSize, fMemory, fWipe, obfuscate)

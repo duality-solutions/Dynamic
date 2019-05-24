@@ -7,6 +7,7 @@
 #include "chain.h"
 #include "core_io.h"
 #include "dynode-sync.h"
+#include "banaccount.h"
 #include "fluiddb.h"
 #include "fluiddynode.h"
 #include "fluidmining.h"
@@ -422,6 +423,24 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         }
     }
     ret.push_back(Pair("mining_reward_history", oMining));
+    // load fluid BDAP account ban transaction history
+    UniValue oAccountBan(UniValue::VOBJ);
+    {
+        std::vector<CBanAccount> vBanEntries;
+        if (!GetAllBanAccountRecords(vBanEntries)) {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error getting fluid account ban entries"));
+        }
+        int x = 1;
+        for (const CBanAccount& banEntry : vBanEntries) {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("fluid_script", StringFromCharVector(banEntry.FluidScript)));
+            std::string addLabel = "account_ban_" + std::to_string(x);
+            oAccountBan.push_back(Pair(addLabel, obj));
+            x++;
+            nTotal++;
+        }
+    }
+    ret.push_back(Pair("account_ban_history", oAccountBan));
     // load fluid transaction summary
     UniValue oSummary(UniValue::VOBJ);
     {
@@ -564,6 +583,36 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         }
     }
     ret.push_back(Pair("mining_reward_history", oMining));
+    // load fluid ban account transaction history
+    UniValue oBanAccounts(UniValue::VOBJ);
+    {
+        std::vector<CBanAccount> banEntries;
+        if (!GetAllBanAccountRecords(banEntries)) {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error getting fluid ban account entries"));
+        }
+        int x = 1;
+        std::sort(banEntries.begin(), banEntries.end()); //sort entries by TimeStamp
+        for (const CBanAccount& banEntry : banEntries) {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("operation", "Ban Account"));
+            obj.push_back(Pair("account_fqdn", StringFromCharVector(banEntry.vchFullObjectPath)));
+            obj.push_back(Pair("timestamp", banEntry.nTimeStamp));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", banEntry.nTimeStamp)));
+            obj.push_back(Pair("block_height", (int)banEntry.nHeight));
+            obj.push_back(Pair("txid", banEntry.txHash.GetHex()));
+            int index = 1;
+            for (const std::vector<unsigned char>& vchAddress : banEntry.vSovereignAddresses) {
+                std::string addLabel = "sovereign_address_" + std::to_string(index);
+                obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+                index++;
+            }
+            std::string addLabel = "ban_account_" + std::to_string(x);
+            oBanAccounts.push_back(Pair(addLabel, obj));
+            x++;
+            nTotal++;
+        }
+    }
+    ret.push_back(Pair("ban_account_history", oBanAccounts));
     // load fluid transaction summary
     UniValue oSummary(UniValue::VOBJ);
     {
@@ -639,50 +688,91 @@ UniValue readfluidtoken(const JSONRPCRequest& request)
     UniValue ret(UniValue::VOBJ);
     std::string strFluidToken = request.params[0].get_str();
     if (IsHex(strFluidToken)) {
-        std::string strAmount;
+        bool fBanAccount = false;
         HexFunctions fluidFunctions;
         std::string strUnHexedFluidOpScript = fluidFunctions.HexToString(strFluidToken);
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, true);
         if (vecSplitScript.size() > 1) {
-            strAmount = vecSplitScript[0];
-            CAmount fluidAmount;
-            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                ret.push_back(Pair("amount", FormatMoney(fluidAmount)));
+            CAmount nAmount;
+            if (!ParseFixedPoint(vecSplitScript[0], 8, &nAmount)) {
+                fBanAccount = true;
             }
-            else {
-                throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4100 - " + _("Fluid token amount too high or invalid."));
+            if (!fBanAccount) {
+                int64_t nTimeStamp;
+                if (!ParseInt64(vecSplitScript[1], &nTimeStamp)) {
+                    fBanAccount = true;
+                }
             }
-            ret.push_back(Pair("time_stamp", vecSplitScript[1]));
-        } else {
-            throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4101 - " + _("Fluid token does not have enough parameters"));
+        }
+        if (!fBanAccount) {
+            std::string strAmount;
+            if (vecSplitScript.size() > 1) {
+                strAmount = vecSplitScript[0];
+                CAmount fluidAmount;
+                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                    ret.push_back(Pair("amount", FormatMoney(fluidAmount)));
+                }
+                else {
+                    throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4100 - " + _("Fluid token amount too high or invalid."));
+                }
+                ret.push_back(Pair("time_stamp", vecSplitScript[1]));
+            } else {
+                throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4101 - " + _("Fluid token does not have enough parameters"));
+            }
+        }
+        else {
+            ret.push_back(Pair("time_stamp", vecSplitScript[0]));
+            if (vecSplitScript.size() > 1) {
+                for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
+                    std::string strFQDN = DecodeBase64(vecSplitScript[iter]);
+                    std::string strLabel = "ban_account_" + std::to_string(iter);
+                    ret.push_back(Pair(strLabel, strFQDN));
+                }
+            }
         }
         if (vecSplitScript.size() > 2) {
             std::string strPayAddress = vecSplitScript[2];
             std::vector<std::string> vecSplitAddress;
             SeparateString(strPayAddress, vecSplitAddress, false);
-            if (vecSplitAddress.size() == 1) {
-                ret.push_back(Pair("pay_address", vecSplitScript[2]));
+            if (!fBanAccount) {
+                if (vecSplitAddress.size() == 1) {
+                    ret.push_back(Pair("pay_address", vecSplitScript[2]));
+                }
+                else if (vecSplitAddress.size() == 2) {
+                    ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                }
+                else if (vecSplitAddress.size() == 3) {
+                    ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                    ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+                }
+                else if (vecSplitAddress.size() == 4) {
+                    ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                    ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+                    ret.push_back(Pair("signature_3", vecSplitAddress[3]));
+                } 
             }
-            else if (vecSplitAddress.size() == 2) {
-                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
-                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
-            }
-            else if (vecSplitAddress.size() == 3) {
-                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
-                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
-                ret.push_back(Pair("signature_2", vecSplitAddress[2]));
-            }
-            else if (vecSplitAddress.size() == 4) {
-                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
-                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
-                ret.push_back(Pair("signature_2", vecSplitAddress[2]));
-                ret.push_back(Pair("signature_3", vecSplitAddress[3]));
+            else {
+                if (vecSplitAddress.size() == 2) {
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                }
+                else if (vecSplitAddress.size() == 3) {
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                    ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+                }
+                else if (vecSplitAddress.size() == 4) {
+                    ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                    ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+                    ret.push_back(Pair("signature_3", vecSplitAddress[3]));
+                }
             }
             
         }
     } else {
-        throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4102 - " + _("Fluid token is not hex"));
+        throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4105 - " + _("Fluid token is not hex"));
     }
 
     return ret;
