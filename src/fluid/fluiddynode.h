@@ -77,6 +77,16 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CFluidDynode operator=(const CFluidDynode& b)
     {
         FluidScript = b.FluidScript;

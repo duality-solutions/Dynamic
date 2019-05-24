@@ -142,6 +142,7 @@ DYNAMIC_CORE_H = \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid/banaccount.h \
   fluid/fluid.h \
   fluid/fluiddb.h \
   fluid/fluiddynode.h \
@@ -296,6 +297,7 @@ libdynamic_server_a_SOURCES = \
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
+  fluid/banaccount.cpp \
   fluid/fluid.cpp \
   fluid/fluiddb.cpp \
   fluid/fluiddynode.cpp \

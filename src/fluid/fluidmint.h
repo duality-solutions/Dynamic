@@ -81,6 +81,16 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CFluidMint& a, const CFluidMint& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidMint& a, const CFluidMint& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CFluidMint operator=(const CFluidMint& b)
     {
         FluidScript = b.FluidScript;

@@ -30,6 +30,7 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "flat-database.h"
+#include "fluid/banaccount.h"
 #include "fluid/fluiddynode.h"
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
@@ -355,6 +356,31 @@ void PrepareShutdown()
         pcoinsdbview = NULL;
         delete pblocktree;
         pblocktree = NULL;
+        // Fluid transaction DB's
+        delete pFluidDynodeDB;
+        pFluidDynodeDB = NULL;
+        delete pFluidMiningDB;
+        pFluidMiningDB = NULL;
+        delete pFluidMintDB;
+        pFluidMintDB = NULL;
+        delete pFluidSovereignDB;
+        pFluidSovereignDB = NULL;
+        delete pBanAccountDB;
+        pBanAccountDB = NULL;
+        // BDAP Services DB's
+        delete pDomainEntryDB;
+        pDomainEntryDB = NULL;
+        delete pLinkRequestDB;
+        pLinkRequestDB = NULL;
+        delete pLinkAcceptDB;
+        pLinkAcceptDB = NULL;
+        delete pLinkManager;
+        pLinkManager = NULL;
+        // LibTorrent DHT Netowrk Services
+        delete pHashTableSession;
+        pHashTableSession = NULL;
+        delete pMutableDataDB;
+        pMutableDataDB = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1696,6 +1722,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidMiningDB;
                 delete pFluidMintDB;
                 delete pFluidSovereignDB;
+                delete pBanAccountDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
                 delete pLinkRequestDB;
@@ -1716,7 +1743,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
-
+                pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);

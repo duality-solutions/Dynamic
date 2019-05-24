@@ -60,8 +60,6 @@ bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& 
 
 bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     int nOut;
     if (!GetFluidSovereignData(tx, *this, nOut)) {
         SetNull();
@@ -72,8 +70,6 @@ bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     if (!GetFluidSovereignData(fluidScript, *this)) {
         SetNull();
         return false;

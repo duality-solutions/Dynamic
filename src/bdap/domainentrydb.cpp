@@ -23,7 +23,7 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
         return false;
     }
     
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
+    if (chainActive.Tip() && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
         entry.SetNull();
         return false;
     }
@@ -41,6 +41,24 @@ bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEn
         return false;
     }
     return !entry.IsNull();
+}
+
+bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    return pDomainEntryDB->DomainEntryExists(vchObjectPath);
+}
+
+bool DeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);;
+    return (fEraseEntryResult && fErasePubKeyResult);
 }
 
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
