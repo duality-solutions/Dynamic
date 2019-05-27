@@ -4667,11 +4667,9 @@ void CWallet::UpdateKeyPoolsFromTransactions(const std::string& strOpType, const
     std::vector<unsigned char> key1 = vvchOpParameters[1];
 
     if (strOpType == "bdap_new_account") {
-        //reservedEd25519PubKeys.push_back(key1);
         ReserveEdKeyForTransactions(key1);
     }
     else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
-        //reservedEd25519PubKeys.push_back(key0);
         ReserveEdKeyForTransactions(key0);
         fNeedToUpdateLinks = true;
     }
@@ -4774,10 +4772,11 @@ void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubK
         }
 
         if (EraseIndex) {
-                std::set<int64_t>::iterator eraseIndexEd = setInternalEdKeyPool.find(IndexToErase);
-                std::set<int64_t>::iterator eraseIndex = setInternalKeyPool.find(IndexToErase);
-
+            std::set<int64_t>::iterator eraseIndexEd = setInternalEdKeyPool.find(IndexToErase);
+            std::set<int64_t>::iterator eraseIndex = setInternalKeyPool.find(IndexToErase);
+            if (eraseIndexEd != setInternalEdKeyPool.end())
                 setInternalEdKeyPool.erase(eraseIndexEd);
+            if (eraseIndex != setInternalKeyPool.end())
                 setInternalKeyPool.erase(eraseIndex);
         }
 
@@ -4790,7 +4789,7 @@ void CWallet::KeepKey(int64_t nIndex)
         CWalletDB walletdb(strWalletFile);
         walletdb.ErasePool(nIndex);
         nKeysLeftSinceAutoBackup = nWalletBackups ? nKeysLeftSinceAutoBackup - 1 : 0;
-     }
+    }
     LogPrintf("keypool keep %d\n", nIndex);
 }
 
