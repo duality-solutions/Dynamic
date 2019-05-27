@@ -4,8 +4,11 @@
 
 #include "bdap/fees.h"
 
+#include "bdap/bdap.h" // for SECONDS_PER_DAY
 #include "bdap/utils.h" // for GetObjectTypeString
 #include "util.h" // for LogPrintf
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 // Default BDAP Monthly Fees
 std::map<int32_t, CAmount> mapDefaultMonthlyFees = {
@@ -105,4 +108,15 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
     }
 
     return true;
+}
+
+int64_t AddMonthsToCurrentEpoch(const short nMonths)
+{
+    boost::gregorian::date dt = boost::gregorian::day_clock::local_day();
+    short nYear = dt.year() + ((dt.month() + nMonths)/12);
+    short nMonth = (dt.month() + nMonths) % 12;
+    short nDay = dt.day();
+    boost::posix_time::time_duration dur = boost::posix_time::ptime(boost::gregorian::date(nYear, nMonth, nDay)) - boost::posix_time::ptime(boost::gregorian::date(1970, 1, 1));
+    //LogPrintf("%s -- nYear %d, nMonth %d, nDay %d\n", __func__, nYear, nMonth, nDay);
+    return dur.total_seconds() + SECONDS_PER_DAY;
 }

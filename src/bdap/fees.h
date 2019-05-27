@@ -36,5 +36,6 @@ static const int32_t BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT    = 7003;
 static const int32_t BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT      = 7004;
 
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee);
+int64_t AddMonthsToCurrentEpoch(const short nMonths);
 
 #endif // DYNAMIC_BDAP_FEES_H

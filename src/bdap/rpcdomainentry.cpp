@@ -4,8 +4,8 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
 #include "bdap/utils.h"
-#include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "rpcprotocol.h"
@@ -83,13 +83,12 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchLinkAddress = vchFromString(linkAddress.ToString());
     txDomainEntry.LinkAddress = vchLinkAddress;
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 2 years.
     if (request.params.size() >= 3) {
-        if (!ParseInt64(request.params[2].get_str(), &nDays))
+        if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
     }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txDomainEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txDomainEntry.Serialize(data);
@@ -108,12 +107,11 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
-    // Send the transaction
-    CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-
+    // Get BDAP fees
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
@@ -121,11 +119,11 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     bool fUseInstantSend = false;
     if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    // Send the transaction
+    CWalletTx wtx;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -415,13 +413,12 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 1 year.
     if (request.params.size() >= 3) {
-        if (!ParseInt64(request.params[2].get_str(), &nDays))
+        if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
     }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txUpdatedEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txUpdatedEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txUpdatedEntry.Serialize(data);
@@ -441,12 +438,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
-    // Send the transaction
-    CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-
+    // Get BDAP fees
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
@@ -454,11 +450,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     bool fUseInstantSend = false;
     if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    // Send the transaction
+    CWalletTx wtx;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
