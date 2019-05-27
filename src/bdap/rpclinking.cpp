@@ -5,6 +5,7 @@
 #include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
@@ -102,7 +103,7 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
 
 static UniValue SendLinkRequest(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
+    if (request.fHelp || request.params.size() != 4)
         throw std::runtime_error(
             "link request userid-from userid-to message\n"
             "Creates a link request transaction on the blockchain."
@@ -111,7 +112,6 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
             "1. requestor          (string)             BDAP account requesting the link\n"
             "2. recipient          (string)             Link recipient's BDAP account.\n"
             "3. invite message     (string)             Message from requestor to recipient.\n"
-            "4. registration days  (int, optional)      Number of days to keep the link request on the blockchain before pruning.\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -196,14 +196,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     if (!CreateSignatureProof(key, strRecipientFQDN, txLink.SignatureProof))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4008 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
-    if (request.params.size() > 4) {
-         if (!ParseInt64(request.params[4].get_str(), &nDays))
-            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4009 - Error parsing registration days parameter = " + request.params[4].get_str());
-    }
-
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txLink.nExpireTime = DEFAULT_LINK_EXPIRE_TIME;
     CKeyEd25519 dhtKey;
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privReqDHTKey, entryRecipient.DHTPublicKey);
     txLink.SharedPubKey = vchSharedPubKey;
@@ -265,14 +258,18 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CScript scriptData;
     scriptData << OP_RETURN << dataEncrypted;
 
+    // Get BDAP fees
+    BDAP::ObjectType bdapType = ObjectType::BDAP_LINK_REQUEST;
+    int32_t nMonths = 0; // Links do not expire
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // Send the transaction
     CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = (GetBDAPFee(scriptData) * powf(3.1, fYears)) + (GetBDAPFee(stealthScript) * powf(3.1, fYears));
-
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, oneTimeFee, depositFee, fUseInstantSend);
+
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -284,7 +281,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
 static UniValue SendLinkAccept(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 3 || request.params.size() > 4)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
             "link accept userid-from userid-to\n"
             "Creates a link accept transaction on the blockchain."
@@ -292,7 +289,6 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
             "\nLink Send Arguments:\n"
             "1. accept account          (string)             BDAP account accepting the link\n"
             "2. requestor account       (string)             Link requestor's BDAP account.\n"
-            "3. registration days       (int, optional)      Number of days to keep the link accept on the blockchain before pruning.\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -377,13 +373,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     if (!CreateSignatureProof(key, strRequestorFQDN, txLinkAccept.SignatureProof))
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4110 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
-    if (request.params.size() > 3) {
-        if (!ParseInt64(request.params[3].get_str(), &nDays))
-            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4111 - Error parsing registration days parameter = " + request.params[3].get_str());
-    }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txLinkAccept.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txLinkAccept.nExpireTime = DEFAULT_LINK_EXPIRE_TIME;
     CKeyEd25519 dhtKey;
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privAcceptDHTKey, entryRequestor.DHTPublicKey);
     txLinkAccept.SharedPubKey = vchSharedPubKey;
@@ -443,13 +433,17 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CScript scriptData;
     scriptData << OP_RETURN << dataEncrypted;
 
+    // Get BDAP fees
+    BDAP::ObjectType bdapType = ObjectType::BDAP_LINK_ACCEPT;
+    int32_t nMonths = 0; // Links do not expire
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+
     // Send the transaction
     CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = (GetBDAPFee(scriptData) * powf(3.1, fYears)) + (GetBDAPFee(stealthScript) * powf(3.1, fYears));
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, oneTimeFee, depositFee, fUseInstantSend);
     txLinkAccept.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -912,10 +906,10 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     oLink.push_back(Pair("list_data_size", (int)vchSerializedList.size()));
     oLink.push_back(Pair("list_records", nRecords));
     uint16_t nVersion = 1; // VGP encryption version 1
-    uint32_t nExpire = 0; // Does not expire.
+    uint64_t nExpire = DEFAULT_LINK_EXPIRE_TIME; // Does not expire.
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(getKey.GetPubKeyBytes());
-    CDataRecord newRecord(strOperationType, nTotalSlots, vvchPubKeys, vchSerializedList, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    CDataRecord newRecord(strOperationType, nTotalSlots, vvchPubKeys, vchSerializedList, nVersion, (uint32_t)nExpire, DHT::DataFormat::BinaryBlob);
     if (newRecord.HasError())
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4245 - Error creating DHT data entry. " + newRecord.ErrorMessage() + _("\n"));
 
