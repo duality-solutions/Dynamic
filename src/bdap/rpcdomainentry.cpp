@@ -88,7 +88,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
     }
-    txDomainEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
+    //txDomainEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txDomainEntry.Serialize(data);
@@ -97,7 +97,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << txDomainEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -418,7 +418,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
     }
-    txUpdatedEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
+    //txUpdatedEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txUpdatedEntry.Serialize(data);
@@ -427,7 +427,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << txUpdatedEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;

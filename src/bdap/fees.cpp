@@ -90,7 +90,11 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         oneTimeFee = 0;
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
-
+    } else if (objType == BDAP::ObjectType::BDAP_DEFAULT_TYPE) {
+        // ********** TODO (BDAP): Remove this
+        oneTimeFee = 0;
+        monthlyFee = 0;
+        depositFee = BDAP_CREDIT;
     }
     else {
         LogPrintf("%s -- BDAP operation code pair (%d and %d) for %s not found or unsupported.\n", __func__, opCodeAction, opCodeObject, strObjectType);
@@ -109,4 +113,41 @@ int64_t AddMonthsToCurrentEpoch(const short nMonths)
     boost::posix_time::time_duration dur = boost::posix_time::ptime(boost::gregorian::date(nYear, nMonth, nDay)) - boost::posix_time::ptime(boost::gregorian::date(1970, 1, 1));
     //LogPrintf("%s -- nYear %d, nMonth %d, nDay %d\n", __func__, nYear, nMonth, nDay);
     return dur.total_seconds() + SECONDS_PER_DAY;
+}
+
+int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths)
+{
+    boost::gregorian::date dt = boost::posix_time::from_time_t(nBlockTime).date();
+    short nYear = dt.year() + ((dt.month() + nMonths)/12);
+    short nMonth = (dt.month() + nMonths) % 12;
+    short nDay = dt.day();
+    boost::posix_time::time_duration dur = boost::posix_time::ptime(boost::gregorian::date(nYear, nMonth, nDay)) - boost::posix_time::ptime(boost::gregorian::date(1970, 1, 1));
+    //LogPrintf("%s -- nYear %d, nMonth %d, nDay %d\n", __func__, nYear, nMonth, nDay);
+    return dur.total_seconds() + SECONDS_PER_DAY;
+}
+
+uint16_t MonthsFromBlockToExpire(const uint32_t& nBlockTime, const uint64_t& nExpireTime)
+{
+    boost::gregorian::date dtBlock = boost::posix_time::from_time_t(nBlockTime).date();
+    boost::gregorian::date dtExpire = boost::posix_time::from_time_t(nExpireTime).date();
+    return (uint16_t)((dtExpire.year() - dtBlock.year())*12 + dtExpire.month() - dtBlock.month());
+}
+
+bool ExtractAmountsFromTx(const CTransactionRef& ptx, CAmount& dataAmount, CAmount& opAmount)
+{
+    bool fDataFound = false, fOpFound = false;
+    for (const CTxOut& out : ptx->vout) {
+        if (out.scriptPubKey.IsUnspendable() && out.scriptPubKey.size() > 40) 
+        {
+            dataAmount = out.nValue;
+            fDataFound = true;
+        }
+        int op1, op2;
+        std::vector<std::vector<unsigned char>> vOpArgs;
+        if (DecodeBDAPScript(out.scriptPubKey, op1, op2, vOpArgs)) {
+            opAmount = out.nValue;
+            fOpFound = true;
+        }
+    }
+    return (fDataFound && fOpFound);
 }
