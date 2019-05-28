@@ -7,6 +7,7 @@
 
 #include "amount.h"
 #include "bdap/bdap.h"
+#include "primitives/transaction.h"
 #include "script/script.h"
 
 #include <map>
@@ -37,5 +38,8 @@ static const int32_t BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT      = 7004;
 
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee);
 int64_t AddMonthsToCurrentEpoch(const short nMonths);
+int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths);
+uint16_t MonthsFromBlockToExpire(const uint32_t& nBlockTime, const uint64_t& nExpireTime);
+bool ExtractAmountsFromTx(const CTransactionRef& ptx, CAmount& dataAmount, CAmount& opAmount);
 
 #endif // DYNAMIC_BDAP_FEES_H

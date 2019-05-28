@@ -4,7 +4,9 @@
 
 #include "bdap/domainentrydb.h"
 
+#include "amount.h"
 #include "base58.h"
+#include "bdap/fees.h"
 #include "coins.h"
 #include "bdap/utils.h"
 #include "validation.h"
@@ -351,9 +353,27 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
         return false;
     }
 
+    if (vvchOpParameters.size() != 3)
+    {
+        errorMessage = "CommonDataCheck failed! Not enough parameters.";
+        return false;
+    }
+
     if (entry.GetFullObjectPath() != stringFromVch(vvchOpParameters[0]))
     {
         errorMessage = "CommonDataCheck failed! Script operation parameter does not match entry entry object.";
+        return false;
+    }
+
+    if (entry.DHTPublicKey != vvchOpParameters[1])
+    {
+        errorMessage = "CommonDataCheck failed! DHT public key mismatch.";
+        return false;
+    }
+
+    if (vvchOpParameters[2].size() > 10)
+    {
+        errorMessage = "CommonDataCheck failed! Expire date or expire months invalid.";
         return false;
     }
 
@@ -378,7 +398,7 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
     return true;
 }
 
-bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
+static bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
@@ -415,7 +435,7 @@ bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scrip
     return FlushLevelDB();
 }
 
-bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
     if (vvchOpParameters.size() == 0) {
@@ -473,7 +493,7 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     return FlushLevelDB();
 }
 
-bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
+static bool CheckUpdateDomainEntryTxInputs(CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash, const int& nMonths, const uint32_t& nBlockTime,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //if exists, check for owner's signature
@@ -523,7 +543,12 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
             return error(errorMessage.c_str());
         }
     }
-
+    if (nMonths < 10000) {
+        entry.nExpireTime = prevDomainEntry.nExpireTime + AddMonthsToBlockTime(nBlockTime, nMonths);
+    }
+    else {
+        entry.nExpireTime = nMonths;
+    }
     if (!pDomainEntryDB->UpdateDomainEntry(entry.vchFullObjectPath(), entry))
     {
         errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry in LevelDB; this update operation failed!";
@@ -533,45 +558,17 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     return FlushLevelDB();
 }
 
-bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                 std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches entry data in leveldb
     //check if exists already
     //if exists, check for owner's signature
-    return false;
-}
-
-bool CheckExecuteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                   std::string& errorMessage, bool fJustCheck)
-{
-    //check name in operation matches entry data in leveldb
-    //check if exists already
-    //if exists, check for owner's signature
-    return false;
-}
-
-bool CheckBindDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                std::string& errorMessage, bool fJustCheck)
-{
-    //check names in operation matches entry data in leveldb
-    //check if request or accept response
-    //check if names exists already
-    //if exists, check for owner's signature
-    return false;
-}
-
-bool CheckRevokeDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                  std::string& errorMessage, bool fJustCheck)
-{
-    //check name in operation matches entry data in leveldb
-    //check if names exists already
-    //if exists, check for fluid signature
     return false;
 }
 
 bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
-                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+                                const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
@@ -579,8 +576,8 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         return true;
     }
 
-    LogPrint("bdap", "%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
-    
+    LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
     std::vector<unsigned char> vchData;
@@ -606,16 +603,114 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         entry.txHash = tx->GetHash();
         entry.nHeight = nHeight;
     }
-    if (strOperationType == "bdap_new_account")
+
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (strOperationType == "bdap_new_account") {
+        if (vvchArgs.size() != 3) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        if (nMonths >= 10000)
+            nMonths = 24;
+        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        // extract amounts from tx.
+        CAmount dataAmount, opAmount;
+        if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+            errorMessage = "Unable to extract BDAP amounts from transaction";
+            return false;
+        }
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee > dataAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP monthly registration fee amount for new BDAP account";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d but should be %d. Fees not enforced.\n", __func__, dataAmount, monthlyFee);
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, dataAmount, monthlyFee);
+        }
+        if (depositFee > opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP deposit fee amount for new BDAP account";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP deposit fee amount for new BDAP account. Deposit paid %d but should be %d. Fees not enforced.\n", __func__, opAmount, depositFee);
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
+        }
+        if (nMonths < 10000) {
+            entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
+        }
+        else {
+            entry.nExpireTime = nMonths;
+        }
+
         return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_delete_account")
+    }
+    else if (strOperationType == "bdap_delete_account") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_DELETE, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to delete a BDAP account";
+            return false;
+        }
+
         return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_update_account")
-        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_move_account")
+    }
+    else if (strOperationType == "bdap_update_account") {
+        if (vvchArgs.size() != 3) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        if (nMonths >= 10000)
+            nMonths = 24;
+        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        // extract amounts from tx.
+        CAmount dataAmount, opAmount;
+        if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+            errorMessage = "Unable to extract BDAP amounts from transaction";
+            return false;
+        }
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP deposit fee amount for updated BDAP account";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP deposit fee amount for updated BDAP account. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP deposit fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        }
+        // Add previous expire date plus additional months
+        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), nMonths, nBlockTime, errorMessage, fJustCheck);
+    }
+    else if (strOperationType == "bdap_move_account") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_MODIFY_RDN, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to move a BDAP account to another domain";
+            return false;
+        }
+
         return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_revoke_account")
-        return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
+    }
 
     return false;
 }

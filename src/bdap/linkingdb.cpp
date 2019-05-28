@@ -4,6 +4,8 @@
 
 #include "bdap/linkingdb.h"
 
+#include "amount.h"
+#include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "base58.h"
 #include "validation.h"
@@ -276,7 +278,7 @@ static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString&
 }
 
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
-                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+                                const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck) {
         LogPrintf("%s -- Trying to add BDAP link in coinbase transaction, skipping...\n", __func__);
@@ -292,10 +294,23 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
 
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
 
+    CAmount monthlyFee, oneTimeFee, depositFee;
     if (strOperationType == "bdap_new_link_request") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, BDAP::ObjectType::BDAP_LINK_REQUEST, nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get BDAP fees for new link request";
+            return false;
+        }
+
         return CheckNewLinkRequestTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
     else if (strOperationType == "bdap_new_link_accept") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, BDAP::ObjectType::BDAP_LINK_ACCEPT, nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get BDAP fees for new link accept";
+            return false;
+        }
+
         return CheckNewLinkAcceptTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
 

@@ -46,7 +46,7 @@ bool CheckLinkDBs();
 bool FlushLinkRequestDB();
 bool FlushLinkAcceptDB();
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
-                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
+                                const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage);
 
 bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck);
 
