@@ -215,17 +215,6 @@ void CreateFeeRecipient(CScript& scriptPubKey, const std::vector<unsigned char>&
     recipient = recp;
 }
 
-CAmount GetDataFee(const CScript& scriptPubKey)
-{
-    CAmount nFee = 0;
-    CRecipient recp = {scriptPubKey, 0, false};
-    CTxOut txout(0, scriptPubKey);
-    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
-    nFee = CWallet::GetMinimumFee(nSize, nTxConfirmTarget, mempool);
-    recp.nAmount = nFee;
-    return recp.nAmount;
-}
-
 void ToLowerCase(CharString& vchValue) {
     std::string strValue;
     CharString::const_iterator vi = vchValue.begin();
@@ -243,17 +232,6 @@ void ToLowerCase(std::string& strValue) {
     {
         strValue[loop]=std::tolower(strValue[loop]);
     }
-}
-
-CAmount GetBDAPFee(const CScript& scriptPubKey)
-{
-    CAmount nFee = 0;
-    CRecipient recp = {scriptPubKey, 0, false};
-    CTxOut txout(0, scriptPubKey);
-    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
-    nFee = CWallet::GetMinimumFee(nSize, nTxConfirmTarget, mempool);
-    recp.nAmount = nFee;
-    return recp.nAmount;
 }
 
 bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch) 
