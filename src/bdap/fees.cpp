@@ -102,7 +102,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
 
 int64_t AddMonthsToCurrentEpoch(const short nMonths)
 {
-    boost::gregorian::date dt = boost::gregorian::day_clock::local_day();
+    boost::gregorian::date dt = boost::gregorian::day_clock::universal_day();
     short nYear = dt.year() + ((dt.month() + nMonths)/12);
     short nMonth = (dt.month() + nMonths) % 12;
     short nDay = dt.day();
