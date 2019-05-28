@@ -20,19 +20,9 @@ std::map<int32_t, CAmount> mapDefaultMonthlyFees = {
 
 // Default BDAP One Time Fees
 std::map<int32_t, CAmount> mapOneTimeFees = {
-    {BDAP_ONE_TIME_REQUEST_LINK_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, 100 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_UPDATE_USER_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_DELETE_USER_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_UPDATE_GROUP_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_DELETE_GROUP_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_UPDATE_LINK_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_DELETE_LINK_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_UPDATE_CERTIFICATE_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_DELETE_CERTIFICATE_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_UPDATE_SIDECHAIN_FEE, 1 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_DELETE_SIDECHAIN_FEE, 1 * BDAP_CREDIT},
+    {BDAP_ONE_TIME_REQUEST_LINK_FEE, 99 * BDAP_CREDIT},
+    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, 99 * BDAP_CREDIT},
+    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, 99 * BDAP_CREDIT},
 };
 
 // Default BDAP Non-Refundable Security Deposit Fees
@@ -72,34 +62,34 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         depositFee = mapNoRefundDeposits[BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT];
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_LINK_REQUEST && objType == BDAP::ObjectType::BDAP_LINK_REQUEST) {
-        // new BDAP sidechain entry
+        // new BDAP link request
         oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_REQUEST_LINK_FEE];
         monthlyFee = 0;
-        depositFee = 0;
+        depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_LINK_ACCEPT && objType == BDAP::ObjectType::BDAP_LINK_ACCEPT) {
-        // new BDAP sidechain entry
+        // new BDAP link accept
         oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_ACCEPT_LINK_FEE];
         monthlyFee = 0;
-        depositFee = 0;
+        depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_AUDIT && objType == BDAP::ObjectType::BDAP_AUDIT) {
-        // new BDAP sidechain entry
+        // new BDAP audit record
         oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_AUDIT_RECORD_FEE];
         monthlyFee = 0;
-        depositFee = 0;
+        depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_USER) {
-        // new BDAP sidechain entry
-        oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_UPDATE_USER_FEE];
+        // update BDAP user account entry
+        oneTimeFee = 0;
         monthlyFee = 0;
-        depositFee = 0;
+        depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_GROUP) {
-        // new BDAP sidechain entry
-        oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_UPDATE_GROUP_FEE];
+        // update BDAP group account entry
+        oneTimeFee = 0;
         monthlyFee = 0;
-        depositFee = 0;
+        depositFee = BDAP_CREDIT;
 
     }
     else {

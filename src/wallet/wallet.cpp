@@ -1388,8 +1388,8 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     UpdateKeyPoolsFromTransactions(strOpType,vvchOpParameters);
                     if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
                         uint64_t nExpireTime = 0;
-                        if (vvchOpParameters.size() > 2) {
-                            nExpireTime = (uint64_t)CScriptNum(vvchOpParameters[2], false).getint();
+                        if (vvchOpParameters.size() > 2 && vvchOpParameters[2].size() <= 10) {
+                            nExpireTime = (uint64_t)CScriptNum(vvchOpParameters[2], false, 10).getint();
                         }
                         uint64_t nHeight = pIndex ? (uint64_t)pIndex->nHeight : (uint64_t)chainActive.Height();
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];

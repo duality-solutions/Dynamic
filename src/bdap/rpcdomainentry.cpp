@@ -18,7 +18,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend);
 
 static constexpr bool fPrintDebug = true;
 
@@ -109,7 +109,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     }
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -141,9 +141,9 @@ UniValue adduser(const JSONRPCRequest& request)
         throw std::runtime_error(
             "adduser \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The account userid\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of days to register account\n"
+            "1. account id           (string)             The account userid\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of months to register account\n"
             "\nAdds a new bdap.io public name account entry to the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -440,7 +440,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     }
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -468,9 +468,9 @@ UniValue updateuser(const JSONRPCRequest& request)
         throw std::runtime_error(
             "updateuser \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The account objectid within public.bdap.io\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of additional days to register account\n"
+            "1. account id           (string)             The account objectid within public.bdap.io\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of additional months to register the account\n"
             "\nUpdates an existing bdap.io public name account entry in the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -515,9 +515,9 @@ UniValue updategroup(const JSONRPCRequest& request)
         throw std::runtime_error(
             "updategroup \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
-            "1. groupid            (string)             The account objectid within public.bdap.io\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of additional days to register account\n"
+            "1. groupid              (string)             The account objectid within public.bdap.io\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of additional months to register the account\n"
             "\nUpdates an existing bdap.io public group account entry in the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -598,13 +598,17 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create empty BDAP OP_RETURN script
     CScript scriptData;
 
+    // Get BDAP fees
+    uint16_t nMonths = 0;
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_DELETE, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+
     // Send the transaction
     CWalletTx wtx;
-    CAmount nOperationFee = (GetBDAPFee(scriptPubKey) * powf(3.1, 1)) + GetDataFee(scriptPubKey);
-    CAmount nDataFee = 0; // No OP_RETURN data needed for deleted account transactions
-
     bool fUseInstantSend = false;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -784,9 +788,9 @@ UniValue addgroup(const JSONRPCRequest& request)
         throw std::runtime_error(
             "addgroup \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The new group account id\n"
-            "2. common name        (string)             The group account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of days to register the account\n"
+            "1. account id           (string)             The new group account id\n"
+            "2. common name          (string)             The group account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of months to register the account\n"
             "\nAdds a new bdap.io public group account entry to the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
