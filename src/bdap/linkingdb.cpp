@@ -292,6 +292,13 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
     if (!GetBDAPDataScript(tx, scriptData))
         return false;
 
+    // extract amounts from tx.
+    CAmount dataAmount, opAmount;
+    if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+        errorMessage = "Unable to extract BDAP amounts from transaction";
+        return false;
+    }
+
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
 
     CAmount monthlyFee, oneTimeFee, depositFee;
@@ -301,7 +308,21 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             errorMessage = "Failed to get BDAP fees for new link request";
             return false;
         }
-
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP fee amount for a new BDAP link request";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link request. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link request. Total paid %d, should be %d\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        }
         return CheckNewLinkRequestTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
     else if (strOperationType == "bdap_new_link_accept") {
@@ -310,7 +331,21 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             errorMessage = "Failed to get BDAP fees for new link accept";
             return false;
         }
-
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP fee amount for a new BDAP link accept";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link accept. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link accept. Total paid %d, should be %d\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        }
         return CheckNewLinkAcceptTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
 
