@@ -395,9 +395,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
 
     // Create OP Script with destination address
     bool fStealthAddress = false;
-    CTxDestination dest = DecodeDestination(entryAcceptor.GetLinkAddress().ToString());
+    CTxDestination dest = DecodeDestination(entryRequestor.GetLinkAddress().ToString());
     if (!IsValidDestination(dest))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid destination address %s", entryAcceptor.GetLinkAddress().ToString()));
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid destination address %s", entryRequestor.GetLinkAddress().ToString()));
 
     CScript scriptDest;
     std::vector<uint8_t> vStealthData;
@@ -407,7 +407,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
         std::string sError;
         if (0 != PrepareStealthOutput(sxAddr, scriptDest, vStealthData, sError)) {
             LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", entryAcceptor.GetLinkAddress().ToString()));
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", entryRequestor.GetLinkAddress().ToString()));
         }
         fStealthAddress = true;
     }
