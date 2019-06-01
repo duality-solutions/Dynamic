@@ -198,6 +198,25 @@ void CWallet::DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet)
 
 } //DeriveEd25519ChildKey
 
+bool CWallet::DeriveChildStealthKey(const CKey& key)
+{
+    CKey spendKey, scanKey;
+    if (!key.DeriveChildKey(spendKey))
+        return false;
+
+    if (!spendKey.DeriveChildKey(scanKey))
+        return false;
+
+    if (!AddKeyPubKey(spendKey, spendKey.GetPubKey()))
+        return false;
+
+    if (!AddKeyPubKey(scanKey, scanKey.GetPubKey()))
+        return false;
+
+    CStealthAddress sxAddr(scanKey, spendKey);
+    return AddStealthAddress(sxAddr);
+}
+
 void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal)
 {
     CHDChain hdChainTmp;
@@ -228,6 +247,7 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
 
     CKeyEd25519 secretEdRet;
     DeriveEd25519ChildKey(secretRet,secretEdRet); //Derive Ed25519 key
+    DeriveChildStealthKey(secretRet);
 
     CPubKey pubkey = secretRet.GetPubKey();
     assert(secretRet.VerifyPubKey(pubkey));
@@ -581,6 +601,12 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
+                if (fNeedToUpgradeWallet) {
+                    if (SyncEdKeyPool()) {
+                        SetMinVersion(FEATURE_HD);
+                        LogPrintf("%s - Upgraded wallet\n", __func__);
+                    }
+                }
                 if (nWalletBackups == -2) {
                     TopUpKeyPoolCombo();
                     LogPrintf("Keypool replenished, re-initializing automatic backups.\n");
@@ -590,10 +616,25 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                     RunProcessStealthQueue(); // Process stealth transactions in queue
                     ProcessLinkQueue(); // Process encrypted links in queue
                 }
-                return true;
+                if (!fNeedToUpgradeWallet) return true;
             }
         }
     }
+
+    if (fNeedToUpgradeWallet) {
+        {
+            LOCK2(cs_main, pwalletMain->cs_wallet);
+            fNeedToUpgradeWallet = false;
+            fNeedToUpdateKeyPools = true;
+            fNeedToUpdateLinks = true;
+            LogPrintf("%s - Rescanning transasctions\n", __func__);
+            pwalletMain->UpdateTimeFirstKey(1);
+            pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+            LogPrintf("%s - Rescanning transasctions DONE\n", __func__);        
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -4464,6 +4505,76 @@ size_t CWallet::EdKeypoolCountInternalKeys()
     return setInternalEdKeyPool.size();
 }
 
+bool CWallet::SyncEdKeyPool() 
+{
+    if (pwalletMain->IsLocked())
+        return false;
+    
+    CWalletDB walletdb(strWalletFile);
+
+    CKeyPool keypool;
+    CPubKey retrievedPubKey;
+    CKey retrievedKey;
+
+    CKeyPool keypool2;
+    CPubKey retrievedPubKey2;
+    CKey retrievedKey2;
+
+    for (int64_t nIndex : setInternalKeyPool) {
+        if (!walletdb.ReadPool(nIndex, keypool)) {
+            throw std::runtime_error(std::string(__func__) + ": read failed");
+        }
+        retrievedPubKey = keypool.vchPubKey;
+        GetKey(retrievedPubKey.GetID(), retrievedKey);
+
+        std::array<char, 32> edSeed = ConvertSecureVector32ToArray(retrievedKey.getKeyData());
+        CKeyEd25519 childKey(edSeed);
+        CharString vchDHTPubKey = childKey.GetPubKey();
+
+        CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey);
+
+        //only add if doesn't currently exist
+        if (!pwalletMain->HaveDHTKey(vchDHTPubKeyID)) {
+            if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, true, retrievedKey), true)))
+                throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+            else {
+                setInternalEdKeyPool.insert(nIndex);    
+                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
+            }
+        }
+    }
+
+    for (int64_t nIndex : setExternalKeyPool) {
+        if (!walletdb.ReadPool(nIndex, keypool2)) {
+            throw std::runtime_error(std::string(__func__) + ": read failed");
+        }
+        retrievedPubKey2 = keypool2.vchPubKey;
+        GetKey(retrievedPubKey2.GetID(), retrievedKey2);
+
+        std::array<char, 32> edSeed2 = ConvertSecureVector32ToArray(retrievedKey2.getKeyData());
+        CKeyEd25519 childKey2(edSeed2);
+        CharString vchDHTPubKey2 = childKey2.GetPubKey();
+
+        CKeyID vchDHTPubKeyID2 = GetIdFromCharVector(vchDHTPubKey2);
+
+        //only add if doesn't currently exist
+        if (!pwalletMain->HaveDHTKey(vchDHTPubKeyID2)) {
+            if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, false, retrievedKey2), false)))
+                throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
+            else {
+                setExternalEdKeyPool.insert(nIndex);    
+                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
+            }
+        }
+    }
+
+    return true;
+
+} //SyncEdKeyPool
+
+
+
+
 bool CWallet::TopUpKeyPool(unsigned int kpSize)
 {
     {
@@ -4817,12 +4928,8 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal)
     LogPrintf("keypool return %d\n", nIndex);
 }
 
-bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& sxAddr, bool fInternal)
+bool CWallet::GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, CStealthAddress& sxAddr, bool fInternal)
 {
-    if (IsLocked())
-        return false;
-
-    std::vector<unsigned char> vchEd25519PubKey;
     if (!GetKeysFromPool(pubkeyWallet, vchEd25519PubKey, fInternal))
         return false;
 
@@ -4836,18 +4943,12 @@ bool CWallet::GetStealthAddressFromPool(CPubKey& pubkeyWallet, CStealthAddress& 
     if (!spendKey.DeriveChildKey(scanKey))
         return false;
 
-    if (!AddKeyPubKey(spendKey, spendKey.GetPubKey()))
-        return false;
-
-    if (!AddKeyPubKey(scanKey, scanKey.GetPubKey()))
-        return false;
-
     CStealthAddress sx(scanKey, spendKey);
     sxAddr = sx;
     return true;
 }
 
-bool CWallet::GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal)
+bool CWallet::GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal)
 {
     int64_t nIndex = 0;
     int64_t nEdIndex = 0;
@@ -4861,15 +4962,15 @@ bool CWallet::GetKeysFromPool(CPubKey& result, std::vector<unsigned char>& vchEd
             if (IsLocked(true))
                 return false;
             // TODO: implement keypool for all accouts?
-            result = GenerateNewKey(0, fInternal);
+            pubkeyWallet = GenerateNewKey(0, fInternal);
         }
         else {
             KeepKey(nIndex);
-            result = keypool.vchPubKey;
+            pubkeyWallet = keypool.vchPubKey;
         }
 
         CKey keyRetrieved;
-        GetKey(result.GetID(), keyRetrieved);
+        GetKey(pubkeyWallet.GetID(), keyRetrieved);
 
         if (nEdIndex == -1) {
             if (IsLocked(true))
@@ -5624,6 +5725,24 @@ bool CWallet::InitLoadWallet()
     }
     pwalletMain = pwallet;
 
+    if (pwallet->GetVersion() < FEATURE_HD) {
+        LogPrintf("%s - Older wallet version detected. Need to upgrade.\n", __func__);
+        if (!pwalletMain->IsLocked()) {
+            if (!pwallet->SyncEdKeyPool()) {
+                LogPrintf("%s - ERROR: Unable to sync Ed25519 Keypool.\n", __func__);
+            }
+            else {
+                LogPrintf("%s - Upgrading wallet version\n", __func__);
+                pwallet->SetMinVersion(FEATURE_HD);
+                pwallet->fNeedToUpgradeWallet = false;
+            }
+        }
+        else {
+            LogPrintf("%s - Upgrade wallet pending unlock\n", __func__);
+            pwallet->fNeedToUpgradeWallet = true; 
+        }
+    }
+
     ProcessLinkQueue(); // Process links in queue.
 
     return true;
@@ -6110,7 +6229,6 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
 
 bool CWallet::AddStealthAddress(const CStealthAddress& sxAddr)
 {
-    LogPrintf("%s: %s\n", __func__, sxAddr.Encoded());
     CWalletDB* pwdb = GetWalletDB();
 
     LOCK(cs_mapStealthAddresses);
