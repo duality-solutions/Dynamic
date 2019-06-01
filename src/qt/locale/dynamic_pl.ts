@@ -5487,7 +5487,7 @@ Na przykład: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Needs Translating</translation>
     </message>
     <message>
-        <source>Registration days:</source>
+        <source>Registration months:</source>
         <translation>Needs Translating</translation>
     </message>
     <message>
