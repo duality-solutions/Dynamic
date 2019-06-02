@@ -26,15 +26,10 @@ public:
     explicit BdapUpdateAccountDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, std::string account = "", std::string commonName = "", std::string expirationDate = "");
     ~BdapUpdateAccountDialog();
 
-
-
 private:
     Ui::BdapUpdateAccountDialog* ui;
     std::string ignoreErrorCode(const std::string input);
     BDAP::ObjectType inputAccountType;
-
-
-
 
 private Q_SLOTS:
 

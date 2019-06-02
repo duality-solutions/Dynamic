@@ -30,19 +30,13 @@ public:
     explicit BdapUserDetailDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, const std::string& accountID = "", const UniValue& resultinput = UniValue(UniValue::VOBJ), bool displayInfo = false);
     ~BdapUserDetailDialog();
 
-
-
 private:
     Ui::BdapUserDetailDialog* ui;
 
     void populateValues(BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput);
 
-
-
-
 private Q_SLOTS:
     void goCancel();
-
 
 };
 

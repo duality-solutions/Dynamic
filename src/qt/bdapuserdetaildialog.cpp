@@ -27,14 +27,12 @@ BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType acc
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
 
     populateValues(accountType,accountID,resultinput);
-
 }
 
 BdapUserDetailDialog::~BdapUserDetailDialog()
 {
     delete ui;
 }
-
 
 void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput)
 {
@@ -102,8 +100,6 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
         result = resultinput;
     }
 
-
-
     for (size_t i {0} ; i < result.size() ; ++i) {
         keyName = "";
         keyName = result.getKeys()[i];
@@ -132,28 +128,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
 
 } //populateValues
 
-
 void BdapUserDetailDialog::goCancel()
 {
     QDialog::reject(); //cancelled
 } //goCancel
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

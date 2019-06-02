@@ -20,7 +20,6 @@ BdapAddUserDialog::BdapAddUserDialog(QWidget *parent, BDAP::ObjectType accountTy
                                                         ui(new Ui::BdapAddUserDialog)
 {
     //By default, accountType is USER. so only change stuff if different
-    
     ui->setupUi(this);
     inputAccountType = accountType;
 
@@ -44,7 +43,6 @@ BdapAddUserDialog::~BdapAddUserDialog()
 {
     delete ui;
 }
-
 
 void BdapAddUserDialog::goAddUser()
 {
@@ -91,10 +89,6 @@ void BdapAddUserDialog::goAddUser()
 
     }; //end inputAccountType if
 
-
-
-    //UniValue rpc_result(UniValue::VOBJ);
-
     try {
         UniValue result = tableRPC.execute(jreq);
 
@@ -111,19 +105,13 @@ void BdapAddUserDialog::goAddUser()
         dlg.exec();
         goClose();
     } catch (const UniValue& objError) {
-        //rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
         std::string message = find_value(objError, "message").get_str();
         outputmessage = ignoreErrorCode(message);
     } catch (const std::exception& e) {
-        //rpc_result = JSONRPCReplyObj(NullUniValue,
-        //JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
         outputmessage = e.what();
     }
 
-
     ui->labelErrorMsg->setText(QObject::tr(outputmessage.c_str()));
-
-
 
 } //goAddUser
 
@@ -131,7 +119,6 @@ void BdapAddUserDialog::goCancel()
 {
     QDialog::reject(); //cancelled
 } //goCancel
-
 
 void BdapAddUserDialog::goClose()
 {
@@ -141,7 +128,6 @@ void BdapAddUserDialog::goClose()
 std::string BdapAddUserDialog::ignoreErrorCode(const std::string input)
 {
     //assuming error code is in the following format: ERROR CODE - ERROR MESSAGE
-    
     std::vector<std::string> results;
     std::string returnvalue = input;
 
@@ -152,20 +138,4 @@ std::string BdapAddUserDialog::ignoreErrorCode(const std::string input)
     }
 
     return returnvalue;
-
-
 } //ignoreErrorCode
-
-
-
-
-
-
-
-
-
-
-
-
-
-
