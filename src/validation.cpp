@@ -657,7 +657,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
 
             std::string strOpType = GetBDAPOpTypeString(op1, op2);
             if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
-                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -668,7 +668,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
             else if (strOpType == "bdap_new_link_request") {
                 std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
                 LogPrint("bdap", "%s -- New Link Request vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
-                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -686,7 +686,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
             else if (strOpType == "bdap_new_link_accept") {
                 std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
                 LogPrint("bdap", "%s -- New Link Accept vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
-                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);

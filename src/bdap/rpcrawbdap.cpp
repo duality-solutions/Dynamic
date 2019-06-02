@@ -4,9 +4,9 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "core_io.h" // for EncodeHexTx
-#include "dht/ed25519.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "policy/policy.h"
@@ -57,12 +57,11 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString vchObjectID = vchFromString(strObjectID);
     CharString vchCommonName = vchFromValue(request.params[1]);
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 1 year.
     if (request.params.size() >= 3) {
-        if (!ParseInt64(request.params[2].get_str(), &nDays))
+        if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4500 - " + _("Error converting registration days to int"));
     }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
     BDAP::ObjectType bdapType = ObjectType::BDAP_USER;
     if (request.params.size() >= 4) {
         int32_t nObjectType;
@@ -89,8 +88,8 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     txDomainEntry.fPublicObject = 1; // make entry public
     txDomainEntry.nObjectType = GetObjectTypeInt(bdapType);
     // Add an extra 8 hours or 28,800 seconds to expire time.
-    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds + 28800;
-    
+    txDomainEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
+
     // Check if name already exists
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4503 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
@@ -121,8 +120,11 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString data;
     txDomainEntry.Serialize(data);
 
-    // TODO (bdap): calculate real BDAP deposit once fee structure is implemented.
-    CAmount nBDAPDeposit(2 * COIN);
+    // Get BDAP fees
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
@@ -132,9 +134,6 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
-
-    // TODO (bdap): calculate BDAP registration fee once fee structure is implemented.
-    CAmount nBDAPRegistrationFee(3 * COIN);
 
     // Create BDAP OP_RETURN script
     CScript scriptData;
@@ -151,19 +150,17 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CScript stealthScript;
     stealthScript << OP_RETURN << vStealthData;
 
-    // TODO (bdap): decrease this amount after BDAP fee structure is implemented.
-    CAmount nLinkAmount(30 * COIN);
-
     // Add the Stealth OP return data
     CTxOut outStealthData(0, stealthScript);
     rawTx.vout.push_back(outStealthData);
     // Add the BDAP data output
-    CTxOut outData(nBDAPRegistrationFee, scriptData);
+    CTxOut outData(monthlyFee, scriptData);
     rawTx.vout.push_back(outData);
     // Add the BDAP operation output
-    CTxOut outOP(nBDAPDeposit, scriptPubKey);
+    CTxOut outOP(depositFee, scriptPubKey);
     rawTx.vout.push_back(outOP);
     // Add the BDAP link funds output
+    CAmount nLinkAmount(0.0400004 * COIN); // enough for 4 links
     CTxOut outLinkFunds(nLinkAmount, scriptDest);
     rawTx.vout.push_back(outLinkFunds);
 

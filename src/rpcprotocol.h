@@ -82,7 +82,8 @@ enum RPCErrorCode {
     RPC_BDAP_SPORK_INACTIVE = -301,        //! BDAP spork is not active
     RPC_BDAP_DB_ERROR = -302,              //! BDAP database error
     RPC_BDAP_LINK_MNGR_ERROR = -303,       //! BDAP link manager error
-    RPC_BDAP_ACCOUNT_NOT_FOUND = -304,     //! BDAP link manager error
+    RPC_BDAP_ACCOUNT_NOT_FOUND = -304,     //! BDAP account not found
+    RPC_BDAP_FEE_UNKNOWN = -305,           //! BDAP fee can not be calculated
     //! DHT errors
     RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT
     RPC_DHT_NOT_STARTED = -401,            //! DHT session not started
