@@ -1,12 +1,6 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 [![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
-
-Graph on Pull Request History
-====================================
-
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
 # **Dynamic (DYN) v2.4.0.0**
 
