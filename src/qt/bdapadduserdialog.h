@@ -26,15 +26,10 @@ public:
     explicit BdapAddUserDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER);
     ~BdapAddUserDialog();
 
-
-
 private:
     Ui::BdapAddUserDialog* ui;
     std::string ignoreErrorCode(const std::string input);
     BDAP::ObjectType inputAccountType;
-
-
-
 
 private Q_SLOTS:
 

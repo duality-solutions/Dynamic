@@ -16,11 +16,9 @@
 #include <stdio.h>
 #include <boost/algorithm/string.hpp>
 
-
 BdapAddLinkDialog::BdapAddLinkDialog(QWidget *parent) : QDialog(parent),
                                                         ui(new Ui::BdapAddLinkDialog)
 {
-   
     ui->setupUi(this);
 
     connect(ui->pushButtonCancel, SIGNAL(clicked()), this, SLOT(goCancel()));
@@ -53,8 +51,6 @@ BdapAddLinkDialog::BdapAddLinkDialog(QWidget *parent) : QDialog(parent),
     autoCompleterTo = new QCompleter(toList, this);
     ui->lineEditRecipient->setCompleter(autoCompleterTo);
     autoCompleterTo->popup()->installEventFilter(this);
-
-
 }
 
 BdapAddLinkDialog::~BdapAddLinkDialog()
@@ -104,7 +100,6 @@ void BdapAddLinkDialog::populateList(std::vector<std::string> &inputList, LinkUs
         return;
     }
 
-
     for (size_t i {0} ; i < result.size() ; ++i) {
         getaccountID = "";
 
@@ -116,17 +111,13 @@ void BdapAddLinkDialog::populateList(std::vector<std::string> &inputList, LinkUs
             inputList.push_back(getaccountID);
     }; //for loop i
 
-
-
 } //populateList
-
 
 void BdapAddLinkDialog::addLink()
 {
     std::string requestor = "";
     std::string recipient = "";
     std::string linkMessage = "";
-    std::string registrationDays = "";
     std::string outputmessage = "";
 
     JSONRPCRequest jreq;
@@ -135,7 +126,6 @@ void BdapAddLinkDialog::addLink()
     requestor = ui->lineEditRequestor->text().toStdString();
     recipient = ui->lineEditRecipient->text().toStdString();
     linkMessage = ui->lineEditLinkMessage->text().toStdString();
-    registrationDays = ui->lineEditRegistrationDays->text().toStdString();
 
     if ((requestor == "") || (recipient == "") || (linkMessage == "")) {
         QMessageBox::critical(this, "BDAP Add Link Error", QObject::tr("Requestor, Recipient and Link Message are required fields"));
@@ -146,7 +136,6 @@ void BdapAddLinkDialog::addLink()
     params.push_back(requestor);
     params.push_back(recipient);
     params.push_back(linkMessage);
-    if (registrationDays.length() >> 0) params.push_back(registrationDays);
     jreq.params = RPCConvertValues("link", params);
     jreq.strMethod = "link";
 
@@ -169,16 +158,12 @@ void BdapAddLinkDialog::addLink()
         QMessageBox::critical(this, "BDAP Add Link Error", QObject::tr(outputmessage.c_str()));
         return;
     }
-
 } //addLink
-
-
 
 void BdapAddLinkDialog::goCancel()
 {
     QDialog::reject(); //cancelled
 } //goCancel
-
 
 void BdapAddLinkDialog::goClose()
 {
@@ -187,8 +172,7 @@ void BdapAddLinkDialog::goClose()
 
 std::string BdapAddLinkDialog::ignoreErrorCode(const std::string input)
 {
-    //assuming error code is in the following format: ERROR CODE - ERROR MESSAGE
-    
+    //assuming error code is in the following format: ERROR CODE - ERROR MESSAGE   
     std::vector<std::string> results;
     std::string returnvalue = input;
 
@@ -202,28 +186,15 @@ std::string BdapAddLinkDialog::ignoreErrorCode(const std::string input)
 } //ignoreErrorCode
 
 std::string BdapAddLinkDialog::getIdFromPath(std::string inputstring) {
-        std::string returnvalue = inputstring;
-        std::vector<std::string> results;
+    std::string returnvalue = inputstring;
+    std::vector<std::string> results;
 
-        boost::split(results, inputstring, [](char c){return c == '@';});
+    boost::split(results, inputstring, [](char c){return c == '@';});
 
-        if (results.size() > 0) {
-            returnvalue = results[0];
-        }
+    if (results.size() > 0) {
+        returnvalue = results[0];
+    }
 
-        return returnvalue;
+    return returnvalue;
 
-    } //getIdFromPath
-
-
-
-
-
-
-
-
-
-
-
-
-
+} //getIdFromPath

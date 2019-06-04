@@ -16,9 +16,7 @@
 
 #include <memory>
 
-
 const std::string LINK_TRANSACTION_MESSAGE = "Please note that your transaction will not be reflected until the next block.";;
-
 
 namespace Ui
 {
@@ -29,24 +27,17 @@ class BdapLinkDetailDialog : public QDialog
 {
     Q_OBJECT
 
-
 public:
     explicit BdapLinkDetailDialog(QWidget *parent = 0, LinkActions actionType = LinkActions::LINK_DEFAULT, const std::string& requestor = "", const std::string& recipient = "", const UniValue& resultinput = UniValue(UniValue::VOBJ), bool displayInfo = false);
     ~BdapLinkDetailDialog();
-
-
 
 private:
     Ui::BdapLinkDetailDialog* ui;
 
     void populateValues(LinkActions accountType, const std::string& requestor, const std::string& recipient, const UniValue& resultinput);
 
-
-
-
 private Q_SLOTS:
     void goClose();
-
 
 };
 

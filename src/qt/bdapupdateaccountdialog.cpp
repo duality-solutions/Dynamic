@@ -21,7 +21,6 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
                                                         ui(new Ui::BdapUpdateAccountDialog)
 {
     //By default, accountType is USER. so only change stuff if different
-    
     ui->setupUi(this);
     inputAccountType = accountType;
 
@@ -50,7 +49,6 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
  
     ui->labelErrorMsg->setVisible(false);
     ui->pushButtonOK->setVisible(false);
-
 }
 
 BdapUpdateAccountDialog::~BdapUpdateAccountDialog()
@@ -70,17 +68,17 @@ void BdapUpdateAccountDialog::updateAccount()
 
     accountID = ui->lineEditID->text().toStdString();
     commonName = ui->lineEditCommonName->text().toStdString();
-    registrationDays = ui->lineEditRegistrationDays->text().toStdString();
+    registrationDays = ui->lineEditRegistrationMonths->text().toStdString();
 
     ui->lineEditID->setReadOnly(true);
     ui->lineEditCommonName->setReadOnly(true);
-    ui->lineEditRegistrationDays->setReadOnly(true);
+    ui->lineEditRegistrationMonths->setReadOnly(true);
 
     QPalette *palette = new QPalette();
     palette->setColor(QPalette::Text,Qt::darkGray);
     ui->lineEditID->setPalette(*palette);
     ui->lineEditCommonName->setPalette(*palette);
-    ui->lineEditRegistrationDays->setPalette(*palette);
+    ui->lineEditRegistrationMonths->setPalette(*palette);
     
 
     ui->labelErrorMsg->setVisible(true);
@@ -105,8 +103,7 @@ void BdapUpdateAccountDialog::updateAccount()
         jreq.params = RPCConvertValues("updategroup", params);
         jreq.strMethod = "updategroup";
 
-    }; //end inputAccountType if
-
+    } //end inputAccountType if
 
     try {
         UniValue result = tableRPC.execute(jreq);
@@ -133,14 +130,10 @@ void BdapUpdateAccountDialog::updateAccount()
     ui->labelErrorMsg->setText(QObject::tr(outputmessage.c_str()));
 } //updateAccount
 
-
-
-
 void BdapUpdateAccountDialog::goCancel()
 {
     QDialog::reject(); //cancelled
 } //goCancel
-
 
 void BdapUpdateAccountDialog::goClose()
 {
@@ -164,17 +157,3 @@ std::string BdapUpdateAccountDialog::ignoreErrorCode(const std::string input)
 
 
 } //ignoreErrorCode
-
-
-
-
-
-
-
-
-
-
-
-
-
-

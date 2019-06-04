@@ -874,10 +874,7 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
-    
-    
-    LogPrintf("DEBUGGER %s - NUMBER OF PARAMS %s\n", __func__, std::to_string(request.params.size()));
-    
+
     if (fPruneMode)
         throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");
 
