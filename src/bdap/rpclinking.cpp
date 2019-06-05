@@ -1087,9 +1087,9 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("shared_pubkey", key.GetPubKeyString()));
     oLink.push_back(Pair("subject_id", unsignedMessage.SubjectID.ToString()));
     oLink.push_back(Pair("message_id", unsignedMessage.MessageID.ToString()));
+    vpgMessage.MineMessage();
     oLink.push_back(Pair("message_hash", vpgMessage.GetHash().ToString()));
     oLink.push_back(Pair("message_size", (int)vpgMessage.vchMsg.size()));
-
     vpgMessage.Sign(walletKey);
     oLink.push_back(Pair("signature_size", (int)vpgMessage.vchSig.size()));
     if (vpgMessage.CheckSignature(vchWalletPubKey)) {

@@ -121,6 +121,7 @@ void CUnsignedVGPMessage::SetNull()
     nTimeStamp = 0;
     nRelayUntil = 0;
     vchMessageData.clear();
+    nNonce = 0;
 }
 
 std::string CUnsignedVGPMessage::ToString() const
@@ -135,6 +136,8 @@ std::string CUnsignedVGPMessage::ToString() const
         "    nTimeStamp           = %d\n"
         "    nRelayUntil          = %d\n"
         "    Message Size         = %d\n"
+        "    nNonce               = %d\n"
+        "    Hash                 = %s\n"
         ")\n",
         nVersion,
         SubjectID.ToString(),
@@ -143,7 +146,17 @@ std::string CUnsignedVGPMessage::ToString() const
         stringFromVch(vchWalletPubKey),
         nTimeStamp,
         nRelayUntil,
-        vchMessageData.size());
+        vchMessageData.size(),
+        nNonce,
+        GetHash().ToString()
+        );
+}
+
+uint256 CUnsignedVGPMessage::GetHash() const
+{
+    CDataStream dsMessageData(SER_NETWORK, PROTOCOL_VERSION);
+    dsMessageData << *this;
+    return hash_Argon2d(dsMessageData.begin(), dsMessageData.end(), 1);
 }
 
 bool CUnsignedVGPMessage::EncryptMessage(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchMessage, const std::vector<unsigned char>& vchSenderFQDN, 
@@ -249,6 +262,14 @@ CVGPMessage::CVGPMessage(CUnsignedVGPMessage& unsignedMessage)
     unsignedMessage.Serialize(vchMsg);
 }
 
+int CVGPMessage::Version() const
+{
+    if (vchMsg.size() == 0)
+        return -1;
+
+    return CUnsignedVGPMessage(vchMsg).nVersion;
+}
+
 void CVGPMessage::SetNull()
 {
     vchMsg.clear();
@@ -262,7 +283,11 @@ bool CVGPMessage::IsNull() const
 
 uint256 CVGPMessage::GetHash() const
 {
-    return Hash(this->vchMsg.begin(), this->vchMsg.end());
+    CUnsignedVGPMessage unsignedMessage(vchMsg);
+    if (unsignedMessage.nVersion == 1)
+        return Hash(this->vchMsg.begin(), this->vchMsg.end());
+
+    return unsignedMessage.GetHash();
 }
 
 bool CVGPMessage::IsInEffect() const
@@ -366,6 +391,12 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "VGP message has an invalid signature. Adding 100 to ban score.";
         return 100; // this will add 100 to the peer's ban score
     }
+    if (unsignedMessage.nVersion > 1 && UintToArith256(unsignedMessage.GetHash()) > UintToArith256(VGP_MESSAGE_MIN_HASH_TARGET))
+    {
+        LogPrintf("%s -- message %s\n", __func__, unsignedMessage.ToString());
+        strErrorMessage = "Message proof of work is invalid and under the target.";
+        return 100; // this will add 100 to the peer's ban score
+    }
     // check if message is for me. if, validate MessageID. If MessageID validates okay, store in memory map.
     int nMyLinkStatus = pLinkManager->IsMyMessage(unsignedMessage.SubjectID, unsignedMessage.MessageID, unsignedMessage.nTimeStamp);
     if (nMyLinkStatus == 1)
@@ -401,6 +432,30 @@ bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
         return false;
     }
     return true;
+}
+
+void CVGPMessage::MineMessage()
+{
+    int64_t nStart = GetTimeMillis();
+    CUnsignedVGPMessage message(vchMsg);
+    message.nNonce = 0;
+    arith_uint256 besthash = UintToArith256(uint256S("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+    arith_uint256 hashTarget = UintToArith256(VGP_MESSAGE_MIN_HASH_TARGET);
+    arith_uint256 newhash = UintToArith256(message.GetHash());
+    while (newhash > hashTarget) {
+        message.nNonce++;
+        if (message.nNonce == 0) {
+            ++message.nTimeStamp;
+            ++message.nRelayUntil;
+        }
+        if (newhash < besthash) {
+            besthash = newhash;
+            LogPrint("bdap", "%s -- New best: %s\n", __func__, newhash.GetHex());
+        }
+        newhash = UintToArith256(message.GetHash());
+    }
+    message.Serialize(vchMsg);
+    LogPrintf("%s -- Milliseconds %d, nNonce %d, Hash %s\n", __func__, GetTimeMillis() - nStart, message.nNonce, GetHash().ToString());
 }
 
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage)
