@@ -152,11 +152,15 @@ UniValue importprivkey(const JSONRPCRequest& request)
             if (!pwalletMain->AddKeyPubKey(key, pubkey))
                 throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
+            pwalletMain->GenerateEdandStealthKey(key);
+
             // whenever a key is imported, we need to scan the whole chain
             pwalletMain->UpdateTimeFirstKey(1);
         }
 
         if (fRescan || !isskip) {
+            pwalletMain->SetUpdateKeyPoolsAndLinks();
+
             pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
         }
     }
@@ -858,7 +862,6 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
-
     
     LOCK2(cs_main, pwalletMain->cs_wallet);
     UniValue entry(UniValue::VOBJ);
@@ -875,8 +878,6 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
     
-    
-    LogPrintf("DEBUGGER %s - NUMBER OF PARAMS %s\n", __func__, std::to_string(request.params.size()));
     
     if (fPruneMode)
         throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");

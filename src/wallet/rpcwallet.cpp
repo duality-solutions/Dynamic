@@ -131,7 +131,7 @@ UniValue getnewaddress(const JSONRPCRequest& request)
         strAccount = AccountFromValue(request.params[0]);
 
     if (!pwalletMain->IsLocked(true))
-        pwalletMain->TopUpKeyPool();
+        pwalletMain->TopUpKeyPoolCombo();
 
     // Generate a new key that is added to wallet
     CPubKey newKey;
@@ -278,7 +278,7 @@ UniValue getrawchangeaddress(const JSONRPCRequest& request)
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     if (!pwalletMain->IsLocked(true))
-        pwalletMain->TopUpKeyPool();
+        pwalletMain->TopUpKeyPoolCombo();
 
     CReserveKey reservekey(pwalletMain);
     CPubKey vchPubKey;
@@ -2195,7 +2195,7 @@ UniValue keypoolrefill(const JSONRPCRequest& request)
     }
 
     EnsureWalletIsUnlocked();
-    pwalletMain->TopUpKeyPool(kpSize);
+    pwalletMain->TopUpKeyPoolCombo(kpSize);
 
     if (pwalletMain->GetKeyPoolSize() < (pwalletMain->IsHDEnabled() ? kpSize * 2 : kpSize))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error refreshing keypool.");

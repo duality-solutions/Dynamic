@@ -787,8 +787,6 @@ private:
     /* HD derive new child stealth key from  */
     bool DeriveChildStealthKey(const CKey& key);
 
-    void ReserveEdKeyFromKeyPool(int64_t& nIndex, CEdKeyPool& edkeypool, bool fInternal);    
-
     void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve);   
 
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
@@ -831,6 +829,12 @@ public:
     bool WalletNeedsUpgrading()
     {
         return fNeedToUpgradeWallet;
+    }
+
+    void SetUpdateKeyPoolsAndLinks()
+    {
+        fNeedToUpdateKeyPools = true;
+        fNeedToUpdateLinks = true;        
     }
 
     void LoadKeyPool(int nIndex, const CKeyPool& keypool)
@@ -997,6 +1001,7 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
+    void GenerateEdandStealthKey(CKey& keyIn);
     std::vector<unsigned char> GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn = CKey());
     //! HaveDHTKey implementation that also checks the mapHdPubKeys
     bool HaveDHTKey(const CKeyID &address) const override;
@@ -1143,12 +1148,9 @@ public:
     size_t EdKeypoolCountExternalKeys();
     size_t EdKeypoolCountInternalKeys();
     bool SyncEdKeyPool(); 
-    bool TopUpKeyPool(unsigned int kpSize = 0);
-    bool TopUpEdKeyPool(unsigned int kpSize = 0); 
-    bool TopUpKeyPoolCombo(unsigned int kpSize = 0);       
-    void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal);
+    bool TopUpKeyPoolCombo(unsigned int kpSize = 0);
+    void ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKeyPool& edkeypool, bool fInternal);
     void KeepKey(int64_t nIndex);
-    void KeepEdKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
     bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
     bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, CStealthAddress& sxAddr, bool fInternal);
