@@ -56,8 +56,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
     printf("NOTE: Genesis nTime = %u \n", genesisBlock.nTime);
     printf("WARN: Genesis nNonce (BLANK!) = %u \n", genesisBlock.nNonce);
 
-    arith_uint256 besthash;
-    memset(&besthash, 0xFF, 32);
+    arith_uint256 besthash = maxUint;
     arith_uint256 hashTarget = UintToArith256(powLimit);
     printf("Target: %s\n", hashTarget.GetHex().c_str());
     arith_uint256 newhash = UintToArith256(genesisBlock.GetHash());
