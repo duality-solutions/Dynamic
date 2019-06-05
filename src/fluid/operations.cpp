@@ -40,7 +40,7 @@ void SeparateString(const std::string& input, std::vector<std::string>& output, 
         boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
 }
 
-void SeparateFluidOpString(std::string input, std::vector<std::string>& output)
+void SeparateFluidOpString(const std::string& input, std::vector<std::string>& output)
 {
     std::vector<std::string> firstSplit;
     SeparateString(input, firstSplit);
@@ -60,7 +60,7 @@ void SeparateFluidOpString(std::string input, std::vector<std::string>& output)
     }
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter)
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const bool subDelimiter)
 {
     if (subDelimiter)
         return stringOne + SubDelimiter + stringTwo;
@@ -68,7 +68,7 @@ std::string StitchString(std::string stringOne, std::string stringTwo, bool subD
         return stringOne + PrimaryDelimiter + stringTwo;
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter)
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const std::string& stringThree, const bool subDelimiter)
 {
     if (subDelimiter)
         return stringOne + SubDelimiter + stringTwo + SubDelimiter + stringThree;
@@ -76,7 +76,7 @@ std::string StitchString(std::string stringOne, std::string stringTwo, std::stri
         return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
 }
 
-std::string GetRidOfScriptStatement(std::string input, int position)
+std::string GetRidOfScriptStatement(const std::string& input, const int& position)
 {
     std::vector<std::string> output;
     boost::split(output, input, boost::is_any_of(" "));
@@ -110,7 +110,6 @@ bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
     return false;
 #endif //ENABLE_WALLET
 }
-
 
 bool COperations::SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
 {

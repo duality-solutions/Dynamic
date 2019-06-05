@@ -16,7 +16,6 @@
 #include <boost/algorithm/string.hpp>
 
 
-
 BdapLinkDetailDialog::BdapLinkDetailDialog(QWidget *parent, LinkActions actionType, const std::string& requestor, const std::string& recipient, const UniValue& resultinput, bool displayInfo) : QDialog(parent),
                                                         ui(new Ui::BdapLinkDetailDialog)
 {
@@ -36,7 +35,6 @@ BdapLinkDetailDialog::~BdapLinkDetailDialog()
 {
     delete ui;
 }
-
 
 void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::string& requestor, const std::string& recipient, const UniValue& resultinput)
 {
@@ -71,8 +69,6 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
     else {
         result = resultinput;
     }
-
-
 
     for (size_t i {0} ; i < result.size() ; ++i) {
         keyName = "";
@@ -196,28 +192,7 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
 
 } //populateValues
 
-
 void BdapLinkDetailDialog::goClose()
 {
     QDialog::accept(); //accepted
 } //goClose
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

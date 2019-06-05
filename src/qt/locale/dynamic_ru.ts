@@ -5464,7 +5464,7 @@ rpcpassword =%s
         <translation>Needs Translating</translation>
     </message>
     <message>
-        <source>Registration days:</source>
+        <source>Registration months:</source>
         <translation>Needs Translating</translation>
     </message>
     <message>

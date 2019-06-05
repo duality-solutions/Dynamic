@@ -285,7 +285,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
     ExtractDestination(payee, address1);
     CDynamicAddress address2(address1);
 
-    LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
+    LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %ld to %s\n", FormatMoney(dynodePayment), address2.ToString());
 }
 
 int CDynodePayments::GetMinDynodePaymentsProto() const

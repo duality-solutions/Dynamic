@@ -51,8 +51,7 @@ public:
         Bantime = 1
     };
 
-    /** @name Methods overridden from QAbstractTableModel
-        @{*/
+    /** @name Methods overridden from QAbstractTableModel*/
     int rowCount(const QModelIndex& parent) const;
     int columnCount(const QModelIndex& parent) const;
     QVariant data(const QModelIndex& index, int role) const;
@@ -61,7 +60,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const;
     void sort(int column, Qt::SortOrder order);
     bool shouldShow();
-    /*@}*/
 
 public Q_SLOTS:
     void refresh();

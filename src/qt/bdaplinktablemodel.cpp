@@ -64,7 +64,6 @@ public:
             } //if rowcount
         } //if not isempty
 
-
         //Execute proper RPC call 
         if (tableWidgetName == "tableWidgetComplete") {
                 params.push_back("complete");
@@ -150,7 +149,7 @@ public:
             } //if searchRequestor...
 
 
-        }; //for loop
+        } //for loop
 
         //if we saved the previous state, apply to current results
         if (hasValues) {
@@ -193,8 +192,6 @@ public:
 
 }; //BdapLinkTablePriv
 
-
-
 BdapLinkTableModel::BdapLinkTableModel(BdapPage* parent) : QAbstractTableModel(parent),
                                                       bdapPage(parent),
                                                       timer(0)
@@ -236,7 +233,6 @@ void BdapLinkTableModel::stopAutoRefresh()
 {
     timer->stop();
 }
-
 
 int BdapLinkTableModel::rowCount(const QModelIndex& parent) const
 {
@@ -287,7 +283,6 @@ QModelIndex BdapLinkTableModel::index(int row, int column, const QModelIndex& pa
     return QModelIndex();
 }
 
-
 void BdapLinkTableModel::sort(int column, Qt::SortOrder order)
 {
     priv->sortColumn = column;
@@ -309,7 +304,6 @@ void BdapLinkTableModel::refreshAll()
 
 } //refreshAll
 
-
 void BdapLinkTableModel::refreshComplete()
 {
     searchCompleteRequestor = bdapPage->getCompleteRequestorSearch();
@@ -320,7 +314,6 @@ void BdapLinkTableModel::refreshComplete()
     Q_EMIT layoutChanged();
 }
 
-
 void BdapLinkTableModel::refreshPendingAccept()
 {
     searchPARequestor = bdapPage->getPARequestorSearch();
@@ -330,7 +323,6 @@ void BdapLinkTableModel::refreshPendingAccept()
     priv->refreshLinks(pendingAcceptTable,pendingAcceptStatus,searchPARequestor,searchPARecipient);
     Q_EMIT layoutChanged();
 }
-
 
 void BdapLinkTableModel::refreshPendingRequest()
 {

@@ -90,9 +90,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->tableWidgetComplete, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
 
     connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
-
-
-
 }
 
 BdapPage::~BdapPage()
@@ -122,10 +119,7 @@ void BdapPage::evaluateTransactionButtons()
             break;
 
     }; //end switch
-
-
 } //evaluateTransactionButtons
-
 
 //Links tab =========================================================================
 void BdapPage::listLinksComplete()
@@ -151,7 +145,6 @@ void BdapPage::listAllGroups()
     bdapAccountTableModel->refreshGroups();
 } //listAllGroups
 
-
 void BdapPage::addGroup()
 {
     if (!dynodeSync.IsBlockchainSynced())  {
@@ -163,11 +156,9 @@ void BdapPage::addGroup()
     dlg.setWindowTitle(QObject::tr("Add BDAP Group"));
     dlg.exec();
     if (dlg.result() == 1) {
-        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
         bdapAccountTableModel->refreshGroups();
     }
 } //addGroup
-
 
 void BdapPage::deleteGroup()
 {
@@ -223,12 +214,10 @@ void BdapPage::updateGroup()
     
     dlg.exec();
     if (dlg.result() == 1) {
-        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
         bdapAccountTableModel->refreshGroups();
     }
 
 } //updateGroup
-
 
 void BdapPage::getGroupDetails(int row, int column)
 {
@@ -236,8 +225,6 @@ void BdapPage::getGroupDetails(int row, int column)
     dlg.setWindowTitle(QObject::tr("BDAP Group Detail"));
     dlg.exec();
 } //getGroupDetails
-
-
 
 //Users tab =========================================================================
 void BdapPage::listAllUsers()
@@ -248,7 +235,6 @@ void BdapPage::listAllUsers()
 
 } //listAllUsers
 
-
 void BdapPage::addUser()
 {
     if (!dynodeSync.IsBlockchainSynced())  {
@@ -257,15 +243,11 @@ void BdapPage::addUser()
     }
 
     BdapAddUserDialog dlg(this);
-    //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
     if (dlg.result() == 1) {
-        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
         bdapAccountTableModel->refreshUsers();
     }
 } //addUser
-
-
 
 void BdapPage::getUserDetails(int row, int column)
 {
@@ -282,7 +264,6 @@ void BdapPage::addLink()
     }
 
     BdapAddLinkDialog dlg(this);
-    //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
 
     if (dlg.result() == 1) {
@@ -316,14 +297,10 @@ void BdapPage::acceptLink()
     reply = QMessageBox::question(this, QObject::tr("Confirm Accept Link"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        //excuteAcceptLink
         executeLinkTransaction(LinkActions::LINK_ACCEPT, requestor, recipient);
-    };
-
-
+    }
 
 } //acceptLink
-
 
 void BdapPage::getLinkDetails(int row, int column)
 {
@@ -342,12 +319,9 @@ void BdapPage::getLinkDetails(int row, int column)
     else if (tableSource == ui->tableWidgetPendingRequest) actionType = LinkActions::LINK_PENDING_REQUEST_DETAIL;
     else if (tableSource == ui->tableWidgetComplete) actionType = LinkActions::LINK_COMPLETE_DETAIL;
 
-    //excuteAcceptLink
     executeLinkTransaction(actionType, requestor, recipient);
 
-
 } //linkDetails
-
 
 void BdapPage::deleteUser()
 {
@@ -373,12 +347,9 @@ void BdapPage::deleteUser()
 
     if (reply == QMessageBox::Yes) {
         executeDeleteAccount(account, BDAP::ObjectType::BDAP_USER);
-
-    };
+    }
 
 } //deleteUser
-
-
 
 void BdapPage::updateUser()
 {
@@ -406,11 +377,9 @@ void BdapPage::updateUser()
     
     dlg.exec();
     if (dlg.result() == 1) {
-        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
         bdapAccountTableModel->refreshUsers();
     }
 } //updateUser
-
 
 void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accountType) {
 
@@ -429,46 +398,46 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
 
     params.push_back(objectID);
 
-        switch (accountType) {
-            case (BDAP::ObjectType::BDAP_USER):
-                jreq.params = RPCConvertValues("deleteuser", params);
-                jreq.strMethod = "deleteuser";
-                break;
-            case (BDAP::ObjectType::BDAP_GROUP):
-                jreq.params = RPCConvertValues("deletegroup", params);
-                jreq.strMethod = "deletegroup";
-                break;
-            default:
-                jreq.params = RPCConvertValues("deleteuser", params);
-                jreq.strMethod = "deleteuser";
-                break;
-        } //end switch
+    switch (accountType) {
+        case (BDAP::ObjectType::BDAP_USER):
+            jreq.params = RPCConvertValues("deleteuser", params);
+            jreq.strMethod = "deleteuser";
+            break;
+        case (BDAP::ObjectType::BDAP_GROUP):
+            jreq.params = RPCConvertValues("deletegroup", params);
+            jreq.strMethod = "deletegroup";
+            break;
+        default:
+            jreq.params = RPCConvertValues("deleteuser", params);
+            jreq.strMethod = "deleteuser";
+            break;
+    } //end switch
 
-        try {
-            UniValue result = tableRPC.execute(jreq);
+    try {
+        UniValue result = tableRPC.execute(jreq);
 
-            outputmessage = result.getValues()[0].get_str();
-            BdapUserDetailDialog dlg(this,accountType,"",result,true);
+        outputmessage = result.getValues()[0].get_str();
+        BdapUserDetailDialog dlg(this,accountType,"",result,true);
 
-            if (accountType == BDAP::ObjectType::BDAP_USER) {
-                dlg.setWindowTitle(QObject::tr("Successfully deleted user"));
-            } else  { //only other option for now is group
-                dlg.setWindowTitle(QObject::tr("Successfully deleted group"));
-            }; //end accountType if
+        if (accountType == BDAP::ObjectType::BDAP_USER) {
+            dlg.setWindowTitle(QObject::tr("Successfully deleted user"));
+        } else  { //only other option for now is group
+            dlg.setWindowTitle(QObject::tr("Successfully deleted group"));
+        }; //end accountType if
 
-            dlg.exec();
-            if (accountType == BDAP::ObjectType::BDAP_USER) bdapAccountTableModel->refreshUsers();
-            else if (accountType == BDAP::ObjectType::BDAP_GROUP) bdapAccountTableModel->refreshGroups();
+        dlg.exec();
+        if (accountType == BDAP::ObjectType::BDAP_USER) bdapAccountTableModel->refreshUsers();
+        else if (accountType == BDAP::ObjectType::BDAP_GROUP) bdapAccountTableModel->refreshGroups();
 
-            return;
-        } catch (const UniValue& objError) {
-            std::string message = find_value(objError, "message").get_str();
-            outputmessage = message;
-        } catch (const std::exception& e) {
-            outputmessage = e.what();
-        }
+        return;
+    } catch (const UniValue& objError) {
+        std::string message = find_value(objError, "message").get_str();
+        outputmessage = message;
+    } catch (const std::exception& e) {
+        outputmessage = e.what();
+    }
 
-        QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
+    QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
 
 } //executeDeleteAccount
 
@@ -540,9 +509,7 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
             dlg.setWindowTitle(QObject::tr("BDAP Pending Request Link Detail"));
         } else if (actionType == LinkActions::LINK_COMPLETE_DETAIL) {
             dlg.setWindowTitle(QObject::tr("BDAP Complete Link Detail"));
-        }; //end actionType if
-
-        //dlg.layout()->setSizeConstraint(QLayout::SetFixedSize);
+        } //end actionType if
 
         dlg.exec();
 
@@ -558,11 +525,7 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
         QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
     }
 
-
-
 } //executeLinkTransaction
-
-
 
 BdapAccountTableModel* BdapPage::getBdapAccountTableModel()
 {
@@ -574,12 +537,10 @@ BdapLinkTableModel* BdapPage::getBdapLinkTableModel()
     return bdapLinkTableModel;
 }
 
-
 QTableWidget* BdapPage::getCompleteTable() 
 { 
     return ui->tableWidgetComplete; 
 }
-
 
 QTableWidget* BdapPage::getPendingAcceptTable() 
 { 
@@ -593,12 +554,10 @@ QTableWidget* BdapPage::getPendingRequestTable()
     
 }
 
-
 QTableWidget* BdapPage::getUserTable() 
 { 
     return ui->tableWidget_Users; 
 }
-
 
 QTableWidget* BdapPage::getGroupTable() 
 { 
@@ -625,18 +584,15 @@ QLabel* BdapPage::getPendingRequestRecords()
     return ui->labelPRRecords;
 }
 
-
 QLabel* BdapPage::getGroupStatus()
 {
     return ui->labelGroupStatus;
 }
 
-
 int BdapPage::getCurrentIndex() 
 { 
     return ui->tabWidget->currentIndex(); 
 }
-
 
 bool BdapPage::getMyUserCheckBoxChecked() 
 { 
@@ -697,7 +653,3 @@ std::string BdapPage::getPRRecipientSearch()
 {
     return ui->lineEditPRRecipientSearch->text().toStdString();
 }
-
-
-
-

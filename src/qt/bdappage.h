@@ -32,7 +32,6 @@ enum LinkActions {
     LINK_COMPLETE_DETAIL = 5
 };
 
-
 namespace Ui
 {
 class BdapPage;
@@ -76,9 +75,6 @@ public:
     std::string getPRRequestorSearch();    
     std::string getPRRecipientSearch();    
 
-
-
-
 private:
     Ui::BdapPage* ui;
     WalletModel* model;
@@ -87,8 +83,6 @@ private:
     BdapLinkTableModel* bdapLinkTableModel;
     void executeDeleteAccount(std::string account, BDAP::ObjectType accountType);
     void executeLinkTransaction(LinkActions actionType, std::string requestor, std::string recipient);
-
-
 
 private Q_SLOTS:
 

@@ -4,8 +4,8 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
 #include "bdap/utils.h"
-#include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "rpcprotocol.h"
@@ -18,7 +18,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend);
 
 static constexpr bool fPrintDebug = true;
 
@@ -49,47 +49,31 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
-    //now using GetKeyFromPool instead of MakeNewKey
     CPubKey pubWalletKey;
     CharString vchDHTPubKey;
-    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, true))
+    CStealthAddress sxAddr;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchDHTPubKey, sxAddr, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
-    
-    CharString vchWalletAddress = vchFromString(walletAddress.ToString());
-    txDomainEntry.WalletAddress = vchWalletAddress;
+    txDomainEntry.WalletAddress = vchFromString(walletAddress.ToString());
 
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
     CKeyID vchDHTPubKeyID = GetIdFromCharVector(vchDHTPubKey); 
     pwalletMain->SetAddressBook(vchDHTPubKeyID, strObjectID, "bdap-dht-key"); 
 
-    // TODO: Add ability to pass in the link address
-    // TODO: Use stealth address for the link address so linking will be private
-    //now using GetKeyFromPool instead of MakeNewKey
-    CPubKey pubLinkKey;
-    CharString NAvchDHTPubKey; //not really used
-    if (!pwalletMain->GetKeysFromPool(pubLinkKey, NAvchDHTPubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    //pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
 
-    CKeyID keyLinkID = pubLinkKey.GetID();
-    CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
+    txDomainEntry.LinkAddress = vchFromString(sxAddr.ToString());
 
-    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
-    
-    CharString vchLinkAddress = vchFromString(linkAddress.ToString());
-    txDomainEntry.LinkAddress = vchLinkAddress;
-
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
     if (request.params.size() >= 3) {
-        if (!ParseInt64(request.params[2].get_str(), &nDays))
+        if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
     }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
     txDomainEntry.Serialize(data);
@@ -98,7 +82,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << txDomainEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -108,12 +92,11 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
-    // Send the transaction
-    CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-
+    // Get BDAP fees
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
@@ -121,11 +104,11 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     bool fUseInstantSend = false;
     if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    // Send the transaction
+    CWalletTx wtx;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -157,9 +140,9 @@ UniValue adduser(const JSONRPCRequest& request)
         throw std::runtime_error(
             "adduser \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The account userid\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of days to register account\n"
+            "1. account id           (string)             The account userid\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of months to register account\n"
             "\nAdds a new bdap.io public name account entry to the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -415,13 +398,12 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
     if (request.params.size() >= 3) {
-        if (!ParseInt64(request.params[2].get_str(), &nDays))
+        if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
     }
-    int64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txUpdatedEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    //txUpdatedEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txUpdatedEntry.Serialize(data);
@@ -430,7 +412,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << txUpdatedEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;
@@ -441,12 +423,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
-    // Send the transaction
-    CWalletTx wtx;
-    float fYears = ((float)nDays/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-
+    // Get BDAP fees
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
@@ -454,11 +435,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     bool fUseInstantSend = false;
     if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    // Send the transaction
+    CWalletTx wtx;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -486,9 +467,9 @@ UniValue updateuser(const JSONRPCRequest& request)
         throw std::runtime_error(
             "updateuser \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The account objectid within public.bdap.io\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of additional days to register account\n"
+            "1. account id           (string)             The account objectid within public.bdap.io\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of additional months to register the account\n"
             "\nUpdates an existing bdap.io public name account entry in the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -533,9 +514,9 @@ UniValue updategroup(const JSONRPCRequest& request)
         throw std::runtime_error(
             "updategroup \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
-            "1. groupid            (string)             The account objectid within public.bdap.io\n"
-            "2. common name        (string)             The account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of additional days to register account\n"
+            "1. groupid              (string)             The account objectid within public.bdap.io\n"
+            "2. common name          (string)             The account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of additional months to register the account\n"
             "\nUpdates an existing bdap.io public group account entry in the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -616,13 +597,17 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create empty BDAP OP_RETURN script
     CScript scriptData;
 
+    // Get BDAP fees
+    uint16_t nMonths = 0;
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (!GetBDAPFees(OP_BDAP_DELETE, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+
     // Send the transaction
     CWalletTx wtx;
-    CAmount nOperationFee = (GetBDAPFee(scriptPubKey) * powf(3.1, 1)) + GetDataFee(scriptPubKey);
-    CAmount nDataFee = 0; // No OP_RETURN data needed for deleted account transactions
-
     bool fUseInstantSend = false;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -802,9 +787,9 @@ UniValue addgroup(const JSONRPCRequest& request)
         throw std::runtime_error(
             "addgroup \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             The new group account id\n"
-            "2. common name        (string)             The group account common name used for searching\n"
-            "3. registration days  (int, optional)      Number of days to register the account\n"
+            "1. account id           (string)             The new group account id\n"
+            "2. common name          (string)             The group account common name used for searching\n"
+            "3. registration months  (int, optional)      Number of months to register the account\n"
             "\nAdds a new bdap.io public group account entry to the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"

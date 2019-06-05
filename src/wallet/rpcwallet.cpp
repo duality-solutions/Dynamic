@@ -215,11 +215,9 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
 
     CPubKey walletPubKey;
     CStealthAddress sxAddr;
-    if (!pwalletMain->GetStealthAddressFromPool(walletPubKey, sxAddr, false))
+    std::vector<unsigned char> vchEd25519PubKey;
+    if (!pwalletMain->GetKeysFromPool(walletPubKey, vchEd25519PubKey, sxAddr, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-
-    if (!pwalletMain->AddStealthAddress(sxAddr))
-        throw std::runtime_error(strprintf("%s -- Failed to write stealth address to local wallet.\n", __func__));
 
     return sxAddr.ToString();
 }
@@ -461,15 +459,15 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend)
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amount
-    if (nOPValue <= 0)
+    if (nRegFee <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
 
-    if (nOPValue + nDataValue > curBalance)
+    if (nRegFee + nDepositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
     // Create and send the transaction
@@ -482,11 +480,11 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    if (nDataValue > 0) {
-        CRecipient recDataScript = {bdapDataScript, 0, false};
+    if (nRegFee > 0) {
+        CRecipient recDataScript = {bdapDataScript, nRegFee, false};
         vecSend.push_back(recDataScript);
     }
-    CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
+    CRecipient recOPScript = {bdapOPScript, nDepositFee, false};
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
@@ -502,16 +500,16 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     }
 }
 
-void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
-                                CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend)
+void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
+                                CWalletTx& wtxNew, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amount
-    if (nOPValue <= 0)
+    if (nOneTimeFee <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendLinkingTransaction invalid amount");
 
-    if (nOPValue + nDataValue > curBalance)
+    if (nOneTimeFee + nDepositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendLinkingTransaction insufficient funds");
 
     // Create and send the transaction
@@ -524,14 +522,19 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     LogPrintf("Sending BDAP Linking Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrintf("Sending BDAP Linking OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    if (nDataValue > 0) {
-        CRecipient recDataScript = {bdapDataScript, 0, false};
-        vecSend.push_back(recDataScript);  
+    if (nOneTimeFee > 0) {
+        CRecipient recDataScript = {bdapDataScript, nOneTimeFee, false};
+        vecSend.push_back(recDataScript);
+        if (stealthScript.size() > 0) {
+            CRecipient sendStealthData = {stealthScript, 0, false};
+            vecSend.push_back(sendStealthData);
+            LogPrintf("Sending Stealth Script: %s\n", ScriptToAsmStr(stealthScript));
+        }
     }
+    CRecipient recOPScript = {bdapOPScript, nDepositFee, false};
 
-    CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recOPScript);
-    // TODO (bdap) Make sure sendAddress is used to fund the transaction.
+    // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())

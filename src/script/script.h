@@ -192,11 +192,11 @@ enum opcodetype {
     OP_UPDATE_FEES = 0xc6,
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
+    OP_BDAP_REVOKE = 0xc9,               // = BDAP delete using fluid protocol
 
     // BDAP directory access, user identity and certificate system
     OP_BDAP_NEW = 0x01,                  // = BDAP create new entry
     OP_BDAP_DELETE = 0x02,               // = BDAP user delete entry
-    OP_BDAP_REVOKE = 0x03,               // = BDAP delete using fluid protocol
     OP_BDAP_MODIFY = 0x04,               // = BDAP update entry
     OP_BDAP_MODIFY_RDN = 0x05,           // = move BDAP entry
     OP_BDAP_ACCOUNT_ENTRY  = 0x06,       // = BDAP domain account entry (users and groups) 
@@ -678,6 +678,9 @@ public:
         case MINING_MODIFY_TX:
             return (size() > 0 && *begin() == OP_REWARD_MINING);
             break;
+        case BDAP_REVOKE_TX:
+            return (size() > 0 && *begin() == OP_BDAP_REVOKE);
+            break;
         default:
             throw std::runtime_error("Protocol code is invalid!");
         }
@@ -753,7 +756,6 @@ public:
 };
 
 // TODO: Use a seperate code file for these BDAP functions
-bool IsDirectoryOp(int op);
 bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
 bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);

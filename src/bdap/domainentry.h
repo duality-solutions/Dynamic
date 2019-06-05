@@ -6,6 +6,7 @@
 #define DYNAMIC_BDAP_DOMAINENTRY_H
 
 #include "bdap.h"
+#include "bdap/utils.h"
 #include "amount.h"
 #include "consensus/params.h"
 #include "primitives/transaction.h"
@@ -37,12 +38,6 @@ class CTxMemPool;
 */
 
 using namespace BDAP;
-
-namespace BDAP {
-    std::string GetObjectTypeString(unsigned int nObjectType);
-    unsigned int GetObjectTypeInt(BDAP::ObjectType ObjectType);
-    BDAP::ObjectType GetObjectTypeEnum(unsigned int nObjectType);
-}
 
 class CDomainEntryDefaultParameters {
 public:
