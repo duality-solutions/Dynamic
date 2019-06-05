@@ -27,12 +27,12 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-            "createrawbdapaccount \"account id\" \"common name\" \"registration days\" \"object type\"\n"
+            "createrawbdapaccount \"account id\" \"common name\" \"registration months\" \"object type\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             BDAP account id requesting the link\n"
-            "2. common name        (string)             Free text comman name for BDAP account with a max length of 95 characters\n"
-            "3. registration days  (int, optional)      Number of registration days for the new account.  Defaults to 2 years.\n"
-            "4. object type        (int, optional)      Type of BDAP account to create. 1 = user and 2 = group.  Default to 1 for user.\n"
+            "1. account id           (string)             BDAP account id requesting the link\n"
+            "2. common name          (string)             Free text comman name for BDAP account with a max length of 95 characters\n"
+            "3. registration months  (int, optional)      Number of registration months for the new account.  Defaults to 2 years.\n"
+            "4. object type          (int, optional)      Type of BDAP account to create. 1 = user and 2 = group.  Default to 1 for user.\n"
             "\nCreates a raw hex encoded BDAP transaction without inputs and with new outputs from this wallet.\n"
             "\nCall fundrawtransaction to pay for the BDAP account, then signrawtransaction and last sendrawtransaction\n"
             "\nResult:\n"
