@@ -39,13 +39,6 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Registration Days:</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="lineEditRequestor">
          <property name="placeholderText">
@@ -64,13 +57,6 @@
         <widget class="QLineEdit" name="lineEditLinkMessage">
          <property name="placeholderText">
           <string>(required)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEditRegistrationDays">
-         <property name="placeholderText">
-          <string>(optional)</string>
          </property>
         </widget>
        </item>

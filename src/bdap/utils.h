@@ -6,7 +6,6 @@
 #define DYNAMIC_BDAP_UTILS_H
 
 #include "bdap/bdap.h"
-#include "amount.h"
 #include "primitives/transaction.h"
 
 #include <string>
@@ -24,7 +23,11 @@ namespace Consensus {
     struct Params;
 }
 
-
+namespace BDAP {
+    std::string GetObjectTypeString(unsigned int nObjectType);
+    unsigned int GetObjectTypeInt(BDAP::ObjectType ObjectType);
+    BDAP::ObjectType GetObjectTypeEnum(unsigned int nObjectType);
+}
 
 std::string BDAPFromOp(const int op);
 bool IsBDAPDataOutput(const CTxOut& out);
@@ -38,8 +41,6 @@ std::vector<unsigned char> vchFromString(const std::string& str);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
-CAmount GetDataFee(const CScript& scriptPubKey);
-CAmount GetBDAPFee(const CScript& scriptPubKey);
 bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
 int GetBDAPOpType(const CScript& script);

@@ -14,6 +14,9 @@
 #include "consensus/params.h"
 #include "consensus/validation.h"
 #include "core_io.h"
+#include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
+#include "fluid/fluidmint.h"
 #include "init.h"
 #include "miner/miner.h"
 #include "net.h"
@@ -838,11 +841,12 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         // Note that this can probably also be removed entirely after the first BIP9 non-force deployment (ie, probably segwit) gets activated
         aMutable.push_back("version/force");
     }
-
+    int64_t nHeight = (int64_t)(pindexPrev->nHeight + 1);
+    CAmount nCoinbaseValue = pblock->vtx[0]->GetValueOut();
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
-    result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->GetValueOut()));
+    result.push_back(Pair("coinbasevalue", (int64_t)nCoinbaseValue));
     result.push_back(Pair("longpollid", chainActive.Tip()->GetBlockHash().GetHex() + i64tostr(nTransactionsUpdatedLast)));
     result.push_back(Pair("target", hashTarget.GetHex()));
     result.push_back(Pair("mintime", (int64_t)pindexPrev->GetMedianTimePast() + 1));
@@ -852,7 +856,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("sizelimit", (int64_t)MAX_BLOCK_SIZE));
     result.push_back(Pair("curtime", pblock->GetBlockTime()));
     result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
-    result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight + 1)));
+    result.push_back(Pair("height", nHeight));
 
     UniValue dynodeObj(UniValue::VOBJ);
     if (pblocktemplate->txoutDynode != CTxOut()) {
@@ -880,9 +884,36 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             superblockObjArray.push_back(entry);
         }
     }
+    CFluidMint fluidMint;
+    bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
+    CScript scriptMint;
+    if (areWeMinting) {
+        // Add minting output to superblock payments
+        CAmount fluidIssuance = nCoinbaseValue - GetFluidDynodeReward(nHeight) - GetFluidMiningReward(nHeight);
+        if (fluidIssuance > 0) {
+            UniValue entry(UniValue::VOBJ);
+            CDynamicAddress mintAddress = fluidMint.GetDestinationAddress();
+            if (!mintAddress.IsScript()) {
+                scriptMint = GetScriptForDestination(mintAddress.Get());
+            } else {
+                CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
+                scriptMint = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
+            }
+            entry.push_back(Pair("payee", mintAddress.ToString().c_str()));
+            entry.push_back(Pair("script", HexStr(scriptMint.begin(), scriptMint.end())));
+            entry.push_back(Pair("amount", (int64_t)fluidIssuance));
+            superblockObjArray.push_back(entry);
+        }
+    }
     result.push_back(Pair("superblock", superblockObjArray));
-    result.push_back(Pair("superblocks_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nSuperblockStartBlock));
-    result.push_back(Pair("superblocks_enabled", sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)));
+    if (areWeMinting) {
+        result.push_back(Pair("superblocks_started", true));
+        result.push_back(Pair("superblocks_enabled", true));
+    }
+    else {
+        result.push_back(Pair("superblocks_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nSuperblockStartBlock));
+        result.push_back(Pair("superblocks_enabled", sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)));
+    }
 
     return result;
 }

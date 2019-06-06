@@ -1395,10 +1395,8 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     UpdateKeyPoolsFromTransactions(strOpType,vvchOpParameters);
                     if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
                         uint64_t nExpireTime = 0;
-                        if (vvchOpParameters.size() > 2) {
-                            nExpireTime = (uint64_t)CScriptNum(vvchOpParameters[2], false).getint();
-                        }
                         uint64_t nHeight = pIndex ? (uint64_t)pIndex->nHeight : (uint64_t)chainActive.Height();
+                        // get block time from height.
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
                         std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
                         CWalletDB walletdb(strWalletFile);
@@ -4665,11 +4663,9 @@ void CWallet::UpdateKeyPoolsFromTransactions(const std::string& strOpType, const
     std::vector<unsigned char> key1 = vvchOpParameters[1];
 
     if (strOpType == "bdap_new_account") {
-        //reservedEd25519PubKeys.push_back(key1);
         ReserveEdKeyForTransactions(key1);
     }
     else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
-        //reservedEd25519PubKeys.push_back(key0);
         ReserveEdKeyForTransactions(key0);
         fNeedToUpdateLinks = true;
     }
@@ -4755,10 +4751,11 @@ void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubK
         }
 
         if (EraseIndex) {
-                std::set<int64_t>::iterator eraseIndexEd = setInternalEdKeyPool.find(IndexToErase);
-                std::set<int64_t>::iterator eraseIndex = setInternalKeyPool.find(IndexToErase);
-
+            std::set<int64_t>::iterator eraseIndexEd = setInternalEdKeyPool.find(IndexToErase);
+            std::set<int64_t>::iterator eraseIndex = setInternalKeyPool.find(IndexToErase);
+            if (eraseIndexEd != setInternalEdKeyPool.end())
                 setInternalEdKeyPool.erase(eraseIndexEd);
+            if (eraseIndex != setInternalKeyPool.end())
                 setInternalKeyPool.erase(eraseIndex);
         }
 
@@ -4772,7 +4769,7 @@ void CWallet::KeepKey(int64_t nIndex)
         walletdb.ErasePool(nIndex);
         walletdb.EraseEdPool(nIndex);
         nKeysLeftSinceAutoBackup = nWalletBackups ? nKeysLeftSinceAutoBackup - 1 : 0;
-     }
+    }
     LogPrintf("keypool keep %d\n", nIndex);
     LogPrintf("edkeypool keep %d\n", nIndex);
 }

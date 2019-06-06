@@ -14,12 +14,10 @@
 
 #include <memory>
 
-
 enum LinkUserType {
     LINK_REQUESTOR = 0,
     LINK_RECIPIENT = 1
 };
-
 
 namespace Ui
 {
@@ -34,8 +32,6 @@ public:
     explicit BdapAddLinkDialog(QWidget *parent = 0);
     ~BdapAddLinkDialog();
 
-
-
 private:
     Ui::BdapAddLinkDialog* ui;
     std::string ignoreErrorCode(const std::string input);
@@ -45,8 +41,6 @@ private:
 
     std::string getIdFromPath(std::string inputstring);
     void populateList(std::vector<std::string> &inputList, LinkUserType userType);
-
-
 
 private Q_SLOTS:
 

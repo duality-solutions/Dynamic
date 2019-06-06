@@ -4,6 +4,8 @@
 
 #include "bdap/linkingdb.h"
 
+#include "amount.h"
+#include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "base58.h"
 #include "validation.h"
@@ -276,7 +278,7 @@ static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString&
 }
 
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
-                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+                                const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck) {
         LogPrintf("%s -- Trying to add BDAP link in coinbase transaction, skipping...\n", __func__);
@@ -290,12 +292,60 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
     if (!GetBDAPDataScript(tx, scriptData))
         return false;
 
+    // extract amounts from tx.
+    CAmount dataAmount, opAmount;
+    if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+        errorMessage = "Unable to extract BDAP amounts from transaction";
+        return false;
+    }
+
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
 
+    CAmount monthlyFee, oneTimeFee, depositFee;
     if (strOperationType == "bdap_new_link_request") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, BDAP::ObjectType::BDAP_LINK_REQUEST, nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get BDAP fees for new link request";
+            return false;
+        }
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP fee amount for a new BDAP link request";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link request. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link request. Total paid %d, should be %d\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        }
         return CheckNewLinkRequestTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
     else if (strOperationType == "bdap_new_link_accept") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, BDAP::ObjectType::BDAP_LINK_ACCEPT, nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get BDAP fees for new link accept";
+            return false;
+        }
+        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
+        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
+            if (ENFORCE_BDAP_FEES) {
+                errorMessage = "Invalid BDAP fee amount for a new BDAP link accept";
+                return false;
+            }
+            else {
+                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link accept. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            }
+        }
+        else {
+            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link accept. Total paid %d, should be %d\n", __func__, 
+                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        }
         return CheckNewLinkAcceptTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
 

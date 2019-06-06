@@ -24,6 +24,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "fluid/banaccount.h"
 #include "fluid/fluid.h"
 #include "fluid/fluiddb.h"
 #include "fluid/fluiddynode.h"
@@ -656,7 +657,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
 
             std::string strOpType = GetBDAPOpTypeString(op1, op2);
             if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
-                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -667,7 +668,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
             else if (strOpType == "bdap_new_link_request") {
                 std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
                 LogPrint("bdap", "%s -- New Link Request vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
-                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -685,7 +686,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
             else if (strOpType == "bdap_new_link_accept") {
                 std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
                 LogPrint("bdap", "%s -- New Link Accept vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
-                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -752,7 +753,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 // fluid transaction is already in the mempool.  Reject tx.
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
-            if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
+            std::string strFluidOpScript = ScriptToAsmStr(txout.scriptPubKey);
+            std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
+            std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+            if (strOperationCode == "OP_BDAP_REVOKE" && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                return state.Invalid(false, REJECT_INVALID, "bdap-spork-inactive");
+
+            if (!fluid.ExtractCheckTimestamp(strOperationCode, ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
             }
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
@@ -2505,6 +2512,33 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     }
                     pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }
+            } else if (OpCode == OP_BDAP_REVOKE) {
+                if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
+                    return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");
+
+                if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
+
+                std::vector<CDomainEntry> vBanAccounts;
+                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, strError))
+                    return state.DoS(0, error("%s -- CheckAccountBanScript failed: %s", __func__, strError), REJECT_INVALID, "fluid-ban-script-invalid");
+
+                int64_t nTimeStamp;
+                std::vector<std::vector<unsigned char>> vSovereignAddresses;
+                if (fluid.ExtractTimestampWithAddresses("OP_BDAP_REVOKE", scriptFluid, nTimeStamp, vSovereignAddresses)) {
+                    for (const CDomainEntry& entry : vBanAccounts) {
+                        LogPrintf("%s -- Fluid command banning account %s\n", __func__, entry.GetFullObjectPath());
+                        if (!DeleteDomainEntry(entry))
+                            LogPrintf("%s -- Error deleting account %s\n", __func__, entry.GetFullObjectPath());
+
+                        CBanAccount banAccount(scriptFluid, entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
+                        AddBanAccountEntry(banAccount);
+                    }
+                }
+            } else {
+                std::string strFluidOpScript = ScriptToAsmStr(scriptFluid);
+                std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+                return state.DoS(100, error("%s -- Invalid fluid operation code %s (%d)", __func__, strOperationCode, OpCode), REJECT_INVALID, "invalid-fluid-operation-code");
             }
         }
     }

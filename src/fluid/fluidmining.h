@@ -77,6 +77,16 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CFluidMining operator=(const CFluidMining& b)
     {
         FluidScript = b.FluidScript;

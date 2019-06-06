@@ -82,6 +82,7 @@ DYNAMIC_CORE_H = \
   bdap/domainentrydb.h \
   bdap/certificate.h \
   bdap/entrycheckpoints.h \
+  bdap/fees.h \
   bdap/identity.h \
   bdap/linking.h \
   bdap/linkingdb.h \
@@ -142,6 +143,7 @@ DYNAMIC_CORE_H = \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid/banaccount.h \
   fluid/fluid.h \
   fluid/fluiddb.h \
   fluid/fluiddynode.h \
@@ -268,6 +270,7 @@ libdynamic_server_a_SOURCES = \
   bdap/domainentrydb.cpp \
   bdap/certificate.cpp \
   bdap/entrycheckpoints.cpp \
+  bdap/fees.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
   bdap/linkingdb.cpp \
@@ -296,6 +299,7 @@ libdynamic_server_a_SOURCES = \
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
+  fluid/banaccount.cpp \
   fluid/fluid.cpp \
   fluid/fluiddb.cpp \
   fluid/fluiddynode.cpp \
