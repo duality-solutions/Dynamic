@@ -10,6 +10,7 @@
 #include "alert.h"
 #include "arith_uint256.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
@@ -1034,6 +1035,16 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         CAmount nValueOut = tx.GetValueOut();
         CAmount nFees = nValueIn - nValueOut;
+        CAmount nBDAPBurn = 0;
+        if (tx.nVersion == BDAP_TX_VERSION) {
+            // Since fees are burned, count BDAP burn funds into fee calculation
+            CAmount nOpCodeAmount;
+            ExtractAmountsFromTx(MakeTransactionRef(tx), nBDAPBurn, nOpCodeAmount);
+            if (nBDAPBurn > 0)
+                nFees += nBDAPBurn;
+
+            LogPrintf("%s -- BDAP Burn Amount %d, Total Fees %d, BDAP Deposit Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nFees), FormatMoney(nOpCodeAmount));
+        }
         // nModifiedFees includes any fee deltas from PrioritiseTransaction
         CAmount nModifiedFees = nFees;
         double nPriorityDummy = 0;
@@ -1096,7 +1107,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             dFreeCount += nSize;
         }
 
-        if (nAbsurdFee && nFees > nAbsurdFee)
+        if (nAbsurdFee && nFees - nBDAPBurn > nAbsurdFee)
             return state.Invalid(false,
                 REJECT_HIGHFEE, "absurdly-high-fee",
                 strprintf("%d > %d", nFees, nAbsurdFee));
