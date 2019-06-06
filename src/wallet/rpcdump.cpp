@@ -152,11 +152,15 @@ UniValue importprivkey(const JSONRPCRequest& request)
             if (!pwalletMain->AddKeyPubKey(key, pubkey))
                 throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
+            pwalletMain->GenerateEdandStealthKey(key);
+
             // whenever a key is imported, we need to scan the whole chain
             pwalletMain->UpdateTimeFirstKey(1);
         }
 
         if (fRescan || !isskip) {
+            pwalletMain->SetUpdateKeyPoolsAndLinks();
+
             pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
         }
     }
@@ -858,7 +862,6 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
-
     
     LOCK2(cs_main, pwalletMain->cs_wallet);
     UniValue entry(UniValue::VOBJ);

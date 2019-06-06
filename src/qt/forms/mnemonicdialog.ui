@@ -664,16 +664,6 @@ Wallet wil restart after mnemonic has been imported.</string>
              </property>
             </spacer>
            </item>
-           <item>
-            <widget class="QCheckBox" name="checkBoxPrivateKeyForceRescan">
-             <property name="text">
-              <string>Force Rescan</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
          <item>
