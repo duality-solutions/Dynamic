@@ -283,11 +283,7 @@ bool CVGPMessage::IsNull() const
 
 uint256 CVGPMessage::GetHash() const
 {
-    CUnsignedVGPMessage unsignedMessage(vchMsg);
-    if (unsignedMessage.nVersion == 1)
-        return Hash(this->vchMsg.begin(), this->vchMsg.end());
-
-    return unsignedMessage.GetHash();
+    return CUnsignedVGPMessage(vchMsg).GetHash();
 }
 
 bool CVGPMessage::IsInEffect() const
@@ -391,9 +387,9 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
         strErrorMessage = "VGP message has an invalid signature. Adding 100 to ban score.";
         return 100; // this will add 100 to the peer's ban score
     }
-    if (unsignedMessage.nVersion > 1 && UintToArith256(unsignedMessage.GetHash()) > UintToArith256(VGP_MESSAGE_MIN_HASH_TARGET))
+    if (UintToArith256(unsignedMessage.GetHash()) > UintToArith256(VGP_MESSAGE_MIN_HASH_TARGET))
     {
-        LogPrintf("%s -- message %s\n", __func__, unsignedMessage.ToString());
+        LogPrintf("%s -- message proof hash failed to meet target %s\n", __func__, unsignedMessage.ToString());
         strErrorMessage = "Message proof of work is invalid and under the target.";
         return 100; // this will add 100 to the peer's ban score
     }

@@ -41,7 +41,7 @@ static const uint256 VGP_MESSAGE_MIN_HASH_TARGET = uint256S("00fffffffffffffffff
 class CUnsignedVGPMessage
 {
 public:
-    static const int CURRENT_VERSION = 2;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     uint256 SubjectID;
     uint256 MessageID; // derived by hashing the public key + nTimestamp
