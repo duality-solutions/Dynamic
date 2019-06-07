@@ -22,7 +22,6 @@ class CKey;
 class CKeyEd25519;
 class CNode;
 class CVGPMessage;
-class uint256;
 
 static constexpr size_t MAX_MESSAGE_SIZE = 8192;
 static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
@@ -34,11 +33,15 @@ static constexpr int KEEP_MESSAGE_LOG_ALIVE_SECONDS = 300; // 5 minutes.
 static constexpr int KEEP_MY_MESSAGE_ALIVE_SECONDS = 240; // 4 minutes.
 static constexpr int MAX_MESAGGE_DRIFT_SECONDS = 90; // 1.5 minutes.
 static constexpr int MAX_MESAGGE_RELAY_SECONDS = 120; // 2 minutes.
+static const uint256 VGP_MESSAGE_MIN_HASH_TARGET = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
+// TODO (BDAP): do not support v1 messages or change hash proof message to v1.
+//! Version VPG message 1 doesn't contain hash proof to prevent spam
+//! Version 2 requires hash proof
 class CUnsignedVGPMessage
 {
 public:
-    static const int CURRENT_VERSION = 1;
+    static const int CURRENT_VERSION = 2;
     int nVersion;
     uint256 SubjectID;
     uint256 MessageID; // derived by hashing the public key + nTimestamp
@@ -47,7 +50,7 @@ public:
     int64_t nTimeStamp;
     int64_t nRelayUntil; // when newer nodes stop relaying to newer nodes
     std::vector<unsigned char> vchMessageData;
-    
+    uint32_t nNonce;
 
     CUnsignedVGPMessage(const uint256& subjectID, const uint256& messageID, const std::vector<unsigned char> wallet, int64_t timestamp, int64_t stoptime)
         : SubjectID(subjectID), MessageID(messageID), vchWalletPubKey(wallet), nTimeStamp(timestamp), nRelayUntil(stoptime)
@@ -79,6 +82,7 @@ public:
         READWRITE(nTimeStamp);
         READWRITE(nRelayUntil);
         READWRITE(vchMessageData);
+        READWRITE(nNonce);
     }
 
     inline CUnsignedVGPMessage operator=(const CUnsignedVGPMessage& b)
@@ -91,6 +95,7 @@ public:
         nTimeStamp = b.nTimeStamp;
         nRelayUntil = b.nRelayUntil;
         vchMessageData = b.vchMessageData;
+        nNonce = b.nNonce;
         return *this;
     }
 
@@ -120,6 +125,7 @@ public:
     std::vector<unsigned char> SenderFQDN();
     bool KeepLast();
     std::string ToString() const;
+    uint256 GetHash() const;
 
 };
 
@@ -169,6 +175,8 @@ public:
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     int ProcessMessage(std::string& strErrorMessage) const;
     bool RelayTo(CNode* pnode, CConnman& connman) const;
+    int Version() const;
+    void MineMessage();
 
 };
 

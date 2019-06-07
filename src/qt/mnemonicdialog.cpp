@@ -115,7 +115,7 @@ void MnemonicDialog::combobox2ItemChanged(int input)
 
 void MnemonicDialog::on_importPrivatekey_clicked()
 {
-    bool ForceRescan = ui->checkBoxPrivateKeyForceRescan->isChecked();
+    bool ForceRescan = true;
     
     importPrivatekey(ForceRescan);
 }

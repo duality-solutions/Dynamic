@@ -5,6 +5,7 @@
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
+#include "bdap/stealth.h"
 #include "bdap/utils.h"
 #include "core_io.h" // for EncodeHexTx
 #include "rpcprotocol.h"
@@ -27,12 +28,12 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-            "createrawbdapaccount \"account id\" \"common name\" \"registration days\" \"object type\"\n"
+            "createrawbdapaccount \"account id\" \"common name\" \"registration months\" \"object type\"\n"
             "\nArguments:\n"
-            "1. account id         (string)             BDAP account id requesting the link\n"
-            "2. common name        (string)             Free text comman name for BDAP account with a max length of 95 characters\n"
-            "3. registration days  (int, optional)      Number of registration days for the new account.  Defaults to 2 years.\n"
-            "4. object type        (int, optional)      Type of BDAP account to create. 1 = user and 2 = group.  Default to 1 for user.\n"
+            "1. account id           (string)             BDAP account id requesting the link\n"
+            "2. common name          (string)             Free text comman name for BDAP account with a max length of 95 characters\n"
+            "3. registration months  (int, optional)      Number of registration months for the new account.  Defaults to 2 years.\n"
+            "4. object type          (int, optional)      Type of BDAP account to create. 1 = user and 2 = group.  Default to 1 for user.\n"
             "\nCreates a raw hex encoded BDAP transaction without inputs and with new outputs from this wallet.\n"
             "\nCall fundrawtransaction to pay for the BDAP account, then signrawtransaction and last sendrawtransaction\n"
             "\nResult:\n"
@@ -129,7 +130,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << txDomainEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -140,15 +141,23 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Create script to fund link transaction for this account
-    CScript scriptDest;
+    CScript scriptStealth;
     std::vector<uint8_t> vStealthData;
     std::string sError;
-    if (0 != PrepareStealthOutput(sxAddr, scriptDest, vStealthData, sError)) {
+    if (0 != PrepareStealthOutput(sxAddr, scriptStealth, vStealthData, sError)) {
         LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid stealth destination address %s", sxAddr.ToString()));
-    }  
+    }
+
     CScript stealthScript;
     stealthScript << OP_RETURN << vStealthData;
+
+    CTxDestination newStealthDest;
+    if (!ExtractDestination(scriptStealth, newStealthDest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Unable to get destination address using stealth address %s", sxAddr.ToString()));
+
+    CDynamicAddress addressStealth(newStealthDest);
+    CScript stealtDestination = GetScriptForDestination(addressStealth.Get());
 
     // Add the Stealth OP return data
     CTxOut outStealthData(0, stealthScript);
@@ -161,7 +170,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     rawTx.vout.push_back(outOP);
     // Add the BDAP link funds output
     CAmount nLinkAmount(0.0400004 * COIN); // enough for 4 links
-    CTxOut outLinkFunds(nLinkAmount, scriptDest);
+    CTxOut outLinkFunds(nLinkAmount, stealtDestination);
     rawTx.vout.push_back(outLinkFunds);
 
     return EncodeHexTx(rawTx);
@@ -253,7 +262,7 @@ static const CRPCCommand commands[] =
   //  --------------------- ----------------------------- -------------------------- ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,      true, {"account id", "common name", "registration days", "object type"} },
+    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,      true, {"account id", "common name", "registration months", "object type"} },
     { "bdap",               "sendandpayrawbdapaccount",   &sendandpayrawbdapaccount,  true, {"hexstring"} },
 #endif //ENABLE_WALLET
 };
