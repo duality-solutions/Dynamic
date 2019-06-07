@@ -165,8 +165,7 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
                         std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
                         if (!DomainEntryExists(vchBanAccountFQDN)) {
                             LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
-                            errorMessage = strprintf("Can't ban %s account because it was not found.", strBanAccountFQDN);
-                            return false;
+                            errorMessage = strprintf("Skipping... Can't ban %s account because it was not found.", strBanAccountFQDN);
                         }
                     }
                 }
@@ -235,8 +234,7 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
             vBanAccounts.push_back(entry);
         }
         else {
-            LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
-            return false;
+            LogPrintf("%s -- Skipping... Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
         }
     }
 
