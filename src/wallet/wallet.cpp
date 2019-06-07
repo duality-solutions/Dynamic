@@ -4545,8 +4545,7 @@ bool CWallet::SyncEdKeyPool()
             if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, true, retrievedKey), true)))
                 throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
             else {
-                setInternalEdKeyPool.insert(nIndex);    
-                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 1);
+                setInternalEdKeyPool.insert(nIndex);
             }
         }
     }
@@ -4569,8 +4568,7 @@ bool CWallet::SyncEdKeyPool()
             if (!walletdb.WriteEdPool(nIndex, CEdKeyPool(GenerateNewEdKey(0, false, retrievedKey2), false)))
                 throw std::runtime_error("SyncEdKeyPool(): writing generated key failed");
             else {
-                setExternalEdKeyPool.insert(nIndex);    
-                LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nIndex, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), 0);
+                setExternalEdKeyPool.insert(nIndex);
             }
         }
     }
@@ -4638,7 +4636,6 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
             } else {
                 setExternalKeyPool.insert(nEnd);
             }
-            LogPrintf("keypool added key %d, size=%u, internal=%d\n", nEnd, setInternalKeyPool.size() + setExternalKeyPool.size(), fInternal);
 
             // TODO: implement keypools for all accounts?
             if (!walletdb.WriteEdPool(nEnd, CEdKeyPool(GenerateNewEdKey(0, fInternal, retrievedKey), fInternal)))
@@ -4649,7 +4646,6 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
             } else {
                 setExternalEdKeyPool.insert(nEnd);
             }
-            LogPrintf("edkeypool added key %d, size=%u, internal=%d\n", nEnd, setInternalEdKeyPool.size() + setExternalEdKeyPool.size(), fInternal);
 
             double dProgress = 100.f * nEnd / (nTargetSize + 1);
             std::string strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
