@@ -166,7 +166,6 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
                         if (!DomainEntryExists(vchBanAccountFQDN)) {
                             LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
                             errorMessage = strprintf("Can't ban %s account because it was not found.", strBanAccountFQDN);
-                            return false;
                         }
                     }
                 }
