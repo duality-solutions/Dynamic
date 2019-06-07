@@ -2527,8 +2527,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
                     return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");
 
-                if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-                    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
+                //if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                //    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
 
                 std::vector<CDomainEntry> vBanAccounts;
                 if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, strError))
