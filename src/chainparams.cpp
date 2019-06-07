@@ -614,7 +614,7 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1549926519, 32244, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1559867972, 60883, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -622,7 +622,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if (!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x0000f8b156a85be050a1304d3101bcc7018c1b32909a81abd6ab1d17c5090d63"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000055a9348d53bed51996102ad11d129207e85dc197d01a5a69d5fd10af0e8a"));
             assert(genesis.hashMerkleRoot == uint256S("0xfa0e753db5a853ebbc52594eb62fa8219155547b426fba8789fa96dbf07e6ed5"));
         }
         vFixedSeeds.clear();
