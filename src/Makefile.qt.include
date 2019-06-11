@@ -59,6 +59,7 @@ QT_MOC_CPP = \
   qt/moc_bdapaccounttablemodel.cpp \
   qt/moc_bdapaddlinkdialog.cpp \
   qt/moc_bdapadduserdialog.cpp \
+  qt/moc_bdapfeespopup.cpp \
   qt/moc_bdaplinkdetaildialog.cpp \
   qt/moc_bdaplinktablemodel.cpp \
   qt/moc_bdappage.cpp \
@@ -139,6 +140,7 @@ DYNAMIC_QT_H = \
   qt/bdapaccounttablemodel.h \
   qt/bdapaddlinkdialog.h \
   qt/bdapadduserdialog.h \
+  qt/bdapfeespopup.h \
   qt/bdaplinkdetaildialog.h \
   qt/bdaplinktablemodel.h \
   qt/bdappage.h \
@@ -308,6 +310,7 @@ DYNAMIC_QT_CPP += \
   qt/askpassphrasedialog.cpp \
   qt/bdapaddlinkdialog.cpp \
   qt/bdapadduserdialog.cpp \
+  qt/bdapfeespopup.cpp \
   qt/bdaplinkdetaildialog.cpp \
   qt/bdappage.cpp \
   qt/bdapupdateaccountdialog.cpp \

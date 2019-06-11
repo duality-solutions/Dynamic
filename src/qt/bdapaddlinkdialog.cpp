@@ -3,18 +3,20 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdapaddlinkdialog.h"
-#include "ui_bdapaddlinkdialog.h"
+#include "bdapfeespopup.h"
 #include "bdaplinkdetaildialog.h"
 #include "bdappage.h"
+#include "ui_bdapaddlinkdialog.h"
 
+#include "bdap/fees.h"
 #include "guiutil.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
 #include "rpcclient.h"
 #include "util.h"
 
-#include <stdio.h>
 #include <boost/algorithm/string.hpp>
+#include <stdio.h>
 
 BdapAddLinkDialog::BdapAddLinkDialog(QWidget *parent) : QDialog(parent),
                                                         ui(new Ui::BdapAddLinkDialog)
@@ -39,7 +41,6 @@ BdapAddLinkDialog::BdapAddLinkDialog(QWidget *parent) : QDialog(parent),
     autoCompleterFrom = new QCompleter(fromList, this);
     ui->lineEditRequestor->setCompleter(autoCompleterFrom);
     autoCompleterFrom->popup()->installEventFilter(this);
-
 
     //setup autocomplete for TO input
     populateList(accountListTo,LinkUserType::LINK_RECIPIENT);
@@ -131,6 +132,11 @@ void BdapAddLinkDialog::addLink()
         QMessageBox::critical(this, "BDAP Add Link Error", QObject::tr("Requestor, Recipient and Link Message are required fields"));
         return;
     } //if requestor
+
+    if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_LINK_REQUEST,BDAP::ObjectType::BDAP_LINK_REQUEST)) {
+        goClose();
+        return;
+    }
 
     params.push_back("request");
     params.push_back(requestor);

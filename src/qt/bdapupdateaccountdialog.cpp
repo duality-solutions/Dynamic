@@ -2,10 +2,12 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "bdapfeespopup.h"
 #include "bdapupdateaccountdialog.h"
-#include "ui_bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
+#include "ui_bdapupdateaccountdialog.h"
 
+#include "bdap/fees.h"
 #include "guiutil.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
@@ -15,7 +17,6 @@
 #include <stdio.h>
 
 #include <boost/algorithm/string.hpp>
-
 
 BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectType accountType, std::string account, std::string commonName, std::string expirationDate) : QDialog(parent),
                                                         ui(new Ui::BdapUpdateAccountDialog)
@@ -41,11 +42,9 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
     ui->labelExpirationDateInfo->setText(QString::fromStdString(expirationDate)); 
 
-
     connect(ui->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(updateAccount()));
     connect(ui->pushButtonCancel, SIGNAL(clicked()), this, SLOT(goCancel()));
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
-   
  
     ui->labelErrorMsg->setVisible(false);
     ui->pushButtonOK->setVisible(false);
@@ -60,15 +59,16 @@ void BdapUpdateAccountDialog::updateAccount()
 {
     std::string accountID = "";
     std::string commonName = "";
-    std::string registrationDays = "";
+    std::string registrationMonths = "";
     JSONRPCRequest jreq;
     std::vector<std::string> params;
+    int32_t regMonths = DEFAULT_REGISTRATION_MONTHS;
 
     std::string outputmessage = "";
 
     accountID = ui->lineEditID->text().toStdString();
     commonName = ui->lineEditCommonName->text().toStdString();
-    registrationDays = ui->lineEditRegistrationMonths->text().toStdString();
+    registrationMonths = ui->lineEditRegistrationMonths->text().toStdString();
 
     ui->lineEditID->setReadOnly(true);
     ui->lineEditCommonName->setReadOnly(true);
@@ -79,21 +79,19 @@ void BdapUpdateAccountDialog::updateAccount()
     ui->lineEditID->setPalette(*palette);
     ui->lineEditCommonName->setPalette(*palette);
     ui->lineEditRegistrationMonths->setPalette(*palette);
-    
 
     ui->labelErrorMsg->setVisible(true);
     ui->pushButtonOK->setVisible(true);
 
     ui->pushButtonUpdate->setVisible(false);
     ui->pushButtonCancel->setVisible(false);
-
     
     params.push_back(accountID);
     params.push_back(commonName);
 
     //TODO: Front end GUI changed this parameter to be ADDITIONAL DAYS from current expiration date.
     //RPC command needs to be updated to reflect this change (so no entry, means expiration date stays the same. Value would mean number of days extended)
-    if (registrationDays.length() >> 0) params.push_back(registrationDays);
+    if (registrationMonths.length() >> 0) params.push_back(registrationMonths);
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
         jreq.params = RPCConvertValues("updateuser", params);
@@ -104,6 +102,13 @@ void BdapUpdateAccountDialog::updateAccount()
         jreq.strMethod = "updategroup";
 
     } //end inputAccountType if
+
+    if (registrationMonths.length() >> 0) regMonths = std::stoi(registrationMonths);
+
+    if (!bdapFeesPopup(this,OP_BDAP_MODIFY,OP_BDAP_ACCOUNT_ENTRY,inputAccountType,regMonths)) {
+        goClose();
+        return;
+    }
 
     try {
         UniValue result = tableRPC.execute(jreq);

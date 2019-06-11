@@ -35,14 +35,14 @@
         <widget class="QLineEdit" name="lineEdit_commonName"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="labelRegistrationDays">
+        <widget class="QLabel" name="labelRegistrationMonths">
          <property name="text">
           <string>Registration months:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_registrationDays"/>
+        <widget class="QLineEdit" name="lineEdit_registrationMonths"/>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="labelUserId">

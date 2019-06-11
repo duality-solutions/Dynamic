@@ -2,22 +2,23 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdappage.h"
-#include "ui_bdappage.h"
-#include "bdapadduserdialog.h"
+#include "bdap/fees.h"
+#include "bdapaccounttablemodel.h"
 #include "bdapaddlinkdialog.h"
+#include "bdapadduserdialog.h"
+#include "bdapfeespopup.h"
+#include "bdaplinkdetaildialog.h"
+#include "bdaplinktablemodel.h"
+#include "bdappage.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
-#include "bdaplinkdetaildialog.h"
-#include "guiutil.h"
-#include "walletmodel.h"
-#include "bdapaccounttablemodel.h"
-#include "bdaplinktablemodel.h"
 #include "dynode-sync.h"
-
+#include "guiutil.h"
+#include "rpcclient.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
-#include "rpcclient.h"
+#include "ui_bdappage.h"
+#include "walletmodel.h"
 
 #include <stdio.h>
 
@@ -297,6 +298,11 @@ void BdapPage::acceptLink()
     reply = QMessageBox::question(this, QObject::tr("Confirm Accept Link"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
+
+        if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_LINK_ACCEPT,BDAP::ObjectType::BDAP_LINK_ACCEPT)) {
+            return;
+        }
+
         executeLinkTransaction(LinkActions::LINK_ACCEPT, requestor, recipient);
     }
 

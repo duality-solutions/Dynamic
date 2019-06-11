@@ -5,15 +5,14 @@
 #ifndef BDAPPAGE_H
 #define BDAPPAGE_H
 
+#include "bdap/bdap.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
-#include "bdap/bdap.h"
 
 #include <QPushButton>
 #include <QWidget>
 
 #include <memory>
-
 
 class BdapAccountTableModel;
 class BdapLinkTableModel;

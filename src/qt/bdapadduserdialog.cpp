@@ -3,18 +3,20 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdapadduserdialog.h"
-#include "ui_bdapadduserdialog.h"
+#include "bdapfeespopup.h"
+#include "bdappage.h"
 #include "bdapuserdetaildialog.h"
+#include "ui_bdapadduserdialog.h"
 
+#include "bdap/fees.h"
 #include "guiutil.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
 #include "rpcclient.h"
 #include "util.h"
 
-#include <stdio.h>
 #include <boost/algorithm/string.hpp>
-
+#include <stdio.h>
 
 BdapAddUserDialog::BdapAddUserDialog(QWidget *parent, BDAP::ObjectType accountType) : QDialog(parent),
                                                         ui(new Ui::BdapAddUserDialog)
@@ -48,36 +50,44 @@ void BdapAddUserDialog::goAddUser()
 {
     std::string accountID = "";
     std::string commonName = "";
-    std::string registrationDays = "";
+    std::string registrationMonths = "";
     JSONRPCRequest jreq;
     std::vector<std::string> params;
 
     std::string outputmessage = "";
 
+    int32_t regMonths = DEFAULT_REGISTRATION_MONTHS;
+
     accountID = ui->lineEdit_userID->text().toStdString();
     commonName = ui->lineEdit_commonName->text().toStdString();
-    registrationDays = ui->lineEdit_registrationDays->text().toStdString();
+    registrationMonths = ui->lineEdit_registrationMonths->text().toStdString();
 
     ui->lineEdit_userID->setReadOnly(true);
     ui->lineEdit_commonName->setReadOnly(true);
-    ui->lineEdit_registrationDays->setReadOnly(true);
+    ui->lineEdit_registrationMonths->setReadOnly(true);
 
     QPalette *palette = new QPalette();
     palette->setColor(QPalette::Text,Qt::darkGray);
     ui->lineEdit_userID->setPalette(*palette);
     ui->lineEdit_commonName->setPalette(*palette);
-    ui->lineEdit_registrationDays->setPalette(*palette);
+    ui->lineEdit_registrationMonths->setPalette(*palette);
 
     ui->labelErrorMsg->setVisible(true);
     ui->pushButtonOK->setVisible(true);
 
     ui->addUser->setVisible(false);
     ui->cancel->setVisible(false);
-
     
+    if (registrationMonths.length() >> 0) regMonths = std::stoi(registrationMonths);
+
+    if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_ACCOUNT_ENTRY,inputAccountType,regMonths)) {
+        goClose();
+        return;
+    }
+
     params.push_back(accountID);
     params.push_back(commonName);
-    if (registrationDays.length() >> 0) params.push_back(registrationDays);
+    if (registrationMonths.length() >> 0) params.push_back(registrationMonths);
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
         jreq.params = RPCConvertValues("adduser", params);
@@ -100,7 +110,6 @@ void BdapAddUserDialog::goAddUser()
         } else  { //only other option for now is group
            dlg.setWindowTitle(QObject::tr("Successfully added group"));
         }; //end inputAccountType if
-
 
         dlg.exec();
         goClose();
