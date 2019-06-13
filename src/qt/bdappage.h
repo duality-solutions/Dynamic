@@ -16,6 +16,7 @@
 
 class BdapAccountTableModel;
 class BdapLinkTableModel;
+class ClientModel;
 class QTableWidget;
 class QLabel;
 
@@ -44,6 +45,7 @@ public:
     explicit BdapPage(const PlatformStyle* platformStyle, QWidget* parent = 0);
     ~BdapPage();
 
+    void setClientModel(ClientModel* clientModel);
     void setModel(WalletModel* model);
     BdapAccountTableModel* getBdapAccountTableModel();
     BdapLinkTableModel* getBdapLinkTableModel();
@@ -76,6 +78,7 @@ public:
 
 private:
     Ui::BdapPage* ui;
+    ClientModel* clientModel;
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     BdapAccountTableModel* bdapAccountTableModel;
@@ -103,6 +106,8 @@ private Q_SLOTS:
     void acceptLink();
     void addLink();
     void getLinkDetails(int row, int column);
+
+    void updateBDAPLists();
 
 };
 

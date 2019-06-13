@@ -12,6 +12,7 @@
 #include "bdappage.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
+#include "clientmodel.h"
 #include "dynode-sync.h"
 #include "guiutil.h"
 #include "rpcclient.h"
@@ -28,6 +29,8 @@
 
 BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
                                                                             ui(new Ui::BdapPage),
+                                                                            clientModel(0),
+                                                                            model(0),
                                                                             bdapAccountTableModel(0)
 {
     ui->setupUi(this);
@@ -91,6 +94,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->tableWidgetComplete, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
 
     connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
+
 }
 
 BdapPage::~BdapPage()
@@ -101,6 +105,15 @@ BdapPage::~BdapPage()
 void BdapPage::setModel(WalletModel* model)
 {
     this->model = model;
+}
+
+void BdapPage::setClientModel(ClientModel* _clientModel)
+{
+    this->clientModel = _clientModel;
+
+    if (_clientModel) {
+        connect(_clientModel, SIGNAL(numBlocksChanged(int, QDateTime, double, bool)), this, SLOT(updateBDAPLists()));
+    }
 }
 
 void BdapPage::evaluateTransactionButtons()
@@ -226,6 +239,27 @@ void BdapPage::getGroupDetails(int row, int column)
     dlg.setWindowTitle(QObject::tr("BDAP Group Detail"));
     dlg.exec();
 } //getGroupDetails
+
+void BdapPage::updateBDAPLists()
+{
+    if (dynodeSync.IsBlockchainSynced())  {
+        evaluateTransactionButtons();
+
+        bdapAccountTableModel->refreshUsers();
+        bdapAccountTableModel->refreshGroups();
+        bdapLinkTableModel->refreshComplete();
+        bdapLinkTableModel->refreshPendingAccept();
+        bdapLinkTableModel->refreshPendingRequest();
+    }
+} //updateBDAPLists
+
+
+
+
+
+
+
+
 
 //Users tab =========================================================================
 void BdapPage::listAllUsers()

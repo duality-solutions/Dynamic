@@ -194,12 +194,13 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     refreshUsers();
     refreshGroups();
 
-    //refresh();
+    //comment out timer, but keep for possible future use
+    /*
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
     timer->setInterval(60000); //MODEL_UPDATE_DELAY originally
     startAutoRefresh();
-
+    */
 }
 
 BdapAccountTableModel::~BdapAccountTableModel()
