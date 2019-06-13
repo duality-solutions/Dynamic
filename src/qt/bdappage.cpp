@@ -58,7 +58,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidget_Users, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getUserDetails(int,int)));
 
-
     //Groups tab
     connect(ui->pushButton_AllGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
@@ -69,13 +68,10 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->lineEditGroupCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
     connect(ui->lineEditGroupFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
 
-
     connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
 
     //Links tab
-    connect(ui->pushButtonRefreshComplete, SIGNAL(clicked()), this, SLOT(listLinksComplete()));
-    connect(ui->pushButtonRefreshPendingAccept, SIGNAL(clicked()), this, SLOT(listPendingAccept()));
-    connect(ui->pushButtonRefreshPendingRequest, SIGNAL(clicked()), this, SLOT(listPendingRequest()));
+    connect(ui->pushButtonRefreshAllLinks, SIGNAL(clicked()), this, SLOT(listLinksAll()));
 
     connect(ui->lineEditCompleteRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
     connect(ui->lineEditCompleteRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
@@ -86,7 +82,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->lineEditPRRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
     connect(ui->lineEditPRRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
 
-
     connect(ui->pushButtonAccept, SIGNAL(clicked()), this, SLOT(acceptLink()));
 
     connect(ui->tableWidgetPendingAccept, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
@@ -94,7 +89,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->tableWidgetComplete, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
 
     connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
-
 }
 
 BdapPage::~BdapPage()
@@ -136,6 +130,11 @@ void BdapPage::evaluateTransactionButtons()
 } //evaluateTransactionButtons
 
 //Links tab =========================================================================
+void BdapPage::listLinksAll()
+{
+    bdapLinkTableModel->refreshAll();
+} //listLinksAll
+
 void BdapPage::listLinksComplete()
 {
     bdapLinkTableModel->refreshComplete();
@@ -252,14 +251,6 @@ void BdapPage::updateBDAPLists()
         bdapLinkTableModel->refreshPendingRequest();
     }
 } //updateBDAPLists
-
-
-
-
-
-
-
-
 
 //Users tab =========================================================================
 void BdapPage::listAllUsers()

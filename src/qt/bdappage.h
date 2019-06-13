@@ -100,6 +100,7 @@ private Q_SLOTS:
     void updateGroup();
     void getGroupDetails(int row, int column);
 
+    void listLinksAll();
     void listLinksComplete();
     void listPendingAccept();
     void listPendingRequest();
