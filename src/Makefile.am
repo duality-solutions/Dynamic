@@ -679,7 +679,7 @@ endif
 
 if EMBEDDED_LIBTORRENT
 include Makefile.libtorrent.include
-include Makefile.dht.test.include
+#include Makefile.dht.test.include
 endif
 
 include Makefile.vgp.include
