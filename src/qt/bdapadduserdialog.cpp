@@ -61,6 +61,22 @@ void BdapAddUserDialog::goAddUser()
     accountID = ui->lineEdit_userID->text().toStdString();
     commonName = ui->lineEdit_commonName->text().toStdString();
     registrationMonths = ui->lineEdit_registrationMonths->text().toStdString();
+    
+    if (registrationMonths.length() >> 0) 
+    {
+        try {
+            regMonths = std::stoi(registrationMonths);
+        } catch (std::exception& e) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Registration months must be a number."));
+            return;
+        }
+
+        CAmount tmpAmount;
+        if ( (!ParseFixedPoint(registrationMonths, 0, &tmpAmount)) || (regMonths <= 0) ) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Registration months cannot be less than or equal to zero, and must be a whole number (no decimals)."));
+            return;
+        }
+    }
 
     ui->lineEdit_userID->setReadOnly(true);
     ui->lineEdit_commonName->setReadOnly(true);
@@ -77,8 +93,6 @@ void BdapAddUserDialog::goAddUser()
 
     ui->addUser->setVisible(false);
     ui->cancel->setVisible(false);
-    
-    if (registrationMonths.length() >> 0) regMonths = std::stoi(registrationMonths);
 
     if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_ACCOUNT_ENTRY,inputAccountType,regMonths)) {
         goClose();
@@ -87,7 +101,7 @@ void BdapAddUserDialog::goAddUser()
 
     params.push_back(accountID);
     params.push_back(commonName);
-    if (registrationMonths.length() >> 0) params.push_back(registrationMonths);
+    if (registrationMonths.length() >> 0) params.push_back(std::to_string(regMonths));
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
         jreq.params = RPCConvertValues("adduser", params);

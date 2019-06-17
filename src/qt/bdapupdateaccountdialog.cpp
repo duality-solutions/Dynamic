@@ -62,13 +62,29 @@ void BdapUpdateAccountDialog::updateAccount()
     std::string registrationMonths = "";
     JSONRPCRequest jreq;
     std::vector<std::string> params;
-    int32_t regMonths = DEFAULT_REGISTRATION_MONTHS;
+    int32_t regMonths = 0; //DEFAULT_REGISTRATION_MONTHS;
 
     std::string outputmessage = "";
 
     accountID = ui->lineEditID->text().toStdString();
     commonName = ui->lineEditCommonName->text().toStdString();
     registrationMonths = ui->lineEditRegistrationMonths->text().toStdString();
+
+    if (registrationMonths.length() >> 0) 
+    {
+        try {
+            regMonths = std::stoi(registrationMonths);
+        } catch (std::exception& e) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Registration months must be a number."));
+            return;
+        }
+        
+        CAmount tmpAmount;
+        if ( (!ParseFixedPoint(registrationMonths, 0, &tmpAmount)) || (regMonths <= 0) ) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Additional months cannot be less than or equal to zero, and must be a whole number (no decimals)."));
+            return;
+        }
+    }
 
     ui->lineEditID->setReadOnly(true);
     ui->lineEditCommonName->setReadOnly(true);
@@ -91,7 +107,7 @@ void BdapUpdateAccountDialog::updateAccount()
 
     //TODO: Front end GUI changed this parameter to be ADDITIONAL DAYS from current expiration date.
     //RPC command needs to be updated to reflect this change (so no entry, means expiration date stays the same. Value would mean number of days extended)
-    if (registrationMonths.length() >> 0) params.push_back(registrationMonths);
+    if (registrationMonths.length() >> 0) params.push_back(std::to_string(regMonths));
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
         jreq.params = RPCConvertValues("updateuser", params);
@@ -102,8 +118,6 @@ void BdapUpdateAccountDialog::updateAccount()
         jreq.strMethod = "updategroup";
 
     } //end inputAccountType if
-
-    if (registrationMonths.length() >> 0) regMonths = std::stoi(registrationMonths);
 
     if (!bdapFeesPopup(this,OP_BDAP_MODIFY,OP_BDAP_ACCOUNT_ENTRY,inputAccountType,regMonths)) {
         goClose();

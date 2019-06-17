@@ -72,7 +72,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
-            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration months to int, only whole numbers allowed (no decimals)"));
+        if (nMonths <= 0)
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error: registration months must be greater than 0"));
     }
 
     CharString data;
