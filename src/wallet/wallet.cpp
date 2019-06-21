@@ -5948,7 +5948,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
 }
 
 // TODO (BDAP): Move to script code file
-static bool IsDataScript(const CScript& data)
+bool IsDataScript(const CScript& data)
 {
     CScript::const_iterator pc = data.begin();
     opcodetype opcode;
@@ -5964,7 +5964,7 @@ static bool IsDataScript(const CScript& data)
 }
 
 // TODO (BDAP): Move to script code file
-static bool GetDataFromScript(const CScript& data, std::vector<uint8_t>& vData)
+bool GetDataFromScript(const CScript& data, std::vector<uint8_t>& vData)
 {
     CScript::const_iterator pc = data.begin();
     opcodetype opcode;

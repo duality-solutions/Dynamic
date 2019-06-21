@@ -1388,4 +1388,7 @@ public:
 
 bool RunProcessStealthQueue();
 
+bool IsDataScript(const CScript& data);
+bool GetDataFromScript(const CScript& data, std::vector<uint8_t>& vData);
+
 #endif // DYNAMIC_WALLET_WALLET_H
