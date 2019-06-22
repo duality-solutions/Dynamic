@@ -59,8 +59,34 @@ bool DeleteDomainEntry(const CDomainEntry& entry)
         return false;
 
     bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
-    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);;
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
     return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoAddDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoUpdateDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo update domain entry used in DisconnectBlock to handle forks
+    return false;
+}
+
+bool UndoDeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo delete domain entry used in DisconnectBlock to handle forks
+    return false;
 }
 
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 

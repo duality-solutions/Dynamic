@@ -1917,7 +1917,6 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
 static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
-
     bool fClean = true;
 
     CBlockUndo blockUndo;
@@ -1945,7 +1944,55 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         const CTransaction& tx = *block.vtx[i];
         uint256 hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
+        bool fIsBDAP = tx.nVersion == BDAP_TX_VERSION;
+        if (fIsBDAP) {
+            LogPrintf("%s -- BDAP tx found. Hash %s\n", __func__, hash.ToString());
+            // get BDAP object
+            CScript scriptBDAPOp; 
+            std::vector<std::vector<unsigned char>> vvchOpParameters;
+            int op1, op2;
+            CTransactionRef ptx = MakeTransactionRef(tx);
+            if (GetBDAPOpScript(ptx, scriptBDAPOp, vvchOpParameters, op1, op2)) {
+                LogPrintf("%s -- Found new BDAP object, op1 %d, op2 %d\n", __func__, op1, op2);
+                std::string strErrorMessage;
+                std::string strOpType = GetBDAPOpTypeString(op1, op2);
+                if (strOpType == "bdap_new_account") {
+                    CDomainEntry domainEntry(ptx);
+                    LogPrintf("%s -- Found new BDAP account %s. Running undo.\n", __func__, domainEntry.GetFullObjectPath());
+                    if (!UndoAddDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo new BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_update_account") {
+                    CDomainEntry domainEntry(ptx);
+                    if (!UndoUpdateDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo update BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_delete_account") {
+                    CDomainEntry domainEntry(ptx);
+                    if (!UndoDeleteDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo delete BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+                    std::vector<unsigned char> vchPubKey, vchSharedPubKey;
+                    if (vvchOpParameters.size() > 0)
+                        vchPubKey = vvchOpParameters[0];
 
+                    if (vvchOpParameters.size() > 1)
+                        vchSharedPubKey = vvchOpParameters[0];
+
+                    LogPrintf("%s -- Found new BDAP link (pubkey %s, sharedpubkey %s). Running undo.\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchSharedPubKey));
+                    if (!UndoLinkData(vchPubKey, vchSharedPubKey)) {
+                        LogPrintf("%s -- Failed to undo link transaction. Disconnect %s transaction failed.\n", __func__, hash.ToString());
+                    }
+                }
+                else {
+                    LogPrintf("%s -- Failed to undo unknown BDAP transaction (op1 = %d, op2 = %d). Nothing to undo for %s transaction.\n", __func__, op1, op2, hash.ToString());
+                }
+            }
+        }
         if (fAddressIndex) {
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut& out = tx.vout[k];

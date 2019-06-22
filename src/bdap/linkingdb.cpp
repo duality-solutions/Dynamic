@@ -16,6 +16,17 @@
 CLinkRequestDB *pLinkRequestDB = NULL;
 CLinkAcceptDB *pLinkAcceptDB = NULL;
 
+bool UndoLinkData(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey)
+{
+    if (!pLinkRequestDB || !pLinkAcceptDB)
+        return false;
+
+    bool fEraseLinkRequestPubkey = pLinkRequestDB->EraseLinkRequestIndex(vchPubKey, vchSharedPubKey);
+    bool fEraseLinkAcceptPubkey = pLinkAcceptDB->EraseLinkAcceptIndex(vchPubKey, vchSharedPubKey);
+
+    return (fEraseLinkRequestPubkey && fEraseLinkAcceptPubkey);
+}
+
 bool CLinkRequestDB::AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid)
 { 
     bool writeState = false;

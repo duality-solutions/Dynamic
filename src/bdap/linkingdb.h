@@ -38,6 +38,7 @@ public:
     //bool CleanupIndexLinkAcceptDB(int& nRemoved);
 };
 
+bool UndoLinkData(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey);
 bool GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
 bool GetLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
 bool CheckLinkRequestDB();
