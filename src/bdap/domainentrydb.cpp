@@ -250,11 +250,12 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
 }
 
 // Lists active entries by domain name with paging support
-bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType)
+bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType, const std::string searchString)
 {
     // TODO: (bdap) implement paging
     // if vchObjectLocation is empty, list entries from all domains
     int index = 0;
+    bool addEntry = true;
     std::pair<std::string, CharString> key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
@@ -268,10 +269,26 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
                 if ((entry.nObjectType == GetObjectTypeInt(accountType)) ||  (accountType == DEFAULT_ACCOUNT_TYPE)) {
                     if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
                     {
-                        UniValue oDomainEntryEntry(UniValue::VOBJ);
-                        BuildBDAPJson(entry, oDomainEntryEntry, false);
-                        oDomainEntryList.push_back(oDomainEntryEntry);
-                        index++;
+                        addEntry = true; //always reset to true
+
+                        if (searchString.size() > 0) {
+                            //compare to ObjectID and Common Name
+                            std::string compareString(entry.ObjectID.begin(), entry.ObjectID.end());
+                            std::string compareCommonString(entry.CommonName.begin(), entry.CommonName.end());
+                            std::size_t found = compareString.find(searchString);
+                            std::size_t foundCommon = compareCommonString.find(searchString);
+
+                            if ((found==std::string::npos) && (foundCommon==std::string::npos))
+                                addEntry = false;
+                        }
+
+                        if (addEntry) 
+                        {
+                            UniValue oDomainEntryEntry(UniValue::VOBJ);
+                            BuildBDAPJson(entry, oDomainEntryEntry, false);
+                            oDomainEntryList.push_back(oDomainEntryEntry);
+                            index++;
+                        }
                     }
                 } //if entry.nObjectType
             }
@@ -280,7 +297,6 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         } //try-catch
-
 
     }
     return true;

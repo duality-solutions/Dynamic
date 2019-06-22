@@ -5,11 +5,11 @@
 #ifndef BDAPADDUSERDIALOG_H
 #define BDAPADDUSERDIALOG_H
 
-#include "platformstyle.h"
 #include "bdap/bdap.h"
+#include "platformstyle.h"
 
-#include <QPushButton>
 #include <QDialog>
+#include <QPushButton>
 
 #include <memory>
 

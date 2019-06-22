@@ -2,22 +2,24 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdappage.h"
-#include "ui_bdappage.h"
-#include "bdapadduserdialog.h"
+#include "bdap/fees.h"
+#include "bdapaccounttablemodel.h"
 #include "bdapaddlinkdialog.h"
+#include "bdapadduserdialog.h"
+#include "bdapfeespopup.h"
+#include "bdaplinkdetaildialog.h"
+#include "bdaplinktablemodel.h"
+#include "bdappage.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
-#include "bdaplinkdetaildialog.h"
-#include "guiutil.h"
-#include "walletmodel.h"
-#include "bdapaccounttablemodel.h"
-#include "bdaplinktablemodel.h"
+#include "clientmodel.h"
 #include "dynode-sync.h"
-
+#include "guiutil.h"
+#include "rpcclient.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
-#include "rpcclient.h"
+#include "ui_bdappage.h"
+#include "walletmodel.h"
 
 #include <stdio.h>
 
@@ -27,6 +29,8 @@
 
 BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
                                                                             ui(new Ui::BdapPage),
+                                                                            clientModel(0),
+                                                                            model(0),
                                                                             bdapAccountTableModel(0)
 {
     ui->setupUi(this);
@@ -54,7 +58,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidget_Users, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getUserDetails(int,int)));
 
-
     //Groups tab
     connect(ui->pushButton_AllGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
@@ -65,13 +68,10 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->lineEditGroupCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
     connect(ui->lineEditGroupFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
 
-
     connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
 
     //Links tab
-    connect(ui->pushButtonRefreshComplete, SIGNAL(clicked()), this, SLOT(listLinksComplete()));
-    connect(ui->pushButtonRefreshPendingAccept, SIGNAL(clicked()), this, SLOT(listPendingAccept()));
-    connect(ui->pushButtonRefreshPendingRequest, SIGNAL(clicked()), this, SLOT(listPendingRequest()));
+    connect(ui->pushButtonRefreshAllLinks, SIGNAL(clicked()), this, SLOT(listLinksAll()));
 
     connect(ui->lineEditCompleteRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
     connect(ui->lineEditCompleteRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
@@ -81,7 +81,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->lineEditPRRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
     connect(ui->lineEditPRRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
-
 
     connect(ui->pushButtonAccept, SIGNAL(clicked()), this, SLOT(acceptLink()));
 
@@ -100,6 +99,15 @@ BdapPage::~BdapPage()
 void BdapPage::setModel(WalletModel* model)
 {
     this->model = model;
+}
+
+void BdapPage::setClientModel(ClientModel* _clientModel)
+{
+    this->clientModel = _clientModel;
+
+    if (_clientModel) {
+        connect(_clientModel, SIGNAL(numBlocksChanged(int, QDateTime, double, bool)), this, SLOT(updateBDAPLists()));
+    }
 }
 
 void BdapPage::evaluateTransactionButtons()
@@ -122,6 +130,11 @@ void BdapPage::evaluateTransactionButtons()
 } //evaluateTransactionButtons
 
 //Links tab =========================================================================
+void BdapPage::listLinksAll()
+{
+    bdapLinkTableModel->refreshAll();
+} //listLinksAll
+
 void BdapPage::listLinksComplete()
 {
     bdapLinkTableModel->refreshComplete();
@@ -226,6 +239,19 @@ void BdapPage::getGroupDetails(int row, int column)
     dlg.exec();
 } //getGroupDetails
 
+void BdapPage::updateBDAPLists()
+{
+    if (dynodeSync.IsBlockchainSynced())  {
+        evaluateTransactionButtons();
+
+        bdapAccountTableModel->refreshUsers();
+        bdapAccountTableModel->refreshGroups();
+        bdapLinkTableModel->refreshComplete();
+        bdapLinkTableModel->refreshPendingAccept();
+        bdapLinkTableModel->refreshPendingRequest();
+    }
+} //updateBDAPLists
+
 //Users tab =========================================================================
 void BdapPage::listAllUsers()
 {
@@ -297,6 +323,11 @@ void BdapPage::acceptLink()
     reply = QMessageBox::question(this, QObject::tr("Confirm Accept Link"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
+
+        if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_LINK_ACCEPT,BDAP::ObjectType::BDAP_LINK_ACCEPT)) {
+            return;
+        }
+
         executeLinkTransaction(LinkActions::LINK_ACCEPT, requestor, recipient);
     }
 

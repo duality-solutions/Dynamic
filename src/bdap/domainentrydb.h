@@ -34,7 +34,7 @@ public:
     void WriteDomainEntryIndexHistory(const CDomainEntry& entry, const int op);
     bool UpdateDomainEntry(const std::vector<unsigned char>& vchObjectPath, const CDomainEntry& entry);
     bool CleanupLevelDB(int& nRemoved);
-    bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType = DEFAULT_ACCOUNT_TYPE);
+    bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType = DEFAULT_ACCOUNT_TYPE, const std::string searchString = "");
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDomainEntryInfo);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry);
 };

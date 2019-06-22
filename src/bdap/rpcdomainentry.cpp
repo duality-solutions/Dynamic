@@ -72,7 +72,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
-            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration months to int, only whole numbers allowed (no decimals)"));
+        if (nMonths <= 0)
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error: registration months must be greater than 0"));
     }
 
     CharString data;
@@ -183,12 +185,13 @@ UniValue adduser(const JSONRPCRequest& request)
 
 UniValue getusers(const JSONRPCRequest& request) 
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3 || request.params.size() == 2)
         throw std::runtime_error(
-            "getusers \"records per page\" \"page returned\"\n"
+            "getusers \"search string\" \"records per page\" \"page returned\"\n"
             "\nArguments:\n"
-            "1. records per page     (int, optional)  If paging, the number of records per page\n"
-            "2. page returned        (int, optional)  If paging, the page number to return\n"
+            "1. search string        (string, optional)  Search for userid\n"
+            "2. records per page     (int, optional)  If paging, the number of records per page\n"
+            "3. page returned        (int, optional)  If paging, the page number to return\n"
             "\nLists all BDAP user accounts in the \"public\" OU for the \"bdap.io\" domain.\n"
             "\nResult:\n"
             "{(json objects)\n"
@@ -202,13 +205,31 @@ UniValue getusers(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getusers", ""));
 
-    unsigned int nRecordsPerPage = 100;
-    unsigned int nPage = 1;
-    if (request.params.size() > 0)
-        nRecordsPerPage = request.params[0].get_int();
+    int nRecordsPerPage = 100;
+    int nPage = 1;
+    std::string searchString = "";
 
-    if (request.params.size() == 2)
-        nPage = request.params[1].get_int();
+    if (request.params.size() > 0)
+    {
+         searchString = request.params[0].get_str();
+    }
+
+    if (request.params.size() == 3)
+    {
+        try {
+            nRecordsPerPage = atoi(request.params[1].get_str());
+            nPage = atoi(request.params[2].get_str());
+
+            if ((nRecordsPerPage <= 0) || (nPage <= 0))
+            {
+                throw std::runtime_error("Error: parameters must be positive integers");
+                return NullUniValue;
+            }       
+        } catch (std::exception& e) {
+            throw std::runtime_error("Error: parameters must be positive integers");
+            return NullUniValue;
+        }
+    }
     
     // only return entries from the default public domain OU
     std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -216,19 +237,20 @@ UniValue getusers(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_USER);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_USER, searchString);
 
     return oDomainEntryList;
 }
 
 UniValue getgroups(const JSONRPCRequest& request) 
 {
-    if (request.fHelp || request.params.size() > 2)
+    if (request.fHelp || request.params.size() > 3 || request.params.size() == 2)
         throw std::runtime_error(
-            "getgroups \"records per page\" \"page returned\"\n"
+            "getgroups \"search string\" \"records per page\" \"page returned\"\n"
             "\nArguments:\n"
-            "1. records per page     (int, optional)  If paging, the number of records per page\n"
-            "2. page returned        (int, optional)  If paging, the page number to return\n"
+            "1. search string        (string, optional)  Search for userid\n"
+            "2. records per page     (int, optional)  If paging, the number of records per page\n"
+            "3. page returned        (int, optional)  If paging, the page number to return\n"
             "\nLists all BDAP group accounts in the \"public\" OU for the \"bdap.io\" domain.\n"
             "\nResult:\n"
             "{(json objects)\n"
@@ -242,13 +264,31 @@ UniValue getgroups(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getgroups", ""));
 
-    unsigned int nRecordsPerPage = 100;
-    unsigned int nPage = 1;
-    if (request.params.size() > 0)
-        nRecordsPerPage = request.params[0].get_int();
+    int nRecordsPerPage = 100;
+    int nPage = 1;
+    std::string searchString = "";
 
-    if (request.params.size() == 2)
-        nPage = request.params[1].get_int();
+    if (request.params.size() > 0)
+    {
+         searchString = request.params[0].get_str();
+    }
+
+    if (request.params.size() == 3)
+    {
+        try {
+            nRecordsPerPage = atoi(request.params[1].get_str());
+            nPage = atoi(request.params[2].get_str());
+
+            if ((nRecordsPerPage <= 0) || (nPage <= 0))
+            {
+                throw std::runtime_error("Error: parameters must be positive integers");
+                return NullUniValue;
+            }       
+        } catch (std::exception& e) {
+            throw std::runtime_error("Error: parameters must be positive integers");
+            return NullUniValue;
+        }
+    }
     
     // only return entries from the default public domain OU
     std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -256,7 +296,7 @@ UniValue getgroups(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_GROUP);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_GROUP, searchString);
 
     return oDomainEntryList;
 }
@@ -887,8 +927,8 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
     /* BDAP */
     { "bdap",            "adduser",                  &adduser,                      true, {"account id", "common name", "registration days"} },
-    { "bdap",            "getusers",                 &getusers,                     true, {"records per page", "page returned"} },
-    { "bdap",            "getgroups",                &getgroups,                    true, {"records per page", "page returned"} },
+    { "bdap",            "getusers",                 &getusers,                     true, {"search string", "records per page", "page returned"} },
+    { "bdap",            "getgroups",                &getgroups,                    true, {"search string", "records per page", "page returned"} },
     { "bdap",            "getuserinfo",              &getuserinfo,                  true, {"account id"} },
     { "bdap",            "updateuser",               &updateuser,                   true, {"account id", "common name", "registration days"} },
     { "bdap",            "updategroup",              &updategroup,                  true, {"account id", "common name", "registration days"} },
