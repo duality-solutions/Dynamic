@@ -712,18 +712,15 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 // TODO (BDAP): Implement link delete
                 errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is not implemented yet." + errorMessage;
                 LogPrintf("%s -- delete link ignored. %s\n", __func__, errorMessage);
-                return true;
             }
             else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_update_link_accept") {
-                // TODO (BDAP): Implement link update
+                // TODO (BDAP): Implement link update, allow for now.
                 errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is not implemented yet." + errorMessage;
-                LogPrintf("%s -- Unknown operation failed. %s\n", __func__, errorMessage);
-                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                LogPrintf("%s -- update link ignored. %s\n", __func__, errorMessage);
             }
             else {
-                errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is an unknown BDAP operation. " + errorMessage;
-                LogPrintf("%s -- Unknown operation failed. %s\n", __func__, errorMessage);
-                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                // Allow unknown BDAP operations
+                LogPrintf("%s -- Unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
             }
         }
     }
@@ -857,6 +854,8 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
             }
         }
+        /*
+        // TODO (BDAP): Implement link delete
         else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
@@ -868,7 +867,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
         }
         // TODO (BDAP): Implement link delete
-        /*
+        
         else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
@@ -881,7 +880,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
         */
         else {
-            return state.Invalid(false, REJECT_INVALID, "bdap-unknown-unsupported-operation");
+            // Allow unknown BDAP operations
+            fRequireStandard = false;
+            LogPrintf("%s -- Unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
         }
     }
     // Coinbase is only valid in a block, not as a loose transaction
