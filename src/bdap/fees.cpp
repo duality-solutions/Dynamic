@@ -36,7 +36,7 @@ std::map<int32_t, CAmount> mapNoRefundDeposits = {
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee)
 {
     std::string strObjectType = BDAP::GetObjectTypeString((unsigned int)objType);
-    LogPrintf("%s -- strObjectType = %s, OpAction %d, OpObject %d\n", __func__, strObjectType, opCodeAction, opCodeObject);
+    LogPrint("bdap", "%s -- strObjectType = %s, OpAction %d, OpObject %d\n", __func__, strObjectType, opCodeAction, opCodeObject);
     if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_USER) {
         // new BDAP user account
         oneTimeFee = 0;

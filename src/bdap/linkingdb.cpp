@@ -200,7 +200,6 @@ static bool CommonLinkParameterCheck(const vchCharString& vvchOpParameters, std:
 
 static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
 {
-    LogPrint("bdap", "%s -- start\n", __func__);
     if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
         return error(errorMessage.c_str());
 
@@ -238,7 +237,6 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
 
 static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
 {
-    LogPrint("bdap", "%s -- start\n", __func__);
     if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
         return error(errorMessage.c_str());
 
@@ -285,8 +283,7 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
         return true;
     }
 
-    //if (fDebug && !bSanityCheck)
-        LogPrintf("%s -- *** BDAP link nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    LogPrint("bdap", "%s -- *** BDAP link nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
 
     CScript scriptData;
     if (!GetBDAPDataScript(tx, scriptData))
@@ -320,7 +317,7 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link request. Total paid %d, should be %d\n", __func__, 
+            LogPrint("bdap", "%s -- *** Valid BDAP fee amount for a new BDAP link request. Total paid %d, should be %d\n", __func__, 
                                 (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
         }
         return CheckNewLinkRequestTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
@@ -343,7 +340,7 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP fee amount for a new BDAP link accept. Total paid %d, should be %d\n", __func__, 
+            LogPrint("bdap", "%s -- *** Valid BDAP fee amount for a new BDAP link accept. Total paid %d, should be %d\n", __func__, 
                                 (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
         }
         return CheckNewLinkAcceptTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
