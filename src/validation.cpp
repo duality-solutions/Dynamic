@@ -105,6 +105,7 @@ bool fAlerts = DEFAULT_ALERTS;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 bool fLoaded = false;
+bool fStealthTx = false;
 
 uint256 hashAssumeValid;
 
