@@ -21,6 +21,7 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "core_io.h"
+#include "dynode-sync.h"
 #include "fluid/fluid.h"
 #include "governance.h"
 #include "init.h"
@@ -1380,8 +1381,11 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         if (fExisted && !fUpdate)
             return false;
 
-        // Check if stealth address belongs to this wallet
-        bool fIsMyStealth = ScanForOwnedOutputs(tx);
+        bool fIsMyStealth = false;
+        if (fStealthTx || dynodeSync.IsBlockchainSynced()) {
+            // Check if stealth address belongs to this wallet
+            fIsMyStealth = ScanForOwnedOutputs(tx);
+        }
 
         if (fExisted || IsMine(tx) || IsFromMe(tx) || fIsMyStealth) {
             const CTransactionRef ptx = MakeTransactionRef(tx);

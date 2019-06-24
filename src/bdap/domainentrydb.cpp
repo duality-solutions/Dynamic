@@ -59,8 +59,34 @@ bool DeleteDomainEntry(const CDomainEntry& entry)
         return false;
 
     bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
-    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);;
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
     return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoAddDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoUpdateDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo update domain entry used in DisconnectBlock to handle forks
+    return false;
+}
+
+bool UndoDeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo delete domain entry used in DisconnectBlock to handle forks
+    return false;
 }
 
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
@@ -592,7 +618,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         return true;
     }
 
-    LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    LogPrint("bdap", "%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
 
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
@@ -650,7 +676,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, dataAmount, monthlyFee);
+            LogPrint("bdap", "%s -- *** Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, dataAmount, monthlyFee);
         }
         if (depositFee > opAmount) {
             if (ENFORCE_BDAP_FEES) {
@@ -662,7 +688,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
+            LogPrint("bdap", "%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
         }
         if (nMonths < 10000) {
             entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
@@ -712,7 +738,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP deposit fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
+            LogPrint("bdap", "%s -- *** Valid BDAP deposit fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
                                 (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
         }
         // Add previous expire date plus additional months

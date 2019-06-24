@@ -43,6 +43,9 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
 bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry);
 bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath);
 bool DeleteDomainEntry(const CDomainEntry& entry);
+bool UndoAddDomainEntry(const CDomainEntry& entry);
+bool UndoUpdateDomainEntry(const CDomainEntry& entry);
+bool UndoDeleteDomainEntry(const CDomainEntry& entry);
 bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);

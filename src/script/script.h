@@ -208,6 +208,7 @@ enum opcodetype {
     OP_BDAP_ID_VERIFICATION = 0x0c,      // = BDAP identity verification
     OP_BDAP_SIDECHAIN = 0x0d,            // = BDAP sub chain
     OP_BDAP_SIDECHAIN_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
+    OP_BDAP_ASSET = 0x0f,                // = BDAP asset
 
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
