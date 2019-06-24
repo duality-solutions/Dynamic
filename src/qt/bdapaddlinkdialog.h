@@ -29,12 +29,13 @@ class BdapAddLinkDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BdapAddLinkDialog(QWidget *parent = 0);
+    explicit BdapAddLinkDialog(QWidget *parent = 0, int DynamicUnits = 0);
     ~BdapAddLinkDialog();
 
 private:
     Ui::BdapAddLinkDialog* ui;
     std::string ignoreErrorCode(const std::string input);
+    int nDynamicUnits;
 
     QCompleter* autoCompleterFrom;
     QCompleter* autoCompleterTo;

@@ -7,6 +7,7 @@
 
 #include "bdap/fees.h"
 #include "bdappage.h"
+#include "dynamicunits.h"
 
 #include <QDialog>
 #include <QMessageBox>
@@ -14,6 +15,6 @@
 #include <QPushButton>
 #include <QTranslator>
 
-bool bdapFeesPopup(QWidget *parentDialog, const opcodetype& opCodeAction, const opcodetype& opCodeObject, BDAP::ObjectType inputAccountType = BDAP::ObjectType::BDAP_USER, int32_t regMonths = DEFAULT_REGISTRATION_MONTHS);
+bool bdapFeesPopup(QWidget *parentDialog, const opcodetype& opCodeAction, const opcodetype& opCodeObject, BDAP::ObjectType inputAccountType, int unit, int32_t regMonths = DEFAULT_REGISTRATION_MONTHS);
 
 #endif // DYNAMIC_QT_BDAPFEESPOPUP_H
