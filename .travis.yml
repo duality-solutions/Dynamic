@@ -1,20 +1,46 @@
+sudo: false
 language: cpp
-compiler: gcc
-os: linux
-sudo: required
-dist: bionic
-install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y ocl-icd-opencl-dev
-  - sudo apt-get install -y build-essential libtool autotools-dev autoconf pkg-config libssl-dev libboost-all-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libcrypto++-dev libevent-dev
-  - sudo add-apt-repository -y ppa:bitcoin/bitcoin
-  - sudo apt-get update -y && sudo apt-get install -y libdb4.8-dev libdb4.8++-dev
-script:
-  - ./autogen.sh && ./configure --with-gui=qt5 --enable-gpu && make -j2
+matrix:
+  include:
+      #linux
+      - os: linux
+        services: docker
+        env:
+          - V=Dockerfile-stretch
+        script:
+          - ./archive.sh
+          - docker build -f scripts/docker/debian/Dockerfile-stretch .
+      - os: linux
+        services: docker
+        env:
+          - V=Dockerfile-jessie
+        script:
+          - ./archive.sh
+          - docker build -f scripts/docker/debian/Dockerfile-jessie .
+      - os: linux
+        sudo: required
+        env:
+          - V=ubuntu
+        before_install:
+          - ./scripts/travis-uninstall-packages.sh
+          - ./scripts/dependencies-ubuntu.sh
+        install: true
+        script:
+          - ./scripts/install-ubuntu.sh
+      - os: linux
+        sudo: required
+        env:
+          - V=ubuntu-debuild
+        before_install:
+          - ./scripts/travis-uninstall-packages.sh
+          - ./scripts/dependencies-ubuntu.sh
+        install: true
+        script:
+          - ./scripts/debuild.sh
+      - os: osx
+        osx_image: xcode9.2
+        before_script:
+          - ./scripts/dependencies-osx.sh 
+        script:
+          - ./scripts/install-osx.sh
 
-deploy:
-  provider: releases
-  file: "dynamic-qt"
-  skip_cleanup: true
-  on:
-tags: true
