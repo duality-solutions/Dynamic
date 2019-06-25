@@ -676,7 +676,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
                 uint256 txid;
-                if (GetLinkRequestIndex(vchPubKey, txid)) {
+                if (GetLinkIndex(vchPubKey, txid)) {
                     if (txid != tx->GetHash()) {
                         errorMessage = "Link request public key already used.";
                         LogPrintf("%s -- %s\n", __func__, errorMessage);
@@ -694,7 +694,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
                 uint256 txid;
-                if (GetLinkAcceptIndex(vchPubKey, txid)) {
+                if (GetLinkIndex(vchPubKey, txid)) {
                     if (txid != tx->GetHash()) {
                         errorMessage = "Link accept public key already used.";
                         return state.DoS(100, false, REJECT_INVALID, errorMessage);

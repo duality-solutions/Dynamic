@@ -172,7 +172,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     // Check if pubkey already exists
     uint256 prevTxID;
-    if (GetLinkRequestIndex(txLink.RequestorPubKey, prevTxID))
+    if (GetLinkIndex(txLink.RequestorPubKey, prevTxID))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4003 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get requestor link address
@@ -349,7 +349,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
 
     // Check if pubkey already exists
     uint256 prevTxID;
-    if (GetLinkAcceptIndex(txLinkAccept.RecipientPubKey, prevTxID))
+    if (GetLinkIndex(txLinkAccept.RecipientPubKey, prevTxID))
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4105 - " + txLinkAccept.RecipientPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get link accepting address

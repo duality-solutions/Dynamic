@@ -370,10 +370,8 @@ void PrepareShutdown()
         // BDAP Services DB's
         delete pDomainEntryDB;
         pDomainEntryDB = NULL;
-        delete pLinkRequestDB;
-        pLinkRequestDB = NULL;
-        delete pLinkAcceptDB;
-        pLinkAcceptDB = NULL;
+        delete pLinkDB;
+        pLinkDB = NULL;
         delete pLinkManager;
         pLinkManager = NULL;
         // LibTorrent DHT Netowrk Services
@@ -1725,8 +1723,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pBanAccountDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
-                delete pLinkRequestDB;
-                delete pLinkAcceptDB;
+                delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
                 delete pHashTableSession;
@@ -1746,8 +1743,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
-                pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);
-                pLinkAcceptDB = new CLinkAcceptDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
                 pHashTableSession = new CHashTableSession();
