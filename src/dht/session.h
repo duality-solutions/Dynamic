@@ -50,7 +50,7 @@ public:
     CCriticalSection cs_EventMap;
     CCriticalSection cs_DHTGetEventMap;
 
-    CHashTableSession() : vDataEntries(CDataRecordBuffer(32)), strErrorMessage("") {};
+    CHashTableSession() : vDataEntries(CDataRecordBuffer(32)), strErrorMessage(""), fShutdown(false) {};
 
     bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const std::string& strSalt, const libtorrent::entry& entryValue);
 
