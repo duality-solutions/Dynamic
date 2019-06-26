@@ -502,6 +502,9 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
             i++;
         }
     }
+    if (strHeaderHex == "")
+        return false; // Header failed, so don't try to get the rest of the record.
+
     header.LoadHex(strHeaderHex);
     if (!header.IsNull() && header.nChunks > 0) {
         std::vector<CDataChunk> vChunks;
