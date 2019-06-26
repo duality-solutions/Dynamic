@@ -85,15 +85,14 @@ uint32_t GetLastPutDate(const HashRecordKey& recordKey);
 void CleanUpPutCommandMap();
 
 /** Start the DHT libtorrent network threads */
-void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
+void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 
 namespace DHT
 {
-    bool PutStatus(const size_t nSessionThread);
-    bool GetStatus(const size_t nSessionThread);
+    bool SessionStatus();
     bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataRecord& record, std::string& strErrorMessage);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
@@ -105,4 +104,5 @@ namespace DHT
     bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents);
     void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
 }
+
 #endif // DYNAMIC_DHT_SESSION_H

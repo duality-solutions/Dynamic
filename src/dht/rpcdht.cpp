@@ -55,7 +55,7 @@ static UniValue GetMutable(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     const std::string strPubKey = request.params[1].get_str();
@@ -108,7 +108,7 @@ static UniValue PutMutable(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -211,7 +211,7 @@ static UniValue GetDHTStatus(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtinfo", ""));
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     libtorrent::session_status stats;
@@ -367,7 +367,7 @@ static UniValue PutRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -470,7 +470,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -564,7 +564,7 @@ static UniValue GetRecord(const JSONRPCRequest& request)
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
    
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -753,7 +753,7 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -870,7 +870,7 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VOBJ);
    
-    if (!DHT::GetStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -956,7 +956,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::GetStatus(0) || !DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -1083,7 +1083,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!DHT::PutStatus(0))
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())

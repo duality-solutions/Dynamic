@@ -17,9 +17,11 @@ private:
     std::string dht_bootstrap_nodes;
     std::string user_agent;
     uint16_t nPort;
+    uint16_t nTotalThreads;
+    bool fMultiThreads;
 
 public:
-    CDHTSettings(const uint16_t nSessionNumber);
+    CDHTSettings(const uint16_t ordinal, const uint16_t threads, const bool multithreaded);
 
     void LoadSettings();
 

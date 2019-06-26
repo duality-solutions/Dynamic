@@ -36,12 +36,13 @@
 
 using namespace libtorrent;
 
-static constexpr size_t nThreads = 7;
+static constexpr size_t nThreads = 8;
+
+bool fMultiThreads;
 
 typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>>, nThreads> SessionThreadGroup;
 
-static SessionThreadGroup arrayGetSessionThreads;
-static SessionThreadGroup arrayPutSessionThreads;
+static SessionThreadGroup arraySessions;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
 static std::map<HashRecordKey, uint32_t> mPutCommands;
@@ -264,40 +265,43 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
                 return;
 
         } while (true);
-        // start all DHT Get sessions
-        for (unsigned int i = 0; i < nThreads; i++) {
+        // start all DHT sessions
+        size_t nRunningThreads = fMultiThreads ? nThreads : 1;
+        if (nRunningThreads > 1) {
+            for (unsigned int i = 0; i < nRunningThreads; i++) {
+                LogPrintf("%s -- starting session #%d\n", __func__, i);
+                std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
+                CDHTSettings settings(i, nThreads, fMultiThreads);
+                pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
+                settings.LoadSettings();
+                pDHTSession->Session = settings.GetSession();
+                std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
+                arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
+                MilliSleep(33);
+            }
+        } else {
+            unsigned int i = 0;
+            LogPrintf("%s -- starting session #%d\n", __func__, i);
             std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
-            CDHTSettings settings(i);
-            pDHTSession->strName = strprintf("get%d", std::to_string(i));
+            CDHTSettings settings(i, nThreads, fMultiThreads);
+            pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
             settings.LoadSettings();
             pDHTSession->Session = settings.GetSession();
             std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
-            arrayGetSessionThreads[i] = std::make_pair(pSessionThread, pDHTSession);
-            MilliSleep(30);
-        }
-        // start all DHT Put sessions
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
-            CDHTSettings settings(i + nThreads);
-            pDHTSession->strName = strprintf("put%d", std::to_string(i));
-            settings.LoadSettings();
-            pDHTSession->Session = settings.GetSession();
-            std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
-            arrayPutSessionThreads[i] = std::make_pair(pSessionThread, pDHTSession);
-            MilliSleep(30);
+            arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
         }
         fStarted = true;
     }
-    catch (const std::runtime_error& e)
-    {
+    catch (const std::runtime_error& e) {
         fRun = false;
         LogPrintf("DHTTorrentNetwork -- runtime error: %s\n", e.what());
         return;
     }
 }
 
-void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
+void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainparams, CConnman& connman)
 {
+    fMultiThreads = multithreads;
     fRun = true;
     fStarted = false;
     if (pDHTTorrentThread != NULL)
@@ -312,37 +316,39 @@ void StopTorrentDHTNetwork()
     fRun = false;
     if (pDHTTorrentThread != NULL)
     {
+        size_t nRunningThreads = fMultiThreads ? nThreads : 1;
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
         if (fStarted) {
             libtorrent::session_params params;
             params.settings.set_bool(settings_pack::enable_dht, false);
             params.settings.set_int(settings_pack::alert_mask, 0x0);
-            // stop all DHT Get sessions
-            for (unsigned int i = 0; i < nThreads; i++) {
-                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[i];
+            // stop all DHT sessions
+            if (fMultiThreads) {
+                for (unsigned int i = 0; i < nRunningThreads; i++) {
+                    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
+                    pairSession.second->StopEventListener();
+                    MilliSleep(30);
+                    pairSession.second->Session->apply_settings(params.settings);
+                    pairSession.second->Session->abort();
+                }
+            } else {
+                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
                 pairSession.second->StopEventListener();
                 MilliSleep(30);
                 pairSession.second->Session->apply_settings(params.settings);
                 pairSession.second->Session->abort();
             }
-            // stop all DHT Put sessions
-            for (unsigned int i = 0; i < nThreads; i++) {
-                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[i];
-                pairSession.second->StopEventListener();
-                MilliSleep(30);
-                pairSession.second->Session->apply_settings(params.settings);
-                pairSession.second->Session->abort();
-            }
+            
         }
         pDHTTorrentThread->join();
-        // join all DHT Get threads
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[i];
-            pairSession.first->join();
-        }
-        // join all DHT Put threads
-        for (unsigned int i = 0; i < nThreads; i++) {
-            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[i];
+        // join all DHT threads
+        if (fMultiThreads) {
+            for (unsigned int i = 0; i < nThreads; i++) {
+                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
+                pairSession.first->join();
+            }
+        } else {
+            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
             pairSession.first->join();
         }
     }
@@ -750,27 +756,13 @@ bool CHashTableSession::GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGet
 namespace DHT
 {
 
-bool PutStatus(const size_t nSessionThread)
+bool SessionStatus()
 {
-    if (nSessionThread >= nThreads)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayPutSessionThreads[nSessionThread];
-    if (!arrayPutSessionThreads[nSessionThread].second)
-        return false;
-
-    return true;
-}
-
-bool GetStatus(const size_t nSessionThread)
-{
-    if (nSessionThread >= nThreads)
-        return false;
-
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
-        return false;
-
+    size_t nRunningThreads = fMultiThreads ? nThreads : 1;
+    for (unsigned int i = 0; i < nRunningThreads; i++) {
+        if (!arraySessions[i].second)
+            return false;
+    }
     return true;
 }
 
@@ -802,11 +794,11 @@ bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64>
     DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
     size_t nCounter = 0;
     for (const std::pair<std::string, libtorrent::entry>& pair : newPut) {
-        if (!arrayPutSessionThreads[nCounter].second) {
+        if (!arraySessions[nCounter].second) {
             strErrorMessage = strprintf("Session %d null.", nCounter);
             return false;
         }
-        arrayPutSessionThreads[nCounter].second->SubmitPut(public_key, private_key, lastSequence, pair.first, pair.second);
+        arraySessions[nCounter].second->SubmitPut(public_key, private_key, lastSequence, pair.first, pair.second);
         LogPrintf("%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
         nCounter++;
     }
@@ -826,11 +818,10 @@ bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_k
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGet(public_key, recordSalt);
+    return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt);
 }
 
 bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
@@ -839,11 +830,10 @@ bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_k
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
+    return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
 }
 
 bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
@@ -852,11 +842,10 @@ bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& pu
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetRecord(public_key, private_seed, strOperationType, iSequence, record);
+    return arraySessions[nSessionThread].second->SubmitGetRecord(public_key, private_seed, strOperationType, iSequence, record);
 }
 
 bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
@@ -864,11 +853,10 @@ bool SubmitGetAllRecordsSync(const size_t nSessionThread, const std::vector<CLin
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
+    return arraySessions[nSessionThread].second->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords);
 }
 
 bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
@@ -876,11 +864,10 @@ bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLi
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->SubmitGetAllRecordsAsync(vchLinkInfo, strOperationType, vchRecords);
+    return arraySessions[nSessionThread].second->SubmitGetAllRecordsAsync(vchLinkInfo, strOperationType, vchRecords);
 }
 
 bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents)
@@ -888,11 +875,10 @@ bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEven
     if (nSessionThread >= nThreads)
         return false;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return false;
 
-    return arrayGetSessionThreads[nSessionThread].second->GetAllDHTGetEvents(vchGetEvents);
+    return arraySessions[nSessionThread].second->GetAllDHTGetEvents(vchGetEvents);
 }
 
 void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets)
@@ -900,11 +886,10 @@ void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats,
     if (nSessionThread >= nThreads)
         return;
 
-    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arrayGetSessionThreads[nSessionThread];
-    if (!arrayGetSessionThreads[nSessionThread].second)
+    if (!arraySessions[nSessionThread].second)
         return;
 
-    arrayGetSessionThreads[nSessionThread].second->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    arraySessions[nSessionThread].second->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
 }
 
 } // end DHT namespace
