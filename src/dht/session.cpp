@@ -422,7 +422,6 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
-    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
     //TODO: DHT add locks
     if (!Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
@@ -800,7 +799,8 @@ bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64>
         }
         arraySessions[nCounter].second->SubmitPut(public_key, private_key, lastSequence, pair.first, pair.second);
         LogPrintf("%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
-        nCounter++;
+        if (fMultiThreads)
+            nCounter++;
     }
     nPutRecords++;
 
