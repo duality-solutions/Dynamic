@@ -6,8 +6,8 @@
 
 #include "bdap/linkstorage.h"
 #include "bdap/utils.h"
-#include "dht/sessionevents.h"
 #include "chainparams.h"
+#include "dht/sessionevents.h"
 #include "dht/datachunk.h"
 #include "dht/dataheader.h"
 #include "dht/settings.h"

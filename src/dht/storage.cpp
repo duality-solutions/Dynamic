@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "storage.h"
+#include "dht/storage.h"
 
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
