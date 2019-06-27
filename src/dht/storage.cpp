@@ -155,6 +155,8 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     // TODO (DHT): Store entries in memory as well
     //pDefaultStorage->put_mutable_item(target, buf, sig, seq, pk, salt, addr);
 
+    // check if the public key belongs to an account or link
+    // check if salt is allowed
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
 
