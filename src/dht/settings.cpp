@@ -42,7 +42,6 @@ CDHTSettings::CDHTSettings(const uint16_t ordinal, const uint16_t threads, const
 
 void CDHTSettings::LoadPeerList()
 {
-    LogPrintf("DEBUGGER - %s - Begin, nTotalThreads = %d\n", __func__, nTotalThreads);
     std::string strPeerList = "";
     // get all Dynodes above the minimum protocol version
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();

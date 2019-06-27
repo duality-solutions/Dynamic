@@ -102,7 +102,7 @@ namespace DHT {
 void CHashTableSession::StopEventListener()
 {
     fShutdown = true;
-    LogPrintf("%s -- stopping.\n", __func__);
+    LogPrintf("%s -- stopping DHT session thread %s.\n", __func__, strName);
     MilliSleep(333);
 }
 
