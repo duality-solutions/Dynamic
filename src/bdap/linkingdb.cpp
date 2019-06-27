@@ -295,3 +295,11 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
     }
     return true;
 }
+
+bool LinkPubKeyExists(const std::vector<unsigned char>& vchPubKey)
+{
+    if (!CheckLinkDB())
+        return false;
+
+    return pLinkDB->LinkExists(vchPubKey);
+}

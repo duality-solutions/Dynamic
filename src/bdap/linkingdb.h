@@ -34,6 +34,8 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
 
 bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck);
 
+bool LinkPubKeyExists(const std::vector<unsigned char>& vchPubKey);
+
 extern CLinkDB *pLinkDB;
 
 #endif // DYNAMIC_BDAP_LINKINGDB_H

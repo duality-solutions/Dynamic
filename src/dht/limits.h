@@ -8,11 +8,12 @@
 /**!
 These limit classes define allowed salts (records) that the DHT will accept for storage.
 The first version contains a list of acceptable salts but in future versions, this list will
-be dynamic.  Application developers that want to store data in the DHT can purchase certificate
-that allow their custom op code.
+be dynamic.  Application developers that want to store data in the DHT can purchase a certificate
+that allows their custom op code.
 */
 
 #include <string>
+#include <vector>
 
 class CAllowDataCode {
 public:
@@ -27,6 +28,6 @@ public:
 };
 
 bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage);
-
+bool CheckPubKey(const std::vector<unsigned char>& vchPubKey);
 
 #endif // DYNAMIC_DHT_LIMITS_H

@@ -6,9 +6,11 @@
 
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "util.h"
+#include "validation.h"
 
 #include <libtorrent/aux_/numeric_cast.hpp>
 #include <libtorrent/broadcast_socket.hpp> // for ip_v4
@@ -155,8 +157,6 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     // TODO (DHT): Store entries in memory as well
     //pDefaultStorage->put_mutable_item(target, buf, sig, seq, pk, salt, addr);
 
-    // check if the public key belongs to an account or link
-    // check if salt is allowed
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
 
@@ -170,10 +170,18 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
 
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data(), ED25519_PUBLIC_KEY_BYTE_LENGTH));
     CharString vchPublicKey = vchFromString(strPublicKey);
-
+    if (!CheckPubKey(vchPublicKey)) {
+        LogPrintf("%s -- Invalid pubkey used (%s).  DHT put storage request failed.\n", __func__, strPublicKey);
+    }
     std::unique_ptr<char[]> saltValue;
     ExtractValueFromSpan(saltValue, salt);
     std::string strSalt = std::string(saltValue.get(), salt.size());
+    //bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage)
+    std::string strErrorMessage;
+    unsigned int nHeight = (unsigned int)chainActive.Height();
+    if (!CheckSalt(strSalt, nHeight, strErrorMessage)) {
+        LogPrintf("%s -- Invalid salt used (%s) at height %d.  DHT put storage request failed.\n", __func__, strSalt, nHeight);
+    }
     CharString vchSalt = vchFromString(strSalt);
 
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);

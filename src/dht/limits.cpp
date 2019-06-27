@@ -4,6 +4,9 @@
 
 #include "dht/limits.h"
 
+#include "bdap/domainentrydb.h"
+#include "bdap/linkingdb.h"
+#include "chain.h"
 #include "utilstrencodings.h"
 #include "tinyformat.h"
 
@@ -71,5 +74,15 @@ bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::stri
         return true;
     }
     strErrorMessage = strprintf("%s, Invalid salt. Allow data type salt not found in allowed data map.", strErrorMessage);
+    return false;
+}
+
+bool CheckPubKey(const std::vector<unsigned char>& vchPubKey)
+{
+    bool fAccountPubkey = AccountPubKeyExists(vchPubKey);
+    bool fLinkPubkey = LinkPubKeyExists(vchPubKey);
+    if (fAccountPubkey || fLinkPubkey)
+        return true;
+
     return false;
 }

@@ -41,6 +41,7 @@ public:
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);
 bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry);
+bool AccountPubKeyExists(const std::vector<unsigned char>& vchPubKey);
 bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath);
 bool DeleteDomainEntry(const CDomainEntry& entry);
 bool UndoAddDomainEntry(const CDomainEntry& entry);
