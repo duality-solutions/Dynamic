@@ -15,6 +15,7 @@
 #include "clientmodel.h"
 #include "dynode-sync.h"
 #include "guiutil.h"
+#include "optionsmodel.h"
 #include "rpcclient.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
@@ -99,6 +100,7 @@ BdapPage::~BdapPage()
 void BdapPage::setModel(WalletModel* model)
 {
     this->model = model;
+
 }
 
 void BdapPage::setClientModel(ClientModel* _clientModel)
@@ -165,7 +167,7 @@ void BdapPage::addGroup()
         return;
     }
 
-    BdapAddUserDialog dlg(this,BDAP::ObjectType::BDAP_GROUP);
+    BdapAddUserDialog dlg(this,model->getOptionsModel()->getDisplayUnit(),BDAP::ObjectType::BDAP_GROUP);
     dlg.setWindowTitle(QObject::tr("Add BDAP Group"));
     dlg.exec();
     if (dlg.result() == 1) {
@@ -222,7 +224,7 @@ void BdapPage::updateGroup()
     commonName = ui->tableWidget_Groups->item(nSelectedRow,0)->text().toStdString();
     expirationDate = ui->tableWidget_Groups->item(nSelectedRow,2)->text().toStdString();
 
-    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,account,commonName,expirationDate);
+    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,account,commonName,expirationDate,model->getOptionsModel()->getDisplayUnit());
     dlg.setWindowTitle(QObject::tr("Update BDAP Group"));
     
     dlg.exec();
@@ -268,7 +270,7 @@ void BdapPage::addUser()
         return;
     }
 
-    BdapAddUserDialog dlg(this);
+    BdapAddUserDialog dlg(this,model->getOptionsModel()->getDisplayUnit());
     dlg.exec();
     if (dlg.result() == 1) {
         bdapAccountTableModel->refreshUsers();
@@ -289,7 +291,7 @@ void BdapPage::addLink()
         return;
     }
 
-    BdapAddLinkDialog dlg(this);
+    BdapAddLinkDialog dlg(this, model->getOptionsModel()->getDisplayUnit());
     dlg.exec();
 
     if (dlg.result() == 1) {
@@ -323,8 +325,7 @@ void BdapPage::acceptLink()
     reply = QMessageBox::question(this, QObject::tr("Confirm Accept Link"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-
-        if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_LINK_ACCEPT,BDAP::ObjectType::BDAP_LINK_ACCEPT)) {
+        if (!bdapFeesPopup(this,OP_BDAP_NEW,OP_BDAP_LINK_ACCEPT,BDAP::ObjectType::BDAP_LINK_ACCEPT,model->getOptionsModel()->getDisplayUnit())) {
             return;
         }
 
@@ -403,7 +404,7 @@ void BdapPage::updateUser()
     commonName = ui->tableWidget_Users->item(nSelectedRow,0)->text().toStdString();
     expirationDate = ui->tableWidget_Users->item(nSelectedRow,2)->text().toStdString();
 
-    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_USER,account,commonName,expirationDate);
+    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_USER,account,commonName,expirationDate,model->getOptionsModel()->getDisplayUnit());
     dlg.setWindowTitle(QObject::tr("Update BDAP User"));
     
     dlg.exec();

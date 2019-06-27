@@ -6,6 +6,7 @@
 #define BDAPPAGE_H
 
 #include "bdap/bdap.h"
+#include "dynamicunits.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
 
@@ -74,7 +75,7 @@ public:
     std::string getPARequestorSearch();    
     std::string getPARecipientSearch();    
     std::string getPRRequestorSearch();    
-    std::string getPRRecipientSearch();    
+    std::string getPRRecipientSearch();  
 
 private:
     Ui::BdapPage* ui;
