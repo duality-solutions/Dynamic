@@ -73,6 +73,12 @@ void CDHTSettings::LoadPeerList()
     LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
 }
 
+void CDHTSettings::LoadPeerID(const std::string& strPeerID)
+{
+    peer_fingerprint = strPeerID;
+    LogPrintf("CDHTSettings::%s -- peer_fingerprint = %s\n", __func__, peer_fingerprint);
+}
+
 void CDHTSettings::LoadSettings()
 {
     LoadPeerList();
@@ -88,6 +94,8 @@ void CDHTSettings::LoadSettings()
         params.settings.set_str(settings_pack::user_agent, user_agent);
         params.settings.set_str(settings_pack::dht_bootstrap_nodes, dht_bootstrap_nodes); 
         params.settings.set_str(settings_pack::listen_interfaces, listen_interfaces);
+        if (peer_fingerprint.size() > 0)
+            params.settings.set_str(settings_pack::peer_fingerprint, peer_fingerprint);
         params.dht_settings.max_peers_reply = 100; // default = 100
         params.dht_settings.search_branching = 10; // default = 5
         params.dht_settings.max_fail_count = 100; // default = 20

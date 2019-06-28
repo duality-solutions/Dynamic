@@ -11,8 +11,8 @@
 #include <vector>
 
 namespace libtorrent {
-    class session;
     class alert;
+    class session;
 }
 
 class CEvent {
@@ -155,5 +155,6 @@ public:
 };
 
 std::string GetInfoHash(const std::string& pubkey, const std::string& salt);
+std::string GetDynodeHashID(const std::string& outpoint);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

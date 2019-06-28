@@ -12,6 +12,7 @@
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/kademlia/types.hpp>
 #include <libtorrent/kademlia/item.hpp>
+#include <libtorrent/hasher.hpp> // for to_hex and from_hex
 #include <libtorrent/hex.hpp> // for to_hex and from_hex
 #include <libtorrent/session.hpp>
 #include <libtorrent/session_status.hpp>
@@ -43,13 +44,21 @@ std::string GetInfoHash(const std::string& pubkey, const std::string& salt)
     dht::public_key pk;
     pk.bytes = arrPubKey;
     const sha1_hash infoHash = dht::item_target_id(salt, pk);
-    
     return aux::to_hex(infoHash.to_string());
+}
+
+std::string GetDynodeHashID(const std::string& outpoint)
+{
+    hasher hashNodeID(outpoint.c_str(), outpoint.size());
+    const sha1_hash nodeID = hashNodeID.final();
+    LogPrintf("%s -- Dynode Outpoint %s,  HashID %s\n\n", __func__, outpoint, aux::to_hex(nodeID.to_string()));
+    return aux::to_hex(nodeID.to_string());
 }
 
 CMutableGetEvent::CMutableGetEvent() : CEvent()
 {
 }
+
 CMutableGetEvent::CMutableGetEvent(const std::string& _message, const int _type, const uint32_t _category, const std::string& _what, 
                                    const std::string& _pubkey, const std::string& _salt, const int64_t& _seq, const std::string& _value, const std::string& _signature, const bool _authoritative)
                 : CEvent(_message, _type, _category, _what)

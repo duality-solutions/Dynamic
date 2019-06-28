@@ -4,6 +4,7 @@
 
 #include "dht/session.h"
 
+#include "activedynode.h"
 #include "bdap/linkstorage.h"
 #include "bdap/utils.h"
 #include "chainparams.h"
@@ -267,16 +268,24 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
         } while (true);
         // start all DHT sessions
         size_t nRunningThreads = fMultiThreads ? nThreads : 1;
+        // Dynodes use a fixed peer id for the DHT.
+        std::string strDynodePeerID;
+        if (fDynodeMode)
+            strDynodePeerID = GetDynodeHashID(activeDynode.outpoint.ToStringShort());
+
         if (nRunningThreads > 1) {
             for (unsigned int i = 0; i < nRunningThreads; i++) {
                 LogPrintf("%s -- starting session #%d\n", __func__, i);
                 std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
                 CDHTSettings settings(i, nThreads, fMultiThreads);
                 pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
+                if (fDynodeMode)
+                    settings.LoadPeerID(strDynodePeerID);
                 settings.LoadSettings();
                 pDHTSession->Session = settings.GetSession();
                 std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
                 arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
+                LogPrintf("%s -- Session PeerID %s\n", __func__, pDHTSession->Session->get_settings().get_str(settings_pack::peer_fingerprint));
                 MilliSleep(33);
             }
         } else {
@@ -285,10 +294,13 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
             std::shared_ptr<CHashTableSession> pDHTSession(new CHashTableSession());
             CDHTSettings settings(i, nThreads, fMultiThreads);
             pDHTSession->strName = strprintf("dht-%d", std::to_string(i));
+            if (fDynodeMode)
+                settings.LoadPeerID(strDynodePeerID);
             settings.LoadSettings();
             pDHTSession->Session = settings.GetSession();
             std::shared_ptr<std::thread> pSessionThread = std::make_shared<std::thread>(std::bind(&StartEventListener, std::ref(pDHTSession)));
             arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
+            LogPrintf("%s -- Session PeerID %s\n", __func__, pDHTSession->Session->get_settings().get_str(settings_pack::peer_fingerprint));
         }
         fStarted = true;
     }
@@ -422,6 +434,7 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
+    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
     //TODO: DHT add locks
     if (!Session) {
         //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";

@@ -70,7 +70,6 @@ public:
     void StopEventListener();
 
 private:
-    
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
     bool LoadSessionState();
     int SaveSessionState();
