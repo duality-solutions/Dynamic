@@ -71,9 +71,9 @@ public:
 
 private:
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
-    bool LoadSessionState();
-    int SaveSessionState();
-    std::string GetSessionStatePath();
+    //bool LoadSessionState();
+    //int SaveSessionState();
+    //std::string GetSessionStatePath();
     bool RemoveDHTGetEvent(const std::string& infoHash);
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
     bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);

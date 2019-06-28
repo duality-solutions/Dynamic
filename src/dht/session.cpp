@@ -196,7 +196,7 @@ bool CHashTableSession::Bootstrap()
     LogPrint("dht", "DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
     return false;
 }
-
+/*
 std::string CHashTableSession::GetSessionStatePath()
 {
     boost::filesystem::path path = GetDataDir() / "dht_state.dat";
@@ -247,7 +247,7 @@ bool CHashTableSession::LoadSessionState()
     }
     return true;
 }
-
+*/
 void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
     LogPrintf("%s -- starting\n", __func__);
@@ -434,22 +434,13 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt)
 {
-    LogPrintf("CHashTableSession::%s -- Start.\n", __func__);
-    //TODO: DHT add locks
     if (!Session) {
-        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. Session is null.";
+        LogPrintf("CHashTableSession::%s -- Session null.  Submit get failed.\n", __func__);
         return false;
     }
     if (!Session->is_dht_running()) {
-        LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
-        if (!LoadSessionState()) {
-            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
-            if (!Bootstrap())
-                return false;
-        }
-        else {
-            LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
-        }
+        LogPrintf("CHashTableSession::%s -- Session not running.  Submit get failed.\n", __func__);
+        return false;
     }
     Session->dht_get_item(public_key, recordSalt);
     LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s\n", __func__, aux::to_hex(public_key), recordSalt);
