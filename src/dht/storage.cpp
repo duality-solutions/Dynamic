@@ -172,6 +172,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchPublicKey = vchFromString(strPublicKey);
     if (!CheckPubKey(vchPublicKey)) {
         LogPrintf("%s -- Invalid pubkey used (%s).  DHT put storage request failed.\n", __func__, strPublicKey);
+        return;
     }
     std::unique_ptr<char[]> saltValue;
     ExtractValueFromSpan(saltValue, salt);
@@ -180,7 +181,8 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     std::string strErrorMessage;
     unsigned int nHeight = (unsigned int)chainActive.Height();
     if (!CheckSalt(strSalt, nHeight, strErrorMessage)) {
-        LogPrintf("%s -- Invalid salt used (%s) at height %d.  DHT put storage request failed.\n", __func__, strSalt, nHeight);
+        LogPrintf("%s -- Invalid salt used (%s) at height %d.  DHT put storage request failed. %s\n", __func__, strSalt, nHeight, strErrorMessage);
+        return;
     }
     CharString vchSalt = vchFromString(strSalt);
 

@@ -45,35 +45,35 @@ bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::stri
     std::vector<std::string> vSplit;
     boost::split(vSplit, strSalt, boost::is_any_of(":"));
     if (vSplit.size() != 2) {
-        strErrorMessage = strprintf("Invalid salt (%s). Could not find ':' delimiter", strSalt);
+        strErrorMessage = strprintf("Invalid salt (%s). Could not find ':' delimiter\n", strSalt);
         return false;
     }
     uint32_t nSlots;
-    if (ParseUInt32(vSplit[1], &nSlots)) {
-        strErrorMessage = strprintf("Invalid salt (%s). Could not parse slot number after :", strSalt);
+    if (!ParseUInt32(vSplit[1], &nSlots)) {
+        strErrorMessage = strprintf("Invalid salt (%s). Could not parse slot number after : %s\n", strSalt, vSplit[1]);
         return false;
     }
     std::multimap<std::string, CAllowDataCode>::iterator iAllowed = mapAllowedData.find(vSplit[0]);
     while (iAllowed != mapAllowedData.end()) {
-        if (nHeight > iAllowed->second.nStartHeight) {
-            strErrorMessage = strprintf("%s, Allow data type found but height is greater than allowed data start height %d. ", strErrorMessage, iAllowed->second.nStartHeight);
+        if (iAllowed->second.nStartHeight > nHeight) {
+            strErrorMessage = strprintf("%sAllow data type found but height (%d) is greater than allowed data start height %d.\n", strErrorMessage, nHeight, iAllowed->second.nStartHeight);
             iAllowed++;
             continue;
         }
-        if (iAllowed->second.nExpireTime >= nHeight && iAllowed->second.nExpireTime != 0) {
-            strErrorMessage = strprintf("%s, Allow data type found but expired %d. ", strErrorMessage, iAllowed->second.nExpireTime);
+        if (nHeight > iAllowed->second.nExpireTime && iAllowed->second.nExpireTime != 0) {
+            strErrorMessage = strprintf("%sAllow data type found but expired %d.\n", strErrorMessage, iAllowed->second.nExpireTime);
             iAllowed++;
             continue;
         }
-        if (nSlots <= iAllowed->second.nMaximumSlots) {
-            strErrorMessage = strprintf("%s, Allow data type found but too many slots (%d) used. Max slots = %d", strErrorMessage, nSlots, iAllowed->second.nMaximumSlots);
+        if (nSlots > iAllowed->second.nMaximumSlots) {
+            strErrorMessage = strprintf("%sAllow data type found but too many slots (%d) used. Max slots = %d\n", strErrorMessage, nSlots, iAllowed->second.nMaximumSlots);
             iAllowed++;
             continue;
         }
-        // Passes all checks so it is a valid data record salt.
+        LogPrintf("%s -- Salt %s passed all checks. Valid data record salt\n", __func__, strSalt);
         return true;
     }
-    strErrorMessage = strprintf("%s, Invalid salt. Allow data type salt not found in allowed data map.", strErrorMessage);
+    strErrorMessage = strprintf("%sInvalid salt (%s). Allow data type salt not found in allowed data map.", strErrorMessage, vSplit[0]);
     return false;
 }
 
