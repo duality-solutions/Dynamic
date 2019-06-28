@@ -47,11 +47,11 @@ std::string GetInfoHash(const std::string& pubkey, const std::string& salt)
     return aux::to_hex(infoHash.to_string());
 }
 
-std::string GetDynodeHashID(const std::string& outpoint)
+std::string GetDynodeHashID(const std::string& service_address)
 {
-    hasher hashNodeID(outpoint.c_str(), outpoint.size());
+    hasher hashNodeID(service_address.c_str(), service_address.size());
     const sha1_hash nodeID = hashNodeID.final();
-    LogPrintf("%s -- Dynode Outpoint %s,  HashID %s\n\n", __func__, outpoint, aux::to_hex(nodeID.to_string()));
+    LogPrintf("%s -- Dynode Service Address %s,  HashID %s\n", __func__, service_address, aux::to_hex(nodeID.to_string()));
     return aux::to_hex(nodeID.to_string());
 }
 

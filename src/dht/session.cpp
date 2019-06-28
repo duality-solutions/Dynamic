@@ -270,8 +270,10 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
         size_t nRunningThreads = fMultiThreads ? nThreads : 1;
         // Dynodes use a fixed peer id for the DHT.
         std::string strDynodePeerID;
-        if (fDynodeMode)
-            strDynodePeerID = GetDynodeHashID(activeDynode.outpoint.ToStringShort());
+        if (fDynodeMode) {
+            MilliSleep(1000); // wait a second to make sure we have the Dynode service address loaded.
+            strDynodePeerID = GetDynodeHashID(activeDynode.service.ToString(false));
+        }
 
         if (nRunningThreads > 1) {
             for (unsigned int i = 0; i < nRunningThreads; i++) {
