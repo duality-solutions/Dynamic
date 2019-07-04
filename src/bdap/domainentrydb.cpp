@@ -658,7 +658,12 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        std::vector<unsigned char> vchMonths = vvchArgs[2];
+        std::string strMonths = stringFromVch(vchMonths);
+        if (IsHex(strMonths)) {
+            vchMonths = ParseHex(strMonths);
+        }
+        int nMonths = CScriptNum(vchMonths, false, 10).getint();
         if (nMonths >= 10000)
             nMonths = 24;
         if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
@@ -719,7 +724,12 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        std::vector<unsigned char> vchMonths = vvchArgs[2];
+        std::string strMonths = stringFromVch(vchMonths);
+        if (IsHex(strMonths)) {
+            vchMonths = ParseHex(strMonths);
+        }
+        int nMonths = CScriptNum(vchMonths, false, 10).getint();
         if (nMonths >= 10000)
             nMonths = 24;
         if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
