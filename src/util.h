@@ -152,6 +152,7 @@ boost::filesystem::path GetDefaultDataDir();
 const boost::filesystem::path& GetDataDir(bool fNetSpecific = true);
 boost::filesystem::path GetBackupsDir();
 std::string GenerateRandomString(unsigned int len);
+unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax);
 void ClearDatadirCache();
 boost::filesystem::path GetConfigFile(const std::string& confPath);
 boost::filesystem::path GetDynodeConfigFile();

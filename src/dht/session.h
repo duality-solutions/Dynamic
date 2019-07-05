@@ -14,8 +14,11 @@
 #include "libtorrent/session.hpp"
 #include "libtorrent/session_status.hpp"
 
+#include <map> // for std::map and std::multimap
+
 class CChainParams;
 class CConnman;
+class CEvent;
 class CKeyEd25519;
 class CLinkInfo;
 class CMutableGetEvent;
@@ -88,6 +91,7 @@ void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainpa
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
+void ReannounceEntries();
 
 namespace DHT
 {

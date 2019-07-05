@@ -64,7 +64,8 @@ private:
     bool InitGet(const std::vector<unsigned char>& privateKey);
 };
 
-class CDataRecordBuffer{
+class CDataRecordBuffer
+{
 public:
     CDataRecordBuffer(size_t size);
     void push_back(const CDataRecord& input);

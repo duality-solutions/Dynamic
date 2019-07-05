@@ -81,6 +81,8 @@ public:
     std::string Signature() const;
     std::string Salt() const;
     std::string Value() const;
+    std::string ToString() const;
+
 };
 
 #endif // DYNAMIC_DHT_MUTABLE_DATA_H

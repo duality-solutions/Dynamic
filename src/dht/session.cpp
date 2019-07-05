@@ -11,6 +11,8 @@
 #include "dht/sessionevents.h"
 #include "dht/datachunk.h"
 #include "dht/dataheader.h"
+#include "dht/mutable.h"
+#include "dht/mutabledb.h"
 #include "dht/settings.h"
 #include "dynode-sync.h"
 #include "net.h"
@@ -27,6 +29,7 @@
 #include "libtorrent/span.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <cstdio> // for snprintf
 #include <cinttypes> // for PRId64 et.al.
@@ -38,6 +41,7 @@
 using namespace libtorrent;
 
 static constexpr size_t nThreads = 8;
+static constexpr int64_t nReannouceSleepMilliSleep = (60 * 1000); // re-announce one item every minute.
 
 bool fMultiThreads;
 
@@ -46,10 +50,12 @@ typedef std::array<std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHash
 static SessionThreadGroup arraySessions;
 
 static std::shared_ptr<std::thread> pDHTTorrentThread;
+static std::shared_ptr<boost::thread> pReannounceThread = nullptr;
 static std::map<HashRecordKey, uint32_t> mPutCommands;
 static uint64_t nPutRecords = 0;
 
 static bool fStarted;
+static bool fReannounceStarted = false;
 static bool fRun;
 
 namespace DHT {
@@ -174,6 +180,42 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
             dhtSession->CleanUpEventMap(300000);
         }
     }
+}
+
+void ReannounceEntries()
+{
+    if (InitMemoryMap()) {
+        try {
+            while (fReannounceStarted) {
+                MilliSleep(nReannouceSleepMilliSleep);
+                boost::this_thread::interruption_point();
+                CMutableData randomMutableItem;
+                // select one local item at random.  
+                if (SelectRandomMutableItem(randomMutableItem)) {
+                    // Check if already re-annouced item
+                    LogPrintf("%s -- Re-annoucing item %s\n", __func__, randomMutableItem.ToString());
+                    // annouced DHT entry, if not already done in the last x hours.
+                }
+            }
+        } catch (const boost::thread_interrupted& ex) {
+            LogPrintf("%s -- thread_interrupted\n", __func__);
+        } catch (const std::exception& ex) {
+            LogPrintf("%s -- ex %s\n", __func__, ex.what());
+        }
+    }
+    else {
+        LogPrintf("%s -- InitMemoryMap failed.\n", __func__);
+    }
+    /*
+    1. pick one random item (i) from the local repository (except
+       items already announced this round)
+    2. If all items in the local repository have been announced
+      2.1 terminate
+    3. look up item i in the DHT
+    4. If fewer than 8 nodes returned the item
+      4.1 announce i to the DHT
+      4.2 goto 1
+    */
 }
 
 bool CHashTableSession::Bootstrap()
@@ -304,6 +346,11 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman& connman)
             arraySessions[i] = std::make_pair(pSessionThread, pDHTSession);
             LogPrintf("%s -- Session PeerID %s\n", __func__, pDHTSession->Session->get_settings().get_str(settings_pack::peer_fingerprint));
         }
+        if (fDynodeMode) {
+            // Start thread used to balance the hash table by re-announcing entries
+            fReannounceStarted = true;
+            pReannounceThread = std::make_shared<boost::thread>(std::bind(&ReannounceEntries));
+        }
         fStarted = true;
     }
     catch (const std::runtime_error& e) {
@@ -365,6 +412,13 @@ void StopTorrentDHTNetwork()
             std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
             pairSession.first->join();
         }
+    }
+    
+    if (fReannounceStarted) {
+        // Stop ReannounceEntries
+        fReannounceStarted = false;
+        pReannounceThread->interrupt();
+        pReannounceThread->join();
     }
     pDHTTorrentThread = NULL;
     LogPrintf("%s --Finished stopping all DHT session threads.\n", __func__);
