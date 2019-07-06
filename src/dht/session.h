@@ -11,6 +11,7 @@
 
 #include "libtorrent/alert.hpp"
 #include "libtorrent/alert_types.hpp"
+#include "libtorrent/fwd.hpp"
 #include "libtorrent/session.hpp"
 #include "libtorrent/session_status.hpp"
 
@@ -21,10 +22,13 @@ class CConnman;
 class CEvent;
 class CKeyEd25519;
 class CLinkInfo;
+class CMutableData;
 class CMutableGetEvent;
 
 namespace libtorrent {
-    class entry;
+    namespace dht {
+        class item;
+    }
 }
 
 typedef std::pair<int64_t, CEvent> EventPair;
@@ -92,6 +96,7 @@ void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainpa
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 void ReannounceEntries();
+bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::dht::item& mut_item);
 
 namespace DHT
 {

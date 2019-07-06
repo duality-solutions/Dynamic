@@ -182,6 +182,29 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
     }
 }
 
+bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::dht::item& mut_item)
+{
+    entry root;
+    root["o"] = "q";
+    root["q"] = "put";
+    entry& broadcast = root["b"];
+    span<char const> value(mut_data.Value());
+    broadcast["v"] = value;
+    //broadcast["token"] = po->m_token;
+    std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> publicKey;
+    aux::from_hex(mut_data.PublicKey(), publicKey.data());
+    broadcast["k"] = publicKey;
+    broadcast["seq"] = mut_data.SequenceNumber;
+    std::array<char, ED25519_SIGTATURE_BYTE_LENGTH> signature;
+    aux::from_hex(mut_data.Signature(), signature.data());
+    broadcast["sig"] = signature;
+    span<char const> salt(mut_data.Salt());
+    broadcast["salt"] = salt;
+    libtorrent::dht::item it(root);
+    mut_item = it;
+    return true;
+}
+
 void ReannounceEntries()
 {
     if (InitMemoryMap()) {
@@ -193,8 +216,13 @@ void ReannounceEntries()
                 // select one local item at random.  
                 if (SelectRandomMutableItem(randomMutableItem)) {
                     // Check if already re-annouced item
+                    // Check if fewer than 8 nodes returned the item with the most recent sequence number
                     LogPrintf("%s -- Re-annoucing item %s\n", __func__, randomMutableItem.ToString());
-                    // annouced DHT entry, if not already done in the last x hours.
+                    libtorrent::dht::item mut_item;
+                    if (ConvertMutableEntry(randomMutableItem, mut_item)) {
+                        // annouced DHT entry, if not already done in the last x hours.
+                        LogPrintf("%s -- Re-annoucing converted item value %s\n", __func__, mut_item.value().to_string());
+                    }
                 }
             }
         } catch (const boost::thread_interrupted& ex) {
