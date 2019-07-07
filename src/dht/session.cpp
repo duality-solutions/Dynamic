@@ -54,6 +54,8 @@ static SessionThreadGroup arraySessions;
 static std::shared_ptr<std::thread> pDHTTorrentThread;
 static std::shared_ptr<boost::thread> pReannounceThread = nullptr;
 static std::map<HashRecordKey, uint32_t> mPutCommands;
+//             <InfoHash   ,      pair<seq    , epoch>
+static std::map<std::string, std::pair<int64_t, int64_t>> mReannouceInfoHashes;
 static uint64_t nPutRecords = 0;
 static uint64_t nPutPieces = 0;
 static uint64_t nPutBytes = 0;
@@ -220,12 +222,30 @@ void ReannounceEntries()
     if (InitMemoryMap()) {
         try {
             while (fReannounceStarted) {
+                // cleanup mReannouceInfoHashes map, make sure it doesn't get too big.
                 MilliSleep(nReannouceSleepMilliSleep);
                 boost::this_thread::interruption_point();
                 CMutableData randomMutableItem;
                 // select one local item at random.  
                 if (SelectRandomMutableItem(randomMutableItem)) {
                     // Check if already re-annouced item
+                    int64_t nCurrentTime = GetTime();
+                    std::map<std::string, std::pair<int64_t, int64_t>>::iterator it = mReannouceInfoHashes.find(randomMutableItem.InfoHash());
+                    if (it == mReannouceInfoHashes.end()) {
+                        mReannouceInfoHashes[randomMutableItem.InfoHash()] = std::make_pair(randomMutableItem.SequenceNumber, nCurrentTime);
+                    } else {
+                        // check if we have a higher sequence number
+                        if (randomMutableItem.SequenceNumber > it->second.first) {
+                            mReannouceInfoHashes[randomMutableItem.InfoHash()] = std::make_pair(randomMutableItem.SequenceNumber, nCurrentTime);
+                        // check if we re-annouced over an hour ago
+                        } else if (nCurrentTime - it->second.second > (60 * 60)) {
+                            mReannouceInfoHashes[randomMutableItem.InfoHash()] = std::make_pair(randomMutableItem.SequenceNumber, nCurrentTime);
+                        } else {
+                            // already re-annouced entry within the hour with the same sequence number.  Do not re-annouce entry.
+                            continue;
+                        }
+                    }
+                    // TODO: Remove debug.log printing below.
                     // Check if fewer than 8 nodes returned the item with the most recent sequence number
                     LogPrintf("%s -- Re-annoucing item %s\n", __func__, randomMutableItem.ToString());
                     libtorrent::dht::item mut_item;

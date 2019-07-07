@@ -67,6 +67,6 @@ std::string CMutableData::Value() const
 
 std::string CMutableData::ToString() const
 {
-    return strprintf("CMutableData(InfoHash = %s\n, PublicKey = %s\n, Salt = %s\n, Signature = %s\n, Value = %s)\n",
-        InfoHash(), PublicKey(), Salt(), Signature(), Value());
+    return strprintf("CMutableData(\nInfoHash = %s\n, PublicKey = %s\n, Salt = %s\n, Seq = %d\n, Signature = %s\n, Value = %s)\n",
+        InfoHash(), PublicKey(), Salt(), SequenceNumber, Signature(), Value());
 }
