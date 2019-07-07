@@ -202,15 +202,16 @@ bool CMutableDataDB::LoadMemoryMap()
     return true;
 }
 
-bool CMutableDataDB::SelectRandomMutableItem(CMutableData& randomItem)
-{
-    if (count == -1 || count == 0)
+bool CMutableDataDB::SelectRandomMutableItem(CMutableData& randomItem) {
+    if (count < 1)
         return false;
 
+    unsigned int nAdvance = 0;
     std::map<std::vector<unsigned char>, CMutableData>::iterator it = mapDataStorage.begin();
-    unsigned int nRandomItem = RandomIntegerRange(0, count - 1);
-    std::advance(it, nRandomItem);
+    if (count != 1) {
+        nAdvance = RandomIntegerRange(0, count - 1);
+    }
+    std::advance(it, nAdvance);
     randomItem = it->second;
-
     return true;
 }
