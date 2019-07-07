@@ -2120,7 +2120,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // Start the DHT Torrent networks in the background
-    const bool fMultiSessions = GetArg("-multidhtsessions", false);
+    const bool fMultiSessions = GetArg("-multidhtsessions", true);
     StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
     // ********************************************************* Step 13: finished
 
