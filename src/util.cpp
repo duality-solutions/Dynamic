@@ -600,6 +600,9 @@ std::string GenerateRandomString(unsigned int len) {
 
 unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
 {
+    if (nMin == nMax)
+        return nMax;
+
     srand(time(NULL) + nMax); //seed srand before using
     return nMin + rand() % (nMax - nMin) + 1;
 }
