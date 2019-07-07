@@ -214,78 +214,23 @@ static UniValue GetDHTStatus(const JSONRPCRequest& request)
     if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
-    libtorrent::session_status stats;
-    std::vector<libtorrent::dht_lookup> vchDHTLookup; 
-    std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
-    DHT::GetDHTStats(0, stats, vchDHTLookup, vchDHTBuckets);
-
+    CSessionStats stats;
+    DHT::GetDHTStats(stats);
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("num_peers", stats.num_peers));
-    result.push_back(Pair("peerlist_size", stats.peerlist_size));
-    result.push_back(Pair("active_request_size", (int)stats.active_requests.size()));
-    result.push_back(Pair("dht_node_cache", stats.dht_node_cache));
-    result.push_back(Pair("dht_global_nodes", stats.dht_global_nodes));
-    result.push_back(Pair("dht_download_rate", stats.dht_download_rate));
-    result.push_back(Pair("dht_upload_rate", stats.dht_upload_rate));
-    result.push_back(Pair("dht_total_allocations", stats.dht_total_allocations));
-    result.push_back(Pair("download_rate", stats.download_rate));
-    result.push_back(Pair("upload_rate", stats.upload_rate));
-    result.push_back(Pair("total_download", stats.total_download));
-    result.push_back(Pair("total_upload", stats.total_upload));
-    result.push_back(Pair("total_dht_download", stats.total_dht_download));
-    result.push_back(Pair("total_dht_upload", stats.total_dht_upload));
-    result.push_back(Pair("total_ip_overhead_download", stats.total_ip_overhead_download));
-    result.push_back(Pair("total_ip_overhead_upload", stats.total_ip_overhead_upload));
-    result.push_back(Pair("total_payload_download", stats.total_payload_download));
-    result.push_back(Pair("total_payload_upload", stats.total_payload_upload));
-    result.push_back(Pair("dht_nodes", stats.dht_nodes));
-    result.push_back(Pair("dht_torrents", stats.dht_torrents));
+    result.push_back(Pair("num_sessions", stats.nSessions));
+    result.push_back(Pair("put_records", stats.nPutRecords));
+    result.push_back(Pair("put_pieces", stats.nPutPieces));
+    result.push_back(Pair("put_bytes", stats.nPutBytes));
+    result.push_back(Pair("get_records", stats.nGetRecords));
+    result.push_back(Pair("get_pieces", stats.nGetPieces));
+    result.push_back(Pair("get_bytes", stats.nGetBytes));
+    result.push_back(Pair("get_errors", stats.nGetErrors));
 
-    for (const libtorrent::dht_routing_bucket& bucket : vchDHTBuckets){
-        UniValue oBucket(UniValue::VOBJ);
-        oBucket.push_back(Pair("num_nodes", bucket.num_nodes));
-        oBucket.push_back(Pair("num_replacements", bucket.num_replacements));
-        oBucket.push_back(Pair("last_active", bucket.last_active));
-        result.push_back(Pair("bucket", oBucket)); 
+    for (const std::pair<std::string, std::string>& pairMessage : stats.vMessages)
+    {
+        result.push_back(Pair(pairMessage.first, pairMessage.second));
     }
 
-    for (const libtorrent::dht_lookup& lookup : vchDHTLookup) {
-        UniValue oLookup(UniValue::VOBJ);
-        oLookup.push_back(Pair("outstanding_requests", lookup.outstanding_requests));
-        oLookup.push_back(Pair("timeouts", lookup.timeouts));
-        oLookup.push_back(Pair("responses", lookup.responses));
-        oLookup.push_back(Pair("branch_factor", lookup.branch_factor));
-        oLookup.push_back(Pair("nodes_left", lookup.nodes_left));
-        oLookup.push_back(Pair("last_sent", lookup.last_sent));
-        oLookup.push_back(Pair("first_timeout", lookup.first_timeout));
-        // string literal indicating which kind of lookup this is
-        // char const* type;
-        // the node-id or info-hash target for this lookup
-        //sha1_hash target;
-        result.push_back(oLookup);
-        result.push_back(Pair("lookup", oLookup)); 
-    }
-/*
-    result.push_back(Pair("ip_overhead_download_rate", stats.ip_overhead_download_rate));
-    result.push_back(Pair("ip_overhead_upload_rate", stats.ip_overhead_upload_rate));
-    result.push_back(Pair("payload_download_rate", stats.payload_download_rate));
-    result.push_back(Pair("payload_upload_rate", stats.payload_upload_rate));
-    result.push_back(Pair("tracker_upload_rate", stats.tracker_upload_rate));
-    result.push_back(Pair("tracker_download_rate", stats.tracker_download_rate));
-    result.push_back(Pair("total_tracker_download", stats.total_tracker_download));
-    result.push_back(Pair("total_tracker_upload", stats.total_tracker_upload));
-    result.push_back(Pair("total_redundant_bytes", stats.total_redundant_bytes));
-    result.push_back(Pair("total_failed_bytes", stats.total_failed_bytes));
-    result.push_back(Pair("num_unchoked", stats.num_unchoked));
-    result.push_back(Pair("allowed_upload_slots", stats.allowed_upload_slots));
-    result.push_back(Pair("up_bandwidth_queue", stats.up_bandwidth_queue));
-    result.push_back(Pair("down_bandwidth_queue", stats.down_bandwidth_queue));
-    result.push_back(Pair("up_bandwidth_bytes_queue", stats.up_bandwidth_bytes_queue));
-    result.push_back(Pair("down_bandwidth_bytes_queue", stats.down_bandwidth_bytes_queue));
-    result.push_back(Pair("optimistic_unchoke_counter", stats.optimistic_unchoke_counter));
-    result.push_back(Pair("unchoke_counter", stats.unchoke_counter));
-    result.push_back(Pair("has_incoming_connections", stats.has_incoming_connections));
-*/
     return result;
 }
 

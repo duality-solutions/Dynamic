@@ -23,11 +23,13 @@
 
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/bencode.hpp" // for bencode()
-#include <libtorrent/hex.hpp> // for to_hex
+#include "libtorrent/hex.hpp" // for to_hex
 #include "libtorrent/kademlia/ed25519.hpp"
-#include <libtorrent/kademlia/item.hpp> // for sign_mutable_item
+#include "libtorrent/kademlia/item.hpp" // for sign_mutable_item
+#include "libtorrent/session_stats.hpp"
 #include "libtorrent/span.hpp"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -53,6 +55,12 @@ static std::shared_ptr<std::thread> pDHTTorrentThread;
 static std::shared_ptr<boost::thread> pReannounceThread = nullptr;
 static std::map<HashRecordKey, uint32_t> mPutCommands;
 static uint64_t nPutRecords = 0;
+static uint64_t nPutPieces = 0;
+static uint64_t nPutBytes = 0;
+static uint64_t nGetRecords = 0;
+static uint64_t nGetPieces = 0;
+static uint64_t nGetBytes = 0;
+static uint64_t nGetErrors = 0;
 
 static bool fStarted;
 static bool fReannounceStarted = false;
@@ -160,13 +168,15 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
                         dhtSession->AddToDHTGetEventMap(infoHash, event);
                     }
                 }
-            }
-            else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
-                // TODO (dht): handle stats 
-                //dht_stats_alert* pAlert = alert_cast<dht_stats_alert>((*iAlert));
-                LogPrintf("%s -- DHT Alert Message: AlertType = %s\n", __func__, strAlertTypeName); 
-            }
-            else {
+            } else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
+                LogPrintf("%s -- DHT Status Alert Message: AlertType = %s\n", __func__, strAlertTypeName);
+                dht_stats_alert* pAlert = alert_cast<dht_stats_alert>((*iAlert));
+                dhtSession->DHTStats = pAlert;
+            } else if (iAlertType == STATS_ALERT_TYPE_CODE) {
+                LogPrintf("%s -- Status Alert Message: AlertType = %s\n", __func__, strAlertTypeName);
+                session_stats_alert* pAlert = alert_cast<session_stats_alert>((*iAlert));
+                dhtSession->SessionStats = pAlert;
+            } else {
                 const CEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName);
                 dhtSession->AddToEventMap(iAlertType, event);
             }
@@ -452,38 +462,6 @@ void StopTorrentDHTNetwork()
     LogPrintf("%s --Finished stopping all DHT session threads.\n", __func__);
 }
 
-void CHashTableSession::GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
-{
-    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats started.\n");
-
-    if (!Session) {
-        return;
-    }
-
-    if (!Session->is_dht_running()) {
-        return;
-        //LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        //if (!LoadSessionState(Session)) {
-        //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
-        //    Bootstrap();
-        //}
-        //else {
-        //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
-        //}
-    }
-    else {
-        LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
-    }
-
-    Session->post_dht_stats();
-    //get alert from map
-    //alert* dhtAlert = WaitForResponse(Session, dht_stats_alert::alert_type);
-    //dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
-    //vchDHTLookup = dhtStatsAlert->active_requests;
-    //vchDHTBuckets = dhtStatsAlert->routing_table;
-    stats = Session->status();
-}
-
 void CleanUpPutCommandMap()
 {
     int64_t nCurrentTime = GetTime();
@@ -614,8 +592,11 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         CDataRecord getRecord(strOperationType, nTotalSlots, header, vChunks, Array32ToVector(private_seed));
         if (record.HasError()) {
             strErrorMessage = strprintf("Record has errors: %s\n", __func__, getRecord.ErrorMessage());
+            nGetErrors++;
             return false;
         }
+        nGetPieces += header.nChunks + 1;
+        nGetBytes += header.nDataSize;
         record = getRecord;
         return true;
     }
@@ -886,11 +867,13 @@ bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64>
             return false;
         }
         arraySessions[nCounter].second->SubmitPut(public_key, private_key, lastSequence, pair.first, pair.second);
-        LogPrintf("%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second.to_string());
+        LogPrintf("%s -- thread: %d, salt: %s, value: %s\n", __func__, nCounter, pair.first, pair.second.to_string());
         if (fMultiThreads)
             nCounter++;
     }
     nPutRecords++;
+    nPutPieces += record.GetHeader().nChunks + 1;
+    nPutBytes += record.GetHeader().nDataSize + record.GetHeader().HexValue().size();
 
     if (nPutRecords % 32 == 0)
         CleanUpPutCommandMap();
@@ -933,6 +916,7 @@ bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& pu
     if (!arraySessions[nSessionThread].second)
         return false;
 
+    nGetRecords++;
     return arraySessions[nSessionThread].second->SubmitGetRecord(public_key, private_seed, strOperationType, iSequence, record);
 }
 
@@ -969,15 +953,52 @@ bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEven
     return arraySessions[nSessionThread].second->GetAllDHTGetEvents(vchGetEvents);
 }
 
-void GetDHTStats(const size_t nSessionThread, libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets)
+void GetDHTStats(CSessionStats& stats)
 {
-    if (nSessionThread >= nThreads)
-        return;
+    CSessionStats newStats;
+    size_t nRunningThreads = fMultiThreads ? nThreads : 1;
+    for (unsigned int i = 0; i < nRunningThreads; i++) {
+        if (!arraySessions[i].second || !arraySessions[i].second->Session)
+            return;
+        //arraySessions[i].second->Session->post_dht_stats();
+        arraySessions[i].second->Session->post_session_stats();
+    }
+    // test get
+    MilliSleep(333);
 
-    if (!arraySessions[nSessionThread].second)
-        return;
+    std::vector<libtorrent::stats_metric> vStats = session_stats_metrics();
+    newStats.nSessions = nRunningThreads;
+    for (unsigned int i = 0; i < nRunningThreads; i++) {
+        libtorrent::session_stats_alert* statsAlert = arraySessions[i].second->SessionStats;
+        if (statsAlert) {
+            std::string strMessage = statsAlert->message();
+            std::vector<std::string> vSplit1;
+            boost::split(vSplit1, strMessage, boost::is_any_of(":"));
+            if (vSplit1.size() > 1) {
+                unsigned int x = 0;
+                std::vector<std::string> vSplit2;
+                boost::split(vSplit2, vSplit1[1], boost::is_any_of(","));
+                for (const std::string& strValue : vSplit2) {
+                    if (std::string(vStats[x].name).find("dht.") == 0) {
+                        std::string strThreadName = "thread[" + std::to_string(i + 1) + "]";
+                        newStats.vMessages.push_back(std::make_pair(strThreadName + std::string(vStats[x].name), strValue));
+                    }
+                    x++;
+                }
+            }
+        }
+    }
 
-    arraySessions[nSessionThread].second->GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+    newStats.nPutRecords = nPutRecords;
+    newStats.nPutPieces = nPutPieces;
+    newStats.nPutBytes = nPutBytes;
+    newStats.nGetRecords = nGetRecords;
+    newStats.nGetPieces = nGetPieces;
+    newStats.nGetBytes = nGetBytes;
+    newStats.nGetErrors = nGetErrors;
+
+    // get dht_global_nodes
+    stats = newStats;
 }
 
 } // end DHT namespace
