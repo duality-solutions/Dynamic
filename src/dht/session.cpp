@@ -194,7 +194,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
     }
 }
 
-bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::dht::item& mut_item)
+bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::entry& mut_item)
 {
     entry root;
     root["o"] = "q";
@@ -212,8 +212,7 @@ bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::dht::item& mu
     broadcast["sig"] = signature;
     span<char const> salt(mut_data.Salt());
     broadcast["salt"] = salt;
-    libtorrent::dht::item it(root);
-    mut_item = it;
+    mut_item = root;
     return true;
 }
 
@@ -245,13 +244,12 @@ void ReannounceEntries()
                             continue;
                         }
                     }
-                    // TODO: Remove debug.log printing below.
-                    // Check if fewer than 8 nodes returned the item with the most recent sequence number
-                    LogPrintf("%s -- Re-annoucing item %s\n", __func__, randomMutableItem.ToString());
-                    libtorrent::dht::item mut_item;
+                    // TODO: Check if fewer than 8 nodes returned the item with the most recent sequence number before re-announcing item
+                    libtorrent::entry mut_item;
                     if (ConvertMutableEntry(randomMutableItem, mut_item)) {
-                        // annouced DHT entry, if not already done in the last x hours.
-                        LogPrintf("%s -- Re-annoucing converted item value %s\n", __func__, mut_item.value().to_string());
+                        size_t thread = fMultiThreads ? nThreads -1 : 0;
+                        arraySessions[thread].second->Session->dht_put_item(mut_item);
+                        LogPrintf("%s -- Re-annoucing mut_item %s\n", __func__, mut_item.to_string());
                     }
                 }
             }

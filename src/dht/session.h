@@ -25,12 +25,6 @@ class CLinkInfo;
 class CMutableData;
 class CMutableGetEvent;
 
-namespace libtorrent {
-    namespace dht {
-        class item;
-    }
-}
-
 typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<int, EventPair> EventTypeMap;
 typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
@@ -114,7 +108,7 @@ void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainpa
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 void ReannounceEntries();
-bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::dht::item& mut_item);
+bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::entry& mut_item);
 
 namespace DHT
 {

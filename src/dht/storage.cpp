@@ -187,8 +187,8 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchSalt = vchFromString(strSalt);
 
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
-    LogPrint("dht", "CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
-                    strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
+    LogPrintf("CDHTStorage::%s -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
+                    __func__, strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
                     vchPutValue.size(), vchSignature.size(), vchPublicKey.size(), vchSalt.size());
 
     CMutableData previousData;
