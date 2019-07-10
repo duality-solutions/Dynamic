@@ -246,10 +246,11 @@ void ReannounceEntries()
                     }
                     // TODO: Check if fewer than 8 nodes returned the item with the most recent sequence number before re-announcing item
                     libtorrent::entry mut_item;
-                    if (ConvertMutableEntry(randomMutableItem, mut_item)) {
+                    if (randomMutableItem.vchSalt.size() > 0 && ConvertMutableEntry(randomMutableItem, mut_item)) {
                         size_t thread = fMultiThreads ? nThreads -1 : 0;
+                        libtorrent::sha1_hash infohash(randomMutableItem.InfoHash().c_str());
                         arraySessions[thread].second->Session->dht_put_item(mut_item);
-                        LogPrintf("%s -- Re-annoucing mut_item %s\n", __func__, mut_item.to_string());
+                        LogPrintf("%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
                     }
                 }
             }
