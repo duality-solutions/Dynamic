@@ -33,9 +33,9 @@ static const bool DEFAULT_PRIVATESEND_MULTISESSION = false;
 
 // Warn user if mixing in gui or try to create backup if mixing in daemon mode
 // when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 100;
+static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 50;
 // Stop mixing completely, it's too dangerous to continue when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_STOP = 50;
+static const int PRIVATESEND_KEYS_THRESHOLD_STOP = 25;
 
 // The main object for accessing mixing
 extern CPrivateSendClientManager privateSendClient;

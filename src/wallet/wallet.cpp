@@ -1441,7 +1441,40 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                         }
                     }
                 }
-            }
+            } // if tx.nversion END
+        else {
+            BOOST_FOREACH (const CTxOut& txout, tx.vout) {
+                CScript scriptPubKey = txout.scriptPubKey;
+                CTxDestination address1;
+                bool ReserveKey = true;
+
+                if (!ExtractDestination(scriptPubKey, address1)) {
+                        ReserveKey = false;
+                    }
+
+                CDynamicAddress address2(address1);
+                CKeyID keyID;
+
+                if (!address2.GetKeyID(keyID)) {
+                        ReserveKey = false;
+                    }
+                CKey vchSecret;
+                if (!GetKey(keyID, vchSecret)) {
+                        ReserveKey = false;
+                    }
+
+                CPubKey retrievePubKey;
+
+                if (ReserveKey) {
+                        retrievePubKey = vchSecret.GetPubKey();
+                        if (ReserveKeyForTransactions(retrievePubKey)) {
+                            TopUpKeyPoolCombo(0,true);
+                            fNeedToRescanTransactions = true;
+                        }
+                    }
+
+            } //BOOST_FOREACH END
+        }
 
             CWalletTx wtx(this, ptx);
                 
@@ -1595,7 +1628,7 @@ void CWallet::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex,
     fAnonymizableTallyCachedNonDenom = false;
 
     if (fNeedToUpdateKeyPools) {
-        TopUpKeyPoolCombo();
+        TopUpKeyPoolCombo(0,true);
         fNeedToUpdateKeyPools = false;
     }
 
@@ -2119,10 +2152,15 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
             CBlock block;
             if (ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
                 for (size_t posInBlock = 0; posInBlock < block.vtx.size(); ++posInBlock) {
-                    AddToWalletIfInvolvingMe(*block.vtx[posInBlock], pindex, posInBlock, fUpdate); 
+                    AddToWalletIfInvolvingMe(*block.vtx[posInBlock], pindex, posInBlock, fUpdate);
+
+                    if (SaveRescanIndex) {
+                        rescan_index = pindex;    
+                        SaveRescanIndex = false;
+                    }
 
                     if (fNeedToUpdateKeyPools) {
-                        TopUpKeyPoolCombo();
+                        TopUpKeyPoolCombo(0,true);
                         fNeedToUpdateKeyPools = false;
                     }
 
@@ -4581,7 +4619,7 @@ bool CWallet::SyncEdKeyPool()
 
 } //SyncEdKeyPool
 
-bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
+bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
 {
     {
         LOCK(cs_wallet);
@@ -4593,8 +4631,9 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
         unsigned int nTargetSize;
         if (kpSize > 0)
             nTargetSize = kpSize;
-        else
+        else {
             nTargetSize = std::max(GetArg("-keypool", DEFAULT_KEYPOOL_SIZE), (int64_t)0);
+        }
 
         // count amount of available keys (internal, external)
         // make sure the keypool of external and internal keys fits the user selected target (-keypool)
@@ -4602,6 +4641,11 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
         int64_t amountInternal = setInternalKeyPool.size();
         int64_t missingExternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountExternal, (int64_t)0);
         int64_t missingInternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountInternal, (int64_t)0);
+
+        if (fIncreaseSize) {
+            missingExternal = missingExternal + 2;
+            missingInternal = missingInternal + 2;
+        }
 
         if (!IsHDEnabled()) {
             // don't create extra internal keys
@@ -4661,6 +4705,9 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize)
 
 void CWallet::UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters)
 {
+    if (vvchOpParameters.size() <= 1)
+        return;
+    
     std::vector<unsigned char> key0 = vvchOpParameters[0];
     std::vector<unsigned char> key1 = vvchOpParameters[1];
 
@@ -4748,6 +4795,7 @@ void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubK
                 fNeedToUpdateKeyPools = true;
                 EraseIndex = true;
                 IndexToErase = nIndex;
+                ReserveKeyCount++;
             }
             it++;
         }
@@ -4762,6 +4810,50 @@ void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubK
         }
 
 } //ReserveEdKeyForTransactions
+
+bool CWallet::ReserveKeyForTransactions(const CPubKey pubKeyToReserve)
+{
+        bool foundPubKey = false;
+
+        CWalletDB walletdb(strWalletFile);
+        CKeyPool keypool;
+        CPubKey PubKey;
+        std::vector<int64_t> keypoolIndexes;
+        bool EraseIndex = false;
+        int64_t IndexToErase = 0;
+        int64_t nIndex = 0;
+        std::set<std::int64_t>::iterator it = setExternalKeyPool.begin();
+
+        while ((it != setExternalKeyPool.end()) && (!EraseIndex)) {
+            nIndex = *it;
+            if (!walletdb.ReadPool(nIndex, keypool)) {
+                throw std::runtime_error(std::string(__func__) + ": read failed");
+            }
+            PubKey = keypool.vchPubKey;
+
+            if(pubKeyToReserve == PubKey) {
+                foundPubKey = true;
+                KeepKey(nIndex);
+                EraseIndex = true;
+                IndexToErase = nIndex;
+                ReserveKeyCount++;
+                SaveRescanIndex = true;
+            }
+            it++;
+        }
+
+        if (EraseIndex) {
+            std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
+            std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
+            if (eraseIndexEd != setExternalKeyPool.end())
+                setExternalEdKeyPool.erase(eraseIndexEd);
+            if (eraseIndex != setExternalKeyPool.end())
+                setExternalKeyPool.erase(eraseIndex);
+        }
+
+        return foundPubKey;
+
+} //ReserveKeyForTransactions
 
 void CWallet::KeepKey(int64_t nIndex)
 {
@@ -5537,6 +5629,20 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
         LogPrintf("Rescanning last %i blocks (from block %i)...\n", chainActive.Height() - pindexRescan->nHeight, pindexRescan->nHeight);
         nStart = GetTimeMillis();
         walletInstance->ScanForWalletTransactions(pindexRescan, true);
+
+        //rescan if boolean is set. go back 100 transactions from most recent transaction involving me.
+        while ((walletInstance->fNeedToRescanTransactions) && (walletInstance->ReserveKeyCount > DEFAULT_RESCAN_THRESHOLD)) {
+            //initialize values
+            walletInstance->fNeedToRescanTransactions = false;
+            walletInstance->ReserveKeyCount = 0;
+
+            CBlockIndex* computed_rescan_index = walletInstance->rescan_index;
+            if (computed_rescan_index->nHeight > 100) {
+                computed_rescan_index = chainActive[computed_rescan_index->nHeight - 100];
+            }
+            walletInstance->ScanForWalletTransactions(computed_rescan_index, true);
+        }
+        
         LogPrintf(" rescan      %15dms\n", GetTimeMillis() - nStart);
         walletInstance->SetBestChain(chainActive.GetLocator());
         CWalletDB::IncrementUpdateCounter();

@@ -626,12 +626,6 @@ static bool IsCurrentForFeeEstimation()
 // Check if BDAP entry is valid
 bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
 {
-    // TODO:    fLoaded not set to true until AFTER we're called during init. 
-    //          may need to revisit. comment out for now.
-    // Do not check while wallet is loading
-    // if (!fLoaded)
-    //     return true;
-
     if (!CheckDomainEntryDB())
         return true;
 
