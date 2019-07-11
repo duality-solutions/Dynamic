@@ -97,6 +97,25 @@ namespace DHT {
         sig = sign.bytes;
     }
 
+    void put_signed_bytes
+    (
+        libtorrent::entry& e
+        ,std::array<char, 64>& sig
+        ,std::int64_t& seq
+        ,std::string const& salt
+        ,std::array<char, 32> const& pk
+        ,std::array<char, 64> const& signature
+        ,libtorrent::entry const& entry
+        ,std::int64_t const& iSeq
+    )
+    {
+        using dht::sign_mutable_item;
+        e = entry;
+        seq = iSeq;
+        sig = signature;
+        LogPrintf("%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
+    }
+
     void CleanUpPutBuffer()
     {
         uint32_t nCurrentTimeStamp = GetAdjustedTime();
@@ -249,7 +268,12 @@ void ReannounceEntries()
                     if (randomMutableItem.vchSalt.size() > 0 && ConvertMutableEntry(randomMutableItem, mut_item)) {
                         size_t thread = fMultiThreads ? nThreads -1 : 0;
                         libtorrent::sha1_hash infohash(randomMutableItem.InfoHash().c_str());
-                        arraySessions[thread].second->Session->dht_put_item(mut_item);
+                        std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> pubkey;
+                        aux::from_hex(randomMutableItem.PublicKey(), pubkey.data());
+                        std::array<char, ED25519_SIGTATURE_BYTE_LENGTH> signature_bytes;
+                        aux::from_hex(randomMutableItem.Signature(), signature_bytes.data());
+                        arraySessions[thread].second->Session->dht_put_item(pubkey, std::bind(&DHT::put_signed_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+                             pubkey, signature_bytes, mut_item, randomMutableItem.SequenceNumber), randomMutableItem.Salt());
                         LogPrintf("%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
                     }
                 }
