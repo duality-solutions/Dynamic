@@ -194,17 +194,17 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {
         if (PutLocalMutableData(vchInfoHash, putMutableData)) {
-            LogPrint("dht", "CDHTStorage -- put_mutable_item added successfully\n");
+            LogPrintf("CDHTStorage::%s added successfully\n", __func__);
         }
     }
     else {
-        if (putMutableData.Value() != previousData.Value() || putMutableData.SequenceNumber != previousData.SequenceNumber) {
+        if (putMutableData.SequenceNumber > previousData.SequenceNumber) {
             if (UpdateLocalMutableData(vchInfoHash, putMutableData)) {
-                LogPrint("dht", "CDHTStorage -- put_mutable_item updated successfully\n");
+                LogPrintf("CDHTStorage::%s updated successfully\n", __func__);
             }
         }
         else {
-            LogPrint("dht", "CDHTStorage -- put_mutable_item value unchanged. No database operation needed.\n");
+            LogPrintf("CDHTStorage::%s value unchanged. No database operation needed.\n", __func__);
         }
     }
     // TODO: Log from address (addr). See touch_item in the default storage implementation.

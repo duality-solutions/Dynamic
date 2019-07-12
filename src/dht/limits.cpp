@@ -70,7 +70,6 @@ bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::stri
             iAllowed++;
             continue;
         }
-        LogPrintf("%s -- Salt %s passed all checks. Valid data record salt\n", __func__, strSalt);
         return true;
     }
     strErrorMessage = strprintf("%sInvalid salt (%s). Allow data type salt not found in allowed data map.", strErrorMessage, vSplit[0]);
