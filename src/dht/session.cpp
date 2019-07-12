@@ -113,7 +113,7 @@ namespace DHT {
         e = entry;
         seq = iSeq;
         sig = signature;
-        LogPrintf("%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
+        LogPrintf("%s --\nSalt = %s\nSequence = %d, sig size = %d, e = %s\n", __func__, salt, seq, sig.size(), e.to_string());
     }
 
     void CleanUpPutBuffer()
@@ -140,6 +140,23 @@ void CHashTableSession::StopEventListener()
     fShutdown = true;
     LogPrintf("%s -- stopping DHT session thread %s.\n", __func__, strName);
     MilliSleep(333);
+}
+
+bool CHashTableSession::ReannounceEntry(const CMutableData& mutableData)
+{
+    libtorrent::entry mut_item;
+    if (mutableData.vchSalt.size() > 0 && ConvertMutableEntry(mutableData, mut_item)) {
+        libtorrent::sha1_hash infohash(mutableData.InfoHash().c_str());
+        std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> pubkey;
+        aux::from_hex(mutableData.PublicKey(), pubkey.data());
+        std::array<char, ED25519_SIGTATURE_BYTE_LENGTH> signature_bytes;
+        aux::from_hex(mutableData.Signature(), signature_bytes.data());
+        Session->dht_put_item(pubkey, std::bind(&DHT::put_signed_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+             pubkey, signature_bytes, mut_item, mutableData.SequenceNumber), mutableData.Salt());
+        LogPrintf("%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
+        return true;
+    }
+    return false;
 }
 
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
@@ -263,18 +280,10 @@ void ReannounceEntries()
                             continue;
                         }
                     }
-                    // TODO: Check if fewer than 8 nodes returned the item with the most recent sequence number before re-announcing item
-                    libtorrent::entry mut_item;
-                    if (randomMutableItem.vchSalt.size() > 0 && ConvertMutableEntry(randomMutableItem, mut_item)) {
+                    // TODO (DHT): Check if fewer than 8 nodes returned the item with the most recent sequence number before re-announcing item
+                    if (randomMutableItem.vchSalt.size() > 0) {
                         size_t thread = fMultiThreads ? nThreads -1 : 0;
-                        libtorrent::sha1_hash infohash(randomMutableItem.InfoHash().c_str());
-                        std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> pubkey;
-                        aux::from_hex(randomMutableItem.PublicKey(), pubkey.data());
-                        std::array<char, ED25519_SIGTATURE_BYTE_LENGTH> signature_bytes;
-                        aux::from_hex(randomMutableItem.Signature(), signature_bytes.data());
-                        arraySessions[thread].second->Session->dht_put_item(pubkey, std::bind(&DHT::put_signed_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
-                             pubkey, signature_bytes, mut_item, randomMutableItem.SequenceNumber), randomMutableItem.Salt());
-                        LogPrintf("%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
+                        arraySessions[thread].second->ReannounceEntry(randomMutableItem);
                     }
                 }
             }
@@ -1042,6 +1051,12 @@ void GetDHTStats(CSessionStats& stats)
 
     // get dht_global_nodes
     stats = newStats;
+}
+
+bool ReannounceEntry(const CMutableData& mutableData)
+{
+    size_t thread = fMultiThreads ? nThreads -1 : 0;
+    return arraySessions[thread].second->ReannounceEntry(mutableData);
 }
 
 } // end DHT namespace

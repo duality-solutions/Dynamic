@@ -1118,6 +1118,50 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
     return result;
 }
 
+static UniValue ReannounceLocalMutable(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 2)
+        throw std::runtime_error(
+            "dht reannounce \"infohash\"\n"
+            "\nReannounces signed mutable item from local leveldb.\n"
+            "\nArguments:\n"
+            "1. infohash               (string)      DHT Infohash reannouncing\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\"") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\""));
+
+    if (!DHT::SessionStatus())
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
+
+    if (!CheckMutableItemDB())
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access mutable data item database."));
+
+    std::string strInfoHash = request.params[1].get_str();
+    CharString vchInfoHash = vchFromString(strInfoHash);
+
+    UniValue result(UniValue::VOBJ);
+
+    CMutableData mutableData;
+    if (!GetLocalMutableData(vchInfoHash, mutableData))
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Mutable data infohash %s not found in local leveldb.", strInfoHash));
+
+    if (!DHT::ReannounceEntry(mutableData))
+        result.push_back(Pair("error", "DHT re-announce failed."));
+
+    result.push_back(Pair("target_hash", mutableData.InfoHash()));
+    result.push_back(Pair("public_key", mutableData.PublicKey()));
+    result.push_back(Pair("salt", mutableData.Salt()));
+    result.push_back(Pair("signature", mutableData.Signature()));
+    result.push_back(Pair("value", mutableData.Value()));
+
+    return result;
+}
+
 UniValue dht_rpc(const JSONRPCRequest& request) 
 {
     std::string strCommand;
@@ -1181,6 +1225,9 @@ UniValue dht_rpc(const JSONRPCRequest& request)
     }
     else if (strCommand == "status") {
         return GetDHTStatus(request);
+    }
+    else if (strCommand == "reannounce") {
+        return ReannounceLocalMutable(request);
     }
     else {
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, strprintf("%s is an unknown DHT method command.", strCommand));

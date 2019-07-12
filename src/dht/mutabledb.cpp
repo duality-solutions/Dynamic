@@ -106,6 +106,14 @@ bool SelectRandomMutableItem(CMutableData& randomItem)
     return true;
 }
 
+bool CheckMutableItemDB()
+{
+    if (!pMutableDataDB)
+        return false;
+
+    return true;
+}
+
 bool CMutableDataDB::AddMutableData(const CMutableData& data)
 {
     bool writeState = false;

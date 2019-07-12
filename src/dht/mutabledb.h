@@ -38,6 +38,7 @@ bool PutLocalMutableData(const std::vector<unsigned char>& vchInfoHash, const CM
 bool GetAllLocalMutableData(std::vector<CMutableData>& vchMutableData);
 bool InitMemoryMap();
 bool SelectRandomMutableItem(CMutableData& randomItem);
+bool CheckMutableItemDB();
 
 extern CMutableDataDB* pMutableDataDB;
 

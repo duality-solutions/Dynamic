@@ -87,6 +87,7 @@ public:
     void AddToEventMap(const int type, const CEvent& event);
     void CleanUpEventMap(const uint32_t timeout);
     void StopEventListener();
+    bool ReannounceEntry(const CMutableData& mutableData);
 
 private:
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
@@ -123,6 +124,7 @@ namespace DHT
     bool SubmitGetAllRecordsAsync(const size_t nSessionThread, const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
     bool GetAllDHTGetEvents(const size_t nSessionThread, std::vector<CMutableGetEvent>& vchGetEvents);
     void GetDHTStats(CSessionStats& stats);
+    bool ReannounceEntry(const CMutableData& mutableData);
 }
 
 #endif // DYNAMIC_DHT_SESSION_H
