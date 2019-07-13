@@ -5,3 +5,4 @@
 [submodule "src/libtorrent"]
 	path = src/libtorrent
 	url = https://github.com/duality-solutions/libbdaptorrent.git
+	branch = incompatible

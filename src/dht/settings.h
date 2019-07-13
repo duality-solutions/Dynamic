@@ -16,12 +16,16 @@ private:
     std::string listen_interfaces;
     std::string dht_bootstrap_nodes;
     std::string user_agent;
+    std::string peer_fingerprint;
     uint16_t nPort;
+    uint16_t nTotalThreads;
+    bool fMultiThreads;
 
 public:
-    CDHTSettings();
+    CDHTSettings(const uint16_t ordinal, const uint16_t threads, const bool multithreaded);
 
     void LoadSettings();
+    void LoadPeerID(const std::string& strPeerID);
 
     libtorrent::settings_pack GetSettingsPack() const { return params.settings; }
     libtorrent::dht_settings GetDHTSettings() const { return params.dht_settings; }

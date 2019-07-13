@@ -2,13 +2,15 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "storage.h"
+#include "dht/storage.h"
 
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "util.h"
+#include "validation.h"
 
 #include <libtorrent/aux_/numeric_cast.hpp>
 #include <libtorrent/broadcast_socket.hpp> // for ip_v4
@@ -168,31 +170,41 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
 
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data(), ED25519_PUBLIC_KEY_BYTE_LENGTH));
     CharString vchPublicKey = vchFromString(strPublicKey);
-
+    if (!CheckPubKey(vchPublicKey)) {
+        LogPrintf("%s -- Invalid pubkey used (%s).  DHT put storage request failed.\n", __func__, strPublicKey);
+        return;
+    }
     std::unique_ptr<char[]> saltValue;
     ExtractValueFromSpan(saltValue, salt);
     std::string strSalt = std::string(saltValue.get(), salt.size());
+    //bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage)
+    std::string strErrorMessage;
+    unsigned int nHeight = (unsigned int)chainActive.Height();
+    if (!CheckSalt(strSalt, nHeight, strErrorMessage)) {
+        LogPrintf("%s -- Invalid salt used (%s) at height %d.  DHT put storage request failed. %s\n", __func__, strSalt, nHeight, strErrorMessage);
+        return;
+    }
     CharString vchSalt = vchFromString(strSalt);
 
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
-    LogPrint("dht", "CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
-                    strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
+    LogPrintf("CDHTStorage::%s -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
+                    __func__, strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
                     vchPutValue.size(), vchSignature.size(), vchPublicKey.size(), vchSalt.size());
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {
         if (PutLocalMutableData(vchInfoHash, putMutableData)) {
-            LogPrint("dht", "CDHTStorage -- put_mutable_item added successfully\n");
+            LogPrintf("CDHTStorage::%s added successfully\n", __func__);
         }
     }
     else {
-        if (putMutableData.Value() != previousData.Value() || putMutableData.SequenceNumber != previousData.SequenceNumber) {
+        if (putMutableData.SequenceNumber > previousData.SequenceNumber) {
             if (UpdateLocalMutableData(vchInfoHash, putMutableData)) {
-                LogPrint("dht", "CDHTStorage -- put_mutable_item updated successfully\n");
+                LogPrintf("CDHTStorage::%s updated successfully\n", __func__);
             }
         }
         else {
-            LogPrint("dht", "CDHTStorage -- put_mutable_item value unchanged. No database operation needed.\n");
+            LogPrintf("CDHTStorage::%s value unchanged. No database operation needed.\n", __func__);
         }
     }
     // TODO: Log from address (addr). See touch_item in the default storage implementation.

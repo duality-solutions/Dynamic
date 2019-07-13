@@ -45,6 +45,12 @@ bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEn
     return !entry.IsNull();
 }
 
+bool AccountPubKeyExists(const std::vector<unsigned char>& vchPubKey)
+{
+    CDomainEntry entry;
+    return GetDomainEntryPubKey(vchPubKey, entry);
+}
+
 bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
 {
     if (!pDomainEntryDB)

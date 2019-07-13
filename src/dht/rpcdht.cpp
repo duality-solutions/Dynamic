@@ -54,7 +54,8 @@ static UniValue GetMutable(const JSONRPCRequest& request)
            HelpExampleRpc("dht getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSession->Session)
+
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     const std::string strPubKey = request.params[1].get_str();
@@ -66,7 +67,7 @@ static UniValue GetMutable(const JSONRPCRequest& request)
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     bool fAuthoritative;
-    fRet = pHashTableSession->SubmitGet(pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
+    fRet = DHT::SubmitGet(0, pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
@@ -106,7 +107,8 @@ static UniValue PutMutable(const JSONRPCRequest& request)
            HelpExampleRpc("dht putmutable", "\"https://duality.solutions/duality/logos/dual.png\" \"avatar\" \"517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a\" \"bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0\""));
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSession->Session)
+
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -139,7 +141,7 @@ static UniValue PutMutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        pHashTableSession->SubmitGet(pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
+        DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
     uint16_t nTotalSlots = 32;
@@ -153,8 +155,9 @@ static UniValue PutMutable(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
     record.GetHeader().Salt = strOperationType;
-    if (!pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -208,81 +211,26 @@ static UniValue GetDHTStatus(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtinfo", ""));
 
-    if (!pHashTableSession->Session)
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
-    libtorrent::session_status stats;
-    std::vector<libtorrent::dht_lookup> vchDHTLookup; 
-    std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
-    GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
-
+    CSessionStats stats;
+    DHT::GetDHTStats(stats);
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("num_peers", stats.num_peers));
-    result.push_back(Pair("peerlist_size", stats.peerlist_size));
-    result.push_back(Pair("active_request_size", (int)stats.active_requests.size()));
-    result.push_back(Pair("dht_node_cache", stats.dht_node_cache));
-    result.push_back(Pair("dht_global_nodes", stats.dht_global_nodes));
-    result.push_back(Pair("dht_download_rate", stats.dht_download_rate));
-    result.push_back(Pair("dht_upload_rate", stats.dht_upload_rate));
-    result.push_back(Pair("dht_total_allocations", stats.dht_total_allocations));
-    result.push_back(Pair("download_rate", stats.download_rate));
-    result.push_back(Pair("upload_rate", stats.upload_rate));
-    result.push_back(Pair("total_download", stats.total_download));
-    result.push_back(Pair("total_upload", stats.total_upload));
-    result.push_back(Pair("total_dht_download", stats.total_dht_download));
-    result.push_back(Pair("total_dht_upload", stats.total_dht_upload));
-    result.push_back(Pair("total_ip_overhead_download", stats.total_ip_overhead_download));
-    result.push_back(Pair("total_ip_overhead_upload", stats.total_ip_overhead_upload));
-    result.push_back(Pair("total_payload_download", stats.total_payload_download));
-    result.push_back(Pair("total_payload_upload", stats.total_payload_upload));
-    result.push_back(Pair("dht_nodes", stats.dht_nodes));
-    result.push_back(Pair("dht_torrents", stats.dht_torrents));
+    result.push_back(Pair("num_sessions", stats.nSessions));
+    result.push_back(Pair("put_records", stats.nPutRecords));
+    result.push_back(Pair("put_pieces", stats.nPutPieces));
+    result.push_back(Pair("put_bytes", stats.nPutBytes));
+    result.push_back(Pair("get_records", stats.nGetRecords));
+    result.push_back(Pair("get_pieces", stats.nGetPieces));
+    result.push_back(Pair("get_bytes", stats.nGetBytes));
+    result.push_back(Pair("get_errors", stats.nGetErrors));
 
-    for (const libtorrent::dht_routing_bucket& bucket : vchDHTBuckets){
-        UniValue oBucket(UniValue::VOBJ);
-        oBucket.push_back(Pair("num_nodes", bucket.num_nodes));
-        oBucket.push_back(Pair("num_replacements", bucket.num_replacements));
-        oBucket.push_back(Pair("last_active", bucket.last_active));
-        result.push_back(Pair("bucket", oBucket)); 
+    for (const std::pair<std::string, std::string>& pairMessage : stats.vMessages)
+    {
+        result.push_back(Pair(pairMessage.first, pairMessage.second));
     }
 
-    for (const libtorrent::dht_lookup& lookup : vchDHTLookup) {
-        UniValue oLookup(UniValue::VOBJ);
-        oLookup.push_back(Pair("outstanding_requests", lookup.outstanding_requests));
-        oLookup.push_back(Pair("timeouts", lookup.timeouts));
-        oLookup.push_back(Pair("responses", lookup.responses));
-        oLookup.push_back(Pair("branch_factor", lookup.branch_factor));
-        oLookup.push_back(Pair("nodes_left", lookup.nodes_left));
-        oLookup.push_back(Pair("last_sent", lookup.last_sent));
-        oLookup.push_back(Pair("first_timeout", lookup.first_timeout));
-        // string literal indicating which kind of lookup this is
-        // char const* type;
-        // the node-id or info-hash target for this lookup
-        //sha1_hash target;
-        result.push_back(oLookup);
-        result.push_back(Pair("lookup", oLookup)); 
-    }
-/*
-    result.push_back(Pair("ip_overhead_download_rate", stats.ip_overhead_download_rate));
-    result.push_back(Pair("ip_overhead_upload_rate", stats.ip_overhead_upload_rate));
-    result.push_back(Pair("payload_download_rate", stats.payload_download_rate));
-    result.push_back(Pair("payload_upload_rate", stats.payload_upload_rate));
-    result.push_back(Pair("tracker_upload_rate", stats.tracker_upload_rate));
-    result.push_back(Pair("tracker_download_rate", stats.tracker_download_rate));
-    result.push_back(Pair("total_tracker_download", stats.total_tracker_download));
-    result.push_back(Pair("total_tracker_upload", stats.total_tracker_upload));
-    result.push_back(Pair("total_redundant_bytes", stats.total_redundant_bytes));
-    result.push_back(Pair("total_failed_bytes", stats.total_failed_bytes));
-    result.push_back(Pair("num_unchoked", stats.num_unchoked));
-    result.push_back(Pair("allowed_upload_slots", stats.allowed_upload_slots));
-    result.push_back(Pair("up_bandwidth_queue", stats.up_bandwidth_queue));
-    result.push_back(Pair("down_bandwidth_queue", stats.down_bandwidth_queue));
-    result.push_back(Pair("up_bandwidth_bytes_queue", stats.up_bandwidth_bytes_queue));
-    result.push_back(Pair("down_bandwidth_bytes_queue", stats.down_bandwidth_bytes_queue));
-    result.push_back(Pair("optimistic_unchoke_counter", stats.optimistic_unchoke_counter));
-    result.push_back(Pair("unchoke_counter", stats.unchoke_counter));
-    result.push_back(Pair("has_incoming_connections", stats.has_incoming_connections));
-*/
     return result;
 }
 
@@ -320,7 +268,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
             oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", data.Value()));
+            oMutableData.push_back(Pair("value", EncodeBase64(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }
@@ -363,8 +311,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     UniValue result(UniValue::VOBJ);
-   
-    if (!pHashTableSession->Session)
+
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -404,7 +352,7 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -430,8 +378,9 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -466,7 +415,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSession->Session)
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -506,7 +455,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -522,8 +471,9 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -558,8 +508,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
 
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
-
-    if (!pHashTableSession->Session)
+   
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -593,8 +543,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSession->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record"));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -692,7 +642,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutableGetEvent> vchMutableData;
-    bool fRet = GetAllDHTGetEvents(vchMutableData);
+    bool fRet = DHT::GetAllDHTGetEvents(0, vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutableGetEvent& data : vchMutableData) {
@@ -748,7 +698,7 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     int64_t nStart = GetTimeMillis();
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSession->Session)
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -820,8 +770,8 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
     CDataRecord record;
-    if (!pHashTableSession->SubmitGetRecord(arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record: %s", pHashTableSession->strPutErrorMessage));
+    if (!DHT::SubmitGetRecord(0, arrPubKey, getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get record"));
 
     result.push_back(Pair("get_seq", iSequence));
     result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
@@ -865,7 +815,7 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VOBJ);
    
-    if (!pHashTableSession->Session)
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -898,8 +848,8 @@ static UniValue GetAllLinkRecords(const JSONRPCRequest& request)
     }
 
     std::vector<CDataRecord> vchRecords;
-    if (!pHashTableSession->SubmitGetAllRecordsSync(vchLinkInfo, strOperationType, vchRecords))
-        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get records: %s", pHashTableSession->strPutErrorMessage));
+    if (!DHT::SubmitGetAllRecordsSync(0, vchLinkInfo, strOperationType, vchRecords))
+        throw JSONRPCError(RPC_DHT_GET_FAILED, strprintf("Failed to get records"));
 
     int nRecordItem = 1;
     for (CDataRecord& record : vchRecords) // loop through records
@@ -951,7 +901,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
 
-    if (!pHashTableSession->Session)
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -1013,7 +963,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -1041,8 +991,9 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -1076,7 +1027,8 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     UniValue result(UniValue::VOBJ);
-    if (!pHashTableSession->Session)
+
+    if (!DHT::SessionStatus())
         throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
 
     if (!CheckDomainEntryDB())
@@ -1139,7 +1091,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -1156,13 +1108,94 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
     if (record.HasError())
         throw JSONRPCError(RPC_DHT_INVALID_RECORD, strprintf("Error creating DHT data entry. %s", record.ErrorMessage()));
 
-    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record))
-        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", pHashTableSession->strPutErrorMessage));
+    std::string strErrorMessage;
+    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record, strErrorMessage))
+        throw JSONRPCError(RPC_DHT_PUT_FAILED, strprintf("Put failed. %s", strErrorMessage));
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
     return result;
+}
+
+static UniValue ReannounceLocalMutable(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 2)
+        throw std::runtime_error(
+            "dht reannounce \"infohash\"\n"
+            "\nReannounces signed mutable item from local leveldb.\n"
+            "\nArguments:\n"
+            "1. infohash               (string)      DHT Infohash reannouncing\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\"") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\""));
+
+    if (!DHT::SessionStatus())
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
+
+    if (!CheckMutableItemDB())
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Can not access mutable data item database."));
+
+    std::string strInfoHash = request.params[1].get_str();
+    CharString vchInfoHash = vchFromString(strInfoHash);
+
+    UniValue result(UniValue::VOBJ);
+
+    CMutableData mutableData;
+    if (!GetLocalMutableData(vchInfoHash, mutableData))
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Mutable data infohash %s not found in local leveldb.", strInfoHash));
+
+    if (!DHT::ReannounceEntry(mutableData))
+        result.push_back(Pair("error", "DHT re-announce failed."));
+
+    result.push_back(Pair("target_hash", mutableData.InfoHash()));
+    result.push_back(Pair("public_key", mutableData.PublicKey()));
+    result.push_back(Pair("salt", mutableData.Salt()));
+    result.push_back(Pair("signature", mutableData.Signature()));
+    result.push_back(Pair("value", mutableData.Value()));
+
+    return result;
+}
+
+static UniValue GetHashTableEvents(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "dht events\n"
+            "\nReturns DHT events.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\"") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\""));
+
+    if (!DHT::SessionStatus())
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
+
+    UniValue results(UniValue::VOBJ);
+    std::vector<CEvent> events;
+    DHT::GetEvents(0, events);
+    size_t nCount = 0;
+    for (const CEvent& event : events) {
+        nCount++;
+        UniValue oEventItem(UniValue::VOBJ);
+        oEventItem.push_back(Pair("message", event.Message()));
+        oEventItem.push_back(Pair("type", (int)event.Type()));
+        oEventItem.push_back(Pair("category", (int)event.Category()));
+        oEventItem.push_back(Pair("what", event.What()));
+        oEventItem.push_back(Pair("timestamp", (int)event.Timestamp()));
+        results.push_back(Pair("event_" + std::to_string(nCount), oEventItem));
+    }
+
+    return results;
 }
 
 UniValue dht_rpc(const JSONRPCRequest& request) 
@@ -1228,6 +1261,12 @@ UniValue dht_rpc(const JSONRPCRequest& request)
     }
     else if (strCommand == "status") {
         return GetDHTStatus(request);
+    }
+    else if (strCommand == "reannounce") {
+        return ReannounceLocalMutable(request);
+    }
+    else if (strCommand == "events") {
+        return GetHashTableEvents(request);
     }
     else {
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, strprintf("%s is an unknown DHT method command.", strCommand));

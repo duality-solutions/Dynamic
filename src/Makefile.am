@@ -131,6 +131,7 @@ DYNAMIC_CORE_H = \
   dht/datarecord.h \
   dht/dataset.h \
   dht/ed25519.h \
+  dht/limits.h \
   dht/mutable.h \
   dht/mutabledb.h \
   dht/session.h \
@@ -287,6 +288,7 @@ libdynamic_server_a_SOURCES = \
   dht/dataheader.cpp \
   dht/datarecord.cpp \
   dht/dataset.cpp \
+  dht/limits.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/rpcdht.cpp \

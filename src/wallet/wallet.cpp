@@ -3770,7 +3770,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
                 else if (strOpType == "bdap_new_link_request") {
                     uint256 txid;
-                    if (GetLinkRequestIndex(vchValue, txid)) {
+                    if (GetLinkIndex(vchValue, txid)) {
                         strFailReason = _("Public key already used for a link request.");
                         return false;
                     }
@@ -3778,7 +3778,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
-                    if (GetLinkAcceptIndex(vchValue, txid)) {
+                    if (GetLinkIndex(vchValue, txid)) {
                         strFailReason = _("Public key already used for an accepted link.");
                         return false;
                     }
@@ -3786,7 +3786,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
                 else if (strOpType == "bdap_delete_link_request") {
                     uint256 prevTxId;
-                    if (!GetLinkRequestIndex(vchValue, prevTxId)) {
+                    if (!GetLinkIndex(vchValue, prevTxId)) {
                         strFailReason = _("Link accept pubkey could not be found.");
                         return false;
                     }
@@ -3801,7 +3801,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
                 else if (strOpType == "bdap_delete_link_accept") {
                     uint256 prevTxId;
-                    if (!GetLinkAcceptIndex(vchValue, prevTxId)) {
+                    if (!GetLinkIndex(vchValue, prevTxId)) {
                         strFailReason = _("Link accept pubkey could not be found.");
                         return false;
                     }

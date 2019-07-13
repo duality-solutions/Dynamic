@@ -5,10 +5,15 @@
 #include "dht/mutabledb.h"
 
 #include "dht/mutable.h"
+#include "util.h"
 
 #include <univalue.h>
 
 #include <boost/thread.hpp>
+
+#include "map"
+
+static std::map<std::vector<unsigned char>, CMutableData> mapDataStorage;
 
 CMutableDataDB *pMutableDataDB = NULL;
 
@@ -79,18 +84,58 @@ bool GetAllLocalMutableData(std::vector<CMutableData>& vchMutableData)
     return true;
 }
 
+bool InitMemoryMap()
+{
+    if (!pMutableDataDB)
+        return false;
+
+    if (!pMutableDataDB->LoadMemoryMap())
+        return false;
+
+    return true;
+}
+
+bool SelectRandomMutableItem(CMutableData& randomItem)
+{
+    if (!pMutableDataDB)
+        return false;
+
+    if (!pMutableDataDB->SelectRandomMutableItem(randomItem))
+        return false;
+
+    return true;
+}
+
+bool CheckMutableItemDB()
+{
+    if (!pMutableDataDB)
+        return false;
+
+    return true;
+}
+
 bool CMutableDataDB::AddMutableData(const CMutableData& data)
 {
     bool writeState = false;
     {
         LOCK(cs_dht_entry);
         writeState = CDBWrapper::Write(make_pair(std::string("ih"), data.vchInfoHash), data);  // use info hash as key
+        if (count >= 0) {
+            mapDataStorage[data.vchInfoHash] = data;
+            count++;
+        }
     }
     return writeState;
 }
 
 bool CMutableDataDB::ReadMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data)
 {
+    if (count >= 0) {
+        data = mapDataStorage[vchInfoHash];
+        if (!data.IsNull())
+            return true;
+    }
+
     LOCK(cs_dht_entry);
     return CDBWrapper::Read(make_pair(std::string("ih"), vchInfoHash), data);
 }
@@ -98,6 +143,9 @@ bool CMutableDataDB::ReadMutableData(const std::vector<unsigned char>& vchInfoHa
 bool CMutableDataDB::EraseMutableData(const std::vector<unsigned char>& vchInfoHash)
 {
     LOCK(cs_dht_entry);
+    if (count >= 0)
+        mapDataStorage.erase(vchInfoHash);
+
     return CDBWrapper::Erase(make_pair(std::string("ih"), vchInfoHash));
 }
 
@@ -110,6 +158,9 @@ bool CMutableDataDB::UpdateMutableData(const CMutableData& data)
 
     bool writeState = false;
     writeState = CDBWrapper::Update(make_pair(std::string("ih"), data.vchInfoHash), data);
+    if (count >= 0)
+        mapDataStorage[data.vchInfoHash] = data;
+
     return writeState;
 }
 
@@ -132,5 +183,43 @@ bool CMutableDataDB::ListMutableData(std::vector<CMutableData>& vchMutableData)
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
+    return true;
+}
+
+bool CMutableDataDB::LoadMemoryMap()
+{
+    std::pair<std::string, CharString> infoHash;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    count = 0;
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CMutableData data;
+        try {
+            if (pcursor->GetKey(infoHash) && infoHash.first == "ih") {
+                pcursor->GetValue(data);
+                mapDataStorage[infoHash.second] = data;
+            }
+            pcursor->Next();
+            count++;
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
+bool CMutableDataDB::SelectRandomMutableItem(CMutableData& randomItem) {
+    if (count < 1)
+        return false;
+
+    unsigned int nAdvance = 0;
+    std::map<std::vector<unsigned char>, CMutableData>::iterator it = mapDataStorage.begin();
+    if (count != 1) {
+        nAdvance = RandomIntegerRange(0, count - 1);
+    }
+    std::advance(it, nAdvance);
+    randomItem = it->second;
     return true;
 }
