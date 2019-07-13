@@ -109,7 +109,7 @@ void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainpa
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);
 void ReannounceEntries();
-bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::entry& mut_item);
+bool ConvertMutableEntryValue(const CMutableData& local_mut_data, libtorrent::entry& dht_item);
 
 namespace DHT
 {

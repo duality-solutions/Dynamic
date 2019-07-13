@@ -145,7 +145,7 @@ void CHashTableSession::StopEventListener()
 bool CHashTableSession::ReannounceEntry(const CMutableData& mutableData)
 {
     libtorrent::entry mut_item;
-    if (mutableData.vchSalt.size() > 0 && ConvertMutableEntry(mutableData, mut_item)) {
+    if (mutableData.vchSalt.size() > 0 && ConvertMutableEntryValue(mutableData, mut_item)) {
         libtorrent::sha1_hash infohash(mutableData.InfoHash().c_str());
         std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> pubkey;
         aux::from_hex(mutableData.PublicKey(), pubkey.data());
@@ -217,6 +217,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
             } else {
                 const CEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName);
                 dhtSession->AddToEventMap(iAlertType, event);
+                LogPrintf("%s -- \nEvent\n%s\n", __func__, event.ToString());
             }
         }
         if (dhtSession->fShutdown)
@@ -230,25 +231,23 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
     }
 }
 
-bool ConvertMutableEntry(const CMutableData& mut_data, libtorrent::entry& mut_item)
+bool ConvertMutableEntryValue(const CMutableData& local_mut_data, libtorrent::entry& dht_item)
 {
-    entry root;
-    root["o"] = "q";
-    root["q"] = "put";
-    entry& broadcast = root["b"];
-    span<char const> value(mut_data.Value());
-    broadcast["v"] = value;
-    //broadcast["token"] = po->m_token;
-    std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> publicKey;
-    aux::from_hex(mut_data.PublicKey(), publicKey.data());
-    broadcast["k"] = publicKey;
-    broadcast["seq"] = mut_data.SequenceNumber;
-    std::array<char, ED25519_SIGTATURE_BYTE_LENGTH> signature;
-    aux::from_hex(mut_data.Signature(), signature.data());
-    broadcast["sig"] = signature;
-    span<char const> salt(mut_data.Salt());
-    broadcast["salt"] = salt;
-    mut_item = root;
+    const std::string strOriginalValue = local_mut_data.Value();
+    std::vector<std::string> vSplit;
+    boost::split(vSplit, strOriginalValue, boost::is_any_of(":"));
+    if (vSplit.size() <= 1)
+        return false;
+
+    std::string strValue = "";
+    for (unsigned int i = 1; i < vSplit.size(); i++) {
+        if (i > 1)
+            strValue += ":";
+
+        strValue += vSplit[i];
+    }
+    entry value(strValue);
+    dht_item = value;
     return true;
 }
 
@@ -282,8 +281,7 @@ void ReannounceEntries()
                     }
                     // TODO (DHT): Check if fewer than 8 nodes returned the item with the most recent sequence number before re-announcing item
                     if (randomMutableItem.vchSalt.size() > 0) {
-                        size_t thread = fMultiThreads ? nThreads -1 : 0;
-                        arraySessions[thread].second->ReannounceEntry(randomMutableItem);
+                        arraySessions[0].second->ReannounceEntry(randomMutableItem);
                     }
                 }
             }
@@ -1055,8 +1053,10 @@ void GetDHTStats(CSessionStats& stats)
 
 bool ReannounceEntry(const CMutableData& mutableData)
 {
-    size_t thread = fMultiThreads ? nThreads -1 : 0;
-    return arraySessions[thread].second->ReannounceEntry(mutableData);
+    if (arraySessions.size() == 0 || !arraySessions[0].second)
+        return false;
+
+    return arraySessions[0].second->ReannounceEntry(mutableData);
 }
 
 } // end DHT namespace
