@@ -1162,6 +1162,42 @@ static UniValue ReannounceLocalMutable(const JSONRPCRequest& request)
     return result;
 }
 
+static UniValue GetHashTableEvents(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "dht events\n"
+            "\nReturns DHT events.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"link_requestor\"      (string)      BDAP account that initiated the link\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\"") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dht reannounce", "\"88196b9f8ca5f1dfb095bd48e18d97157f7a4435\""));
+
+    if (!DHT::SessionStatus())
+        throw JSONRPCError(RPC_DHT_NOT_STARTED, strprintf("dht %s failed. DHT session not started.", request.params[0].get_str()));
+
+    UniValue results(UniValue::VOBJ);
+    std::vector<CEvent> events;
+    DHT::GetEvents(0, events);
+    size_t nCount = 0;
+    for (const CEvent& event : events) {
+        nCount++;
+        UniValue oEventItem(UniValue::VOBJ);
+        oEventItem.push_back(Pair("message", event.Message()));
+        oEventItem.push_back(Pair("type", (int)event.Type()));
+        oEventItem.push_back(Pair("category", (int)event.Category()));
+        oEventItem.push_back(Pair("what", event.What()));
+        oEventItem.push_back(Pair("timestamp", (int)event.Timestamp()));
+        results.push_back(Pair("event_" + std::to_string(nCount), oEventItem));
+    }
+
+    return results;
+}
+
 UniValue dht_rpc(const JSONRPCRequest& request) 
 {
     std::string strCommand;
@@ -1228,6 +1264,9 @@ UniValue dht_rpc(const JSONRPCRequest& request)
     }
     else if (strCommand == "reannounce") {
         return ReannounceLocalMutable(request);
+    }
+    else if (strCommand == "events") {
+        return GetHashTableEvents(request);
     }
     else {
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, strprintf("%s is an unknown DHT method command.", strCommand));

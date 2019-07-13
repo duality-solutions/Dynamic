@@ -217,7 +217,6 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
             } else {
                 const CEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName);
                 dhtSession->AddToEventMap(iAlertType, event);
-                LogPrintf("%s -- \nEvent\n%s\n", __func__, event.ToString());
             }
         }
         if (dhtSession->fShutdown)
@@ -843,6 +842,19 @@ bool CHashTableSession::GetLastTypeEvent(const int& type, const int64_t& startTi
     return events.size() > 0;
 }
 
+void CHashTableSession::GetEvents(const int64_t& startTime, std::vector<CEvent>& events)
+{
+    LOCK(cs_EventMap);
+    std::multimap<int, EventPair>::iterator iEvents = m_EventTypeMap.begin();
+    while (iEvents != m_EventTypeMap.end()) {
+        if (iEvents->second.first >= startTime) {
+            events.push_back(iEvents->second.second);
+        }
+        iEvents++;
+    }
+    LogPrintf("%s -- events.size() = %u\n", __func__, events.size());
+}
+
 bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
 {
     //LOCK(cs_DHTGetEventMap);
@@ -1057,6 +1069,14 @@ bool ReannounceEntry(const CMutableData& mutableData)
         return false;
 
     return arraySessions[0].second->ReannounceEntry(mutableData);
+}
+
+void GetEvents(const int64_t& startTime, std::vector<CEvent>& events)
+{
+    size_t nRunningThreads = fMultiThreads ? nThreads : 1;
+    for (unsigned int i = 0; i < nRunningThreads; i++) {
+        arraySessions[i].second->GetEvents(startTime, events);
+    }
 }
 
 } // end DHT namespace
