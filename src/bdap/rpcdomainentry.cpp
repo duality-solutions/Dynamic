@@ -19,6 +19,7 @@
 #include <univalue.h>
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend);
+extern void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
 static constexpr bool fPrintDebug = true;
 
@@ -925,6 +926,55 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue colorcoin(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
+        throw std::runtime_error(
+            "colorcoin \"dynamicaddress\" \"amount\" \"utxo list\"\n"
+            "\nConvert your DYN to BDAP colored credits\n"
+            + HelpRequiringPassphrase() +
+            "\nArguments:\n"
+            "1. \"dynamicaddress\"       (string)            The destination wallet address\n"
+            "2. \"amount\"               (int)               The amount in " + CURRENCY_UNIT + " to color. eg 0.1\n"
+            "3. \"utxo list\"            (string, optional)  UTXO txids list seperated by commas\n"
+            "\nResult:\n"
+            "  \"tx id\"                 (string)            The transaction id for the coin coloring\n"
+            "\nExamples:\n"
+            + HelpExampleCli("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\"") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\""));
+
+    EnsureWalletIsUnlocked();
+
+    if (!pwalletMain)
+        throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
+
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+
+    CAmount nColorAmount = AmountFromValue(request.params[1]);
+    if (nColorAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for coloring");
+
+    std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+    std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+
+    // Create BDAP move asset operation script
+    CScript scriptColorCoins;
+    scriptColorCoins << CScript::EncodeOP_N(OP_BDAP_MODIFY_RDN) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
+                        << vchMoveSource << vchMoveDestination << OP_2DROP << OP_2DROP;
+
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(dest);
+    scriptColorCoins += scriptDestination;
+
+    CWalletTx wtx;
+    SendColorTransaction(scriptColorCoins, wtx, nColorAmount, NULL, false, false);
+
+    return wtx.GetHash().GetHex();
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
@@ -941,6 +991,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
+    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount", "utxo list"} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
