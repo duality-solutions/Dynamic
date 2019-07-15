@@ -71,11 +71,13 @@ std::string BDAPFromOp(const int op)
             return "bdap_new";
         case OP_BDAP_DELETE:
             return "bdap_delete";
+        case OP_BDAP_EXPIRE:
+            return "bdap_expire";
         case OP_BDAP_REVOKE:
             return "bdap_revoke";
         case OP_BDAP_MODIFY:
             return "bdap_update";
-        case OP_BDAP_MODIFY_RDN:
+        case OP_BDAP_MOVE:
             return "bdap_move";
         case OP_BDAP_ACCOUNT_ENTRY:
             return "bdap_account_entry";
@@ -281,10 +283,11 @@ int GetBDAPOpType(const CScript& script)
             if (script.GetOp2(it, op1, &vch)) 
             {
                 if ((op1 - OP_1NEGATE - 1 == OP_BDAP_NEW) || 
-                    (op1 - OP_1NEGATE - 1 == OP_BDAP_DELETE) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_DELETE) ||
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_EXPIRE) ||
                     (op1 - OP_1NEGATE - 1 == OP_BDAP_REVOKE) || 
                     (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY) ||
-                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY_RDN)
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MOVE)
                 )
                 {
                     continue;
@@ -372,7 +375,7 @@ std::string GetBDAPOpTypeString(const int& op1, const int& op2)
     else if (op1 == OP_BDAP_MODIFY && op2 == OP_BDAP_ACCOUNT_ENTRY) {
         return "bdap_update_account";
     }
-    else if (op1 == OP_BDAP_MODIFY_RDN && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+    else if (op1 == OP_BDAP_MOVE && op2 == OP_BDAP_ACCOUNT_ENTRY) {
         return "bdap_move_account";
     }
     else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_LINK_REQUEST) {
@@ -392,6 +395,9 @@ std::string GetBDAPOpTypeString(const int& op1, const int& op2)
     }
     else if (op1 == OP_BDAP_MODIFY && op2 == OP_BDAP_LINK_ACCEPT) {
         return "bdap_update_link_accept";
+    }
+    else if (op1 == OP_BDAP_MOVE && op2 == OP_BDAP_ASSET) {
+        return "bdap_move_asset";
     }
     else {
         return "unknown";

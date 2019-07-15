@@ -962,7 +962,7 @@ UniValue colorcoin(const JSONRPCRequest& request)
 
     // Create BDAP move asset operation script
     CScript scriptColorCoins;
-    scriptColorCoins << CScript::EncodeOP_N(OP_BDAP_MODIFY_RDN) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
+    scriptColorCoins << CScript::EncodeOP_N(OP_BDAP_MOVE) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
                         << vchMoveSource << vchMoveDestination << OP_2DROP << OP_2DROP;
 
     CScript scriptDestination;

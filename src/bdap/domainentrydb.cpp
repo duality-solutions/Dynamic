@@ -764,7 +764,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
     }
     else if (strOperationType == "bdap_move_account") {
         uint16_t nMonths = 0;
-        if (!GetBDAPFees(OP_BDAP_MODIFY_RDN, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+        if (!GetBDAPFees(OP_BDAP_MOVE, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to move a BDAP account to another domain";
             return false;
         }
