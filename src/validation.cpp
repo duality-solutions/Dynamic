@@ -626,10 +626,6 @@ static bool IsCurrentForFeeEstimation()
 // Check if BDAP entry is valid
 bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
 {
-    // Do not check while wallet is loading
-    if (!fLoaded)
-        return true;
-
     if (!CheckDomainEntryDB())
         return true;
 
@@ -1946,7 +1942,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         uint256 hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
         bool fIsBDAP = tx.nVersion == BDAP_TX_VERSION;
-        if (fIsBDAP) {
+        if (fIsBDAP && !fReindex) {
             LogPrintf("%s -- BDAP tx found. Hash %s\n", __func__, hash.ToString());
             // get BDAP object
             CScript scriptBDAPOp; 
