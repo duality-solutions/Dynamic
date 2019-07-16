@@ -462,8 +462,7 @@ void StopTorrentDHTNetwork()
 {
     LogPrintf("%s --Begin stopping all DHT session threads.\n", __func__);
     fRun = false;
-    if (pDHTTorrentThread != NULL)
-    {
+    if (pDHTTorrentThread != nullptr) {
         size_t nRunningThreads = fMultiThreads ? nThreads : 1;
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
         if (fStarted) {
@@ -486,21 +485,26 @@ void StopTorrentDHTNetwork()
                 pairSession.second->Session->apply_settings(params.settings);
                 pairSession.second->Session->abort();
             }
-            
+        } else {
+            MilliSleep(1001);
         }
+
         pDHTTorrentThread->join();
-        // join all DHT threads
-        if (fMultiThreads) {
-            for (unsigned int i = 0; i < nThreads; i++) {
-                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
+
+        if (fStarted) {
+            // join all DHT threads
+            if (fMultiThreads) {
+                for (unsigned int i = 0; i < nThreads; i++) {
+                    std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[i];
+                    pairSession.first->join();
+                }
+            } else {
+                std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
                 pairSession.first->join();
             }
-        } else {
-            std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
-            pairSession.first->join();
         }
     }
-    
+
     if (fReannounceStarted) {
         // Stop ReannounceEntries
         fReannounceStarted = false;
