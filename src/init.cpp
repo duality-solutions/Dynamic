@@ -370,15 +370,11 @@ void PrepareShutdown()
         // BDAP Services DB's
         delete pDomainEntryDB;
         pDomainEntryDB = NULL;
-        delete pLinkRequestDB;
-        pLinkRequestDB = NULL;
-        delete pLinkAcceptDB;
-        pLinkAcceptDB = NULL;
+        delete pLinkDB;
+        pLinkDB = NULL;
         delete pLinkManager;
         pLinkManager = NULL;
         // LibTorrent DHT Netowrk Services
-        delete pHashTableSession;
-        pHashTableSession = NULL;
         delete pMutableDataDB;
         pMutableDataDB = NULL;
     }
@@ -1658,7 +1654,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     fReindex = GetBoolArg("-reindex", false);
     bool fReindexChainState = GetBoolArg("-reindex-chainstate", false);
-
+    fStealthTx = GetBoolArg("-stealthtx", false);
     // Upgrading to 0.8; hard-link the old blknnnn.dat files into /blocks/
     boost::filesystem::path blocksDir = GetDataDir() / "blocks";
     if (!boost::filesystem::exists(blocksDir)) {
@@ -1725,11 +1721,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pBanAccountDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
-                delete pLinkRequestDB;
-                delete pLinkAcceptDB;
+                delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
-                delete pHashTableSession;
                 delete pMutableDataDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
@@ -1746,11 +1740,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
-                pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);
-                pLinkAcceptDB = new CLinkAcceptDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
-                pHashTableSession = new CHashTableSession();
                 pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
@@ -2127,8 +2119,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         StartMiners();
     }
 
-    // Start the DHT Torrent network in the background
-    StartTorrentDHTNetwork(chainparams, connman);
+    // Start the DHT Torrent networks in the background
+    const bool fMultiSessions = GetArg("-multidhtsessions", true);
+    StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
     // ********************************************************* Step 13: finished
 
     SetRPCWarmupFinished();

@@ -5,18 +5,19 @@
 #ifndef BDAPPAGE_H
 #define BDAPPAGE_H
 
+#include "bdap/bdap.h"
+#include "dynamicunits.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
-#include "bdap/bdap.h"
 
 #include <QPushButton>
 #include <QWidget>
 
 #include <memory>
 
-
 class BdapAccountTableModel;
 class BdapLinkTableModel;
+class ClientModel;
 class QTableWidget;
 class QLabel;
 
@@ -45,6 +46,7 @@ public:
     explicit BdapPage(const PlatformStyle* platformStyle, QWidget* parent = 0);
     ~BdapPage();
 
+    void setClientModel(ClientModel* clientModel);
     void setModel(WalletModel* model);
     BdapAccountTableModel* getBdapAccountTableModel();
     BdapLinkTableModel* getBdapLinkTableModel();
@@ -73,10 +75,11 @@ public:
     std::string getPARequestorSearch();    
     std::string getPARecipientSearch();    
     std::string getPRRequestorSearch();    
-    std::string getPRRecipientSearch();    
+    std::string getPRRecipientSearch();  
 
 private:
     Ui::BdapPage* ui;
+    ClientModel* clientModel;
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     BdapAccountTableModel* bdapAccountTableModel;
@@ -98,12 +101,15 @@ private Q_SLOTS:
     void updateGroup();
     void getGroupDetails(int row, int column);
 
+    void listLinksAll();
     void listLinksComplete();
     void listPendingAccept();
     void listPendingRequest();
     void acceptLink();
     void addLink();
     void getLinkDetails(int row, int column);
+
+    void updateBDAPLists();
 
 };
 

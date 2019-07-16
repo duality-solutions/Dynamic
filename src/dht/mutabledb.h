@@ -22,6 +22,13 @@ public:
     bool ReadMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
     bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash);
     bool ListMutableData(std::vector<CMutableData>& vchMutableData);
+    bool LoadMemoryMap();
+    bool SelectRandomMutableItem(CMutableData& randomItem);
+    int64_t Size() const { return count; }
+
+private:
+	int64_t count = -1;
+
 };
 
 bool AddLocalMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
@@ -29,6 +36,9 @@ bool UpdateLocalMutableData(const std::vector<unsigned char>& vchInfoHash, const
 bool GetLocalMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
 bool PutLocalMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
 bool GetAllLocalMutableData(std::vector<CMutableData>& vchMutableData);
+bool InitMemoryMap();
+bool SelectRandomMutableItem(CMutableData& randomItem);
+bool CheckMutableItemDB();
 
 extern CMutableDataDB* pMutableDataDB;
 

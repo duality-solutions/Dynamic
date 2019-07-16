@@ -2,10 +2,12 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "bdapfeespopup.h"
 #include "bdapupdateaccountdialog.h"
-#include "ui_bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
+#include "ui_bdapupdateaccountdialog.h"
 
+#include "bdap/fees.h"
 #include "guiutil.h"
 #include "rpcregister.h"
 #include "rpcserver.h"
@@ -16,13 +18,13 @@
 
 #include <boost/algorithm/string.hpp>
 
-
-BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectType accountType, std::string account, std::string commonName, std::string expirationDate) : QDialog(parent),
+BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectType accountType, std::string account, std::string commonName, std::string expirationDate, int DynamicUnits) : QDialog(parent),
                                                         ui(new Ui::BdapUpdateAccountDialog)
 {
     //By default, accountType is USER. so only change stuff if different
     ui->setupUi(this);
     inputAccountType = accountType;
+    nDynamicUnits = DynamicUnits;
 
     std::string objectID = "";
     std::vector<std::string> results;
@@ -41,11 +43,9 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
     ui->labelExpirationDateInfo->setText(QString::fromStdString(expirationDate)); 
 
-
     connect(ui->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(updateAccount()));
     connect(ui->pushButtonCancel, SIGNAL(clicked()), this, SLOT(goCancel()));
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
-   
  
     ui->labelErrorMsg->setVisible(false);
     ui->pushButtonOK->setVisible(false);
@@ -60,15 +60,32 @@ void BdapUpdateAccountDialog::updateAccount()
 {
     std::string accountID = "";
     std::string commonName = "";
-    std::string registrationDays = "";
+    std::string registrationMonths = "";
     JSONRPCRequest jreq;
     std::vector<std::string> params;
+    int32_t regMonths = 0; //DEFAULT_REGISTRATION_MONTHS;
 
     std::string outputmessage = "";
 
     accountID = ui->lineEditID->text().toStdString();
     commonName = ui->lineEditCommonName->text().toStdString();
-    registrationDays = ui->lineEditRegistrationMonths->text().toStdString();
+    registrationMonths = ui->lineEditRegistrationMonths->text().toStdString();
+
+    if (registrationMonths.length() >> 0) 
+    {
+        try {
+            regMonths = std::stoi(registrationMonths);
+        } catch (std::exception& e) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Registration months must be a number."));
+            return;
+        }
+        
+        CAmount tmpAmount;
+        if ( (!ParseFixedPoint(registrationMonths, 0, &tmpAmount)) || (regMonths <= 0) ) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Additional months cannot be less than or equal to zero, and must be a whole number (no decimals)."));
+            return;
+        }
+    }
 
     ui->lineEditID->setReadOnly(true);
     ui->lineEditCommonName->setReadOnly(true);
@@ -79,21 +96,19 @@ void BdapUpdateAccountDialog::updateAccount()
     ui->lineEditID->setPalette(*palette);
     ui->lineEditCommonName->setPalette(*palette);
     ui->lineEditRegistrationMonths->setPalette(*palette);
-    
 
     ui->labelErrorMsg->setVisible(true);
     ui->pushButtonOK->setVisible(true);
 
     ui->pushButtonUpdate->setVisible(false);
     ui->pushButtonCancel->setVisible(false);
-
     
     params.push_back(accountID);
     params.push_back(commonName);
 
     //TODO: Front end GUI changed this parameter to be ADDITIONAL DAYS from current expiration date.
     //RPC command needs to be updated to reflect this change (so no entry, means expiration date stays the same. Value would mean number of days extended)
-    if (registrationDays.length() >> 0) params.push_back(registrationDays);
+    if (registrationMonths.length() >> 0) params.push_back(std::to_string(regMonths));
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
         jreq.params = RPCConvertValues("updateuser", params);
@@ -104,6 +119,11 @@ void BdapUpdateAccountDialog::updateAccount()
         jreq.strMethod = "updategroup";
 
     } //end inputAccountType if
+
+    if (!bdapFeesPopup(this,OP_BDAP_MODIFY,OP_BDAP_ACCOUNT_ENTRY,inputAccountType,nDynamicUnits,regMonths)) {
+        goClose();
+        return;
+    }
 
     try {
         UniValue result = tableRPC.execute(jreq);

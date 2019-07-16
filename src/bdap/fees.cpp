@@ -9,96 +9,149 @@
 #include "util.h" // for LogPrintf
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <limits>
+#include <map>
 
 // Default BDAP Monthly Fees
-std::map<int32_t, CAmount> mapDefaultMonthlyFees = {
-    {BDAP_MONTHY_USER_FEE, 50 * BDAP_CREDIT},
-    {BDAP_MONTHY_GROUP_FEE, 200 * BDAP_CREDIT},
-    {BDAP_MONTHY_CERTIFICATE_FEE, 100 * BDAP_CREDIT},
-    {BDAP_MONTHY_SIDECHAIN_FEE, 1000 * BDAP_CREDIT},
+std::map<int32_t, CFeeItem> mapDefaultMonthlyFees = {
+    {BDAP_MONTHY_USER_FEE, CFeeItem(BDAP_MONTHY_USER_FEE, 50 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_GROUP_FEE, CFeeItem(BDAP_MONTHY_GROUP_FEE, 200 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_CERTIFICATE_FEE, CFeeItem(BDAP_MONTHY_CERTIFICATE_FEE, 100 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_SIDECHAIN_FEE, CFeeItem(BDAP_MONTHY_SIDECHAIN_FEE, 1000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 // Default BDAP One Time Fees
-std::map<int32_t, CAmount> mapOneTimeFees = {
-    {BDAP_ONE_TIME_REQUEST_LINK_FEE, 99 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, 99 * BDAP_CREDIT},
-    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, 99 * BDAP_CREDIT},
+std::multimap<int32_t, CFeeItem> mapOneTimeFees = {
+    {BDAP_ONE_TIME_REQUEST_LINK_FEE, CFeeItem(BDAP_ONE_TIME_REQUEST_LINK_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, CFeeItem(BDAP_ONE_TIME_ACCEPT_LINK_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, CFeeItem(BDAP_ONE_TIME_AUDIT_RECORD_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 // Default BDAP Non-Refundable Security Deposit Fees
-std::map<int32_t, CAmount> mapNoRefundDeposits = {
-    {BDAP_NON_REFUNDABLE_USER_DEPOSIT, 1000 * BDAP_CREDIT},
-    {BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, 10000 * BDAP_CREDIT},
-    {BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, 5000 * BDAP_CREDIT},
-    {BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, 25000 * BDAP_CREDIT},
+std::map<int32_t, CFeeItem> mapNoRefundDeposits = {
+    {BDAP_NON_REFUNDABLE_USER_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_USER_DEPOSIT, 1000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, 10000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, 5000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, 25000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee)
 {
     std::string strObjectType = BDAP::GetObjectTypeString((unsigned int)objType);
-    LogPrintf("%s -- strObjectType = %s, OpAction %d, OpObject %d\n", __func__, strObjectType, opCodeAction, opCodeObject);
+    LogPrint("bdap", "%s -- strObjectType = %s, OpAction %d, OpObject %d\n", __func__, strObjectType, opCodeAction, opCodeObject);
     if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_USER) {
-        // new BDAP user account
+        // Fees for a new BDAP user account
         oneTimeFee = 0;
-        monthlyFee = mapDefaultMonthlyFees[BDAP_MONTHY_USER_FEE] * nMonths;
-        depositFee = mapNoRefundDeposits[BDAP_NON_REFUNDABLE_USER_DEPOSIT];
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_USER_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        CFeeItem feeDeposit;
+        std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_USER_DEPOSIT);
+        if (iDeposit != mapNoRefundDeposits.end()) {
+            feeDeposit = iDeposit->second;
+            depositFee = feeDeposit.Fee;
+        }
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_GROUP) {
-        // new BDAP group account
+        // Fees for a new BDAP group account
         oneTimeFee = 0;
-        monthlyFee = mapDefaultMonthlyFees[BDAP_MONTHY_GROUP_FEE] * nMonths;
-        depositFee = mapNoRefundDeposits[BDAP_NON_REFUNDABLE_GROUP_DEPOSIT];
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_GROUP_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        CFeeItem feeDeposit;
+        std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_GROUP_DEPOSIT);
+        if (iDeposit != mapNoRefundDeposits.end()) {
+            feeDeposit = iDeposit->second;
+            depositFee = feeDeposit.Fee;
+        }
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_CERTIFICATE && objType == BDAP::ObjectType::BDAP_CERTIFICATE) {
-        // new BDAP certificate
+        // Fees for a new BDAP certificate
         oneTimeFee = 0;
-        monthlyFee = mapDefaultMonthlyFees[BDAP_MONTHY_CERTIFICATE_FEE] * nMonths;
-        depositFee = mapNoRefundDeposits[BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT];
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_CERTIFICATE_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        CFeeItem feeDeposit;
+        std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT);
+        if (iDeposit != mapNoRefundDeposits.end()) {
+            feeDeposit = iDeposit->second;
+            depositFee = feeDeposit.Fee;
+        }
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_SIDECHAIN && objType == BDAP::ObjectType::BDAP_SIDECHAIN) {
-        // new BDAP sidechain entry
+        // Fees for a new BDAP sidechain entry
         oneTimeFee = 0;
-        monthlyFee = mapDefaultMonthlyFees[BDAP_MONTHY_SIDECHAIN_FEE] * nMonths;
-        depositFee = mapNoRefundDeposits[BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT];
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_SIDECHAIN_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        CFeeItem feeDeposit;
+        std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT);
+        if (iDeposit != mapNoRefundDeposits.end()) {
+            feeDeposit = iDeposit->second;
+            depositFee = feeDeposit.Fee;
+        }
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_LINK_REQUEST && objType == BDAP::ObjectType::BDAP_LINK_REQUEST) {
-        // new BDAP link request
-        oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_REQUEST_LINK_FEE];
+        // Fees for a new BDAP link request
+        CFeeItem feeOneTime;
+        std::multimap<int32_t, CFeeItem>::iterator iOneTime = mapOneTimeFees.find(BDAP_ONE_TIME_REQUEST_LINK_FEE);
+        if (iOneTime != mapOneTimeFees.end()) {
+            feeOneTime = iOneTime->second;
+            oneTimeFee = feeOneTime.Fee;
+        }
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_LINK_ACCEPT && objType == BDAP::ObjectType::BDAP_LINK_ACCEPT) {
-        // new BDAP link accept
-        oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_ACCEPT_LINK_FEE];
+        // Fees for a new BDAP link accept
+        CFeeItem feeOneTime;
+        std::multimap<int32_t, CFeeItem>::iterator iOneTime = mapOneTimeFees.find(BDAP_ONE_TIME_ACCEPT_LINK_FEE);
+        if (iOneTime != mapOneTimeFees.end()) {
+            feeOneTime = iOneTime->second;
+            oneTimeFee = feeOneTime.Fee;
+        }
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_AUDIT && objType == BDAP::ObjectType::BDAP_AUDIT) {
-        // new BDAP audit record
-        oneTimeFee = mapOneTimeFees[BDAP_ONE_TIME_AUDIT_RECORD_FEE];
+        // Fees for a new BDAP audit record
+        CFeeItem feeOneTime;
+        std::multimap<int32_t, CFeeItem>::iterator iOneTime = mapOneTimeFees.find(BDAP_ONE_TIME_AUDIT_RECORD_FEE);
+        if (iOneTime != mapOneTimeFees.end()) {
+            feeOneTime = iOneTime->second;
+            oneTimeFee = feeOneTime.Fee;
+        }
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_USER) {
-        // update BDAP user account entry
+        // Fees for an update BDAP user account entry
         oneTimeFee = 0;
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_GROUP) {
-        // update BDAP group account entry
+        // Fees for an update BDAP group account entry
         oneTimeFee = 0;
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
-    } else if (objType == BDAP::ObjectType::BDAP_DEFAULT_TYPE) {
-        // ********** TODO (BDAP): Remove this
-        oneTimeFee = 0;
+    } else {
+        oneTimeFee = BDAP_CREDIT;
         monthlyFee = 0;
         depositFee = BDAP_CREDIT;
-    }
-    else {
         LogPrintf("%s -- BDAP operation code pair (%d and %d) for %s not found or unsupported.\n", __func__, opCodeAction, opCodeObject, strObjectType);
-        return false;
     }
 
     return true;

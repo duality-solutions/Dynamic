@@ -209,13 +209,15 @@ BdapLinkTableModel::BdapLinkTableModel(BdapPage* parent) : QAbstractTableModel(p
     // default to unsorted
     priv->sortColumn = -1;
 
-    //initialize tables the first time
     refreshAll();
 
+    //comment out timer, but keep for possible future use
+    /*
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
     timer->setInterval(60000); //MODEL_UPDATE_DELAY originally 
     startAutoRefresh();  
+    */
 
 }
 

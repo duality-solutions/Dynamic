@@ -413,6 +413,12 @@ QTabBar { alignment: left; }
             <layout class="QHBoxLayout" name="horizontalLayout_14">
              <item>
               <widget class="QLabel" name="labelPA">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pending Accept</string>
                </property>
@@ -437,19 +443,6 @@ QTabBar { alignment: left; }
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButtonRefreshPendingAccept">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Refresh</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </item>
@@ -582,6 +575,12 @@ QTabBar { alignment: left; }
             <layout class="QHBoxLayout" name="horizontalLayout_15">
              <item>
               <widget class="QLabel" name="labelPR">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pending Request</string>
                </property>
@@ -606,19 +605,6 @@ QTabBar { alignment: left; }
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButtonRefreshPendingRequest">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Refresh</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </item>
@@ -740,7 +726,7 @@ QTabBar { alignment: left; }
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButtonRefreshComplete">
+              <widget class="QPushButton" name="pushButtonRefreshAllLinks">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -748,7 +734,7 @@ QTabBar { alignment: left; }
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Refresh</string>
+                <string>Refresh All</string>
                </property>
               </widget>
              </item>

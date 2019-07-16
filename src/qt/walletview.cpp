@@ -154,6 +154,7 @@ void WalletView::setClientModel(ClientModel* _clientModel)
 
     overviewPage->setClientModel(_clientModel);
     sendCoinsPage->setClientModel(_clientModel);
+    bdapPage->setClientModel(_clientModel);
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
         dynodeListPage->setClientModel(_clientModel);

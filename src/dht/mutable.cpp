@@ -7,6 +7,7 @@
 #include "bdap/utils.h"
 #include "hash.h"
 #include "streams.h"
+#include "tinyformat.h"
 
 #include <univalue.h>
 
@@ -62,4 +63,10 @@ std::string CMutableData::Salt() const
 std::string CMutableData::Value() const
 {
     return stringFromVch(vchValue);
+}
+
+std::string CMutableData::ToString() const
+{
+    return strprintf("CMutableData(\nInfoHash = %s\n, PublicKey = %s\n, Salt = %s\n, Seq = %d\n, Signature = %s\n, Value = %s)\n",
+        InfoHash(), PublicKey(), Salt(), SequenceNumber, Signature(), Value());
 }

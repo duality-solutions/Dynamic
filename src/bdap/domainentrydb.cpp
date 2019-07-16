@@ -45,6 +45,12 @@ bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEn
     return !entry.IsNull();
 }
 
+bool AccountPubKeyExists(const std::vector<unsigned char>& vchPubKey)
+{
+    CDomainEntry entry;
+    return GetDomainEntryPubKey(vchPubKey, entry);
+}
+
 bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
 {
     if (!pDomainEntryDB)
@@ -59,8 +65,34 @@ bool DeleteDomainEntry(const CDomainEntry& entry)
         return false;
 
     bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
-    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);;
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
     return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoAddDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoUpdateDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo update domain entry used in DisconnectBlock to handle forks
+    return false;
+}
+
+bool UndoDeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo delete domain entry used in DisconnectBlock to handle forks
+    return false;
 }
 
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
@@ -250,11 +282,12 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
 }
 
 // Lists active entries by domain name with paging support
-bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType)
+bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType, const std::string searchString)
 {
     // TODO: (bdap) implement paging
     // if vchObjectLocation is empty, list entries from all domains
     int index = 0;
+    bool addEntry = true;
     std::pair<std::string, CharString> key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
@@ -268,10 +301,26 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
                 if ((entry.nObjectType == GetObjectTypeInt(accountType)) ||  (accountType == DEFAULT_ACCOUNT_TYPE)) {
                     if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
                     {
-                        UniValue oDomainEntryEntry(UniValue::VOBJ);
-                        BuildBDAPJson(entry, oDomainEntryEntry, false);
-                        oDomainEntryList.push_back(oDomainEntryEntry);
-                        index++;
+                        addEntry = true; //always reset to true
+
+                        if (searchString.size() > 0) {
+                            //compare to ObjectID and Common Name
+                            std::string compareString(entry.ObjectID.begin(), entry.ObjectID.end());
+                            std::string compareCommonString(entry.CommonName.begin(), entry.CommonName.end());
+                            std::size_t found = compareString.find(searchString);
+                            std::size_t foundCommon = compareCommonString.find(searchString);
+
+                            if ((found==std::string::npos) && (foundCommon==std::string::npos))
+                                addEntry = false;
+                        }
+
+                        if (addEntry) 
+                        {
+                            UniValue oDomainEntryEntry(UniValue::VOBJ);
+                            BuildBDAPJson(entry, oDomainEntryEntry, false);
+                            oDomainEntryList.push_back(oDomainEntryEntry);
+                            index++;
+                        }
                     }
                 } //if entry.nObjectType
             }
@@ -280,7 +329,6 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         } //try-catch
-
 
     }
     return true;
@@ -576,7 +624,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         return true;
     }
 
-    LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    LogPrint("bdap", "%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
 
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
@@ -634,7 +682,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, dataAmount, monthlyFee);
+            LogPrint("bdap", "%s -- *** Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, dataAmount, monthlyFee);
         }
         if (depositFee > opAmount) {
             if (ENFORCE_BDAP_FEES) {
@@ -646,7 +694,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
+            LogPrint("bdap", "%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
         }
         if (nMonths < 10000) {
             entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
@@ -696,7 +744,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             }
         }
         else {
-            LogPrintf("%s -- *** Valid BDAP deposit fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
+            LogPrint("bdap", "%s -- *** Valid BDAP deposit fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
                                 (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
         }
         // Add previous expire date plus additional months

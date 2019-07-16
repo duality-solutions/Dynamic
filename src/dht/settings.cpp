@@ -16,12 +16,28 @@
 
 using namespace libtorrent;
 
-CDHTSettings::CDHTSettings()
+CDHTSettings::CDHTSettings(const uint16_t ordinal, const uint16_t threads, const bool multithreaded)
 {
-    nPort = Params().GetDefaultPort() + 11;
+    nPort = Params().GetDefaultPort() + (ordinal + 11);
+    nTotalThreads = threads;
+    fMultiThreads = multithreaded;
     user_agent = "Dynamic v" + FormatFullVersion();
     // Uses UDP port 33311 for mainnet, 333411 for testnet, 33511 for regtest, or 33611 for privatenet
-    listen_interfaces = "0.0.0.0:" + std::to_string(nPort) + ",[::]:" + std::to_string(nPort);
+    listen_interfaces = "";
+    if (!fMultiThreads) {
+        for (unsigned int i = 0; i < nTotalThreads; i++) {
+            uint16_t nListenPort = Params().GetDefaultPort() + (ordinal + i + 11);
+            listen_interfaces += "0.0.0.0:" + std::to_string(nListenPort) + ",[::]:" + std::to_string(nListenPort) + ",";
+        }
+    }
+    else {
+        uint16_t nListenPort = nPort;
+        listen_interfaces += "0.0.0.0:" + std::to_string(nListenPort) + ",[::]:" + std::to_string(nListenPort) + ",";
+    }
+    if (listen_interfaces.size() > 1) {
+        listen_interfaces.pop_back(); // removes trailing comma
+    }
+    LogPrintf("%s -- listening interfaces: %s\n", __func__, listen_interfaces);
 }
 
 void CDHTSettings::LoadPeerList()
@@ -40,14 +56,27 @@ void CDHTSettings::LoadPeerList()
             }
             pos = strPeerList.find(strDynodeIP);
             if (pos == std::string::npos) {
-                strPeerList += strDynodeIP + ":" + std::to_string(nPort) + ",";
+                if (fMultiThreads) {
+                    strPeerList += strDynodeIP + ":" + std::to_string(nPort) + ",";
+                } else {
+                    for (unsigned int i = 0; i < nTotalThreads; i++) {
+                        strPeerList += strDynodeIP + ":" + std::to_string(nPort + i) + ",";
+                    }
+                }
             }
         }
     }
     if (strPeerList.size() > 1) {
-        dht_bootstrap_nodes = strPeerList.substr(0, strPeerList.size()-1);
+        strPeerList.pop_back(); // removes trailing comma
+        dht_bootstrap_nodes = strPeerList;
     }
     LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
+}
+
+void CDHTSettings::LoadPeerID(const std::string& strPeerID)
+{
+    peer_fingerprint = strPeerID;
+    LogPrintf("CDHTSettings::%s -- peer_fingerprint = %s\n", __func__, peer_fingerprint);
 }
 
 void CDHTSettings::LoadSettings()
@@ -65,6 +94,8 @@ void CDHTSettings::LoadSettings()
         params.settings.set_str(settings_pack::user_agent, user_agent);
         params.settings.set_str(settings_pack::dht_bootstrap_nodes, dht_bootstrap_nodes); 
         params.settings.set_str(settings_pack::listen_interfaces, listen_interfaces);
+        if (peer_fingerprint.size() > 0)
+            params.settings.set_str(settings_pack::peer_fingerprint, peer_fingerprint);
         params.dht_settings.max_peers_reply = 100; // default = 100
         params.dht_settings.search_branching = 10; // default = 5
         params.dht_settings.max_fail_count = 100; // default = 20

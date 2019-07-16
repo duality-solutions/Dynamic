@@ -49,7 +49,10 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
 
-static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
+//Set the following 2 constants together
+static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
+static const int DEFAULT_RESCAN_THRESHOLD = 150;
+
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -fallbackfee default
@@ -789,6 +792,8 @@ private:
 
     void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve);   
 
+    bool ReserveKeyForTransactions(const CPubKey pubKeyToReserve);   
+
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 
     bool fFileBacked;
@@ -825,6 +830,11 @@ public:
     mutable CCriticalSection cs_wallet;
 
     const std::string strWalletFile;
+
+    bool fNeedToRescanTransactions = false;
+    CBlockIndex* rescan_index = nullptr;
+    int ReserveKeyCount = 0;
+    bool SaveRescanIndex = false;
 
     bool WalletNeedsUpgrading()
     {
@@ -1148,7 +1158,7 @@ public:
     size_t EdKeypoolCountExternalKeys();
     size_t EdKeypoolCountInternalKeys();
     bool SyncEdKeyPool(); 
-    bool TopUpKeyPoolCombo(unsigned int kpSize = 0);
+    bool TopUpKeyPoolCombo(unsigned int kpSize = 0, bool fIncreaseSize = false);
     void ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKeyPool& edkeypool, bool fInternal);
     void KeepKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
@@ -1387,5 +1397,8 @@ public:
 };
 
 bool RunProcessStealthQueue();
+
+bool IsDataScript(const CScript& data);
+bool GetDataFromScript(const CScript& data, std::vector<uint8_t>& vData);
 
 #endif // DYNAMIC_WALLET_WALLET_H

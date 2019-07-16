@@ -36,6 +36,18 @@ static const int32_t BDAP_NON_REFUNDABLE_GROUP_DEPOSIT          = 7002;
 static const int32_t BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT    = 7003;
 static const int32_t BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT      = 7004;
 
+class CFeeItem {
+public:
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    int32_t nType;
+    CAmount Fee;
+    unsigned int nStartHeight;
+    unsigned int nEndHeight;
+    CFeeItem() : nVersion(CURRENT_VERSION), nType(0), Fee(0), nStartHeight(0), nEndHeight(0) {}
+    CFeeItem(const int32_t& type, const CAmount& fee, const unsigned int& start, const unsigned int& end) : nVersion(CURRENT_VERSION), nType(type), Fee(fee), nStartHeight(start), nEndHeight(end) {}
+};
+
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee);
 int64_t AddMonthsToCurrentEpoch(const short nMonths);
 int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths);
