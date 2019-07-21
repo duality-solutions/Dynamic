@@ -582,7 +582,7 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
            HelpExampleRpc("dhtputmessages", ""));
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the DHT until the BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
 
@@ -637,7 +637,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
            HelpExampleRpc("dhtgetmessages", ""));
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the DHT until the BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
 
@@ -1227,7 +1227,7 @@ UniValue dht_rpc(const JSONRPCRequest& request)
     if (strCommand == "getmutable" || strCommand == "putmutable" || 
             strCommand == "getrecord" || strCommand == "putrecord" || strCommand == "clearrecord" || 
             strCommand == "getlinkrecord" || strCommand == "putlinkrecord" || strCommand == "clearlinkrecord" || strCommand == "getalllinkrecords" ||
-            strCommand == "status") 
+            strCommand == "status" || strCommand == "reannounce" || strCommand == "events") 
     {
         if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
             throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the DHT until the BDAP spork is active."));
