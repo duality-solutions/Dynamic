@@ -936,7 +936,6 @@ UniValue colorcoin(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"dynamicaddress\"       (string)            The destination wallet address\n"
             "2. \"amount\"               (int)               The amount in " + CURRENCY_UNIT + " to color. eg 0.1\n"
-            "3. \"utxo list\"            (string, optional)  UTXO txids list seperated by commas\n"
             "\nResult:\n"
             "  \"tx id\"                 (string)            The transaction id for the coin coloring\n"
             "\nExamples:\n"
@@ -945,6 +944,9 @@ UniValue colorcoin(const JSONRPCRequest& request)
             + HelpExampleRpc("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\""));
 
     EnsureWalletIsUnlocked();
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the colorcoin RPC command until the BDAP spork is active."));
 
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
@@ -991,7 +993,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
-    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount", "utxo list"} },
+    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount"} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
