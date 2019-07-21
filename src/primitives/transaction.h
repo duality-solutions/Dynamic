@@ -218,6 +218,9 @@ public:
         return !(a == b);
     }
 
+    bool IsBDAP() const;
+    bool IsData() const;
+
     std::string ToString() const;
 };
 
