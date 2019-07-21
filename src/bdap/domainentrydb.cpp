@@ -21,27 +21,17 @@ CDomainEntryDB *pDomainEntryDB = NULL;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
 {
-    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry)) {
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry))
         return false;
-    }
-    
-    if (chainActive.Tip() && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
-        entry.SetNull();
-        return false;
-    }
+
     return !entry.IsNull();
 }
 
 bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry)
 {
-    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry))
         return false;
-    }
-    
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
-        entry.SetNull();
-        return false;
-    }
+
     return !entry.IsNull();
 }
 
