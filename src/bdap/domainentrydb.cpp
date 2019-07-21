@@ -658,15 +658,16 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        std::vector<unsigned char> vchMonths = vvchArgs[2];
-        std::string strMonths = stringFromVch(vchMonths);
-        if (IsHex(strMonths)) {
-            vchMonths = ParseHex(strMonths);
-        }
-        int nMonths = CScriptNum(vchMonths, false, 10).getint();
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
+
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
         if (nMonths >= 10000)
             nMonths = 24;
-        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
@@ -724,15 +725,16 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        std::vector<unsigned char> vchMonths = vvchArgs[2];
-        std::string strMonths = stringFromVch(vchMonths);
-        if (IsHex(strMonths)) {
-            vchMonths = ParseHex(strMonths);
-        }
-        int nMonths = CScriptNum(vchMonths, false, 10).getint();
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
+
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
         if (nMonths >= 10000)
             nMonths = 24;
-        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
