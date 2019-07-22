@@ -4931,12 +4931,11 @@ bool CWallet::GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>&
             pubkeyWallet = keypool.vchPubKey;
         }
 
-        CKey keyRetrieved;
-        GetKey(pubkeyWallet.GetID(), keyRetrieved);
-
         if (nEdIndex == -1) {
             if (IsLocked(true))
                 return false;
+            CKey keyRetrieved;
+            GetKey(pubkeyWallet.GetID(), keyRetrieved);
             vchEd25519PubKey = GenerateNewEdKey(0, fInternal, keyRetrieved);
         }
         else {
