@@ -1041,7 +1041,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (nBDAPBurn > 0)
                 nFees += nBDAPBurn;
 
-            LogPrintf("%s -- BDAP Burn Amount %d, Total Fees %d, BDAP Deposit Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nFees), FormatMoney(nOpCodeAmount));
+            LogPrint("bdap", "%s -- BDAP Burn Amount %d, Total Fees %d, BDAP Deposit Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nFees), FormatMoney(nOpCodeAmount));
         }
         // nModifiedFees includes any fee deltas from PrioritiseTransaction
         CAmount nModifiedFees = nFees;

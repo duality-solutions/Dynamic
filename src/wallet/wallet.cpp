@@ -1410,7 +1410,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                             if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
                                 CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::RequestType, nHeight, nExpireTime, GetTime(), tx.GetHash());
                                 if (walletdb.WriteLink(link)) {
-                                    LogPrintf("%s -- WriteLinkRequest nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
+                                    LogPrint("bdap", "%s -- WriteLinkRequest nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
                                 }
                             }
                         }
@@ -1420,7 +1420,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                             if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
                                 CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::AcceptType, nHeight, nExpireTime, GetTime(), tx.GetHash());
                                 if (walletdb.WriteLink(link)) {
-                                    LogPrintf("%s -- WriteLinkAccept nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
+                                    LogPrint("bdap", "%s -- WriteLinkAccept nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
                                 }
                             }
                         }
@@ -6005,7 +6005,7 @@ bool CWallet::ProcessStealthOutput(const CTxDestination& address, std::vector<ui
         if (idMatchShared != idExtracted) {
             continue;
         }
-        LogPrintf("%s -- Found txn output from address %s belongs to stealth address %s\n", __func__, CDynamicAddress(idExtracted).ToString(), sxAddr.Encoded());
+        LogPrint("bdap", "%s -- Found txn output from address %s belongs to stealth address %s\n", __func__, CDynamicAddress(idExtracted).ToString(), sxAddr.Encoded());
 
         if (IsLocked()) {
             LogPrintf("%s: Wallet locked, adding stealth key to queue wallet.\n", __func__);
