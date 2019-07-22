@@ -81,8 +81,7 @@ bool CTxOut::IsData() const
     if (!scriptPubKey.GetOp(pc, opcode))
         return false;
 
-    int op = CScript::DecodeOP_N(opcode);
-    if (op == OP_RETURN)
+    if (opcode == OP_RETURN)
         return true;
 
     return false;
@@ -90,7 +89,8 @@ bool CTxOut::IsData() const
 
 std::string CTxOut::ToString() const
 {
-    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));
+    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s, IsBDAP=%s, IsData=%s)", nValue / COIN, nValue % COIN
+        , HexStr(scriptPubKey).substr(0, 30), IsBDAP() ? "Yes" : "No", IsData() ? "Yes" : "No");
 }
 
 CMutableTransaction::CMutableTransaction() : nVersion(CTransaction::CURRENT_VERSION), nLockTime(0) {}
