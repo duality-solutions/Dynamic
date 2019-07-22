@@ -163,8 +163,6 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
             "\nExamples:\n" +
             HelpExampleCli("getnewed25519address", "") + HelpExampleRpc("getnewed25519address", ""));
 
-    EnsureWalletIsUnlocked();
-
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     // Parse the account first so we don't generate a key if there's an error
