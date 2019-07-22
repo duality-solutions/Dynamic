@@ -7,7 +7,7 @@ sudo: required
 dist: bionic
 env:
   global:
-    - MAKETHREADS="-j3"
+    - MAKETHREADS="-j2"
     - MAIN_PACKAGES="build-essential libtool autotools-dev autoconf libssl-dev libboost-all-dev libcrypto++-dev libevent-dev"
     - QT_PACKAGES="libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler"
     - GPU_PACKAGES="ocl-icd-opencl-dev"
