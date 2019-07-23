@@ -851,20 +851,34 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
             }
         }
-        /*
-        // TODO (BDAP): Implement link delete
         else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
             if (vvch.size() > 3)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
-
+            //check for duplicate pubkeys
             std::vector<unsigned char> vchPubKey = vvch[0];
             if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strOpType, strErrorMessage))
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
+
+            if (LinkPubKeyExists(vchPubKey))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-pubkey");
+
+            CDomainEntry prevEntry;
+            if (GetDomainEntryPubKey(vchPubKey, prevEntry))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-pubkey-entry");
+
+            if (vvch.size() > 1) {
+                std::vector<unsigned char> vchSharedPubKey = vvch[1];
+                if (LinkPubKeyExists(vchSharedPubKey))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey");
+
+                if (GetDomainEntryPubKey(vchSharedPubKey, prevEntry))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey-entry");
+            }
         }
         // TODO (BDAP): Implement link delete
-        
+        /*
         else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
