@@ -21,27 +21,17 @@ CDomainEntryDB *pDomainEntryDB = NULL;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
 {
-    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry)) {
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry))
         return false;
-    }
-    
-    if (chainActive.Tip() && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
-        entry.SetNull();
-        return false;
-    }
+
     return !entry.IsNull();
 }
 
 bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry)
 {
-    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry))
         return false;
-    }
-    
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
-        entry.SetNull();
-        return false;
-    }
+
     return !entry.IsNull();
 }
 
@@ -658,10 +648,16 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
+
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
         if (nMonths >= 10000)
             nMonths = 24;
-        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
@@ -719,10 +715,16 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
-        int nMonths = CScriptNum(vvchArgs[2], false, 10).getint();
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
+
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
         if (nMonths >= 10000)
             nMonths = 24;
-        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }

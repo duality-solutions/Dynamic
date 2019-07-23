@@ -59,6 +59,8 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString vchCommonName = vchFromValue(request.params[1]);
 
     int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 1 year.
+    std::string strMonths = std::to_string(nMonths) + "Month";
+    std::vector<unsigned char> vchMonths = vchFromString(strMonths);
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4500 - " + _("Error converting registration days to int"));
@@ -130,7 +132,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << vchMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());

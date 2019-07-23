@@ -79,12 +79,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     CharString data;
     txDomainEntry.Serialize(data);
-    
+
     // Create BDAP operation script
     CScript scriptPubKey;
+    std::string strMonths = std::to_string(nMonths) + "Month";
+    std::vector<unsigned char> vchMonths = vchFromString(strMonths);
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << vchMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -450,9 +452,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     
     // Create BDAP operation script
     CScript scriptPubKey;
+    std::string strMonths = std::to_string(nMonths) + "Month";
+    std::vector<unsigned char> vchMonths = vchFromString(strMonths);
     std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
-                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << nMonths << OP_2DROP << OP_2DROP << OP_DROP;
+                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << vchMonths << OP_2DROP << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;
