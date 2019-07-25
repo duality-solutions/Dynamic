@@ -76,19 +76,14 @@ DYNAMIC_CORE_H = \
   addrman.h \
   alert.h \
   base58.h \
-  bdap/auditdata.h \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
-  bdap/certificate.h \
-  bdap/entrycheckpoints.h \
   bdap/fees.h \
-  bdap/identity.h \
   bdap/linking.h \
   bdap/linkingdb.h \
   bdap/linkmanager.h \
   bdap/linkstorage.h \
-  bdap/sidechain.h \
   bdap/stealth.h \
   bdap/utils.h \
   bdap/vgpmessage.h \
@@ -266,13 +261,9 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  bdap/auditdata.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
-  bdap/certificate.cpp \
-  bdap/entrycheckpoints.cpp \
   bdap/fees.cpp \
-  bdap/identity.cpp \
   bdap/linking.cpp \
   bdap/linkingdb.cpp \
   bdap/linkmanager.cpp \
@@ -280,7 +271,6 @@ libdynamic_server_a_SOURCES = \
   bdap/rpcdomainentry.cpp \
   bdap/rpclinking.cpp \
   bdap/rpcrawbdap.cpp \
-  bdap/sidechain.cpp \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
   dbwrapper.cpp \
