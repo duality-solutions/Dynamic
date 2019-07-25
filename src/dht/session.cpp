@@ -90,7 +90,7 @@ namespace DHT {
         bencode(std::back_inserter(bufSign), e);
         dht::signature sign;
         seq = iSeq;
-        LogPrintf("%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
+        LogPrint("dht", "%s --\nSalt = %s\nSequence = %d, e = %s\n", __func__, salt, seq, e.to_string());
         sign = sign_mutable_item(bufSign, salt, dht::sequence_number(seq)
             , dht::public_key(pk.data())
             , dht::secret_key(sk.data()));
@@ -113,7 +113,7 @@ namespace DHT {
         e = entry;
         seq = iSeq;
         sig = signature;
-        LogPrintf("%s --\nSalt = %s\nSequence = %d, sig size = %d, e = %s\n", __func__, salt, seq, sig.size(), e.to_string());
+        LogPrint("dht", "%s --\nSalt = %s\nSequence = %d, sig size = %d, e = %s\n", __func__, salt, seq, sig.size(), e.to_string());
     }
 
     void CleanUpPutBuffer()
@@ -153,7 +153,7 @@ bool CHashTableSession::ReannounceEntry(const CMutableData& mutableData)
         aux::from_hex(mutableData.Signature(), signature_bytes.data());
         Session->dht_put_item(pubkey, std::bind(&DHT::put_signed_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
              pubkey, signature_bytes, mut_item, mutableData.SequenceNumber), mutableData.Salt());
-        LogPrintf("%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
+        LogPrint("dht", "%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
         return true;
     }
     return false;

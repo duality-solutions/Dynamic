@@ -124,7 +124,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     item["seq"] = mutableData.SequenceNumber;
     if (force_fill || (sequence_number(0) <= seq && seq < sequence_number(mutableData.SequenceNumber)))
     {
-        LogPrintf("********** CDHTStorage -- get_mutable_item data found.\n");
+        LogPrint("dht", "********** CDHTStorage -- get_mutable_item data found.\n");
         item["v"] = get_bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
         std::array<char, 64> sig;
         aux::from_hex(mutableData.Signature(), sig.data());
@@ -187,7 +187,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchSalt = vchFromString(strSalt);
 
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
-    LogPrintf("CDHTStorage::%s -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
+    LogPrint("dht", "CDHTStorage::%s -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
                     __func__, strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
                     vchPutValue.size(), vchSignature.size(), vchPublicKey.size(), vchSalt.size());
 
