@@ -804,6 +804,8 @@ private:
     std::set<int64_t> setInternalEdKeyPool;
     std::set<int64_t> setExternalEdKeyPool;
 
+    unsigned int DynamicKeyPoolSize = (int64_t)0;
+
     std::vector<std::vector<unsigned char>> reservedEd25519PubKeys;
 
     int64_t nTimeFirstKey;
@@ -835,6 +837,7 @@ public:
     CBlockIndex* rescan_index = nullptr;
     int ReserveKeyCount = 0;
     bool SaveRescanIndex = false;
+    //unsigned int DynamicKeyPoolSize = (int64_t)0;
 
     bool WalletNeedsUpgrading()
     {
