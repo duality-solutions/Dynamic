@@ -108,9 +108,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + strMessage);
 
     bool fUseInstantSend = false;
-    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        fUseInstantSend = true;
-    }
+    //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
+    //    fUseInstantSend = true;
+
     // Send the transaction
     CWalletTx wtx;
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
@@ -479,9 +479,9 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + strMessage);
 
     bool fUseInstantSend = false;
-    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        fUseInstantSend = true;
-    }
+    //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
+    //    fUseInstantSend = true;
+
     // Send the transaction
     CWalletTx wtx;
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
