@@ -2908,8 +2908,8 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if (!found)
                     continue;
 
-                if (pcoin->tx->vout[i].IsBDAP())
-                    continue;
+                //if (pcoin->tx->vout[i].IsBDAP())
+                //    continue;
 
                 isminetype mine = IsMine(pcoin->tx->vout[i]);
                 if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO &&
