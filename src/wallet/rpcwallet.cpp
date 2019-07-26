@@ -457,15 +457,20 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend)
+/*
+For BDAP transactions, 
+    - nDataAmount is burned in the OP_RUTRN transaction.
+    - nOpAmount turns to BDAP credits and can only be used to fund BDAP fees
+*/
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
-    // Check amount
-    if (nRegFee <= 0)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
+    // Check amounts
+    if (nDataAmount <= 0 || nOpAmount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
 
-    if (nRegFee + nDepositFee > curBalance)
+    if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
     // Create and send the transaction
@@ -475,14 +480,14 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     std::vector<CRecipient> vecSend;
     int nChangePosInOut = 0;
 
-    LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
-    LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+    LogPrint("bdap", "Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrint("bdap", "Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    if (nRegFee > 0) {
-        CRecipient recDataScript = {bdapDataScript, nRegFee, false};
+    if (nDataAmount > 0) {
+        CRecipient recDataScript = {bdapDataScript, nDataAmount, false};
         vecSend.push_back(recDataScript);
     }
-    CRecipient recOPScript = {bdapOPScript, nDepositFee, false};
+    CRecipient recOPScript = {bdapOPScript, nOpAmount, false};
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,

@@ -18,7 +18,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 extern void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
 static constexpr bool fPrintDebug = true;
@@ -113,7 +113,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -484,7 +484,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -652,7 +652,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
