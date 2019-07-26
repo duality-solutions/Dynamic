@@ -1441,40 +1441,27 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                         }
                     }
                 }
-            } // if tx.nversion END
-        else {
-            BOOST_FOREACH (const CTxOut& txout, tx.vout) {
-                CScript scriptPubKey = txout.scriptPubKey;
-                CTxDestination address1;
-                bool ReserveKey = true;
+            } else {
+                for (const CTxOut& txout : tx.vout) {
+                    CScript scriptPubKey = txout.scriptPubKey;
+                    CTxDestination dest;
+                    if (!ExtractDestination(scriptPubKey, dest))
+                        continue;
 
-                if (!ExtractDestination(scriptPubKey, address1)) {
-                        ReserveKey = false;
-                    }
+                    CDynamicAddress address(dest);
+                    CKeyID keyID;
+                    if (!address.GetKeyID(keyID))
+                        continue;
 
-                CDynamicAddress address2(address1);
-                CKeyID keyID;
-
-                if (!address2.GetKeyID(keyID)) {
-                        ReserveKey = false;
-                    }
-                CKey vchSecret;
-                if (!GetKey(keyID, vchSecret)) {
-                        ReserveKey = false;
-                    }
-
-                CPubKey retrievePubKey;
-
-                if (ReserveKey) {
-                        retrievePubKey = vchSecret.GetPubKey();
+                    CPubKey retrievePubKey;
+                    if (GetPubKey(keyID, retrievePubKey)) {
                         if (ReserveKeyForTransactions(retrievePubKey)) {
-                            TopUpKeyPoolCombo(0,true);
+                            TopUpKeyPoolCombo(0, true);
                             fNeedToRescanTransactions = true;
                         }
                     }
-
-            } //BOOST_FOREACH END
-        }
+                }
+            }
 
             CWalletTx wtx(this, ptx);
                 
@@ -4814,7 +4801,7 @@ void CWallet::ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubK
 
 } //ReserveEdKeyForTransactions
 
-bool CWallet::ReserveKeyForTransactions(const CPubKey pubKeyToReserve)
+bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
 {
         bool foundPubKey = false;
 
