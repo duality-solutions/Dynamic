@@ -226,7 +226,7 @@ void MiningPage::updateGPUPushSwitch()
 
 void MiningPage::StartCPUMiner()
 {
-    LogPrintf("StartCPUMiner %d (%s)", ui->sliderCPUCores->value(), fCPUMinerOn);
+    LogPrintf("StartCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = true;
     InitMiners(Params(), *g_connman);
     changeNumberOfCPUThreads(ui->sliderCPUCores->value());
@@ -245,7 +245,7 @@ void MiningPage::StartGPUMiner()
 
 void MiningPage::StopCPUMiner()
 {
-    LogPrintf("StopCPUMiner %d (%s)", ui->sliderCPUCores->value(), fCPUMinerOn);
+    LogPrintf("StopCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = false;
     changeNumberOfCPUThreads(0, true);
     ShutdownCPUMiners();

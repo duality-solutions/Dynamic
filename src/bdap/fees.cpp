@@ -138,15 +138,26 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_USER) {
         // Fees for an update BDAP user account entry
-        oneTimeFee = 0;
-        monthlyFee = 0;
-        depositFee = BDAP_CREDIT;
+        oneTimeFee = BDAP_CREDIT;
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_USER_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        depositFee = 0;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_GROUP) {
         // Fees for an update BDAP group account entry
-        oneTimeFee = 0;
-        monthlyFee = 0;
-        depositFee = BDAP_CREDIT;
+        oneTimeFee = BDAP_CREDIT;
+        CFeeItem feeMonthly;
+        std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_GROUP_FEE);
+        if (iMonthly != mapDefaultMonthlyFees.end()) {
+            feeMonthly = iMonthly->second;
+            monthlyFee = (nMonths * feeMonthly.Fee);
+        }
+        depositFee = 0;
+
     } else {
         oneTimeFee = BDAP_CREDIT;
         monthlyFee = 0;

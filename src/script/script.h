@@ -195,10 +195,11 @@ enum opcodetype {
     OP_BDAP_REVOKE = 0xc9,               // = BDAP delete using fluid protocol
 
     // BDAP directory access, user identity and certificate system
-    OP_BDAP_NEW = 0x01,                  // = BDAP create new entry
-    OP_BDAP_DELETE = 0x02,               // = BDAP user delete entry
+    OP_BDAP_NEW = 0x01,                  // = BDAP new entry
+    OP_BDAP_DELETE = 0x02,               // = BDAP delete entry
+    OP_BDAP_EXPIRE = 0x03,               // = BDAP expire entry
     OP_BDAP_MODIFY = 0x04,               // = BDAP update entry
-    OP_BDAP_MODIFY_RDN = 0x05,           // = move BDAP entry
+    OP_BDAP_MOVE = 0x05,                 // = BDAP move entry
     OP_BDAP_ACCOUNT_ENTRY  = 0x06,       // = BDAP domain account entry (users and groups) 
     OP_BDAP_LINK_REQUEST = 0x07,         // = BDAP link request
     OP_BDAP_LINK_ACCEPT = 0x08,          // = BDAP link accept
@@ -228,7 +229,7 @@ enum ProtocolCodes {
     BDAP_DELETE_TX = 5,
     BDAP_REVOKE_TX = 6,
     BDAP_MODIFY_TX = 7,
-    BDAP_MODIFY_RDN_TX = 8,
+    BDAP_MOVE_TX = 8,
     BDAP_ACCOUNT_ENTRY = 9,
     BDAP_LINK_REQUEST = 10,
     BDAP_LINK_ACCEPT = 11,
@@ -238,6 +239,7 @@ enum ProtocolCodes {
     BDAP_ID_VERIFICATION_TX = 15,
     BDAP_SIDECHAIN_TX = 16,
     BDAP_SIDECHAIN_CHECKPOINT = 17,
+    BDAP_EXPIRE_TX = 18,
     NO_TX = 0
 };
 
@@ -701,11 +703,14 @@ public:
         case BDAP_REVOKE_TX:
             return (size() > 0 && *begin() == OP_BDAP_REVOKE);
             break;
+        case BDAP_EXPIRE_TX:
+            return (size() > 0 && *begin() == OP_BDAP_EXPIRE);
+            break;
         case BDAP_MODIFY_TX:
             return (size() > 0 && *begin() == OP_BDAP_MODIFY);
             break;
-        case BDAP_MODIFY_RDN_TX:
-            return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
+        case BDAP_MOVE_TX:
+            return (size() > 0 && *begin() == OP_BDAP_MOVE);
             break;
         case BDAP_ACCOUNT_ENTRY:
             return (size() > 0 && *begin() == OP_BDAP_ACCOUNT_ENTRY);

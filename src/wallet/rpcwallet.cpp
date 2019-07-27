@@ -457,15 +457,20 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend)
+/*
+For BDAP transactions, 
+    - nDataAmount is burned in the OP_RUTRN transaction.
+    - nOpAmount turns to BDAP credits and can only be used to fund BDAP fees
+*/
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
-    // Check amount
-    if (nRegFee <= 0)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
+    // Check amounts
+    if (nDataAmount <= 0 || nOpAmount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
 
-    if (nRegFee + nDepositFee > curBalance)
+    if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
     // Create and send the transaction
@@ -475,14 +480,14 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     std::vector<CRecipient> vecSend;
     int nChangePosInOut = 0;
 
-    LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
-    LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+    LogPrint("bdap", "Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrint("bdap", "Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    if (nRegFee > 0) {
-        CRecipient recDataScript = {bdapDataScript, nRegFee, false};
+    if (nDataAmount > 0) {
+        CRecipient recDataScript = {bdapDataScript, nDataAmount, false};
         vecSend.push_back(recDataScript);
     }
-    CRecipient recOPScript = {bdapOPScript, nDepositFee, false};
+    CRecipient recOPScript = {bdapOPScript, nOpAmount, false};
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
@@ -536,6 +541,42 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+}
+
+void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend)
+{
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nColorAmount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("%s invalid amount", __func__));
+
+    if (nColorAmount > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("%s insufficient funds", __func__));
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosInOut = 0;
+
+    LogPrintf("Sending color coin script: %s\n", ScriptToAsmStr(scriptColorCoins));
+
+    CRecipient recScript = {scriptColorCoins, nColorAmount, false};
+    vecSend.push_back(recScript);
+    //
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
+            strError, coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend, true)) {
+        if (nColorAmount + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }

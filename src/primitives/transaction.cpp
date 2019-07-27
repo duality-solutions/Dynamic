@@ -58,9 +58,39 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn)
     nRounds = nRoundsIn;
 }
 
+bool CTxOut::IsBDAP() const
+{
+    opcodetype opcode;
+    CScript::const_iterator pc = scriptPubKey.begin();
+    if (!scriptPubKey.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+
+    int op = CScript::DecodeOP_N(opcode);
+    if (op == OP_BDAP_NEW || op == OP_BDAP_DELETE || op == OP_BDAP_EXPIRE || op == OP_BDAP_MODIFY || op == OP_BDAP_MOVE)
+        return true;
+
+    return false;
+}
+
+bool CTxOut::IsData() const
+{
+    opcodetype opcode;
+    CScript::const_iterator pc = scriptPubKey.begin();
+    if (!scriptPubKey.GetOp(pc, opcode))
+        return false;
+
+    if (opcode == OP_RETURN)
+        return true;
+
+    return false;
+}
+
 std::string CTxOut::ToString() const
 {
-    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));
+    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s, IsBDAP=%s, IsData=%s)", nValue / COIN, nValue % COIN
+        , HexStr(scriptPubKey).substr(0, 30), IsBDAP() ? "Yes" : "No", IsData() ? "Yes" : "No");
 }
 
 CMutableTransaction::CMutableTransaction() : nVersion(CTransaction::CURRENT_VERSION), nLockTime(0) {}

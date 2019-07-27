@@ -18,9 +18,8 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nRegFee, const CAmount& nDepositFee, const bool fUseInstantSend);
-
-static constexpr bool fPrintDebug = true;
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
+extern void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
 static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType)
 {
@@ -100,33 +99,33 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+    LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + strMessage);
 
     bool fUseInstantSend = false;
-    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        fUseInstantSend = true;
-    }
+    //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
+    //    fUseInstantSend = true;
+
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDomainEntry, oName))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3507 - " + _("Failed to read from BDAP JSON object"));
     
-    if (fPrintDebug) {
+    if (LogAcceptCategory("bdap")) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
-        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+        LogPrint("bdap", "DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
         const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
+        LogPrint("bdap", "CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
             stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
@@ -471,33 +470,33 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+    LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + strMessage);
 
     bool fUseInstantSend = false;
-    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
-        fUseInstantSend = true;
-    }
+    //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
+    //    fUseInstantSend = true;
+
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txUpdatedEntry, oName))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Failed to read from BDAP JSON object"));
     
-    if (fPrintDebug) {
+    if (LogAcceptCategory("bdap")) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
-        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+        LogPrint("bdap", "DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
         const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
+        LogPrint("bdap", "CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
             stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
@@ -646,26 +645,26 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_DELETE, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+    LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
 
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDeletedEntry, oName))
         throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
     
-    if (fPrintDebug) {
+    if (LogAcceptCategory("bdap")) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
-        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+        LogPrint("bdap", "DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
         const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
+        LogPrint("bdap", "CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
             stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
@@ -925,6 +924,57 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue colorcoin(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
+        throw std::runtime_error(
+            "colorcoin \"dynamicaddress\" \"amount\" \"utxo list\"\n"
+            "\nConvert your DYN to BDAP colored credits\n"
+            + HelpRequiringPassphrase() +
+            "\nArguments:\n"
+            "1. \"dynamicaddress\"       (string)            The destination wallet address\n"
+            "2. \"amount\"               (int)               The amount in " + CURRENCY_UNIT + " to color. eg 0.1\n"
+            "\nResult:\n"
+            "  \"tx id\"                 (string)            The transaction id for the coin coloring\n"
+            "\nExamples:\n"
+            + HelpExampleCli("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\"") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\""));
+
+    EnsureWalletIsUnlocked();
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the colorcoin RPC command until the BDAP spork is active."));
+
+    if (!pwalletMain)
+        throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
+
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+
+    CAmount nColorAmount = AmountFromValue(request.params[1]);
+    if (nColorAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for coloring");
+
+    std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+    std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+
+    // Create BDAP move asset operation script
+    CScript scriptColorCoins;
+    scriptColorCoins << CScript::EncodeOP_N(OP_BDAP_MOVE) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
+                        << vchMoveSource << vchMoveDestination << OP_2DROP << OP_2DROP;
+
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(dest);
+    scriptColorCoins += scriptDestination;
+
+    CWalletTx wtx;
+    SendColorTransaction(scriptColorCoins, wtx, nColorAmount, NULL, false, false);
+
+    return wtx.GetHash().GetHex();
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
@@ -941,6 +991,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
+    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount"} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
