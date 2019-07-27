@@ -46,8 +46,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
     strErrorRet = "";
 
     bool isBlockRewardValueMet = (block.vtx[0]->GetValueOut() <= blockReward);
-    if (fDebug)
-        LogPrintf("block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", block.vtx[0]->GetValueOut(), blockReward);
+    LogPrint("gobject", "block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", block.vtx[0]->GetValueOut(), blockReward);
 
     // we are still using budgets, but we have no data about them anymore,
     // all we know is predefined budget cycle and window
@@ -87,8 +86,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
     if (!dynodeSync.IsSynced()) {
         // not enough data but at least it must NOT exceed superblock max value
         if (CSuperblock::IsValidBlockHeight(nBlockHeight)) {
-            if (fDebug)
-                LogPrintf("IsBlockPayeeValid -- WARNING: Client not synced, checking superblock max bounds only\n");
+            LogPrint("gobject", "IsBlockPayeeValid -- WARNING: Client not synced, checking superblock max bounds only\n");
             if (!isSuperblockMaxValueMet) {
                 strErrorRet = strprintf("coinbase pays too much at height %d (actual=%d vs limit=%d), exceeded superblock max value",
                     nBlockHeight, block.vtx[0]->GetValueOut(), nSuperblockMaxValue);
@@ -141,8 +139,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
 {
     if (!dynodeSync.IsSynced()) {
         //there is no budget data to use to check anything, let's just accept the longest chain
-        if (fDebug)
-            LogPrintf("IsBlockPayeeValid -- WARNING: Client not synced, skipping block payee checks\n");
+        LogPrint("dnpayments", "IsBlockPayeeValid -- WARNING: Client not synced, skipping block payee checks\n");
         return true;
     }
 
