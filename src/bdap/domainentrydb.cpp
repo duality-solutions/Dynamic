@@ -581,9 +581,9 @@ static bool CheckUpdateDomainEntryTxInputs(CDomainEntry& entry, const CScript& s
             return error(errorMessage.c_str());
         }
     }
-    LogPrintf("%s -- DEBGUGGER, prevDomainEntry.nExpireTime = %d, AddMonthsToBlockTime() = %d, nMonths = %d, nBlockTime = %d\n", __func__, 
-                    prevDomainEntry.nExpireTime, AddMonthsToBlockTime(nBlockTime, nMonths), nMonths, nBlockTime);
-    entry.nExpireTime = prevDomainEntry.nExpireTime + AddMonthsToBlockTime(nBlockTime, nMonths);
+    entry.nExpireTime = AddMonthsToBlockTime(prevDomainEntry.nExpireTime, nMonths);
+    LogPrint("bdap", "%s -- prevDomainEntry.nExpireTime = %d, AddMonthsToBlockTime() = %d, nMonths = %d\n", __func__, 
+                    prevDomainEntry.nExpireTime, AddMonthsToBlockTime(prevDomainEntry.nExpireTime, nMonths), nMonths);
     if (!pDomainEntryDB->UpdateDomainEntry(entry.vchFullObjectPath(), entry))
     {
         errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry in LevelDB; this update operation failed!";
