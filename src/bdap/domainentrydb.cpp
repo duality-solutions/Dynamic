@@ -581,12 +581,9 @@ static bool CheckUpdateDomainEntryTxInputs(CDomainEntry& entry, const CScript& s
             return error(errorMessage.c_str());
         }
     }
-    if (nMonths < 10000) {
-        entry.nExpireTime = prevDomainEntry.nExpireTime + AddMonthsToBlockTime(nBlockTime, nMonths);
-    }
-    else {
-        entry.nExpireTime = nMonths;
-    }
+    LogPrintf("%s -- DEBGUGGER, prevDomainEntry.nExpireTime = %d, AddMonthsToBlockTime() = %d, nMonths = %d, nBlockTime = %d\n", __func__, 
+                    prevDomainEntry.nExpireTime, AddMonthsToBlockTime(nBlockTime, nMonths), nMonths, nBlockTime);
+    entry.nExpireTime = prevDomainEntry.nExpireTime + AddMonthsToBlockTime(nBlockTime, nMonths);
     if (!pDomainEntryDB->UpdateDomainEntry(entry.vchFullObjectPath(), entry))
     {
         errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry in LevelDB; this update operation failed!";
@@ -655,21 +652,23 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
 
         uint32_t nMonths;
         ParseUInt32(strMonths, &nMonths);
-        if (nMonths >= 10000)
-            nMonths = 24;
-        if (nMonths < 10000 && !GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
+
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
+        LogPrint("bdap", "%s -- nMonths %d, monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, nMonths, monthlyFee, oneTimeFee, depositFee);
         // extract amounts from tx.
         CAmount dataAmount, opAmount;
         if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
             errorMessage = "Unable to extract BDAP amounts from transaction";
             return false;
         }
+        LogPrint("bdap", "%s -- dataAmount %d, opAmount %d\n", __func__, dataAmount, opAmount);
         // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
         if (monthlyFee > dataAmount) {
             if (ENFORCE_BDAP_FEES) {
+                LogPrintf("%s -- Invalid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d but should be %d. Fees enforced.\n", __func__, dataAmount, monthlyFee);
                 errorMessage = "Invalid BDAP monthly registration fee amount for new BDAP account";
                 return false;
             }
@@ -682,6 +681,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         }
         if (depositFee > opAmount) {
             if (ENFORCE_BDAP_FEES) {
+                LogPrintf("%s -- Invalid BDAP deposit fee amount for new BDAP account. Deposit paid %d but should be %d. Fees not enforced.\n", __func__, opAmount, depositFee);
                 errorMessage = "Invalid BDAP deposit fee amount for new BDAP account";
                 return false;
             }
@@ -692,12 +692,7 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         else {
             LogPrint("bdap", "%s -- *** Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, opAmount, depositFee);
         }
-        if (nMonths < 10000) {
-            entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
-        }
-        else {
-            entry.nExpireTime = nMonths;
-        }
+        entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
 
         return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
@@ -728,12 +723,14 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
+        LogPrint("bdap", "%s -- nMonths %d, monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, nMonths, monthlyFee, oneTimeFee, depositFee);
         // extract amounts from tx.
         CAmount dataAmount, opAmount;
         if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
             errorMessage = "Unable to extract BDAP amounts from transaction";
             return false;
         }
+        LogPrint("bdap", "%s -- dataAmount %d, opAmount %d\n", __func__, dataAmount, opAmount);
         // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
         if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
             if (ENFORCE_BDAP_FEES) {
