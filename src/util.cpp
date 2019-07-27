@@ -272,6 +272,9 @@ bool LogAcceptCategory(const char* category)
                 ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
                 // thread_specific_ptr automatically deletes the set when the thread ends.
                 // "dynamic" is a composite category enabling all Dynamic-related debug output
+                //addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
+                //"|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
+                //"dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject|dht|bdap|validation|stealth|
                 if (ptrCategory->count(std::string("dynamic"))) {
                     ptrCategory->insert(std::string("privatesend"));
                     ptrCategory->insert(std::string("instantsend"));
@@ -283,6 +286,7 @@ bool LogAcceptCategory(const char* category)
                     ptrCategory->insert(std::string("dht"));
                     ptrCategory->insert(std::string("bdap"));
                     ptrCategory->insert(std::string("validation"));
+                    ptrCategory->insert(std::string("stealth"));
                 }
             } else {
                 ptrCategory.reset(new std::set<std::string>());
