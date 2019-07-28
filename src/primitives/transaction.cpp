@@ -74,6 +74,28 @@ bool CTxOut::IsBDAP() const
     return false;
 }
 
+void CTxOut::GetBDAPOpCodes(int& opCode1, int& opCode2) const
+{
+    if (!IsBDAP())
+        return;
+
+    opcodetype opcode;
+    CScript::const_iterator pc = scriptPubKey.begin();
+    if (!scriptPubKey.GetOp(pc, opcode))
+        return;
+    if (opcode < OP_1 || opcode > OP_16)
+        return;
+
+    opCode1 = CScript::DecodeOP_N(opcode);
+
+    if (!scriptPubKey.GetOp(pc, opcode))
+        return;
+    if (opcode < OP_1 || opcode > OP_16)
+        return;
+
+    opCode2 = CScript::DecodeOP_N(opcode);
+}
+
 bool CTxOut::IsData() const
 {
     opcodetype opcode;

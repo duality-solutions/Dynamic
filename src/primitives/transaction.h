@@ -220,6 +220,7 @@ public:
 
     bool IsBDAP() const;
     bool IsData() const;
+    void GetBDAPOpCodes(int& opCode1, int& opCode2) const;
 
     std::string ToString() const;
 };
