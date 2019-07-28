@@ -81,8 +81,8 @@ void BdapUpdateAccountDialog::updateAccount()
         }
         
         CAmount tmpAmount;
-        if ( (!ParseFixedPoint(registrationMonths, 0, &tmpAmount)) || (regMonths <= 0) ) {
-            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Additional months cannot be less than or equal to zero, and must be a whole number (no decimals)."));
+        if ( (!ParseFixedPoint(registrationMonths, 0, &tmpAmount)) || (regMonths < 0) ) {
+            QMessageBox::critical(this, QObject::tr("BDAP Error"),QObject::tr("Additional months cannot be less than zero, and must be a whole number (no decimals)."));
             return;
         }
     }

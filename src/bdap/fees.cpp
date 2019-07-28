@@ -145,6 +145,8 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
             feeMonthly = iMonthly->second;
             monthlyFee = (nMonths * feeMonthly.Fee);
         }
+        if (monthlyFee == 0)
+            monthlyFee = BDAP_CREDIT;
         depositFee = 0;
 
     } else if (opCodeAction == OP_BDAP_MODIFY && opCodeObject == OP_BDAP_ACCOUNT_ENTRY && objType == BDAP::ObjectType::BDAP_GROUP) {
@@ -156,6 +158,8 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
             feeMonthly = iMonthly->second;
             monthlyFee = (nMonths * feeMonthly.Fee);
         }
+        if (monthlyFee == 0)
+            monthlyFee = BDAP_CREDIT;
         depositFee = 0;
 
     } else {
