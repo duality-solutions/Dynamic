@@ -540,7 +540,6 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
-
 bool CheckTransaction(const CTransaction& tx, CValidationState& state)
 {
     // Basic checks that don't depend on any context
@@ -552,6 +551,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
     if (::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) > MAX_TX_SIZE)
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-oversize");
 
+    // Check for BDAP inputs or outputs so we can validate credit usage
+    bool fIsBDAP = false;
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
     for (const CTxOut& txout : tx.vout) {
@@ -568,6 +569,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
             if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
         }
+        if (txout.IsBDAP())
+            fIsBDAP = true;
     }
 
     // Check for duplicate inputs
@@ -582,10 +585,19 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         if (tx.vin[0].scriptSig.size() < 2 || tx.vin[0].scriptSig.size() > 100)
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-length");
     } else {
-        BOOST_FOREACH (const CTxIn& txin, tx.vin)
+        for (const CTxIn& txin : tx.vin) {
             if (txin.prevout.IsNull())
                 return state.DoS(10, false, REJECT_INVALID, "bad-txns-prevout-null");
+
+            CCoinsViewCache view(pcoinsTip);
+            const Coin& coin = view.AccessCoin(txin.prevout);
+            if (coin.out.IsBDAP())
+                fIsBDAP = true;
+        }
     }
+    // if we find a BDAP txin or txout, then make sure the transaction has the correct version
+    if (fIsBDAP && tx.nVersion != BDAP_TX_VERSION)
+        return state.DoS(100, false, REJECT_INVALID, "incorrect-bdap-tx-version");
 
     return true;
 }
