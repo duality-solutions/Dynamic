@@ -548,7 +548,7 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     else {
         return false;
     }
-    LogPrintf("%s -- strOpType = %s, strPrefix = %s, vchValue = %s\n", __func__, strOpType, strPrefix, stringFromVch(vchValue));
+    LogPrint("bdap", "%s -- strOpType = %s, strPrefix = %s, vchValue = %s\n", __func__, strOpType, strPrefix, stringFromVch(vchValue));
     return true;
 }
 

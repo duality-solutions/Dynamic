@@ -74,26 +74,15 @@ bool CTxOut::IsBDAP() const
     return false;
 }
 
-void CTxOut::GetBDAPOpCodes(int& opCode1, int& opCode2) const
+bool CTxOut::GetBDAPOpCodes(int& opCode1, int& opCode2) const
 {
-    if (!IsBDAP())
-        return;
+    std::vector<std::vector<unsigned char>> vvch;
+    return DecodeBDAPScript(scriptPubKey, opCode1, opCode2, vvch);
+}
 
-    opcodetype opcode;
-    CScript::const_iterator pc = scriptPubKey.begin();
-    if (!scriptPubKey.GetOp(pc, opcode))
-        return;
-    if (opcode < OP_1 || opcode > OP_16)
-        return;
-
-    opCode1 = CScript::DecodeOP_N(opcode);
-
-    if (!scriptPubKey.GetOp(pc, opcode))
-        return;
-    if (opcode < OP_1 || opcode > OP_16)
-        return;
-
-    opCode2 = CScript::DecodeOP_N(opcode);
+bool CTxOut::GetBDAPOpCodes(int& opCode1, int& opCode2, std::vector<std::vector<unsigned char>>& vvch) const
+{
+    return DecodeBDAPScript(scriptPubKey, opCode1, opCode2, vvch);
 }
 
 bool CTxOut::IsData() const

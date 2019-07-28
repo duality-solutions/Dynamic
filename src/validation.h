@@ -388,6 +388,11 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 
 /** Context-independent validity checks */
 bool CheckTransaction(const CTransaction& tx, CValidationState& state);
+/** 
+ * Validate the usage of BDAP credits to makes sure they are not recirculated
+ * with standard DYN (trapped as fuel credit) and used to fund the appropriate BDAP operation.
+*/
+bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins);
 
 namespace Consensus
 {
@@ -573,5 +578,18 @@ void DumpMempool();
 
 /** Load the mempool from disk. */
 bool LoadMempool();
+
+class CServiceCredit {
+public:
+    std::string OpType;
+    CAmount nValue;
+    std::vector<std::vector<unsigned char>> vParameters;
+
+    CServiceCredit(const std::string& op_str, const CAmount& value)
+        : OpType(op_str), nValue(value) {}
+
+    CServiceCredit(const std::string& op_str, const CAmount& value,const std::vector<std::vector<unsigned char>>& params)
+        : OpType(op_str), nValue(value), vParameters(params) {}
+};
 
 #endif // DYNAMIC_VALIDATION_H

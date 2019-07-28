@@ -581,6 +581,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
     }
 
+    std::vector<Coin> vBdapCoins;
     if (tx.IsCoinBase()) {
         if (tx.vin[0].scriptSig.size() < 2 || tx.vin[0].scriptSig.size() > 100)
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-length");
@@ -591,13 +592,92 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
 
             CCoinsViewCache view(pcoinsTip);
             const Coin& coin = view.AccessCoin(txin.prevout);
-            if (coin.out.IsBDAP())
+            if (coin.out.IsBDAP()) {
+                vBdapCoins.push_back(coin);
                 fIsBDAP = true;
+            }
         }
     }
+
+    if (tx.IsCoinBase() && tx.nVersion == BDAP_TX_VERSION)
+        return state.DoS(100, false, REJECT_INVALID, "bdap-tx-can-not-be-coinbase");
+
     // if we find a BDAP txin or txout, then make sure the transaction has the correct version
     if (fIsBDAP && tx.nVersion != BDAP_TX_VERSION)
         return state.DoS(100, false, REJECT_INVALID, "incorrect-bdap-tx-version");
+
+    if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins))
+        return state.DoS(100, false, REJECT_INVALID, "bad-bdap-credit-use");
+
+    return true;
+}
+
+bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins)
+{
+    std::vector<std::pair<CServiceCredit, CDynamicAddress>> vInputInfo;
+    for (const Coin& coin : vBdapCoins) {
+        int opCode1 = -1; int opCode2 = -1;
+        std::vector<std::vector<unsigned char>> vvchOpParameters;
+        coin.out.GetBDAPOpCodes(opCode1, opCode2, vvchOpParameters);
+        CDynamicAddress address = GetScriptAddress(coin.out.scriptPubKey);
+        std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+        CServiceCredit credit(strOpType, coin.out.nValue, vvchOpParameters);
+        vInputInfo.push_back(std::make_pair(credit, address));
+        LogPrint("bdap", "%s -- BDAP Input strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
+            strOpType, opCode1, opCode2, FormatMoney(coin.out.nValue), address.ToString());
+    }
+    std::vector<std::pair<CServiceCredit, CDynamicAddress>> vOutputInfo;
+    for (const CTxOut& txout : tx.vout) {
+        if (txout.IsBDAP()) {
+            int opCode1 = -1; int opCode2 = -1;
+            std::vector<std::vector<unsigned char>> vvchOpParameters;
+            txout.GetBDAPOpCodes(opCode1, opCode2, vvchOpParameters);
+            CDynamicAddress address = GetScriptAddress(txout.scriptPubKey);
+            std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+            CServiceCredit credit(strOpType, txout.nValue, vvchOpParameters);
+            vOutputInfo.push_back(std::make_pair(credit, address));
+            LogPrint("bdap", "%s -- BDAP Output strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
+                strOpType, opCode1, opCode2, FormatMoney(txout.nValue), address.ToString());
+        } else if (txout.IsData()) {
+            CDynamicAddress address;
+            CServiceCredit credit("data", txout.nValue);
+            vOutputInfo.push_back(std::make_pair(credit, address));
+            LogPrint("bdap", "%s -- BDAP Output strOpType %s, nValue %d\n", __func__, "data", FormatMoney(txout.nValue));
+        }
+    }
+    /*
+    1 - When input is a BDAP credit, make sure unconsumed coins go to a BDAP credit change ouput with the same credit input address and parameters
+    2 - When input is a BDAP account update or delete operation, make sure deposit change goes back to input wallet address
+    3 - When input is a BDAP link operation, make sure it is only spent by a link update or delete operations with the same input address and parameters
+
+    Example BDAP transactions
+    - New Account:
+        inputs: Can be BDAP credits or standard DYN.
+        outputs:
+            strOpType data, nValue 0.600006
+            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 1.00001
+
+    - Update Account
+        inputs: Restricted
+            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 1.00001 -- uses the previous input
+        outputs:
+            strOpType bdap_update_account, opCode1 4, opCode2 6, nValue 0.100001 -- operation fee
+            strOpType data, nValue 0.100001 -- burned data registration fee. Can be from credits or standard.
+            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 0.99800998 -- optional change
+
+    - Delete Account
+        inputs: Restricted
+            strOpType bdap_update_account, opCode1 4, opCode2 6, nValue 0.100001 -- uses the previous input
+        outputs:
+            strOpType bdap_delete_account, opCode1 2, opCode2 6, nValue 0.100001 -- operation fee
+
+    - New Link:
+        inputs: Can be BDAP credits or standard DYN.
+        outputs:
+            strOpType bdap_new_link_request, opCode1 1, opCode2 7, nValue 0.100001 -- deposit, can be from credits or standard.
+            strOpType data, nValue 0.9900099  -- burned data registration fee. Can be from credits or standard.
+
+    */
 
     return true;
 }
