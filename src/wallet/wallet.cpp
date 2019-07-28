@@ -3690,6 +3690,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
     CAmount nFeePay = fUseInstantSend ? CTxLockRequest().GetMinFee(true) : 0;
     std::string strOpType;
+    CScript prevScriptPubKey;
 
     CAmount nValue = 0;
     int nChangePosRequest = nChangePosInOut;
@@ -3768,6 +3769,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
                 if (strOpType == "bdap_new_account") {
+                    // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
                 else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
@@ -3792,7 +3794,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         strFailReason = _("GetDomainEntryInfo failed to find previous domanin entry transaction.");
                         return false;
                     }
-                    CScript prevScriptPubKey;
+                    
                     GetBDAPOpScript(prevTx, prevScriptPubKey);
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
@@ -3967,11 +3969,13 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         CScript scriptChange;
 
                         // coin control: send change to custom address
-                        if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange))
+                        if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange)) {
                             scriptChange = GetScriptForDestination(coinControl->destChange);
-
-                        // no coin control: send change to newly generated address
-                        else {
+                        } else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                            // send deposit change back to original account.
+                            scriptChange = prevScriptPubKey;
+                        } else {
+                            // no coin control: send change to newly generated address
                             // Note: We use a new key here to keep it from being obvious which side is the change.
                             //  The drawback is that by not reusing a previous key, the change may be lost if a
                             //  backup is restored, if the backup doesn't have the new private key for the change.
@@ -4118,7 +4122,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     //                    if (dPriorityNeeded > 0 && dPriority >= dPriorityNeeded)
                     //                        break;
                 }
-                CAmount nFeeNeeded = std::max(nFeePay, GetMinimumFee(nBytes, currentConfirmationTarget, mempool));
+                // Standard fee not needed for BDAP
+                CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, currentConfirmationTarget, mempool)) : 0;
                 if (coinControl && nFeeNeeded > 0 && coinControl->nMinimumTotalFee > nFeeNeeded) {
                     nFeeNeeded = coinControl->nMinimumTotalFee;
                 }
@@ -4132,7 +4137,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
                 // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
                 // because we must be at the maximum allowed fee.
-                if (nFeeNeeded < ::minRelayTxFee.GetFee(nBytes)) {
+                if (!fIsBDAP && nFeeNeeded < ::minRelayTxFee.GetFee(nBytes)) {
                     strFailReason = _("Transaction too large for fee policy");
                     return false;
                 }
