@@ -2846,7 +2846,7 @@ void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScri
     }
 }
 
-void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl* coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend) const
+void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl* coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
 {
     vCoins.clear();
 
@@ -2895,8 +2895,8 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if (!found)
                     continue;
 
-                //if (pcoin->tx->vout[i].IsBDAP())
-                //    continue;
+                if (!fUseBDAP && pcoin->tx->vout[i].IsBDAP())
+                    continue;
 
                 isminetype mine = IsMine(pcoin->tx->vout[i]);
                 if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO &&
@@ -3757,7 +3757,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
         LOCK2(cs_main, cs_wallet);
         {
             std::vector<COutput> vAvailableCoins;
-            AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+            AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
             int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
             if (fIsBDAP) {
@@ -3770,7 +3770,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
                 if (strOpType == "bdap_new_account") {
                     // Use BDAP credits first.
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
                     CDomainEntry prevEntry;
@@ -3804,7 +3804,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         strFailReason = _("Public key already used for a link request.");
                         return false;
                     }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
@@ -3812,7 +3812,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         strFailReason = _("Public key already used for an accepted link.");
                         return false;
                     }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_delete_link_request") {
                     uint256 prevTxId;
@@ -3857,7 +3857,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
             } else {
-                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
             }
 
             nFeeRet = 0;
