@@ -12,6 +12,7 @@
 #include "rpcserver.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
+#include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "dynode-sync.h"
 #include "spork.h"
@@ -126,8 +127,10 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     // Get BDAP fees
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
-        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP user account fees."));
+    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, 
+        FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
+
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
@@ -170,9 +173,35 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     // Add the BDAP operation output
     CTxOut outOP(depositFee, scriptPubKey);
     rawTx.vout.push_back(outOP);
-    // Add the BDAP link funds output
-    CAmount nLinkAmount(0.0400004 * COIN); // enough for 4 links
-    CTxOut outLinkFunds(nLinkAmount, stealtDestination);
+
+    // Get fees for 10 link request transactions
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, BDAP::ObjectType::BDAP_LINK_REQUEST, 0, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP link fees."));
+
+    CAmount nLinkRequestAmount((oneTimeFee + depositFee + monthlyFee) * 10); // enough for 10 link requests
+
+    // Get fees for 10 link accept transactions
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, BDAP::ObjectType::BDAP_LINK_ACCEPT, 0, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP link fees."));
+
+    CAmount nLinkAcceptAmount((oneTimeFee + depositFee + monthlyFee) * 10); // enough for 10 link accepts
+    // Get total amount need for 10 link request and 10 link accept transactions
+    CAmount nTotalLinkAmount = (nLinkRequestAmount + nLinkAcceptAmount);
+    LogPrintf("%s -- nLinkRequestAmount %d,  nLinkAcceptAmount %d, Total %d\n", __func__, 
+        FormatMoney(nLinkRequestAmount), FormatMoney(nLinkAcceptAmount), FormatMoney(nTotalLinkAmount));
+
+    // Create BDAP credits operation script
+    std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+    std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+    CScript scriptBdapCredits;
+    scriptBdapCredits << CScript::EncodeOP_N(OP_BDAP_MOVE) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
+                        << vchMoveSource << vchMoveDestination << OP_2DROP << OP_2DROP;
+ 
+    // Add stealth link destination address to credits
+    scriptBdapCredits += stealtDestination;
+
+    // Add the BDAP link with credit funds output
+    CTxOut outLinkFunds(nTotalLinkAmount, scriptBdapCredits);
     rawTx.vout.push_back(outLinkFunds);
 
     return EncodeHexTx(rawTx);
