@@ -21,8 +21,6 @@
 
 #include <stdint.h>
 
-#include <boost/foreach.hpp>
-
 /* Return positive answer if transaction should be shown in list.
  */
 bool TransactionRecord::showTransaction(const CWalletTx& wtx)
@@ -87,7 +85,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         int nFromMe = 0;
         bool involvesWatchAddress = false;
         isminetype fAllFromMe = ISMINE_SPENDABLE;
-        BOOST_FOREACH (const CTxIn& txin, wtx.tx->vin) {
+        for (const CTxIn& txin : wtx.tx->vin) {
             if (wallet->IsMine(txin)) {
                 fAllFromMeDenom = fAllFromMeDenom && wallet->IsDenominated(txin.prevout);
                 nFromMe++;
@@ -102,7 +100,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         isminetype fAllToMe = ISMINE_SPENDABLE;
         bool fAllToMeDenom = true;
         int nToMe = 0;
-        BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
+        for (const CTxOut& txout : wtx.tx->vout) {
             if (wallet->IsMine(txout)) {
                 fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(txout.nValue);
                 nToMe++;
@@ -193,6 +191,10 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     // from a transaction sent back to our own address.
                     continue;
                 }
+
+                // Do not display stealth OP_RETURN outputs.
+                if (txout.IsData() && txout.nValue == 0)
+                    continue;
 
                 CTxDestination address;
                 if (ExtractDestination(txout.scriptPubKey, address)) {
