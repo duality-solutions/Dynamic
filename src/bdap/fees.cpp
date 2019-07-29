@@ -14,25 +14,25 @@
 
 // Default BDAP Monthly Fees
 std::map<int32_t, CFeeItem> mapDefaultMonthlyFees = {
-    {BDAP_MONTHY_USER_FEE, CFeeItem(BDAP_MONTHY_USER_FEE, 50 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_MONTHY_GROUP_FEE, CFeeItem(BDAP_MONTHY_GROUP_FEE, 200 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_MONTHY_CERTIFICATE_FEE, CFeeItem(BDAP_MONTHY_CERTIFICATE_FEE, 100 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_MONTHY_SIDECHAIN_FEE, CFeeItem(BDAP_MONTHY_SIDECHAIN_FEE, 1000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_USER_FEE, CFeeItem(BDAP_MONTHY_USER_FEE, 15 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_GROUP_FEE, CFeeItem(BDAP_MONTHY_GROUP_FEE, 60 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_CERTIFICATE_FEE, CFeeItem(BDAP_MONTHY_CERTIFICATE_FEE, 30 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_MONTHY_SIDECHAIN_FEE, CFeeItem(BDAP_MONTHY_SIDECHAIN_FEE, 300 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 // Default BDAP One Time Fees
 std::multimap<int32_t, CFeeItem> mapOneTimeFees = {
-    {BDAP_ONE_TIME_REQUEST_LINK_FEE, CFeeItem(BDAP_ONE_TIME_REQUEST_LINK_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, CFeeItem(BDAP_ONE_TIME_ACCEPT_LINK_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, CFeeItem(BDAP_ONE_TIME_AUDIT_RECORD_FEE, 99 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_ONE_TIME_REQUEST_LINK_FEE, CFeeItem(BDAP_ONE_TIME_REQUEST_LINK_FEE, 30 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_ONE_TIME_ACCEPT_LINK_FEE, CFeeItem(BDAP_ONE_TIME_ACCEPT_LINK_FEE, 30 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_ONE_TIME_AUDIT_RECORD_FEE, CFeeItem(BDAP_ONE_TIME_AUDIT_RECORD_FEE, 30 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 // Default BDAP Non-Refundable Security Deposit Fees
 std::map<int32_t, CFeeItem> mapNoRefundDeposits = {
-    {BDAP_NON_REFUNDABLE_USER_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_USER_DEPOSIT, 1000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, 10000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, 5000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
-    {BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, 25000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_USER_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_USER_DEPOSIT, 300 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_GROUP_DEPOSIT, 3000 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT, 1500 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
+    {BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, 7500 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
 bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee)
