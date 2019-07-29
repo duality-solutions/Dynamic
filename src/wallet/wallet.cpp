@@ -2895,7 +2895,23 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if (!found)
                     continue;
 
-                if (!fUseBDAP && pcoin->tx->vout[i].IsBDAP())
+                bool fIsBDAP = false;
+                if (pcoin->tx->vout[i].IsBDAP()) {
+                    fIsBDAP = true;
+                    int opCode1 = -1; int opCode2 = -1;
+                    std::vector<std::vector<unsigned char>> vParameters;
+                    pcoin->tx->vout[i].GetBDAPOpCodes(opCode1, opCode2, vParameters);
+                    // Only use BDAP credit assets for available coins and filter out all other BDAP outputs
+                    if (!(opCode1 == 5 && opCode2 == 15))
+                        break;
+
+                    std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+                    std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+                    if (!(vParameters.size() == 2 && vParameters[0] == vchMoveSource && vParameters[1] == vchMoveDestination))
+                        break;
+                }
+
+                if (!fUseBDAP && fIsBDAP)
                     continue;
 
                 isminetype mine = IsMine(pcoin->tx->vout[i]);
