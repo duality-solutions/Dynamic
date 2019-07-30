@@ -2931,6 +2931,46 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
     }
 }
 
+void CWallet::AvailableBDAPCredits(std::vector<std::pair<CTxOut, COutPoint>>& vCredits, bool fOnlyConfirmed) const
+{
+    vCredits.clear();
+
+    {
+        LOCK2(cs_main, cs_wallet);
+
+        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
+            const uint256& wtxid = it->first;
+            const CWalletTx* pcoin = &(*it).second;
+
+            if (!CheckFinalTx(*pcoin))
+                continue;
+
+            if (fOnlyConfirmed && !pcoin->IsTrusted())
+                continue;
+
+            if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
+                continue;
+
+            int nDepth = pcoin->GetDepthInMainChain();
+            // We should not consider coins which aren't at least in our mempool
+            // It's possible for these to be conflicted via ancestors which we may never be able to detect
+            if (nDepth == 0 && !pcoin->InMempool())
+                continue;
+
+            for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+                if (!pcoin->tx->vout[i].IsBDAP())
+                    continue;
+
+                if (fOnlyConfirmed && pcoin->tx->vout[i].nValue == 0)
+                    continue;
+
+                isminetype mine = IsMine(pcoin->tx->vout[i]);
+                if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO)
+                    vCredits.push_back(std::make_pair(pcoin->tx->vout[i], COutPoint(pcoin->tx->GetHash(), i)));
+            }
+        }
+    }
+}
 static void ApproximateBestSubset(std::vector<std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> > > vValue, const CAmount& nTotalLower, const CAmount& nTargetValue, std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
 {
     std::vector<char> vfIncluded;

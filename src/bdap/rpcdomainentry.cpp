@@ -13,6 +13,7 @@
 #include "primitives/transaction.h"
 #include "spork.h"
 #include "wallet/wallet.h"
+#include "utilmoneystr.h"
 #include "validation.h"
 #include "dynode-sync.h"
 
@@ -148,7 +149,7 @@ UniValue adduser(const JSONRPCRequest& request)
             "3. registration months  (int, optional)      Number of months to register account\n"
             "\nAdds a new bdap.io public name account entry to the blockchain directory.\n"
             "\nResult:\n"
-            "{(json object)\n"
+            "{(json objects)\n"
             "  \"oid\"                        (string)  Account OID\n"
             "  \"version\"                    (int)     Recipient's BDAP full path\n"
             "  \"domain_component\"           (string)  Account domain name\n"
@@ -167,7 +168,7 @@ UniValue adduser(const JSONRPCRequest& request)
             "  \"height\"                     (int)     Last transaction height for account data\n"
             "  \"expires_on\"                 (int)     Account expiration epoch time\n"
             "  \"expired\"                    (boolean) Account expired\n"
-            "  }\n"
+            "  },...n \n"
             "\nExamples\n" +
            HelpExampleCli("adduser", "Alice \"Wonderland, Alice\"") +
            "\nAs a JSON-RPC call\n" + 
@@ -924,12 +925,12 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue colorcoin(const JSONRPCRequest& request)
+UniValue makecredits(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "colorcoin \"dynamicaddress\" \"amount\" \"utxo list\"\n"
-            "\nConvert your DYN to BDAP colored credits\n"
+            "makecredits \"dynamicaddress\" \"amount\"\n"
+            "\nConvert your Dynamic (DYN) to BDAP colored credits\n"
             + HelpRequiringPassphrase() +
             "\nArguments:\n"
             "1. \"dynamicaddress\"       (string)            The destination wallet address\n"
@@ -937,14 +938,14 @@ UniValue colorcoin(const JSONRPCRequest& request)
             "\nResult:\n"
             "  \"tx id\"                 (string)            The transaction id for the coin coloring\n"
             "\nExamples:\n"
-            + HelpExampleCli("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\"") +
+            + HelpExampleCli("makecredits", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\""));
+            + HelpExampleRpc("makecredits", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98"));
 
     EnsureWalletIsUnlocked();
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the colorcoin RPC command until the BDAP spork is active."));
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the makecredits RPC command until the BDAP spork is active."));
 
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
@@ -975,6 +976,84 @@ UniValue colorcoin(const JSONRPCRequest& request)
     return wtx.GetHash().GetHex();
 }
 
+UniValue getcredits(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getcredits\n"
+            "\nGet available BDAP credit balance\n"
+            + HelpRequiringPassphrase() +
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"type\"                    (string)            The credit type.\n"
+            "  \"operation\"               (string)            The operation code used in the tx output\n"
+            "  \"address\"                 (string)            The address holding the unspent BDAP credits\n"
+            "  \"dynamic_amount\"          (int)               The unspent BDAP amount int DYN\n"
+            "  \"credits\"                 (int)               The unspent BDAP credits\n"
+            "  },...n \n"
+            "\"total_credits\"             (int)               The total credits available.\n"
+            "\"total_deposits\"            (int)               The total deposits available.\n"
+            "\"total_dynamic\"             (int)               The total Dynamic available that are BDAP colored.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getcredits", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("getcredits", ""));
+
+    if (!pwalletMain)
+        throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
+
+    std::vector<std::pair<CTxOut, COutPoint>> vCredits;
+    pwalletMain->AvailableBDAPCredits(vCredits);
+
+    CAmount nTotalAmount = 0;
+    CAmount nTotalCredits = 0;
+    CAmount nTotalDeposits = 0;
+    UniValue result(UniValue::VOBJ);
+    for (const std::pair<CTxOut, COutPoint>& credit : vCredits) {
+        UniValue oCredit(UniValue::VOBJ);
+        int opCode1 = -1; int opCode2 = -1;
+        std::vector<std::vector<unsigned char>> vvch;
+        credit.first.GetBDAPOpCodes(opCode1, opCode2, vvch);
+        std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+        const CDynamicAddress address = GetScriptAddress(credit.first.scriptPubKey);
+        std::string strType = "unknown";
+        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account") {
+            strType = "account deposit";
+            nTotalDeposits += credit.first.nValue;
+        } else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept" || 
+                    strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+            strType = "link deposit";
+            nTotalDeposits += credit.first.nValue;
+        } else if (strOpType == "bdap_move_asset") {
+            if (vvch.size() > 1) {
+                std::string strMoveSource = stringFromVch(vvch[0]);
+                std::string strMoveDestination = stringFromVch(vvch[1]);
+                strType = strprintf("credit (%s to %s)", strMoveSource, strMoveDestination);
+                if (strMoveSource == "DYN" && strMoveDestination == "BDAP")
+                    nTotalCredits += credit.first.nValue;
+            } else {
+                strType = strprintf("credit (unknown)");
+            }
+        }
+        oCredit.push_back(Pair("type", strType));
+        oCredit.push_back(Pair("operation", strOpType));
+        oCredit.push_back(Pair("address", address.ToString()));
+        oCredit.push_back(Pair("dynamic_amount", FormatMoney(credit.first.nValue)));
+        oCredit.push_back(Pair("credits", credit.first.nValue/BDAP_CREDIT));
+        std::string strOutput = credit.second.hash.ToString() + "-" + std::to_string(credit.second.n);
+        result.push_back(Pair(strOutput, oCredit));
+        nTotalAmount += credit.first.nValue;
+    }
+    // Add total amounts and credits
+
+    result.push_back(Pair("total_credits", nTotalCredits/BDAP_CREDIT));
+    result.push_back(Pair("total_deposits", nTotalDeposits/BDAP_CREDIT));
+    result.push_back(Pair("total_dynamic", FormatMoney(nTotalAmount)));
+
+    return result;
+}
+
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
@@ -991,7 +1070,8 @@ static const CRPCCommand commands[] =
     { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
-    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount"} },
+    { "bdap",            "makecredits",              &makecredits,                  true, {"dynamicaddress", "amount"} },
+    { "bdap",            "getcredits",               &getcredits,                   true, {} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
