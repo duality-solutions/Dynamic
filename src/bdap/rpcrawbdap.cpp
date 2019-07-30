@@ -59,7 +59,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString vchObjectID = vchFromString(strObjectID);
     CharString vchCommonName = vchFromValue(request.params[1]);
 
-    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 1 year.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS;  // default to 1 year or 12 months
     std::string strMonths = std::to_string(nMonths) + "Month";
     std::vector<unsigned char> vchMonths = vchFromString(strMonths);
     if (request.params.size() >= 3) {
