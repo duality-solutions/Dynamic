@@ -1053,6 +1053,102 @@ UniValue getcredits(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue bdapfees(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "bdapfees\n"
+            "\nGet current BDAP fee schedule\n"
+            + HelpRequiringPassphrase() +
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"monthly\"                    (int)            The credit type.\n"
+            "  \"deposit\"                    (int)            The operation code used in the tx output\n"
+            "  \"one-time\"                   (int)            The unspent BDAP amount int DYN\n"
+            "  },...n \n"
+            "\nExamples:\n"
+            + HelpExampleCli("bdapfees", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("bdapfees", ""));
+
+    UniValue oFees(UniValue::VOBJ);
+
+    const uint16_t nMonths = 1;
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, BDAP::ObjectType::BDAP_USER, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nNewUserMonthly = 0;
+    CAmount nNewUserDeposit = 0;
+    CAmount nNewUserOnetime = 0;
+    UniValue oNewUserFee(UniValue::VOBJ);
+    nNewUserMonthly = monthlyFee;
+    nNewUserDeposit = depositFee;
+    nNewUserOnetime = oneTimeFee;
+    oNewUserFee.push_back(Pair("monthly_dynamic", FormatMoney(nNewUserMonthly)));
+    oNewUserFee.push_back(Pair("monthly_credits", nNewUserMonthly/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("deposit_dynamic", FormatMoney(nNewUserDeposit)));
+    oNewUserFee.push_back(Pair("deposit_credits", nNewUserDeposit/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("one-time", FormatMoney(nNewUserOnetime)));
+    oNewUserFee.push_back(Pair("one-time_credits", nNewUserOnetime/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("total_dynamic", FormatMoney((nNewUserMonthly + nNewUserDeposit + nNewUserOnetime))));
+    oNewUserFee.push_back(Pair("total_credits", (nNewUserMonthly + nNewUserDeposit + nNewUserOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_user", oNewUserFee));
+
+    GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, BDAP::ObjectType::BDAP_USER, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nUpdateUserMonthly = 0;
+    CAmount nUpdateUserDeposit = 0;
+    CAmount nUpdateUserOnetime = 0;
+    UniValue oUpdateUserFee(UniValue::VOBJ);
+    nUpdateUserMonthly = monthlyFee;
+    nUpdateUserDeposit = depositFee;
+    nUpdateUserOnetime = oneTimeFee;
+    oUpdateUserFee.push_back(Pair("monthly_dynamic", FormatMoney(nUpdateUserMonthly)));
+    oUpdateUserFee.push_back(Pair("monthly_credits", nUpdateUserMonthly/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("deposit_dynamic", FormatMoney(nUpdateUserDeposit)));
+    oUpdateUserFee.push_back(Pair("deposit_credits", nUpdateUserDeposit/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("one-time_dynamic", FormatMoney(nUpdateUserOnetime)));
+    oUpdateUserFee.push_back(Pair("one-time_credits", nUpdateUserOnetime/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("total_dynamic", FormatMoney((nUpdateUserMonthly + nUpdateUserDeposit + nUpdateUserOnetime))));
+    oUpdateUserFee.push_back(Pair("total_credits", (nUpdateUserMonthly + nUpdateUserDeposit + nUpdateUserOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("update_user", oUpdateUserFee));
+
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, BDAP::ObjectType::BDAP_LINK_REQUEST, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nLinkRequestMonthly = 0;
+    CAmount nLinkRequestDeposit = 0;
+    CAmount nLinkRequestOnetime = 0;
+    UniValue oLinkRequestFee(UniValue::VOBJ);
+    nLinkRequestMonthly = monthlyFee;
+    nLinkRequestDeposit = depositFee;
+    nLinkRequestOnetime = oneTimeFee;
+    oLinkRequestFee.push_back(Pair("monthly_dynamic", FormatMoney(nLinkRequestMonthly)));
+    oLinkRequestFee.push_back(Pair("monthly_credits", nLinkRequestMonthly/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("deposit_dynamic", FormatMoney(nLinkRequestDeposit)));
+    oLinkRequestFee.push_back(Pair("deposit_credits", nLinkRequestDeposit/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("one-time_dynamic", FormatMoney(nLinkRequestOnetime)));
+    oLinkRequestFee.push_back(Pair("one-time_credits", nLinkRequestOnetime/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("total_dynamic", FormatMoney((nLinkRequestMonthly + nLinkRequestDeposit + nLinkRequestOnetime))));
+    oLinkRequestFee.push_back(Pair("total_credits", (nLinkRequestMonthly + nLinkRequestDeposit + nLinkRequestOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_link_request", oLinkRequestFee));
+
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, BDAP::ObjectType::BDAP_LINK_ACCEPT, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nLinkAcceptMonthly = 0;
+    CAmount nLinkAcceptDeposit = 0;
+    CAmount nLinkAcceptOnetime = 0;
+    UniValue oLinkAcceptFee(UniValue::VOBJ);
+    nLinkAcceptMonthly = monthlyFee;
+    nLinkAcceptDeposit = depositFee;
+    nLinkAcceptOnetime = oneTimeFee;
+    oLinkAcceptFee.push_back(Pair("monthly_dynamic", FormatMoney(nLinkAcceptMonthly)));
+    oLinkAcceptFee.push_back(Pair("monthly_credits", nLinkAcceptMonthly/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("deposit_dynamic", FormatMoney(nLinkAcceptDeposit)));
+    oLinkAcceptFee.push_back(Pair("deposit_credits", nLinkAcceptDeposit/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("one-time_dynamic", FormatMoney(nLinkAcceptOnetime)));
+    oLinkAcceptFee.push_back(Pair("one-time_credits", nLinkAcceptOnetime/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("total_dynamic", FormatMoney((nLinkAcceptMonthly + nLinkAcceptDeposit + nLinkAcceptOnetime))));
+    oLinkAcceptFee.push_back(Pair("total_credits", (nLinkAcceptMonthly + nLinkAcceptDeposit + nLinkAcceptOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_link_accept", oLinkAcceptFee));
+
+    return oFees;
+}
 
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
@@ -1072,6 +1168,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
     { "bdap",            "makecredits",              &makecredits,                  true, {"dynamicaddress", "amount"} },
     { "bdap",            "getcredits",               &getcredits,                   true, {} },
+    { "bdap",            "bdapfees",                 &bdapfees,                     true, {} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
