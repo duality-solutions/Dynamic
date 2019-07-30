@@ -1017,12 +1017,23 @@ UniValue getcredits(const JSONRPCRequest& request)
         std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
         const CDynamicAddress address = GetScriptAddress(credit.first.scriptPubKey);
         std::string strType = "unknown";
+        std::string strAccount =  "";
+        std::string strPubKey =  "";
+        std::string strSharedPubKey =  "";
         if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account") {
             strType = "account deposit";
+            if (vvch.size() > 0)
+                strAccount = stringFromVch(vvch[0]);
+            if (vvch.size() > 1)
+                strPubKey = stringFromVch(vvch[1]);
             nTotalDeposits += credit.first.nValue;
         } else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept" || 
                     strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
             strType = "link deposit";
+            if (vvch.size() > 0)
+                strPubKey = stringFromVch(vvch[0]);
+            if (vvch.size() > 1)
+                strSharedPubKey = stringFromVch(vvch[1]);
             nTotalDeposits += credit.first.nValue;
         } else if (strOpType == "bdap_move_asset") {
             if (vvch.size() > 1) {
@@ -1037,7 +1048,13 @@ UniValue getcredits(const JSONRPCRequest& request)
         }
         oCredit.push_back(Pair("type", strType));
         oCredit.push_back(Pair("operation", strOpType));
+        if (strAccount.size() > 0)
+            oCredit.push_back(Pair("account", strAccount));
         oCredit.push_back(Pair("address", address.ToString()));
+        if (strPubKey.size() > 0)
+            oCredit.push_back(Pair("pubkey", strPubKey));
+        if (strSharedPubKey.size() > 0)
+            oCredit.push_back(Pair("shared_pubkey", strSharedPubKey));
         oCredit.push_back(Pair("dynamic_amount", FormatMoney(credit.first.nValue)));
         oCredit.push_back(Pair("credits", credit.first.nValue/BDAP_CREDIT));
         std::string strOutput = credit.second.hash.ToString() + "-" + std::to_string(credit.second.n);
