@@ -2901,14 +2901,17 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                     int opCode1 = -1; int opCode2 = -1;
                     std::vector<std::vector<unsigned char>> vParameters;
                     pcoin->tx->vout[i].GetBDAPOpCodes(opCode1, opCode2, vParameters);
+                    std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+                    LogPrint("bdap", "%s -- strOpType %s, vParameters.size %d, nValue %d\n", __func__, 
+                                strOpType, vParameters.size(), FormatMoney(pcoin->tx->vout[i].nValue));
                     // Only use BDAP credit assets for available coins and filter out all other BDAP outputs
-                    if (!(opCode1 == 5 && opCode2 == 15))
-                        break;
+                    if (!(strOpType == "bdap_move_asset"))
+                        continue;
 
                     std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
                     std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
                     if (!(vParameters.size() == 2 && vParameters[0] == vchMoveSource && vParameters[1] == vchMoveDestination))
-                        break;
+                        continue;
                 }
 
                 if (!fUseBDAP && fIsBDAP)
@@ -3859,6 +3862,10 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     CScript prevScriptPubKey;
                     GetBDAPOpScript(prevTx, prevScriptPubKey);
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+                else if (strOpType == "bdap_move_asset") {
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
+                    fIsBDAP = false; // Treat like a standard transaction so standard fees are applied.
                 }
                 else if (strOpType == "bdap_update_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");

@@ -499,6 +499,7 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
         std::vector<unsigned char> vch;
         if (!script.GetOp(itScript, opcode, vch))
             return false;
+
         if (!(0 <= opcode && opcode <= OP_PUSHDATA4)) {
             strPrefix += GetOpName(opcode);
             if (i == 1)
@@ -544,6 +545,9 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     }
     else if (strPrefix == "4 8") {
         strOpType = "bdap_update_link_accept";
+    }
+    else if (strPrefix == "5 15") {
+        strOpType = "bdap_move_asset";
     }
     else {
         return false;

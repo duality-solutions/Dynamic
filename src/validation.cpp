@@ -790,6 +790,15 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 return true;
             }
+            else if (strOpType == "bdap_move_asset") {
+                if (!(vvchBDAPArgs.size() == 2)) {
+                    errorMessage = "Incorrect number of parameters used for " + strOpType + " transaction.";
+                    LogPrintf("%s -- delete link ignored. %s\n", __func__, errorMessage);
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                LogPrint("bdap", "%s -- BDAP move asset operation. vvchBDAPArgs.size() = %d\n", __func__, vvchBDAPArgs.size());
+                return true;
+            }
             else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
                 /*
                 if (!CheckPreviousLinkInputs(strOpType, scriptOp, vvchBDAPArgs, errorMessage, fJustCheck)) {
@@ -808,8 +817,10 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 LogPrintf("%s -- update link ignored. %s\n", __func__, errorMessage);
             }
             else {
-                // Allow unknown BDAP operations
-                LogPrintf("%s -- Unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
+                // Do not allow unknown BDAP operations
+                errorMessage = strprintf("%s -- Failed, unknown operation found. opcode1 = %d, opcode2 = %d", __func__, op1, op2);
+                LogPrintf("%s\n", errorMessage);
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
         }
     }
@@ -969,6 +980,17 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                     return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey-entry");
             }
         }
+        else if (strOpType == "bdap_move_asset") {
+            if (vvch.size() != 2)
+                return state.Invalid(false, REJECT_INVALID, "bdap-move-invalid-parameter-size");
+            std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+            std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+            if (vvch[0] != vchMoveSource)
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-source");
+            if (vvch[1] != vchMoveDestination)
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-destination");
+
+        }
         // TODO (BDAP): Implement link delete
         /*
         else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
@@ -983,9 +1005,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
         */
         else {
-            // Allow unknown BDAP operations
-            fRequireStandard = false;
-            LogPrintf("%s -- Unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
+            // Do not allow unknown BDAP operations
+            LogPrintf("%s -- Failed, unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
+            return state.DoS(100, false, REJECT_INVALID, "bdap-unknown-operation");
         }
     }
     // Coinbase is only valid in a block, not as a loose transaction
