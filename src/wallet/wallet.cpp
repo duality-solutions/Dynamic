@@ -4698,7 +4698,11 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
             }
 
             double dProgress = 100.f * nEnd / (nTargetSize + 1);
-            std::string strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
+            std::string strMsg = "";
+            if (dProgress <= 100)
+                strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
+            else
+                strMsg = strprintf(_("Increasing keypool... (%d)"),amountExternal);
             uiInterface.InitMessage(strMsg);
         }
     }
