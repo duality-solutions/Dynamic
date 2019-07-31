@@ -49,7 +49,6 @@ bool bdapFeesPopup(QWidget *parentDialog, const opcodetype& opCodeAction, const 
     questionString.append(QObject::tr("One Time Fee = %1<br />") .arg(DynamicUnits::formatHtmlWithUnit(unit, oneTimeFee)));
     questionString.append(QObject::tr("Deposit Fee = %1") .arg(DynamicUnits::formatHtmlWithUnit(unit, depositFee)));
     questionString.append(QObject::tr("<hr>"));
-    questionString.append(QObject::tr("<br><span style='color:#aa0000;'><b>Note:</b></span> Total Amount does not include transaction fee (to be removed in the future)."));
 
     reply = QMessageBox::question(parentDialog, QObject::tr("Confirm BDAP Transaction Amount"), questionString, QMessageBox::Yes|QMessageBox::No);
 
