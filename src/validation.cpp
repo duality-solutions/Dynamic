@@ -555,6 +555,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
     bool fIsBDAP = false;
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
+    CAmount nStandardOut = 0;
+    CAmount nCreditsOut = 0;
+    CAmount nDataBurned = 0;
     for (const CTxOut& txout : tx.vout) {
         if (txout.nValue < 0)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-vout-negative");
@@ -569,8 +572,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
             if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
         }
-        if (txout.IsBDAP())
+        if (txout.IsBDAP()) {
             fIsBDAP = true;
+            nCreditsOut += txout.nValue;
+        } else if (txout.IsData()) {
+            nDataBurned += txout.nValue;
+        } else {
+            nStandardOut += txout.nValue;
+        }
     }
 
     // Check for duplicate inputs
@@ -580,7 +589,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         if (!vInOutPoints.insert(txin.prevout).second)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
     }
-
+    CAmount nStandardIn = 0;
+    CAmount nCreditsIn = 0;
     std::vector<Coin> vBdapCoins;
     if (tx.IsCoinBase()) {
         if (tx.vin[0].scriptSig.size() < 2 || tx.vin[0].scriptSig.size() > 100)
@@ -595,6 +605,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
             if (coin.out.IsBDAP()) {
                 vBdapCoins.push_back(coin);
                 fIsBDAP = true;
+                nCreditsIn += coin.out.nValue;
+            } else {
+                nStandardIn += coin.out.nValue;
             }
         }
     }
@@ -606,14 +619,34 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
     if (fIsBDAP && tx.nVersion != BDAP_TX_VERSION)
         return state.DoS(100, false, REJECT_INVALID, "incorrect-bdap-tx-version");
 
-    if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins))
+    if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins, nStandardIn, nCreditsIn, nStandardOut, nCreditsOut, nDataBurned))
         return state.DoS(100, false, REJECT_INVALID, "bad-bdap-credit-use");
 
     return true;
 }
 
-bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins)
+bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins, 
+                                const CAmount& nStandardIn, const CAmount& nCreditsIn, const CAmount& nStandardOut, const CAmount& nCreditsOut, const CAmount& nDataBurned)
 {
+    LogPrint("bdap", "%s -- nStandardIn %d, nCreditsIn %d, nStandardOut %d, nCreditsOut %d, nDataBurned %d\n", __func__,
+                    FormatMoney(nStandardIn), FormatMoney(nCreditsIn), FormatMoney(nStandardOut), FormatMoney(nCreditsOut), FormatMoney(nDataBurned));
+    // when there are no BDAP inputs, we do not need to check how credits are used.
+    if (vBdapCoins.size() == 0 || nCreditsIn == 0)
+        return true;
+
+    if (nStandardIn > 0 && nStandardOut > 0 && nStandardOut >= nStandardIn) {
+        LogPrintf("%s -- Invalid use of BDAP credits. Standard DYN output amounts exceeds or equals standard DYN input amount\n", __func__);
+        if (ENFORCE_BDAP_CREDIT_USE)
+            return false;
+    }
+
+    if (nCreditsOut >= nCreditsIn) {
+        LogPrintf("%s -- Invalid use of BDAP credits. BDAP credits output amount exceeds BDAP credit input amount\n", __func__);
+        if (ENFORCE_BDAP_CREDIT_USE)
+            return false;
+    }
+
+    std::multimap<CDynamicAddress, CServiceCredit> mapInputs;
     std::vector<std::pair<CServiceCredit, CDynamicAddress>> vInputInfo;
     for (const Coin& coin : vBdapCoins) {
         int opCode1 = -1; int opCode2 = -1;
@@ -623,10 +656,13 @@ bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBd
         std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
         CServiceCredit credit(strOpType, coin.out.nValue, vvchOpParameters);
         vInputInfo.push_back(std::make_pair(credit, address));
+        mapInputs.insert({address, credit});
         LogPrint("bdap", "%s -- BDAP Input strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
             strOpType, opCode1, opCode2, FormatMoney(coin.out.nValue), address.ToString());
     }
-    std::vector<std::pair<CServiceCredit, CDynamicAddress>> vOutputInfo;
+
+    // Only check outputs when a BDAP input is used.
+    std::multimap<CDynamicAddress, CServiceCredit> mapOutputs;
     for (const CTxOut& txout : tx.vout) {
         if (txout.IsBDAP()) {
             int opCode1 = -1; int opCode2 = -1;
@@ -635,50 +671,97 @@ bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBd
             CDynamicAddress address = GetScriptAddress(txout.scriptPubKey);
             std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
             CServiceCredit credit(strOpType, txout.nValue, vvchOpParameters);
-            vOutputInfo.push_back(std::make_pair(credit, address));
+            mapOutputs.insert({address, credit});
             LogPrint("bdap", "%s -- BDAP Output strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
                 strOpType, opCode1, opCode2, FormatMoney(txout.nValue), address.ToString());
         } else if (txout.IsData()) {
             CDynamicAddress address;
             CServiceCredit credit("data", txout.nValue);
-            vOutputInfo.push_back(std::make_pair(credit, address));
+            mapOutputs.insert({address, credit});
             LogPrint("bdap", "%s -- BDAP Output strOpType %s, nValue %d\n", __func__, "data", FormatMoney(txout.nValue));
+        } else {
+            CDynamicAddress address = GetScriptAddress(txout.scriptPubKey);
+            CServiceCredit credit("standard", txout.nValue);
+            mapOutputs.insert({address, credit});
         }
     }
-    /*
-    1 - When input is a BDAP credit, make sure unconsumed coins go to a BDAP credit change ouput with the same credit input address and parameters
-    2 - When input is a BDAP account update or delete operation, make sure deposit change goes back to input wallet address
-    3 - When input is a BDAP link operation, make sure it is only spent by a link update or delete operations with the same input address and parameters
 
-    Example BDAP transactions
-    - New Account:
-        inputs: Can be BDAP credits or standard DYN.
-        outputs:
-            strOpType data, nValue 0.600006
-            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 1.00001
+    for (const std::pair<CServiceCredit, CDynamicAddress>& credit : vInputInfo) {
+        if (credit.first.OpType == "bdap_move_asset") {
+            // When an input is a BDAP credit, make sure unconsumed coins go to a BDAP credit change ouput with the same credit input address and parameters
+            if (credit.first.vParameters.size() == 2) {
+                std::vector<unsigned char> vchMoveSource = credit.first.vParameters[0];
+                std::vector<unsigned char> vchMoveDestination = credit.first.vParameters[1];
+                if (vchMoveSource != vchFromString(std::string("DYN")) || vchMoveDestination != vchFromString(std::string("BDAP"))) {
+                    LogPrintf("%s -- Failed. BDAP Credit has incorrect parameter. Move Source %s (should be DYN), Move Destination %s (should be BDAP)\n", __func__, 
+                                            stringFromVch(vchMoveSource), stringFromVch(vchMoveDestination));
+                    return false;
+                }
+            } else {
+                LogPrintf("%s -- Failed. BDAP Credit has incorrect parameter count.\n", __func__);
+                return false;
+            }
+            // make sure all of the credits are spent when we can't find an output address
+            CDynamicAddress inputAddress = credit.second;
+            std::multimap<CDynamicAddress, CServiceCredit>::iterator it = mapOutputs.find(inputAddress);
+            if (it == mapOutputs.end()) {
+                LogPrintf("%s -- Failed. Can't find credit address %s in outputs\n", __func__, inputAddress.ToString());
+                if (ENFORCE_BDAP_CREDIT_USE)
+                    return false;
 
-    - Update Account
-        inputs: Restricted
-            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 1.00001 -- uses the previous input
-        outputs:
-            strOpType bdap_update_account, opCode1 4, opCode2 6, nValue 0.100001 -- operation fee
-            strOpType data, nValue 0.100001 -- burned data registration fee. Can be from credits or standard.
-            strOpType bdap_new_account, opCode1 1, opCode2 6, nValue 0.99800998 -- optional change
+            } else {
+                // make sure asset doesn't move to another address, check outputs
+                CAmount nInputAmount = 0;
+                for (auto itr = mapInputs.find(inputAddress); itr != mapInputs.end(); itr++) {
+                    nInputAmount += itr->second.nValue;
+                }
+                CAmount nOutputAmount = 0;
+                for (auto itr = mapOutputs.find(inputAddress); itr != mapOutputs.end(); itr++) {
+                    nOutputAmount += itr->second.nValue;
+                }
+                LogPrintf("%s -- inputAddress %s, nInputAmount %d, nOutputAmount %d, Diff %d\n", __func__, 
+                                inputAddress.ToString(), FormatMoney(nInputAmount), FormatMoney(nOutputAmount), FormatMoney((nInputAmount - nOutputAmount)));
 
-    - Delete Account
-        inputs: Restricted
-            strOpType bdap_update_account, opCode1 4, opCode2 6, nValue 0.100001 -- uses the previous input
-        outputs:
-            strOpType bdap_delete_account, opCode1 2, opCode2 6, nValue 0.100001 -- operation fee
+                if (!((nInputAmount - nOutputAmount) == (nCreditsIn - nCreditsOut))) {
+                    LogPrintf("%s -- Failed due to fuel used %d should equal total fuel used %d\n", __func__, 
+                                    FormatMoney((nInputAmount - nOutputAmount)), FormatMoney((nCreditsIn - nCreditsOut)));
+                    if (ENFORCE_BDAP_CREDIT_USE)
+                        return false;
+                }
+            }
+        } else if (credit.first.OpType == "bdap_new_account" || credit.first.OpType == "bdap_update_account" || 
+                        credit.first.OpType == "bdap_new_link_request" || credit.first.OpType == "bdap_new_link_accept") {
+            // When input is a BDAP account new or update operation, make sure deposit change goes back to input wallet address
+            // When input is a BDAP link operation, make sure it is only spent by a link update or delete operations with the same input address and parameters
+            CDynamicAddress inputAddress = credit.second;
+            std::multimap<CDynamicAddress, CServiceCredit>::iterator it = mapOutputs.find(inputAddress);
+            if (it == mapOutputs.end()) {
+                LogPrintf("%s -- Failed. Can't find account address %s in outputs\n", __func__, inputAddress.ToString());
+                if (ENFORCE_BDAP_CREDIT_USE)
+                    return false;
 
-    - New Link:
-        inputs: Can be BDAP credits or standard DYN.
-        outputs:
-            strOpType bdap_new_link_request, opCode1 1, opCode2 7, nValue 0.100001 -- deposit, can be from credits or standard.
-            strOpType data, nValue 0.9900099  -- burned data registration fee. Can be from credits or standard.
+            } else {
+                // make sure asset doesn't move to another address, check outputs
+                CAmount nInputAmount = 0;
+                for (auto itr = mapInputs.find(inputAddress); itr != mapInputs.end(); itr++) {
+                    nInputAmount += itr->second.nValue;
+                }
+                CAmount nOutputAmount = 0;
+                for (auto itr = mapOutputs.find(inputAddress); itr != mapOutputs.end(); itr++) {
+                    nOutputAmount += itr->second.nValue;
+                }
+                LogPrintf("%s --inputAddress %s, nInputAmount %d, nOutputAmount %d, Diff %d\n", __func__, 
+                                inputAddress.ToString(), FormatMoney(nInputAmount), FormatMoney(nOutputAmount), FormatMoney((nInputAmount - nOutputAmount)));
 
-    */
-
+                if (!((nInputAmount - nOutputAmount) == (nCreditsIn - nCreditsOut))) {
+                    LogPrintf("%s -- Failed due to fuel used %d should equal total fuel used %d\n", __func__, 
+                                    FormatMoney((nInputAmount - nOutputAmount)), FormatMoney((nCreditsIn - nCreditsOut)));
+                    if (ENFORCE_BDAP_CREDIT_USE)
+                        return false;
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -1169,7 +1252,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (nBDAPBurn > 0)
                 nFees += nBDAPBurn;
 
-            LogPrint("bdap", "%s -- BDAP Burn Amount %d, Total Fees %d, BDAP Deposit Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nFees), FormatMoney(nOpCodeAmount));
+            LogPrint("bdap", "%s -- BDAP Burn Data Amount %d, BDAP Op Code Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nOpCodeAmount));
         }
         // nModifiedFees includes any fee deltas from PrioritiseTransaction
         CAmount nModifiedFees = nFees;
