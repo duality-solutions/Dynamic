@@ -50,6 +50,7 @@ bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharSt
 bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp);
 bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData);
 bool GetBDAPDataScript(const CTransactionRef& ptx, CScript& scriptBDAPData);
+bool GetBDAPCreditScript(const CTransactionRef& ptx, CScript& scriptBDAPScredit);
 bool IsBDAPOperationOutput(const CTxOut& out);
 int GetBDAPOperationOutIndex(const CTransactionRef& tx);
 int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash);

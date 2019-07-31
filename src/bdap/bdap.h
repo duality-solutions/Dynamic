@@ -55,6 +55,7 @@ static constexpr unsigned int MAX_BDAP_SIGNATURE_PROOF    = 90; // TODO (bdap): 
 static constexpr unsigned int MAX_BDAP_LINK_DATA_SIZE     = 1592;
 static constexpr uint64_t DEFAULT_LINK_EXPIRE_TIME        = 1861920000;
 static constexpr int32_t DEFAULT_REGISTRATION_MONTHS      = 12; // 1 year
+static constexpr bool ENFORCE_BDAP_CREDIT_USE             = false; // TODO: Change to true before release
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";
