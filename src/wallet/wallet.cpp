@@ -3816,11 +3816,10 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
         LOCK2(cs_main, cs_wallet);
         {
             std::vector<COutput> vAvailableCoins;
-            AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
             int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
-
-            if (fIsBDAP) {
-                
+            if (!fIsBDAP) {
+                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
+            } else {
                 std::vector<unsigned char> vchValue;
                 CScript bdapOperationScript;
                 if (!GetScriptOpTypeValue(vecSend, bdapOperationScript, strOpType, vchValue)) {
@@ -3919,8 +3918,6 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = strOpType + _(" is an uknown BDAP operation.");
                     return false;
                 }
-            } else {
-                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
             }
 
             nFeeRet = 0;
@@ -4001,7 +3998,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
 
-
+                bool fUsingBDAPCredits = false;
+                CScript scriptBdapChange;
                 for (const auto& pcoin : setCoins) {
                     CAmount nCredit = pcoin.first->tx->vout[pcoin.second].nValue;
                     //The coin age after the next block (depth+1) is used instead of the current,
@@ -4013,6 +4011,15 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     if (age != 0)
                         age += 1;
                     dPriority += (double)nCredit * age;
+                    int opCode1 = -1; int opCode2 = -1;
+                    pcoin.first->tx->vout[pcoin.second].GetBDAPOpCodes(opCode1, opCode2);
+                    std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+                    if (strOpType == "bdap_move_asset") {
+                        GetBDAPCreditScript(pcoin.first->tx, scriptBdapChange);
+                        CDynamicAddress address = GetScriptAddress(scriptBdapChange);
+                        LogPrintf("%s -- address %s, scriptBdapChange %s\n", __func__, address.ToString(), ScriptToAsmStr(scriptBdapChange));
+                        fUsingBDAPCredits = true;
+                    }
                 }
 
                 const CAmount nChange = nValueIn - nValueToSelect;
@@ -4037,6 +4044,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         } else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
                             // send deposit change back to original account.
                             scriptChange = prevScriptPubKey;
+                        } else if (fUsingBDAPCredits) {
+                            scriptChange = scriptBdapChange;
                         } else {
                             // no coin control: send change to newly generated address
                             // Note: We use a new key here to keep it from being obvious which side is the change.
