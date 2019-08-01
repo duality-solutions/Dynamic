@@ -356,6 +356,9 @@ std::string GetOpCodeType(const std::string& strOpCode)
     else if (strOpCode == "bdap_update_link_accept") {
         return "link";
     }
+    else if (strOpCode == "bdap_move_asset") {
+        return "asset";
+    }
     else {
         return "unknown";
     }
@@ -413,6 +416,23 @@ bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharSt
         {
             scriptBDAPOp = out.scriptPubKey;
             return true;
+        }
+    }
+    return false;
+}
+
+bool GetBDAPCreditScript(const CTransactionRef& ptx, CScript& scriptBDAPScredit)
+{
+    for (unsigned int i = 0; i < ptx->vout.size(); i++) 
+    {
+        const CTxOut& out = ptx->vout[i];
+        int op1, op2;
+        vchCharString vvchOpParameters;
+        if (DecodeBDAPScript(out.scriptPubKey, op1, op2, vvchOpParameters)) {
+            if (op1 == 5 && op2 == 15) {
+                scriptBDAPScredit = out.scriptPubKey;
+                return true;
+            }
         }
     }
     return false;
@@ -499,6 +519,7 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
         std::vector<unsigned char> vch;
         if (!script.GetOp(itScript, opcode, vch))
             return false;
+
         if (!(0 <= opcode && opcode <= OP_PUSHDATA4)) {
             strPrefix += GetOpName(opcode);
             if (i == 1)
@@ -544,6 +565,9 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     }
     else if (strPrefix == "4 8") {
         strOpType = "bdap_update_link_accept";
+    }
+    else if (strPrefix == "5 15") {
+        strOpType = "bdap_move_asset";
     }
     else {
         return false;
