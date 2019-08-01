@@ -37,7 +37,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderCPUCores->setVisible(false);
-        ui->labelNCPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
+        ui->labelNCPUCores->setText(tr("Slider will show once Dynamic has finished syncing"));
     } else {
         ui->sliderCPUCores->setVisible(true);
         ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
@@ -50,7 +50,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #ifdef ENABLE_GPU
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderGPUCores->setVisible(false);
-        ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
+        ui->labelNGPUCores->setText(tr("Slider will show once Dynamic has finished syncing"));
     } else {
         ui->sliderGPUCores->setVisible(true);
         ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
@@ -63,7 +63,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->checkBoxShowGPUGraph->setVisible(true);
 #else
     ui->sliderGPUCores->setVisible(false);
-    ui->labelNGPUCores->setText(QString("GPU mining is not supported in this version of Dynamic"));
+    ui->labelNGPUCores->setText(tr("GPU mining is not supported in this version of Dynamic"));
     ui->pushSwitchGPUMining->setVisible(false);
     ui->checkBoxShowGPUGraph->setVisible(false);
 #endif
@@ -226,7 +226,7 @@ void MiningPage::updateGPUPushSwitch()
 
 void MiningPage::StartCPUMiner()
 {
-    LogPrintf("StartCPUMiner %d (%s)", ui->sliderCPUCores->value(), fCPUMinerOn);
+    LogPrintf("StartCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = true;
     InitMiners(Params(), *g_connman);
     changeNumberOfCPUThreads(ui->sliderCPUCores->value());
@@ -245,7 +245,7 @@ void MiningPage::StartGPUMiner()
 
 void MiningPage::StopCPUMiner()
 {
-    LogPrintf("StopCPUMiner %d (%s)", ui->sliderCPUCores->value(), fCPUMinerOn);
+    LogPrintf("StopCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = false;
     changeNumberOfCPUThreads(0, true);
     ShutdownCPUMiners();

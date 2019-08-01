@@ -29,9 +29,10 @@ static const int SPORK_12_RECONSIDER_BLOCKS = 10011;
 static const int SPORK_13_OLD_SUPERBLOCK_FLAG = 10012;
 static const int SPORK_14_REQUIRE_SENTINEL_FLAG = 10013;
 static const int SPORK_15_INSTANTSEND_AUTOLOCKS = 10015;
+static const int SPORK_30_ACTIVATE_BDAP = 10030;
 
 static const int SPORK_START = SPORK_2_INSTANTSEND_ENABLED;
-static const int SPORK_END = SPORK_15_INSTANTSEND_AUTOLOCKS;
+static const int SPORK_END = SPORK_30_ACTIVATE_BDAP;
 
 extern std::map<int, int64_t> mapSporkDefaults;
 extern CSporkManager sporkManager;

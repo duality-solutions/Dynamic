@@ -1,5 +1,7 @@
 // Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2014 The ShadowCoin developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -8,6 +10,10 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
+#include "bdap/linkstorage.h"
+#include "bdap/stealth.h"
+#include "bdap/utils.h"
+#include "dht/ed25519.h"
 #include "consensus/validation.h"
 #include "protocol.h"
 #include "serialize.h"
@@ -69,21 +75,68 @@ bool CWalletDB::EraseTx(uint256 hash)
     return Erase(std::make_pair(std::string("tx"), hash));
 }
 
+bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta)
+{
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+    if (!Write(std::make_pair(std::string("dhtkeymeta"), keyID), keyMeta, false))
+        return false;
+
+    nWalletDBUpdated++;
+    std::vector<unsigned char> vchPrivKeySeed = key.GetPrivSeed();
+    // hash pubkey/privkey to accelerate wallet load
+    std::vector<unsigned char> vchKey;
+    vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
+    vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
+    vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
+
+    LogPrint("dht", "CWalletDB::WriteDHTKey \nvchKey = %s, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                    stringFromVch(vchKey), keyID.ToString(), 
+                    key.GetPubKeyString(), key.GetPrivKeyString(), key.GetPrivSeedString());
+
+    return Write(std::make_pair(std::string("dhtkey"), vchPubKey), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
+}
+
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
 {
     nWalletDBUpdateCounter++;
-
-    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey),
-            keyMeta, false))
+    if (!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, false))
         return false;
-
     // hash pubkey/privkey to accelerate wallet load
     std::vector<unsigned char> vchKey;
     vchKey.reserve(vchPubKey.size() + vchPrivKey.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
-
     return Write(std::make_pair(std::string("key"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
+}
+
+bool CWalletDB::WriteCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, 
+    const std::vector<unsigned char>& vchCryptedSecret, 
+    const CKeyMetadata& keyMeta)
+{
+    const bool fEraseUnencryptedKey = true;
+    nWalletDBUpdateCounter++;
+
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+    if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta)) {
+        LogPrint("dht", "CWalletDB::WriteCryptedDHTKey Write keymeta failed.\n");
+        return false;
+    }
+
+    // hash pubkey/privkey to accelerate wallet load
+    std::vector<unsigned char> vchKey;
+    vchKey.reserve(vchPubKey.size() + vchCryptedSecret.size());
+    vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
+    vchKey.insert(vchKey.end(), vchCryptedSecret.begin(), vchCryptedSecret.end());
+
+    if (!Write(std::make_pair(std::string("cdhtkey"), vchPubKey), vchCryptedSecret, false)) {
+        LogPrint("dht", "CWalletDB::WriteCryptedDHTKey Write cdhtkey failed.\n");
+        return false;
+    }
+
+    if (fEraseUnencryptedKey) {
+        Erase(std::make_pair(std::string("dhtkey"), vchPubKey));
+    }
+    return true;
 }
 
 bool CWalletDB::WriteCryptedKey(const CPubKey& vchPubKey,
@@ -176,6 +229,26 @@ bool CWalletDB::ErasePool(int64_t nPool)
     nWalletDBUpdateCounter++;
     return Erase(std::make_pair(std::string("pool"), nPool));
 }
+
+bool CWalletDB::ReadEdPool(int64_t nPool, CEdKeyPool& edkeypool)
+{
+    return Read(std::make_pair(std::string("edpool"), nPool), edkeypool);
+}
+
+bool CWalletDB::WriteEdPool(int64_t nPool, const CEdKeyPool& edkeypool)
+{
+    nWalletDBUpdateCounter++;
+    return Write(std::make_pair(std::string("edpool"), nPool), edkeypool);
+}
+
+bool CWalletDB::EraseEdPool(int64_t nPool)
+{
+    nWalletDBUpdateCounter++;
+    return Erase(std::make_pair(std::string("edpool"), nPool));
+}
+
+
+
 
 bool CWalletDB::WriteMinVersion(int nVersion)
 {
@@ -398,6 +471,44 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadKey failed";
                 return false;
             }
+        } else if (strType == "dhtkey") {
+            std::vector<unsigned char> vchPubKey;
+            ssKey >> vchPubKey;
+            std::vector<unsigned char> vchPrivKeySeed;
+            ssValue >> vchPrivKeySeed;
+            CKeyEd25519 key(vchPrivKeySeed);
+            uint256 hash;
+            std::string strPubKey = stringFromVch(vchPubKey);
+            
+            try
+            {
+                ssValue >> hash;
+            }
+            catch (...) {}
+
+            if (!hash.IsNull()) {
+                std::vector<unsigned char> vchKey;
+                vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
+                vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
+                vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
+                uint256 hash2 = Hash(vchKey.begin(), vchKey.end());
+                
+                if (hash2 != hash)
+                {
+                    //LogPrintf("CReadKeyValue hash mismatch error: \nvchKey = %s, \nhash = %s\n, \nhash2 = %s\n", 
+                    //                          stringFromVch(vchKey), hash2.ToString(), hash.ToString());
+                    strErr = "Error reading wallet database: DHT Ed25519 CPubKey/CPrivKey corrupt";
+                    return false;
+                }
+            }
+            //LogPrintf("CReadKeyValue, \nvchPubKey = %s, \nprivkey = %s, \nprivseed = %s,\nhash = %s\n", 
+            //                          strPubKey, key.GetPrivKeyString(), key.GetPrivSeedString(), hash.ToString());
+
+            if (!pwallet->LoadDHTKey(key, vchPubKey))
+            {
+                strErr = "Error reading wallet database: LoadDHTKey failed";
+                return false;
+            }
         } else if (strType == "mkey") {
             unsigned int nID;
             ssKey >> nID;
@@ -422,6 +533,19 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             wss.nCKeys++;
 
             if (!pwallet->LoadCryptedKey(vchPubKey, vchPrivKey)) {
+                strErr = "Error reading wallet database: LoadCryptedKey failed";
+                return false;
+            }
+            wss.fIsEncrypted = true;
+        } else if (strType == "cdhtkey") {
+            std::vector<unsigned char> vchPubKey;
+            ssKey >> vchPubKey;
+            
+            std::vector<unsigned char> vchPrivKey;
+            ssValue >> vchPrivKey;
+            wss.nCKeys++;
+
+            if (!pwallet->LoadCryptedDHTKey(vchPubKey, vchPrivKey)) {
                 strErr = "Error reading wallet database: LoadCryptedKey failed";
                 return false;
             }
@@ -451,6 +575,12 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             CKeyPool keypool;
             ssValue >> keypool;
             pwallet->LoadKeyPool(nIndex, keypool);
+        } else if (strType == "edpool") {
+            int64_t nIndex;
+            ssKey >> nIndex;
+            CEdKeyPool edkeypool;
+            ssValue >> edkeypool;
+            pwallet->LoadEdKeyPool(nIndex, edkeypool);
         } else if (strType == "version") {
             ssValue >> wss.nFileVersion;
             if (wss.nFileVersion == 10300)
@@ -504,9 +634,43 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadHDPubKey failed";
                 return false;
             }
+        } else if (strType == "link") {
+            uint256 linkID;
+            ssKey >> linkID;
+
+            CLinkStorage storage;
+            ssValue >> storage;
+            if (!pwalletMain)
+                pwalletMain = pwallet;
+            ProcessLink(storage, true);
+
+        } else if (strType == "linkid") {
+            uint256 SubjectID;
+            ssKey >> SubjectID;
+
+            std::vector<unsigned char> vchPubKey;
+            ssValue >> vchPubKey;
+
+            LoadLinkMessageInfo(SubjectID, vchPubKey);
+
+        } else if (strType == "stealth") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthAddress sxAddr;
+            ssValue >> sxAddr;
+            pwallet->AddStealthToMap(std::make_pair(keyID, sxAddr));
+
+        } else if (strType == "sxqueue") {
+            CKeyID keyID;
+            ssKey >> keyID;
+            CStealthKeyQueueData stealthData;
+            ssValue >> stealthData;
+            pwallet->AddToStealthQueue(std::make_pair(keyID, stealthData));
+
         }
     } catch (...) {
-        return false;
+        if (strType != "keymeta")
+            return false;
     }
     return true;
 }
@@ -515,7 +679,8 @@ static bool IsKeyType(std::string strType)
 {
     return (strType == "key" || strType == "wkey" ||
             strType == "mkey" || strType == "ckey" ||
-            strType == "hdchain" || strType == "chdchain");
+            strType == "hdchain" || strType == "chdchain" ||
+            strType == "dhtkey" || strType == "cdhtkey");
 }
 
 DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
@@ -923,4 +1088,56 @@ void CWalletDB::IncrementUpdateCounter()
 unsigned int CWalletDB::GetUpdateCounter()
 {
     return nWalletDBUpdateCounter;
+}
+
+// Stores the raw link in the wallet database
+bool CWalletDB::WriteLink(const CLinkStorage& link)
+{
+    ProcessLink(link);
+    std::vector<unsigned char> vchPubKeys = link.vchLinkPubKey;
+    vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
+    uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
+    return Write(std::make_pair(std::string("link"), linkID), link); 
+}
+
+bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey)
+{
+    std::vector<unsigned char> vchPubKeys = vchPubKey;
+    vchPubKeys.insert(vchPubKeys.end(), vchSharedKey.begin(), vchSharedKey.end());
+    uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
+    LogPrint("bdap", "%s -- linkID = %s\n", __func__, linkID.ToString());
+    return Erase(std::make_pair(std::string("link"), linkID));
+}
+
+bool CWalletDB::WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey)
+{
+    LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
+    return Write(std::make_pair(std::string("linkid"), subjectID), vchPubKey); 
+}
+
+bool CWalletDB::EraseLinkMessageInfo(const uint256& subjectID)
+{
+    LogPrint("bdap", "%s -- subjectID = %s\n", __func__, subjectID.ToString());
+    return Erase(std::make_pair(std::string("linkid"), subjectID)); 
+}
+
+bool CWalletDB::WriteStealthAddress(const CStealthAddress& sxAddr)
+{
+    return Write(std::make_pair(std::string("stealth"), sxAddr.GetSpendKeyID()), sxAddr);
+}
+
+bool CWalletDB::WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta)
+{
+    return Write(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
+}
+
+bool CWalletDB::EraseStealthKeyQueue(const CKeyID& keyId)
+{
+    return Erase(std::make_pair(std::string("sxqueue"), keyId));
+}
+
+bool CWalletDB::ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta)
+{
+    return Read(std::make_pair(std::string("sxqueue"), keyId), sxKeyMeta);
 }

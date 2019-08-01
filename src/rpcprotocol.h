@@ -46,6 +46,7 @@ enum RPCErrorCode {
     RPC_OUT_OF_MEMORY = -7,            //! Ran out of memory during operation
     RPC_INVALID_PARAMETER = -8,        //! Invalid, missing or duplicate parameter
     RPC_DATABASE_ERROR = -20,          //! Database error
+    RPC_SPORK_INACTIVE = -21,          //! Required spork inactivate
     RPC_DESERIALIZATION_ERROR = -22,   //! Error parsing or validating structure in raw format
     RPC_VERIFY_ERROR = -25,            //! General error during transaction or block submission
     RPC_VERIFY_REJECTED = -26,         //! Transaction or block was rejected by network rules
@@ -76,6 +77,26 @@ enum RPCErrorCode {
     RPC_WALLET_WRONG_ENC_STATE = -15,      //! Command given in wrong wallet encryption state (encrypting an encrypted wallet etc.)
     RPC_WALLET_ENCRYPTION_FAILED = -16,    //! Failed to encrypt the wallet
     RPC_WALLET_ALREADY_UNLOCKED = -17,     //! Wallet is already unlocked
+    //! BDAP errors
+    RPC_BDAP_ERROR = -300,                 //! Unspecified BDAP error
+    RPC_BDAP_SPORK_INACTIVE = -301,        //! BDAP spork is not active
+    RPC_BDAP_DB_ERROR = -302,              //! BDAP database error
+    RPC_BDAP_LINK_MNGR_ERROR = -303,       //! BDAP link manager error
+    RPC_BDAP_ACCOUNT_NOT_FOUND = -304,     //! BDAP account not found
+    RPC_BDAP_FEE_UNKNOWN = -305,           //! BDAP fee can not be calculated
+    //! DHT errors
+    RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT
+    RPC_DHT_NOT_STARTED = -401,            //! DHT session not started
+    RPC_DHT_GET_KEY_FAILED = -402,         //! Get DHT private key failed
+    RPC_DHT_GET_FAILED = -403,             //! Get DHT data failed
+    RPC_DHT_PUT_FAILED = -404,             //! Put DHT data failed
+    RPC_DHT_INVALID_HEADER = -405,         //! Invalid DHT header information
+    RPC_DHT_INVALID_RECORD = -406,         //! Invalid DHT record information
+    RPC_DHT_RECORD_LOCKED = -407,          //! DHT record locked
+    RPC_DHT_PUBKEY_MISMATCH = -408,        //! DHT public key mismatch
+    //! Fluid errors
+    RPC_FLUID_ERROR = -500,                //! Unspecified fluid error
+    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp 
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);

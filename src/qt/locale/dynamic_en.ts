@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="en" version="2.0">
+<TS language="en" version="2.4">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -1342,6 +1342,72 @@ Consequently, users who have backups disabled will also have PrivateSend disable
     </message>
 </context>
 <context>
+<name>MnemonicDialog</name>
+    <message>
+        <source>Import – recovery phrase/private key</source>
+        <translation>Import – recovery phrase/private key</translation>
+    </message>
+    <message>
+        <source>Import Mnemonic Phrase or Private Key</source>
+        <translation>Import Mnemonic Phrase or Private Key</translation>
+    </message>
+    <message>
+        <source>Import mnemonic</source>
+        <translation>Import mnemonic</translation>
+    </message>
+    <message>
+        <source>Input your mnemonic</source>
+        <translation>Input your mnemonic</translation>
+    </message>
+    <message>
+        <source>Import privatekey</source>
+        <translation>Import privatekey</translation>
+    </message>
+    <message>
+        <source>Import privatekey file</source>
+        <translation>Import privatekey file</translation>
+    </message>
+    <message>
+        <source>Input single privatekey</source>
+        <translation>Input single privatekey</translation>
+    </message>
+    <message>
+        <source>Input privatekey file</source>
+        <translation>Input privatekey file</translation>
+    </message>
+    <message>
+        <source>Separating by space</source>
+        <translation>Separating by space</translation>
+    </message>
+    <message>
+        <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
+        <translation>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
+    </message>
+    <message>
+        <source>Tips: The private key file is the file exported by Bitcoin-Core ‘dumpwallet filename’, not the .dat file.</source>
+        <translation>Tips: The private key file is the file exported by Bitcoin-Core ‘dumpwallet filename’, not the .dat file.</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Import</translation>
+    </message>
+    <message>
+        <source>Reimport</source>
+        <translation>Reimport</translation>
+    </message>
+    <message>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the ‘re-import’ button.</source>
+        <translation>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the ‘re-import’ button.</translation>
+    </message>
+</context>
+ <context>
+    <name>WalletChooseDialog</name>
+    <message>
+        <source>choose wallet</source>
+        <translation>choose wallet</translation>
+    </message>
+</context>
+<context>
     <name>Intro</name>
     <message>
         <location filename="../forms/intro.ui" line="+14"/>
@@ -2568,6 +2634,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <location line="+2"/>
         <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import(I)...</source>
+        <translation>Import(I)...</translation>
+    </message>
+    <message>
+        <source>Import Mnemonic Phrase or Private Key</source>
+        <translation>Import Mnemonic Phrase or Private Key</translation>
+    </message>
+    <message>
+        <source>Choose File</source>
+        <translation>Choose File</translation>
     </message>
     <message>
         <location line="+139"/>

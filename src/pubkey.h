@@ -11,6 +11,7 @@
 #include "hash.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "util.h"
 
 #include <stdexcept>
 #include <vector>

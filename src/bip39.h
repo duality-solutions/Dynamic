@@ -36,11 +36,32 @@
 class CMnemonic
 {
 public:
-    static SecureString Generate(int strength); // strength in bits
-    static SecureString FromData(const SecureVector& data, int len);
-    static bool Check(SecureString mnemonic);
+
+    enum Language {
+        ENGLISH = 0,
+        CHINESE_SIMPLIFIED = 1,
+        CHINESE_TRADITIONAL = 2,
+        FRENCH = 3,
+        GERMAN = 4,
+        ITALIAN = 5,
+        JAPANESE = 6,
+        KOREAN = 7,
+        RUSSIAN = 8,
+        SPANISH = 9,
+        UKRAINIAN = 10
+    };
+
+    static SecureString Generate(int strength, Language selectLanguage = Language::ENGLISH); // strength in bits
+    static SecureString FromData(const SecureVector& data, int len, Language selectLanguage = Language::ENGLISH);
+    static bool Check(SecureString mnemonic, Language selectLanguage = Language::ENGLISH);
     // passphrase must be at most 256 characters or code may crash
     static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
+    static Language getLanguageEnumFromLabel(const std::string &input);
+
+private:
+    static void getWordList(const char* const* &input, Language selectLanguage = Language::ENGLISH);
+  
+
 };
 
 #endif

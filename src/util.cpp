@@ -271,7 +271,10 @@ bool LogAcceptCategory(const char* category)
                 const std::vector<std::string>& categories = mapMultiArgs.at("-debug");
                 ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
                 // thread_specific_ptr automatically deletes the set when the thread ends.
-                // "dynamic" is a composite category enabling all Dash-related debug output
+                // "dynamic" is a composite category enabling all Dynamic-related debug output
+                //addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
+                //"|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
+                //"dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject|dht|bdap|validation|stealth|
                 if (ptrCategory->count(std::string("dynamic"))) {
                     ptrCategory->insert(std::string("privatesend"));
                     ptrCategory->insert(std::string("instantsend"));
@@ -280,6 +283,10 @@ bool LogAcceptCategory(const char* category)
                     ptrCategory->insert(std::string("keepass"));
                     ptrCategory->insert(std::string("dnpayments"));
                     ptrCategory->insert(std::string("gobject"));
+                    ptrCategory->insert(std::string("dht"));
+                    ptrCategory->insert(std::string("bdap"));
+                    ptrCategory->insert(std::string("validation"));
+                    ptrCategory->insert(std::string("stealth"));
                 }
             } else {
                 ptrCategory.reset(new std::set<std::string>());
@@ -595,8 +602,11 @@ std::string GenerateRandomString(unsigned int len) {
     return strPassword;
 }
 
-static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
+unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
 {
+    if (nMin == nMax)
+        return nMax;
+
     srand(time(NULL) + nMax); //seed srand before using
     return nMin + rand() % (nMax - nMin) + 1;
 }
@@ -1024,5 +1034,15 @@ std::string SafeIntVersionToString(uint32_t nVersion)
         return IntVersionToString(nVersion);
     } catch (const std::bad_cast&) {
         return "invalid_version";
+    }
+}
+
+bool FileExists(const std::string& strFilePath)
+{
+    if (FILE *file = fopen(strFilePath.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
     }
 }

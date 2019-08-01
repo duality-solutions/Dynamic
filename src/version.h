@@ -12,7 +12,7 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 71000;
+static const int PROTOCOL_VERSION = 71400; // TODO (BDAP): ***** Revert to 71000
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;
@@ -21,7 +21,7 @@ static const int INIT_PROTO_VERSION = 209;
 static const int GETHEADERS_VERSION = 60800;
 
 //! disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION = 70900; // Only connect to v2.3 Nodes and newer
+static const int MIN_PEER_PROTO_VERSION = 71400;  // TODO (BDAP): ***** Revert to 70900
 
 //! nTime field added to CAddress, starting with this version;
 //! if possible, avoid requesting addresses nodes older than this

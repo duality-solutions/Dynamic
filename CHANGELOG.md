@@ -3,6 +3,255 @@
 
 **Dynamic v2.4.0.0**
 
+* [DHT] Add more UDP ports and fix saving key in wallet
+* [BDAP] Update enum item names so it doesn't overlap with Windows macros
+* Merge pull request #25 from duality-solutions/windows
+* [DHT] Add parameter info to RPC call error
+* [BDAP] More fixes to private key wallet saving
+* Merge pull request #26 from duality-solutions/dht-fixes2
+* [DHT] Fix put mutable value method
+* [DHT] Fix salt parsing in the put save data method
+* [DHT] Check signature and pubkey length before saving for put
+* [DHT] Fix put by using fixed sizes for pubkey and signature. Use variable sizes for salt and value
+* Merge pull request #27 from duality-solutions/fix-dht3
+* [DHT] Fix session event logging and searching memory maps
+* [DHT] Use multimap and implement locks session events
+* Resolve merge conflicts with v2.4-WIP
+* [DHT] Rework libtorrent event threads
+* [DHT] Fix async get operations
+* [DHT] Add function to remove old libtorrent events from memory multimap
+* [DHT] Fix MacOSX build warnings
+* Merge branch 'v2.4-WIP' of https://github.com/duality-solutions/dynamic into merge-public
+* [DHT] Fix put BDAP data function for mutable hash table database
+* [DHT] Add RPC command that returns all put message events in memory
+* [DHT] Add RPC command that returns all get mutable events in memory
+* [DHT] Fix blocking alert thread issue affecting puts
+* Merge branch 'v2.4-WIP' of https://github.com/duality-solutions/dynamic into merge-public
+* Merge pull request #29 from duality-solutions/fix-dht5
+* Merge branch 'master' into merge-public
+* Merge pull request #30 from duality-solutions/merge-public
+* [DHT] Fix put wait for reponse
+* [BDAP] Add dump bdap keys RPC command <dumpbdapkeys>
+* [BDAP] Add RPC command to import BDAP account private keys
+* Merge branch 'master' into fix-dht6
+* Merge pull request #31 from duality-solutions/fix-dht6
+* [BDAP] Fix build errors after merge conflicts
+* Merge pull request #32 from duality-solutions/hd-seed
+* [BDAP] Add RPC command to get local wallet accounts <mybdapaccounts>
+* Merge branch 'master' into myaccounts
+* Merge pull request #33 from duality-solutions/myaccounts
+* Update testnet spork address
+* Update print in ThreadSocketHandler
+* Fixes
+* Merge pull request #34 from duality-solutions/spencer
+* Fix Strings
+* Change uint256S to Int
+* Merge pull request #35 from duality-solutions/spencer
+* Merge pull request #36 from duality-solutions/chainwork
+* Merge pull request #37 from duality-solutions/newtestnet
+* [DHT] Revert CPubKey class and add AddCryptedDHTKey
+* [DHT] Fix segfault when shutdown before libtorrent session init
+* Add mnemonic import
+* Improve menu title
+* Update fluiddynode.cpp
+* Add second spork address to testnet
+* [DHT] Fixes to wallet encryption for Ed25519 keys
+* [DHT] Fix libtorrent event map for bootstrap event
+* [DHT] Cleanup storage debug.log usage
+* [DHT] Fix last wallet encryption issue for ed25519 keys
+* Merge pull request #39 from duality-solutions/dht-keys
+* [DHT] Fix segfault when saving BDAP hash table key
+* Merge pull request #258 from duality-solutions/v2.4-WIP
+* Resolve merge conflicts and fix mnemonic build error
+* Merge pull request #41 from duality-solutions/skfix
+* [BDAP] Move entries leveldb database into blocks directory
+* Merge pull request #40 from duality-solutions/dht-keys2
+* Fix non-standard and null data sign step and combine signatures
+* [Fluid] Add boost thread include to fluid db code files
+* Fix override warnings in keystore and crypter
+* [BDAP] Update certificate class, refactor and add category
+* [BDAP] Update link classes
+* [BDAP] Stub linking db and RPC commands
+* [BDAP] Refactor common utility functions to seperate file
+* [BDAP] Add invite message to link request class
+* [BDAP] Add generic script parsing for linking and domain entries
+* Remove second spork address for testnet
+* Add privatenet to chain parameters
+* Merge pull request #46 from duality-solutions/privatenet
+* Add privatenet seed nodes
+* [BDAP] Rearrange operation codes
+* [BDAP] Use op1 and op2 to get operation type
+* [BDAP] Fix update entry issue
+* [BDAP] Put users and groups in @public.bdap.io by default
+* Merge pull request #49 from duality-solutions/bdap-opcodes
+* Merge branch 'master' into bdap-updates
+* [BDAP] Fix issues caused by previous merge conflicts
+* Merge pull request #48 from duality-solutions/bdap-updates
+* Updated LibTorrent submodule, synced with root repo
+* [BDAP] Updates to link requests
+* [BDAP] Check if link request pubkey already exists in the mempool
+* [BDAP] Add shared pubkey to link requests
+* Merge pull request #51 from duality-solutions/linking
+* Merge pull request #50 from duality-solutions/fix-warnings
+* Merge public v2.4-WIP with private repo
+* Resolve merge conflicts with v2.4-WIP public repo
+* Sync public repo v2.4-WIP changes
+* Fix warnings for struct/class mismatch and missing overrides
+* Merge pull request #52 from duality-solutions/merge-public4
+* [BDAP] Fix link request from and to me functions
+* Update ReadMe
+* Update README.md
+* Update README.md
+* Merge pull request #54 from duality-solutions/ReadMeUpdate
+* Merge pull request #55 from duality-solutions/merge-public4
+* [BDAP] Fixes to linking and account db functions
+* Move endif to correct place
+* [BDAP] Rename entry channel to sidechain
+* [BDAP] Add link accept RPC command
+* [BDAP] Fixes to link consensus checks
+* [DHT] Fill Ed25519 private keys with zeros in destructor
+* [BDAP] Fixes to Leveldb link request and accept databases
+* [BDAP] More fixes for link request and accept consensus
+* [BDAP] Fix transaction display in Qt UI for account entries and links
+* [Fluid] Add initial sovereign addresses for privatenet
+* [BDAP] Use Instant Send when possible for BDAP txs
+* [BDAP] Fix mybdapaccounts after adding links
+* [BDAP] Add expire time and pubkey to user and group operation transaction
+* [BDAP] Implement link pending RPC commands
+* Sync with public v2.4-WIP branch 2019-01-10
+* Merge pull request #57 from duality-solutions/merge-public6
+* Fix Windows build issue for embedded libtorrent
+* Fix Windows Qt resource file so it will build
+* Update libtorrent synced with original repo on 2019-01-11
+* Merge pull request #53 from duality-solutions/linking2
+* Add MacOS framework CoreFoundation and SystemConfiguration to make
+* Update locales and add fully translated NL file
+* Merge branch 'master' of https://github.com/duality-solutions/Dynamic-private
+* Stub BIP39 Wordlist files for zh_CN/zh_TW/fr/it/jp/ko/es
+* fix final text for translations
+* Remove 1 ?
+* Merge pull request #58 from duality-solutions/locales
+* Update documentation
+* Merge pull request #59 from duality-solutions/readme
+* Update Docs
+* Merge pull request #60 from duality-solutions/readme
+* Fix mismatched parameters to LogPrint
+* Fix warning comparison between signed and unsigned integer expressions
+* Merge pull request #62 from duality-solutions/dm-bugfixes
+* Add BDAP to menubar and associated GUI
+* [DHT] Change alert threading to avoid segfault
+* [DHT] Change alert threading to avoid segfault
+* [BDAP] Fix linking destination and source address for request/accept
+* [BDAP] Fix registration days parameter for RPC commands
+* Merge pull request #64 from duality-solutions/updates
+* BDAP Whitepaper v0.1
+* Update BDAP.md
+* Update BDAP.md
+* Add DHT RPC Calls and link to code location.
+* Codify OP_RETURN
+* Update wording
+* Improve formatting
+* update dht link
+* link dynamic and sequence
+* Link BDAP references to website
+* Improve Layout
+* Add a para to intro
+* Add to technical information.
+* Link LDAP
+* Improve wording
+* Improve wording
+* Improve layout
+* Remove DYN and link Dynamic
+* Merge pull request #66 from duality-solutions/RPCWording
+* Update BDAP.md
+* Add BDAP AddUser modal, button event handlers and css
+* Update BDAP.md
+* Stub BDK section
+* [BDAP] Implement version 0 (public) linking without encryption
+* [DHT] Fix keymeta wallet issue when loading
+* [BDAP] Add signature proof verification for link requests
+* Update class info
+* Fix formatting
+* Stub further sections and tidy RPC sections
+* Outline stubs
+* Amend RPC section formatting to match
+* Remove `
+* Update libtorrent, allow larger mutable DHT entries (from 1000 to 5120 bytes)
+* Update Spanish Translation
+* Merge pull request #68 from duality-solutions/locales
+* Update dynamic_es.ts
+* Merge pull request #67 from duality-solutions/linking4
+* [BDAP GUI] Implement List All Users in TableWidget
+* [BDAP] Add ability to filter by users, groups or all in ListDirectories
+* [BDAP] Prevent creating duplicate links
+* [BDAP] Add completed link RPC command
+* [BDAP] Improve link request and accept database structure
+* [BDAP] Filter pending link RPC commands
+* [BDAP] Add delete link request and accept RPC command
+* [BDAP] Remove OP_RETURN data from delete domain account RPC
+* [BDAP GUI] Implement List All Groups in TableWidget. WIP
+* [BDAP GUI] Make BDAP Users table resize dynamically. WIP
+* [BDAP] Add create raw account transaction RPC command
+* [BDAP GUI] Make BDAP Groups table resize dynamically. Bugfixes. WIP
+* [BDAP GUI] Handle get user details. WIP
+* [BDAP GUI] Change ListDirectories output from condensed to full in order to populate expiration date
+* [BDAP GUI] Rearrange GUI. WIP
+* [BDAP GUI] Change refresh method, add My Users/Groups checkbox. WIP
+* Update importmnemonic RPC command example
+* [BDAP GUI] Tweak GUI, wire up My Groups checkbox. WIP
+* [BDAP] Add optional accountType parameter to RPC mybdapaccounts
+* [BDAP] Check if account exists in createrawbdapaccount RPC
+* [BDAP] Add RPC command to pay, sign and send a raw hex account
+* [BDAP] Fix mybdapaccounts help
+* [BDAP] Fix help for account RPC commands
+* Merge pull request #70 from duality-solutions/rpc-bdap
+* [BDAP] Fix DHT RPC comand help output
+* [BDAP] Add parameter names to all bdap RPC commands
+* [BDAP] Fix delete link consensus and wallet checks
+* Merge pull request #69 from duality-solutions/linking5
+* [BDAP GUI] Wire up search functionality. Save sort states.
+* [BDAP] Fix issue when trying to delete link multiple times
+* [BDAP GUI] Add BDAP Account Detail dialog box functionality
+* Less chatty debug.log file when not in debug mode
+* Add syncstatus RPC command for better info on chain status
+* Merge pull request #71 from duality-solutions/sync-status
+* Fix debug logging due to an extra category passed
+* Tweak syncstatus progress calculation
+* [BDAP GUI] Add User Dialog functionality. WIP
+* Merge branch 'master' into qt-mockups
+* [BDAP GUI] Tweak Add User Error Message reporting. WIP
+* [BDAP GUI] Display user details upon successful add user transaction
+* [BDAP GUI] Make My Users/Groups default view. Add record count display.
+* [BDAP GUI] Add add group functionality. Enable wordWrap for longer error messages.
+* [BDAP] Reduce linking logging when not in debug mode
+* [BDAP GUI] Add delete user/group functionality
+* [BDAP GUI] Add update BDAP user/group functionality
+* [BDAP] Add VGP encryption library to build
+* [BDAP] Add VGP encryption to link request
+* [BDAP] Update VGP submodule to most recent master branch
+* [BDAP] Add function to convert hex ed25519 pubkeys to bytes
+* [BDAP] Add, remove, get version number for encrypted data
+* [BDAP] Fix missing operation code translation
+* [BDAP] Decrypt v1 link data before adding to local wallet
+* [BDAP] Increase maximum link data size to 1592
+* [BDAP] Add more debug log print for links
+* Merge pull request #74 from duality-solutions/VGP
+* [BDAP GUI] Add user-friendly behavior, more error handling and cleanup
+* [BDAP GUI] Implement changes requested by PR reviewers
+* Merge pull request #73 from duality-solutions/qt-mockups
+* [BDAP] Update VGP library's gitignore
+* [VGP] Fix unit test and qt test make files
+* [BDAP QT] Remove net include from tablemodel class
+* Update German Translation
+* Stub BDAP UI translations to NL ts file
+* Pass placeholdertext through QObject::tr
+* [BDAP] Fix issue with deleting an account
+* [BDAP] Fix decrypting link request and accept data
+* [BDAP] Add missing license headers to code files
+* [Fluid] Fix get miner reward after first change
+* [Fluid] Move operations code to fluid directory
+* Bump client version to 2.4.6
+* Merge pull request #76 from duality-solutions/BDAP-Translate
 * Fixes for PS and UTXO sorting
 * Cleanup fee section
 * Increase Signatures Required and Total

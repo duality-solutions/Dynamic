@@ -1,0 +1,37 @@
+# Copyright (c) 2018 Duality Blockchain Solutions Developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+LIBVGP=
+LIBVGP_CPPFLAGS=
+
+LIBVGP_INT = bdap/vgp/libvgp.a
+EXTRA_LIBRARIES += $(LIBVGP_INT)
+LIBVGP += $(LIBVGP_INT)
+
+LIBVGP_CPPFLAGS += -I$(srcdir)/bdap/vgp/include
+
+LIBVGP_CPPFLAGS_INT =
+LIBVGP_CPPFLAGS_INT += -Wno-deprecated-declarations -fstack-protector-all -I$(srcdir)/bdap/vgp/src
+
+bdap_vgp_libvgp_a_CPPFLAGS = $(CPPFLAGS) $(LIBVGP_CPPFLAGS_INT) $(LIBVGP_CPPFLAGS)
+bdap_vgp_libvgp_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
+
+bdap_vgp_libvgp_a_SOURCES= \
+  bdap/vgp/src/aes256.c \
+  bdap/vgp/src/aes256ctr.c \
+  bdap/vgp/src/aes256gcm.c \
+  bdap/vgp/src/curve25519.c \
+  bdap/vgp/src/ed25519.c \
+  bdap/vgp/src/encryption.cpp \
+  bdap/vgp/src/encryption_core.c \
+  bdap/vgp/src/encryption_error.c \
+  bdap/vgp/src/ed25519.c \
+  bdap/vgp/src/fe.c \
+  bdap/vgp/src/ge.c \
+  bdap/vgp/src/os_rand.c \
+  bdap/vgp/src/rand.c \
+  bdap/vgp/src/sha512.c \
+  bdap/vgp/src/shake256.c \
+  bdap/vgp/src/shake256_rand.c \
+  bdap/vgp/src/utils.c

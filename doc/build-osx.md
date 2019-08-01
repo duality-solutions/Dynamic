@@ -5,7 +5,7 @@ This guide will show you how to build dynamicd (headless client) for OSX.
 Notes
 -----
 
-* Tested on OS X 10.7 through 10.12.6 on 64-bit Intel processors only.
+* Tested on OS X Lion 10.7 through to Mojave 10.14.2 on 64-bit Intel processors only.
 
 * All of the commands should be executed in a Terminal application. The
 built-in one is located in `/Applications/Utilities`.
@@ -38,8 +38,7 @@ Instructions: Homebrew
 
 #### Install dependencies using Homebrew
 
-    $ brew install git autoconf automake libevent libtool boost --c++11 miniupnpc openssl pkg-config qt berkeley-db4
-    $ brew install homebrew/versions/protobuf260 --c++11
+    $ brew install git autoconf automake libevent libtool boost --c++11 miniupnpc openssl pkg-config protobuf260 --c++11 qt berkeley-db4
     
 
 Because of OS X having LibreSSL installed we have to tell the compiler where OpenSSL is located:
@@ -49,7 +48,7 @@ Because of OS X having LibreSSL installed we have to tell the compiler where Ope
     
 or you can instead symlink your newly installed OpenSSL:
 
-    $ sudo ln -s openssl-1.0.2j /usr/local/openssl
+    $ sudo ln -s openssl-1.0.2q /usr/local/openssl
 
 (the above version of OpenSSL may differ to the one you have installed, amend to suit)
 
@@ -67,6 +66,10 @@ Prior to running the build commands:
 
     CPPFLAGS=-march=native
     
+At configure time:
+
+    --enable-avx2
+    
 CPU's with AVX2 support:
 
     Intel
@@ -76,33 +79,63 @@ CPU's with AVX2 support:
         Broadwell E processor, Q3 2016
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
-        Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2017
+        Coffee Lake processor, Q4 2017
+
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
-        
-### Building `dynamicd`
 
-1. Clone the github tree to get the source code and go into the directory.
+AVX512 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX512 optimisations can be enabled. 
 
-        git clone https://github.com/duality-solutions/dynamic.git
-        cd dynamic
+Prior to running the build commands:
 
-2.  Build dynamicd:
+    CPPFLAGS=-march=native
 
-        ./autogen.sh
-        ./configure
-        make
+At configure time:
 
-3.  It is also a good idea to build and run the unit tests:
+    --enable-avx512f
+    
+CPU's with AVX512 support:
 
-        make check
+    Intel
+        Xeon Phi x200/Knights Landing processor, 2016
+        Knights Mill processor, 2017
+        Skylake-SP processor, 2017
+        Skylake-X processor, 2017
+        Cannonlake processor, expected in 2019
+        Ice Lake processor, expected in 2019
+       
 
-4.  (Optional) You can also install dynamicd to your path:
+GPU Mining
+----------
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
 
-        make install
+For OpenCL you need the following:
 
+    sudo apt-get install ocl-icd-opencl-dev
+    
+For CUDA please visit: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+    
+At configure time for OpenCL(Nvidia/AMD):
+
+    --enable-gpu 
+
+At configure time for CUDA(Nvidia):
+
+    --enable-gpu --enable-cuda
+
+Example Build Command
+--------------------
+Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
+
+    ./autogen.sh && ./configure --with-gui --disable-gpu && make
+
+CLI and Deamon Only build without GPU support and without AVX support:
+
+    ./autogen.sh && ./configure --without-gui --disable-gpu && make
+    
 Use Qt Creator as IDE
 ------------------------
 You can use Qt Creator as IDE, for debugging and for manipulating forms, etc.

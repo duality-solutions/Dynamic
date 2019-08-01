@@ -375,6 +375,10 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
     case TransactionRecord::DeleteDomainGroup:
     case TransactionRecord::RevokeDomainGroup:
         return tr("BDAP Group Entry");
+    case TransactionRecord::LinkRequest:
+        return tr("BDAP Link Request");
+    case TransactionRecord::LinkAccept:
+        return tr("BDAP Link Accepted");
     case TransactionRecord::PrivateSendDenominate:
         return tr("PrivateSend Denominate");
     case TransactionRecord::PrivateSendCollateralPayment:
@@ -415,6 +419,9 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::UpdateDomainGroup:
     case TransactionRecord::DeleteDomainGroup:
     case TransactionRecord::RevokeDomainGroup:
+        return QIcon(":/icons/" + theme + "/tx_bdap");
+    case TransactionRecord::LinkRequest:
+    case TransactionRecord::LinkAccept:
         return QIcon(":/icons/" + theme + "/tx_bdap");
     default:
         return QIcon(":/icons/" + theme + "/tx_inout");
@@ -458,6 +465,10 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
         return tr("Delete Directory Group");
     case TransactionRecord::RevokeDomainGroup:
         return tr("Revoke Directory Group");
+    case TransactionRecord::LinkRequest:
+        return tr("Link Request");
+    case TransactionRecord::LinkAccept:
+        return tr("Link Accepted");
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;
@@ -481,7 +492,9 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
     case TransactionRecord::NewDomainGroup:
     case TransactionRecord::UpdateDomainGroup:
     case TransactionRecord::DeleteDomainGroup:
-    case TransactionRecord::RevokeDomainGroup: {
+    case TransactionRecord::RevokeDomainGroup:
+    case TransactionRecord::LinkRequest:
+    case TransactionRecord::LinkAccept: {
         QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
         if (label.isEmpty())
             return COLOR_BAREADDRESS;

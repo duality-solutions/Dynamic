@@ -4,7 +4,12 @@
 
 #include "bdap/domainentrydb.h"
 
+#include "amount.h"
 #include "base58.h"
+#include "bdap/fees.h"
+#include "coins.h"
+#include "bdap/utils.h"
+#include "utilmoneystr.h"
 #include "validation.h"
 #include "validationinterface.h"
 
@@ -17,15 +22,68 @@ CDomainEntryDB *pDomainEntryDB = NULL;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
 {
-    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry)) {
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntry(vchObjectPath, entry))
         return false;
-    }
-    
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
-        entry.SetNull();
-        return false;
-    }
+
     return !entry.IsNull();
+}
+
+bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry)
+{
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry))
+        return false;
+
+    return !entry.IsNull();
+}
+
+bool AccountPubKeyExists(const std::vector<unsigned char>& vchPubKey)
+{
+    CDomainEntry entry;
+    return GetDomainEntryPubKey(vchPubKey, entry);
+}
+
+bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    return pDomainEntryDB->DomainEntryExists(vchObjectPath);
+}
+
+bool DeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoAddDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+
+    bool fEraseEntryResult = pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath());
+    bool fErasePubKeyResult = pDomainEntryDB->EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return (fEraseEntryResult && fErasePubKeyResult);
+}
+
+bool UndoUpdateDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo update domain entry used in DisconnectBlock to handle forks
+    return false;
+}
+
+bool UndoDeleteDomainEntry(const CDomainEntry& entry)
+{
+    if (!pDomainEntryDB)
+        return false;
+    // TODO (BDAP): Implement undo delete domain entry used in DisconnectBlock to handle forks
+    return false;
 }
 
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
@@ -33,8 +91,8 @@ bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op)
     bool writeState = false;
     {
         LOCK(cs_bdap_entry);
-        writeState = Write(make_pair(std::string("dc"), entry.GetFullObjectPath()), entry) 
-                         && Write(make_pair(std::string("txid"), entry.txHash), entry.GetFullObjectPath());
+        writeState = Write(make_pair(std::string("dc"), entry.vchFullObjectPath()), entry) 
+                         && Write(make_pair(std::string("pk"), entry.DHTPublicKey), entry);
     }
     if (writeState)
         AddDomainEntryIndex(entry, op);
@@ -58,22 +116,32 @@ bool CDomainEntryDB::ReadDomainEntry(const std::vector<unsigned char>& vchObject
     return CDBWrapper::Read(make_pair(std::string("dc"), vchObjectPath), entry);
 }
 
-bool CDomainEntryDB::ReadDomainEntryTxId(const uint256& txHash, std::vector<unsigned char>& vchObjectPath) 
+bool CDomainEntryDB::ReadDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Read(make_pair(std::string("txid"), txHash), vchObjectPath);
+    return CDBWrapper::Read(make_pair(std::string("pk"), vchPubKey), entry);
 }
 
 bool CDomainEntryDB::EraseDomainEntry(const std::vector<unsigned char>& vchObjectPath) 
 {
     LOCK(cs_bdap_entry);
+    CDomainEntry entry;
+    if (!ReadDomainEntry(vchObjectPath, entry)) {
+        LogPrintf("CDomainEntryDB::%s -- ReadDomainEntry failed. vchObjectPath = %s\n", __func__, stringFromVch(vchObjectPath));
+        return false;
+    }
+
     return CDBWrapper::Erase(make_pair(std::string("dc"), vchObjectPath));
 }
 
-bool CDomainEntryDB::EraseDomainEntryTxId(const uint256& txHash) 
+bool CDomainEntryDB::EraseDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Erase(make_pair(std::string("txid"), txHash));
+    CDomainEntry entry;
+    if (!ReadDomainEntryPubKey(vchPubKey, entry)) 
+        return false;
+
+    return CDBWrapper::Erase(make_pair(std::string("pk"), vchPubKey));
 }
 
 bool CDomainEntryDB::DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
@@ -82,10 +150,10 @@ bool CDomainEntryDB::DomainEntryExists(const std::vector<unsigned char>& vchObje
     return CDBWrapper::Exists(make_pair(std::string("dc"), vchObjectPath));
 }
 
-bool CDomainEntryDB::DomainEntryExistsTxId(const uint256& txHash) 
+bool CDomainEntryDB::DomainEntryExistsPubKey(const std::vector<unsigned char>& vchPubKey) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Exists(make_pair(std::string("txid"), txHash));
+    return CDBWrapper::Exists(make_pair(std::string("pk"), vchPubKey));
 }
 
 bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
@@ -112,9 +180,8 @@ bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
                 if (GetDomainEntry(value, entry) && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime)
                 {
                     entriesRemoved++;
-                    EraseDomainEntryTxId(entry.txHash);
+                    EraseDomainEntryPubKey(entry.DHTPublicKey);
                 }
-
             }
             pcursor->Next();
         } catch (std::exception &e) {
@@ -138,11 +205,10 @@ void CDomainEntryDB::WriteDomainEntryIndex(const CDomainEntry& entry, const int 
 {
     if (IsArgSet("-zmqpubbdaprecord")) {
         UniValue oName(UniValue::VOBJ);
-        oName.push_back(Pair("_id", stringFromVch(entry.OID)));
         CDynamicAddress address(EncodeBase58(entry.WalletAddress));
         oName.push_back(Pair("address", address.ToString()));
         oName.push_back(Pair("expires_on", entry.nExpireTime));
-        oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
+        oName.push_back(Pair("dht_publickey", HexStr(entry.DHTPublicKey)));
         GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "bdap_record");
     }
     WriteDomainEntryIndexHistory(entry, op);
@@ -152,12 +218,18 @@ bool CDomainEntryDB::UpdateDomainEntry(const std::vector<unsigned char>& vchObje
 {
     LOCK(cs_bdap_entry);
 
-    if (!EraseDomainEntryTxId(entry.txHash))
+    if (!EraseDomainEntry(vchObjectPath)) {
+        LogPrintf("CDomainEntryDB::%s -- EraseDomainEntry failed. vchObjectPath = %s\n", __func__, stringFromVch(vchObjectPath));
         return false;
+    }
+    if (!EraseDomainEntryPubKey(entry.DHTPublicKey)) {
+        LogPrintf("CDomainEntryDB::%s -- EraseDomainEntryPubKey failed. vchObjectPath = %s\n", __func__, stringFromVch(entry.DHTPublicKey));
+        return false;
+    }
 
     bool writeState = false;
-    writeState = Update(make_pair(std::string("dc"), entry.GetFullObjectPath()), entry) 
-                    && Write(make_pair(std::string("txid"), entry.txHash), entry.GetFullObjectPath());
+    writeState = Update(make_pair(std::string("dc"), entry.vchFullObjectPath()), entry) 
+                    && Update(make_pair(std::string("pk"), entry.DHTPublicKey), entry);
     if (writeState)
         AddDomainEntryIndex(entry, OP_BDAP_MODIFY);
 
@@ -183,15 +255,13 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
                     EraseDomainEntry(key.second);
                 }
             }
-            else if (pcursor->GetKey(key) && key.first == "txid") 
+            else if (pcursor->GetKey(key) && key.first == "pk") 
             {
-                std::vector<unsigned char> value;
-                CDomainEntry entry;
-                pcursor->GetValue(value);
-                if (GetDomainEntry(value, entry) && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime)
+                pcursor->GetValue(dirEntry);
+                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= dirEntry.nExpireTime)
                 {
                     nRemoved++;
-                    EraseDomainEntryTxId(entry.txHash);
+                    EraseDomainEntryPubKey(dirEntry.DHTPublicKey);
                 }
             }
             pcursor->Next();
@@ -203,11 +273,12 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
 }
 
 // Lists active entries by domain name with paging support
-bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList)
+bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType, const std::string searchString)
 {
     // TODO: (bdap) implement paging
     // if vchObjectLocation is empty, list entries from all domains
     int index = 0;
+    bool addEntry = true;
     std::pair<std::string, CharString> key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
@@ -217,19 +288,39 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
         try {
             if (pcursor->GetKey(key) && key.first == "dc") {
                 pcursor->GetValue(entry);
-                if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
-                {
-                    UniValue oDomainEntryEntry(UniValue::VOBJ);
-                    BuildBDAPJson(entry, oDomainEntryEntry, true);
-                    oDomainEntryList.push_back(oDomainEntryEntry);
-                    index++;
-                }
+                //filter by accountType, unless DEFAULT
+                if ((entry.nObjectType == GetObjectTypeInt(accountType)) ||  (accountType == DEFAULT_ACCOUNT_TYPE)) {
+                    if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
+                    {
+                        addEntry = true; //always reset to true
+
+                        if (searchString.size() > 0) {
+                            //compare to ObjectID and Common Name
+                            std::string compareString(entry.ObjectID.begin(), entry.ObjectID.end());
+                            std::string compareCommonString(entry.CommonName.begin(), entry.CommonName.end());
+                            std::size_t found = compareString.find(searchString);
+                            std::size_t foundCommon = compareCommonString.find(searchString);
+
+                            if ((found==std::string::npos) && (foundCommon==std::string::npos))
+                                addEntry = false;
+                        }
+
+                        if (addEntry) 
+                        {
+                            UniValue oDomainEntryEntry(UniValue::VOBJ);
+                            BuildBDAPJson(entry, oDomainEntryEntry, false);
+                            oDomainEntryList.push_back(oDomainEntryEntry);
+                            index++;
+                        }
+                    }
+                } //if entry.nObjectType
             }
             pcursor->Next();
         }
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
+        } //try-catch
+
     }
     return true;
 }
@@ -256,29 +347,7 @@ bool CDomainEntryDB::GetDomainEntryInfo(const std::vector<unsigned char>& vchFul
     
     return true;
 }
-/*
-bool CDomainEntryDB::GetDomainEntryInfoTxId(const uint256& txHash, CDomainEntry& entry)
-{
-    std::vector<unsigned char> vchFullObjectPath;
-    if (!ReadDomainEntryTxId(txHash, vchFullObjectPath)) {
-        return false;
-    }
-    if (!ReadDomainEntry(vchFullObjectPath, entry)) {
-        return false;
-    }
-    
-    return true;
-}
 
-bool CDomainEntryDB::GetDomainEntryInfoTxId(const uint256& txHash, std::vector<unsigned char>& vchFullObjectPath)
-{
-    if (!ReadDomainEntryTxId(txHash, vchFullObjectPath)) {
-        return false;
-    }
-    
-    return true;
-}
-*/
 bool CheckDomainEntryDB()
 {
     if (!pDomainEntryDB)
@@ -309,7 +378,6 @@ void CleanupLevelDB(int& nRemoved)
     FlushLevelDB();
 }
 
-
 static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvchOpParameters, std::string& errorMessage)
 {
     if (entry.IsNull() == true)
@@ -324,21 +392,33 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
         return false;
     }
 
+    if (vvchOpParameters.size() != 3)
+    {
+        errorMessage = "CommonDataCheck failed! Not enough parameters.";
+        return false;
+    }
+
     if (entry.GetFullObjectPath() != stringFromVch(vvchOpParameters[0]))
     {
         errorMessage = "CommonDataCheck failed! Script operation parameter does not match entry entry object.";
         return false;
     }
-    
-    if (entry.DomainComponent != vchDefaultDomainName)
+
+    if (entry.DHTPublicKey != vvchOpParameters[1])
     {
-        errorMessage = "CommonDataCheck failed! Must use default domain.";
+        errorMessage = "CommonDataCheck failed! DHT public key mismatch.";
         return false;
     }
 
-    if (entry.OrganizationalUnit != vchDefaultPublicOU && entry.OrganizationalUnit != vchDefaultUserOU && entry.OrganizationalUnit != vchDefaultGroupOU)
+    if (vvchOpParameters[2].size() > 10)
     {
-        errorMessage = "CommonDataCheck failed! Must use default organizational units.";
+        errorMessage = "CommonDataCheck failed! Expire date or expire months invalid.";
+        return false;
+    }
+
+    if (entry.DomainComponent != vchDefaultDomainName)
+    {
+        errorMessage = "CommonDataCheck failed! Must use default domain.";
         return false;
     }
 
@@ -348,10 +428,16 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
         return false;
     }
 
+    if (entry.OrganizationalUnit != vchDefaultPublicOU)
+    {
+        errorMessage = "CommonDataCheck failed! Must use default public organizational unit.";
+        return false;
+    }
+
     return true;
 }
 
-bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
@@ -363,8 +449,14 @@ bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scrip
     CDomainEntry getDomainEntry;
     if (GetDomainEntry(entry.vchFullObjectPath(), getDomainEntry))
     {
-        errorMessage = "CheckNewDomainEntryTxInputs: - The entry " + getDomainEntry.GetFullObjectPath() + " already exists.  Add new entry failed!";
-        return error(errorMessage.c_str());
+        if (entry.txHash != txHash) {
+            errorMessage = "CheckNewDomainEntryTxInputs: - The entry " + getDomainEntry.GetFullObjectPath() + " already exists.  Add new entry failed!";
+            return error(errorMessage.c_str());
+        }
+        else {
+            LogPrintf("%s -- Already have entry %s in local database. Skipping add entry step.\n", __func__, entry.GetFullObjectPath());
+            return true;
+        }
     }
 
     if (!pDomainEntryDB)
@@ -382,18 +474,19 @@ bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scrip
     return FlushLevelDB();
 }
 
-bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
-    //if exists, check for owner's signature
-    if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
+    if (vvchOpParameters.size() == 0) {
+        errorMessage = "CheckDeleteDomainEntryTxInputs: - Invalid delete operation parameters. This delete operation failed!";
         return error(errorMessage.c_str());
-
+    }
     if (fJustCheck)
         return true;
 
+    std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
     CDomainEntry prevDomainEntry;
-    if (!GetDomainEntry(entry.vchFullObjectPath(), prevDomainEntry))
+    if (!GetDomainEntry(vchFullObjectPath, prevDomainEntry))
     {
         errorMessage = "CheckDeleteDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this delete operation failed!";
         return error(errorMessage.c_str());
@@ -427,7 +520,10 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
         }
     }
 
-    if (!pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath()))
+    //Remove PubKey entry also (2 records in LevelDB for each domainentry)
+    pDomainEntryDB->EraseDomainEntryPubKey(prevDomainEntry.DHTPublicKey);
+
+    if (!pDomainEntryDB->EraseDomainEntry(vchFullObjectPath))
     {
         errorMessage = "CheckDeleteDomainEntryTxInputs: - Error deleting entry entry in LevelDB; this delete operation failed!";
         return error(errorMessage.c_str());
@@ -436,7 +532,7 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     return FlushLevelDB();
 }
 
-bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckUpdateDomainEntryTxInputs(CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash, const int& nMonths, const uint32_t& nBlockTime,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //if exists, check for owner's signature
@@ -449,8 +545,14 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     CDomainEntry prevDomainEntry;
     if (!GetDomainEntry(entry.vchFullObjectPath(), prevDomainEntry))
     {
-        errorMessage = "CheckUpdateDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this update operation failed!";
-        return error(errorMessage.c_str());
+        if (entry.txHash != txHash) {
+            errorMessage = "CheckUpdateDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this update operation failed!";
+            return error(errorMessage.c_str());
+        }
+        else {
+            LogPrintf("%s -- Already have entry %s in local database. Skipping update entry step.\n", __func__, entry.GetFullObjectPath());
+            return true;
+        }
     }
 
     CTxDestination bdapDest;
@@ -480,17 +582,19 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
             return error(errorMessage.c_str());
         }
     }
-
+    entry.nExpireTime = AddMonthsToBlockTime(prevDomainEntry.nExpireTime, nMonths);
+    LogPrint("bdap", "%s -- prevDomainEntry.nExpireTime = %d, AddMonthsToBlockTime() = %d, nMonths = %d\n", __func__, 
+                    prevDomainEntry.nExpireTime, AddMonthsToBlockTime(prevDomainEntry.nExpireTime, nMonths), nMonths);
     if (!pDomainEntryDB->UpdateDomainEntry(entry.vchFullObjectPath(), entry))
     {
-        errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry entry in LevelDB; this update operation failed!";
+        errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry in LevelDB; this update operation failed!";
         return error(errorMessage.c_str());
     }
 
     return FlushLevelDB();
 }
 
-bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+static bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                 std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches entry data in leveldb
@@ -499,36 +603,8 @@ bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scri
     return false;
 }
 
-bool CheckExecuteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                   std::string& errorMessage, bool fJustCheck)
-{
-    //check name in operation matches entry data in leveldb
-    //check if exists already
-    //if exists, check for owner's signature
-    return false;
-}
-
-bool CheckBindDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                std::string& errorMessage, bool fJustCheck)
-{
-    //check names in operation matches entry data in leveldb
-    //check if request or accept response
-    //check if names exists already
-    //if exists, check for owner's signature
-    return false;
-}
-
-bool CheckRevokeDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                  std::string& errorMessage, bool fJustCheck)
-{
-    //check name in operation matches entry data in leveldb
-    //check if names exists already
-    //if exists, check for fluid signature
-    return false;
-}
-
-bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
-                            int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
+                                const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
@@ -536,56 +612,151 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
         return true;
     }
 
-    //if (fDebug && !bSanityCheck)
-        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
-    
-    CScript scriptOp;
-    vchCharString vvchOpParameters;
-    if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("Transaction does not contain BDAP operation script!");
-        return error(errorMessage.c_str());
-    }
-    const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
-    //if (fDebug)
-        LogPrintf("CheckDomainEntryTxInputs, strOperationType= %s \n", strOperationType);
-    
+    LogPrint("bdap", "%s -- BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nDataOut;
-    
-    bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
-    if(bData && !entry.UnserializeFromData(vchData, vchHash))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
-        return error(errorMessage.c_str());
+    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+    if (strOperationType != "bdap_delete_account") {
+        bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
+        if(bData && !entry.UnserializeFromData(vchData, vchHash))
+        {
+            errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
+            LogPrintf("%s -- %s \n", __func__, errorMessage);
+            return error(errorMessage.c_str());
+        }
+
+        if(!entry.ValidateValues(errorMessage))
+        {
+            errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
+            LogPrintf("%s -- %s \n", __func__, errorMessage);
+            return error(errorMessage.c_str());
+        }
+
+        entry.txHash = tx->GetHash();
+        entry.nHeight = nHeight;
     }
 
-    if(!entry.ValidateValues(errorMessage))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
-        return error(errorMessage.c_str());
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (strOperationType == "bdap_new_account") {
+        if (vvchArgs.size() != 3) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
+
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
+
+        if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        LogPrint("bdap", "%s -- nMonths %d, monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, 
+                                nMonths, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
+        // extract amounts from tx.
+        CAmount dataAmount, opAmount;
+        if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+            errorMessage = "Unable to extract BDAP amounts from transaction";
+            return false;
+        }
+        LogPrint("bdap", "%s -- dataAmount %d, opAmount %d\n", __func__, FormatMoney(dataAmount), FormatMoney(opAmount));
+        if (monthlyFee > dataAmount) {
+            LogPrintf("%s -- Invalid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d but should be %d\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(monthlyFee));
+            errorMessage = "Invalid BDAP monthly registration fee amount for new BDAP account";
+            return false;
+        }
+        else {
+            LogPrint("bdap", "%s -- Valid BDAP monthly registration fee amount for new BDAP account. Monthly paid %d, should be %d.\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(monthlyFee));
+        }
+        if (depositFee > opAmount) {
+            LogPrintf("%s -- Invalid BDAP deposit fee amount for new BDAP account. Deposit paid %d but should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
+            errorMessage = "Invalid BDAP deposit fee amount for new BDAP account";
+            return false;
+        }
+        else {
+            LogPrint("bdap", "%s -- Valid BDAP deposit fee amount for new BDAP account. Deposit paid %d, should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
+        }
+        entry.nExpireTime = AddMonthsToBlockTime(nBlockTime, nMonths);
+
+        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
+    else if (strOperationType == "bdap_delete_account") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_DELETE, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to delete a BDAP account";
+            return false;
+        }
 
-    entry.txHash = tx->GetHash();
-    entry.nHeight = nHeight;
+        return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
+    }
+    else if (strOperationType == "bdap_update_account") {
+        if (vvchArgs.size() != 3) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        std::string strMonths = stringFromVch(vvchArgs[2]);
+        std::size_t foundMonth = strMonths.find("Month");
+        if (foundMonth != std::string::npos)
+            strMonths.replace(foundMonth, 5, "");
 
-    if (strOperationType == "bdap_new")
-        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_delete")
-        return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_update")
-        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_move")
-        return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_execute")
-        return CheckExecuteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_bind")
-        return CheckBindDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_revoke")
-        return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        uint32_t nMonths;
+        ParseUInt32(strMonths, &nMonths);
+        if (nMonths >= 10000)
+            nMonths = 24;
+        if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to add a new BDAP account";
+            return false;
+        }
+        LogPrint("bdap", "%s -- nMonths %d, monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, 
+                                nMonths, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
+        // extract amounts from tx.
+        CAmount dataAmount, opAmount;
+        if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+            errorMessage = "Unable to extract BDAP amounts from transaction";
+            return false;
+        }
+        LogPrint("bdap", "%s -- dataAmount %d, opAmount %d\n", __func__, FormatMoney(dataAmount), FormatMoney(opAmount));
+        if (monthlyFee > dataAmount) {
+            LogPrintf("%s -- Invalid BDAP data fee amount for updated BDAP account. Total paid %d but should be %d\n", __func__, 
+                                dataAmount, monthlyFee);
+            errorMessage = "Invalid BDAP deposit fee amount for updated BDAP account";
+            return false;
+        } else {
+            LogPrint("bdap", "%s -- Valid BDAP data fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
+                                FormatMoney(dataAmount), FormatMoney(monthlyFee));
+        }
+        if (oneTimeFee > opAmount) {
+            LogPrintf("%s -- Invalid BDAP one-time fee amount for updated BDAP account. Total paid %d but should be %d\n", __func__, 
+                                FormatMoney(dataAmount), FormatMoney(monthlyFee));
+            errorMessage = "Invalid BDAP one-time fee amount for updated BDAP account";
+            return false;
+        } else {
+            LogPrint("bdap", "%s -- Valid BDAP one-time fee amount for updated BDAP account. Total paid %d, should be %d\n", __func__, 
+                                FormatMoney(dataAmount), FormatMoney(monthlyFee));
+        }
+        // Add previous expire date plus additional months
+        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, tx->GetHash(), nMonths, nBlockTime, errorMessage, fJustCheck);
+    }
+    else if (strOperationType == "bdap_move_account") {
+        uint16_t nMonths = 0;
+        if (!GetBDAPFees(OP_BDAP_MOVE, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), nMonths, monthlyFee, oneTimeFee, depositFee)) {
+            errorMessage = "Failed to get fees to move a BDAP account to another domain";
+            return false;
+        }
+
+        return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
+    }
 
     return false;
 }

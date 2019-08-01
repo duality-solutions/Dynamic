@@ -77,11 +77,22 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CFluidDynode operator=(const CFluidDynode& b)
     {
         FluidScript = b.FluidScript;
         DynodeReward = b.DynodeReward;
         nTimeStamp = b.nTimeStamp;
+        SovereignAddresses.clear(); //clear out previous entries
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }

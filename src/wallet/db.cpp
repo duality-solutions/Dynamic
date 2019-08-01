@@ -350,6 +350,7 @@ bool CDBEnv::RemoveDb(const std::string& strFile)
 
 bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
 {
+    LogPrintf("CDB::%s: Rewriting %s...\n", __func__, strFile);
     while (true) {
         {
             LOCK(bitdb.cs_db);
@@ -360,7 +361,6 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
                 bitdb.mapFileUseCount.erase(strFile);
 
                 bool fSuccess = true;
-                LogPrintf("CDB::Rewrite: Rewriting %s...\n", strFile);
                 std::string strFileRes = strFile + ".rewrite";
                 { // surround usage of db with extra {}
                     CDB db(strFile.c_str(), "r");
@@ -376,7 +376,6 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
                         LogPrintf("CDB::Rewrite: Can't create database file %s\n", strFileRes);
                         fSuccess = false;
                     }
-
                     Dbc* pcursor = db.GetCursor();
                     if (pcursor)
                         while (fSuccess) {
@@ -429,7 +428,6 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
     }
     return false;
 }
-
 
 void CDBEnv::Flush(bool fShutdown)
 {

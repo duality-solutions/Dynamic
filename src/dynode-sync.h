@@ -82,6 +82,8 @@ public:
     void UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman& connman);
 
     void DoMaintenance(CConnman& connman);
+    double SyncProgress();
+
 };
 
 #endif // DYNAMIC_DYNODE_SYNC_H

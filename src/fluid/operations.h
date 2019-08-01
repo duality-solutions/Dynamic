@@ -15,7 +15,7 @@
 class HexFunctions
 {
 public:
-    std::string StringToHex(std::string input)
+    std::string StringToHex(const std::string& input)
     {
         static const char* const lut = "0123456789ABCDEF";
         size_t len = input.length();
@@ -30,7 +30,7 @@ public:
         return output;
     }
 
-    std::string HexToString(std::string hex)
+    std::string HexToString(const std::string& hex)
     {
         int len = hex.length();
         std::string newString;
@@ -56,11 +56,11 @@ public:
 };
 
 void ScrubString(std::string& input, bool forInteger = false);
-void SeparateString(std::string input, std::vector<std::string>& output, bool subDelimiter = false);
-void SeparateFluidOpString(std::string input, std::vector<std::string>& output);
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter = false);
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter = false);
-std::string GetRidOfScriptStatement(std::string input, int position = 1);
+void SeparateString(const std::string& input, std::vector<std::string>& output, bool subDelimiter = false);
+void SeparateFluidOpString(const std::string& input, std::vector<std::string>& output);
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const bool subDelimiter = false);
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const std::string& stringThree, const bool subDelimiter = false);
+std::string GetRidOfScriptStatement(const std::string& input, const int& position = 1);
 
 extern std::string PrimaryDelimiter;
 extern std::string SubDelimiter;
@@ -69,9 +69,9 @@ extern std::string SignatureDelimiter;
 class COperations : public HexFunctions
 {
 public:
-    bool VerifyAddressOwnership(CDynamicAddress dynamicAddress);
-    bool SignTokenMessage(CDynamicAddress address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch = true);
-    bool GenericSignMessage(const std::string message, std::string& signedString, CDynamicAddress signer);
+    bool VerifyAddressOwnership(const CDynamicAddress& dynamicAddress);
+    bool SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch = true);
+    bool GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
 };
 
 #endif // OPERATIONS_H

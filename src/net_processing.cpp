@@ -10,6 +10,7 @@
 #include "addrman.h"
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/vgpmessage.h"
 #include "blockencodings.h"
 #include "chainparams.h"
 #include "consensus/validation.h"
@@ -1477,7 +1478,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         if (fLogIPs)
             remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
 
-        LogPrintf("receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
+        LogPrint("net", "receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
             cleanSubVer, pfrom->nVersion,
             pfrom->nStartingHeight, addrMe.ToString(), pfrom->id,
             remoteAddr);
@@ -2436,7 +2437,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 return error("invalid header received");
             }
         }
-
+        if (!pindexLast) {
+            LogPrintf("*** ProcessMessage Error -- ProcessNewBlockHeaders returned an invalid pindexLast.  Avoid assert(pindexLast);\n");
+            return error("ProcessNewBlockHeaders returned an invalid pindexLast.");
+        }
         {
             LOCK(cs_main);
             CNodeState* nodestate = State(pfrom->GetId());
@@ -2684,6 +2688,63 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
     }
 
+    else if (strCommand == NetMsgType::VGPMESSAGE) {
+        CVGPMessage message;
+        vRecv >> message;
+        CUnsignedVGPMessage unsignedMessage(message.vchMsg);
+
+        LogPrint("bdap", "%s -- VGP message received: size = %d, SubjectID = %s, MessageID = %s, HashID = %s \n", 
+                        __func__, message.vchMsg.size(), unsignedMessage.SubjectID.ToString(), unsignedMessage.MessageID.ToString(), message.GetHash().ToString());
+
+        std::string strErrorMessage = "";
+        int statusBan = message.ProcessMessage(strErrorMessage);
+        if (strErrorMessage.size() > 0)
+        {
+            LogPrint("bdap", "%s -- Error processing message. Hash %s,  MessageID %s, SubjectID %s, Error %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString(), strErrorMessage);
+        }
+        if (statusBan == 0)
+        {
+            // Relay
+            pfrom->setKnown.insert(message.GetHash());
+            {
+                connman.ForEachNode([&message, &connman](CNode* pnode) {
+                    message.RelayTo(pnode, connman);
+                });
+            }
+        }
+        else if (statusBan > 0)
+        {
+            Misbehaving(pfrom->GetId(), statusBan);
+        }
+        else if (statusBan == -1)
+        {
+            LogPrint("bdap", "%s -- Duplicate message recieved. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+        else if (statusBan == -2)
+        {
+            LogPrint("bdap", "%s -- Message either too old or timestamp is in the future. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+        else if (statusBan == -3)
+        {
+            LogPrint("bdap", "%s -- Timestamp is greater than relay until time. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have a timestamp greater than the relay until time so ban node.
+        }
+        else if (statusBan == -4)
+        {
+            LogPrint("bdap", "%s -- Relay time is too much.  max relay is 120 seconds. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+            Misbehaving(pfrom->GetId(), 10); // there is no reason to have longer relay until time span so ban node.
+        }
+        else
+        {
+            LogPrintf("%s -- Unkown ProcessMessage status. Hash %s,  MessageID %s, SubjectID %s\n", __func__, 
+                                message.GetHash().ToString(), unsignedMessage.MessageID.ToString(), unsignedMessage.SubjectID.ToString());
+        }
+    }
 
     else if (strCommand == NetMsgType::FILTERLOAD) {
         CBloomFilter filter;

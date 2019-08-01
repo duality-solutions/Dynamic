@@ -54,6 +54,7 @@ public:
         SECRET_KEY,     // BIP16
         EXT_PUBLIC_KEY, // BIP32
         EXT_SECRET_KEY, // BIP32
+        STEALTH_ADDRESS, // Used for BDAP links
 
         MAX_BASE58_TYPES
     };

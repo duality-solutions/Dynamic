@@ -46,6 +46,8 @@ DYNAMIC_TESTS =\
   test/base32_tests.cpp \
   test/base58_tests.cpp \
   test/base64_tests.cpp \
+  test/bdap_link_tests.cpp \
+  test/bdap_vgp_message_tests.cpp \
   test/bip32_tests.cpp \
   test/bip39_tests.cpp \
   test/blockencodings_tests.cpp \
@@ -57,6 +59,8 @@ DYNAMIC_TESTS =\
   test/coins_tests.cpp \
   test/compress_tests.cpp \
   test/crypto_tests.cpp \
+  test/dht_data_tests.cpp \
+  test/dht_key_tests \
   test/DoS_tests.cpp \
   test/getarg_tests.cpp \
   test/governance_validators_tests.cpp \
@@ -109,14 +113,15 @@ endif
 
 test_test_dynamic_SOURCES = $(DYNAMIC_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
 test_test_dynamic_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_dynamic_LDADD = $(LIBDYNAMIC_SERVER) $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CRYPTO) $(LIBUNIVALUE) \
+
+test_test_dynamic_LDADD = $(LIBDYNAMIC_SERVER) $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CONSENSUS) $(LIBDYNAMIC_CRYPTO) $(LIBVGP) $(LIBUNIVALUE) $(LIBTORRENT) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 test_test_dynamic_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 if ENABLE_WALLET
 test_test_dynamic_LDADD += $(LIBDYNAMIC_WALLET)
 endif
 
-test_test_dynamic_LDADD += $(LIBDYNAMIC_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+test_test_dynamic_LDADD += $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 test_test_dynamic_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ

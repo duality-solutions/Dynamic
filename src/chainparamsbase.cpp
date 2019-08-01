@@ -15,6 +15,7 @@
 const std::string CBaseChainParams::MAIN = "main";
 const std::string CBaseChainParams::TESTNET = "test";
 const std::string CBaseChainParams::REGTEST = "regtest";
+const std::string CBaseChainParams::PRIVATENET = "privatenet";
 
 void AppendParamsHelpMessages(std::string& strUsage, bool debugHelp)
 {
@@ -67,6 +68,20 @@ public:
 };
 static CBaseRegTestParams regTestParams;
 
+/**
+ * Privatenet
+ */
+class CBasePrivateNetParams : public CBaseChainParams
+{
+public:
+    CBasePrivateNetParams()
+    {
+        nRPCPort = 33650;
+        strDataDir = "privatenet";
+    }
+};
+static CBasePrivateNetParams privateNetParams;
+
 static CBaseChainParams* pCurrentBaseParams = 0;
 
 const CBaseChainParams& BaseParams()
@@ -83,6 +98,8 @@ CBaseChainParams& BaseParams(const std::string& chain)
         return testNetParams;
     else if (chain == CBaseChainParams::REGTEST)
         return regTestParams;
+    else if (chain == CBaseChainParams::PRIVATENET)
+        return privateNetParams;
     else
         throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }
@@ -96,6 +113,7 @@ std::string ChainNameFromCommandLine()
 {
     bool fRegTest = GetBoolArg("-regtest", false);
     bool fTestNet = GetBoolArg("-testnet", false);
+    bool fPrivateNet = GetBoolArg("-privatenet", false);
 
     if (fTestNet && fRegTest)
         throw std::runtime_error("Invalid combination of -regtest and -testnet.");
@@ -103,6 +121,8 @@ std::string ChainNameFromCommandLine()
         return CBaseChainParams::REGTEST;
     if (fTestNet)
         return CBaseChainParams::TESTNET;
+    if (fPrivateNet)
+        return CBaseChainParams::PRIVATENET;
     return CBaseChainParams::MAIN;
 }
 

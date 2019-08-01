@@ -84,8 +84,8 @@ QValidator::State DynamicAddressCheckValidator::validate(QString& input, int& po
 {
     Q_UNUSED(pos);
     // Validate the passed Dynamic address
-    CDynamicAddress addr(input.toStdString());
-    if (addr.IsValid())
+    const CTxDestination dest = DecodeDestination(input.toStdString());
+    if (IsValidDestination(dest))
         return QValidator::Acceptable;
 
     return QValidator::Invalid;

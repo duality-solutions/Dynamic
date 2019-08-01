@@ -139,7 +139,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     if (fDynodeMode)
         return;
     if (fLiteMode)
-        return; // ignore all Dash related functionality
+        return; // ignore all Dynamic related functionality
     if (!dynodeSync.IsBlockchainSynced())
         return;
     if (strCommand == NetMsgType::PSSTATUSUPDATE) {

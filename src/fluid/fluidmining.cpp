@@ -68,8 +68,6 @@ bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut)
 
 bool CFluidMining::UnserializeFromTx(const CTransaction& tx)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     int nOut;
     if (!GetFluidMiningData(tx, *this, nOut)) {
         SetNull();
@@ -80,8 +78,6 @@ bool CFluidMining::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidMining::UnserializeFromScript(const CScript& fluidScript)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     if (!GetFluidMiningData(fluidScript, *this)) {
         SetNull();
         return false;

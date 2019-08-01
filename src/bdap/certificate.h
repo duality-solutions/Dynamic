@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_BDAP_ENTRYCERTIFICATE_H
-#define DYNAMIC_BDAP_ENTRYCERTIFICATE_H
+#ifndef DYNAMIC_BDAP_CERTIFICATE_H
+#define DYNAMIC_BDAP_CERTIFICATE_H
 
 #include "bdap.h"
 #include "bdap/domainentry.h"
@@ -12,12 +12,13 @@
 
 class CTransaction;
 
-class CEntryCertificate {
+class CCertificate {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     CharString OwnerFullPath;  // name of the owner's full domain entry path
     CharString Name; // Certificate name
+    CharString Category; // Certificate category
     CharString CertificateData;
     CharString AuthorityFullPath;
     CharString AuthoritySignature;
@@ -27,20 +28,21 @@ public:
     CDomainEntry* OwnerDomainEntry;
     CDomainEntry* AuthorityDomainEntry;
 
-    CEntryCertificate() {
+    CCertificate() {
         SetNull();
     }
 
-    CEntryCertificate(const CTransactionRef& tx) {
+    CCertificate(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
 
     inline void SetNull()
     {
-        nVersion = CEntryCertificate::CURRENT_VERSION;
+        nVersion = CCertificate::CURRENT_VERSION;
         OwnerFullPath.clear();
         Name.clear();
+        Category.clear();
         CertificateData.clear();
         AuthorityFullPath.clear();
         AuthoritySignature.clear();
@@ -58,6 +60,7 @@ public:
         READWRITE(this->nVersion);
         READWRITE(OwnerFullPath);
         READWRITE(Name);
+        READWRITE(Category);
         READWRITE(CertificateData);
         READWRITE(AuthorityFullPath);
         READWRITE(AuthoritySignature);
@@ -66,17 +69,19 @@ public:
         READWRITE(txHash);
     }
 
-    inline friend bool operator==(const CEntryCertificate &a, const CEntryCertificate &b) {
-        return (a.OwnerFullPath == b.OwnerFullPath && a.Name == b.Name && a.CertificateData == b.CertificateData && a.nExpireTime == b.nExpireTime);
+    inline friend bool operator==(const CCertificate &a, const CCertificate &b) {
+        return (a.OwnerFullPath == b.OwnerFullPath && a.Name == b.Name && a.Category == b.Category 
+                    && a.CertificateData == b.CertificateData && a.nExpireTime == b.nExpireTime);
     }
 
-    inline friend bool operator!=(const CEntryCertificate &a, const CEntryCertificate &b) {
+    inline friend bool operator!=(const CCertificate &a, const CCertificate &b) {
         return !(a == b);
     }
 
-    inline CEntryCertificate operator=(const CEntryCertificate &b) {
+    inline CCertificate operator=(const CCertificate &b) {
         OwnerFullPath = b.OwnerFullPath;
         Name = b.Name;
+        Category = b.Category;
         CertificateData = b.CertificateData;
         AuthorityFullPath = b.AuthorityFullPath;
         AuthoritySignature = b.AuthoritySignature;
@@ -104,4 +109,4 @@ public:
     bool ValidateValues(std::string& errorMessage);
 };
 
-#endif // DYNAMIC_BDAP_ENTRYCERTIFICATE_H
+#endif // DYNAMIC_BDAP_CERTIFICATE_H

@@ -103,7 +103,7 @@ UniValue getinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("connections", (int)g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL)));
     obj.push_back(Pair("proxy", (proxy.IsValid() ? proxy.proxy.ToStringIPPort() : std::string())));
     obj.push_back(Pair("difficulty", (double)GetDifficulty()));
-    obj.push_back(Pair("testnet", Params().NetworkIDString() == CBaseChainParams::TESTNET));
+    obj.push_back(Pair("testnet", Params().NetworkIDString() == CBaseChainParams::TESTNET || Params().NetworkIDString() == CBaseChainParams::PRIVATENET));
 #ifdef ENABLE_WALLET
     if (pwalletMain) {
         obj.push_back(Pair("keypoololdest", pwalletMain->GetOldestKeyPoolTime()));
@@ -124,10 +124,10 @@ UniValue debug(const JSONRPCRequest& request)
         throw std::runtime_error(
             "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
             "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
-            "dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject )\n"
-            "Change debug category on the fly. Specify single category or use comma to specify many.\n"
+            "dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject|dht|bdap|validation|stealth|)\n"
+            "Change debug category on the fly. Specify single category or use a plus to specify many.\n"
             "\nExamples:\n" +
-            HelpExampleCli("debug", "dynamic") + HelpExampleRpc("debug", "dynamic,net"));
+            HelpExampleCli("debug", "dynamic") + HelpExampleRpc("debug", "dynamic+net"));
 
     std::string strMode = request.params[0].get_str();
 
@@ -216,6 +216,15 @@ public:
         }
         return obj;
     }
+
+    UniValue operator()(const CStealthAddress& sxAddr) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isstealthaddress", true);
+        obj.pushKV("prefix_num_bits", sxAddr.prefix_number_bits);
+        obj.pushKV("prefix_bitfield", strprintf("0x%04x", sxAddr.prefix_bitfield));
+        return obj;
+    }
+
 };
 #endif
 

@@ -1,12 +1,6 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 [![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
-
-Graph on Pull Request History
-====================================
-
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
 # **Dynamic (DYN) v2.4.0.0**
 
@@ -31,6 +25,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
+* Max Block Size: 4MB
 
 
 [Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic can be used to run incentivized Dynodes; the second tier of nodes on the network processing, verifying, validating and storing data.
@@ -116,7 +111,7 @@ It is required to build Dynamic on Ubuntu 18.04LTS(Bionic) or later due to C++14
 
 Build requirements:
 
-    sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
+    sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
     
 For Ubuntu 18.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
 
@@ -316,8 +311,8 @@ CPU's with AVX2 support:
         Broadwell E processor, Q3 2016
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
-        Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2018
+        Coffee Lake processor, Q4 2017
+
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
@@ -337,28 +332,52 @@ CPU's with AVX512 support:
         Knights Mill processor, 2017
         Skylake-SP processor, 2017
         Skylake-X processor, 2017
-        Cannonlake processor, expected in 2018
-        Ice Lake processor, expected in 2018
+        Cannonlake processor, expected in 2019
+        Ice Lake processor, expected in 2019
        
+
 GPU Mining
 ----------
-To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. 
-(Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer)
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
 
-At configure time for non-Nvidia GPU's:
+For OpenCL you need the following:
 
-    --enable-gpu --disable-cuda 
+    sudo apt-get install ocl-icd-opencl-dev
+    
+For CUDA please visit: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+    
+At configure time for OpenCL(Nvidia/AMD):
 
-At configure time for Nvidia GPU's:
+    --enable-gpu 
+
+At configure time for CUDA(Nvidia):
 
     --enable-gpu --enable-cuda
 
 Example Build Command
 --------------------
-Qt Wallet and Deamon, CLI version build without GPU support:
+Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
 
     ./autogen.sh && ./configure --with-gui --disable-gpu && make
 
-CLI and Deamon Only build without GPU support:
+CLI and Deamon Only build without GPU support and without AVX support:
 
     ./autogen.sh && ./configure --without-gui --disable-gpu && make
+
+Use Qt Creator as IDE
+------------------------
+You can use Qt Creator as IDE, for debugging and for manipulating forms, etc.
+Download Qt Creator from http://www.qt.io/download/. Download the "community edition" and only install Qt Creator (uncheck the rest during the installation process).
+
+1. Make sure you installed everything through homebrew mentioned above 
+2. Do a proper ./configure --with-gui=qt5 --enable-debug
+3. In Qt Creator do "New Project" -> Import Project -> Import Existing Project
+4. Enter "dynamic-qt" as project name, enter src/qt as location
+5. Leave the file selection as it is
+6. Confirm the "summary page"
+7. In the "Projects" tab select "Manage Kits..."
+8. Select the default "Desktop" kit and select "Clang (x86 64bit in /usr/bin)" as compiler
+9. Select LLDB as debugger (you might need to set the path to your installtion)
+10. Start debugging with Qt Creator
+
+

@@ -1,0 +1,289 @@
+# Copyright (c) 2018 Duality Blockchain Solutions Developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+LIBTORRENT_INT = libtorrent/librasterbar.a
+EXTRA_LIBRARIES += $(LIBTORRENT_INT)
+LIBTORRENT += $(LIBTORRENT_INT)
+
+LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include
+LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/ed25519/src
+
+LIBTORRENT_CPPFLAGS_INT =
+LIBTORRENT_CPPFLAGS_INT += -Wno-deprecated-declarations -fstack-protector-all -I$(srcdir)/libtorrent
+
+if TARGET_WINDOWS
+LIBTORRENT_CPPFLAGS_INT += -DWIN32_LEAN_AND_MEAN -D__USE_W32_SOCKETS -DWIN32 -D_WIN32 -DBOOST_ASIO_ENABLE_CANCELIO -D__USE_MINGW_ANSI_STDIO=1
+endif
+
+if TARGET_DARWIN
+AM_LDFLAGS += -framework CoreFoundation -framework SystemConfiguration
+endif
+
+libtorrent_librasterbar_a_CPPFLAGS = $(CPPFLAGS) $(LIBTORRENT_CPPFLAGS_INT) $(LIBTORRENT_CPPFLAGS)
+libtorrent_librasterbar_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
+
+libtorrent_librasterbar_a_SOURCES= \
+  libtorrent/src/add_torrent_params.cpp             \
+  libtorrent/src/alert.cpp                          \
+  libtorrent/src/alert_manager.cpp                  \
+  libtorrent/src/announce_entry.cpp                 \
+  libtorrent/src/assert.cpp                         \
+  libtorrent/src/bandwidth_limit.cpp                \
+  libtorrent/src/bandwidth_manager.cpp              \
+  libtorrent/src/bandwidth_queue_entry.cpp          \
+  libtorrent/src/bdecode.cpp                        \
+  libtorrent/src/bitfield.cpp                       \
+  libtorrent/src/block_cache.cpp                    \
+  libtorrent/src/bloom_filter.cpp                   \
+  libtorrent/src/broadcast_socket.cpp               \
+  libtorrent/src/bt_peer_connection.cpp             \
+  libtorrent/src/chained_buffer.cpp                 \
+  libtorrent/src/choker.cpp                         \
+  libtorrent/src/close_reason.cpp                   \
+  libtorrent/src/ConvertUTF.cpp                     \
+  libtorrent/src/cpuid.cpp                          \
+  libtorrent/src/crc32c.cpp                         \
+  libtorrent/src/create_torrent.cpp                 \
+  libtorrent/src/disk_buffer_holder.cpp             \
+  libtorrent/src/disk_buffer_pool.cpp               \
+  libtorrent/src/disk_io_job.cpp                    \
+  libtorrent/src/disk_io_thread.cpp                 \
+  libtorrent/src/disk_io_thread_pool.cpp            \
+  libtorrent/src/disk_job_fence.cpp                 \
+  libtorrent/src/disk_job_pool.cpp                  \
+  libtorrent/src/entry.cpp                          \
+  libtorrent/src/enum_net.cpp                       \
+  libtorrent/src/error_code.cpp                     \
+  libtorrent/src/escape_string.cpp                  \
+  libtorrent/src/ffs.cpp                            \
+  libtorrent/src/file.cpp                           \
+  libtorrent/src/file_pool.cpp                      \
+  libtorrent/src/file_progress.cpp                  \
+  libtorrent/src/file_storage.cpp                   \
+  libtorrent/src/fingerprint.cpp                    \
+  libtorrent/src/generate_peer_id.cpp               \
+  libtorrent/src/gzip.cpp                           \
+  libtorrent/src/hasher.cpp                         \
+  libtorrent/src/hasher512.cpp                      \
+  libtorrent/src/hex.cpp                            \
+  libtorrent/src/http_connection.cpp                \
+  libtorrent/src/http_parser.cpp                    \
+  libtorrent/src/http_seed_connection.cpp           \
+  libtorrent/src/http_stream.cpp                    \
+  libtorrent/src/http_tracker_connection.cpp        \
+  libtorrent/src/i2p_stream.cpp                     \
+  libtorrent/src/identify_client.cpp                \
+  libtorrent/src/instantiate_connection.cpp         \
+  libtorrent/src/ip_filter.cpp                      \
+  libtorrent/src/ip_notifier.cpp                    \
+  libtorrent/src/ip_voter.cpp                       \
+  libtorrent/src/lazy_bdecode.cpp                   \
+  libtorrent/src/listen_socket_handle.cpp           \
+  libtorrent/src/lsd.cpp                            \
+  libtorrent/src/magnet_uri.cpp                     \
+  libtorrent/src/merkle.cpp                         \
+  libtorrent/src/natpmp.cpp                         \
+  libtorrent/src/packet_buffer.cpp                  \
+  libtorrent/src/parse_url.cpp                      \
+  libtorrent/src/part_file.cpp                      \
+  libtorrent/src/path.cpp                           \
+  libtorrent/src/pe_crypto.cpp                      \
+  libtorrent/src/peer_class.cpp                     \
+  libtorrent/src/peer_class_set.cpp                 \
+  libtorrent/src/peer_connection.cpp                \
+  libtorrent/src/peer_connection_handle.cpp         \
+  libtorrent/src/peer_info.cpp                      \
+  libtorrent/src/peer_list.cpp                      \
+  libtorrent/src/performance_counters.cpp           \
+  libtorrent/src/piece_picker.cpp                   \
+  libtorrent/src/platform_util.cpp                  \
+  libtorrent/src/proxy_base.cpp                     \
+  libtorrent/src/proxy_settings.cpp                 \
+  libtorrent/src/puff.cpp                           \
+  libtorrent/src/random.cpp                         \
+  libtorrent/src/read_resume_data.cpp               \
+  libtorrent/src/receive_buffer.cpp                 \
+  libtorrent/src/request_blocks.cpp                 \
+  libtorrent/src/resolve_links.cpp                  \
+  libtorrent/src/resolver.cpp                       \
+  libtorrent/src/session.cpp                        \
+  libtorrent/src/session_call.cpp                   \
+  libtorrent/src/session_handle.cpp                 \
+  libtorrent/src/session_impl.cpp                   \
+  libtorrent/src/session_settings.cpp               \
+  libtorrent/src/session_stats.cpp                  \
+  libtorrent/src/session_udp_sockets.cpp            \
+  libtorrent/src/settings_pack.cpp                  \
+  libtorrent/src/sha1.cpp                           \
+  libtorrent/src/sha1_hash.cpp                      \
+  libtorrent/src/sha512.cpp                         \
+  libtorrent/src/smart_ban.cpp                      \
+  libtorrent/src/socket_io.cpp                      \
+  libtorrent/src/socket_type.cpp                    \
+  libtorrent/src/socks5_stream.cpp                  \
+  libtorrent/src/stack_allocator.cpp                \
+  libtorrent/src/stat.cpp                           \
+  libtorrent/src/stat_cache.cpp                     \
+  libtorrent/src/storage.cpp                        \
+  libtorrent/src/storage_piece_set.cpp              \
+  libtorrent/src/storage_utils.cpp                  \
+  libtorrent/src/string_util.cpp                    \
+  libtorrent/src/time.cpp                           \
+  libtorrent/src/timestamp_history.cpp              \
+  libtorrent/src/torrent.cpp                        \
+  libtorrent/src/torrent_handle.cpp                 \
+  libtorrent/src/torrent_info.cpp                   \
+  libtorrent/src/torrent_peer.cpp                   \
+  libtorrent/src/torrent_peer_allocator.cpp         \
+  libtorrent/src/torrent_status.cpp                 \
+  libtorrent/src/tracker_manager.cpp                \
+  libtorrent/src/udp_socket.cpp                     \
+  libtorrent/src/udp_tracker_connection.cpp         \
+  libtorrent/src/upnp.cpp                           \
+  libtorrent/src/ut_metadata.cpp                    \
+  libtorrent/src/ut_pex.cpp                         \
+  libtorrent/src/utf8.cpp                           \
+  libtorrent/src/utp_socket_manager.cpp             \
+  libtorrent/src/utp_stream.cpp                     \
+  libtorrent/src/version.cpp                        \
+  libtorrent/src/web_connection_base.cpp            \
+  libtorrent/src/web_peer_connection.cpp            \
+  libtorrent/src/write_resume_data.cpp              \
+  libtorrent/src/xml_parse.cpp                      \
+  libtorrent/src/kademlia/dht_settings.cpp          \
+  libtorrent/src/kademlia/dht_state.cpp             \
+  libtorrent/src/kademlia/dht_storage.cpp           \
+  libtorrent/src/kademlia/dht_tracker.cpp           \
+  libtorrent/src/kademlia/dos_blocker.cpp           \
+  libtorrent/src/kademlia/ed25519.cpp               \
+  libtorrent/src/kademlia/find_data.cpp             \
+  libtorrent/src/kademlia/get_item.cpp              \
+  libtorrent/src/kademlia/get_peers.cpp             \
+  libtorrent/src/kademlia/item.cpp                  \
+  libtorrent/src/kademlia/msg.cpp                   \
+  libtorrent/src/kademlia/node.cpp                  \
+  libtorrent/src/kademlia/node_entry.cpp            \
+  libtorrent/src/kademlia/node_id.cpp               \
+  libtorrent/src/kademlia/put_data.cpp              \
+  libtorrent/src/kademlia/refresh.cpp               \
+  libtorrent/src/kademlia/routing_table.cpp         \
+  libtorrent/src/kademlia/rpc_manager.cpp           \
+  libtorrent/src/kademlia/sample_infohashes.cpp     \
+  libtorrent/src/kademlia/traversal_algorithm.cpp   \
+  libtorrent/ed25519/src/add_scalar.cpp             \
+  libtorrent/ed25519/src/fe.cpp                     \
+  libtorrent/ed25519/src/ge.cpp                     \
+  libtorrent/ed25519/src/key_exchange.cpp           \
+  libtorrent/ed25519/src/keypair.cpp                \
+  libtorrent/ed25519/src/sc.cpp                     \
+  libtorrent/ed25519/src/sign.cpp                   \
+  libtorrent/ed25519/src/verify.cpp
+
+LIBTORRENT_DOCS_IMAGES = \
+  libtorrent/docs/client_test.png                   \
+  libtorrent/docs/cwnd.png                          \
+  libtorrent/docs/cwnd_thumb.png                    \
+  libtorrent/docs/delays.png                        \
+  libtorrent/docs/delays_thumb.png                  \
+  libtorrent/docs/hacking.html                      \
+  libtorrent/docs/merkle_tree.png                   \
+  libtorrent/docs/our_delay_base.png                \
+  libtorrent/docs/our_delay_base_thumb.png          \
+  libtorrent/docs/read_disk_buffers.png             \
+  libtorrent/docs/read_disk_buffers.diagram         \
+  libtorrent/docs/storage.png                       \
+  libtorrent/docs/todo.html                         \
+  libtorrent/docs/write_disk_buffers.png            \
+  libtorrent/docs/write_disk_buffers.diagram        \
+  libtorrent/docs/ip_id_v4.png                      \
+  libtorrent/docs/ip_id_v6.png                      \
+  libtorrent/docs/hash_distribution.png             \
+  libtorrent/docs/complete_bit_prefixes.png         \
+  libtorrent/docs/troubleshooting.dot               \
+  libtorrent/docs/troubleshooting.png               \
+  libtorrent/docs/troubleshooting_thumb.png         \
+  libtorrent/docs/hacking.diagram                   \
+  libtorrent/docs/hacking.png                       \
+  libtorrent/docs/disk_cache.diagram                \
+  libtorrent/docs/disk_cache.png                    \
+  libtorrent/docs/utp_stack.diagram                 \
+  libtorrent/docs/utp_stack.png                     \
+  libtorrent/docs/bitcoin.png                       \
+  libtorrent/docs/style.css                         \
+  libtorrent/docs/rst.css                           \
+  libtorrent/docs/img/bg.png                        \
+  libtorrent/docs/img/blue_bottom.png               \
+  libtorrent/docs/img/blue_top.png                  \
+  libtorrent/docs/img/dotline.gif                   \
+  libtorrent/docs/img/minus.gif                     \
+  libtorrent/docs/img/orange.png
+
+LIBTORRENT_DOCS_PAGES = \
+  libtorrent/docs/building.html                     \
+  libtorrent/docs/client_test.html                  \
+  libtorrent/docs/contributing.html                 \
+  libtorrent/docs/dht_extensions.html               \
+  libtorrent/docs/dht_rss.html                      \
+  libtorrent/docs/dht_sec.html                      \
+  libtorrent/docs/dht_store.html                    \
+  libtorrent/docs/examples.html                     \
+  libtorrent/docs/extension_protocol.html           \
+  libtorrent/docs/features.html                     \
+  libtorrent/docs/index.html                        \
+  libtorrent/docs/manual-ref.html                   \
+  libtorrent/docs/projects.html                     \
+  libtorrent/docs/python_binding.html               \
+  libtorrent/docs/tuning.html                       \
+  libtorrent/docs/settings.rst                      \
+  libtorrent/docs/stats_counters.rst                \
+  libtorrent/docs/troubleshooting.html              \
+  libtorrent/docs/udp_tracker_protocol.html         \
+  libtorrent/docs/utp.html                          \
+  libtorrent/docs/streaming.html                    \
+  libtorrent/docs/building.rst                      \
+  libtorrent/docs/client_test.rst                   \
+  libtorrent/docs/contributing.rst                  \
+  libtorrent/docs/dht_extensions.rst                \
+  libtorrent/docs/dht_rss.rst                       \
+  libtorrent/docs/dht_sec.rst                       \
+  libtorrent/docs/dht_store.rst                     \
+  libtorrent/docs/examples.rst                      \
+  libtorrent/docs/extension_protocol.rst            \
+  libtorrent/docs/features.rst                      \
+  libtorrent/docs/index.rst                         \
+  libtorrent/docs/manual-ref.rst                    \
+  libtorrent/docs/projects.rst                      \
+  libtorrent/docs/python_binding.rst                \
+  libtorrent/docs/tuning.rst                        \
+  libtorrent/docs/troubleshooting.rst               \
+  libtorrent/docs/udp_tracker_protocol.rst          \
+  libtorrent/docs/utp.rst                           \
+  libtorrent/docs/streaming.rst                     \
+  libtorrent/docs/tutorial.rst                      \
+  libtorrent/docs/tutorial.html                     \
+  libtorrent/docs/reference-Alerts.html             \
+  libtorrent/docs/reference-Bdecoding.html          \
+  libtorrent/docs/reference-Bencoding.html          \
+  libtorrent/docs/reference-Core.html               \
+  libtorrent/docs/reference-Create_Torrents.html    \
+  libtorrent/docs/reference-Custom_Storage.html     \
+  libtorrent/docs/reference-ed25519.html            \
+  libtorrent/docs/reference-Error_Codes.html        \
+  libtorrent/docs/reference-Filter.html             \
+  libtorrent/docs/reference-Plugins.html            \
+  libtorrent/docs/reference-Settings.html           \
+  libtorrent/docs/reference-Storage.html            \
+  libtorrent/docs/reference-Utility.html            \
+  libtorrent/docs/reference.html                    \
+  libtorrent/docs/single-page-ref.html
+
+LIBTORRENT_EXTRA_DIST = \
+  libtorrent/Jamfile                                \
+  libtorrent/Jamroot.jam                            \
+  libtorrent/CMakeLists.txt                         \
+  libtorrent/setup.py                               \
+  libtorrent/LICENSE                                \
+  libtorrent/README.rst                             \
+  $(LIBTORRENT_DOCS_PAGES)                          \
+  $(LIBTORRENT_DOCS_IMAGES)

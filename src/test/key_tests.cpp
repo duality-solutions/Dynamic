@@ -16,14 +16,14 @@
 
 #include <boost/test/unit_test.hpp>
 
-static const std::string strSecret1     ("7qh6LYnLN2w2ntz2wwUhRUEgkQ2j8XB16FGw77ZRDZmC29bn7cD");
-static const std::string strSecret2     ("7rve4MxeWFQHGbSYH6J2yaaZd3MBUqoDEwN6ZAZ6ZHmhTT4r3hW");
-static const std::string strSecret1C    ("XBuxZHH6TqXUuaSjbVTFR1DQSYecxCB9QA1Koyx5tTc3ddhqEnhm");
-static const std::string strSecret2C    ("XHMkZqWcY6Zkoq1j42NBijD8z5N5FtNy2Wx7WyAfXX2HZgxry8cr");
-static const CDynamicAddress addr1 ("Xywgfc872nn5CKtpATCoAjZCc4v96pJczy");
-static const CDynamicAddress addr2 ("XpmouUj9KKJ99ZuU331ZS1KqsboeFnLGgK");
-static const CDynamicAddress addr1C("XxV9h4Xmv6Pup8tVAQmH97K6grzvDwMG9F");
-static const CDynamicAddress addr2C("Xn7ZrYdExuk79Dm7CJCw7sfUWi2qWJSbRy");
+static const std::string strSecret1 ("5i6n7o5TnTTW3hTZVY8vfejwkRGn1UwCY6ZvTcZXsCYGFH5ca2y");
+static const std::string strSecret2 ("5hzndwFToeWnwvFYqxRTr8ewTXLS6PaS3YW91aZe2TSpAoD5meV");
+static const std::string strSecret1C ("MnQW8zNhDdmyCuaEQxRysbaYee8df8JDvFaJxTxbEZvzHy1cdQbb");
+static const std::string strSecret2C ("Mmx4S2SqJtaVoQ3DZ5cyVrnTN4tmkneZYE3cMZ94RRiwBrTh8269");
+static const CDynamicAddress addr1 ("D6T9u5Am6wC35D1fHxAwtXZkqgsCCH1z5S");
+static const CDynamicAddress addr2 ("DADRng3sCSRZVQeP2Xv7z5nQtfpqNnMVr4");
+static const CDynamicAddress addr1C("D8G2LrvZNRJKafxEkPAJNqoitbFco5nmL5");
+static const CDynamicAddress addr2C("DBy6Fwx2f2gTtRpGfyoZa2GdrXYXae3aTn");
 
 
 static const std::string strAddressBad("Xta1praZQjyELweyMByXyiREw1ZRsjXzVP");
@@ -33,8 +33,8 @@ BOOST_FIXTURE_TEST_SUITE(key_tests, BasicTestingSetup)
 BOOST_AUTO_TEST_CASE(key_test1)
 {
     CDynamicSecret bsecret1, bsecret2, bsecret1C, bsecret2C, baddress1;
-    BOOST_CHECK( bsecret1.SetString (strSecret1));
-    BOOST_CHECK( bsecret2.SetString (strSecret2));
+    BOOST_CHECK( bsecret1.SetString(strSecret1));
+    BOOST_CHECK( bsecret2.SetString(strSecret2));
     BOOST_CHECK( bsecret1C.SetString(strSecret1C));
     BOOST_CHECK( bsecret2C.SetString(strSecret2C));
     BOOST_CHECK(!baddress1.SetString(strAddressBad));
@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(key_test1)
     CKey key2C = bsecret2C.GetKey();
     BOOST_CHECK(key2C.IsCompressed() == true);
 
-    CPubKey pubkey1  = key1. GetPubKey();
-    CPubKey pubkey2  = key2. GetPubKey();
+    CPubKey pubkey1  = key1.GetPubKey();
+    CPubKey pubkey2  = key2.GetPubKey();
     CPubKey pubkey1C = key1C.GetPubKey();
     CPubKey pubkey2C = key2C.GetPubKey();
 
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(key_test1)
 
         std::vector<unsigned char> sign1, sign2, sign1C, sign2C;
 
-        BOOST_CHECK(key1.Sign (hashMsg, sign1));
-        BOOST_CHECK(key2.Sign (hashMsg, sign2));
+        BOOST_CHECK(key1.Sign(hashMsg, sign1));
+        BOOST_CHECK(key2.Sign(hashMsg, sign2));
         BOOST_CHECK(key1C.Sign(hashMsg, sign1C));
         BOOST_CHECK(key2C.Sign(hashMsg, sign2C));
 
@@ -116,15 +116,15 @@ BOOST_AUTO_TEST_CASE(key_test1)
 
         std::vector<unsigned char> csign1, csign2, csign1C, csign2C;
 
-        BOOST_CHECK(key1.SignCompact (hashMsg, csign1));
-        BOOST_CHECK(key2.SignCompact (hashMsg, csign2));
+        BOOST_CHECK(key1.SignCompact(hashMsg, csign1));
+        BOOST_CHECK(key2.SignCompact(hashMsg, csign2));
         BOOST_CHECK(key1C.SignCompact(hashMsg, csign1C));
         BOOST_CHECK(key2C.SignCompact(hashMsg, csign2C));
 
         CPubKey rkey1, rkey2, rkey1C, rkey2C;
 
-        BOOST_CHECK(rkey1.RecoverCompact (hashMsg, csign1));
-        BOOST_CHECK(rkey2.RecoverCompact (hashMsg, csign2));
+        BOOST_CHECK(rkey1.RecoverCompact(hashMsg, csign1));
+        BOOST_CHECK(rkey2.RecoverCompact(hashMsg, csign2));
         BOOST_CHECK(rkey1C.RecoverCompact(hashMsg, csign1C));
         BOOST_CHECK(rkey2C.RecoverCompact(hashMsg, csign2C));
 
@@ -142,19 +142,19 @@ BOOST_AUTO_TEST_CASE(key_test1)
     BOOST_CHECK(key1.Sign(hashMsg, detsig));
     BOOST_CHECK(key1C.Sign(hashMsg, detsigc));
     BOOST_CHECK(detsig == detsigc);
-    BOOST_CHECK(detsig == ParseHex("304402205dbbddda71772d95ce91cd2d14b592cfbc1dd0aabd6a394b6c2d377bbe59d31d022014ddda21494a4e221f0824f0b8b924c43fa43c0ad57dccdaa11f81a6bd4582f6"));
+    BOOST_CHECK(detsig == ParseHex("3045022100a56c95041098c6aab765cf8df362321b3a7f3cb270dbdf81d0e15ef48145fe9f0220427e3de5b249ed90cabf87eb37bd7fdeeadd978d54dd5eaedece3d49a6af0f2f"));
     BOOST_CHECK(key2.Sign(hashMsg, detsig));
     BOOST_CHECK(key2C.Sign(hashMsg, detsigc));
     BOOST_CHECK(detsig == detsigc);
-    BOOST_CHECK(detsig == ParseHex("3044022052d8a32079c11e79db95af63bb9600c5b04f21a9ca33dc129c2bfa8ac9dc1cd5022061d8ae5e0f6c1a16bde3719c64c2fd70e404b6428ab9a69566962e8771b5944d"));
+    BOOST_CHECK(detsig == ParseHex("304502210086c9095d62a7c950a5f89da24b222ecb38f06e288ec9f4f50ff5abb88d5d07ae022056e337bfef2424bbeec51cd1694110f051b44bac17ce2aa2d5eb0d3e086efe87"));
     BOOST_CHECK(key1.SignCompact(hashMsg, detsig));
     BOOST_CHECK(key1C.SignCompact(hashMsg, detsigc));
-    BOOST_CHECK(detsig == ParseHex("1c5dbbddda71772d95ce91cd2d14b592cfbc1dd0aabd6a394b6c2d377bbe59d31d14ddda21494a4e221f0824f0b8b924c43fa43c0ad57dccdaa11f81a6bd4582f6"));
-    BOOST_CHECK(detsigc == ParseHex("205dbbddda71772d95ce91cd2d14b592cfbc1dd0aabd6a394b6c2d377bbe59d31d14ddda21494a4e221f0824f0b8b924c43fa43c0ad57dccdaa11f81a6bd4582f6"));
+    BOOST_CHECK(detsig == ParseHex("1ba56c95041098c6aab765cf8df362321b3a7f3cb270dbdf81d0e15ef48145fe9f427e3de5b249ed90cabf87eb37bd7fdeeadd978d54dd5eaedece3d49a6af0f2f"));
+    BOOST_CHECK(detsigc == ParseHex("1fa56c95041098c6aab765cf8df362321b3a7f3cb270dbdf81d0e15ef48145fe9f427e3de5b249ed90cabf87eb37bd7fdeeadd978d54dd5eaedece3d49a6af0f2f"));
     BOOST_CHECK(key2.SignCompact(hashMsg, detsig));
     BOOST_CHECK(key2C.SignCompact(hashMsg, detsigc));
-    BOOST_CHECK(detsig == ParseHex("1c52d8a32079c11e79db95af63bb9600c5b04f21a9ca33dc129c2bfa8ac9dc1cd561d8ae5e0f6c1a16bde3719c64c2fd70e404b6428ab9a69566962e8771b5944d"));
-    BOOST_CHECK(detsigc == ParseHex("2052d8a32079c11e79db95af63bb9600c5b04f21a9ca33dc129c2bfa8ac9dc1cd561d8ae5e0f6c1a16bde3719c64c2fd70e404b6428ab9a69566962e8771b5944d"));
+    BOOST_CHECK(detsig == ParseHex("1b86c9095d62a7c950a5f89da24b222ecb38f06e288ec9f4f50ff5abb88d5d07ae56e337bfef2424bbeec51cd1694110f051b44bac17ce2aa2d5eb0d3e086efe87"));
+    BOOST_CHECK(detsigc == ParseHex("1f86c9095d62a7c950a5f89da24b222ecb38f06e288ec9f4f50ff5abb88d5d07ae56e337bfef2424bbeec51cd1694110f051b44bac17ce2aa2d5eb0d3e086efe87"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

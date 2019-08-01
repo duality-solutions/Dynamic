@@ -8,6 +8,7 @@
 #include "data/base58_keys_invalid.json.h"
 #include "data/base58_keys_valid.json.h"
 
+#include "bdap/stealth.h"
 #include "key.h"
 #include "script/script.h"
 #include "uint256.h"
@@ -92,6 +93,10 @@ public:
     {
         return (exp_addrType == "none");
     }
+    bool operator()(const CStealthAddress &sxAddr) const
+    {
+        return (exp_addrType == "stealth");
+    }
 };
 
 // Visitor to check address payload
@@ -114,6 +119,11 @@ public:
     bool operator()(const CNoDestination &no) const
     {
         return exp_payload.size() == 0;
+    }
+    bool operator()(const CStealthAddress &sxAddr) const
+    {
+        uint160 exp_key(exp_payload);
+        return exp_key == sxAddr.GetSpendKeyID();
     }
 };
 

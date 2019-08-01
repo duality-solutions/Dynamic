@@ -15,6 +15,7 @@
 #include "dynamicunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
+#include "mnemonicdialog.h"
 #include "modaloverlay.h"
 #include "networkstyle.h"
 #include "notificator.h"
@@ -103,6 +104,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
                                                                                                                  miningAction(0),
+                                                                                                                 bdapAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
                                                                                                                  usedReceivingAddressesAction(0),
@@ -117,6 +119,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  aboutQtAction(0),
                                                                                                                  openRPCConsoleAction(0),
                                                                                                                  openAction(0),
+                                                                                                                 mnemonicAction(0),
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
                                                                                                                  trayIcon(0),
@@ -364,6 +367,17 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(miningAction);
 
+    bdapAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&BDAP"), this);
+    bdapAction->setStatusTip(tr("BDAP"));
+    bdapAction->setToolTip(bdapAction->statusTip());
+    bdapAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    bdapAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
+#else
+    bdapAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+#endif
+    tabGroup->addAction(bdapAction);    
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -382,6 +396,8 @@ void DynamicGUI::createActions()
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
+    connect(bdapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(bdapAction, SIGNAL(triggered()), this, SLOT(gotoBdapPage()));
 
 #endif // ENABLE_WALLET
 
@@ -430,8 +446,8 @@ void DynamicGUI::createActions()
     openRepairAction->setStatusTip(tr("Show wallet repair options"));
     openConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open Wallet &Configuration File"), this);
     openConfEditorAction->setStatusTip(tr("Open configuration file"));
-    openSNConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open &Dynode Configuration File"), this);
-    openSNConfEditorAction->setStatusTip(tr("Open Dynode configuration file"));
+    openDNConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open &Dynode Configuration File"), this);
+    openDNConfEditorAction->setStatusTip(tr("Open Dynode configuration file"));
     showBackupsAction = new QAction(QIcon(":/icons/" + theme + "/browse"), tr("Show Automatic &Backups"), this);
     showBackupsAction->setStatusTip(tr("Show automatically created wallet backups"));
     // initially disable the debug window menu items
@@ -448,6 +464,9 @@ void DynamicGUI::createActions()
 
     openAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), tr("Open &URI..."), this);
     openAction->setStatusTip(tr("Open a dynamic: URI or payment request"));
+
+    mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("&Import mnemonic/private key..."), this);
+    mnemonicAction->setStatusTip(tr("Import Mnemonic Phrase or Private Key"));
 
     showHelpMessageAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Command-line options"), this);
     showHelpMessageAction->setMenuRole(QAction::NoRole);
@@ -474,7 +493,7 @@ void DynamicGUI::createActions()
 
     // Open configs and backup folder from menu
     connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
-    connect(openSNConfEditorAction, SIGNAL(triggered()), this, SLOT(showDNConfEditor()));
+    connect(openDNConfEditorAction, SIGNAL(triggered()), this, SLOT(showDNConfEditor()));
     connect(showBackupsAction, SIGNAL(triggered()), this, SLOT(showBackups()));
 
     // Get restart command-line parameters and handle restart
@@ -495,6 +514,7 @@ void DynamicGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+        connect(mnemonicAction, SIGNAL(triggered()), this, SLOT(mnemonicClicked()));
     }
 #endif // ENABLE_WALLET
 
@@ -523,6 +543,7 @@ void DynamicGUI::createMenuBar()
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
         file->addSeparator();
+        file->addAction(mnemonicAction);
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
@@ -548,7 +569,7 @@ void DynamicGUI::createMenuBar()
         tools->addAction(openRepairAction);
         tools->addSeparator();
         tools->addAction(openConfEditorAction);
-        tools->addAction(openSNConfEditorAction);
+        tools->addAction(openDNConfEditorAction);
         tools->addAction(showBackupsAction);
     }
 
@@ -572,6 +593,7 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(historyAction);
         toolbar->addAction(dynodeAction);
         toolbar->addAction(miningAction);
+        toolbar->addAction(bdapAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -714,6 +736,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
     miningAction->setEnabled(enabled);
+    bdapAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -722,6 +745,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     usedSendingAddressesAction->setEnabled(enabled);
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
+    mnemonicAction->setEnabled(enabled);
 }
 
 void DynamicGUI::createTrayIcon(const NetworkStyle* networkStyle)
@@ -751,6 +775,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
     pmenu->addAction(miningAction);
+    pmenu->addAction(bdapAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
@@ -760,7 +785,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(openRepairAction);
     pmenu->addSeparator();
     pmenu->addAction(openConfEditorAction);
-    pmenu->addAction(openSNConfEditorAction);
+    pmenu->addAction(openDNConfEditorAction);
     pmenu->addAction(showBackupsAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     pmenu->addSeparator();
@@ -865,6 +890,13 @@ void DynamicGUI::showPrivateSendHelpClicked()
 }
 
 #ifdef ENABLE_WALLET
+void DynamicGUI::mnemonicClicked()
+{
+    MnemonicDialog dlg(this);
+    connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
+    dlg.exec();
+}
+
 void DynamicGUI::openClicked()
 {
     OpenURIDialog dlg(this);
@@ -913,6 +945,13 @@ void DynamicGUI::gotoMiningPage()
     miningAction->setChecked(true);
     if (walletFrame)
         walletFrame->gotoMiningPage();
+}
+
+void DynamicGUI::gotoBdapPage()
+{
+    bdapAction->setChecked(true);
+    if (walletFrame)
+        walletFrame->gotoBdapPage();
 }
 
 void DynamicGUI::gotoSignMessageTab(QString addr)
@@ -1377,12 +1416,21 @@ void DynamicGUI::detectShutdown()
             rpcConsole->hide();
         qApp->quit();
     }
+    else {
+        if (MnemonicRestartRequested()) {
+            if (rpcConsole) {
+                QStringList args;
+                Q_EMIT handleRestart(args);
+            } //if rpcConsole
+        } //if MnemonicRestartRequested
+    }
 }
 
 void DynamicGUI::showProgress(const QString& title, int nProgress)
 {
     if (nProgress == 0) {
         progressDialog = new QProgressDialog(title, "", 0, 100);
+        progressDialog->setWindowTitle(tr(PACKAGE_NAME));
         progressDialog->setWindowModality(Qt::ApplicationModal);
         progressDialog->setMinimumDuration(0);
         progressDialog->setCancelButton(0);

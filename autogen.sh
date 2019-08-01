@@ -1,4 +1,5 @@
 #!/bin/sh
+git submodule update --init --recursive
 set -e
 srcdir="$(dirname $0)"
 cd "$srcdir"

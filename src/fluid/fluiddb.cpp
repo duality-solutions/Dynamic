@@ -46,7 +46,11 @@ CAmount GetFluidMiningReward(const int nHeight)
     if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord, nHeight)) {
         return GetStandardPoWBlockPayment(nHeight);
     }
-    return lastMiningRecord.MiningReward;
+    if (lastMiningRecord.MiningReward > 0) {
+        return lastMiningRecord.MiningReward;
+    } else {
+        return GetStandardPoWBlockPayment(nHeight);
+    }
 }
 
 bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
