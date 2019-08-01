@@ -1442,6 +1442,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     }
                 }
             } else {
+                TopUpKeyPoolCombo(0, true);
                 for (const CTxOut& txout : tx.vout) {
                     CScript scriptPubKey = txout.scriptPubKey;
                     CTxDestination dest;
@@ -1456,7 +1457,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     CPubKey retrievePubKey;
                     if (GetPubKey(keyID, retrievePubKey)) {
                         if (ReserveKeyForTransactions(retrievePubKey)) {
-                            TopUpKeyPoolCombo(0, true);
+                            SetAddressBook(dest, "", "");
                             fNeedToRescanTransactions = true;
                         }
                     }
@@ -4694,25 +4695,31 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
         if (IsLocked(true))
             return false;
 
+        int64_t amountExternal = setExternalKeyPool.size();
+        int64_t amountInternal = setInternalKeyPool.size();
+
         // Top up key pool
         unsigned int nTargetSize;
+        unsigned int defaultKeyPoolSize = std::max(GetArg("-keypool", DEFAULT_KEYPOOL_SIZE), (int64_t)0);
         if (kpSize > 0)
             nTargetSize = kpSize;
         else {
-            nTargetSize = std::max(GetArg("-keypool", DEFAULT_KEYPOOL_SIZE), (int64_t)0);
+            if (defaultKeyPoolSize >= DynamicKeyPoolSize) {
+                DynamicKeyPoolSize = defaultKeyPoolSize;
+            }
+
+            if (fIncreaseSize) {
+                DynamicKeyPoolSize = DynamicKeyPoolSize + 1;
+            } //if fIncreaseSize
+
+            nTargetSize = DynamicKeyPoolSize; 
         }
 
         // count amount of available keys (internal, external)
         // make sure the keypool of external and internal keys fits the user selected target (-keypool)
-        int64_t amountExternal = setExternalKeyPool.size();
-        int64_t amountInternal = setInternalKeyPool.size();
+
         int64_t missingExternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountExternal, (int64_t)0);
         int64_t missingInternal = std::max(std::max((int64_t)nTargetSize, (int64_t)1) - amountInternal, (int64_t)0);
-
-        if (fIncreaseSize) {
-            missingExternal = missingExternal + 2;
-            missingInternal = missingInternal + 2;
-        }
 
         if (!IsHDEnabled()) {
             // don't create extra internal keys
@@ -4763,7 +4770,11 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
             }
 
             double dProgress = 100.f * nEnd / (nTargetSize + 1);
-            std::string strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
+            std::string strMsg = "";
+            if (dProgress <= 100)
+                strMsg = strprintf(_("Loading wallet... (%3.2f %%)"), dProgress);
+            else
+                strMsg = strprintf(_("Increasing keypool... (%d)"),amountExternal);
             uiInterface.InitMessage(strMsg);
         }
     }
@@ -4904,7 +4915,9 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
                 EraseIndex = true;
                 IndexToErase = nIndex;
                 ReserveKeyCount++;
-                SaveRescanIndex = true;
+                if (ReserveKeyCount <= DEFAULT_RESCAN_THRESHOLD) {
+                    SaveRescanIndex = true;
+                }
             }
             it++;
         }
@@ -5697,7 +5710,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
         walletInstance->ScanForWalletTransactions(pindexRescan, true);
 
         //rescan if boolean is set. go back 100 transactions from most recent transaction involving me.
-        while ((walletInstance->fNeedToRescanTransactions) && (walletInstance->ReserveKeyCount > DEFAULT_RESCAN_THRESHOLD)) {
+        while ((walletInstance->fNeedToRescanTransactions) && (walletInstance->ReserveKeyCount > 0)) {
             //initialize values
             walletInstance->fNeedToRescanTransactions = false;
             walletInstance->ReserveKeyCount = 0;
@@ -5707,6 +5720,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile, const bool 
                 computed_rescan_index = chainActive[computed_rescan_index->nHeight - 100];
             }
             walletInstance->ScanForWalletTransactions(computed_rescan_index, true);
+
         }
         
         LogPrintf(" rescan      %15dms\n", GetTimeMillis() - nStart);
