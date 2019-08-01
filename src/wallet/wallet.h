@@ -804,6 +804,8 @@ private:
     std::set<int64_t> setInternalEdKeyPool;
     std::set<int64_t> setExternalEdKeyPool;
 
+    unsigned int DynamicKeyPoolSize = (int64_t)0;
+
     std::vector<std::vector<unsigned char>> reservedEd25519PubKeys;
 
     int64_t nTimeFirstKey;
@@ -835,6 +837,7 @@ public:
     CBlockIndex* rescan_index = nullptr;
     int ReserveKeyCount = 0;
     bool SaveRescanIndex = false;
+    //unsigned int DynamicKeyPoolSize = (int64_t)0;
 
     bool WalletNeedsUpgrading()
     {
@@ -963,9 +966,13 @@ public:
     /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed = true, const CCoinControl* coinControl = NULL, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false) const;
+    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed = true, const CCoinControl* coinControl = NULL, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false, bool fUseBDAP = false) const;
     /**
-     * populate vCoins with vector of available COutputs for a BDAP transaction.
+     * populate vCoins with vector of available BDAP credits.
+     */
+    void AvailableBDAPCredits(std::vector<std::pair<CTxOut, COutPoint>>& vCredits, bool fOnlyConfirmed = true) const;
+    /**
+     * populate vCoins with vector of available COutputs for the specified address.
      */
     void GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScriptPubKey) const;
     /**

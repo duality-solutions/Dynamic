@@ -13,6 +13,7 @@
 #include "primitives/transaction.h"
 #include "spork.h"
 #include "wallet/wallet.h"
+#include "utilmoneystr.h"
 #include "validation.h"
 #include "dynode-sync.h"
 
@@ -68,7 +69,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     txDomainEntry.LinkAddress = vchFromString(sxAddr.ToString());
 
-    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
+    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 1 year or 12 months
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration months to int, only whole numbers allowed (no decimals)"));
@@ -148,7 +149,7 @@ UniValue adduser(const JSONRPCRequest& request)
             "3. registration months  (int, optional)      Number of months to register account\n"
             "\nAdds a new bdap.io public name account entry to the blockchain directory.\n"
             "\nResult:\n"
-            "{(json object)\n"
+            "{(json objects)\n"
             "  \"oid\"                        (string)  Account OID\n"
             "  \"version\"                    (int)     Recipient's BDAP full path\n"
             "  \"domain_component\"           (string)  Account domain name\n"
@@ -167,7 +168,7 @@ UniValue adduser(const JSONRPCRequest& request)
             "  \"height\"                     (int)     Last transaction height for account data\n"
             "  \"expires_on\"                 (int)     Account expiration epoch time\n"
             "  \"expired\"                    (boolean) Account expired\n"
-            "  }\n"
+            "  },...n \n"
             "\nExamples\n" +
            HelpExampleCli("adduser", "Alice \"Wonderland, Alice\"") +
            "\nAs a JSON-RPC call\n" + 
@@ -439,7 +440,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 2 years.
+    int32_t nMonths = 0;
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
@@ -924,12 +925,12 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue colorcoin(const JSONRPCRequest& request)
+UniValue makecredits(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "colorcoin \"dynamicaddress\" \"amount\" \"utxo list\"\n"
-            "\nConvert your DYN to BDAP colored credits\n"
+            "makecredits \"dynamicaddress\" \"amount\"\n"
+            "\nConvert your Dynamic (DYN) to BDAP colored credits\n"
             + HelpRequiringPassphrase() +
             "\nArguments:\n"
             "1. \"dynamicaddress\"       (string)            The destination wallet address\n"
@@ -937,14 +938,14 @@ UniValue colorcoin(const JSONRPCRequest& request)
             "\nResult:\n"
             "  \"tx id\"                 (string)            The transaction id for the coin coloring\n"
             "\nExamples:\n"
-            + HelpExampleCli("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\"") +
+            + HelpExampleCli("makecredits", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("colorcoin", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98 \"utxo1,utxo2\""));
+            + HelpExampleRpc("makecredits", "\"DKkDJn9bjoXJiiPysSVEeUc3ve6SaWLzVv\" 100.98"));
 
     EnsureWalletIsUnlocked();
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the colorcoin RPC command until the BDAP spork is active."));
+        throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use the makecredits RPC command until the BDAP spork is active."));
 
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
@@ -975,6 +976,197 @@ UniValue colorcoin(const JSONRPCRequest& request)
     return wtx.GetHash().GetHex();
 }
 
+UniValue getcredits(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getcredits\n"
+            "\nGet available BDAP credit balance\n"
+            + HelpRequiringPassphrase() +
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"type\"                    (string)            The credit type.\n"
+            "  \"operation\"               (string)            The operation code used in the tx output\n"
+            "  \"address\"                 (string)            The address holding the unspent BDAP credits\n"
+            "  \"dynamic_amount\"          (int)               The unspent BDAP amount int DYN\n"
+            "  \"credits\"                 (int)               The unspent BDAP credits\n"
+            "  },...n \n"
+            "\"total_credits\"             (int)               The total credits available.\n"
+            "\"total_deposits\"            (int)               The total deposits available.\n"
+            "\"total_dynamic\"             (int)               The total Dynamic available that are BDAP colored.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getcredits", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("getcredits", ""));
+
+    if (!pwalletMain)
+        throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
+
+    std::vector<std::pair<CTxOut, COutPoint>> vCredits;
+    pwalletMain->AvailableBDAPCredits(vCredits);
+
+    CAmount nTotalAmount = 0;
+    CAmount nTotalCredits = 0;
+    CAmount nTotalDeposits = 0;
+    UniValue result(UniValue::VOBJ);
+    for (const std::pair<CTxOut, COutPoint>& credit : vCredits) {
+        UniValue oCredit(UniValue::VOBJ);
+        int opCode1 = -1; int opCode2 = -1;
+        std::vector<std::vector<unsigned char>> vvch;
+        credit.first.GetBDAPOpCodes(opCode1, opCode2, vvch);
+        std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+        const CDynamicAddress address = GetScriptAddress(credit.first.scriptPubKey);
+        std::string strType = "unknown";
+        std::string strAccount =  "";
+        std::string strPubKey =  "";
+        std::string strSharedPubKey =  "";
+        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account") {
+            strType = "account deposit";
+            if (vvch.size() > 0)
+                strAccount = stringFromVch(vvch[0]);
+            if (vvch.size() > 1)
+                strPubKey = stringFromVch(vvch[1]);
+            nTotalDeposits += credit.first.nValue;
+        } else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept" || 
+                    strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+            strType = "link deposit";
+            if (vvch.size() > 0)
+                strPubKey = stringFromVch(vvch[0]);
+            if (vvch.size() > 1)
+                strSharedPubKey = stringFromVch(vvch[1]);
+            nTotalDeposits += credit.first.nValue;
+        } else if (strOpType == "bdap_move_asset") {
+            if (vvch.size() > 1) {
+                std::string strMoveSource = stringFromVch(vvch[0]);
+                std::string strMoveDestination = stringFromVch(vvch[1]);
+                strType = strprintf("credit (%s to %s)", strMoveSource, strMoveDestination);
+                if (strMoveSource == "DYN" && strMoveDestination == "BDAP")
+                    nTotalCredits += credit.first.nValue;
+            } else {
+                strType = strprintf("credit (unknown)");
+            }
+        }
+        oCredit.push_back(Pair("type", strType));
+        oCredit.push_back(Pair("operation", strOpType));
+        if (strAccount.size() > 0)
+            oCredit.push_back(Pair("account", strAccount));
+        oCredit.push_back(Pair("address", address.ToString()));
+        if (strPubKey.size() > 0)
+            oCredit.push_back(Pair("pubkey", strPubKey));
+        if (strSharedPubKey.size() > 0)
+            oCredit.push_back(Pair("shared_pubkey", strSharedPubKey));
+        oCredit.push_back(Pair("dynamic_amount", FormatMoney(credit.first.nValue)));
+        oCredit.push_back(Pair("credits", credit.first.nValue/BDAP_CREDIT));
+        std::string strOutput = credit.second.hash.ToString() + "-" + std::to_string(credit.second.n);
+        result.push_back(Pair(strOutput, oCredit));
+        nTotalAmount += credit.first.nValue;
+    }
+    // Add total amounts and credits
+
+    result.push_back(Pair("total_credits", nTotalCredits/BDAP_CREDIT));
+    result.push_back(Pair("total_deposits", nTotalDeposits/BDAP_CREDIT));
+    result.push_back(Pair("total_dynamic", FormatMoney(nTotalAmount)));
+
+    return result;
+}
+
+UniValue bdapfees(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "bdapfees\n"
+            "\nGet current BDAP fee schedule\n"
+            + HelpRequiringPassphrase() +
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"monthly\"                    (int)            The credit type.\n"
+            "  \"deposit\"                    (int)            The operation code used in the tx output\n"
+            "  \"one-time\"                   (int)            The unspent BDAP amount int DYN\n"
+            "  },...n \n"
+            "\nExamples:\n"
+            + HelpExampleCli("bdapfees", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("bdapfees", ""));
+
+    UniValue oFees(UniValue::VOBJ);
+
+    const uint16_t nMonths = 1;
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, BDAP::ObjectType::BDAP_USER, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nNewUserMonthly = 0;
+    CAmount nNewUserDeposit = 0;
+    CAmount nNewUserOnetime = 0;
+    UniValue oNewUserFee(UniValue::VOBJ);
+    nNewUserMonthly = monthlyFee;
+    nNewUserDeposit = depositFee;
+    nNewUserOnetime = oneTimeFee;
+    oNewUserFee.push_back(Pair("monthly_dynamic", FormatMoney(nNewUserMonthly)));
+    oNewUserFee.push_back(Pair("monthly_credits", nNewUserMonthly/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("deposit_dynamic", FormatMoney(nNewUserDeposit)));
+    oNewUserFee.push_back(Pair("deposit_credits", nNewUserDeposit/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("one-time", FormatMoney(nNewUserOnetime)));
+    oNewUserFee.push_back(Pair("one-time_credits", nNewUserOnetime/BDAP_CREDIT));
+    oNewUserFee.push_back(Pair("total_dynamic", FormatMoney((nNewUserMonthly + nNewUserDeposit + nNewUserOnetime))));
+    oNewUserFee.push_back(Pair("total_credits", (nNewUserMonthly + nNewUserDeposit + nNewUserOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_user", oNewUserFee));
+
+    GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, BDAP::ObjectType::BDAP_USER, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nUpdateUserMonthly = 0;
+    CAmount nUpdateUserDeposit = 0;
+    CAmount nUpdateUserOnetime = 0;
+    UniValue oUpdateUserFee(UniValue::VOBJ);
+    nUpdateUserMonthly = monthlyFee;
+    nUpdateUserDeposit = depositFee;
+    nUpdateUserOnetime = oneTimeFee;
+    oUpdateUserFee.push_back(Pair("monthly_dynamic", FormatMoney(nUpdateUserMonthly)));
+    oUpdateUserFee.push_back(Pair("monthly_credits", nUpdateUserMonthly/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("deposit_dynamic", FormatMoney(nUpdateUserDeposit)));
+    oUpdateUserFee.push_back(Pair("deposit_credits", nUpdateUserDeposit/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("one-time_dynamic", FormatMoney(nUpdateUserOnetime)));
+    oUpdateUserFee.push_back(Pair("one-time_credits", nUpdateUserOnetime/BDAP_CREDIT));
+    oUpdateUserFee.push_back(Pair("total_dynamic", FormatMoney((nUpdateUserMonthly + nUpdateUserDeposit + nUpdateUserOnetime))));
+    oUpdateUserFee.push_back(Pair("total_credits", (nUpdateUserMonthly + nUpdateUserDeposit + nUpdateUserOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("update_user", oUpdateUserFee));
+
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, BDAP::ObjectType::BDAP_LINK_REQUEST, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nLinkRequestMonthly = 0;
+    CAmount nLinkRequestDeposit = 0;
+    CAmount nLinkRequestOnetime = 0;
+    UniValue oLinkRequestFee(UniValue::VOBJ);
+    nLinkRequestMonthly = monthlyFee;
+    nLinkRequestDeposit = depositFee;
+    nLinkRequestOnetime = oneTimeFee;
+    oLinkRequestFee.push_back(Pair("monthly_dynamic", FormatMoney(nLinkRequestMonthly)));
+    oLinkRequestFee.push_back(Pair("monthly_credits", nLinkRequestMonthly/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("deposit_dynamic", FormatMoney(nLinkRequestDeposit)));
+    oLinkRequestFee.push_back(Pair("deposit_credits", nLinkRequestDeposit/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("one-time_dynamic", FormatMoney(nLinkRequestOnetime)));
+    oLinkRequestFee.push_back(Pair("one-time_credits", nLinkRequestOnetime/BDAP_CREDIT));
+    oLinkRequestFee.push_back(Pair("total_dynamic", FormatMoney((nLinkRequestMonthly + nLinkRequestDeposit + nLinkRequestOnetime))));
+    oLinkRequestFee.push_back(Pair("total_credits", (nLinkRequestMonthly + nLinkRequestDeposit + nLinkRequestOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_link_request", oLinkRequestFee));
+
+    GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, BDAP::ObjectType::BDAP_LINK_ACCEPT, nMonths, monthlyFee, oneTimeFee, depositFee);
+    CAmount nLinkAcceptMonthly = 0;
+    CAmount nLinkAcceptDeposit = 0;
+    CAmount nLinkAcceptOnetime = 0;
+    UniValue oLinkAcceptFee(UniValue::VOBJ);
+    nLinkAcceptMonthly = monthlyFee;
+    nLinkAcceptDeposit = depositFee;
+    nLinkAcceptOnetime = oneTimeFee;
+    oLinkAcceptFee.push_back(Pair("monthly_dynamic", FormatMoney(nLinkAcceptMonthly)));
+    oLinkAcceptFee.push_back(Pair("monthly_credits", nLinkAcceptMonthly/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("deposit_dynamic", FormatMoney(nLinkAcceptDeposit)));
+    oLinkAcceptFee.push_back(Pair("deposit_credits", nLinkAcceptDeposit/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("one-time_dynamic", FormatMoney(nLinkAcceptOnetime)));
+    oLinkAcceptFee.push_back(Pair("one-time_credits", nLinkAcceptOnetime/BDAP_CREDIT));
+    oLinkAcceptFee.push_back(Pair("total_dynamic", FormatMoney((nLinkAcceptMonthly + nLinkAcceptDeposit + nLinkAcceptOnetime))));
+    oLinkAcceptFee.push_back(Pair("total_credits", (nLinkAcceptMonthly + nLinkAcceptDeposit + nLinkAcceptOnetime)/BDAP_CREDIT));
+    oFees.push_back(Pair("new_link_accept", oLinkAcceptFee));
+
+    return oFees;
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
@@ -991,7 +1183,9 @@ static const CRPCCommand commands[] =
     { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
-    { "bdap",            "colorcoin",                &colorcoin,                    true, {"dynamicaddress", "amount"} },
+    { "bdap",            "makecredits",              &makecredits,                  true, {"dynamicaddress", "amount"} },
+    { "bdap",            "getcredits",               &getcredits,                   true, {} },
+    { "bdap",            "bdapfees",                 &bdapfees,                     true, {} },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };

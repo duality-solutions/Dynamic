@@ -8,6 +8,7 @@
 #include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "base58.h"
+#include "utilmoneystr.h"
 #include "validation.h"
 #include "validationinterface.h"
 
@@ -192,20 +193,24 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             errorMessage = "Failed to get BDAP fees for new link request";
             return false;
         }
-        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
-        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
-            if (ENFORCE_BDAP_FEES) {
-                errorMessage = "Invalid BDAP fee amount for a new BDAP link request";
-                return false;
-            }
-            else {
-                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link request. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
-                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
-            }
+        if (oneTimeFee > dataAmount) {
+            LogPrintf("%s -- Invalid BDAP one-time fee amount for a new BDAP link request. Total paid %d but should be %d\n", __func__, 
+                            FormatMoney(dataAmount), FormatMoney(oneTimeFee));
+            errorMessage = "Invalid BDAP fee amount for a new BDAP link request";
+            return false;
         }
         else {
-            LogPrint("bdap", "%s -- *** Valid BDAP fee amount for a new BDAP link request. Total paid %d, should be %d\n", __func__, 
-                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+            LogPrint("bdap", "%s -- Valid BDAP one-time fee amount for new BDAP request link. One-time paid %d, should be %d.\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(oneTimeFee));
+        }
+        if (depositFee > opAmount) {
+            LogPrintf("%s -- Invalid BDAP deposit amount for a new BDAP link request. Total paid %d but should be %d\n", __func__, 
+                            FormatMoney(opAmount), FormatMoney(depositFee));
+            errorMessage = "Invalid BDAP fee amount for a new BDAP link request";
+            return false;
+        } else {
+            LogPrint("bdap", "%s -- Valid BDAP deposit fee amount for new BDAP request link. Deposit paid %d, should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
         }
         return CheckNewLinkTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
@@ -215,20 +220,23 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
             errorMessage = "Failed to get BDAP fees for new link accept";
             return false;
         }
-        // check if fees equal or exceed tx amounts.  Use ENFORCE_BDAP_FEES for now.  If ENFORCE_BDAP_FEES = false, just print the error.
-        if (monthlyFee + oneTimeFee + depositFee > dataAmount + opAmount) {
-            if (ENFORCE_BDAP_FEES) {
-                errorMessage = "Invalid BDAP fee amount for a new BDAP link accept";
-                return false;
-            }
-            else {
-                LogPrintf("%s -- Invalid BDAP fee amount for a new BDAP link accept. Total paid %d but should be %d. Fees not enforced.\n", __func__, 
-                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
-            }
+        if (oneTimeFee > dataAmount) {
+            LogPrintf("%s -- Invalid BDAP one-time fee amount for a new BDAP link accept. Total paid %d but should be %d\n", __func__, 
+                            FormatMoney(dataAmount), FormatMoney(oneTimeFee));
+            errorMessage = "Invalid BDAP fee amount for a new BDAP link accept";
+            return false;
+        } else {
+            LogPrint("bdap", "%s -- Valid BDAP one-time fee amount for new BDAP accept link. One-time paid %d, should be %d.\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(oneTimeFee));
         }
-        else {
-            LogPrint("bdap", "%s -- *** Valid BDAP fee amount for a new BDAP link accept. Total paid %d, should be %d\n", __func__, 
-                                (dataAmount + opAmount), (monthlyFee + oneTimeFee + depositFee));
+        if (depositFee > opAmount) {
+            LogPrintf("%s -- Invalid BDAP deposit amount for a new BDAP link accept. Total paid %d but should be %d\n", __func__, 
+                            FormatMoney(opAmount), FormatMoney(depositFee));
+            errorMessage = "Invalid BDAP fee amount for a new BDAP link accept";
+            return false;
+        } else {
+            LogPrint("bdap", "%s -- Valid BDAP deposit fee amount for new BDAP accept link. Deposit paid %d, should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
         }
         return CheckNewLinkTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }

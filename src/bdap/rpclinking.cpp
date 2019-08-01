@@ -24,6 +24,7 @@
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
 #include "uint256.h"
+#include "utilmoneystr.h"
 #include "utiltime.h"
 #include "validation.h"
 
@@ -265,7 +266,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+    LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
@@ -440,6 +441,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+    LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
 
     // Send the transaction
     CWalletTx wtx;

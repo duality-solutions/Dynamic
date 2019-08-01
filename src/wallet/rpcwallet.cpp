@@ -467,7 +467,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amounts
-    if (nDataAmount <= 0 || nOpAmount <= 0)
+    if (nOpAmount <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
 
     if (nDataAmount + nOpAmount > curBalance)
@@ -483,10 +483,11 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     LogPrint("bdap", "Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrint("bdap", "Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    if (nDataAmount > 0) {
+    if (bdapDataScript.size() > 0) {
         CRecipient recDataScript = {bdapDataScript, nDataAmount, false};
         vecSend.push_back(recDataScript);
     }
+
     CRecipient recOPScript = {bdapOPScript, nOpAmount, false};
     vecSend.push_back(recOPScript);
 
@@ -522,8 +523,8 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     std::vector<CRecipient> vecSend;
     int nChangePosInOut = 0;
 
-    LogPrintf("Sending BDAP Linking Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
-    LogPrintf("Sending BDAP Linking OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+    LogPrint("bdap", "Sending BDAP Linking Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrint("bdap", "Sending BDAP Linking OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
     if (nOneTimeFee > 0) {
         CRecipient recDataScript = {bdapDataScript, nOneTimeFee, false};
@@ -531,7 +532,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
         if (stealthScript.size() > 0) {
             CRecipient sendStealthData = {stealthScript, 0, false};
             vecSend.push_back(sendStealthData);
-            LogPrintf("Sending Stealth Script: %s\n", ScriptToAsmStr(stealthScript));
+            LogPrint("bdap", "Sending Stealth Script: %s\n", ScriptToAsmStr(stealthScript));
         }
     }
     CRecipient recOPScript = {bdapOPScript, nDepositFee, false};
