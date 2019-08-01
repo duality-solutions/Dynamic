@@ -24,9 +24,9 @@ class CNode;
 class CVGPMessage;
 
 static constexpr size_t MAX_MESSAGE_SIZE = 8192;
-static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71200; // TODO (BDAP): Update minimum protocol version before v2.4 release
+static constexpr int MIN_VGP_MESSAGE_PEER_PROTO_VERSION = 71000;
 static constexpr size_t MAX_MESSAGE_DATA_LENGTH = 8192;
-static constexpr uint32_t MIN_CLIENT_VERSION = 2041400; // TODO (BDAP): Update minimum client version before v2.4 release
+static constexpr uint32_t MIN_CLIENT_VERSION = 2040000;
 static constexpr size_t MAX_SIGNATURE_SIZE = 72;
 static constexpr size_t MAX_WALLET_PUBKEY_SIZE = 40;
 static constexpr int KEEP_MESSAGE_LOG_ALIVE_SECONDS = 300; // 5 minutes.
@@ -35,9 +35,6 @@ static constexpr int MAX_MESAGGE_DRIFT_SECONDS = 90; // 1.5 minutes.
 static constexpr int MAX_MESAGGE_RELAY_SECONDS = 120; // 2 minutes.
 static const uint256 VGP_MESSAGE_MIN_HASH_TARGET = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-// TODO (BDAP): do not support v1 messages or change hash proof message to v1.
-//! Version VPG message 1 doesn't contain hash proof to prevent spam
-//! Version 2 requires hash proof
 class CUnsignedVGPMessage
 {
 public:
