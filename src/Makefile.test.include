@@ -60,7 +60,7 @@ DYNAMIC_TESTS =\
   test/compress_tests.cpp \
   test/crypto_tests.cpp \
   test/dht_data_tests.cpp \
-  test/dht_key_tests \
+  test/dht_key_tests.cpp \
   test/DoS_tests.cpp \
   test/getarg_tests.cpp \
   test/governance_validators_tests.cpp \
