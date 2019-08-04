@@ -552,7 +552,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     }
 }
 
-void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend)
+void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -570,11 +570,16 @@ void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, co
     std::vector<CRecipient> vecSend;
     int nChangePosInOut = 0;
 
-    LogPrintf("Sending color coin script: %s\n", ScriptToAsmStr(scriptColorCoins));
+    LogPrint("bdap", "Sending color coin script: %s\n", ScriptToAsmStr(scriptColorCoins));
+
+    if (stealthDataScript.size() > 0) {
+        CRecipient recStealthData = {stealthDataScript, 0, false};
+        vecSend.push_back(recStealthData);
+    }
 
     CRecipient recScript = {scriptColorCoins, nColorAmount, false};
     vecSend.push_back(recScript);
-    //
+
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend, true)) {
         if (nColorAmount + nFeeRequired > pwalletMain->GetBalance())
