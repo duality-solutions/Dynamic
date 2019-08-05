@@ -6194,7 +6194,7 @@ Your old account wallet file will be renamed to wallat.dat.before-mnemonic-impor
         <translation>Die Wallet hat bereits ein HD Konto geladen.
 		Bei der Importierung einer anderen Wiederherstellungsphrase, wird ein neues Konto erstellt und als Standard definiert.
 		Die Wallet wird nur auf Adressen des neu importieren Konto empfangen.
-		Ihre alte Konto Walletdatei wird auf wallat.dat.before-mnemonic-import.&lt;isodate&gt in ihrem Datenverzeichnis umbenannt.</translation>
+		Ihre alte Konto Walletdatei wird auf wallat.dat.before-mnemonic-import.&lt;isodate&gt; in ihrem Datenverzeichnis umbenannt.</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
