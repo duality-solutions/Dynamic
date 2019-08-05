@@ -23,10 +23,15 @@ static const bool DEFAULT_FLUSHWALLET = true;
 
 class CAccount;
 class CAccountingEntry;
+class CKeyEd25519;
 struct CBlockLocator;
 class CKeyPool;
+class CEdKeyPool;
+class CLinkStorage;
 class CMasterKey;
 class CScript;
+class CStealthAddress;
+class CStealthKeyQueueData;
 class CWallet;
 class CWalletTx;
 class uint160;
@@ -92,8 +97,11 @@ public:
     bool WriteTx(const CWalletTx& wtx);
     bool EraseTx(uint256 hash);
 
+    bool WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta);
+
     bool WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta);
     bool WriteCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, const CKeyMetadata& keyMeta);
+    bool WriteCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, const CKeyMetadata& keyMeta);
     bool WriteMasterKey(unsigned int nID, const CMasterKey& kMasterKey);
 
     bool WriteCScript(const uint160& hash, const CScript& redeemScript);
@@ -111,6 +119,10 @@ public:
     bool ReadPool(int64_t nPool, CKeyPool& keypool);
     bool WritePool(int64_t nPool, const CKeyPool& keypool);
     bool ErasePool(int64_t nPool);
+
+    bool ReadEdPool(int64_t nPool, CEdKeyPool& edkeypool);
+    bool WriteEdPool(int64_t nPool, const CEdKeyPool& edkeypool);
+    bool EraseEdPool(int64_t nPool);    
 
     bool WriteMinVersion(int nVersion);
 
@@ -143,6 +155,16 @@ public:
 
     static void IncrementUpdateCounter();
     static unsigned int GetUpdateCounter();
+
+    bool WriteLink(const CLinkStorage& link);
+    bool EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey);
+    bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool EraseLinkMessageInfo(const uint256& subjectID);
+
+    bool WriteStealthAddress(const CStealthAddress& sxAddr);
+    bool WriteStealthKeyQueue(const CKeyID& keyId, const CStealthKeyQueueData& sxKeyMeta);
+    bool EraseStealthKeyQueue(const CKeyID& keyId);
+    bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
 
 private:
     CWalletDB(const CWalletDB&);

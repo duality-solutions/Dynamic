@@ -56,8 +56,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
     printf("NOTE: Genesis nTime = %u \n", genesisBlock.nTime);
     printf("WARN: Genesis nNonce (BLANK!) = %u \n", genesisBlock.nNonce);
 
-    arith_uint256 besthash;
-    memset(&besthash, 0xFF, 32);
+    arith_uint256 besthash = maxUint;
     arith_uint256 hashTarget = UintToArith256(powLimit);
     printf("Target: %s\n", hashTarget.GetHex().c_str());
     arith_uint256 newhash = UintToArith256(genesisBlock.GetHash());
@@ -219,6 +218,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         // Dynamic BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'L'
+        base58Prefixes[STEALTH_ADDRESS] = {0x0F};
         // Dynamic BIP44 coin type is '5'
         nExtCoinType = 5;
 
@@ -323,10 +324,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = 702; // 702 blocks
+        consensus.nMinimumChainWork = 210; // 210
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000004ca904b66049dbb93c7f129dec1c9e42213d42a5983a4b6ff7f4f88a912"); // Block 702
+        consensus.defaultAssumeValid = uint256S("0x00001a32bc1d6887d29d3847e21fcfb1026e14369df048a7f0666acdd9ccdf0d"); // 210
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
@@ -363,6 +364,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'T'
+        base58Prefixes[STEALTH_ADDRESS] = {0x15};
         // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
@@ -378,7 +381,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        vSporkAddresses = {"DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"}; // Must have this converted to an address "04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5";
+        vSporkAddresses = {"DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"};
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
@@ -501,7 +504,7 @@ public:
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
 
-        vSporkAddresses = {"D5uFBBHBe11nmYPmSNNTC1iR6V6bPkhJwe"};
+        vSporkAddresses = {"ygUqnUfyRnRfBUks3EBc937tgmYBwQYE2S"}; //private key: cT21Wm3oozS7HpP9K9g1SDxdgr2vw9TBPSTxjxeArLjYxGastsf9
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
@@ -524,6 +527,8 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Regtest Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Dynamic Stealth Address start with 'R'
+        base58Prefixes[STEALTH_ADDRESS] = {0x13};
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
     }
@@ -534,6 +539,140 @@ public:
     }
 };
 static CRegTestParams regTestParams;
+
+
+/**
+ * Privatenet
+ */
+class CPrivateNetParams : public CChainParams
+{
+public:
+    CPrivateNetParams()
+    {
+        strNetworkID = "privatenet";
+
+        consensus.nRewardsStart = 0; // Rewards starts on block 0
+        consensus.nDynodePaymentsStartBlock = 0;
+        consensus.nMinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
+
+        consensus.nInstantSendConfirmationsRequired = 11;
+        consensus.nInstantSendKeepLock = 24;
+
+        consensus.nBudgetPaymentsStartBlock = 200;
+        consensus.nBudgetPaymentsCycleBlocks = 50;
+        consensus.nBudgetPaymentsWindowBlocks = 10;
+        consensus.nBudgetProposalEstablishingTime = 60 * 20;
+
+        consensus.nSuperblockStartBlock = 0;
+        consensus.nSuperblockStartHash = uint256(); // do not check this on testnet
+        consensus.nSuperblockCycle = 24;            // Superblocks can be issued hourly on testnet
+
+        consensus.nGovernanceMinQuorum = 1;
+        consensus.nGovernanceFilterElements = 500;
+
+        consensus.nDynodeMinimumConfirmations = 1;
+
+        consensus.nMajorityEnforceBlockUpgrade = 510;
+        consensus.nMajorityRejectBlockOutdated = 750;
+        consensus.nMajorityWindow = 1000;
+
+        consensus.powLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPowAveragingWindow = 5;
+        consensus.nPowMaxAdjustUp = 32;
+        consensus.nPowMaxAdjustDown = 48;
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
+        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
+        consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
+        assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
+        consensus.fPowAllowMinDifficultyBlocks = true;
+        consensus.fPowNoRetargeting = false;
+        consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
+        consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
+
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999;   // December 31, 2008
+
+        // Deployment of BIP68, BIP112, and BIP113.
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
+
+        // The best chain should have at least this much work.
+        consensus.nMinimumChainWork = 210; // 210
+
+        // By default assume that the signatures in ancestors of this block are valid.
+        consensus.defaultAssumeValid = uint256S("0x00001a32bc1d6887d29d3847e21fcfb1026e14369df048a7f0666acdd9ccdf0d"); // 210
+
+        pchMessageStart[0] = 0x2f;
+        pchMessageStart[1] = 0x32;
+        pchMessageStart[2] = 0x15;
+        pchMessageStart[3] = 0x40;
+        // To import alert key:  importprivkey 6Jjb9DG1cr71VWiwxg97zVEyZUBhFzzGhqE7GY9DrbYYM6gVgxS
+        vAlertPubKey = ParseHex("043d9e8440ea8fe66b0c2639f0a0931c9d7c41132ec9ee04cdf5d9e88ada2c2df52d93a0c1983958d3aea56df9fb3d1a61ca4eb6f72c27456fc313be80cdc70032");
+        nDefaultPort = DEFAULT_P2P_PORT + 300; // 33600 
+        nPruneAfterHeight = 100;
+        startNewChain = false;
+
+        genesis = CreateGenesisBlock(1559867972, 60883, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        if (startNewChain == true) {
+            MineGenesis(genesis, consensus.powLimit, true);
+        }
+
+        consensus.hashGenesisBlock = genesis.GetHash();
+
+        if (!startNewChain) {
+            assert(consensus.hashGenesisBlock == uint256S("0x000055a9348d53bed51996102ad11d129207e85dc197d01a5a69d5fd10af0e8a"));
+            assert(genesis.hashMerkleRoot == uint256S("0xfa0e753db5a853ebbc52594eb62fa8219155547b426fba8789fa96dbf07e6ed5"));
+        }
+        vFixedSeeds.clear();
+        vSeeds.clear();
+        //vSeeds.push_back(CDNSSeedData("",  ""));
+        //vSeeds.push_back(CDNSSeedData("", ""));
+
+        // Privatenet Dynamic addresses start with 'y'
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 30);
+        // Privatenet Dynamic script addresses start with '8' or '9'
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 10);
+        // Privatenet private keys start with '9' or 'c' (Bitcoin defaults)
+        base58Prefixes[SECRET_KEY] = std::vector<unsigned char>(1, 158);
+        // Privatenet Dynamic BIP32 pubkeys start with 'tpub' (Bitcoin defaults)
+        base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
+        // Privatenet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
+        base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // Privatenet Stealth Address start with 'P'
+        base58Prefixes[STEALTH_ADDRESS] = {0x12};
+        // Privatenet Dynamic BIP44 coin type is '1' (All coin's testnet default)
+        nExtCoinType = 1;
+
+        vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_privatenet, pnSeed6_privatenet + ARRAYLEN(pnSeed6_privatenet));
+
+        fMiningRequiresPeers = false;
+        fDefaultConsistencyChecks = false;
+        fRequireStandard = false;
+        fRequireRoutableExternalIP = true;
+        fMineBlocksOnDemand = false;
+        fAllowMultipleAddressesFromGroup = false;
+        fAllowMultiplePorts = false;
+
+        nPoolMaxTransactions = 3;
+        nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
+        // To import spork key (D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL): importprivkey QWUVh41RrhjhnF813U5XLU4S8qYjvDQ5L1n53jC7Qawr8bBCQfFh
+        vSporkAddresses = {"D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL"};
+        nMinSporkKeys = 1;
+
+        checkpointData = (CCheckpointData){
+            boost::assign::map_list_of(0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))};
+
+        chainTxData = ChainTxData{
+            0,  // * UNIX timestamp of last known number of transactions
+            0,  // * total number of transactions between genesis and that timestamp
+                //   (the tx=... number in the SetBestChain debug.log lines)
+            0.1 // * estimated number of transactions per second after that timestamp
+        };
+    }
+};
+static CPrivateNetParams privateNetParams;
 
 static CChainParams* pCurrentParams = 0;
 
@@ -551,6 +690,8 @@ CChainParams& Params(const std::string& chain)
         return testNetParams;
     else if (chain == CBaseChainParams::REGTEST)
         return regTestParams;
+    else if (chain == CBaseChainParams::PRIVATENET)
+        return privateNetParams;
     else
         throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }

@@ -132,10 +132,18 @@ bool CKey::Check(const unsigned char* vch)
     return secp256k1_ec_seckey_verify(secp256k1_context_sign, vch);
 }
 
+
+void CKey::SetCompressedBoolean(bool fCompressedIn)
+{
+    fCompressed = fCompressedIn;
+}
+
+
+
 void CKey::MakeNewKey(bool fCompressedIn)
 {
     do {
-        GetRandBytes(keydata.data(), keydata.size());
+        GetStrongRandBytes(keydata.data(), keydata.size());
     } while (!Check(keydata.data()));
     fValid = true;
     fCompressed = fCompressedIn;
@@ -257,6 +265,17 @@ bool CKey::Derive(CKey& keyChild, ChainCode& ccChild, unsigned int nChild, const
     keyChild.fCompressed = true;
     keyChild.fValid = ret;
     return ret;
+}
+
+bool CKey::DeriveChildKey(CKey& keyChild) const
+{
+    assert(IsValid());
+    assert(IsCompressed());
+    SecureVector newkeyData(32);
+    CSHA256().Write(&keydata[0], 32).Finalize(&newkeyData[0]);
+    keyChild.Set(newkeyData.begin(), newkeyData.end(), true);
+    keyChild.fCompressed = true;
+    return keyChild.fValid;
 }
 
 bool CExtKey::Derive(CExtKey& out, unsigned int _nChild) const

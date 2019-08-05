@@ -171,3 +171,10 @@ install_manifest.txt
 # Qt Creator
 *.user
 *.autosave
+
+# Visual Studio Code
+.vscode/
+
+# DHT Test binary
+src/dht/test/data_test
+.dht

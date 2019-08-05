@@ -32,7 +32,7 @@ void ScrubString(std::string& input, bool forInteger)
         input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
 }
 
-void SeparateString(std::string input, std::vector<std::string>& output, bool subDelimiter)
+void SeparateString(const std::string& input, std::vector<std::string>& output, bool subDelimiter)
 {
     if (subDelimiter)
         boost::split(output, input, boost::is_any_of(SubDelimiter));
@@ -40,7 +40,7 @@ void SeparateString(std::string input, std::vector<std::string>& output, bool su
         boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
 }
 
-void SeparateFluidOpString(std::string input, std::vector<std::string>& output)
+void SeparateFluidOpString(const std::string& input, std::vector<std::string>& output)
 {
     std::vector<std::string> firstSplit;
     SeparateString(input, firstSplit);
@@ -60,7 +60,7 @@ void SeparateFluidOpString(std::string input, std::vector<std::string>& output)
     }
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter)
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const bool subDelimiter)
 {
     if (subDelimiter)
         return stringOne + SubDelimiter + stringTwo;
@@ -68,7 +68,7 @@ std::string StitchString(std::string stringOne, std::string stringTwo, bool subD
         return stringOne + PrimaryDelimiter + stringTwo;
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter)
+std::string StitchString(const std::string& stringOne, const std::string& stringTwo, const std::string& stringThree, const bool subDelimiter)
 {
     if (subDelimiter)
         return stringOne + SubDelimiter + stringTwo + SubDelimiter + stringThree;
@@ -76,7 +76,7 @@ std::string StitchString(std::string stringOne, std::string stringTwo, std::stri
         return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
 }
 
-std::string GetRidOfScriptStatement(std::string input, int position)
+std::string GetRidOfScriptStatement(const std::string& input, const int& position)
 {
     std::vector<std::string> output;
     boost::split(output, input, boost::is_any_of(" "));
@@ -90,7 +90,7 @@ std::string GetRidOfScriptStatement(std::string input, int position)
 //
 /////////////////////////////////////////////////////////////
 
-bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress)
+bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
 {
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
@@ -111,8 +111,7 @@ bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress)
 #endif //ENABLE_WALLET
 }
 
-
-bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
+bool COperations::SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
 {
 #ifdef ENABLE_WALLET
     CHashWriter ss(SER_GETHASH, 0);
@@ -143,7 +142,7 @@ bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsigned
 #endif //ENABLE_WALLET
 }
 
-bool COperations::GenericSignMessage(const std::string message, std::string& signedString, CDynamicAddress signer)
+bool COperations::GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer)
 {
     if (!SignTokenMessage(signer, message, signedString, true))
         return false;

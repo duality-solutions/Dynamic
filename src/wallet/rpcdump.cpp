@@ -6,6 +6,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
+#include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
+#include "bip39.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
@@ -20,6 +24,7 @@
 #include "wallet.h"
 
 #include <univalue.h>
+#include <libtorrent/hex.hpp> // for to_hex and from_hex
 
 #include <fstream>
 #include <stdint.h>
@@ -111,8 +116,9 @@ UniValue importprivkey(const JSONRPCRequest& request)
     if (request.params.size() > 1)
         strLabel = request.params[1].get_str();
 
+    bool isskip = false;
     // Whether to perform rescan after import
-    bool fRescan = true;
+    bool fRescan = false;
     if (request.params.size() > 2)
         fRescan = request.params[2].get_bool();
 
@@ -137,13 +143,230 @@ UniValue importprivkey(const JSONRPCRequest& request)
         pwalletMain->SetAddressBook(vchAddress, strLabel, "receive");
 
         // Don't throw error in case a key is already there
-        if (pwalletMain->HaveKey(vchAddress))
+        if (pwalletMain->HaveKey(vchAddress)) {
+            isskip = true;
+        } else {
+            
+            pwalletMain->mapKeyMetadata[vchAddress].nCreateTime = 1;
+
+            if (!pwalletMain->AddKeyPubKey(key, pubkey))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
+
+            pwalletMain->GenerateEdandStealthKey(key);
+
+            // whenever a key is imported, we need to scan the whole chain
+            pwalletMain->UpdateTimeFirstKey(1);
+        }
+
+        if (fRescan || !isskip) {
+            pwalletMain->SetUpdateKeyPoolsAndLinks();
+
+            pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+        }
+    }
+
+    return NullUniValue;
+}
+
+UniValue importstealthaddress(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
+        throw std::runtime_error(
+            "importstealthaddress \"scan private key\" \"spend private key\" ( \"prefix bits\" ) ( \"prefix number\" ) \n"
+            "\nAdds a stealth address (as returned by dumpprivkey) to your wallet.\n"
+            "\nArguments:\n"
+            "1. \"scan private key\"       (string, required) The stealth scan private key (see dumpprivkey)\n"
+            "2. \"spend private key\"      (string, required) The stealth spend private key  (see dumpprivkey)\n"
+            "3. \"prefix bits\"            (int, optional, default=0)\n"
+            "4. \"prefix number\"          (int, optional) If prefix number is not specified the prefix will be selected deterministically.\n"
+            "\nNote: This call can take minutes to complete because it rescans the chain for transactions.\n"
+            "\nExamples:\n"
+            "\nDump stealth address private keys\n" +
+            HelpExampleCli("importstealthaddress", "\"scan_key\" \"spend_key\"") +
+            HelpExampleRpc("importstealthaddress", "\"scan_key\" \"spend_key\""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+
+    std::string strScanKey = request.params[0].get_str();
+    std::string strSpendKey = request.params[1].get_str();
+    uint8_t prefix_bits = 0;
+    if (request.params.size() > 2)
+        prefix_bits = request.params[2].get_int();
+
+    uint32_t prefix_number = 0;
+    if (request.params.size() > 3)
+        prefix_number = request.params[3].get_int();
+
+    CDynamicSecret vchScanSecret, vchSpendSecret;
+    bool fGood = vchScanSecret.SetString(strScanKey);
+
+    if (!fGood)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid scan private key encoding");
+
+    fGood = vchSpendSecret.SetString(strSpendKey);
+    if (!fGood)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid spend private key encoding");
+
+    CKey keyScan = vchScanSecret.GetKey();
+    if (!keyScan.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Scan private key outside allowed range");
+
+    CKey keySpend = vchSpendSecret.GetKey();
+    if (!keySpend.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Spend private key outside allowed range");
+
+    CPubKey pubkeyScan = keyScan.GetPubKey();
+    assert(keyScan.VerifyPubKey(pubkeyScan));
+    CPubKey pubkeySpend = keySpend.GetPubKey();
+    assert(keySpend.VerifyPubKey(pubkeySpend));
+    CKeyID scanID = pubkeyScan.GetID();
+    CKeyID spendID = pubkeySpend.GetID();
+    {
+        pwalletMain->MarkDirty();
+        pwalletMain->SetAddressBook(scanID, "", "receive");
+        pwalletMain->SetAddressBook(spendID, "", "receive");
+        // Don't throw error in case a key is already there
+        if (!pwalletMain->HaveKey(scanID)) {
+            pwalletMain->mapKeyMetadata[scanID].nCreateTime = 1;
+            if (!pwalletMain->AddKeyPubKey(keyScan, pubkeyScan))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding scan key to wallet");
+        }
+        if (!pwalletMain->HaveKey(spendID)) {
+            pwalletMain->mapKeyMetadata[spendID].nCreateTime = 1;
+            if (!pwalletMain->AddKeyPubKey(keySpend, pubkeySpend))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding spend key to wallet");
+        }
+        CStealthAddress sxAddr(keyScan, keySpend, prefix_bits, prefix_number);
+        if (!pwalletMain->HaveStealthAddress(spendID)) {
+            if (!pwalletMain->AddStealthAddress(sxAddr)) {
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding spend key to wallet");
+            }
+            else {
+                // whenever a key is imported, we need to scan the whole chain
+                pwalletMain->UpdateTimeFirstKey(1);
+                pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+            }
+        }
+    }
+    return NullUniValue;
+}
+
+UniValue importbdapkeys(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+    
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
+        throw std::runtime_error(
+            "importbdapkeys \"account id\" \"wallet privkey\" \"link privkey\" \"DHT privkey\" \"rescan\"\n"
+            "\nAdds a private keys (as returned by dumpbdapkeys) to your wallet.\n"
+            "\nArguments:\n"
+            "1. \"account id\"       (string, required) The BDAP account id (see dumpbdapkeys)\n"
+            "2. \"wallet privkey\"   (string, required) The BDAP account wallet private key (see dumpbdapkeys)\n"
+            "3. \"link privkey\"     (string, required) The BDAP account link address private key (see dumpbdapkeys)\n"
+            "4. \"DHT privkey\"      (string, required) The BDAP account DHT private key (see dumpbdapkeys)\n"
+            "5. \"rescan\"           (boolean, optional, default=true) Rescan the wallet for transactions\n"
+            "\nNote: This call can take minutes to complete if rescan is true.\n"
+            "\nExamples:\n"
+            "\nDump a private key\n"
+            + HelpExampleCli("dumpbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            "\nImport the private key with rescan\n"
+            + HelpExampleCli("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\"") +
+            "\nImport using a label and without rescan\n"
+            + HelpExampleCli("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false")
+        );
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+ 
+    std::string vchObjectID = request.params[0].get_str();
+    std::string strWalletPrivKey = request.params[1].get_str();
+    std::string strLinkPrivKey = request.params[2].get_str();
+    std::string strDHTPrivKey = request.params[3].get_str();
+    // Whether to perform rescan after import
+    bool fRescan = true;
+    if (request.params.size() > 4)
+        fRescan = request.params[2].get_bool();
+
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
+    entry.ObjectID = vchFromString(vchObjectID);
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
+        throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
+    }
+
+    if (fRescan && fPruneMode)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Rescan is disabled in pruned mode");
+
+    // Wallet address
+    CDynamicSecret vchWalletSecret;
+    bool fGood = vchWalletSecret.SetString(strWalletPrivKey);
+    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid wallet private key encoding");
+    CKey keyWallet = vchWalletSecret.GetKey();
+    if (!keyWallet.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Wallet private key outside allowed range");
+    CPubKey pubkeyWallet = keyWallet.GetPubKey();
+    assert(keyWallet.VerifyPubKey(pubkeyWallet));
+    CKeyID vchWalletAddress = pubkeyWallet.GetID();
+    // TODO (BDAP): Check if wallet address matches BDAP entry
+
+    // Link address
+    CDynamicSecret vchLinkSecret;
+    fGood = vchLinkSecret.SetString(strLinkPrivKey);
+    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid link private key encoding");
+    CKey keyLink = vchLinkSecret.GetKey();
+    if (!keyLink.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Link private key outside allowed range");
+    CPubKey pubkeyLink = keyLink.GetPubKey();
+    assert(keyLink.VerifyPubKey(pubkeyLink));
+    CKeyID vchLinkAddress = pubkeyLink.GetID();
+    // TODO (BDAP): Check if link address matches BDAP entry
+    
+    // DHT key
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> arrDHTPrivSeedKey;
+    libtorrent::aux::from_hex(strDHTPrivKey, arrDHTPrivSeedKey.data());
+    CKeyEd25519 privDHTKey(arrDHTPrivSeedKey);
+    std::vector<unsigned char> vchDHTPubKey = privDHTKey.GetPubKey();
+    CKeyID dhtKeyID(Hash160(vchDHTPubKey.begin(), vchDHTPubKey.end()));
+
+    // Add keys to local wallet database
+    {
+        pwalletMain->MarkDirty();
+        
+        if (!pwalletMain->HaveDHTKey(dhtKeyID)) {
+            pwalletMain->SetAddressBook(privDHTKey.GetID(), vchObjectID, "bdap-dht-key");
+            if (!pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey)) {
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP DHT key to wallet database");
+            }
+            pwalletMain->mapKeyMetadata[dhtKeyID].nCreateTime = 1;
+        }
+
+        // Don't throw error in case all keys already already there
+        if (pwalletMain->HaveKey(vchWalletAddress) && pwalletMain->HaveKey(vchLinkAddress))
             return NullUniValue;
 
-        pwalletMain->mapKeyMetadata[vchAddress].nCreateTime = 1;
+        // TODO (BDAP): What is nCreateTime used for?
+        pwalletMain->mapKeyMetadata[vchWalletAddress].nCreateTime = 1;
+        pwalletMain->mapKeyMetadata[vchLinkAddress].nCreateTime = 1;
+        
+        if (!pwalletMain->HaveKey(vchWalletAddress)) {
+            pwalletMain->SetAddressBook(vchWalletAddress, vchObjectID, "bdap-wallet");
+            if (!pwalletMain->AddKeyPubKey(keyWallet, pubkeyWallet))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP wallet key to wallet database");
+        }
 
-        if (!pwalletMain->AddKeyPubKey(key, pubkey))
-            throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
+        if (!pwalletMain->HaveKey(vchLinkAddress)) {
+            pwalletMain->SetAddressBook(vchLinkAddress, vchObjectID, "bdap-link");
+            if (!pwalletMain->AddKeyPubKey(keyLink, pubkeyLink))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP link key to wallet database");
+        }
 
         // whenever a key is imported, we need to scan the whole chain
         pwalletMain->UpdateTimeFirstKey(1);
@@ -401,12 +624,13 @@ UniValue importwallet(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() != 1)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "importwallet \"filename\"\n"
             "\nImports keys from a wallet dump file (see dumpwallet).\n"
             "\nArguments:\n"
             "1. \"filename\"    (string, required) The wallet file\n"
+            "2. forcerescan     (boolean, optional, default=true) Rescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nDump the wallet\n" +
             HelpExampleCli("dumpwallet", "\"test\"") +
@@ -424,6 +648,11 @@ UniValue importwallet(const JSONRPCRequest& request)
     file.open(request.params[0].get_str().c_str(), std::ios::in | std::ios::ate);
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
+
+    bool neednotRescan = true;
+    bool forcerescan = false;
+    if (!request.params[1].isNull())
+        forcerescan = request.params[1].get_bool();
 
     int64_t nTimeBegin = chainActive.Tip()->GetBlockTime();
 
@@ -455,6 +684,7 @@ UniValue importwallet(const JSONRPCRequest& request)
             LogPrintf("Skipping import of %s (key already present)\n", CDynamicAddress(keyid).ToString());
             continue;
         }
+        neednotRescan=false;
         int64_t nTime = DecodeDumpTime(vstr[1]);
         std::string strLabel;
         bool fLabel = true;
@@ -482,6 +712,7 @@ UniValue importwallet(const JSONRPCRequest& request)
     }
     file.close();
     pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
+    if (forcerescan || !neednotRescan) {
     pwalletMain->UpdateTimeFirstKey(nTimeBegin);
 
     CBlockIndex* pindex = chainActive.FindEarliestAtLeast(nTimeBegin - 7200);
@@ -489,7 +720,8 @@ UniValue importwallet(const JSONRPCRequest& request)
     LogPrintf("Rescanning last %i blocks\n", pindex ? chainActive.Height() - pindex->nHeight + 1 : 0);
     pwalletMain->ScanForWalletTransactions(pindex);
     pwalletMain->MarkDirty();
-
+    }
+   
     if (!fGood)
         throw JSONRPCError(RPC_WALLET_ERROR, "Error adding some keys to wallet");
 
@@ -624,6 +856,102 @@ UniValue importelectrumwallet(const JSONRPCRequest& request)
 
     return NullUniValue;
 }
+
+UniValue importmnemonic(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
+        return NullUniValue;
+    }
+    
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+    UniValue entry(UniValue::VOBJ);
+    if (request.fHelp || request.params.size() > 6 || request.params.size() == 0)
+        throw std::runtime_error(
+            "importmnemonic \"mnemonic\"\n"
+            "\nImports mnemonic\n"
+            "\nArguments:\n"
+            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
+            "2. \"language\"    (english|french|chinesesimplified|chinesetraditional|italian|japanese|korean|spanish, optional)\n"
+            "3. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
+            "\nExamples:\n"
+            "\nImports mnemonic\n"
+            + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
+        );
+
+    if (fPruneMode)
+        throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");
+
+    std::string strMnemonic = "", strMnemonicPassphrase = "";
+    if (!request.params[0].isNull())
+        strMnemonic = request.params[0].get_str();
+
+    // Mnemonic can be delimited by dash ('-') or space(' ') character
+    std::replace(strMnemonic.begin(), strMnemonic.end(), '-', ' ');
+
+    if (strMnemonic.size() > 512) //RESTRICTION REMOVED: was 256
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
+
+    SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
+    CMnemonic mnemonic;
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //default language is ENGLISH
+
+    std::string compareLanguage = "english"; //default language is ENGLISH
+
+    if (!request.params[1].isNull()) {
+        compareLanguage = request.params[1].get_str();
+
+        selectLanguage = CMnemonic::getLanguageEnumFromLabel(compareLanguage);
+    } //if language
+
+
+
+    if (!mnemonic.Check(strSecureMnemonic,selectLanguage))
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic check failed.");
+
+    SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+
+
+
+    if (!request.params[2].isNull()) {
+        strMnemonicPassphrase = request.params[2].get_str();
+    }
+
+
+    if (strMnemonicPassphrase.size() > 24)
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
+
+
+    pwalletMain->ShowProgress(_("Importing... Wallet will restart when complete."), 0); // show progress dialog in GUI
+    pwalletMain->ShowProgress("", 25); //show we're working in the background...
+
+    //CREATE BACKUP OF WALLET before importing mnemonic and swapping files
+    //wallat.dat.before-mnemonic-import.isodate
+    std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M-%S", GetTime());
+    boost::filesystem::path backupFile = GetDataDir() / ("wallet.dat.before-mnemonic-import" + dateTimeStr);
+    pwalletMain->BackupWallet(backupFile.string());
+
+    ForceSetArg("-mnemonic", strMnemonic);
+    ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
+    ForceSetArg("-mnemoniclanguage", compareLanguage);
+    SoftSetBoolArg("-importmnemonic", true);
+    SoftSetBoolArg("-skipmnemoniccheck", true);
+
+    CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
+    pwalletMain = pwallet;
+    pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
+    StartMnemonicRestart();
+    entry.push_back(Pair("Done", "Stopping daemon... Please restart dynamic..."));
+
+    //cleanup
+    ForceRemoveArg("-mnemonic");
+    ForceRemoveArg("-importmnemonic");
+    ForceRemoveArg("-mnemoniclanguage");
+    ForceRemoveArg("-skipmnemoniccheck");
+
+    return entry;
+
+}
+
 UniValue dumpprivkey(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))
@@ -646,16 +974,121 @@ UniValue dumpprivkey(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     std::string strAddress = request.params[0].get_str();
-    CDynamicAddress address;
-    if (!address.SetString(strAddress))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
-    CKeyID keyID;
-    if (!address.GetKeyID(keyID))
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
-    CKey vchSecret;
-    if (!pwalletMain->GetKey(keyID, vchSecret))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
-    return CDynamicSecret(vchSecret).ToString();
+    CTxDestination dest = DecodeDestination(strAddress);
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address " + strAddress);
+
+    if (dest.type() == typeid(CStealthAddress)) {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+        if (!pwalletMain->GetStealthAddress(sxAddr.GetSpendKeyID(), sxAddr))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
+
+        UniValue result(UniValue::VOBJ);
+
+        result.push_back(Pair("scan_private_key", CDynamicSecret(sxAddr.scan_secret).ToString()));
+
+        CKey vchSpendSecret;
+        if (!pwalletMain->GetKey(sxAddr.spend_secret_id, vchSpendSecret))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for spend address " + CDynamicAddress(sxAddr.spend_secret_id).ToString() + " is not known");
+
+        result.push_back(Pair("spend_private_key", CDynamicSecret(vchSpendSecret).ToString()));
+        result.push_back(Pair("prefix_number_bits", (int)sxAddr.prefix_number_bits));
+        result.push_back(Pair("prefix_bitfield", (int)sxAddr.prefix_bitfield));
+
+        return result;
+    } else {
+        CDynamicAddress address;
+        if (!address.SetString(strAddress))
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+        CKeyID keyID;
+        if (!address.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+        CKey vchSecret;
+        if (!pwalletMain->GetKey(keyID, vchSecret))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
+        return CDynamicSecret(vchSecret).ToString();
+    }
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type: " + strAddress + " Must be a standard or stealth address.");
+}
+
+UniValue dumpbdapkeys(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+    
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "dumpbdapkeys \"account id\"\n"
+            "\nReveals the private key corresponding to 'BDAP account'.\n"
+            "Then the importbdapkeys can be used with this output\n"
+            "\nArguments:\n"
+            "1. \"account id\"      (string, required) The BDAP id for the private keys\n"
+            "\nResult:\n"
+            "\"wallet_address\"     (string) The wallet address\n"
+            "\"wallet_privkey\"     (string) The wallet address private key\n"
+            "\"link_address\"       (string) The link address\n"
+            "\"link_privkey\"       (string) The link address private keys\n"
+            "\"dht_publickey\"      (string) The DHT public key\n"
+            "\"dht_privkey\"        (string) The DHT private key\n"
+            "\nExamples:\n"
+            + HelpExampleCli("dumpbdapkeys", "\"Alice\"")
+            + HelpExampleRpc("dumpbdapkeys", "\"Alice\"")
+        );
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    UniValue result(UniValue::VOBJ);
+
+    EnsureWalletIsUnlocked();
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
+    entry.ObjectID = vchObjectID;
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
+        throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
+    }
+
+    // Get wallet address private key from wallet db.
+    CKeyID walletKeyID;
+    CDynamicAddress address = entry.GetWalletAddress();
+    if (!address.GetKeyID(walletKeyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key " + address.ToString());
+    CKey vchWalletSecret;
+    if (!pwalletMain->GetKey(walletKeyID, vchWalletSecret))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + address.ToString() + " is not known");
+    std::string strWalletPrivKey = CDynamicSecret(vchWalletSecret).ToString();
+
+    // Get link address private key from wallet db.
+    CKeyID linkKeyID;
+    CDynamicAddress linkAddress = entry.GetLinkAddress();
+    if (!linkAddress.GetKeyID(linkKeyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Link address does not refer to a key" + linkAddress.ToString());
+    CKey vchLinkSecret;
+    if (!pwalletMain->GetKey(linkKeyID, vchLinkSecret))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + linkAddress.ToString() + " is not known");
+    std::string strLinkPrivKey = CDynamicSecret(vchLinkSecret).ToString();
+
+    // Get DHT private key from wallet db.
+    CKeyEd25519 keyDHT;
+    std::vector<unsigned char> vchDHTPubKey = vchFromString(entry.DHTPubKeyString());
+    CKeyID dhtKeyID(Hash160(vchDHTPubKey.begin(), vchDHTPubKey.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(dhtKeyID, keyDHT)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error getting ed25519 private key for " + entry.DHTPubKeyString());
+    }
+    std::string strDHTPrivKey = keyDHT.GetPrivSeedString();
+
+    result.push_back(Pair("wallet_address", address.ToString()));
+    result.push_back(Pair("wallet_privkey", strWalletPrivKey));
+    result.push_back(Pair("link_address", linkAddress.ToString()));
+    result.push_back(Pair("link_privkey", strLinkPrivKey));
+    result.push_back(Pair("dht_publickey", entry.DHTPubKeyString()));
+    result.push_back(Pair("dht_privkey", strDHTPrivKey));
+
+    return result;
 }
 
 UniValue dumphdinfo(const JSONRPCRequest& request)

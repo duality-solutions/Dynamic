@@ -1127,7 +1127,7 @@ void CConnman::ThreadSocketHandler()
             std::vector<CNode*> vNodesCopy = vNodes;
             BOOST_FOREACH (CNode* pnode, vNodesCopy) {
                 if (pnode->fDisconnect) {
-                    LogPrintf("ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fInbound=%d fDynode=%d\n",
+                    LogPrint("net", "ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fInbound=%d fDynode=%d\n",
                         pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fInbound, pnode->fDynode);
 
                     // remove from vNodes
@@ -1332,7 +1332,7 @@ void CConnman::ThreadSocketHandler()
                             int nErr = WSAGetLastError();
                             if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS) {
                                 if (!pnode->fDisconnect)
-                                    LogPrintf("socket recv error %s\n", NetworkErrorString(nErr));
+                                    LogPrint("net", "socket recv error %s\n", NetworkErrorString(nErr));
                                 pnode->CloseSocketDisconnect();
                             }
                         }
@@ -1357,7 +1357,7 @@ void CConnman::ThreadSocketHandler()
             int64_t nTime = GetSystemTimeInSeconds();
             if (nTime - pnode->nTimeConnected > 60) {
                 if (pnode->nLastRecv == 0 || pnode->nLastSend == 0) {
-                    LogPrint("net", "socket no message in first 60 seconds, %d %d from %d\n", pnode->nLastRecv != 0, pnode->nLastSend != 0, pnode->id);
+                    LogPrintf("socket no message in first 60 seconds, %d %d from %d\n", pnode->nLastRecv != 0, pnode->nLastSend != 0, pnode->id);
                     pnode->fDisconnect = true;
                 } else if (nTime - pnode->nLastSend > TIMEOUT_INTERVAL) {
                     LogPrintf("socket sending timeout: %is\n", nTime - pnode->nLastSend);

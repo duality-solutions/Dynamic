@@ -26,8 +26,14 @@ void RegisterDynodeRPCCommands(CRPCTable& tableRPC);
 void RegisterGovernanceRPCCommands(CRPCTable& tableRPC);
 /** Register fluid RPC commands */
 void RegisterFluidRPCCommands(CRPCTable& tableRPC);
-/** Register BDAP RPC commands */
-void RegisterDomainEntryRPCCommands(CRPCTable& tableRPC);
+/** Register BDAP Domain Entry RPC commands */
+void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC);
+/** Register DHT RPC commands */
+void RegisterDHTRPCCommands(CRPCTable &tableRPC);
+/** Register BDAP Linking RPC commands */
+void RegisterLinkingRPCCommands(CRPCTable &tableRPC);
+/** Register Raw BDAP Account RPC commands */
+void RegisterRawBDAPAccountRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
 {
@@ -40,6 +46,9 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
     RegisterGovernanceRPCCommands(t);
     RegisterFluidRPCCommands(t);
     RegisterDomainEntryRPCCommands(t);
+    RegisterDHTRPCCommands(t);
+    RegisterLinkingRPCCommands(t);
+    RegisterRawBDAPAccountRPCCommands(t);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H

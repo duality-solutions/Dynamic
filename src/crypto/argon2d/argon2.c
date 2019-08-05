@@ -27,6 +27,10 @@ const char *argon2_type2string(argon2_type type, int uppercase) {
     switch (type) {
         case Argon2_d:
             return uppercase ? "Argon2d" : "argon2d";
+        case Argon2_i:
+            return uppercase ? "Argon2i" : "argon2i";
+        case Argon2_id:
+            return uppercase ? "Argon2id" : "argon2id";
     }
 
     return NULL;

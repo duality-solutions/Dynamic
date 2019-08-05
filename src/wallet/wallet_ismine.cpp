@@ -7,6 +7,7 @@
 
 #include "wallet_ismine.h"
 
+#include "bdap/stealth.h"
 #include "key.h"
 #include "keystore.h"
 #include "script/script.h"

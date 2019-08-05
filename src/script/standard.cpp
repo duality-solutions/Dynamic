@@ -5,6 +5,7 @@
 
 #include "script/standard.h"
 
+#include "bdap/stealth.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "util.h"
@@ -246,6 +247,15 @@ public:
         *script << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
         return true;
     }
+
+    bool operator()(const CStealthAddress& sxAddr) const {
+        script->clear();
+        // TODO (BDAP): Create the correct stealth address script visitor
+        //*script << OP_DUP << OP_HASH160 << ToByteVector(sxAddr.GetSpendKeyID()) << OP_EQUALVERIFY << OP_CHECKSIG;
+        LogPrintf("CScriptVisitor(CStealthAddress) TODO\n");
+        return false;
+    }
+
 };
 } // namespace
 
@@ -271,4 +281,8 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys)
         script << ToByteVector(key);
     script << CScript::EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
     return script;
+}
+
+bool IsValidDestination(const CTxDestination& dest) {
+    return dest.which() != 0;
 }

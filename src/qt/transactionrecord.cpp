@@ -8,19 +8,18 @@
 #include "transactionrecord.h"
 
 #include "base58.h"
-#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
+#include "policy/policy.h"
 #include "privatesend.h"
 #include "timedata.h"
 #include "validation.h"
 #include "wallet/wallet.h"
 
 #include <stdint.h>
-
-#include <boost/foreach.hpp>
 
 /* Return positive answer if transaction should be shown in list.
  */
@@ -86,7 +85,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         int nFromMe = 0;
         bool involvesWatchAddress = false;
         isminetype fAllFromMe = ISMINE_SPENDABLE;
-        BOOST_FOREACH (const CTxIn& txin, wtx.tx->vin) {
+        for (const CTxIn& txin : wtx.tx->vin) {
             if (wallet->IsMine(txin)) {
                 fAllFromMeDenom = fAllFromMeDenom && wallet->IsDenominated(txin.prevout);
                 nFromMe++;
@@ -101,7 +100,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         isminetype fAllToMe = ISMINE_SPENDABLE;
         bool fAllToMeDenom = true;
         int nToMe = 0;
-        BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
+        for (const CTxOut& txout : wtx.tx->vout) {
             if (wallet->IsMine(txout)) {
                 fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(txout.nValue);
                 nToMe++;
@@ -168,8 +167,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
             // Debit
             //
             CAmount nTxFee = nDebit - wtx.tx->GetValueOut();
-            CDomainEntry entry;
-            std::string strOpType;
             bool fDone = false;
             if (wtx.tx->vin.size() == 1 && wtx.tx->vout.size() == 1 && CPrivateSend::IsCollateralAmount(nDebit) && nCredit == 0 // OP_RETURN
                 && CPrivateSend::IsCollateralAmount(-nNet)) {
@@ -186,9 +183,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 sub.idx = parts.size();
                 sub.involvesWatchAddress = involvesWatchAddress;
 
-                if (GetBDAPOpType(txout) > 0) {
-                    // BDAP type
-                    strOpType = BDAPFromOp(GetBDAPOpCodeFromOutput(txout));
+                if (wtx.tx->nVersion == BDAP_TX_VERSION && GetBDAPOpType(txout) > 0) {
                     continue;
                 }
                 if (wallet->IsMine(txout)) {
@@ -196,6 +191,10 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     // from a transaction sent back to our own address.
                     continue;
                 }
+
+                // Do not display stealth OP_RETURN outputs.
+                if (txout.IsData() && txout.nValue == 0)
+                    continue;
 
                 CTxDestination address;
                 if (ExtractDestination(txout.scriptPubKey, address)) {
@@ -207,27 +206,43 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     sub.type = TransactionRecord::SendToOther;
                     sub.address = mapValue["to"];
                 }
-                if (IsBDAPDataOutput(txout)) {
-                    std::vector<unsigned char> vchData;
-                    std::vector<unsigned char> vchHash;
-                    GetBDAPData(txout, vchData, vchHash);
-                    entry.UnserializeFromData(vchData, vchHash);
-                    if (strOpType == "bdap_new" && entry.ObjectTypeString() == "User Entry") {
-                        sub.type = TransactionRecord::NewDomainUser;
-                    } else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "User Entry") {
-                        sub.type = TransactionRecord::UpdateDomainUser;
-                    } else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "User Entry") {
-                        sub.type = TransactionRecord::DeleteDomainUser;
-                    } else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "User Entry") {
-                        sub.type = TransactionRecord::RevokeDomainUser;
-                    } else if (strOpType == "bdap_new" && entry.ObjectTypeString() == "Group Entry") {
-                        sub.type = TransactionRecord::NewDomainGroup;
-                    } else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "Group Entry") {
-                        sub.type = TransactionRecord::UpdateDomainGroup;
-                    } else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "Group Entry") {
-                        sub.type = TransactionRecord::DeleteDomainGroup;
-                    } else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "Group Entry") {
-                        sub.type = TransactionRecord::RevokeDomainGroup;
+                if (wtx.tx->nVersion == BDAP_TX_VERSION && txout.scriptPubKey.IsUnspendable() && IsBDAPDataOutput(txout)) {
+                    int op1, op2;
+                    std::vector<std::vector<unsigned char> > vvchBDAPArgs;
+                    CScript scriptOp;
+                    if (GetBDAPOpScript(wtx.tx, scriptOp, vvchBDAPArgs, op1, op2)) {
+                        std::string errorMessage;
+                        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                            std::vector<unsigned char> vchData;
+                            std::vector<unsigned char> vchHash;
+                            CDomainEntry entry;
+                            GetBDAPData(txout, vchData, vchHash);
+                            entry.UnserializeFromData(vchData, vchHash);
+                            if (strOpType == "bdap_new_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::NewDomainUser;
+                            } else if (strOpType == "bdap_update_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::UpdateDomainUser;
+                            } else if (strOpType == "bdap_delete_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::DeleteDomainUser;
+                            } else if (strOpType == "bdap_revoke_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::RevokeDomainUser;
+                            } else if (strOpType == "bdap_new_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::NewDomainGroup;
+                            } else if (strOpType == "bdap_update_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::UpdateDomainGroup;
+                            } else if (strOpType == "bdap_delete_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::DeleteDomainGroup;
+                            } else if (strOpType == "bdap_revoke_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::RevokeDomainGroup;
+                            }
+                        }
+                        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
+                            sub.type = TransactionRecord::LinkRequest;
+                        }
+                        else if (strOpType == "bdap_new_link_accept" || strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
+                            sub.type = TransactionRecord::LinkAccept;
+                        }
                     }
                 }
                 if (IsTransactionFluid(txout.scriptPubKey)) {

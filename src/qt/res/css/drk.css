@@ -353,12 +353,12 @@ margin: 0px 18px 0px 18px;
 
 
 QScrollBar::handle:vertical { /* Scroll Bar Slider - vertical */
-background:#e0e0e0;
+background: #494848;
 min-height:10px;
 }
 
 QScrollBar::handle:horizontal { /* Scroll Bar Slider - horizontal */
-background:#e0e0e0;
+background: #494848;
 min-width:10px;
 }
 
@@ -2032,3 +2032,110 @@ padding-right:25px;
 padding-top:5px;
 padding-bottom:5px;
 }
+
+
+/*******************************************************/
+/* BDAP MENU */
+QWidget#BdapPage .QLabel#label_Users, QWidget#BdapPage .QLabel#label_Groups {
+    color:#7400A1;
+    font-weight:bold;
+    font-size:14px;
+ 
+}
+
+QWidget#BdapPage .QTabWidget#tabWidget {
+    background-color:#000000;
+}
+
+QWidget#BdapPage .QTabWidget#tabWidget::pane {
+    background-color:#000000;
+    border:1px solid white;
+}
+
+QWidget#BdapPage .QLabel#labelPA, QWidget#BdapPage .QLabel#labelPR, QWidget#BdapPage .QLabel#labelComplete {
+    font-weight: bold;
+    color: rgb(169, 60, 212);
+    font-size: 12pt;    
+}
+
+
+QWidget#BdapPage .QLabel#labelCompleteRecords, QWidget#BdapPage .QLabel#labelPRRecords, QWidget#BdapPage .QLabel#labelPARecords {
+    font-weight: bold;
+}
+
+/*make disabled buttons look disabled*/
+QWidget#BdapPage .QPushButton:disabled {
+    background-color: #c4c4c4;
+}
+
+/*******************************************************/
+/* BDAPADDUSERDIALOG and BDAPADDLINKDIALOG */
+QDialog#BdapAddUserDialog, QDialog#BdapAddLinkDialog {
+    background-color:#000000;
+    border:2px solid white;
+}
+
+QDialog#BdapAddUserDialog .QLabel#labelErrorMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
+    margin-top: 10px;
+}
+
+QWidget#tab_Links .QPushButton#pushButtonAddLink {
+    margin-top: 5px;
+}
+
+/*******************************************************/
+/* BDAPUSERDETAILDIALOG AND BDAPUPDATEACCOUNTDIALOG*/
+QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog, QDialog#BdapLinkDetailDialog {
+    background-color:#000000;
+    border:2px solid white;
+}
+
+QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader, QDialog#BdapLinkDetailDialog .QLabel#labelinfoHeader {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
+
+QDialog#BdapUpdateAccountDialog .QLineEdit#lineEditID {
+    background-color: rgb(139, 139, 139);
+}
+
+QDialog#BdapUpdateAccountDialog .QLabel#labelErrorMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+QDialog#BdapUpdateAccountDialog .QPushButton#pushButtonOK {
+    margin-top: 10px;
+}
+
+/*******************************************************/
+/* MNEMONICDIALOG */
+QDialog#MnemonicDialog .QLabel#labelWarning {
+    color: red;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+
+QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate {
+    background-color:rgb(255,149,0);
+    color: black;
+    border-radius: 2px;
+    border-style: outset;
+    border: 1px groove gray;
+}
+
+/*
+QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate:pressed {
+    background-color:rgb(112, 170, 245);
+    border-style: inset;
+    border: 1px groove gray
+}
+*/

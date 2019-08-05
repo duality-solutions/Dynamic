@@ -6,6 +6,7 @@
 
 #include "test_dynamic.h"
 
+#include "bdap/stealth.h"
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
@@ -34,14 +35,18 @@
 #include <boost/thread.hpp>
 
 std::unique_ptr<CConnman> g_connman;
+
 FastRandomContext insecure_rand_ctx(true);
+uint256 insecure_rand_seed = GetRandHash();
 
 extern bool fPrintToConsole;
 extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
+        RandomInit();
         ECC_Start();
+        ECC_Start_Stealth();
         SetupEnvironment();
         SetupNetworking();
         fPrintToDebugLog = false; // don't want to write to debug.log file
@@ -53,7 +58,8 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 BasicTestingSetup::~BasicTestingSetup()
 {
         ECC_Stop();
-         g_connman.reset();
+        ECC_Stop_Stealth();
+        g_connman.reset();
 }
 
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
@@ -184,4 +190,9 @@ void StartShutdown()
 bool ShutdownRequested()
 {
   return false;
+}
+
+void StartMnemonicRestart()
+{
+  exit(0);
 }

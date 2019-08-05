@@ -30,6 +30,7 @@ std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_12_RECONSIDER_BLOCKS, 0},                     // 0 BLOCKS
     {SPORK_14_REQUIRE_SENTINEL_FLAG, 4070908800ULL},     // OFF
     {SPORK_15_INSTANTSEND_AUTOLOCKS, 4070908800ULL},     // OFF
+    {SPORK_30_ACTIVATE_BDAP, 4070908800ULL},             // OFF
 };
 
 bool CSporkManager::SporkValueIsActive(int nSporkID, int64_t& nActiveValueRet) const
@@ -287,6 +288,8 @@ int CSporkManager::GetSporkIDByName(std::string strName)
         return SPORK_14_REQUIRE_SENTINEL_FLAG;
     if (strName == "SPORK_15_INSTANTSEND_AUTOLOCKS")
         return SPORK_15_INSTANTSEND_AUTOLOCKS;
+    if (strName == "SPORK_30_ACTIVATE_BDAP")
+        return SPORK_30_ACTIVATE_BDAP;
     LogPrint("spork", "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
 }
@@ -316,6 +319,8 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         return "SPORK_14_REQUIRE_SENTINEL_FLAG";
     case SPORK_15_INSTANTSEND_AUTOLOCKS:
         return "SPORK_15_INSTANTSEND_AUTOLOCKS";
+    case SPORK_30_ACTIVATE_BDAP:
+        return "SPORK_30_ACTIVATE_BDAP";
     default:
         LogPrint("spork", "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
         return "Unknown";

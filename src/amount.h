@@ -17,6 +17,7 @@ typedef int64_t CAmount;
 
 static const CAmount COIN = 100000000;
 static const CAmount CENT = 1000000;
+static const CAmount BDAP_CREDIT = 100001; //= 0.00100001 DYN. Matches lowest PrivateSend denomination
 
 extern const std::string CURRENCY_UNIT;
 

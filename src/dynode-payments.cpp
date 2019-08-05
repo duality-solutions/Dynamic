@@ -46,8 +46,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
     strErrorRet = "";
 
     bool isBlockRewardValueMet = (block.vtx[0]->GetValueOut() <= blockReward);
-    if (fDebug)
-        LogPrintf("block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", block.vtx[0]->GetValueOut(), blockReward);
+    LogPrint("gobject", "block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", block.vtx[0]->GetValueOut(), blockReward);
 
     // we are still using budgets, but we have no data about them anymore,
     // all we know is predefined budget cycle and window
@@ -87,8 +86,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
     if (!dynodeSync.IsSynced()) {
         // not enough data but at least it must NOT exceed superblock max value
         if (CSuperblock::IsValidBlockHeight(nBlockHeight)) {
-            if (fDebug)
-                LogPrintf("IsBlockPayeeValid -- WARNING: Client not synced, checking superblock max bounds only\n");
+            LogPrint("gobject", "IsBlockPayeeValid -- WARNING: Client not synced, checking superblock max bounds only\n");
             if (!isSuperblockMaxValueMet) {
                 strErrorRet = strprintf("coinbase pays too much at height %d (actual=%d vs limit=%d), exceeded superblock max value",
                     nBlockHeight, block.vtx[0]->GetValueOut(), nSuperblockMaxValue);
@@ -141,8 +139,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
 {
     if (!dynodeSync.IsSynced()) {
         //there is no budget data to use to check anything, let's just accept the longest chain
-        if (fDebug)
-            LogPrintf("IsBlockPayeeValid -- WARNING: Client not synced, skipping block payee checks\n");
+        LogPrint("dnpayments", "IsBlockPayeeValid -- WARNING: Client not synced, skipping block payee checks\n");
         return true;
     }
 
@@ -285,7 +282,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
     ExtractDestination(payee, address1);
     CDynamicAddress address2(address1);
 
-    LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
+    LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %ld to %s\n", FormatMoney(dynodePayment), address2.ToString());
 }
 
 int CDynodePayments::GetMinDynodePaymentsProto() const
@@ -695,7 +692,7 @@ void CDynodePayments::CheckAndRemove()
             ++it;
         }
     }
-    LogPrintf("CDynodePayments::CheckAndRemove -- %s\n", ToString());
+    LogPrint("dnpayments", "CDynodePayments::CheckAndRemove -- %s\n", ToString());
 }
 
 bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::string& strError, CConnman& connman) const
@@ -785,7 +782,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
 
     // LOCATE THE NEXT DYNODE WHICH SHOULD BE PAID
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Start: nBlockHeight=%d, dynode=%s\n", nBlockHeight, activeDynode.outpoint.ToStringShort());
+    LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- Start: nBlockHeight=%d, dynode=%s\n", nBlockHeight, activeDynode.outpoint.ToStringShort());
 
     // pay to the oldest DN that still had no payment but its input is old enough and it was active long enough
     int nCount = 0;
@@ -796,7 +793,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
         return false;
     }
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", dnInfo.outpoint.ToStringShort());
+    LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", dnInfo.outpoint.ToStringShort());
 
     CScript payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
 
@@ -806,13 +803,13 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
     ExtractDestination(payee, address1);
     CDynamicAddress address2(address1);
 
-    LogPrintf("CDynodePayments::ProcessBlock -- vote: payee=%s, nBlockHeight=%d\n", address2.ToString(), nBlockHeight);
+    LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- vote: payee=%s, nBlockHeight=%d\n", address2.ToString(), nBlockHeight);
 
     // SIGN MESSAGE TO NETWORK WITH OUR DYNODE KEYS
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Signing vote\n");
+    LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- Signing vote\n");
     if (voteNew.Sign()) {
-        LogPrintf("CDynodePayments::ProcessBlock -- AddPaymentVote()\n");
+        LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- AddPaymentVote()\n");
 
         if (AddOrUpdatePaymentVote(voteNew)) {
             voteNew.Relay(connman);
@@ -1011,7 +1008,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
             vToFetch.push_back(CInv(MSG_DYNODE_PAYMENT_BLOCK, pindex->GetBlockHash()));
             // We should not violate GETDATA rules
             if (vToFetch.size() == MAX_INV_SZ) {
-                LogPrintf("CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d blocks\n", pnode->id, MAX_INV_SZ);
+                LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d blocks\n", pnode->id, MAX_INV_SZ);
                 connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
                 // Start filling new batch
                 vToFetch.clear();
@@ -1057,7 +1054,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
         }
         // We should not violate GETDATA rules
         if (vToFetch.size() == MAX_INV_SZ) {
-            LogPrintf("CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, MAX_INV_SZ);
+            LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, MAX_INV_SZ);
             connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
             // Start filling new batch
             vToFetch.clear();
@@ -1065,7 +1062,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
     }
     // Ask for the rest of it
     if (!vToFetch.empty()) {
-        LogPrintf("CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, vToFetch.size());
+        LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, vToFetch.size());
         connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
     }
 }

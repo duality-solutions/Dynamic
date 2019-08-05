@@ -22,7 +22,7 @@ namespace BDAP {
 
 class CAuditData {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString OwnerFullPath;  // name of the owner's full domain entry path
     CharString AuditData; // usually just a hash that points to the document being audited

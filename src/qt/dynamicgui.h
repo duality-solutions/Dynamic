@@ -26,6 +26,7 @@ class ClientModel;
 class DynodeList;
 class HelpMessageDialog;
 class MiningPage;
+class BdapPage;
 class ModalOverlay;
 class NetworkStyle;
 class Notificator;
@@ -126,6 +127,7 @@ private:
     QAction* historyAction;
     QAction* dynodeAction;
     QAction* miningAction;
+    QAction* bdapAction;        
     QAction* quitAction;
     QAction* usedSendingAddressesAction;
     QAction* usedReceivingAddressesAction;
@@ -146,9 +148,10 @@ private:
     QAction* openPeersAction;
     QAction* openRepairAction;
     QAction* openConfEditorAction;
-    QAction* openSNConfEditorAction;
+    QAction* openDNConfEditorAction;
     QAction* showBackupsAction;
     QAction* openAction;
+    QAction *mnemonicAction;
     QAction* showHelpMessageAction;
     QAction* showPrivateSendHelpAction;
 
@@ -245,6 +248,8 @@ private Q_SLOTS:
     void gotoDynodePage();
     /** Switch to mining page */
     void gotoMiningPage();
+    /** Switch to BDAP page */
+    void gotoBdapPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
@@ -253,6 +258,7 @@ private Q_SLOTS:
 
     /** Show open dialog */
     void openClicked();
+    void mnemonicClicked();
 #endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();

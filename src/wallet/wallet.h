@@ -1,5 +1,7 @@
 // Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2014 The ShadowCoin developers
 // Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -10,6 +12,7 @@
 
 #include "amount.h"
 #include "base58.h"
+#include "bdap/linkstorage.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "ui_interface.h"
@@ -46,7 +49,10 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
 
-static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
+//Set the following 2 constants together
+static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
+static const int DEFAULT_RESCAN_THRESHOLD = 150;
+
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -fallbackfee default
@@ -73,6 +79,7 @@ static const bool DEFAULT_WALLETBROADCAST = true;
 static const bool DEFAULT_DISABLE_WALLET = false;
 
 extern const char* DEFAULT_WALLET_DAT;
+extern const char* DEFAULT_WALLET_DAT_MNEMONIC;
 
 //! if set, all keys will be derived by using BIP32
 static const bool DEFAULT_USE_HD_WALLET = true;
@@ -140,6 +147,41 @@ public:
             READWRITE(nVersion);
         READWRITE(nTime);
         READWRITE(vchPubKey);
+        if (ser_action.ForRead()) {
+            try {
+                READWRITE(fInternal);
+            } catch (std::ios_base::failure&) {
+                /* flag as external address if we can't read the internal boolean
+                   (this will be the case for any wallet before the HD chain split version) */
+                fInternal = false;
+            }
+        } else {
+            READWRITE(fInternal);
+        }
+    }
+};
+
+/** An Ed key pool entry */
+class CEdKeyPool
+{
+public:
+    int64_t nTime;
+    std::vector<unsigned char> edPubKey;
+    bool fInternal; // for change outputs
+
+    CEdKeyPool();
+    CEdKeyPool(const std::vector<unsigned char>& edPubKeyIn, bool fInternalIn);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        int nVersion = s.GetVersion();
+        if (!(s.GetType() & SER_GETHASH))
+            READWRITE(nVersion);
+        READWRITE(nTime);
+        READWRITE(edPubKey);
         if (ser_action.ForRead()) {
             try {
                 READWRITE(fInternal);
@@ -624,6 +666,68 @@ private:
     std::vector<char> _ssExtra;
 };
 
+class CStealthKeyQueueData
+{
+// Used to get secret for keys created by stealth transaction with wallet locked
+public:
+    CStealthKeyQueueData() {}
+
+    CStealthKeyQueueData(const CPubKey& pkEphem_, const CPubKey& pkScan_, const CPubKey& pkSpend_, const CKey& SharedKey_)
+    {
+        pkEphem = pkEphem_;
+        pkScan = pkScan_;
+        pkSpend = pkSpend_;
+        SharedKey = SharedKey_;
+    };
+
+    CPubKey pkEphem;
+    CPubKey pkScan;
+    CPubKey pkSpend;
+    CKey SharedKey;
+
+    inline CStealthKeyQueueData operator=(const CStealthKeyQueueData& b) {
+        pkEphem = b.pkEphem;
+        pkScan = b.pkScan;
+        pkSpend = b.pkSpend;
+        SharedKey = b.SharedKey;
+        return *this;
+    }
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(pkEphem);
+        READWRITE(pkScan);
+        READWRITE(pkSpend);
+        if (ser_action.ForRead()) {
+            std::vector<unsigned char> vchSharedKey;
+            READWRITE(vchSharedKey);
+            SharedKey.Set(vchSharedKey.begin(), vchSharedKey.end(), true);
+        } else {
+            std::vector<unsigned char> vchSharedKey(SharedKey.begin(), SharedKey.end());
+            READWRITE(vchSharedKey);
+        }
+    };
+};
+
+class CStealthAddressRaw
+{
+// Used to keep a list of stealth addresses used by this wallet by storing the raw format.
+public:
+    CStealthAddressRaw() {};
+
+    CStealthAddressRaw(std::vector<uint8_t>& addrRaw_) : addrRaw(addrRaw_) {};
+    std::vector<uint8_t> addrRaw;
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(addrRaw);
+    };
+};
+
 /** 
  * A CWallet is an extension of a keystore, which also maintains a set of transactions and balances,
  * and provides the ability to create new transactions.
@@ -652,6 +756,10 @@ private:
     int64_t nLastResend;
     bool fBroadcastTransactions;
 
+    bool fNeedToUpdateKeyPools = false;
+    bool fNeedToUpdateLinks = false;
+    bool fNeedToUpgradeWallet = false;
+
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
     mutable bool fAnonymizableTallyCachedNonDenom;
@@ -677,10 +785,28 @@ private:
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal /*= false*/);
 
+    void DeriveEd25519ChildKey(const CKey& seed, CKeyEd25519& secretEdRet);
+
+    /* HD derive new child stealth key from  */
+    bool DeriveChildStealthKey(const CKey& key);
+
+    void ReserveEdKeyForTransactions(const std::vector<unsigned char>& pubKeyToReserve);   
+
+    bool ReserveKeyForTransactions(const CPubKey& pubKeyToReserve);   
+
+    std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
+
     bool fFileBacked;
 
     std::set<int64_t> setInternalKeyPool;
     std::set<int64_t> setExternalKeyPool;
+
+    std::set<int64_t> setInternalEdKeyPool;
+    std::set<int64_t> setExternalEdKeyPool;
+
+    unsigned int DynamicKeyPoolSize = (int64_t)0;
+
+    std::vector<std::vector<unsigned char>> reservedEd25519PubKeys;
 
     int64_t nTimeFirstKey;
 
@@ -707,6 +833,23 @@ public:
 
     const std::string strWalletFile;
 
+    bool fNeedToRescanTransactions = false;
+    CBlockIndex* rescan_index = nullptr;
+    int ReserveKeyCount = 0;
+    bool SaveRescanIndex = false;
+    //unsigned int DynamicKeyPoolSize = (int64_t)0;
+
+    bool WalletNeedsUpgrading()
+    {
+        return fNeedToUpgradeWallet;
+    }
+
+    void SetUpdateKeyPoolsAndLinks()
+    {
+        fNeedToUpdateKeyPools = true;
+        fNeedToUpdateLinks = true;        
+    }
+
     void LoadKeyPool(int nIndex, const CKeyPool& keypool)
     {
         if (keypool.fInternal) {
@@ -721,6 +864,24 @@ public:
         CKeyID keyid = keypool.vchPubKey.GetID();
         if (mapKeyMetadata.count(keyid) == 0)
             mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
+    }
+
+    void LoadEdKeyPool(int nIndex, const CEdKeyPool& edkeypool)
+    {
+        if (edkeypool.fInternal) {
+            setInternalEdKeyPool.insert(nIndex);
+        } else {
+            setExternalEdKeyPool.insert(nIndex);
+        }
+
+        /*
+        // If no metadata exists yet, create a default with the pool key's
+        // creation time. Note that this may be overwritten by actually
+        // stored metadata for that key later, which is fine.
+        CKeyID keyid = keypool.vchPubKey.GetID();
+        if (mapKeyMetadata.count(keyid) == 0)
+            mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
+        */    
     }
 
     // Map from Key ID (for regular keys) or Script ID (for watch-only keys) to
@@ -765,6 +926,7 @@ public:
         fAnonymizableTallyCachedNonDenom = false;
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
+        nFoundStealth = 0;
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -786,6 +948,11 @@ public:
     int64_t nKeysLeftSinceAutoBackup;
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
+    std::map<CKeyID, CStealthAddress> mapStealthAddresses; //<! memory map of stealth addresses
+    mutable CCriticalSection cs_mapStealthAddresses;
+    std::vector<std::pair<CKeyID, CStealthKeyQueueData>> vStealthKeyQueue;
+    mutable CCriticalSection cs_vStealthKeyQueue;
+    uint32_t nFoundStealth; // for reporting, zero before use
 
     const CWalletTx* GetWalletTx(const uint256& hash) const;
 
@@ -799,9 +966,13 @@ public:
     /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed = true, const CCoinControl* coinControl = NULL, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false) const;
+    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed = true, const CCoinControl* coinControl = NULL, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false, bool fUseBDAP = false) const;
     /**
-     * populate vCoins with vector of available COutputs for a BDAP transaction.
+     * populate vCoins with vector of available BDAP credits.
+     */
+    void AvailableBDAPCredits(std::vector<std::pair<CTxOut, COutPoint>>& vCredits, bool fOnlyConfirmed = true) const;
+    /**
+     * populate vCoins with vector of available COutputs for the specified address.
      */
     void GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScriptPubKey) const;
     /**
@@ -847,20 +1018,30 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
+    void GenerateEdandStealthKey(CKey& keyIn);
+    std::vector<unsigned char> GenerateNewEdKey(uint32_t nAccountIndex, bool fInternal, const CKey& seedIn = CKey());
+    //! HaveDHTKey implementation that also checks the mapHdPubKeys
+    bool HaveDHTKey(const CKeyID &address) const override;
     //! HaveKey implementation that also checks the mapHdPubKeys
     bool HaveKey(const CKeyID& address) const override;
     //! GetPubKey implementation that also checks the mapHdPubKeys
     bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const override;
     //! GetKey implementation that can derive a HD private key on the fly
     bool GetKey(const CKeyID& address, CKey& keyOut) const override;
+    //! Gets Ed25519 private key from the wallet(database)
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const override;
     //! Adds a HDPubKey into the wallet(database)
     bool AddHDPubKey(const CExtPubKey& extPubKey, bool fInternal);
     //! loads a HDPubKey into the wallets memory
     bool LoadHDPubKey(const CHDPubKey& hdPubKey);
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
+    //! Adds an ed25519 keypair and saves it to disk.
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) override;
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key, const CPubKey& pubkey) { return CCryptoKeyStore::AddKeyPubKey(key, pubkey); }
+    //! Adds a key to the store, without saving it to disk (used by LoadWallet)
+    bool LoadDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) { return CCryptoKeyStore::AddDHTKey(key, pubkey); }
     //! Load metadata (used by LoadWallet)
     bool LoadKeyMetadata(const CTxDestination& pubKey, const CKeyMetadata& metadata);
 
@@ -875,8 +1056,10 @@ public:
 
     //! Adds an encrypted key to the store, and saves it to disk.
     bool AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret) override;
+    bool AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret) override;
     //! Adds an encrypted key to the store, without saving it to disk (used by LoadWallet)
     bool LoadCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+    bool LoadCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
     bool AddCScript(const CScript& redeemScript) override;
     bool LoadCScript(const CScript& redeemScript);
 
@@ -976,15 +1159,21 @@ public:
     static CAmount GetRequiredFee(unsigned int nTxBytes);
 
     bool NewKeyPool();
+    bool NewEdKeyPool();
     size_t KeypoolCountExternalKeys();
     size_t KeypoolCountInternalKeys();
-    bool TopUpKeyPool(unsigned int kpSize = 0);
-    void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fInternal);
+    size_t EdKeypoolCountExternalKeys();
+    size_t EdKeypoolCountInternalKeys();
+    bool SyncEdKeyPool(); 
+    bool TopUpKeyPoolCombo(unsigned int kpSize = 0, bool fIncreaseSize = false);
+    void ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKeyPool& edkeypool, bool fInternal);
     void KeepKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal);
-    bool GetKeyFromPool(CPubKey& key, bool fInternal /*= false*/);
+    bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, bool fInternal);
+    bool GetKeysFromPool(CPubKey& pubkeyWallet, std::vector<unsigned char>& vchEd25519PubKey, CStealthAddress& sxAddr, bool fInternal);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
+    void UpdateKeyPoolsFromTransactions(const std::string& strOpType, const std::vector<std::vector<unsigned char>>& vvchOpParameters);
 
     std::set<std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, CAmount> GetAddressBalances();
@@ -1015,7 +1204,7 @@ public:
     CAmount GetChange(const CTransaction& tx) const;
     void SetBestChain(const CBlockLocator& loc) override;
 
-    DBErrors LoadWallet(bool& fFirstRunRet);
+    DBErrors LoadWallet(bool& fFirstRunRet, const bool fImportMnemonic = false);
     DBErrors ZapSelectTx(std::vector<uint256>& vHashIn, std::vector<uint256>& vHashOut);
     DBErrors ZapWalletTx(std::vector<CWalletTx>& vWtx);
 
@@ -1102,7 +1291,7 @@ public:
     static std::string GetWalletHelpString(bool showDebug);
 
     /* Initializes the wallet, returns a new CWallet instance or a null pointer in case of an error */
-    static CWallet* CreateWalletFromFile(const std::string walletFile);
+    static CWallet* CreateWalletFromFile(const std::string walletFile, const bool fImportMnemonic = false);
     static bool InitLoadWallet();
 
     /**
@@ -1131,6 +1320,27 @@ public:
     bool SetHDChain(const CHDChain& chain, bool memonly);
     bool SetCryptedHDChain(const CHDChain& chain, bool memonly);
     bool GetDecryptedHDChain(CHDChain& hdChainRet);
+    // Support mnemonic sub-chains
+    void DeriveNewChildKeyBIP44BychainChildKey(CExtKey& chainChildKey, CKey& secret, bool internal, uint32_t* nInternalChainCounter, uint32_t* nExternalChainCounter);
+    // Returns local BDAP DHT Public keys
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
+
+    bool WriteLinkMessageInfo(const uint256& subjectID, const std::vector<unsigned char>& vchPubKey);
+    bool EraseLinkMessageInfo(const uint256& subjectID);
+
+    // Stealth Address Support
+    bool GetStealthAddress(const CKeyID& keyid, CStealthAddress& sxAddr) const;
+    bool ProcessStealthQueue();
+    bool ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared);
+    int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
+    bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
+    bool ScanForOwnedOutputs(const CTransaction& tx);
+    bool AddStealthAddress(const CStealthAddress& sxAddr);
+    bool AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress);
+    bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
+    CWalletDB* GetWalletDB();
+    bool HaveStealthAddress(const CKeyID& address) const;
+
 };
 
 /** A key allocated from the key pool. */
@@ -1192,5 +1402,10 @@ public:
         READWRITE(vchPubKey);
     }
 };
+
+bool RunProcessStealthQueue();
+
+bool IsDataScript(const CScript& data);
+bool GetDataFromScript(const CScript& data, std::vector<uint8_t>& vData);
 
 #endif // DYNAMIC_WALLET_WALLET_H

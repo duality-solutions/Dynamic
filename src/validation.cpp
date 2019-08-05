@@ -10,6 +10,10 @@
 #include "alert.h"
 #include "arith_uint256.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/fees.h"
+#include "bdap/linking.h"
+#include "bdap/linkingdb.h"
+#include "bdap/utils.h"
 #include "blockencodings.h"
 #include "chainparams.h"
 #include "checkpoints.h"
@@ -21,6 +25,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "fluid/banaccount.h"
 #include "fluid/fluid.h"
 #include "fluid/fluiddb.h"
 #include "fluid/fluiddynode.h"
@@ -77,8 +82,9 @@ CCriticalSection cs_main;
 BlockMap mapBlockIndex;
 CChain chainActive;
 CBlockIndex* pindexBestHeader = NULL;
-CWaitableCriticalSection csBestBlock;
-CConditionVariable cvBlockChange;
+Mutex g_best_block_mutex;
+std::condition_variable g_best_block_cv;
+uint256 g_best_block;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 bool fReindex = false;
@@ -99,6 +105,7 @@ bool fAlerts = DEFAULT_ALERTS;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 bool fLoaded = false;
+bool fStealthTx = false;
 
 uint256 hashAssumeValid;
 
@@ -533,7 +540,6 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
-
 bool CheckTransaction(const CTransaction& tx, CValidationState& state)
 {
     // Basic checks that don't depend on any context
@@ -542,11 +548,16 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
     if (tx.vout.empty())
         return state.DoS(10, false, REJECT_INVALID, "bad-txns-vout-empty");
     // Size limits
-    if (::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) > MAX_BLOCK_SIZE)
+    if (::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) > MAX_TX_SIZE)
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-oversize");
 
+    // Check for BDAP inputs or outputs so we can validate credit usage
+    bool fIsBDAP = false;
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
+    CAmount nStandardOut = 0;
+    CAmount nCreditsOut = 0;
+    CAmount nDataBurned = 0;
     for (const CTxOut& txout : tx.vout) {
         if (txout.nValue < 0)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-vout-negative");
@@ -561,6 +572,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
             if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
         }
+        if (txout.IsBDAP()) {
+            fIsBDAP = true;
+            nCreditsOut += txout.nValue;
+        } else if (txout.IsData()) {
+            nDataBurned += txout.nValue;
+        } else {
+            nStandardOut += txout.nValue;
+        }
     }
 
     // Check for duplicate inputs
@@ -570,16 +589,178 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         if (!vInOutPoints.insert(txin.prevout).second)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
     }
-
+    CAmount nStandardIn = 0;
+    CAmount nCreditsIn = 0;
+    std::vector<Coin> vBdapCoins;
     if (tx.IsCoinBase()) {
         if (tx.vin[0].scriptSig.size() < 2 || tx.vin[0].scriptSig.size() > 100)
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-length");
     } else {
-        BOOST_FOREACH (const CTxIn& txin, tx.vin)
+        for (const CTxIn& txin : tx.vin) {
             if (txin.prevout.IsNull())
                 return state.DoS(10, false, REJECT_INVALID, "bad-txns-prevout-null");
+
+            CCoinsViewCache view(pcoinsTip);
+            const Coin& coin = view.AccessCoin(txin.prevout);
+            if (coin.out.IsBDAP()) {
+                vBdapCoins.push_back(coin);
+                fIsBDAP = true;
+                nCreditsIn += coin.out.nValue;
+            } else {
+                nStandardIn += coin.out.nValue;
+            }
+        }
     }
 
+    if (tx.IsCoinBase() && tx.nVersion == BDAP_TX_VERSION)
+        return state.DoS(100, false, REJECT_INVALID, "bdap-tx-can-not-be-coinbase");
+
+    // if we find a BDAP txin or txout, then make sure the transaction has the correct version
+    if (fIsBDAP && tx.nVersion != BDAP_TX_VERSION)
+        return state.DoS(100, false, REJECT_INVALID, "incorrect-bdap-tx-version");
+
+    if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins, nStandardIn, nCreditsIn, nStandardOut, nCreditsOut, nDataBurned))
+        return state.DoS(100, false, REJECT_INVALID, "bad-bdap-credit-use");
+
+    return true;
+}
+
+bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins, 
+                                const CAmount& nStandardIn, const CAmount& nCreditsIn, const CAmount& nStandardOut, const CAmount& nCreditsOut, const CAmount& nDataBurned)
+{
+    LogPrint("bdap", "%s -- nStandardIn %d, nCreditsIn %d, nStandardOut %d, nCreditsOut %d, nDataBurned %d\n", __func__,
+                    FormatMoney(nStandardIn), FormatMoney(nCreditsIn), FormatMoney(nStandardOut), FormatMoney(nCreditsOut), FormatMoney(nDataBurned));
+    // when there are no BDAP inputs, we do not need to check how credits are used.
+    if (vBdapCoins.size() == 0 || nCreditsIn == 0)
+        return true;
+
+    if (nStandardIn > 0 && nStandardOut > 0 && nStandardOut >= nStandardIn) {
+        LogPrintf("%s -- Check failed. Invalid use of BDAP credits. Standard DYN output amounts exceeds or equals standard DYN input amount\n", __func__);
+        if (ENFORCE_BDAP_CREDIT_USE)
+            return false;
+    }
+
+    if (nCreditsOut >= nCreditsIn) {
+        LogPrintf("%s -- Check failed. Invalid use of BDAP credits. BDAP credits output amount exceeds BDAP credit input amount\n", __func__);
+        if (ENFORCE_BDAP_CREDIT_USE)
+            return false;
+    }
+
+    std::multimap<CDynamicAddress, CServiceCredit> mapInputs;
+    std::vector<std::pair<CServiceCredit, CDynamicAddress>> vInputInfo;
+    for (const Coin& coin : vBdapCoins) {
+        int opCode1 = -1; int opCode2 = -1;
+        std::vector<std::vector<unsigned char>> vvchOpParameters;
+        coin.out.GetBDAPOpCodes(opCode1, opCode2, vvchOpParameters);
+        CDynamicAddress address = GetScriptAddress(coin.out.scriptPubKey);
+        std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+        CServiceCredit credit(strOpType, coin.out.nValue, vvchOpParameters);
+        vInputInfo.push_back(std::make_pair(credit, address));
+        mapInputs.insert({address, credit});
+        LogPrint("bdap", "%s -- BDAP Input strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
+            strOpType, opCode1, opCode2, FormatMoney(coin.out.nValue), address.ToString());
+    }
+
+    std::multimap<CDynamicAddress, CServiceCredit> mapOutputs;
+    for (const CTxOut& txout : tx.vout) {
+        if (txout.IsBDAP()) {
+            int opCode1 = -1; int opCode2 = -1;
+            std::vector<std::vector<unsigned char>> vvchOpParameters;
+            txout.GetBDAPOpCodes(opCode1, opCode2, vvchOpParameters);
+            CDynamicAddress address = GetScriptAddress(txout.scriptPubKey);
+            std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+            CServiceCredit credit(strOpType, txout.nValue, vvchOpParameters);
+            mapOutputs.insert({address, credit});
+            LogPrint("bdap", "%s -- BDAP Output strOpType %s, opCode1 %d, opCode2 %d, nValue %d, address %s\n", __func__, 
+                strOpType, opCode1, opCode2, FormatMoney(txout.nValue), address.ToString());
+        } else if (txout.IsData()) {
+            CDynamicAddress address;
+            CServiceCredit credit("data", txout.nValue);
+            mapOutputs.insert({address, credit});
+            LogPrint("bdap", "%s -- BDAP Output strOpType %s, nValue %d\n", __func__, "data", FormatMoney(txout.nValue));
+        } else {
+            CDynamicAddress address = GetScriptAddress(txout.scriptPubKey);
+            CServiceCredit credit("standard", txout.nValue);
+            mapOutputs.insert({address, credit});
+        }
+    }
+
+    for (const std::pair<CServiceCredit, CDynamicAddress>& credit : vInputInfo) {
+        if (credit.first.OpType == "bdap_move_asset") {
+            // When an input is a BDAP credit, make sure unconsumed coins go to a BDAP credit change ouput with the same credit input address and parameters
+            if (credit.first.vParameters.size() == 2) {
+                std::vector<unsigned char> vchMoveSource = credit.first.vParameters[0];
+                std::vector<unsigned char> vchMoveDestination = credit.first.vParameters[1];
+                if (vchMoveSource != vchFromString(std::string("DYN")) || vchMoveDestination != vchFromString(std::string("BDAP"))) {
+                    LogPrintf("%s -- Check failed. Invalid use of BDAP credits. BDAP Credit has incorrect parameter. Move Source %s (should be DYN), Move Destination %s (should be BDAP)\n", __func__, 
+                                            stringFromVch(vchMoveSource), stringFromVch(vchMoveDestination));
+                    return false;
+                }
+            } else {
+                LogPrintf("%s -- Check failed. Invalid use of BDAP credits. BDAP Credit has incorrect parameter count.\n", __func__);
+                return false;
+            }
+            // make sure all of the credits are spent when we can't find an output address
+            CDynamicAddress inputAddress = credit.second;
+            std::multimap<CDynamicAddress, CServiceCredit>::iterator it = mapOutputs.find(inputAddress);
+            if (it == mapOutputs.end()) {
+                LogPrintf("%s -- Check failed. Invalid use of BDAP credits. Can't find credit address %s in outputs\n", __func__, inputAddress.ToString());
+                if (ENFORCE_BDAP_CREDIT_USE)
+                    return false;
+
+            } else {
+                // make sure asset doesn't move to another address, check outputs
+                CAmount nInputAmount = 0;
+                for (auto itr = mapInputs.find(inputAddress); itr != mapInputs.end(); itr++) {
+                    nInputAmount += itr->second.nValue;
+                }
+                CAmount nOutputAmount = 0;
+                for (auto itr = mapOutputs.find(inputAddress); itr != mapOutputs.end(); itr++) {
+                    nOutputAmount += itr->second.nValue;
+                }
+                LogPrint("bdap", "%s -- inputAddress %s, nInputAmount %d, nOutputAmount %d, Diff %d\n", __func__, 
+                                inputAddress.ToString(), FormatMoney(nInputAmount), FormatMoney(nOutputAmount), FormatMoney((nInputAmount - nOutputAmount)));
+
+                if (!((nInputAmount - nOutputAmount) == (nCreditsIn - nCreditsOut))) {
+                    LogPrintf("%s -- Check failed. Invalid use of BDAP credits. Fuel used %d should equal total fuel used %d\n", __func__, 
+                                    FormatMoney((nInputAmount - nOutputAmount)), FormatMoney((nCreditsIn - nCreditsOut)));
+                    if (ENFORCE_BDAP_CREDIT_USE)
+                        return false;
+                }
+            }
+        } else if (credit.first.OpType == "bdap_new_account" || credit.first.OpType == "bdap_update_account" || 
+                        credit.first.OpType == "bdap_new_link_request" || credit.first.OpType == "bdap_new_link_accept") {
+            // When input is a BDAP account new or update operation, make sure deposit change goes back to input wallet address
+            // When input is a BDAP link operation, make sure it is only spent by a link update or delete operations with the same input address and parameters
+            CDynamicAddress inputAddress = credit.second;
+            std::multimap<CDynamicAddress, CServiceCredit>::iterator it = mapOutputs.find(inputAddress);
+            if (it == mapOutputs.end()) {
+                LogPrintf("%s -- Check failed. Invalid use of BDAP credits. Can't find account address %s in outputs\n", __func__, inputAddress.ToString());
+                if (ENFORCE_BDAP_CREDIT_USE)
+                    return false;
+
+            } else {
+                // make sure asset doesn't move to another address, check outputs
+                CAmount nInputAmount = 0;
+                for (auto itr = mapInputs.find(inputAddress); itr != mapInputs.end(); itr++) {
+                    nInputAmount += itr->second.nValue;
+                }
+                CAmount nOutputAmount = 0;
+                for (auto itr = mapOutputs.find(inputAddress); itr != mapOutputs.end(); itr++) {
+                    nOutputAmount += itr->second.nValue;
+                }
+                LogPrint("bdap", "%s --inputAddress %s, nInputAmount %d, nOutputAmount %d, Diff %d\n", __func__, 
+                                inputAddress.ToString(), FormatMoney(nInputAmount), FormatMoney(nOutputAmount), FormatMoney((nInputAmount - nOutputAmount)));
+
+                if (!((nInputAmount - nOutputAmount) == (nCreditsIn - nCreditsOut))) {
+                    LogPrintf("%s -- Check failed. Invalid use of BDAP credits. Fuel used %d should equal total fuel used %d\n", __func__, 
+                                    FormatMoney((nInputAmount - nOutputAmount)), FormatMoney((nCreditsIn - nCreditsOut)));
+                    if (ENFORCE_BDAP_CREDIT_USE)
+                        return false;
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -619,10 +800,6 @@ static bool IsCurrentForFeeEstimation()
 // Check if BDAP entry is valid
 bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
 {
-    // Do not check while wallet is loading
-    if (!fLoaded)
-        return true;
-
     if (!CheckDomainEntryDB())
         return true;
 
@@ -631,23 +808,102 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         return true;
 
     std::vector<std::vector<unsigned char> > vvchBDAPArgs;
-
-    int op = -1;
+    int op1 = -1;
+    int op2 = -1;
     if (nHeight == 0) {
         nHeight = chainActive.Height() + 1;
     }
-
     bool bValid = false;
     if (tx->nVersion == BDAP_TX_VERSION) {
-        if (DecodeBDAPTx(tx, op, vvchBDAPArgs)) {
+        CScript scriptOp;
+        if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
             std::string errorMessage;
-            bValid = CheckDomainEntryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
-            if (!bValid) {
-                errorMessage = "ValidateBDAPInputs: " + errorMessage;
+            if (vvchBDAPArgs.size() > 3) {
+                errorMessage = "Too many BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
-            if (!errorMessage.empty())
+            if (vvchBDAPArgs.size() < 1) {
+                errorMessage = "Not enough BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+
+            std::string strOpType = GetBDAPOpTypeString(op1, op2);
+            if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                if (!errorMessage.empty())
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+            else if (strOpType == "bdap_new_link_request") {
+                std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
+                LogPrint("bdap", "%s -- New Link Request vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                uint256 txid;
+                if (GetLinkIndex(vchPubKey, txid)) {
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link request public key already used.";
+                        LogPrintf("%s -- %s\n", __func__, errorMessage);
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
+                }
+                return true;
+            }
+            else if (strOpType == "bdap_new_link_accept") {
+                std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
+                LogPrint("bdap", "%s -- New Link Accept vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                uint256 txid;
+                if (GetLinkIndex(vchPubKey, txid)) {
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link accept public key already used.";
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
+                }
+                return true;
+            }
+            else if (strOpType == "bdap_move_asset") {
+                if (!(vvchBDAPArgs.size() == 2)) {
+                    errorMessage = "Incorrect number of parameters used for " + strOpType + " transaction.";
+                    LogPrintf("%s -- delete link ignored. %s\n", __func__, errorMessage);
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                LogPrint("bdap", "%s -- BDAP move asset operation. vvchBDAPArgs.size() = %d\n", __func__, vvchBDAPArgs.size());
+                return true;
+            }
+            else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+                /*
+                if (!CheckPreviousLinkInputs(strOpType, scriptOp, vvchBDAPArgs, errorMessage, fJustCheck)) {
+                    errorMessage = "ValidateBDAPInputs: Delete link failed" + errorMessage;
+                    LogPrintf("%s -- delete link failed. %s\n", __func__, errorMessage);
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                */
+                // TODO (BDAP): Implement link delete
+                errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is not implemented yet." + errorMessage;
+                LogPrintf("%s -- delete link ignored. %s\n", __func__, errorMessage);
+            }
+            else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_update_link_accept") {
+                // TODO (BDAP): Implement link update, allow for now.
+                errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is not implemented yet." + errorMessage;
+                LogPrintf("%s -- update link ignored. %s\n", __func__, errorMessage);
+            }
+            else {
+                // Do not allow unknown BDAP operations
+                errorMessage = strprintf("%s -- Failed, unknown operation found. opcode1 = %d, opcode2 = %d", __func__, op1, op2);
+                LogPrintf("%s\n", errorMessage);
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
         }
     }
     return true;
@@ -677,7 +933,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 // fluid transaction is already in the mempool.  Reject tx.
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
-            if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
+            std::string strFluidOpScript = ScriptToAsmStr(txout.scriptPubKey);
+            std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
+            std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+            if (strOperationCode == "OP_BDAP_REVOKE" && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                return state.Invalid(false, REJECT_INVALID, "bdap-spork-inactive");
+
+            if (!fluid.ExtractCheckTimestamp(strOperationCode, ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
             }
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
@@ -685,54 +947,151 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             }
         }
     }
+    // Don't relay BDAP transaction until spork is activated
+    if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
 
     if (tx.nVersion == BDAP_TX_VERSION) {
+        CScript scriptBDAPOp;
+        std::vector<std::vector<unsigned char>> vvch;
+        int op1, op2;
+        if (!GetBDAPOpScript(ptx, scriptBDAPOp, vvch, op1, op2))
+            return state.Invalid(false, REJECT_INVALID, "bdap-txn-script-error");
+
         std::string strErrorMessage;
-        CDomainEntry domainEntry(ptx);
-        if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
-            return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
+        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+            CDomainEntry domainEntry(ptx);
+            if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-account-txn-already-in-mempool " + strErrorMessage);
+            }
+            int op1, op2;
+            CScript scriptOp;
+            vchCharString vvchOpParameters;
+            if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
+            }
+            const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+            if (strOperationType == "bdap_new_account") {
+                CDomainEntry findDomainEntry;
+                if (GetDomainEntry(domainEntry.vchFullObjectPath(), findDomainEntry))
+                {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + findDomainEntry.GetFullObjectPath() + " already exists.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
+                }
+            }
+            else if (strOperationType == "bdap_update_account") {
+                CDomainEntry entry;
+                CDomainEntry prevEntry;
+                std::vector<unsigned char> vchData;
+                std::vector<unsigned char> vchHash;
+                int nDataOut;
+                bool bData = GetBDAPData(ptx, vchData, vchHash, nDataOut);
+                if (bData && !entry.UnserializeFromData(vchData, vchHash)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-data-failed" + strErrorMessage);
+                }
+
+                if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
+                }
+                CTransactionRef pPrevTx;
+                uint256 hashBlock;
+                if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
+                }
+                // Get current wallet address used for BDAP tx
+                CScript scriptPubKey = scriptBDAPOp;
+                CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+                // Get previous wallet address used for BDAP tx
+                CScript prevScriptPubKey;
+                GetBDAPOpScript(pPrevTx, prevScriptPubKey);
+                CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+                if (txAddress.ToString() != prevAddress.ToString()) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
+                }
+            }
+            else if (strOperationType == "bdap_delete_account") {
+                if (!(vvchOpParameters.size() > 0))
+                    return state.Invalid(false, REJECT_INVALID, "bdap-delete-account-get-object-path" + strErrorMessage);
+
+                std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
+                CDomainEntry prevEntry;
+                if (!pDomainEntryDB->GetDomainEntryInfo(vchFullObjectPath, prevEntry)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
+                }
+                CTransactionRef pPrevTx;
+                uint256 hashBlock;
+                if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
+                }
+                // Get current wallet address used for BDAP tx
+                CScript scriptPubKey = scriptBDAPOp;
+                CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+                // Get previous wallet address used for BDAP tx
+                CScript prevScriptPubKey;
+                GetBDAPOpScript(pPrevTx, prevScriptPubKey);
+                CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+                if (txAddress.ToString() != prevAddress.ToString()) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
+                }
+            }
         }
-        int op;
-        CScript scriptOp;
-        vchCharString vvchOpParameters;
-        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op)) {
-            return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
-        }
-        const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
-        if (strOperationType == "bdap_update" || strOperationType == "bdap_delete") {
-            CDomainEntry entry;
+        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+            if (vvch.size() < 1)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
+            if (vvch.size() > 3)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
+            //check for duplicate pubkeys
+            std::vector<unsigned char> vchPubKey = vvch[0];
+            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strOpType, strErrorMessage))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
+
+            if (LinkPubKeyExists(vchPubKey))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-pubkey");
+
             CDomainEntry prevEntry;
-            std::vector<unsigned char> vchData;
-            std::vector<unsigned char> vchHash;
-            int nDataOut;
+            if (GetDomainEntryPubKey(vchPubKey, prevEntry))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-pubkey-entry");
 
-            bool bData = GetBDAPData(ptx, vchData, vchHash, nDataOut);
-            if (bData && !entry.UnserializeFromData(vchData, vchHash)) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
-            }
+            if (vvch.size() > 1) {
+                std::vector<unsigned char> vchSharedPubKey = vvch[1];
+                if (LinkPubKeyExists(vchSharedPubKey))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey");
 
-            if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-failed" + strErrorMessage);
+                if (GetDomainEntryPubKey(vchSharedPubKey, prevEntry))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey-entry");
             }
-            CTransactionRef pPrevTx;
-            uint256 hashBlock;
-            if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-tx-failed" + strErrorMessage);
-            }
-            // Get current wallet address used for BDAP tx
-            CScript scriptPubKey;
-            GetBDAPOpScript(ptx, scriptPubKey);
-            CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
-            // Get previous wallet address used for BDAP tx
-            CScript prevScriptPubKey;
-            GetBDAPOpScript(pPrevTx, prevScriptPubKey);
-            CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
-            if (txAddress.ToString() != prevAddress.ToString()) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-incorrect-wallet-address-used" + strErrorMessage);
-            }
+        }
+        else if (strOpType == "bdap_move_asset") {
+            if (vvch.size() != 2)
+                return state.Invalid(false, REJECT_INVALID, "bdap-move-invalid-parameter-size");
+            std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
+            std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
+            if (vvch[0] != vchMoveSource)
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-source");
+            if (vvch[1] != vchMoveDestination)
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-destination");
+
+        }
+        // TODO (BDAP): Implement link delete
+        /*
+        else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+            if (vvch.size() < 1)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
+            if (vvch.size() > 2)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
+
+            std::vector<unsigned char> vchPubKey = vvch[0];
+            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strOpType, strErrorMessage))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
+        }
+        */
+        else {
+            // Do not allow unknown BDAP operations
+            LogPrintf("%s -- Failed, unknown operation found. opcode1 = %d, opcode2 = %d\n", __func__, op1, op2);
+            return state.DoS(100, false, REJECT_INVALID, "bdap-unknown-operation");
         }
     }
-
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
@@ -744,7 +1103,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     if (fRequireStandard && tx.nVersion >= 2 && tx.nVersion != BDAP_TX_VERSION && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
         return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
     }
-
+    
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
     if (fRequireStandard && !IsStandardTx(tx, reason) && !fluidTransaction)
@@ -884,6 +1243,16 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         CAmount nValueOut = tx.GetValueOut();
         CAmount nFees = nValueIn - nValueOut;
+        CAmount nBDAPBurn = 0;
+        if (tx.nVersion == BDAP_TX_VERSION) {
+            // Since fees are burned, count BDAP burn funds into fee calculation
+            CAmount nOpCodeAmount;
+            ExtractAmountsFromTx(MakeTransactionRef(tx), nBDAPBurn, nOpCodeAmount);
+            if (nBDAPBurn > 0)
+                nFees += nBDAPBurn;
+
+            LogPrint("bdap", "%s -- BDAP Burn Data Amount %d, BDAP Op Code Amount %d\n", __func__, FormatMoney(nBDAPBurn), FormatMoney(nOpCodeAmount));
+        }
         // nModifiedFees includes any fee deltas from PrioritiseTransaction
         CAmount nModifiedFees = nFees;
         double nPriorityDummy = 0;
@@ -946,7 +1315,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             dFreeCount += nSize;
         }
 
-        if (nAbsurdFee && nFees > nAbsurdFee)
+        if (nAbsurdFee && nFees - nBDAPBurn > nAbsurdFee)
             return state.Invalid(false,
                 REJECT_HIGHFEE, "absurdly-high-fee",
                 strprintf("%d > %d", nFees, nAbsurdFee));
@@ -1119,7 +1488,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 __func__, hash.ToString(), FormatStateMessage(state));
         }
 
-        if (!ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
             return false;
         }
 
@@ -1752,10 +2121,9 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
 
 /** Undo the effects of this block (with given index) on the UTXO set represented by coins.
  *  When UNCLEAN or FAILED is returned, view is left in an indeterminate state. */
-static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view)
+static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, int nCheckLevel)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
-
     bool fClean = true;
 
     CBlockUndo blockUndo;
@@ -1783,7 +2151,55 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         const CTransaction& tx = *block.vtx[i];
         uint256 hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
+        bool fIsBDAP = tx.nVersion == BDAP_TX_VERSION;
+        if (fIsBDAP && !fReindex && nCheckLevel >= 4) {
+            LogPrintf("%s -- BDAP tx found. Hash %s\n", __func__, hash.ToString());
+            // get BDAP object
+            CScript scriptBDAPOp; 
+            std::vector<std::vector<unsigned char>> vvchOpParameters;
+            int op1, op2;
+            CTransactionRef ptx = MakeTransactionRef(tx);
+            if (GetBDAPOpScript(ptx, scriptBDAPOp, vvchOpParameters, op1, op2)) {
+                LogPrintf("%s -- Found new BDAP object, op1 %d, op2 %d\n", __func__, op1, op2);
+                std::string strErrorMessage;
+                std::string strOpType = GetBDAPOpTypeString(op1, op2);
+                if (strOpType == "bdap_new_account") {
+                    CDomainEntry domainEntry(ptx);
+                    LogPrintf("%s -- Found new BDAP account %s. Running undo.\n", __func__, domainEntry.GetFullObjectPath());
+                    if (!UndoAddDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo new BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_update_account") {
+                    CDomainEntry domainEntry(ptx);
+                    if (!UndoUpdateDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo update BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_delete_account") {
+                    CDomainEntry domainEntry(ptx);
+                    if (!UndoDeleteDomainEntry(domainEntry)) {
+                        LogPrintf("%s -- Failed to undo delete BDAP account transaction %s. Disconnect %s transaction failed.\n", __func__, domainEntry.GetFullObjectPath(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+                    std::vector<unsigned char> vchPubKey, vchSharedPubKey;
+                    if (vvchOpParameters.size() > 0)
+                        vchPubKey = vvchOpParameters[0];
 
+                    if (vvchOpParameters.size() > 1)
+                        vchSharedPubKey = vvchOpParameters[0];
+
+                    LogPrintf("%s -- Found new BDAP link (pubkey %s, sharedpubkey %s). Running undo.\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchSharedPubKey));
+                    if (!UndoLinkData(vchPubKey, vchSharedPubKey)) {
+                        LogPrintf("%s -- Failed to undo link transaction. Disconnect %s transaction failed.\n", __func__, hash.ToString());
+                    }
+                }
+                else {
+                    LogPrintf("%s -- Failed to undo unknown BDAP transaction (op1 = %d, op2 = %d). Nothing to undo for %s transaction.\n", __func__, op1, op2, hash.ToString());
+                }
+            }
+        }
         if (fAddressIndex) {
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut& out = tx.vout[k];
@@ -2076,6 +2492,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             if (it->second->GetAncestor(pindex->nHeight) == pindex &&
                 pindexBestHeader->GetAncestor(pindex->nHeight) == pindex &&
                 pindexBestHeader->nChainWork >= int64_t(chainparams.GetConsensus().nMinimumChainWork)) {
+
                 // This block is a member of the assumed verified chain and an ancestor of the best header.
                 // The equivalent time check discourages hashpower from extorting the network via DOS attack
                 // into accepting an invalid block through telling users they must manually set assumevalid.
@@ -2094,8 +2511,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     nTimeCheck += nTime1 - nTimeStart;
     LogPrint("bench", "    - Sanity checks: %.2fms [%.2fs]\n", 0.001 * (nTime1 - nTimeStart), nTimeCheck * 0.000001);
 
-    /// DASH: Check superblock start
-
     // make sure old budget is the real one
     if (pindex->nHeight == chainparams.GetConsensus().nSuperblockStartBlock &&
         chainparams.GetConsensus().nSuperblockStartHash != uint256() &&
@@ -2103,7 +2518,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         return state.DoS(100, error("ConnectBlock(): invalid superblock start"),
             REJECT_INVALID, "bad-sb-start");
 
-    /// END DASH
     // BIP16 didn't become active until Apr 1 2012
     int64_t nBIP16SwitchTime = 1333238400;
     bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
@@ -2265,7 +2679,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         CCoinsViewCache viewCoinCache(pcoinsTip);
         CTransactionRef ptx = MakeTransactionRef(tx);
-        if (!ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
+
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
             return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
         }
 
@@ -2364,6 +2779,33 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     }
                     pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }
+            } else if (OpCode == OP_BDAP_REVOKE) {
+                if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
+                    return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");
+
+                //if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                //    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
+
+                std::vector<CDomainEntry> vBanAccounts;
+                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, strError))
+                    return state.DoS(0, error("%s -- CheckAccountBanScript failed: %s", __func__, strError), REJECT_INVALID, "fluid-ban-script-invalid");
+
+                int64_t nTimeStamp;
+                std::vector<std::vector<unsigned char>> vSovereignAddresses;
+                if (fluid.ExtractTimestampWithAddresses("OP_BDAP_REVOKE", scriptFluid, nTimeStamp, vSovereignAddresses)) {
+                    for (const CDomainEntry& entry : vBanAccounts) {
+                        LogPrintf("%s -- Fluid command banning account %s\n", __func__, entry.GetFullObjectPath());
+                        if (!DeleteDomainEntry(entry))
+                            LogPrintf("%s -- Error deleting account %s\n", __func__, entry.GetFullObjectPath());
+
+                        CBanAccount banAccount(scriptFluid, entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
+                        AddBanAccountEntry(banAccount);
+                    }
+                }
+            } else {
+                std::string strFluidOpScript = ScriptToAsmStr(scriptFluid);
+                std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+                return state.DoS(100, error("%s -- Invalid fluid operation code %s (%d)", __func__, strOperationCode, OpCode), REJECT_INVALID, "invalid-fluid-operation-code");
             }
         }
     }
@@ -2571,7 +3013,11 @@ void static UpdateTip(CBlockIndex* pindexNew, const CChainParams& chainParams)
     // New best block
     mempool.AddTransactionsUpdated(1);
 
-    cvBlockChange.notify_all();
+    {
+        LOCK(g_best_block_mutex);
+        g_best_block = pindexNew->GetBlockHash();
+        g_best_block_cv.notify_all();
+    }
 
     static bool fWarned = false;
     std::vector<std::string> warningMessages;
@@ -2613,19 +3059,19 @@ void static UpdateTip(CBlockIndex* pindexNew, const CChainParams& chainParams)
             }
         }
     }
-    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8f tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)", __func__,
+    LogPrint("validation", "%s: new best=%s height=%d version=0x%08x log2_work=%.8f tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)", __func__,
         chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), chainActive.Tip()->nVersion,
         log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
         DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
         GuessVerificationProgress(chainParams.TxData(), chainActive.Tip()), pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)), pcoinsTip->GetCacheSize());
     if (!warningMessages.empty())
         LogPrintf(" warning='%s'", boost::algorithm::join(warningMessages, ", "));
-    LogPrintf("\n");
 }
 
 /** Disconnect chainActive's tip. You probably want to call mempool.removeForReorg and manually re-limit mempool size after this, with cs_main held. */
 bool static DisconnectTip(CValidationState& state, const CChainParams& chainparams)
 {
+
     CBlockIndex* pindexDelete = chainActive.Tip();
     assert(pindexDelete);
     // Read block from disk.
@@ -2636,7 +3082,7 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
     int64_t nStart = GetTimeMicros();
     {
         CCoinsViewCache view(pcoinsTip);
-        if (DisconnectBlock(block, state, pindexDelete, view) != DISCONNECT_OK)
+        if (DisconnectBlock(block, state, pindexDelete, view, 4) != DISCONNECT_OK)
             return error("DisconnectTip(): DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
         bool flushed = view.Flush();
         assert(flushed);
@@ -3428,7 +3874,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
                 }
             }
         }
-
         if (!fluid.CheckTransactionToBlock(*tx, block))
             return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx->GetHash().ToString());
     }
@@ -3563,7 +4008,10 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 
     // TODO : ENABLE BLOCK CACHE IN SPECIFIC CASES
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
-        if (miSelf != mapBlockIndex.end()) {
+        if (miSelf != mapBlockIndex.end() && !miSelf->second) {
+            mapBlockIndex.erase(hash);
+        }
+        if (miSelf != mapBlockIndex.end() && miSelf->second) {
             // Block header is already known.
             pindex = miSelf->second;
             if (ppindex)
@@ -3574,7 +4022,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         }
 
         if (!CheckBlockHeader(block, state, chainparams.GetConsensus()))
-            return false;
+            return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
 
         // Get prev block index
         CBlockIndex* pindexPrev = NULL;
@@ -3590,7 +4038,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
             return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__, state.GetRejectReason().c_str());
 
         if (!ContextualCheckBlockHeader(block, state, chainparams.GetConsensus(), pindexPrev, GetAdjustedTime()))
-            return false;
+            return error("%s: Consensus::ContextualCheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
     }
     if (pindex == NULL)
         pindex = AddToBlockIndex(block);
@@ -3599,7 +4047,6 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         *ppindex = pindex;
 
     CheckBlockIndex(chainparams.GetConsensus());
-
 
     // Notify external listeners about accepted block header
     GetMainSignals().AcceptedBlockHeader(pindex);
@@ -3748,7 +4195,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
 
-    LogPrintf("%s : ACCEPTED\n", __func__);
+    LogPrint("validation", "%s : ACCEPTED\n", __func__);
     return true;
 }
 
@@ -4164,7 +4611,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
         }
         // check level 3: check for inconsistencies during memory-only disconnect of tip blocks
         if (nCheckLevel >= 3 && pindex == pindexState && (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <= nCoinCacheUsage) {
-            DisconnectResult res = DisconnectBlock(block, state, pindex, coins);
+            DisconnectResult res = DisconnectBlock(block, state, pindex, coins, nCheckLevel);
             if (res == DISCONNECT_FAILED) {
                 return error("VerifyDB(): *** irrecoverable inconsistency in block data at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
             }

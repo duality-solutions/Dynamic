@@ -77,11 +77,22 @@ public:
         return !(a == b);
     }
 
+    friend bool operator<(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
     inline CFluidMining operator=(const CFluidMining& b)
     {
         FluidScript = b.FluidScript;
         MiningReward = b.MiningReward;
         nTimeStamp = b.nTimeStamp;
+        SovereignAddresses.clear(); //clear out previous entries
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }

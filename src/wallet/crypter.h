@@ -117,6 +117,8 @@ class CCryptoKeyStore : public CBasicKeyStore
 {
 private:
     CryptedKeyMap mapCryptedKeys;
+    CryptedDHTKeyMap mapCryptedDHTKeys;
+
     CHDChain cryptedHDChain;
 
     CKeyingMaterial vMasterKey;
@@ -187,8 +189,21 @@ public:
     bool Lock(bool fAllowMixing = false);
 
     virtual bool AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+    virtual bool AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
-    bool HaveKey(const CKeyID& address) const override
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) override;
+    bool HaveDHTKey(const CKeyID &address) const override
+    {
+        {
+            LOCK(cs_KeyStore);
+            if (!IsCrypted())
+                return CBasicKeyStore::HaveDHTKey(address);
+            return mapCryptedDHTKeys.count(address) > 0;
+        }
+        return false;
+    }
+    bool HaveKey(const CKeyID &address) const override
     {
         {
             LOCK(cs_KeyStore);
@@ -214,8 +229,11 @@ public:
         }
     }
 
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const override;
+
     virtual bool GetHDChain(CHDChain& hdChainRet) const override;
 
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
     /**
      * Wallet status (encrypted, locked) changed.
      * Note: Called without locks held.

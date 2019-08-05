@@ -44,11 +44,11 @@
 
 void WaitForShutdown(boost::thread_group* threadGroup)
 {
-    bool fShutdown = ShutdownRequested();
+    bool fShutdown = ShutdownRequested() || MnemonicRestartRequested();
     // Tell the main threads to shutdown.
     while (!fShutdown) {
         MilliSleep(200);
-        fShutdown = ShutdownRequested();
+        fShutdown = ShutdownRequested() || MnemonicRestartRequested();
     }
     if (threadGroup) {
         Interrupt(*threadGroup);

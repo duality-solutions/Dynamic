@@ -22,20 +22,20 @@ static const int MIN_PRIVATESEND_AMOUNT = 2;
 static const int MIN_PRIVATESEND_LIQUIDITY = 0;
 static const int MAX_PRIVATESEND_SESSIONS = 10;
 static const int MAX_PRIVATESEND_ROUNDS = 16;
-static const int MAX_PRIVATESEND_AMOUNT = 1000;
-static const int MAX_PRIVATESEND_LIQUIDITY = 100;
+static const int MAX_PRIVATESEND_AMOUNT = 100;
+static const int MAX_PRIVATESEND_LIQUIDITY = 10;
 static const int DEFAULT_PRIVATESEND_SESSIONS = 4;
 static const int DEFAULT_PRIVATESEND_ROUNDS = 4;
-static const int DEFAULT_PRIVATESEND_AMOUNT = 1000;
+static const int DEFAULT_PRIVATESEND_AMOUNT = 100;
 static const int DEFAULT_PRIVATESEND_LIQUIDITY = 0;
 
 static const bool DEFAULT_PRIVATESEND_MULTISESSION = false;
 
 // Warn user if mixing in gui or try to create backup if mixing in daemon mode
 // when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 100;
+static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 50;
 // Stop mixing completely, it's too dangerous to continue when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_STOP = 50;
+static const int PRIVATESEND_KEYS_THRESHOLD_STOP = 25;
 
 // The main object for accessing mixing
 extern CPrivateSendClientManager privateSendClient;

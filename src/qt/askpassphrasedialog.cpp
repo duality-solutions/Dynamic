@@ -118,7 +118,7 @@ void AskPassphraseDialog::accept()
             break;
         }
         QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm wallet encryption"),
-            tr("Warning: If you encrypt your wallet and lose your passphrase, you will <b>LOSE ALL OF YOUR DASH</b>!") + "<br><br>" + tr("Are you sure you wish to encrypt your wallet?"),
+            tr("Warning: If you encrypt your wallet and lose your passphrase, you will <b>LOSE ALL OF YOUR DYN</b>!") + "<br><br>" + tr("Are you sure you wish to encrypt your wallet?"),
             QMessageBox::Yes | QMessageBox::Cancel,
             QMessageBox::Cancel);
         if (retval == QMessageBox::Yes) {
@@ -167,6 +167,18 @@ void AskPassphraseDialog::accept()
     } break;
     case UnlockMixing:
     case Unlock:
+        if (model->getWallet()->WalletNeedsUpgrading()) {
+            QMessageBox::StandardButton reply;
+            ui->buttonBox->clear();
+            ui->statuslabel->setText(tr("Rescanning... Please wait, this may take several minutes."));
+            reply = QMessageBox::question(this, QObject::tr("Confirm Additional Operations"), QObject::tr("The current wallet needs to be upgraded to a newer version. This will require the creation of new keys and a full rescan. This may take several minutes to complete. Continue?"), QMessageBox::Yes|QMessageBox::No);
+
+            if (reply == QMessageBox::No) {
+                QDialog::reject(); //cancel
+                break;
+            }
+        }
+
         if (!model->setWalletLocked(false, oldpass, mode == UnlockMixing)) {
             QMessageBox::critical(this, tr("Wallet unlock failed"),
                 tr("The passphrase entered for the wallet decryption was incorrect."));

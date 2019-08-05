@@ -178,14 +178,16 @@ extern BlockMap mapBlockIndex;
 extern uint64_t nLastBlockTx;
 extern uint64_t nLastBlockSize;
 extern const std::string strMessageMagic;
-extern CWaitableCriticalSection csBestBlock;
-extern CConditionVariable cvBlockChange;
+extern Mutex g_best_block_mutex;
+extern std::condition_variable g_best_block_cv;
+extern uint256 g_best_block;
 extern std::atomic_bool fImporting;
 extern bool fReindex;
 extern int nScriptCheckThreads;
 extern bool fTxIndex;
 extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
+extern bool fStealthTx;
 extern unsigned int nBytesPerSigOp;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
@@ -386,6 +388,12 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 
 /** Context-independent validity checks */
 bool CheckTransaction(const CTransaction& tx, CValidationState& state);
+/** 
+ * Validate the usage of BDAP credits to makes sure they are not recirculated
+ * with standard DYN (trapped as fuel credit) and used to fund the appropriate BDAP operation.
+*/
+bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBdapCoins, 
+							const CAmount& nStandardIn, const CAmount& nCreditsIn, const CAmount& nStandardOut, const CAmount& nCreditsOut, const CAmount& nDataBurned);
 
 namespace Consensus
 {
@@ -571,5 +579,18 @@ void DumpMempool();
 
 /** Load the mempool from disk. */
 bool LoadMempool();
+
+class CServiceCredit {
+public:
+    std::string OpType;
+    CAmount nValue;
+    std::vector<std::vector<unsigned char>> vParameters;
+
+    CServiceCredit(const std::string& op_str, const CAmount& value)
+        : OpType(op_str), nValue(value) {}
+
+    CServiceCredit(const std::string& op_str, const CAmount& value,const std::vector<std::vector<unsigned char>>& params)
+        : OpType(op_str), nValue(value), vParameters(params) {}
+};
 
 #endif // DYNAMIC_VALIDATION_H

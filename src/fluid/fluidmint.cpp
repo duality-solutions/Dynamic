@@ -72,8 +72,6 @@ bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)
 
 bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     int nOut;
     if (!GetFluidMintData(tx, *this, nOut)) {
         SetNull();
@@ -84,8 +82,6 @@ bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
 {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
     if (!GetFluidMintData(fluidScript, *this)) {
         SetNull();
         return false;

@@ -125,6 +125,21 @@ bool error(const char* fmt, const Args&... args)
     return false;
 }
 
+template<typename... Args>
+int errorN(int n, const char *fmt, const Args&... args)
+{
+    LogPrintf("ERROR: %s\n", tfm::format(fmt, args...));
+    return n;
+}
+
+template<typename... Args>
+int errorN(int n, std::string &s, const char *func, const char *fmt, const Args&... args)
+{
+    s = tfm::format(fmt, args...);
+    LogPrintf("ERROR: %s\n", std::string(func) + ": " + s);
+    return n;
+}
+
 void PrintExceptionContinue(const std::exception* pex, const char* pszThread);
 void ParseParameters(int argc, const char* const argv[]);
 void FileCommit(FILE* file);
@@ -137,6 +152,7 @@ boost::filesystem::path GetDefaultDataDir();
 const boost::filesystem::path& GetDataDir(bool fNetSpecific = true);
 boost::filesystem::path GetBackupsDir();
 std::string GenerateRandomString(unsigned int len);
+unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax);
 void ClearDatadirCache();
 boost::filesystem::path GetConfigFile(const std::string& confPath);
 boost::filesystem::path GetDynodeConfigFile();
@@ -295,5 +311,7 @@ std::string IntVersionToString(uint32_t nVersion);
  * or "Invalid version" if can't cast the given value
  */
 std::string SafeIntVersionToString(uint32_t nVersion);
+
+bool FileExists(const std::string& strFilePath);
 
 #endif // DYNAMIC_UTIL_H
