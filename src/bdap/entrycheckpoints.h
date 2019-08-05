@@ -14,7 +14,7 @@ class CTransaction;
 
 class CEntryCheckpoints {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString OwnerFullPath;  // name of the owner's full domain entry path
     vCheckPoints CheckPointHashes; // vector of checkpoints containing the entry's channel or sub-chain block height and hash

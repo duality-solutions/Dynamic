@@ -48,7 +48,7 @@ public:
 // See LDAP Distinguished Name
 class CDomainEntry {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString RootOID; // Canonical Object ID
     //CN=John Smith,OU=Public,DC=BDAP,DC=IO, O=Duality Blockchain Solutions, UID=johnsmith21

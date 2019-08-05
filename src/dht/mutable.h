@@ -12,7 +12,7 @@
 
 class CMutableData {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString vchInfoHash;  // key
     CharString vchPublicKey;

@@ -38,7 +38,7 @@ namespace BDAP {
 
 class CLinkRequest {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path
@@ -141,7 +141,7 @@ public:
 // OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkAccept))
 class CLinkAccept {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path

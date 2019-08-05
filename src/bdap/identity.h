@@ -13,7 +13,7 @@
 
 class CIdentity {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString OwnerFullPath;  // name of the owner's full domain entry path
     CharString VerificationData;
@@ -77,7 +77,7 @@ public:
 
 class CIdentityVerification {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString VerifierFullPath;  // name of the verifier's full domain entry path
     CIdentity Identity;

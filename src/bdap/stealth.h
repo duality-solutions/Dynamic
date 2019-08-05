@@ -35,7 +35,7 @@ struct stealth_prefix
 class CStealthAddress
 {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     uint8_t options;
     uint8_t prefix_number_bits;
