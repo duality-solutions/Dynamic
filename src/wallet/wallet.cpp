@@ -4944,8 +4944,6 @@ void CWallet::KeepKey(int64_t nIndex)
         walletdb.EraseEdPool(nIndex);
         nKeysLeftSinceAutoBackup = nWalletBackups ? nKeysLeftSinceAutoBackup - 1 : 0;
     }
-    LogPrintf("keypool keep %d\n", nIndex);
-    LogPrintf("edkeypool keep %d\n", nIndex);
 }
 
 void CWallet::ReturnKey(int64_t nIndex, bool fInternal)

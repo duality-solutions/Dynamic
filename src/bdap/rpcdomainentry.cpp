@@ -20,7 +20,7 @@
 #include <univalue.h>
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
-extern void SendColorTransaction(const CScript& scriptColorCoins, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
+extern void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
 static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType)
 {
@@ -958,20 +958,40 @@ UniValue makecredits(const JSONRPCRequest& request)
     if (nColorAmount <= 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for coloring");
 
+    CScript scriptDestination;
+    std::vector<uint8_t> vStealthData;
+    bool fStealthAddress = false;
+    if (dest.type() == typeid(CStealthAddress))
+    {
+        CStealthAddress sxAddr = boost::get<CStealthAddress>(dest);
+        std::string sError;
+        if (0 != PrepareStealthOutput(sxAddr, scriptDestination, vStealthData, sError)) {
+            LogPrintf("%s -- PrepareStealthOutput failed. Error = %s\n", __func__, sError);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+        }
+        fStealthAddress = true;
+        CTxDestination newDest;
+        if (ExtractDestination(scriptDestination, newDest))
+            LogPrint("bdap", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
+    }
+    else {
+        scriptDestination = GetScriptForDestination(dest);
+    }
+    CScript stealthScript;
+    if (fStealthAddress) {
+        stealthScript << OP_RETURN << vStealthData;
+    }
+    // Create BDAP move asset operation script
     std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
     std::vector<unsigned char> vchMoveDestination = vchFromString(std::string("BDAP"));
-
-    // Create BDAP move asset operation script
     CScript scriptColorCoins;
     scriptColorCoins << CScript::EncodeOP_N(OP_BDAP_MOVE) << CScript::EncodeOP_N(OP_BDAP_ASSET) 
                         << vchMoveSource << vchMoveDestination << OP_2DROP << OP_2DROP;
 
-    CScript scriptDestination;
-    scriptDestination = GetScriptForDestination(dest);
     scriptColorCoins += scriptDestination;
 
     CWalletTx wtx;
-    SendColorTransaction(scriptColorCoins, wtx, nColorAmount, NULL, false, false);
+    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, NULL, false, false);
 
     return wtx.GetHash().GetHex();
 }

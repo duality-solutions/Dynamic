@@ -14,7 +14,7 @@ class CTransaction;
 
 class CCertificate {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     CharString OwnerFullPath;  // name of the owner's full domain entry path
     CharString Name; // Certificate name

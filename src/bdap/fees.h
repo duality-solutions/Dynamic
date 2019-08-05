@@ -38,7 +38,7 @@ static const int32_t BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT      = 7004;
 
 class CFeeItem {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     int32_t nType;
     CAmount Fee;

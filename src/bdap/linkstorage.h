@@ -23,7 +23,7 @@ namespace BDAP {
 
 class CLinkStorage {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> vchRawData;
     std::vector<unsigned char> vchLinkPubKey;
@@ -105,7 +105,7 @@ public:
 
 class CLinkInfo {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> vchFullObjectPath;
     std::vector<unsigned char> vchSenderPubKey;

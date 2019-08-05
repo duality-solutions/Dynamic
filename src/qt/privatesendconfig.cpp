@@ -43,10 +43,10 @@ void PrivateSendConfig::setModel(WalletModel* model)
 
 void PrivateSendConfig::clickBasic()
 {
-    configure(true, 1000, 2);
+    configure(true, MAX_PRIVATESEND_AMOUNT, 2);
 
     QString strAmount(DynamicUnits::formatWithUnit(
-        model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
+        model->getOptionsModel()->getDisplayUnit(), MAX_PRIVATESEND_AMOUNT * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
             "PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.")
@@ -57,10 +57,10 @@ void PrivateSendConfig::clickBasic()
 
 void PrivateSendConfig::clickHigh()
 {
-    configure(true, 1000, 8);
+    configure(true, MAX_PRIVATESEND_AMOUNT, 8);
 
     QString strAmount(DynamicUnits::formatWithUnit(
-        model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
+        model->getOptionsModel()->getDisplayUnit(), MAX_PRIVATESEND_AMOUNT * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
             "PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.")
@@ -71,10 +71,10 @@ void PrivateSendConfig::clickHigh()
 
 void PrivateSendConfig::clickMax()
 {
-    configure(true, 1000, 16);
+    configure(true, MAX_PRIVATESEND_AMOUNT, 16);
 
     QString strAmount(DynamicUnits::formatWithUnit(
-        model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
+        model->getOptionsModel()->getDisplayUnit(), MAX_PRIVATESEND_AMOUNT * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
             "PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.")

@@ -2,6 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "bdappage.h"
+
 #include "bdap/fees.h"
 #include "bdapaccounttablemodel.h"
 #include "bdapaddlinkdialog.h"
@@ -9,7 +11,6 @@
 #include "bdapfeespopup.h"
 #include "bdaplinkdetaildialog.h"
 #include "bdaplinktablemodel.h"
-#include "bdappage.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
 #include "clientmodel.h"

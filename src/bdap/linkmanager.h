@@ -31,7 +31,7 @@ namespace BDAP {
 
 class CLink {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     uint256 LinkID;
     bool fRequestFromMe;
