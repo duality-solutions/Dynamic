@@ -4539,4 +4539,669 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>wallet.dat bị lỗi, cứu chữa không thành công.</translation>
     </message>
 </context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
+        <translation>Die angezeigten Informationen sind möglicherweise nicht mehr aktuell. Ihre Geld synchronisiert automatisch mit dem Dymamic Netzwerk, nachdem eine Verbindung hergestellt wurde, aber dieser Prozess ist noch nicht fertiggestellt. Dass heißt, dass die letzten Transaktionen nicht sichtbar sein werden und der Kontostand nicht auf den letzten Stand sein wird bis dieser Prozess fertiggestellt worden ist.</translation>
+    </message>
+    <message>
+        <source>Spending DYN may not be possible during that phase!</source>
+        <translation>Während dieser Phase ist das Ausgeben der DYN nicht möglich!</translation>
+    </message>
+    <message>
+        <source>Amount of blocks left</source>
+        <translation>Anzahl der verbleibenden Blöcke</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>unbekannt</translation>
+    </message>
+    <message>
+        <source>Unknown...</source>
+        <translation>Unbekannt...</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>Unbekannt. Sychronisierung der Kopfzeilen (%1)...</translation>
+    </message>
+    <message>
+        <source>Last block time</source>
+        <translation>Letzte Blockzeit</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>Fortschritt</translation>
+    </message>
+    <message>
+        <source>Progress increase per Hour</source>
+        <translation>Stündlicher Fortschritt</translation>
+    </message>
+    <message>
+        <source>calculating...</source>
+        <translation>Berechnung...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>Geschätzte Zeit bis zur Fertigstellung der Sychronisierung</translation>
+    </message>
+    <message>
+        <source>&amp;Hide</source>
+        <translation>&amp;Verstecken</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verstecken</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAccountTableModel</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddUserDialog</name>
+    <message>
+        <source>Add BDAP User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration months:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create a new address</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully added user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Needs Translating</translation>
+    </message>   
+    <message>
+        <source>Expiration Date:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkTableModel</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    </context>
+<context>
+    <name>BdapLinkTablePriv</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapPage</name>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Users</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Only display My Users</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add a user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected user from the list</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Links</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Only display My Groups</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add a new group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected group from the list</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>&amp;Delete Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add BDAP Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete \"</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Confirm Delete Account</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update BDAP Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Group Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update BDAP User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully deleted user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully deleted group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter common name to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter object full path to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Request</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Deny</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Spam</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Confirm Accept Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully accepted link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Request Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapUpdateAccountDialog</name>
+    <message>
+        <source>Update BDAP Account</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully updated user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully updated group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Please note that your transaction will not be reflected until the next block.</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapUserDetailDialog</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Form</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>DHT Public Key:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TX ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddLinkDialog</name>
+    <message>
+        <source>BDAP Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(required)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(optional)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>From:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>To:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Add Link Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor, Recipient and Link Message are required fields</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
 </TS>
