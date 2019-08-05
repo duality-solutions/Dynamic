@@ -29,12 +29,13 @@ typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<int, EventPair> EventTypeMap;
 typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
 
-static constexpr int DHT_GET_ALERT_TYPE_CODE = 75;
-static constexpr int DHT_PUT_ALERT_TYPE_CODE = 76;
 static constexpr int DHT_BOOTSTRAP_ALERT_TYPE_CODE = 62;
-static constexpr int DHT_STATS_ALERT_TYPE_CODE = 83;
 static constexpr int STATS_ALERT_TYPE_CODE = 70;
 static constexpr int DHT_ERROR_ALERT_TYPE_CODE = 73;
+static constexpr int DHT_GET_ALERT_TYPE_CODE = 75;
+static constexpr int DHT_PUT_ALERT_TYPE_CODE = 76;
+static constexpr int DHT_STATS_ALERT_TYPE_CODE = 83;
+
 static constexpr int64_t DHT_RECORD_LOCK_SECONDS = 16;
 static constexpr uint32_t DHT_KEEP_PUT_BUFFER_SECONDS = 300;
 
