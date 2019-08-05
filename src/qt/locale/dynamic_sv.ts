@@ -421,7 +421,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>Open Wallet &amp;Configuration File</source>
-        <translation>Öppna plånbok &amp konfigurationsfil</translation>
+        <translation>Öppna plånbok &amp;Konfigurationsfil</translation>
     </message>
     <message>
         <source>Open configuration file</source>
