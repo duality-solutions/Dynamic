@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdaplinktablemodel.h"
+
 #include "bdappage.h"
 #include "guiconstants.h"
 #include "guiutil.h"

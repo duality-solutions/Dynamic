@@ -3,11 +3,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdapaddlinkdialog.h"
+#include "ui_bdapaddlinkdialog.h"
+
 #include "bdapfeespopup.h"
 #include "bdaplinkdetaildialog.h"
 #include "bdappage.h"
-#include "ui_bdapaddlinkdialog.h"
-
 #include "bdap/fees.h"
 #include "guiutil.h"
 #include "rpcregister.h"
