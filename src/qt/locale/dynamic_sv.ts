@@ -554,19 +554,22 @@ Var vänlig och försök igen.</translation>
     <message numerus="yes">
         <source>%n hour(s)</source>
         <translation>
-            <translation><numerusform>%n timme</numerusform><numerusform>%n timmar</numerusform></translation>
+            <numerusform>%n timme</numerusform>
+            <numerusform>%n timmar</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
         <translation>
-            <translation><numerusform>%n dag</numerusform><numerusform>%n dagar</numerusform></translation>
+            <numerusform>%n dag</numerusform>
+            <numerusform>%n dagar</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
         <translation>
-            <translation><numerusform>%n vecka</numerusform><numerusform>%n veckor</numerusform></translation>
+            <numerusform>%n vecka</numerusform>
+            <numerusform>%n veckor</numerusform>
         </translation>
     </message>
     <message>
@@ -576,7 +579,7 @@ Var vänlig och försök igen.</translation>
     <message numerus="yes">
         <source>%n year(s)</source>
         <translation>
-            <translation><numerusform>%n år</numerusform><numerusform>%n år</numerusform></translation>
+           <numerusform>%n år</numerusform>
         </translation>
     </message>
     <message>
@@ -887,7 +890,7 @@ Adres: %4
     </message>
     <message>
         <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
-        <translation>Denna etikett blir röd om någon mottagare får en betalning som är mindre än aktuell dammtröskel./translation>
+        <translation>Denna etikett blir röd om någon mottagare får en betalning som är mindre än aktuell dammtröskel.</translation>
     </message>
     <message>
         <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
@@ -1131,7 +1134,6 @@ Adres: %4
     </message>
     <message>
         <source>PrivateSend-LongText</source>
-        <translation>
     	<translation>
 &lt;h3&gt;PrivateSend Grunderna&lt;/h3&gt;
 PrivateSend ger dig sann ekonomisk integritet genom att dölja ursprunget för dina pengar.
@@ -1153,8 +1155,7 @@ dina medel kommer redan att bli anonymiserade. Ingen ytterligare väntan krävs.
 Det betyder dem 2000 adresser varar i ca 200 blandningshändelser. När 1900 av dem används, din plånbok måste skapa fler adresser.
 Det kan dock bara göra om du har aktiverat automatisk säkerhetskopiering .&lt;br&gt;
 Följaktligen kommer användare som har säkerhetskopierade avstängningar också att ha PrivateSend inaktiverade. &lt;hr&gt;
-                </translation>
-            </translation>
+        </translation>
     </message>
     <message>
         <source>Choose data directory on startup (default: %n)</source>
@@ -2580,7 +2581,7 @@ Mest förekommande; som typ på &quot; transaktioner &quot; flik.</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for Dynamic transactions than the network can process.</source>
-        <translation>Att betala endast minsta avgiften är bara bra så länge som det finns mindre transaktionsvolym än utrymmet i blocken.&Lt;br /&gt; Men var medveten om att detta kan hamna i en  obekräftand transaktion när det finns mer efterfrågan på Dynamic transaktioner än nätverket kan hantera.</translation>
+        <translation>Att betala endast minsta avgiften är bara bra så länge som det finns mindre transaktionsvolym än utrymmet i blocken.&lt;br /&gt; Men var medveten om att detta kan hamna i en  obekräftand transaktion när det finns mer efterfrågan på Dynamic transaktioner än nätverket kan hantera.</translation>
     </message>
     <message>
         <source>per kilobyte</source>
@@ -5824,7 +5825,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translat>Bekräfta Acceptera länk</translation>
+        <translation>Bekräfta Acceptera länk</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
@@ -5863,7 +5864,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Update</source>
-        <translation>Uppdatera/translation>
+        <translation>Uppdatera</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -5964,7 +5965,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>BDAP Användarinformation</translation>
     </message>
     <message>
-        <source>Form</source>home in
+        <source>Form</source>
         <translation>Formulär</translation>
     </message>
     <message>
