@@ -37,8 +37,8 @@ QT_FORMS_UI = \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
   qt/forms/miningpage.ui \
-  qt/forms/modaloverlay.ui \
   qt/forms/mnemonicdialog.ui \
+  qt/forms/modaloverlay.ui \
   qt/forms/openuridialog.ui \
   qt/forms/optionsdialog.ui \
   qt/forms/overviewpage.ui \
