@@ -6042,4 +6042,144 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;Alerta Dynamic&quot; admin@foo
         <translation>Needs Translating</translation>
     </message>
 </context>
+<context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Choose File</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import Recovery Phrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Paste from clipboard</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recovery Passphrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
+Wallet wil restart after mnemonic has been imported.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Reimport</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create New Recovery Phrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Copy to clipboard</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Bytes of Entropy</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Generate</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Validate</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import privatekey</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Input single privatekey</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Force Rescan</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import privatekey file</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Input privatekey file</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
 </TS>
