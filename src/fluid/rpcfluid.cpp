@@ -114,7 +114,7 @@ UniValue banaccountstoken(const JSONRPCRequest& request)
             "\nCreates a token to ban a list of BDAP accounts\n"
             "\nArguments:\n"
             "1. \"timestamp\"         (int, required) Fluid transaction timestamp.\n"
-            "2. \"account_fqdn1\"     (string, required) The BDAP account fully qualified domain name.\n"
+            "2. \"account_address\"   (string, required) The BDAP account fully qualified domain name or a wallet address.\n"
             "\nExamples:\n" +
             HelpExampleCli("banaccountstoken", "1558389600 \"badaccount@public.bdap.io\" \"banme@public.bdap.io\"") + 
             HelpExampleRpc("banaccountstoken", "1558389600 \"badaccount@public.bdap.io\" \"banme@public.bdap.io\""));
@@ -131,13 +131,18 @@ UniValue banaccountstoken(const JSONRPCRequest& request)
         if (iter == 0) {
             strResult += request.params[iter].get_str() + SubDelimiter;
         } else {
-            std::string strAccountFQDN = request.params[iter].get_str();
-            ToLowerCase(strAccountFQDN);
-            if (!DomainEntryExists(vchFromString(strAccountFQDN)))
-                throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("The %s BDAP account was not found", strAccountFQDN));
+            std::string strAccountAddress = request.params[iter].get_str();
+            CTxDestination dest = DecodeDestination(strAccountAddress);
+            if (!IsValidDestination(dest)) {
+                ToLowerCase(strAccountAddress);
+                if (!DomainEntryExists(vchFromString(strAccountAddress)))
+                    throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("The %s BDAP account was not found", strAccountAddress));
 
-            // base64 encode the BDAP account FQDN so that the @ character doesn't interfere with the standard token delimiter
-            strResult += EncodeBase64(strAccountFQDN) + SubDelimiter;
+                // base64 encode the BDAP account FQDN so that the @ character doesn't interfere with the standard token delimiter
+                strResult += EncodeBase64(strAccountAddress) + SubDelimiter;
+            } else {
+                strResult += EncodeBase64(strAccountAddress) + SubDelimiter;
+            }
         }
     }
 
@@ -427,13 +432,13 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
     UniValue oAccountBan(UniValue::VOBJ);
     {
         std::vector<CBanAccount> vBanEntries;
-        if (!GetAllBanAccountRecords(vBanEntries)) {
+        if (!GetAllBanRecords(vBanEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error getting fluid account ban entries"));
         }
         int x = 1;
         for (const CBanAccount& banEntry : vBanEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(banEntry.FluidScript)));
+            obj.push_back(Pair("account_address", StringFromCharVector(banEntry.vchAccountAddress)));
             std::string addLabel = "account_ban_" + std::to_string(x);
             oAccountBan.push_back(Pair(addLabel, obj));
             x++;
@@ -587,7 +592,7 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
     UniValue oBanAccounts(UniValue::VOBJ);
     {
         std::vector<CBanAccount> banEntries;
-        if (!GetAllBanAccountRecords(banEntries)) {
+        if (!GetAllBanRecords(banEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error getting fluid ban account entries"));
         }
         int x = 1;
@@ -595,7 +600,11 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CBanAccount& banEntry : banEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Ban Account"));
-            obj.push_back(Pair("account_fqdn", StringFromCharVector(banEntry.vchFullObjectPath)));
+            if (banEntry.fIsWalletAddress) {
+                obj.push_back(Pair("wallet_address", StringFromCharVector(banEntry.vchAccountAddress)));
+            } else {
+                obj.push_back(Pair("account_fqdn", StringFromCharVector(banEntry.vchAccountAddress)));
+            }
             obj.push_back(Pair("timestamp", banEntry.nTimeStamp));
             obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", banEntry.nTimeStamp)));
             obj.push_back(Pair("block_height", (int)banEntry.nHeight));

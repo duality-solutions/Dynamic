@@ -210,7 +210,7 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
     return false;
 }
 
-bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::string& strErrorMessage)
+bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::vector<CDynamicAddress>& vBanWallets, std::string& strErrorMessage)
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScript);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
@@ -227,14 +227,22 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
     }
     
     for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
-        CDomainEntry entry;
-        std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
-        std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
-        if (GetDomainEntry(vchBanAccountFQDN, entry)) {
-            vBanAccounts.push_back(entry);
-        }
-        else {
-            LogPrintf("%s -- Skipping... Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
+        std::string strBanAccountAddress = DecodeBase64(vecSplitScript[iter]);
+        CTxDestination destBan = DecodeDestination(strBanAccountAddress);
+        if (!IsValidDestination(destBan)) {
+            // ban domain account and its wallet address.  Can't ban a stealth address since the destination always changes.
+            CDomainEntry entry;
+            std::vector<unsigned char> vchBanAccountAddress = vchFromString(strBanAccountAddress);
+            if (GetDomainEntry(vchBanAccountAddress, entry)) {
+                vBanAccounts.push_back(entry);
+                vBanWallets.push_back(entry.GetWalletAddress());
+            }
+            else {
+                LogPrintf("%s -- Skipping... Can't ban %s account because it was not found.\n", __func__, strBanAccountAddress);
+            }
+        } else {
+            // ban wallet address
+            vBanWallets.push_back(CDynamicAddress(strBanAccountAddress));
         }
     }
 

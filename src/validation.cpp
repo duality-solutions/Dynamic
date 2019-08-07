@@ -1125,10 +1125,21 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             REJECT_INVALID, "bad-txlockrequest");
 
     // Check for conflicts with a completed Transaction Lock
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
+        // check for banned wallet address
+        
+        CTransactionRef prevTx;
+        uint256 hashBlock;
+        if (GetTransaction(txin.prevout.hash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+            CDynamicAddress address;
+            if (IsBannedWalletAddress(prevTx, address))
+                return state.DoS(10, error("%s : Transaction %s UTXO uses the banned wallet address %s.", __func__, hash.ToString(), address.ToString()),
+                    REJECT_INVALID, "tx-input-wallet-address-banned");
+        }
+
         uint256 hashLocked;
         if (instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hash != hashLocked)
-            return state.DoS(10, error("AcceptToMemoryPool : Transaction %s conflicts with completed Transaction Lock %s", hash.ToString(), hashLocked.ToString()),
+            return state.DoS(10, error("%s : Transaction %s conflicts with completed Transaction Lock %s", __func__, hash.ToString(), hashLocked.ToString()),
                 REJECT_INVALID, "tx-txlock-conflict");
     }
 
@@ -1136,7 +1147,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     std::set<uint256> setConflicts;
     {
         LOCK(pool.cs); // protect pool.mapNextTx
-        BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        for (const CTxIn& txin : tx.vin) {
             auto itConflicting = pool.mapNextTx.find(txin.prevout);
             if (itConflicting != pool.mapNextTx.end()) {
                 const CTransaction* ptxConflicting = itConflicting->second;
@@ -2783,11 +2794,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
                     return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");
 
-                //if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-                //    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
-
                 std::vector<CDomainEntry> vBanAccounts;
-                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, strError))
+                std::vector<CDynamicAddress> vWalletAddresses;
+                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, vWalletAddresses, strError))
                     return state.DoS(0, error("%s -- CheckAccountBanScript failed: %s", __func__, strError), REJECT_INVALID, "fluid-ban-script-invalid");
 
                 int64_t nTimeStamp;
@@ -2796,10 +2805,14 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     for (const CDomainEntry& entry : vBanAccounts) {
                         LogPrintf("%s -- Fluid command banning account %s\n", __func__, entry.GetFullObjectPath());
                         if (!DeleteDomainEntry(entry))
-                            LogPrintf("%s -- Error deleting account %s\n", __func__, entry.GetFullObjectPath());
+                            LogPrintf("%s -- Error banning account %s\n", __func__, entry.GetFullObjectPath());
 
-                        CBanAccount banAccount(scriptFluid, entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
+                        CBanAccount banAccount(entry.vchFullObjectPath(), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
                         AddBanAccountEntry(banAccount);
+                    }
+                    for (const CDynamicAddress& address : vWalletAddresses) {
+                        CBanAccount banWallet(vchFromString(address.ToString()), nTimeStamp, vSovereignAddresses, tx.GetHash(), pindex->nHeight);
+                        AddBanWalletEntry(banWallet);
                     }
                 }
             } else {
