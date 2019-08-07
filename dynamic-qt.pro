@@ -628,28 +628,28 @@ RESOURCES += \
 FORMS += \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/askpassphrasedialog.ui \
+    src/qt/forms/bdapaddlinkdialog.ui \
+    src/qt/forms/bdapadduserdialog.ui \
+    src/qt/forms/bdaplinkdetaildialog.ui \
+    src/qt/forms/bdappage.ui \
+    src/qt/forms/bdapupdateaccountdialog.ui \
+    src/qt/forms/bdapuserdetaildialog.ui \
     src/qt/forms/coincontroldialog.ui \
+    src/qt/forms/dynodelist.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/helpmessagedialog.ui \
     src/qt/forms/intro.ui \
+    src/qt/forms/miningpage.ui \
+    src/qt/forms/mnemonicdialog.ui \
+    src/qt/forms/modaloverlay.ui \
     src/qt/forms/openuridialog.ui \
     src/qt/forms/optionsdialog.ui \
     src/qt/forms/overviewpage.ui \
+    src/qt/forms/privatesendconfig.ui \
     src/qt/forms/receivecoinsdialog.ui \
     src/qt/forms/receiverequestdialog.ui \
     src/qt/forms/rpcconsole.ui \
-    src/qt/forms/privatesendconfig.ui \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/signverifymessagedialog.ui \
-    src/qt/forms/dynodelist.ui \
-    src/qt/forms/transactiondescdialog.ui \
-    src/qt/forms/modaloverlay.ui \
-    src/qt/forms/miningpage.ui \
-    src/qt/forms/bdappage.ui \
-    src/qt/forms/bdapadduserdialog.ui \
-    src/qt/forms/bdapuserdetaildialog.ui \
-    src/qt/forms/bdapupdateaccountdialog.ui \
-    src/qt/forms/bdaplinkdetaildialog.ui \
-    src/qt/forms/bdapaddlinkdialog.ui \
-    src/qt/forms/mnemonicdialog.ui
+    src/qt/forms/transactiondescdialog.ui
