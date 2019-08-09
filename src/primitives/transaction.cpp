@@ -60,6 +60,9 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn)
 
 bool CTxOut::IsBDAP() const
 {
+    if (scriptPubKey.size() < 2)
+        return false;
+
     opcodetype opcode;
     CScript::const_iterator pc = scriptPubKey.begin();
     if (!scriptPubKey.GetOp(pc, opcode))
