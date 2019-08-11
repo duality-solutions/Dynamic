@@ -1541,7 +1541,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Available:</source>
-        <translation>Tillgänglig:</translation>
+        <translation>Tillgängligt:</translation>
     </message>
     <message>
         <source>Your current spendable balance</source>
