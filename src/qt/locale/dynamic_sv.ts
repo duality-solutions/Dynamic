@@ -413,7 +413,7 @@ Var vänlig och försök igen.</translation>
     </message>
     <message>
         <source>Wallet &amp;Repair</source>
-        <translation>Plånbok &amp;Reperation</translation>
+        <translation>Reparera &amp;Plånbok</translation>
     </message>
     <message>
         <source>Show wallet repair options</source>
@@ -1541,7 +1541,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Available:</source>
-        <translation>Tillgänglig:</translation>
+        <translation>Tillgängligt:</translation>
     </message>
     <message>
         <source>Your current spendable balance</source>
@@ -2324,7 +2324,7 @@ Mest förekommande; som typ på &quot; transaktioner &quot; flik.</translation>
     </message>
     <message>
         <source>Request InstantSend</source>
-        <translation>InstantSend Verzoek</translation>
+        <translation>Begär InstantSend</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2844,7 +2844,7 @@ Mest förekommande; som typ på &quot; transaktioner &quot; flik.</translation>
     </message>
     <message>
         <source>A&amp;mount:</source>
-        <translation>B&amp;Belopp:</translation>
+        <translation>B&amp;elopp:</translation>
     </message>
     <message>
         <source>Message:</source>
@@ -3367,7 +3367,7 @@ Mest förekommande; som typ på &quot; transaktioner &quot; flik.</translation>
     </message>
     <message>
         <source>Mined</source>
-        <translation>Genererade</translation>
+        <translation>Genererad</translation>
     </message>
     <message>
         <source>PrivateSend Denominate</source>
@@ -5761,7 +5761,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Ange vanligt namn för att söka</translation>
+        <translation>Ange ett namn för att söka</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
