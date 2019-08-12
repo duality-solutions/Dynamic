@@ -229,7 +229,7 @@ void CDynode::Check(bool fForce)
         LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
             outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
-        if (fSentinelPingExpired) {
+        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) && fSentinelPingExpired) {
             nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
             if (nActiveStatePrev != nActiveState) {
                 LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
@@ -258,7 +258,7 @@ void CDynode::Check(bool fForce)
         LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
             outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
-        if (fSentinelPingExpired) {
+        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) && fSentinelPingExpired) {
             nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
             if (nActiveStatePrev != nActiveState) {
                 LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
