@@ -37,8 +37,8 @@ static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = fa
     tx.vout.resize(nInput+1);
     tx.vout[nInput].nValue = nValue;
     if (fIsFromMe) {
-        // IsFromMe() returns (GetDebit() > 0), and GetDebit() is 0 if vin.empty(),
-        // so stop vin being empty, and cache a non-zero Debit to fake out IsFromMe()
+        // IsRelevantToMe() returns (GetDebit() > 0), and GetDebit() is 0 if vin.empty(),
+        // so stop vin being empty, and cache a non-zero Debit to fake out IsRelevantToMe()
         tx.vin.resize(1);
     }
     std::unique_ptr<CWalletTx> wtx(new CWalletTx(&wallet, MakeTransactionRef(std::move(tx))));
@@ -46,6 +46,8 @@ static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = fa
     {
         wtx->fDebitCached = true;
         wtx->nDebitCached = 1;
+        wtx->fFromMeCached = true;
+        wtx->fFromMeCachedValue = true;
     }
     COutput output(wtx.get(), nInput, nAge, true, true);
     vCoins.push_back(output);
