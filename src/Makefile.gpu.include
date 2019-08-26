@@ -36,6 +36,7 @@ crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_SOURCES = \
 	crypto/argon2gpu/cuda/cuda-exception.h \
 	crypto/argon2gpu/cuda/device.h \
 	crypto/argon2gpu/cuda/global-context.h \
+	crypto/argon2gpu/cuda/blake2b-kernels.h \
 	crypto/argon2gpu/cuda/kernels.h \
 	crypto/argon2gpu/cuda/processing-unit.h \
 	crypto/argon2gpu/cuda/program-context.h \
