@@ -130,6 +130,10 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     if (request.params.size() > 0)
         strAccount = AccountFromValue(request.params[0]);
 
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
+
     if (!pwalletMain->IsLocked(true))
         pwalletMain->TopUpKeyPoolCombo();
 
@@ -169,6 +173,10 @@ UniValue getnewed25519address(const JSONRPCRequest& request)
     std::string strAccount;
     if (request.params.size() > 0)
         strAccount = AccountFromValue(request.params[0]);
+
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
 
     if (!pwalletMain->IsLocked(true))
         pwalletMain->TopUpKeyPoolCombo(); //TopUpEdKeyPool();
@@ -210,6 +218,10 @@ static UniValue getnewstealthaddress(const JSONRPCRequest &request)
     EnsureWalletIsUnlocked();
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
 
     CPubKey walletPubKey;
     CStealthAddress sxAddr;
@@ -2246,6 +2258,10 @@ UniValue keypoolrefill(const JSONRPCRequest& request)
         kpSize = (unsigned int)request.params[0].get_int();
     }
 
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
+        
     EnsureWalletIsUnlocked();
     pwalletMain->TopUpKeyPoolCombo(kpSize);
 

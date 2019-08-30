@@ -163,6 +163,13 @@ void BdapPage::listAllGroups()
 
 void BdapPage::addGroup()
 {
+    //Check to see if wallet needs upgrading
+    if (model->getWallet()->WalletNeedsUpgrading()) {
+        QMessageBox::critical(this, QObject::tr("Older wallet version detected"),
+                QObject::tr("Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue."));
+        return;
+    }
+
     if (!dynodeSync.IsBlockchainSynced())  {
         QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
         return;
@@ -266,6 +273,13 @@ void BdapPage::listAllUsers()
 
 void BdapPage::addUser()
 {
+    //Check to see if wallet needs upgrading
+    if (model->getWallet()->WalletNeedsUpgrading()) {
+        QMessageBox::critical(this, QObject::tr("Older wallet version detected"),
+                QObject::tr("Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue."));
+        return;
+    }
+
     if (!dynodeSync.IsBlockchainSynced())  {
         QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
         return;
@@ -287,6 +301,13 @@ void BdapPage::getUserDetails(int row, int column)
 
 void BdapPage::addLink()
 {
+    //Check to see if wallet needs upgrading
+    if (model->getWallet()->WalletNeedsUpgrading()) {
+        QMessageBox::critical(this, QObject::tr("Older wallet version detected"),
+                QObject::tr("Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue."));
+        return;
+    }
+
     if (!dynodeSync.IsBlockchainSynced())  {
         QMessageBox::information(this, QObject::tr("Wallet not synced"), QObject::tr("Cannot create BDAP objects while wallet is not synced."));
         return;
