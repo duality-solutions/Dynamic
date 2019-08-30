@@ -174,6 +174,10 @@ UniValue adduser(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("adduser", "Alice \"Wonderland, Alice\""));
 
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw std::runtime_error("Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
+
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
     }
@@ -860,6 +864,10 @@ UniValue addgroup(const JSONRPCRequest& request)
            HelpExampleCli("addgroup", "Duality \"Duality Blockchain Solutions Group\"") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("addgroup", "Duality \"Duality Blockchain Solutions Group\""));
+
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw std::runtime_error("Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
 
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");

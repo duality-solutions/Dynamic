@@ -4876,7 +4876,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nIndex = *setKeyPool.begin();
         setKeyPool.erase(nIndex);
         if (!walletdb.ReadPool(nIndex, keypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [keypool]");
         }
         if (!HaveKey(keypool.vchPubKey.GetID())) {
             throw std::runtime_error(std::string(__func__) + ": unknown key in key pool");
@@ -4891,7 +4891,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nEdIndex = *setEdKeyPool.begin();
         setEdKeyPool.erase(nEdIndex);
         if (!walletdb.ReadEdPool(nEdIndex, edkeypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [edkeypool]");
         }
         if (edkeypool.fInternal != fInternal) {
             throw std::runtime_error(std::string(__func__) + ": keypool entry misclassified");
