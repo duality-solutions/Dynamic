@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,33 +17,6 @@ base_blob<BITS>::base_blob(const std::vector<unsigned char>& vch)
 {
     assert(vch.size() == sizeof(data));
     memcpy(data, &vch[0], sizeof(data));
-}
-
-
-template <unsigned int BITS>
-int base_blob<BITS>::CompareTo(const base_blob<BITS>& b) const
-{
-    for (int i = WIDTH - 1; i >= 0; i--) {
-        if (data[i] < b.data[i])
-            return -1;
-        if (data[i] > b.data[i])
-            return 1;
-    }
-    return 0;
-}
-
-template <unsigned int BITS>
-bool base_blob<BITS>::EqualTo(uint64_t b) const
-{
-    for (int i = WIDTH - 1; i >= 2; i--) {
-        if (data[i])
-            return false;
-    }
-    if (data[1] != (b >> 32))
-        return false;
-    if (data[0] != (b & 0xfffffffful))
-        return false;
-    return true;
 }
 
 template <unsigned int BITS>
@@ -102,8 +75,6 @@ template std::string base_blob<160>::GetHex() const;
 template std::string base_blob<160>::ToString() const;
 template void base_blob<160>::SetHex(const char*);
 template void base_blob<160>::SetHex(const std::string&);
-template int base_blob<160>::CompareTo(const base_blob<160>&) const;
-template bool base_blob<160>::EqualTo(uint64_t) const;
 
 // Explicit instantiations for base_blob<256>
 template base_blob<256>::base_blob(const std::vector<unsigned char>&);
@@ -111,5 +82,3 @@ template std::string base_blob<256>::GetHex() const;
 template std::string base_blob<256>::ToString() const;
 template void base_blob<256>::SetHex(const char*);
 template void base_blob<256>::SetHex(const std::string&);
-template int base_blob<256>::CompareTo(const base_blob<256>&) const;
-template bool base_blob<256>::EqualTo(uint64_t) const;

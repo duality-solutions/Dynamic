@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,8 +14,9 @@
 class ClientModel;
 class DynamicGUI;
 
-namespace Ui {
-    class HelpMessageDialog;
+namespace Ui
+{
+class HelpMessageDialog;
 }
 
 /** "Help message" dialog box */
@@ -30,14 +31,14 @@ public:
         pshelp
     };
 
-    explicit HelpMessageDialog(QWidget *parent, HelpMode helpMode);
+    explicit HelpMessageDialog(QWidget* parent, HelpMode helpMode);
     ~HelpMessageDialog();
 
     void printToConsole();
     void showOrPrint();
 
 private:
-    Ui::HelpMessageDialog *ui;
+    Ui::HelpMessageDialog* ui;
     QString text;
 
 private Q_SLOTS:
@@ -51,11 +52,11 @@ class ShutdownWindow : public QWidget
     Q_OBJECT
 
 public:
-    ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
-    static QWidget *showShutdownWindow(DynamicGUI *window);
+    ShutdownWindow(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    static QWidget* showShutdownWindow(DynamicGUI* window);
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 };
 
 #endif // DYNAMIC_QT_UTILITYDIALOG_H

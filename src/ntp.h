@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2013-2016 The NovaCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -10,7 +10,7 @@
 int64_t NtpGetTime(CNetAddr& ip);
 
 // Get time from provided server.
-int64_t NtpGetTime(const std::string &strHostName);
+int64_t NtpGetTime(const std::string& strHostName);
 
 // Get time from random server.
 int64_t NtpGetTime();

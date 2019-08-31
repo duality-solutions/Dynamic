@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -9,7 +9,8 @@ CGovernanceObjectVoteFile::CGovernanceObjectVoteFile()
     : nMemoryVotes(0),
       listVotes(),
       mapVoteIndex()
-{}
+{
+}
 
 CGovernanceObjectVoteFile::CGovernanceObjectVoteFile(const CGovernanceObjectVoteFile& other)
     : nMemoryVotes(other.nMemoryVotes),
@@ -21,34 +22,34 @@ CGovernanceObjectVoteFile::CGovernanceObjectVoteFile(const CGovernanceObjectVote
 
 void CGovernanceObjectVoteFile::AddVote(const CGovernanceVote& vote)
 {
+    uint256 nHash = vote.GetHash();
+    // make sure to never add/update already known votes
+    if (HasVote(nHash))
+        return;
     listVotes.push_front(vote);
-    mapVoteIndex[vote.GetHash()] = listVotes.begin();
+    mapVoteIndex.emplace(nHash, listVotes.begin());
     ++nMemoryVotes;
 }
 
 bool CGovernanceObjectVoteFile::HasVote(const uint256& nHash) const
 {
-    vote_m_cit it = mapVoteIndex.find(nHash);
-    if(it == mapVoteIndex.end()) {
-        return false;
-    }
-    return true;
+    return mapVoteIndex.find(nHash) != mapVoteIndex.end();
 }
 
-bool CGovernanceObjectVoteFile::GetVote(const uint256& nHash, CGovernanceVote& vote) const
+bool CGovernanceObjectVoteFile::SerializeVoteToStream(const uint256& nHash, CDataStream& ss) const
 {
     vote_m_cit it = mapVoteIndex.find(nHash);
-    if(it == mapVoteIndex.end()) {
+    if (it == mapVoteIndex.end()) {
         return false;
     }
-    vote = *(it->second);
+    ss << *(it->second);
     return true;
 }
 
 std::vector<CGovernanceVote> CGovernanceObjectVoteFile::GetVotes() const
 {
     std::vector<CGovernanceVote> vecResult;
-    for(vote_l_cit it = listVotes.begin(); it != listVotes.end(); ++it) {
+    for (vote_l_cit it = listVotes.begin(); it != listVotes.end(); ++it) {
         vecResult.push_back(*it);
     }
     return vecResult;
@@ -57,24 +58,15 @@ std::vector<CGovernanceVote> CGovernanceObjectVoteFile::GetVotes() const
 void CGovernanceObjectVoteFile::RemoveVotesFromDynode(const COutPoint& outpointDynode)
 {
     vote_l_it it = listVotes.begin();
-    while(it != listVotes.end()) {
-        if(it->GetDynodeOutpoint() == outpointDynode) {
+    while (it != listVotes.end()) {
+        if (it->GetDynodeOutpoint() == outpointDynode) {
             --nMemoryVotes;
             mapVoteIndex.erase(it->GetHash());
             listVotes.erase(it++);
-        }
-        else {
+        } else {
             ++it;
         }
     }
-}
-
-CGovernanceObjectVoteFile& CGovernanceObjectVoteFile::operator=(const CGovernanceObjectVoteFile& other)
-{
-    nMemoryVotes = other.nMemoryVotes;
-    listVotes = other.listVotes;
-    RebuildIndex();
-    return *this;
 }
 
 void CGovernanceObjectVoteFile::RebuildIndex()
@@ -82,15 +74,14 @@ void CGovernanceObjectVoteFile::RebuildIndex()
     mapVoteIndex.clear();
     nMemoryVotes = 0;
     vote_l_it it = listVotes.begin();
-    while(it != listVotes.end()) {
+    while (it != listVotes.end()) {
         CGovernanceVote& vote = *it;
         uint256 nHash = vote.GetHash();
-        if(mapVoteIndex.find(nHash) == mapVoteIndex.end()) {
+        if (mapVoteIndex.find(nHash) == mapVoteIndex.end()) {
             mapVoteIndex[nHash] = it;
             ++nMemoryVotes;
             ++it;
-        }
-        else {
+        } else {
             listVotes.erase(it++);
         }
     }

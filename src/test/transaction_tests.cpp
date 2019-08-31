@@ -6,6 +6,7 @@
 #include "data/tx_valid.json.h"
 #include "test/test_dynamic.h"
 
+#include "bdap/stealth.h"
 #include "clientversion.h"
 #include "consensus/validation.h"
 #include "core_io.h"
@@ -132,8 +133,7 @@ BOOST_AUTO_TEST_CASE(tx_valid)
 
             std::string transaction = test[1].get_str();
             CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
-            CTransaction tx;
-            stream >> tx;
+            CTransaction tx(deserialize, stream);
 
             CValidationState state;
             BOOST_CHECK_MESSAGE(CheckTransaction(tx, state), strTest);
@@ -207,8 +207,7 @@ BOOST_AUTO_TEST_CASE(tx_invalid)
 
             std::string transaction = test[1].get_str();
             CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
-            CTransaction tx;
-            stream >> tx;
+            CTransaction tx(deserialize, stream);
 
             CValidationState state;
             fValid = CheckTransaction(tx, state) && state.IsValid();

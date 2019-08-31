@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_MINER
 #define FLUID_MINER
@@ -13,27 +13,31 @@
 class CScript;
 class CTransaction;
 
-class CFluidMining {
+class CFluidMining
+{
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
     CAmount MiningReward;
     int64_t nTimeStamp;
-    std::vector<std::vector<unsigned char>> SovereignAddresses;
+    std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidMining() { 
+    CFluidMining()
+    {
         SetNull();
     }
 
-    CFluidMining(const CTransaction& tx) {
+    CFluidMining(const CTransaction& tx)
+    {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidMining(const CScript& fluidScript) {
+    CFluidMining(const CScript& fluidScript)
+    {
         SetNull();
         UnserializeFromScript(fluidScript);
     }
@@ -52,7 +56,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
         READWRITE(MiningReward);
@@ -62,27 +67,40 @@ public:
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidMining& a, const CFluidMining& b) {
+    inline friend bool operator==(const CFluidMining& a, const CFluidMining& b)
+    {
         return (a.FluidScript == b.FluidScript && a.MiningReward == b.MiningReward && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidMining& a, const CFluidMining& b) {
+    inline friend bool operator!=(const CFluidMining& a, const CFluidMining& b)
+    {
         return !(a == b);
     }
 
-    inline CFluidMining operator=(const CFluidMining& b) {
+    friend bool operator<(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidMining& a, const CFluidMining& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
+    inline CFluidMining operator=(const CFluidMining& b)
+    {
         FluidScript = b.FluidScript;
         MiningReward = b.MiningReward;
         nTimeStamp = b.nTimeStamp;
-        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses)
-        {
+        SovereignAddresses.clear(); //clear out previous entries
+        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }
         txHash = b.txHash;
         nHeight = b.nHeight;
         return *this;
     }
- 
+
     inline bool IsNull() const { return (nTimeStamp == 0); }
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
@@ -91,7 +109,8 @@ public:
 
 static CCriticalSection cs_fluid_mining;
 
-class CFluidMiningDB : public CDBWrapper {
+class CFluidMiningDB : public CDBWrapper
+{
 public:
     CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidMiningEntry(const CFluidMining& entry, const int op);
@@ -106,6 +125,6 @@ bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
 bool CheckFluidMiningDB();
 CAmount GetFluidMiningReward();
 
-extern CFluidMiningDB *pFluidMiningDB;
+extern CFluidMiningDB* pFluidMiningDB;
 
 #endif // FLUID_MINER

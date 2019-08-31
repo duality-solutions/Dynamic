@@ -1,0 +1,120 @@
+#
+# Argon2 GPU miner
+#
+
+LIBDYNAMIC_GPU = crypto/argon2gpu/libdynamic_gpu.a
+LIBDYNAMIC_GPU_LDADD_EXTRA = $(LIBDYNAMIC_GPU)
+LIBDYNAMIC_GPU_LDFLAGS_EXTRA =
+EXTRA_LIBRARIES += $(LIBDYNAMIC_GPU)
+
+crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
+crypto_argon2gpu_libdynamic_gpu_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_argon2gpu_libdynamic_gpu_a_SOURCES = \
+	crypto/argon2gpu/blake2b.h \
+	crypto/argon2gpu/common.h \
+	crypto/argon2gpu/common.cpp \
+	crypto/argon2gpu/blake2b.cpp
+
+if ENABLE_CUDA
+LIBDYNAMIC_GPU_CUDA = crypto/argon2gpu/cuda/libdynamic_gpu_cuda.a
+EXTRA_LIBRARIES += $(LIBDYNAMIC_GPU_CUDA)
+
+LIBDYNAMIC_GPU_LDADD_EXTRA += $(LIBDYNAMIC_GPU_CUDA)
+LIBDYNAMIC_GPU_LDADD_EXTRA += $(CUDA_LDLIBS)
+DYNAMIC_INCLUDES += $(CUDA_CFLAGS)
+
+NVCCFLAGS += -arch=sm_30 -w -lineinfo -Xcompiler='--std=c++11 $(CFLAGS)'
+
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_AR = $(NVCC) $(NVCCFLAGS) -lib -o
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_LIBADD = $(CUDA_LDLIBS)
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_LIBADD += \
+	crypto/argon2gpu/cuda/blake2b-kernels.cu.o \
+	crypto/argon2gpu/cuda/kernels.cu.o
+crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_SOURCES = \
+	crypto/argon2gpu/cuda/cuda-exception.h \
+	crypto/argon2gpu/cuda/device.h \
+	crypto/argon2gpu/cuda/global-context.h \
+	crypto/argon2gpu/cuda/blake2b-kernels.h \
+	crypto/argon2gpu/cuda/kernels.h \
+	crypto/argon2gpu/cuda/processing-unit.h \
+	crypto/argon2gpu/cuda/program-context.h \
+	crypto/argon2gpu/cuda/device.cpp \
+	crypto/argon2gpu/cuda/global-context.cpp \
+	crypto/argon2gpu/cuda/blake2b-kernels.cu \
+	crypto/argon2gpu/cuda/kernels.cu \
+	crypto/argon2gpu/cuda/processing-unit.cpp \
+	crypto/argon2gpu/cuda/program-context.cpp
+
+nvcc_FLAGS = -I. $(CUDA_CFLAGS) $(NVCCFLAGS)
+
+.cu.o:
+	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
+
+
+crypto/argon2gpu/cuda/blake2b-kernels.cu.o: crypto/argon2gpu/cuda/blake2b-kernels.cu
+	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
+
+crypto/argon2gpu/cuda/blake2b-kernels.o: crypto/argon2gpu/cuda/blake2b-kernels.cu.o
+	$(NVCC) $(nvcc_FLAGS) -dlink -o $@ $<
+	
+crypto/argon2gpu/cuda/kernels.cu.o: crypto/argon2gpu/cuda/kernels.cu
+	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
+
+crypto/argon2gpu/cuda/kernels.o: crypto/argon2gpu/cuda/kernels.cu.o
+	$(NVCC) $(nvcc_FLAGS) -dlink -o $@ $<
+
+
+else
+LIBDYNAMIC_GPU_OPENCL = crypto/argon2gpu/opencl/libdynamic_gpu_opencl.a
+EXTRA_LIBRARIES += $(LIBDYNAMIC_GPU_OPENCL)
+
+LIBDYNAMIC_GPU_LDADD_EXTRA += $(LIBDYNAMIC_GPU_OPENCL)
+
+if TARGET_DARWIN
+LIBDYNAMIC_GPU_LDFLAGS_EXTRA += -stdlib=libc++ -framework OpenCL -L/System/Library/Frameworks/OpenCL.framework/Libraries -Wl,-x -m64
+else
+LIBDYNAMIC_GPU_LDADD_EXTRA += -lOpenCL
+endif
+
+OPENCL_KERNEL_FILES = crypto/argon2gpu/opencl/kernel.cl
+
+GENERATED_KERNEL_FILES = $(OPENCL_KERNEL_FILES:.cl=.cl.h)
+
+crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
+crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = \
+	$(OPENCL_KERNEL_FILES) \
+	crypto/argon2gpu/opencl/cl.hpp \
+	crypto/argon2gpu/opencl/device.h \
+	crypto/argon2gpu/opencl/global-context.h \
+	crypto/argon2gpu/opencl/kernel-loader.h \
+	crypto/argon2gpu/opencl/kernel-runner.h \
+	crypto/argon2gpu/opencl/opencl.h \
+	crypto/argon2gpu/opencl/processing-unit.h \
+	crypto/argon2gpu/opencl/program-context.h \
+	crypto/argon2gpu/opencl/device.cpp \
+	crypto/argon2gpu/opencl/global-context.cpp \
+	crypto/argon2gpu/opencl/kernel-loader.cpp \
+	crypto/argon2gpu/opencl/kernel-runner.cpp \
+	crypto/argon2gpu/opencl/processing-unit.cpp \
+	crypto/argon2gpu/opencl/program-context.cpp
+
+nodist_crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = $(GENERATED_KERNEL_FILES)
+
+BUILT_SOURCES = $(GENERATED_KERNEL_FILES)
+CLEANFILES += $(GENERATED_KERNEL_FILES)
+
+%.cl.h: %.cl
+	@$(MKDIR_P) $(@D)
+	@echo "namespace argon2gpu { namespace opencl { namespace code {" > $@
+	@echo "static unsigned const char $(*F)[] = {" >> $@
+	@$(HEXDUMP) -v -e '16/1 "_x%02X" "\n"' $< | $(SED) -e 's/_/\\/g; s/\\x  //g; s/.*/    "&"/' >> $@
+	@echo "};" >> $@
+	@echo "}}}" >> $@
+	@echo "Generated $@"
+endif
+
+dynamicd_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)
+dynamicd_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS_EXTRA)

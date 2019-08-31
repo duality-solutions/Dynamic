@@ -1,10 +1,10 @@
-// Copyright (c) 2014 The Bitcoin Core developers
+// Copyright (c) 2014-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "crypto/sha1.h"
+#include <crypto/sha1.h>
 
-#include "crypto/common.h"
+#include <crypto/common.h>
 
 #include <string.h>
 
@@ -24,9 +24,7 @@ void inline Round(uint32_t a, uint32_t& b, uint32_t c, uint32_t d, uint32_t& e, 
 uint32_t inline f1(uint32_t b, uint32_t c, uint32_t d) { return d ^ (b & (c ^ d)); }
 uint32_t inline f2(uint32_t b, uint32_t c, uint32_t d) { return b ^ c ^ d; }
 uint32_t inline f3(uint32_t b, uint32_t c, uint32_t d) { return (b & c) | (d & (b | c)); }
-
 uint32_t inline left(uint32_t x) { return (x << 1) | (x >> 31); }
-
 /** Initialize SHA-1 state. */
 void inline Initialize(uint32_t* s)
 {

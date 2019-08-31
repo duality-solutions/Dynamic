@@ -1,11 +1,14 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "governance-validators.h"
 #include "univalue.h"
 #include "utilstrencodings.h"
+
+#include "data/proposals_valid.json.h"
+#include "data/proposals_invalid.json.h"
 
 #include "test/test_dynamic.h"
 
@@ -15,27 +18,11 @@
 #include <fstream>
 #include <string>
 
+#include <univalue.h>
+
+extern UniValue read_json(const std::string& jsondata);
+
 BOOST_FIXTURE_TEST_SUITE(governance_validators_tests, BasicTestingSetup)
-
-UniValue LoadJSON(const std::string& strFilename)
-{
-    UniValue obj(UniValue::VOBJ);
-    std::ifstream istr(strFilename.c_str());
-
-    std::string strData;
-    std::string strLine;
-    bool fFirstLine = true;
-    while(std::getline(istr, strLine)) {
-        if(!fFirstLine) {
-            strData += "\n";
-        }
-        strData += strLine;
-        fFirstLine = false;
-    }
-    obj.read(strData);
-
-    return obj;
-}
 
 std::string CreateEncodedProposalObject(const UniValue& objJSON)
 {
@@ -53,33 +40,46 @@ std::string CreateEncodedProposalObject(const UniValue& objJSON)
 
 BOOST_AUTO_TEST_CASE(valid_proposals_test)
 {
-    CProposalValidator validator;
-    UniValue obj = LoadJSON("src/test/data/proposals-valid.json");
-    for(size_t i = 0; i < obj.size(); ++i) {
-        const UniValue& objProposal = obj[i];
-        std::string strHexData = CreateEncodedProposalObject(objProposal);
-        validator.SetHexData(strHexData);
-        BOOST_CHECK(validator.ValidateJSON());
-        BOOST_CHECK(validator.ValidateName());
-        BOOST_CHECK(validator.ValidateURL());
-        BOOST_CHECK(validator.ValidateStartEndEpoch());
-        BOOST_CHECK(validator.ValidatePaymentAmount());
-        BOOST_CHECK(validator.ValidatePaymentAddress());
-        BOOST_CHECK(validator.Validate());
-        validator.Clear();
+    // all proposals are valid but expired
+    UniValue tests = read_json(std::string(json_tests::proposals_valid, json_tests::proposals_valid + sizeof(json_tests::proposals_valid)));
+
+    BOOST_CHECK_MESSAGE(tests.size(), "Empty `tests`");
+    for(size_t i = 0; i < tests.size(); ++i) {
+        const UniValue& objProposal = tests[i];
+
+        // legacy format
+        std::string strHexData1 = CreateEncodedProposalObject(objProposal);
+        CProposalValidator validator1(strHexData1);
+        BOOST_CHECK_MESSAGE(validator1.Validate(false), validator1.GetErrorMessages());
+        BOOST_CHECK_MESSAGE(!validator1.Validate(), validator1.GetErrorMessages());
+
+        // new format
+        std::string strHexData2 = HexStr(objProposal.write());
+        CProposalValidator validator2(strHexData2);
+        BOOST_CHECK_MESSAGE(validator2.Validate(false), validator2.GetErrorMessages());
+        BOOST_CHECK_MESSAGE(!validator2.Validate(), validator2.GetErrorMessages());
     }
 }
 
 BOOST_AUTO_TEST_CASE(invalid_proposals_test)
 {
-    CProposalValidator validator;
-    UniValue obj = LoadJSON("src/test/data/proposals-invalid.json");
-    for(size_t i = 0; i < obj.size(); ++i) {
-        const UniValue& objProposal = obj[i];
-        std::string strHexData = CreateEncodedProposalObject(objProposal);
-        validator.SetHexData(strHexData);
-        BOOST_CHECK(!validator.Validate());
-        validator.Clear();
+    // all proposals are invalid regardless of being expired or not
+    // (i.e. we don't even check for expiration here)
+    UniValue tests = read_json(std::string(json_tests::proposals_invalid, json_tests::proposals_invalid + sizeof(json_tests::proposals_invalid)));
+
+    BOOST_CHECK_MESSAGE(tests.size(), "Empty `tests`");
+    for(size_t i = 0; i < tests.size(); ++i) {
+        const UniValue& objProposal = tests[i];
+
+        // legacy format
+        std::string strHexData1 = CreateEncodedProposalObject(objProposal);
+        CProposalValidator validator1(strHexData1);
+        BOOST_CHECK_MESSAGE(!validator1.Validate(false), validator1.GetErrorMessages());
+
+        // new format
+        std::string strHexData2 = HexStr(objProposal.write());
+        CProposalValidator validator2(strHexData2);
+        BOOST_CHECK_MESSAGE(!validator2.Validate(false), validator2.GetErrorMessages());
     }
 }
 

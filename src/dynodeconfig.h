@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -15,20 +15,19 @@ extern CDynodeConfig dynodeConfig;
 
 class CDynodeConfig
 {
-
 public:
-
-    class CDynodeEntry {
-
+    class CDynodeEntry
+    {
     private:
         std::string alias;
         std::string ip;
         std::string privKey;
         std::string txHash;
         std::string outputIndex;
-    public:
 
-        CDynodeEntry(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex) {
+    public:
+        CDynodeEntry(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex)
+        {
             this->alias = alias;
             this->ip = ip;
             this->privKey = privKey;
@@ -36,67 +35,78 @@ public:
             this->outputIndex = outputIndex;
         }
 
-        const std::string& getAlias() const {
+        const std::string& getAlias() const
+        {
             return alias;
         }
 
-        void setAlias(const std::string& alias) {
+        void setAlias(const std::string& alias)
+        {
             this->alias = alias;
         }
 
-        const std::string& getOutputIndex() const {
+        const std::string& getOutputIndex() const
+        {
             return outputIndex;
         }
 
-        void setOutputIndex(const std::string& outputIndex) {
+        void setOutputIndex(const std::string& outputIndex)
+        {
             this->outputIndex = outputIndex;
         }
 
-        const std::string& getPrivKey() const {
+        const std::string& getPrivKey() const
+        {
             return privKey;
         }
 
-        void setPrivKey(const std::string& privKey) {
+        void setPrivKey(const std::string& privKey)
+        {
             this->privKey = privKey;
         }
 
-        const std::string& getTxHash() const {
+        const std::string& getTxHash() const
+        {
             return txHash;
         }
 
-        void setTxHash(const std::string& txHash) {
+        void setTxHash(const std::string& txHash)
+        {
             this->txHash = txHash;
         }
 
-        const std::string& getIp() const {
+        const std::string& getIp() const
+        {
             return ip;
         }
 
-        void setIp(const std::string& ip) {
+        void setIp(const std::string& ip)
+        {
             this->ip = ip;
         }
     };
 
-    CDynodeConfig() {
+    CDynodeConfig()
+    {
         entries = std::vector<CDynodeEntry>();
     }
 
     void clear();
     bool read(std::string& strErr);
-    void add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex);
+    void add(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex);
 
-    std::vector<CDynodeEntry>& getEntries() {
+    std::vector<CDynodeEntry>& getEntries()
+    {
         return entries;
     }
 
-    int getCount() {
+    int getCount()
+    {
         return (int)entries.size();
     }
 
 private:
     std::vector<CDynodeEntry> entries;
-
-
 };
 
 

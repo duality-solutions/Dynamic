@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +9,9 @@
 #define DYNAMIC_INDIRECTMAP_H
 
 template <class T>
-struct DereferencingComparator { bool operator()(const T a, const T b) const { return *a < *b; } };
+struct DereferencingComparator {
+    bool operator()(const T a, const T b) const { return *a < *b; }
+};
 
 /* Map whose keys are pointers, but are compared by their dereferenced values.
  *
@@ -22,10 +24,12 @@ struct DereferencingComparator { bool operator()(const T a, const T b) const { r
  * result of DereferencingComparator.
  */
 template <class K, class T>
-class indirectmap {
+class indirectmap
+{
 private:
     typedef std::map<const K*, T, DereferencingComparator<const K*> > base;
     base m;
+
 public:
     typedef typename base::iterator iterator;
     typedef typename base::const_iterator const_iterator;
@@ -36,24 +40,24 @@ public:
     std::pair<iterator, bool> insert(const value_type& value) { return m.insert(value); }
 
     // pass address (value interface)
-    iterator find(const K& key)                     { return m.find(&key); }
-    const_iterator find(const K& key) const         { return m.find(&key); }
-    iterator lower_bound(const K& key)              { return m.lower_bound(&key); }
-    const_iterator lower_bound(const K& key) const  { return m.lower_bound(&key); }
-    size_type erase(const K& key)                   { return m.erase(&key); }
-    size_type count(const K& key) const             { return m.count(&key); }
+    iterator find(const K& key) { return m.find(&key); }
+    const_iterator find(const K& key) const { return m.find(&key); }
+    iterator lower_bound(const K& key) { return m.lower_bound(&key); }
+    const_iterator lower_bound(const K& key) const { return m.lower_bound(&key); }
+    size_type erase(const K& key) { return m.erase(&key); }
+    size_type count(const K& key) const { return m.count(&key); }
 
     // passthrough
-    bool empty() const              { return m.empty(); }
-    size_type size() const          { return m.size(); }
-    size_type max_size() const      { return m.max_size(); }
-    void clear()                    { m.clear(); }
-    iterator begin()                { return m.begin(); }
-    iterator end()                  { return m.end(); }
-    const_iterator begin() const    { return m.begin(); }
-    const_iterator end() const      { return m.end(); }
-    const_iterator cbegin() const   { return m.cbegin(); }
-    const_iterator cend() const     { return m.cend(); }
+    bool empty() const { return m.empty(); }
+    size_type size() const { return m.size(); }
+    size_type max_size() const { return m.max_size(); }
+    void clear() { m.clear(); }
+    iterator begin() { return m.begin(); }
+    iterator end() { return m.end(); }
+    const_iterator begin() const { return m.begin(); }
+    const_iterator end() const { return m.end(); }
+    const_iterator cbegin() const { return m.cbegin(); }
+    const_iterator cend() const { return m.cend(); }
 };
 
 #endif // DYNAMIC_INDIRECTMAP_H

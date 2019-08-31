@@ -3,7 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "zmqabstractnotifier.h"
-
 #include "util.h"
 
 
@@ -23,6 +22,21 @@ bool CZMQAbstractNotifier::NotifyTransaction(const CTransaction &/*transaction*/
 }
 
 bool CZMQAbstractNotifier::NotifyTransactionLock(const CTransaction &/*transaction*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyGovernanceVote(const CGovernanceVote& /*vote*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyGovernanceObject(const CGovernanceObject& /*object*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyInstantSendDoubleSpendAttempt(const CTransaction &currentTx, const CTransaction &previousTx)
 {
     return true;
 }

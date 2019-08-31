@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 The Bitcoin Developers
+// Copyright (c) 2016-2019 The Bitcoin Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,12 +15,12 @@ enum RBFTransactionState {
 
 // Check whether the sequence numbers on this transaction are signaling
 // opt-in to replace-by-fee, according to BIP 125
-bool SignalsOptInRBF(const CTransaction &tx);
+bool SignalsOptInRBF(const CTransaction& tx);
 
 // Determine whether an in-mempool transaction is signaling opt-in to RBF
 // according to BIP 125
 // This involves checking sequence numbers of the transaction, as well
 // as the sequence numbers of all in-mempool ancestors.
-RBFTransactionState IsRBFOptIn(const CTransaction &tx, CTxMemPool &pool);
+RBFTransactionState IsRBFOptIn(const CTransaction& tx, CTxMemPool& pool);
 
 #endif // DYNAMIC_POLICY_RBF_H

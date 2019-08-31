@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,6 +16,7 @@
 #ifndef DYNAMIC_BASE58_H
 #define DYNAMIC_BASE58_H
 
+#include "bdap/stealth.h"
 #include "chainparams.h"
 #include "key.h"
 #include "pubkey.h"
@@ -26,6 +27,14 @@
 #include <string>
 #include <vector>
 
+/**
+ * Encode a tx destination as a base58-encoded string.
+ */
+std::string EncodeDestination(const CTxDestination& dest);
+/**
+ * Decode a tx destination as a base58-encoded string.
+ */
+CTxDestination DecodeDestination(const std::string& str);
 /**
  * Encode a byte sequence as a base58-encoded string.
  * pbegin and pend cannot be NULL, unless both are.
@@ -81,8 +90,8 @@ protected:
     vector_uchar vchData;
 
     CBase58Data();
-    void SetData(const std::vector<unsigned char> &vchVersionIn, const void* pdata, size_t nSize);
-    void SetData(const std::vector<unsigned char> &vchVersionIn, const unsigned char *pbegin, const unsigned char *pend);
+    void SetData(const std::vector<unsigned char>& vchVersionIn, const void* pdata, size_t nSize);
+    void SetData(const std::vector<unsigned char>& vchVersionIn, const unsigned char* pbegin, const unsigned char* pend);
 
 public:
     bool SetString(const char* psz, unsigned int nVersionBytes = 1);
@@ -93,8 +102,8 @@ public:
     bool operator==(const CBase58Data& b58) const { return CompareTo(b58) == 0; }
     bool operator<=(const CBase58Data& b58) const { return CompareTo(b58) <= 0; }
     bool operator>=(const CBase58Data& b58) const { return CompareTo(b58) >= 0; }
-    bool operator< (const CBase58Data& b58) const { return CompareTo(b58) <  0; }
-    bool operator> (const CBase58Data& b58) const { return CompareTo(b58) >  0; }
+    bool operator<(const CBase58Data& b58) const { return CompareTo(b58) < 0; }
+    bool operator>(const CBase58Data& b58) const { return CompareTo(b58) > 0; }
 };
 
 /** base58-encoded Dynamic addresses.
@@ -103,21 +112,25 @@ public:
  * Script-hash-addresses have version 16 (or 19 testnet).
  * The data vector contains RIPEMD160(SHA256(cscript)), where cscript is the serialized redemption script.
  */
-class CDynamicAddress : public CBase58Data {
+class CDynamicAddress : public CBase58Data
+{
 public:
-    bool Set(const CKeyID &id);
-    bool Set(const CScriptID &id);
-    bool Set(const CTxDestination &dest);
+    bool Set(const CKeyID& id);
+    bool Set(const CScriptID& id);
+    bool Set(const CTxDestination& dest);
+    bool Set(const CStealthAddress& sxAddr);
     bool IsValid() const;
-    bool IsValid(const CChainParams &params) const;
+    bool IsValid(const CChainParams& params) const;
+    bool IsValidStealthAddress() const;
+    bool IsValidStealthAddress(const CChainParams& params) const;
 
     CDynamicAddress() {}
-    CDynamicAddress(const CTxDestination &dest) { Set(dest); }
+    CDynamicAddress(const CTxDestination& dest) { Set(dest); }
     CDynamicAddress(const std::string& strAddress) { SetString(strAddress); }
     CDynamicAddress(const char* pszAddress) { SetString(pszAddress); }
 
     CTxDestination Get() const;
-    bool GetKeyID(CKeyID &keyID) const;
+    bool GetKeyID(CKeyID& keyID) const;
     bool GetIndexKey(uint160& hashBytes, int& type) const;
     bool IsScript() const;
 };
@@ -138,16 +151,19 @@ public:
     CDynamicSecret() {}
 };
 
-template<typename K, int Size, CChainParams::Base58Type Type> class CDynamicExtKeyBase : public CBase58Data
+template <typename K, int Size, CChainParams::Base58Type Type>
+class CDynamicExtKeyBase : public CBase58Data
 {
 public:
-    void SetKey(const K &key) {
+    void SetKey(const K& key)
+    {
         unsigned char vch[Size];
         key.Encode(vch);
-        SetData(Params().Base58Prefix(Type), vch, vch+Size);
+        SetData(Params().Base58Prefix(Type), vch, vch + Size);
     }
 
-    K GetKey() {
+    K GetKey()
+    {
         K ret;
         if (vchData.size() == Size) {
             //if base58 encouded data not holds a ext key, return a !IsValid() key
@@ -156,11 +172,13 @@ public:
         return ret;
     }
 
-    CDynamicExtKeyBase(const K &key) {
+    CDynamicExtKeyBase(const K& key)
+    {
         SetKey(key);
     }
 
-    CDynamicExtKeyBase(const std::string& strBase58c) {
+    CDynamicExtKeyBase(const std::string& strBase58c)
+    {
         SetString(strBase58c.c_str(), Params().Base58Prefix(Type).size());
     }
 

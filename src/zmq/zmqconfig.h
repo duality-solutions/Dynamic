@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The Bitcoin Core developers
+// Copyright (c) 2014 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,15 +9,20 @@
 #include "config/dynamic-config.h"
 #endif
 
-#include "primitives/block.h"
-#include "primitives/transaction.h"
+#include <stdarg.h>
+#include <string>
 
 #if ENABLE_ZMQ
 #include <zmq.h>
 #endif
 
-#include <stdarg.h>
-#include <string>
+#include "primitives/block.h"
+#include "primitives/transaction.h"
+
+#include "governance-object.h"
+#include "governance-vote.h"
+
+#include "instantsend.h"
 
 void zmqError(const char *str);
 

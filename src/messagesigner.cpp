@@ -1,22 +1,23 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "messagesigner.h"
 #include "base58.h"
 #include "hash.h"
-#include "validation.h" // For strMessageMagic
-#include "messagesigner.h"
 #include "tinyformat.h"
 #include "utilstrencodings.h"
+#include "validation.h" // For strMessageMagic
 
-bool CMessageSigner::GetKeysFromSecret(const std::string strSecret, CKey& keyRet, CPubKey& pubkeyRet)
+bool CMessageSigner::GetKeysFromSecret(const std::string& strSecret, CKey& keyRet, CPubKey& pubkeyRet)
 {
     CDynamicSecret vchSecret;
 
-    if(!vchSecret.SetString(strSecret)) return false;
+    if (!vchSecret.SetString(strSecret))
+        return false;
 
     keyRet = vchSecret.GetKey();
     pubkeyRet = keyRet.GetPubKey();
@@ -24,7 +25,7 @@ bool CMessageSigner::GetKeysFromSecret(const std::string strSecret, CKey& keyRet
     return true;
 }
 
-bool CMessageSigner::SignMessage(const std::string strMessage, std::vector<unsigned char>& vchSigRet, const CKey key)
+bool CMessageSigner::SignMessage(const std::string& strMessage, std::vector<unsigned char>& vchSigRet, const CKey& key)
 {
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
@@ -33,32 +34,42 @@ bool CMessageSigner::SignMessage(const std::string strMessage, std::vector<unsig
     return CHashSigner::SignHash(ss.GetHash(), key, vchSigRet);
 }
 
-bool CMessageSigner::VerifyMessage(const CPubKey pubkey, const std::vector<unsigned char>& vchSig, const std::string strMessage, std::string& strErrorRet)
+bool CMessageSigner::VerifyMessage(const CPubKey& pubkey, const std::vector<unsigned char>& vchSig, const std::string& strMessage, std::string& strErrorRet)
+{
+    return VerifyMessage(pubkey.GetID(), vchSig, strMessage, strErrorRet);
+}
+
+bool CMessageSigner::VerifyMessage(const CKeyID& keyID, const std::vector<unsigned char>& vchSig, const std::string& strMessage, std::string& strErrorRet)
 {
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << strMessage;
 
-    return CHashSigner::VerifyHash(ss.GetHash(), pubkey, vchSig, strErrorRet);
+    return CHashSigner::VerifyHash(ss.GetHash(), keyID, vchSig, strErrorRet);
 }
 
-bool CHashSigner::SignHash(const uint256& hash, const CKey key, std::vector<unsigned char>& vchSigRet)
+bool CHashSigner::SignHash(const uint256& hash, const CKey& key, std::vector<unsigned char>& vchSigRet)
 {
     return key.SignCompact(hash, vchSigRet);
 }
 
-bool CHashSigner::VerifyHash(const uint256& hash, const CPubKey pubkey, const std::vector<unsigned char>& vchSig, std::string& strErrorRet)
+bool CHashSigner::VerifyHash(const uint256& hash, const CPubKey& pubkey, const std::vector<unsigned char>& vchSig, std::string& strErrorRet)
+{
+    return VerifyHash(hash, pubkey.GetID(), vchSig, strErrorRet);
+}
+
+bool CHashSigner::VerifyHash(const uint256& hash, const CKeyID& keyID, const std::vector<unsigned char>& vchSig, std::string& strErrorRet)
 {
     CPubKey pubkeyFromSig;
-    if(!pubkeyFromSig.RecoverCompact(hash, vchSig)) {
+    if (!pubkeyFromSig.RecoverCompact(hash, vchSig)) {
         strErrorRet = "Error recovering public key.";
         return false;
     }
 
-    if(pubkeyFromSig.GetID() != pubkey.GetID()) {
+    if (pubkeyFromSig.GetID() != keyID) {
         strErrorRet = strprintf("Keys don't match: pubkey=%s, pubkeyFromSig=%s, hash=%s, vchSig=%s",
-                    pubkey.GetID().ToString(), pubkeyFromSig.GetID().ToString(), hash.ToString(),
-                    EncodeBase64(&vchSig[0], vchSig.size()));
+            keyID.ToString(), pubkeyFromSig.GetID().ToString(), hash.ToString(),
+            EncodeBase64(&vchSig[0], vchSig.size()));
         return false;
     }
 

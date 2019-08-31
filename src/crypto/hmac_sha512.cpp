@@ -1,8 +1,8 @@
-// Copyright (c) 2014 The Bitcoin Core developers
+// Copyright (c) 2014-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "crypto/hmac_sha512.h"
+#include <crypto/hmac_sha512.h>
 
 #include <string.h>
 
@@ -13,7 +13,9 @@ CHMAC_SHA512::CHMAC_SHA512(const unsigned char* key, size_t keylen)
         memcpy(rkey, key, keylen);
         memset(rkey + keylen, 0, 128 - keylen);
     } else {
-        CSHA512().Write(key, keylen).Finalize(rkey);
+        CSHA512()
+            .Write(key, keylen)
+            .Finalize(rkey);
         memset(rkey + 64, 0, 64);
     }
 

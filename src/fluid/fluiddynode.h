@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_DYNODE_H
 #define FLUID_DYNODE_H
@@ -13,27 +13,31 @@
 class CScript;
 class CTransaction;
 
-class CFluidDynode {
+class CFluidDynode
+{
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
     CAmount DynodeReward;
     int64_t nTimeStamp;
-    std::vector<std::vector<unsigned char>> SovereignAddresses;
+    std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidDynode() { 
+    CFluidDynode()
+    {
         SetNull();
     }
 
-    CFluidDynode(const CTransaction& tx) {
+    CFluidDynode(const CTransaction& tx)
+    {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidDynode(const CScript& fluidScript) {
+    CFluidDynode(const CScript& fluidScript)
+    {
         SetNull();
         UnserializeFromScript(fluidScript);
     }
@@ -52,7 +56,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
         READWRITE(DynodeReward);
@@ -62,27 +67,40 @@ public:
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidDynode& a, const CFluidDynode& b) {
+    inline friend bool operator==(const CFluidDynode& a, const CFluidDynode& b)
+    {
         return (a.FluidScript == b.FluidScript && a.DynodeReward == b.DynodeReward && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidDynode& a, const CFluidDynode& b) {
+    inline friend bool operator!=(const CFluidDynode& a, const CFluidDynode& b)
+    {
         return !(a == b);
     }
 
-    inline CFluidDynode operator=(const CFluidDynode& b) {
+    friend bool operator<(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidDynode& a, const CFluidDynode& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
+    inline CFluidDynode operator=(const CFluidDynode& b)
+    {
         FluidScript = b.FluidScript;
         DynodeReward = b.DynodeReward;
         nTimeStamp = b.nTimeStamp;
-        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses)
-        {
+        SovereignAddresses.clear(); //clear out previous entries
+        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }
         txHash = b.txHash;
         nHeight = b.nHeight;
         return *this;
     }
- 
+
     inline bool IsNull() const { return (nTimeStamp == 0); }
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
@@ -91,7 +109,8 @@ public:
 
 static CCriticalSection cs_fluid_dynode;
 
-class CFluidDynodeDB : public CDBWrapper {
+class CFluidDynodeDB : public CDBWrapper
+{
 public:
     CFluidDynodeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidDynodeEntry(const CFluidDynode& entry, const int op);
@@ -105,6 +124,6 @@ bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);
 bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut);
 bool CheckFluidDynodeDB();
 
-extern CFluidDynodeDB *pFluidDynodeDB;
+extern CFluidDynodeDB* pFluidDynodeDB;
 
 #endif // FLUID_DYNODE_H

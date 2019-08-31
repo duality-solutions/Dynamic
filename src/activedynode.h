@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,16 +14,16 @@
 #include "primitives/transaction.h"
 
 #ifdef ENABLE_WALLET
-#include "wallet/wallet.h"     
+#include "wallet/wallet.h"
 #endif //ENABLE_WALLET
 
 class CActiveDynode;
 
-static const int ACTIVE_DYNODE_INITIAL          = 0; // initial state
-static const int ACTIVE_DYNODE_SYNC_IN_PROCESS  = 1;
-static const int ACTIVE_DYNODE_INPUT_TOO_NEW    = 2;
-static const int ACTIVE_DYNODE_NOT_CAPABLE      = 3;
-static const int ACTIVE_DYNODE_STARTED          = 4;
+static const int ACTIVE_DYNODE_INITIAL = 0; // initial state
+static const int ACTIVE_DYNODE_SYNC_IN_PROCESS = 1;
+static const int ACTIVE_DYNODE_INPUT_TOO_NEW = 2;
+static const int ACTIVE_DYNODE_NOT_CAPABLE = 3;
+static const int ACTIVE_DYNODE_STARTED = 4;
 
 extern CActiveDynode activeDynode;
 
@@ -33,7 +33,7 @@ class CActiveDynode
 public:
     enum dynode_type_enum_t {
         DYNODE_UNKNOWN = 0,
-        DYNODE_REMOTE  = 1
+        DYNODE_REMOTE = 1
     };
 
 private:
@@ -71,7 +71,8 @@ public:
           outpoint(),
           service(),
           nState(ACTIVE_DYNODE_INITIAL)
-    {}
+    {
+    }
 
     /// Manage state of active Dynode
     void ManageState(CConnman& connman);
@@ -81,6 +82,8 @@ public:
     std::string GetTypeString() const;
 
     bool UpdateSentinelPing(int version);
+
+    void DoMaintenance(CConnman &connman);
 
 private:
     void ManageStateInitial(CConnman& connman);

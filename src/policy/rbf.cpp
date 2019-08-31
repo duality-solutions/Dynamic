@@ -1,20 +1,20 @@
-// Copyright (c) 2016-2018 The Bitcoin Developers
+// Copyright (c) 2016-2019 The Bitcoin Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "policy/rbf.h"
 
-bool SignalsOptInRBF(const CTransaction &tx)
+bool SignalsOptInRBF(const CTransaction& tx)
 {
-    BOOST_FOREACH(const CTxIn &txin, tx.vin) {
-        if (txin.nSequence < std::numeric_limits<unsigned int>::max()-1) {
+    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        if (txin.nSequence < std::numeric_limits<unsigned int>::max() - 1) {
             return true;
         }
     }
     return false;
 }
 
-RBFTransactionState IsRBFOptIn(const CTransaction &tx, CTxMemPool &pool)
+RBFTransactionState IsRBFOptIn(const CTransaction& tx, CTxMemPool& pool)
 {
     AssertLockHeld(pool.cs);
 
@@ -38,7 +38,7 @@ RBFTransactionState IsRBFOptIn(const CTransaction &tx, CTxMemPool &pool)
     CTxMemPoolEntry entry = *pool.mapTx.find(tx.GetHash());
     pool.CalculateMemPoolAncestors(entry, setAncestors, noLimit, noLimit, noLimit, noLimit, dummy, false);
 
-    BOOST_FOREACH(CTxMemPool::txiter it, setAncestors) {
+    BOOST_FOREACH (CTxMemPool::txiter it, setAncestors) {
         if (SignalsOptInRBF(it->GetTx())) {
             return RBF_TRANSACTIONSTATE_REPLACEABLE_BIP125;
         }

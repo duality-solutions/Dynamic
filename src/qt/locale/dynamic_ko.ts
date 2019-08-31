@@ -1,229 +1,227 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ko">
+<TS language="ko" version="2.4">
 <context>
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>주소 및 라벨을 수정하려면 마우스 오른쪽 버튼을 클릭해주세요</translation>
+        <translation>右键编辑地址或者标签</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>새로운 주소 만들기</translation>
+        <translation>创建一个新地址</translation>
     </message>
     <message>
         <source>&amp;New</source>
-        <translation>&amp;생성</translation>
+        <translation>&amp;新建</translation>
     </message>
     <message>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>현재 선택된 주소를 복사합니다</translation>
+        <translation>复制当前选中的地址到剪切板</translation>
     </message>
     <message>
         <source>&amp;Copy</source>
-        <translation>&amp;복사</translation>
+        <translation>复制</translation>
     </message>
     <message>
         <source>Delete the currently selected address from the list</source>
-        <translation>현재 선택된 주소를 목록에서 삭제합니다</translation>
+        <translation>从列表中删除当前选中的地址</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
-        <translation>&amp;삭제</translation>
+        <translation>删除</translation>
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
-        <translation>현재 선택된 탭의 데이터를 파일로 내보내기</translation>
+        <translation>将当前选项卡中的数据导出到文件</translation>
     </message>
     <message>
         <source>&amp;Export</source>
-        <translation>&amp;내보내기</translation>
+        <translation>导出</translation>
     </message>
     <message>
         <source>C&amp;lose</source>
-        <translation>닫&amp;기</translation>
+        <translation>关闭</translation>
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>전송할 주소를 선택해주세요</translation>
+        <translation>选择发送数字货币的地址</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>전송 받을 주소를 선택해주세요</translation>
+        <translation>选择接收数字货币的地址</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
-        <translation>선&amp;택</translation>
+        <translation>选择</translation>
     </message>
     <message>
         <source>Sending addresses</source>
-        <translation>보낼 주소</translation>
+        <translation>发送地址</translation>
     </message>
     <message>
         <source>Receiving addresses</source>
-        <translation>받는 주소</translation>
+        <translation>接收地址</translation>
     </message>
     <message>
         <source>These are your Dynamic addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>이 주소들은 전송할 Dynamic 주소입니다. 송금하기 전 항상 금액과 전송할 주소를 확인해주세요.</translation>
+        <translation>这是您的Dynamic支付地址，在发送数字货币前，请务必检查好金额和接收地址的正确性。</translation>
     </message>
     <message>
         <source>These are your Dynamic addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>이 주소들은 전송 받을 Dynamic 주소입니다. 각 트랜잭션별로 새로운 입금 주소를 사용하는 것이 좋습니다.</translation>
+        <translation>这是您的Dynamic接收地址，推荐为每笔交易使用新的接收地址。</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
-        <translation>&amp;주소 복사</translation>
+        <translation>复制地址</translation>
     </message>
     <message>
         <source>Copy &amp;Label</source>
-        <translation>라벨 &amp;복사</translation>
+        <translation>复制标签</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation>&amp;수정</translation>
+        <translation>编辑</translation>
     </message>
     <message>
         <source>Export Address List</source>
-        <translation>주소록 내보내기</translation>
+        <translation>导出地址列表</translation>
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
-        <translation>콤마로 구분 된 파일 (*.csv)</translation>
+        <translation>逗号分隔文件(*.csv)</translation>
     </message>
     <message>
         <source>Exporting Failed</source>
-        <translation>내보내기 실패</translation>
+        <translation>导出失败</translation>
     </message>
     <message>
         <source>There was an error trying to save the address list to %1. Please try again.</source>
-        <translation>%1 에 주소 목록을 저장하는 동안 오류가 발생하였습니다. 다시 시도해주세요.</translation>
+        <translation>尝试将地址列表保存到％1时出错，请重试。</translation>
     </message>
 </context>
 <context>
     <name>AddressTableModel</name>
     <message>
         <source>Label</source>
-        <translation>라벨</translation>
+        <translation>标签</translation>
     </message>
     <message>
         <source>Address</source>
-        <translation>마스터노드 주소</translation>
+        <translation>地址</translation>
     </message>
     <message>
         <source>(no label)</source>
-        <translation>(라벨 없음)</translation>
+        <translation>(没有标签)</translation>
     </message>
 </context>
 <context>
     <name>AskPassphraseDialog</name>
     <message>
         <source>Passphrase Dialog</source>
-        <translation>암호 대화상자</translation>
+        <translation>密码对话框</translation>
     </message>
     <message>
         <source>Enter passphrase</source>
-        <translation>암호 입력</translation>
+        <translation>输入密码</translation>
     </message>
     <message>
         <source>New passphrase</source>
-        <translation>새로운 암호</translation>
+        <translation>新密码</translation>
     </message>
     <message>
         <source>Repeat new passphrase</source>
-        <translation>새로운 암호 확인</translation>
+        <translation>重置新密码</translation>
     </message>
     <message>
         <source>For anonymization only</source>
-        <translation>익명 전용</translation>
+        <translation>仅限匿名</translation>
     </message>
     <message>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
-        <translation>지갑에 새로운 암호를 입력해주세요. &lt;br/&gt;&lt;b&gt;10자리 이상의 임의의 문자&lt;/b&gt; 또는, &lt;b&gt;8개 이상의 단어&lt;/b&gt;로 구성된 암호를 입력해주세요.</translation>
+        <translation>输入新密码，请使用10个以上随机字符，或者8个以上的单词做为密码</translation>
     </message>
     <message>
         <source>Encrypt wallet</source>
-        <translation>지갑 암호화</translation>
+        <translation>加密钱包</translation>
     </message>
     <message>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
-        <translation>이 작업은 지갑의 암호를 풀어 지갑을 잠금해제를 진행해야 합니다.</translation>
+        <translation>此操作需要使用密码解锁钱包。</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
-        <translation>지갑 잠금해제</translation>
+        <translation>解锁钱包</translation>
     </message>
     <message>
         <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
-        <translation>이 작업은 지갑 암호화 해제를 하셔야 가능합니다.</translation>
+        <translation>此操作需要使用密码解密钱包。</translation>
     </message>
     <message>
         <source>Decrypt wallet</source>
-        <translation>지갑 암호화 해제</translation>
+        <translation>解密钱包</translation>
     </message>
     <message>
         <source>Change passphrase</source>
-        <translation>암호 변경</translation>
+        <translation>更改密码</translation>
     </message>
     <message>
         <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>지갑에 사용할 이전 암호와 새로운 암호를 입력해주세요.</translation>
+        <translation>输入钱包的新旧密码。</translation>
     </message>
     <message>
         <source>Confirm wallet encryption</source>
-        <translation>지갑 암호화 확인</translation>
+        <translation>确认钱包加密</translation>
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DYN&lt;/b&gt;!</source>
-        <translation>경고: 지갑 암호화 후 암호를 분실하게 되면 &lt;b&gt;모든 DYN를 잃게 됩니다&lt;/b&gt;!</translation>
+        <translation>警告：如果您对钱包进行加密后忘记加密的密码，您将失去所有的DYN！</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
-        <translation>지갑을 암호화 하시겠습니까?</translation>
+        <translation>确认对钱包进行加密？</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
-        <translation>지갑 암호화 완료</translation>
+        <translation>钱包已加密</translation>
     </message>
     <message>
         <source>Dynamic will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your Dynamic from being stolen by malware infecting your computer.</source>
-        <translation>Dynamic는 이제 암호화 프로세스를 마치기 위해 닫힐것입니다. 지갑을 암호화하더라도 맬웨어로 인한 Dynamic(DYN) 의 도난당하는 것을 완벽하게 보호 할 수는 없습니다.</translation>
+        <translation>Dynamic 将立即关闭以完成加密过程。请注意，对钱包加密无法完全阻止恶意软件入侵您的电脑从页盗取Dynamic。</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
-        <translation>중요: 이전에 지갑 파일로 백업 한 경우 지갑 파일을 암호화 된 지갑 파일로 대체해야 합니다. 보안상 문제로, 암호화되지 않은 지갑 파일의 이전 백업은 새롭게 암호화 된 지갑을 사용하게 되면 쓸모없게 될 것입니다.</translation>
+        <translation>重要信息：您之前所有对钱包进行的备份都应该替换为此次新生成的钱包文件。出于安全考虑，一旦开始使用新的加密钱包文件，未加密的钱包文件将无法继续使用。</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
-        <translation>지갑 암호화 실패</translation>
+        <translation>钱包加密码失败</translation>
     </message>
     <message>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation>내부 오류로 인해 지갑 암호화에 실패했습니다. 지갑이 암호화되지 않았습니다.</translation>
+        <translation>内部错误造成钱官加密码失败，您的钱包没有成功加密</translation>
     </message>
     <message>
         <source>The supplied passphrases do not match.</source>
-        <translation>암호가 일치하지 않습니다.</translation>
+        <translation>密码不匹配</translation>
     </message>
     <message>
         <source>Wallet unlock failed</source>
-        <translation>지갑 잠금해제 실패</translation>
+        <translation>钱包解锁失败</translation>
     </message>
     <message>
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
-        <translation>입력한 지갑 암호가 올바르지 않습니다.</translation>
+        <translation>用于解密钱包的密码输入错误</translation>
     </message>
     <message>
         <source>Wallet decryption failed</source>
-        <translation>지갑 암호화 해제 실패</translation>
+        <translation>钱包解密失败</translation>
     </message>
     <message>
         <source>Wallet passphrase was successfully changed.</source>
-        <translation>지갑 암호가 변경되었습니다.</translation>
+        <translation>钱包密码已经成功更改</translation>
     </message>
     <message>
         <source>Warning: The Caps Lock key is on!</source>
-        <translation>경고: Caps Lock 키가 켜져있습니다!</translation>
+        <translation>警告：Caps Lock 键盘处于开启状态！</translation>
     </message>
 </context>
 <context>
@@ -234,383 +232,383 @@
     </message>
     <message>
         <source>Wallet</source>
-        <translation>지갑</translation>
+        <translation>钱包</translation>
     </message>
     <message>
         <source>Node</source>
-        <translation>노드</translation>
+        <translation>节点</translation>
     </message>
     <message>
         <source>&amp;Overview</source>
-        <translation>&amp;개요</translation>
+        <translation>概况</translation>
     </message>
     <message>
         <source>Show general overview of wallet</source>
-        <translation>지갑의 일반적인 개요 표시</translation>
+        <translation>显示钱包概况</translation>
     </message>
     <message>
         <source>&amp;Send</source>
-        <translation>&amp;전송</translation>
+        <translation>发送</translation>
     </message>
     <message>
         <source>Send coins to a Dynamic address</source>
-        <translation>Dynamic 주소로 전송하기</translation>
+        <translation>发送数字货币到 Dynamic 地址</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
-        <translation>&amp;받기</translation>
+        <translation>接收</translation>
     </message>
     <message>
         <source>Request payments (generates QR codes and dynamic: URIs)</source>
-        <translation>결제 요청 (QR 코드 및 Dynamic: URI 생성)</translation>
+        <translation>请求支付（生成二维码和 dynamic: URIs）</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
-        <translation>&amp;트랜잭션</translation>
+        <translation>交易记录</translation>
     </message>
     <message>
         <source>&amp;Dynodes</source>
-        <translation>&amp;Dynodes</translation>
+        <translation>Dynodes</translation>
     </message>
     <message>
         <source>&amp;Mining</source>
-        <translation>&amp;광업의</translation>
+        <translation>挖矿</translation>
     </message>
     <message>
         <source>Browse transaction history</source>
-        <translation>트랜잭션 내역 보기</translation>
+        <translation>浏览交易记录</translation>
     </message>
     <message>
         <source>Browse Dynodes</source>
-        <translation>Dynodes 찾아보기</translation>
+        <translation>浏览 Dynodes</translation>
     </message>
     <message>
         <source>Mine Dynamic(DYN)</source>
-        <translation>광산 Dynamic(DYN)</translation>
+        <translation>挖矿 Dynamic(DYN)</translation>
     </message>
     <message>
         <source>E&amp;xit</source>
-        <translation>종&amp;료</translation>
+        <translation>退出</translation>
     </message>
     <message>
         <source>Quit application</source>
-        <translation>어플리케이션 종료</translation>
+        <translation>退出应用</translation>
     </message>
     <message>
         <source>&amp;About Dynamic</source>
-        <translation>&amp;Dynamic 정보</translation>
+        <translation>关于 Dynamic</translation>
     </message>
     <message>
         <source>Show information about Dynamic</source>
-        <translation>Dynamic에 대한 정보 표시</translation>
+        <translation>显示 Dynamic 相关信息</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
-        <translation>&amp;Qt 정보</translation>
+        <translation>关于 Qt</translation>
     </message>
     <message>
         <source>Show information about Qt</source>
-        <translation>Qt에 대한 정보 표시</translation>
+        <translation>显示 QT 相关信息</translation>
     </message>
     <message>
         <source>&amp;Options...</source>
-        <translation>&amp;옵션...</translation>
+        <translation>选项...</translation>
     </message>
     <message>
         <source>Modify configuration options for Dynamic</source>
-        <translation>Dynamic에 대한 구성 옵션 수정</translation>
+        <translation>修改 Dynamic 配置选项</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
-        <translation>&amp;보이기 / 숨기기</translation>
+        <translation>显示 / 隐藏</translation>
     </message>
     <message>
         <source>Show or hide the main Window</source>
-        <translation>기본 창 보이기 또는 숨기기</translation>
+        <translation>显示或隐藏主窗口</translation>
     </message>
     <message>
         <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;지갑 암호화...</translation>
+        <translation>加密钱包...</translation>
     </message>
     <message>
         <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>지갑 개인 키 암호화</translation>
+        <translation>加密您钱包的私钥</translation>
     </message>
     <message>
         <source>&amp;Backup Wallet...</source>
-        <translation>&amp;지갑 백업 ...</translation>
+        <translation>备份钱包...</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
-        <translation>다른 위치에 지갑 백업</translation>
+        <translation>将钱包备份到其它位置</translation>
     </message>
     <message>
         <source>&amp;Change Passphrase...</source>
-        <translation>&amp;암호 변경...</translation>
+        <translation>更改密码...</translation>
     </message>
     <message>
         <source>Change the passphrase used for wallet encryption</source>
-        <translation>지갑 암호화에 사용되는 암호 변경</translation>
+        <translation>更改用于加密钱包的密码</translation>
     </message>
     <message>
         <source>&amp;Unlock Wallet...</source>
-        <translation>&amp;지갑 잠금해제...</translation>
+        <translation>解锁钱包...</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
-        <translation>지갑 잠금해제</translation>
+        <translation>解锁钱包</translation>
     </message>
     <message>
         <source>&amp;Lock Wallet</source>
-        <translation>&amp;지갑 잠금</translation>
+        <translation>锁定钱包</translation>
     </message>
     <message>
         <source>Sign &amp;message...</source>
-        <translation>메세지 &amp;서명...</translation>
+        <translation>消息签名...</translation>
     </message>
     <message>
         <source>Sign messages with your Dynamic addresses to prove you own them</source>
-        <translation>Dynamic 주소로 메시지에 서명하여 소유하고 있음을 증명하십시오</translation>
+        <translation>使用 Dynamic 地址关联的私钥为消息签名，以证明您拥有这个地址</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
-        <translation>&amp;메시지 확인...</translation>
+        <translation>验证消息...</translation>
     </message>
     <message>
         <source>Verify messages to ensure they were signed with specified Dynamic addresses</source>
-        <translation>메시지가 지정된 Dynamic 주소로 서명되었는지 확인합니다</translation>
+        <translation>验证消息，以确保该消息是由指定的 Dynamic 地址所有者签名的</translation>
     </message>
     <message>
         <source>&amp;Information</source>
-        <translation>정보</translation>
+        <translation>信息</translation>
     </message>
     <message>
         <source>Show diagnostic information</source>
-        <translation>진단 정보 표시</translation>
+        <translation>显示诊断</translation>
     </message>
     <message>
         <source>&amp;Debug console</source>
-        <translation>&amp;디버그 콘솔</translation>
+        <translation>Debug 控制台</translation>
     </message>
     <message>
         <source>Open debugging console</source>
-        <translation>디버깅 콘솔 열기</translation>
+        <translation>打开 Debug 控制台</translation>
     </message>
     <message>
         <source>&amp;Network Monitor</source>
-        <translation>&amp;네트워크 모니터</translation>
+        <translation>网络监控</translation>
     </message>
     <message>
         <source>Show network monitor</source>
-        <translation>네트워크 모니터 표시</translation>
+        <translation>显示网络监控</translation>
     </message>
     <message>
         <source>&amp;Peers list</source>
-        <translation>&amp;피어 목록</translation>
+        <translation>节点列表</translation>
     </message>
     <message>
         <source>Show peers info</source>
-        <translation>피어 정보 표시</translation>
+        <translation>显示节点信息</translation>
     </message>
     <message>
         <source>Wallet &amp;Repair</source>
-        <translation>지갑 &amp;복구</translation>
+        <translation>钱包修复</translation>
     </message>
     <message>
         <source>Show wallet repair options</source>
-        <translation>지갑 복구 옵션 표시</translation>
+        <translation>显示钱包修复选项</translation>
     </message>
     <message>
         <source>Open Wallet &amp;Configuration File</source>
-        <translation>월렛 구성 파일 열기</translation>
+        <translation>打开钱包配置文件</translation>
     </message>
     <message>
         <source>Open configuration file</source>
-        <translation>열기 구성 파일</translation>
+        <translation>打开配置文件</translation>
     </message>
     <message>
         <source>Open &amp;Dynode Configuration File</source>
-        <translation>&amp;Dynode 구성 파일 열기</translation>
+        <translation>打开 Dynode 配置文件</translation>
     </message>
     <message>
         <source>Open Dynode configuration file</source>
-        <translation>Dynode 구성 파일 열기</translation>
+        <translation>打开 Dynode 配置文件</translation>
     </message>
     <message>
         <source>Open &amp;Configuration File</source>
-        <translation>&amp;구성 파일 열기</translation>
+        <translation>打开配置文件</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
-        <translation>자동 &amp;백업 폴더 열기</translation>
+        <translation>显示自动备份</translation>
     </message>
     <message>
         <source>Show automatically created wallet backups</source>
-        <translation>자동 생성된 지갑 백업 표시</translation>
+        <translation>显示自动创建的钱包备份</translation>
     </message>
     <message>
         <source>&amp;Sending addresses...</source>
-        <translation>&amp;주소 보내는중...</translation>
+        <translation>发送地址...</translation>
     </message>
     <message>
         <source>Connecting to peers...</source>
-        <translation>동료와 연결...</translation>
+        <translation>连接节点...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
-        <translation>전송 된 주소 및 라벨 목록 표시</translation>
+        <translation>显示已使用的发送地址和标签列表</translation>
     </message>
     <message>
         <source>&amp;Receiving addresses...</source>
-        <translation>&amp;받는 주소...</translation>
+        <translation>接收地址...</translation>
     </message>
     <message>
         <source>Show the list of used receiving addresses and labels</source>
-        <translation>입금 된 주소 및 라벨 목록 표시</translation>
+        <translation>显示已使用的接收地址和标签列表</translation>
     </message>
     <message>
         <source>Open &amp;URI...</source>
-        <translation>&amp;URI 열기...</translation>
+        <translation>打开 URI...</translation>
     </message>
     <message>
         <source>Open a dynamic: URI or payment request</source>
-        <translation>Dynamic: URI 또는 ​​결제 요청 열기</translation>
+        <translation>打开 dynamic: URI 或付款请求</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
-        <translation>명령행 옵션</translation>
+        <translation>命令行选项</translation>
     </message>
     <message>
         <source>&amp;PrivateSend information</source>
-        <translation>&amp;PrivateSend 정보</translation>
+        <translation>匿名发送 信息</translation>
     </message>
     <message>
         <source>Dynamic client</source>
-        <translation>Dynamic 클라이언트</translation>
+        <translation>Dynamic 客户端</translation>
     </message>
     <message numerus="yes">
         <source>Processed %n block(s) of transaction history.</source>
         <translation>
-            <numerusform>%n 블록의 거래내역 확인됨.</numerusform>
+            <numerusform>处理了交易记录中的%n个块</numerusform>
         </translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
-        <translation>추가 데이터 동기화: %p%</translation>
+        <translation>同步其它数据: %p%</translation>
     </message>
     <message>
         <source>Show the Dynamic help message to get a list with possible Dynamic command-line options</source>
-        <translation>Dynamic 도움말 메세지를 표시하여 사용 가능한 Dynamic 명령행 옵션 목록 표시</translation>
+        <translation>显示 Dynamic 帮助消息，以获取包含可能的 Dynamic 命令行选项</translation>
     </message>
     <message>
         <source>&amp;File</source>
-        <translation>&amp;파일</translation>
+        <translation>文件</translation>
     </message>
     <message>
         <source>&amp;Settings</source>
-        <translation>&amp;설정</translation>
+        <translation>设置</translation>
     </message>
     <message>
         <source>&amp;Tools</source>
-        <translation>&amp;도구</translation>
+        <translation>工具</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation>&amp;도움말</translation>
+        <translation>帮助</translation>
     </message>
     <message>
         <source>Tabs toolbar</source>
-        <translation>탭 도구 모음</translation>
+        <translation>标签工具栏</translation>
     </message>
     <message numerus="yes">
         <source>%n active connection(s) to Dynamic network</source>
         <translation>
-            <numerusform>%n 개의 Dynamic 네트웍에 연결됨</numerusform>
+            <numerusform>%n 活动连接Dynamic 网络</numerusform>
         </translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
-        <translation>네트워크 동기화중...</translation>
+        <translation>与网络同步...</translation>
     </message>
     <message>
         <source>Importing blocks from disk...</source>
-        <translation>디스크에서 블록 가져오기...</translation>
+        <translation>从磁盘导入块...</translation>
     </message>
     <message>
         <source>Reindexing blocks on disk...</source>
-        <translation>디스크 블록 재색인...</translation>
+        <translation>从磁盘重新索引快...</translation>
     </message>
     <message>
         <source>No block source available...</source>
-        <translation>사용 가능한 블록 소스 없음...</translation>
+        <translation>没有块资源可以使用...</translation>
     </message>
     <message>
         <source>Up to date</source>
-        <translation>최신</translation>
+        <translation>最新</translation>
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
         <translation>
-            <numerusform>%n 시간</numerusform>
+            <numerusform>%n 小时</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
         <translation>
-            <numerusform>%n 일</numerusform>
+            <numerusform>%n 天</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
         <translation>
-            <numerusform>%n 주</numerusform>
+            <numerusform>%n 周</numerusform>
         </translation>
     </message>
     <message>
         <source>%1 and %2</source>
-        <translation>%1 그리고 %2</translation>
+        <translation>%1 和 %2</translation>
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
         <translation>
-            <numerusform>%n 년</numerusform>
+            <numerusform>%n 年</numerusform>
         </translation>
     </message>
     <message>
         <source>%1 behind</source>
-        <translation>%1 뒤에</translation>
+        <translation>%1 后</translation>
     </message>
     <message>
         <source>Catching up...</source>
-        <translation>동기화 중...</translation>
+        <translation>追块...</translation>
     </message>
     <message>
         <source>Last received block was generated %1 ago.</source>
-        <translation>마지막으로 받은 블록이 %1 전에 생성되었습니다.</translation>
+        <translation>最后收到的块是在 1% 之前生成的</translation>
     </message>
     <message>
         <source>Transactions after this will not yet be visible.</source>
-        <translation>이후의 트랜잭션은 아직 표시되지 않습니다.</translation>
+        <translation>之前的交易不可见</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation>에러</translation>
+        <translation>错误</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>경고</translation>
+        <translation>警告</translation>
     </message>
     <message>
         <source>Information</source>
-        <translation>정보</translation>
+        <translation>信息</translation>
     </message>
     <message>
         <source>Sent transaction</source>
-        <translation>보낸 트랜잭션</translation>
+        <translation>已发送交易</translation>
     </message>
     <message>
         <source>Incoming transaction</source>
-        <translation>받은 트랜잭션</translation>
+        <translation>接收交易</translation>
     </message>
     <message>
         <source>Date: %1
@@ -618,214 +616,214 @@ Amount: %2
 Type: %3
 Address: %4
 </source>
-        <translation>날짜: %1
-금액: %2
-유형: %3
-주소: %4
+        <translation>日期: %1
+账号: %2
+类型: %3
+地址: %4
 </translation>
     </message>
     <message>
         <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>HD 키 생성이 &lt;b&gt;사용됨&lt;/b&gt;</translation>
+        <translation>HD 密钥生成处于启用状态</translation>
     </message>
     <message>
         <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>HD 키 생성이 &lt;b&gt;비활성화 됨&lt;/b&gt;</translation>
+        <translation>HD 密钥生成处于禁用状态</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>현재 지갑은 &lt;b&gt;암호화되어 &lt;b&gt;잠금해제되었습니다</translation>
+        <translation>钱包已加密且已经解锁</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt; for anonimization only</source>
-        <translation>현재 지갑은 &lt;b&gt;암호화&lt;/b&gt; 되어 &lt;b&gt;잠긴&lt;/b&gt; 상태로 익명의 전용모드로 안전하게 구동중입니다</translation>
+        <translation>钱包已加密且仅针对anonimization解锁</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>지갑은 &lt;b&gt;암호화&lt;/b&gt;되어 있으며 현재 &lt;b&gt;잠겨 있습니다&lt;/b&gt;</translation>
+        <translation>钱包已加密且已经锁定</translation>
     </message>
 </context>
 <context>
     <name>ClientModel</name>
     <message>
         <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
-        <translation>합계: %1 (PS 호환 가능한
-: %2 / 사용: %3)</translation>
+        <translation>总计: %1 (匿名 兼容
+: %2 / 启用: %3)</translation>
     </message>
     <message>
         <source>Network Alert</source>
-        <translation>네트워크 알림</translation>
+        <translation>网络报警</translation>
     </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
         <source>Quantity:</source>
-        <translation>수량:</translation>
+        <translation>数量:</translation>
     </message>
     <message>
         <source>Bytes:</source>
-        <translation>Bytes:</translation>
+        <translation>字节:</translation>
     </message>
     <message>
         <source>Amount:</source>
-        <translation>금액:</translation>
+        <translation>金额:</translation>
     </message>
     <message>
         <source>Priority:</source>
-        <translation>우선 순위:</translation>
+        <translation>优先:</translation>
     </message>
     <message>
         <source>Fee:</source>
-        <translation>수수료:</translation>
+        <translation>费率:</translation>
     </message>
     <message>
         <source>Coin Selection</source>
-        <translation>코인 선택</translation>
+        <translation>选择数字货币</translation>
     </message>
     <message>
         <source>Dust:</source>
-        <translation>현금:</translation>
+        <translation>零钱:</translation>
     </message>
     <message>
         <source>After Fee:</source>
-        <translation>이후 수수료:</translation>
+        <translation>加上交易费用后:</translation>
     </message>
     <message>
         <source>Change:</source>
-        <translation>잔돈:</translation>
+        <translation>修改:</translation>
     </message>
     <message>
         <source>toggle lock state</source>
-        <translation>토글 잠금 상태</translation>
+        <translation>切换锁定状态</translation>
     </message>
     <message>
         <source>(un)select all</source>
-        <translation>모두 선택(해제)</translation>
+        <translation>全选（取消全选）</translation>
     </message>
     <message>
         <source>Tree mode</source>
-        <translation>트리 모드</translation>
+        <translation>树状模式</translation>
     </message>
     <message>
         <source>List mode</source>
-        <translation>목록 모드</translation>
+        <translation>列表模式</translation>
     </message>
     <message>
         <source>(1 locked)</source>
-        <translation>(1 잠김)</translation>
+        <translation>(1 锁定)</translation>
     </message>
     <message>
         <source>Amount</source>
-        <translation>금액</translation>
+        <translation>金额</translation>
     </message>
     <message>
         <source>Received with label</source>
-        <translation>수신 된 라벨</translation>
+        <translation>收款标签</translation>
     </message>
     <message>
         <source>Received with address</source>
-        <translation>수신 된 주소</translation>
+        <translation>收款地址</translation>
     </message>
     <message>
         <source>PS Rounds</source>
-        <translation>PS 한바퀴</translation>
+        <translation>匿名发送循环</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>날짜</translation>
+        <translation>日期</translation>
     </message>
     <message>
         <source>Confirmations</source>
-        <translation>확인</translation>
+        <translation>确认</translation>
     </message>
     <message>
         <source>Confirmed</source>
-        <translation>확정</translation>
+        <translation>已确认</translation>
     </message>
     <message>
         <source>Priority</source>
-        <translation>우선 사항</translation>
+        <translation>优先级</translation>
     </message>
     <message>
         <source>Copy address</source>
-        <translation>주소 복사</translation>
+        <translation>复制地址</translation>
     </message>
     <message>
         <source>Copy label</source>
-        <translation>라벨 복사</translation>
+        <translation>复制标签</translation>
     </message>
     <message>
         <source>Copy amount</source>
-        <translation>금액 복사</translation>
+        <translation>复制金额</translation>
     </message>
     <message>
         <source>Copy transaction ID</source>
-        <translation>트랜잭션 ID 복사</translation>
+        <translation>复制交易ID</translation>
     </message>
     <message>
         <source>Lock unspent</source>
-        <translation>잠금되지 않음</translation>
+        <translation>锁定未花费</translation>
     </message>
     <message>
         <source>Unlock unspent</source>
-        <translation>잠금해제되지 않음</translation>
+        <translation>解锁未花费</translation>
     </message>
     <message>
         <source>Copy quantity</source>
-        <translation>수량 복사</translation>
+        <translation>复制数量</translation>
     </message>
     <message>
         <source>Copy fee</source>
-        <translation>수수료 복사</translation>
+        <translation>复制费用</translation>
     </message>
     <message>
         <source>Copy after fee</source>
-        <translation>이용 수수료 복사</translation>
+        <translation>复制加上交易费用后</translation>
     </message>
     <message>
         <source>Copy bytes</source>
-        <translation>Bytes 복사</translation>
+        <translation>复制字节数</translation>
     </message>
     <message>
         <source>Copy priority</source>
-        <translation>우선 사항 복사</translation>
+        <translation>复制优先级</translation>
     </message>
     <message>
         <source>Copy dust</source>
-        <translation>현금 복사</translation>
+        <translation>复制零钱</translation>
     </message>
     <message>
         <source>Copy change</source>
-        <translation>변경 복사</translation>
+        <translation>复制变更</translation>
     </message>
     <message>
         <source>Please switch to &apos;List mode&apos; to use this function.</source>
-        <translation>이 기능을 사용하려면 &apos;목록 모드&apos; 로 전환하십시오.</translation>
+        <translation>请切换到列表模式使用此功能</translation>
     </message>
     <message>
         <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-anonymized inputs first and then check PrivateSend checkbox again.</source>
-        <translation>익명 처리되지 않은 입력이 선택되었습니다. &lt;b&gt;PrivateSend 사용 중지됨.&lt;/b&gt;&lt;br&gt;&lt;br&gt;여전히 PrivateSend를 사용하려면 비 익명화 된 모든 입력을 먼저 선택 취소하고 PrivateSend 확인란을 다시 선택하십시오.</translation>
+        <translation>已选择非匿名输入，PrivateSend 将被禁用，若想要使用匿名发送，请先取消所有非匿名输入，然后再次勾选匿名发送复选框</translation>
     </message>
     <message>
         <source>highest</source>
-        <translation>최고</translation>
+        <translation>最高</translation>
     </message>
     <message>
         <source>higher</source>
-        <translation>매우 높음</translation>
+        <translation>较高</translation>
     </message>
     <message>
         <source>high</source>
-        <translation>높음</translation>
+        <translation>高</translation>
     </message>
     <message>
         <source>medium-high</source>
-        <translation>약간 높음</translation>
+        <translation>中高</translation>
     </message>
     <message>
         <source>Can vary +/- %1 satoshi(s) per input.</source>
-        <translation>입력당 +/- %1 satoshi 조절 가능.</translation>
+        <translation>每个输入可以变更 +/- %1 聪</translation>
     </message>
     <message>
         <source>N/A</source>
@@ -833,102 +831,102 @@ Address: %4
     </message>
     <message>
         <source>medium</source>
-        <translation>중간</translation>
+        <translation>中</translation>
     </message>
     <message>
         <source>low-medium</source>
-        <translation>낮은 중간</translation>
+        <translation>中低</translation>
     </message>
     <message>
         <source>low</source>
-        <translation>낮음</translation>
+        <translation>低</translation>
     </message>
     <message>
         <source>lower</source>
-        <translation>매우 낮음</translation>
+        <translation>较低</translation>
     </message>
     <message>
         <source>lowest</source>
-        <translation>최저</translation>
+        <translation>最低</translation>
     </message>
     <message>
         <source>(%1 locked)</source>
-        <translation>(%1 잠김)</translation>
+        <translation>(%1 已锁定)</translation>
     </message>
     <message>
         <source>none</source>
-        <translation>없음</translation>
+        <translation>无</translation>
     </message>
     <message>
         <source>yes</source>
-        <translation>예</translation>
+        <translation>是</translation>
     </message>
     <message>
         <source>no</source>
-        <translation>아니오</translation>
+        <translation>否</translation>
     </message>
     <message>
         <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
-        <translation>수신자가 현재 먼지 임계 값보다 작은 양을 수신하면이 레이블이 빨간색으로 바뀝니다.</translation>
+        <translation>如何收款金额小于设置的零钱数值，则此标签为红色。</translation>
     </message>
     <message>
         <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
-        <translation>트랜잭션 크기가 1000 byte 보다 클 경우 라벨이 빨간색으로 변경됩니다.</translation>
+        <translation>如果交易数据大于1000字节，则此标签为红色。</translation>
     </message>
     <message>
         <source>This means a fee of at least %1 per kB is required.</source>
-        <translation>즉, KB 당 최소 %1 의 수수료가 필요합니다.</translation>
+        <translation>每KB数据需要至少1%的费用。</translation>
     </message>
     <message>
         <source>Can vary +/- 1 byte per input.</source>
-        <translation>입력당 +/- 1 byte 조절 가능.</translation>
+        <translation>每个输入可以更改 +/- 1 字节。</translation>
     </message>
     <message>
         <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>우선 순위가 높은 트랜잭션이 블록에 포함 될 확률이 높아집니다.</translation>
+        <translation>具有较高优先级的交易更有可能被包含在块中。</translation>
     </message>
     <message>
         <source>This label turns red, if the priority is smaller than &quot;medium&quot;.</source>
-        <translation>우선 순위가 &quot;중간&quot; 보다 낮으면 라벨이 빨간색으로 변경됩니다.</translation>
+        <translation>如果优先级小于中等，则此标签为红色</translation>
     </message>
     <message>
         <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>받는 사람이 %1 보다 작은 금액을 받으면 라벨이 빨간색으로 변경됩니다.</translation>
+        <translation>如果收款金额小于 1%，刚此标签为红色</translation>
     </message>
     <message>
         <source>(no label)</source>
-        <translation>(라벨 없음)</translation>
+        <translation>(没有标签)</translation>
     </message>
     <message>
         <source>change from %1 (%2)</source>
-        <translation>%1 (%2) 에서 변경</translation>
+        <translation>从 %1 (%2) 更改</translation>
     </message>
     <message>
         <source>(change)</source>
-        <translation>(잔돈)</translation>
+        <translation>(更改)</translation>
     </message>
 </context>
 <context>
     <name>PrivateSendConfig</name>
     <message>
         <source>Configure PrivateSend</source>
-        <translation>Privendsend 구성</translation>
+        <translation>配置 匿名发送</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
-        <translation>기본 개인 정보</translation>
+        <translation>基础匿名</translation>
     </message>
     <message>
         <source>High Privacy</source>
-        <translation>높은 개인 정보</translation>
+        <translation>高级匿名</translation>
     </message>
     <message>
         <source>Maximum Privacy</source>
-        <translation>최대 개인 정보</translation>
+        <translation>极限匿名</translation>
     </message>
     <message>
         <source>Please select a privacy level.</source>
-        <translation>개인 정보 보호 수준을 선택하십시오.</translation>
+        <translation>请选择一种匿名级别</translation>
     </message>
     <message>
         <source>Use 2 separate Dynodes to mix funds up to 1000 DYN</source>
@@ -3476,6 +3474,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>최소 금액</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>주소 복사</translation>
     </message>
@@ -3694,7 +3696,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>Form</translation>
     </message>
     <message>
-        <source>Number of threads to use:</source>
+        <source>Number of CPU threads to use:</source>
         <translation>사용할 스레드 수:</translation>
     </message>
     <message>
@@ -3904,7 +3906,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>가장 좋은 블록이 변경되면 명령을 실행합니다 (cmd의 %s 는 블록 해시로 대체됩니다)</translation>
     </message>
     <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
         <translation>이 모드에서 -genproclimit은 즉시 생성되는 블록 수를 제어합니다.</translation>
     </message>
     <message>
@@ -5379,6 +5381,756 @@ rpcpassword=%s
     <message>
         <source>Hide</source>
         <translation>숨는 장소</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAccountTableModel</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddUserDialog</name>
+    <message>
+        <source>Add BDAP User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration months:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create a new address</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully added user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Needs Translating</translation>
+    </message>   
+    <message>
+        <source>Expiration Date:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkTableModel</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    </context>
+<context>
+    <name>BdapLinkTablePriv</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapPage</name>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Users</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Only display My Users</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add a user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected user from the list</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Links</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Only display My Groups</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add a new group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected group from the list</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>&amp;Delete Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add BDAP Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete \"</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Confirm Delete Account</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update BDAP Group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Group Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update BDAP User</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully deleted user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully deleted group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter common name to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter object full path to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Request</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Deny</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Spam</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Confirm Accept Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully accepted link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Request Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapUpdateAccountDialog</name>
+    <message>
+        <source>Update BDAP Account</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully updated user</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Successfully updated group</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Please note that your transaction will not be reflected until the next block.</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapUserDetailDialog</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Form</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>DHT Public Key:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TX ID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddLinkDialog</name>
+    <message>
+        <source>BDAP Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(required)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(optional)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>From:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>To:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Add Link Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor, Recipient and Link Message are required fields</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Choose File</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import Recovery Phrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Paste from clipboard</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recovery Passphrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
+Wallet wil restart after mnemonic has been imported.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Reimport</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create mnemonic</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Create New Recovery Phrase</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Copy to clipboard</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Bytes of Entropy</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Generate</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Validate</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import privatekey</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Input single privatekey</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Force Rescan</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Import privatekey file</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Input privatekey file</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
+        <translation>Needs Translating</translation>
     </message>
 </context>
 </TS>

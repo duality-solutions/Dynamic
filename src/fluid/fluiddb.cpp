@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 
 #include "fluiddb.h"
 
@@ -9,7 +9,7 @@
 #include "fluidmint.h"
 #include "fluidsovereign.h"
 
-CAmount GetFluidDynodeReward(const int nHeight) 
+CAmount GetFluidDynodeReward(const int nHeight)
 {
     if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardDynodePayment(nHeight);
@@ -26,13 +26,12 @@ CAmount GetFluidDynodeReward(const int nHeight)
     }
     if (lastDynodeRecord.DynodeReward > 0) {
         return lastDynodeRecord.DynodeReward;
-    }
-    else {
+    } else {
         return GetStandardDynodePayment(nHeight);
     }
 }
 
-CAmount GetFluidMiningReward(const int nHeight) 
+CAmount GetFluidMiningReward(const int nHeight)
 {
     if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardPoWBlockPayment(nHeight);
@@ -47,14 +46,18 @@ CAmount GetFluidMiningReward(const int nHeight)
     if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord, nHeight)) {
         return GetStandardPoWBlockPayment(nHeight);
     }
-    return lastMiningRecord.MiningReward;
+    if (lastMiningRecord.MiningReward > 0) {
+        return lastMiningRecord.MiningReward;
+    } else {
+        return GetStandardPoWBlockPayment(nHeight);
+    }
 }
 
 bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
 {
     if (!CheckFluidMintDB())
         return false;
-    
+
     if (pFluidMintDB->IsEmpty())
         return false;
 
@@ -62,9 +65,8 @@ bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
     if (!pFluidMintDB->GetLastFluidMintRecord(getFluidMint)) {
         return false;
     }
-    
-    if ((int)getFluidMint.nHeight == (nHeight -1))
-    {
+
+    if ((int)getFluidMint.nHeight == (nHeight - 1)) {
         fluidMint = getFluidMint;
         return true;
     }
@@ -72,12 +74,12 @@ bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
 }
 
 /** Checks if any given address is a current sovereign wallet address (invoked by RPC) */
-bool IsSovereignAddress(const CDynamicAddress& inputAddress) 
+bool IsSovereignAddress(const CDynamicAddress& inputAddress)
 {
     if (!inputAddress.IsValid()) {
         return false;
     }
-    
+
     if (!CheckFluidSovereignDB()) {
         return false;
     }
@@ -86,7 +88,7 @@ bool IsSovereignAddress(const CDynamicAddress& inputAddress)
     if (!pFluidSovereignDB->GetLastFluidSovereignRecord(lastSovereign)) {
         return false;
     }
-    
+
     for (const std::vector<unsigned char>& vchAddress : lastSovereign.SovereignAddresses) {
         CDynamicAddress attemptKey(StringFromCharVector(vchAddress));
         if (attemptKey.IsValid() && inputAddress == attemptKey) {
@@ -98,12 +100,11 @@ bool IsSovereignAddress(const CDynamicAddress& inputAddress)
 
 bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& dynodeEntries)
 {
-    if (CheckFluidDynodeDB()) { 
+    if (CheckFluidDynodeDB()) {
         if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
             return false;
         }
-    }
-    else {
+    } else {
         return false;
     }
     return true;
@@ -111,12 +112,11 @@ bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& dynodeEntries)
 
 bool GetAllFluidMiningRecords(std::vector<CFluidMining>& miningEntries)
 {
-    if (CheckFluidMiningDB()) { 
+    if (CheckFluidMiningDB()) {
         if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
             return false;
         }
-    }
-    else {
+    } else {
         return false;
     }
     return true;
@@ -124,12 +124,11 @@ bool GetAllFluidMiningRecords(std::vector<CFluidMining>& miningEntries)
 
 bool GetAllFluidMintRecords(std::vector<CFluidMint>& mintEntries)
 {
-    if (CheckFluidMintDB()) { 
+    if (CheckFluidMintDB()) {
         if (!pFluidMintDB->GetAllFluidMintRecords(mintEntries)) {
             return false;
         }
-    }
-    else {
+    } else {
         return false;
     }
     return true;
@@ -137,16 +136,14 @@ bool GetAllFluidMintRecords(std::vector<CFluidMint>& mintEntries)
 
 bool GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& sovereignEntries)
 {
-    if (CheckFluidSovereignDB())
-    {
+    if (CheckFluidSovereignDB()) {
         if (pFluidSovereignDB->IsEmpty()) {
             return false;
         }
         if (!pFluidSovereignDB->GetAllFluidSovereignRecords(sovereignEntries)) {
             return false;
         }
-    }
-    else {
+    } else {
         return false;
     }
     return true;
@@ -167,23 +164,22 @@ bool GetLastFluidSovereignAddressStrings(std::vector<std::string>& sovereignAddr
 }
 
 /** Checks whether 3 of 5 sovereign addresses signed the token in the script to meet the quorum requirements */
-bool CheckSignatureQuorum(const std::vector<unsigned char>& vchFluidScript, std::string& errMessage, bool individual) 
+bool CheckSignatureQuorum(const std::vector<unsigned char>& vchFluidScript, std::string& errMessage, bool individual)
 {
     std::string consentToken = StringFromCharVector(vchFluidScript);
     std::vector<std::string> fluidSovereigns;
     if (!GetLastFluidSovereignAddressStrings(fluidSovereigns)) {
         return false;
     }
-    
+
     std::pair<CDynamicAddress, bool> keyOne;
     std::pair<CDynamicAddress, bool> keyTwo;
     std::pair<CDynamicAddress, bool> keyThree;
-    keyOne.second = false; 
-    keyTwo.second = false; 
+    keyOne.second = false;
+    keyTwo.second = false;
     keyThree.second = false;
 
-    for (const std::string& sovereignAddress : fluidSovereigns) 
-    {
+    for (const std::string& sovereignAddress : fluidSovereigns) {
         CDynamicAddress attemptKey;
         CDynamicAddress xKey(sovereignAddress);
 
@@ -203,8 +199,7 @@ bool CheckSignatureQuorum(const std::vector<unsigned char>& vchFluidScript, std:
         }
     }
 
-    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
-                   && keyOne.first.ToString() != keyThree.first.ToString());
+    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString() && keyOne.first.ToString() != keyThree.first.ToString());
 
     LogPrint("fluid", "CheckSignatureQuorum(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
 

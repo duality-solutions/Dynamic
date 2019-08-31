@@ -1,0 +1,51 @@
+DHT_TESTS += dht/test/data_test
+bin_PROGRAMS += dht/test/data_test
+TEST_SRCDIR = dht/test
+TEST_BINARY=dht/test/data_test$(EXEEXT)
+
+TEST_DHT =\
+  dht/test/data_test.cpp
+
+dht_test_data_test_SOURCES = $(TEST_DHT)
+dht_test_data_test_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
+dht_test_data_test_LDADD = $(LIBDYNAMIC_SERVER) $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CONSENSUS) $(LIBDYNAMIC_CRYPTO) $(LIBVGP) $(LIBUNIVALUE) $(LIBTORRENT) \
+  $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
+dht_test_data_test_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+if ENABLE_WALLET
+dht_test_data_test_LDADD += $(LIBDYNAMIC_WALLET)
+endif
+
+dht_test_data_test_LDADD += $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+dht_test_data_test_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+
+if ENABLE_ZMQ
+dht_test_data_test_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
+endif
+if ENABLE_GPU
+dht_test_data_test_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)
+dht_test_data_test_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS_EXTRA)
+endif
+
+nodist_dht_test_data_test_SOURCES = $(GENERATED_DHT_TEST_FILES)
+
+$(DHT_TESTS): $(GENERATED_DHT_TEST_FILES)
+
+CLEAN_DHT_TEST = dht/test/*.gcda dht/test/*.gcno $(GENERATED_DHT_TEST_FILES)
+
+CLEANFILES += $(CLEAN_DHT_TEST)
+
+data_test: $(TEST_DHT_BINARY)
+
+dynamic_test_check: $(TEST_DHT_BINARY) FORCE
+	$(MAKE) check-DHT_TESTS DHT_TESTS=$^
+
+dynamic_test_clean : FORCE
+	rm -f $(CLEAN_DHT_TEST) $(dht_test_data_test_OBJECTS) $(TEST_DHT_BINARY)
+
+%.raw.h: %.raw
+	@$(MKDIR_P) $(@D)
+	@echo "namespace alert_tests{" > $@
+	@echo "static unsigned const char $(*F)[] = {" >> $@
+	@$(HEXDUMP) -v -e '8/1 "0x%02x, "' -e '"\n"' $< | $(SED) -e 's/0x  ,//g' >> $@
+	@echo "};};" >> $@
+	@echo "Generated $@"

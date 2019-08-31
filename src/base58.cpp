@@ -1,16 +1,18 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
 
+#include "bdap/stealth.h"
 #include "hash.h"
 #include "uint256.h"
 
 #include <assert.h>
+#include <cmath>
 #include <stdint.h>
 #include <string.h>
 #include <string>
@@ -21,6 +23,68 @@
 
 /** All alphanumeric characters except for "0", "I", "O", and "l" */
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+
+namespace
+{
+class DestinationEncoder : public boost::static_visitor<std::string>
+{
+private:
+    const CChainParams& m_params;
+
+public:
+    explicit DestinationEncoder(const CChainParams& params) : m_params(params) {}
+
+    std::string operator()(const CKeyID& id) const
+    {
+        std::vector<unsigned char> data = m_params.Base58Prefix(CChainParams::PUBKEY_ADDRESS);
+        data.insert(data.end(), id.begin(), id.end());
+        return EncodeBase58Check(data);
+    }
+
+    std::string operator()(const CScriptID& id) const
+    {
+        std::vector<unsigned char> data = m_params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
+        data.insert(data.end(), id.begin(), id.end());
+        return EncodeBase58Check(data);
+    }
+
+    std::string operator()(const CNoDestination& no) const { return {}; }
+    std::string operator()(const CStealthAddress& sxAddr) const { return CDynamicAddress(sxAddr).ToString(); }
+
+};
+
+static CTxDestination DecodeDestination(const std::string& str, const CChainParams& params)
+{
+    CDynamicAddress addr(str);
+    if (addr.IsValid()) {
+        return addr.Get();
+    }
+
+    std::vector<unsigned char> data;
+    if (DecodeBase58Check(str, data)) {
+        const std::vector<unsigned char>& stealth_prefix = params.Base58Prefix(CChainParams::STEALTH_ADDRESS);
+        if (data.size() > stealth_prefix.size() && std::equal(stealth_prefix.begin(), stealth_prefix.end(), data.begin())) {
+            CStealthAddress sxAddr;
+            if (0 == sxAddr.FromRaw(data.data() + stealth_prefix.size(), data.size()))
+                return sxAddr;
+            return CNoDestination();
+        }
+    }
+    data.clear();
+    return CNoDestination();
+}
+} // namespace
+
+CTxDestination DecodeDestination(const std::string& str)
+{
+    return DecodeDestination(str, Params());
+}
+
+std::string EncodeDestination(const CTxDestination& dest)
+{
+    return boost::apply_visitor(DestinationEncoder(Params()), dest);
+}
 
 bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
 {
@@ -35,7 +99,7 @@ bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
         psz++;
     }
     // Allocate enough space in big-endian base256 representation.
-    int size = strlen(psz) * 733 /1000 + 1; // log(58) / log(256), rounded up.
+    int size = strlen(psz) * 733 / 1000 + 1; // log(58) / log(256), rounded up.
     std::vector<unsigned char> b256(size);
     // Process the characters.
     while (*psz && !isspace(*psz)) {
@@ -227,9 +291,10 @@ public:
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
     bool operator()(const CNoDestination& no) const { return false; }
+    bool operator()(const CStealthAddress& sxAddr) const { return addr->Set(sxAddr); }
 };
 
-} // anon namespace
+} // namespace
 
 bool CDynamicAddress::Set(const CKeyID& id)
 {
@@ -248,6 +313,16 @@ bool CDynamicAddress::Set(const CTxDestination& dest)
     return boost::apply_visitor(CDynamicAddressVisitor(this), dest);
 }
 
+bool CDynamicAddress::Set(const CStealthAddress& sxAddr)
+{
+    std::vector<uint8_t> raw;
+    if (0 != sxAddr.ToRaw(raw))
+        return false;
+
+    SetData(Params().Base58Prefix(CChainParams::STEALTH_ADDRESS), &raw[0], raw.size());
+    return true;
+}
+
 bool CDynamicAddress::IsValid() const
 {
     return IsValid(Params());
@@ -259,6 +334,36 @@ bool CDynamicAddress::IsValid(const CChainParams& params) const
     bool fKnownVersion = vchVersion == params.Base58Prefix(CChainParams::PUBKEY_ADDRESS) ||
                          vchVersion == params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
     return fCorrectSize && fKnownVersion;
+}
+
+bool CDynamicAddress::IsValidStealthAddress() const
+{
+    return IsValidStealthAddress(Params());
+}
+
+bool CDynamicAddress::IsValidStealthAddress(const CChainParams& params) const
+{
+    if (vchVersion != params.Base58Prefix(CChainParams::STEALTH_ADDRESS))
+        return false;
+
+    if (vchData.size() < MIN_STEALTH_RAW_SIZE)
+        return false;
+
+    size_t nPkSpend = vchData[34];
+
+    if (nPkSpend != 1) // TODO: allow multi
+        return false;
+
+    size_t nBits = vchData[35 + EC_COMPRESSED_SIZE * nPkSpend + 1];
+    if (nBits > 32)
+        return false;
+
+    size_t nPrefixBytes = std::ceil((float)nBits / 8.0);
+
+    if (vchData.size() != MIN_STEALTH_RAW_SIZE + EC_COMPRESSED_SIZE * (nPkSpend-1) + nPrefixBytes)
+        return false;
+
+    return true;
 }
 
 CTxDestination CDynamicAddress::Get() const

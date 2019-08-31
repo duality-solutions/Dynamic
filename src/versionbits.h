@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -36,9 +36,11 @@ typedef std::map<const CBlockIndex*, ThresholdState> ThresholdConditionCache;
 
 struct BIP9DeploymentInfo {
     /** Deployment name */
-    const char *name;
+    const char* name;
     /** Whether GBT clients can safely ignore this rule in simplified usage */
     bool gbt_force;
+    /** Whether to check current MN protocol or not */
+    bool check_dn_protocol;
 };
 
 extern const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[];
@@ -46,13 +48,14 @@ extern const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[];
 /**
  * Abstract class that implements BIP9-style threshold logic, and caches results.
  */
-class AbstractThresholdConditionChecker {
+class AbstractThresholdConditionChecker
+{
 protected:
-    virtual bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const =0;
-    virtual int64_t BeginTime(const Consensus::Params& params) const =0;
-    virtual int64_t EndTime(const Consensus::Params& params) const =0;
-    virtual int Period(const Consensus::Params& params) const =0;
-    virtual int Threshold(const Consensus::Params& params) const =0;
+    virtual bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const = 0;
+    virtual int64_t BeginTime(const Consensus::Params& params) const = 0;
+    virtual int64_t EndTime(const Consensus::Params& params) const = 0;
+    virtual int Period(const Consensus::Params& params) const = 0;
+    virtual int Threshold(const Consensus::Params& params) const = 0;
 
 public:
     // Note that the function below takes a pindexPrev as input: they compute information for block B based on its parent.
@@ -60,8 +63,7 @@ public:
     int GetStateSinceHeightFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const;
 };
 
-struct VersionBitsCache
-{
+struct VersionBitsCache {
     ThresholdConditionCache caches[Consensus::MAX_VERSION_BITS_DEPLOYMENTS];
 
     void Clear();

@@ -10,6 +10,25 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
+extern uint256 insecure_rand_seed;
+extern FastRandomContext insecure_rand_ctx;
+
+static inline void SeedInsecureRand(bool fDeterministic = false)
+{
+    if (fDeterministic) {
+        insecure_rand_seed = uint256();
+    } else {
+        insecure_rand_seed = GetRandHash();
+    }
+    insecure_rand_ctx = FastRandomContext(insecure_rand_seed);
+}
+
+static inline uint32_t InsecureRand32() { return insecure_rand_ctx.rand32(); }
+static inline uint256 InsecureRand256() { return insecure_rand_ctx.rand256(); }
+static inline uint64_t InsecureRandBits(int bits) { return insecure_rand_ctx.randbits(bits); }
+static inline uint64_t InsecureRandRange(uint64_t range) { return insecure_rand_ctx.randrange(range); }
+static inline bool InsecureRandBool() { return insecure_rand_ctx.randbool(); }
+
 /** Basic testing setup.
  * This just configures logging and chain parameters.
  */
@@ -76,7 +95,8 @@ struct TestMemPoolEntryHelper
         nFee(0), nTime(0), dPriority(0.0), nHeight(1),
         hadNoDependencies(false), spendsCoinbase(false), sigOpCount(1) { }
     
-    CTxMemPoolEntry FromTx(CMutableTransaction &tx, CTxMemPool *pool = NULL);
+    CTxMemPoolEntry FromTx(const CMutableTransaction &tx, CTxMemPool *pool = NULL);
+    CTxMemPoolEntry FromTx(const CTransaction &tx, CTxMemPool *pool = NULL);
 
     // Change the default value
     TestMemPoolEntryHelper &Fee(CAmount _fee) { nFee = _fee; return *this; }

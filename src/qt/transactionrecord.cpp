@@ -1,34 +1,33 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "transactionrecord.h"
 
 #include "base58.h"
+#include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
-#include "validation.h"
+#include "policy/policy.h"
 #include "privatesend.h"
 #include "timedata.h"
+#include "validation.h"
 #include "wallet/wallet.h"
 
 #include <stdint.h>
 
-#include <boost/foreach.hpp>
-
 /* Return positive answer if transaction should be shown in list.
  */
-bool TransactionRecord::showTransaction(const CWalletTx &wtx)
+bool TransactionRecord::showTransaction(const CWalletTx& wtx)
 {
-    if (wtx.IsCoinBase())
-    {
+    if (wtx.IsCoinBase()) {
         // Ensures we show generated coins / mined transactions at depth 1
-        if (!wtx.IsInMainChain())
-        {
+        if (!wtx.IsInMainChain()) {
             return false;
         }
     }
@@ -38,7 +37,7 @@ bool TransactionRecord::showTransaction(const CWalletTx &wtx)
 /*
  * Decompose CWallet transaction to model transaction records.
  */
-QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *wallet, const CWalletTx &wtx)
+QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* wallet, const CWalletTx& wtx)
 {
     QList<TransactionRecord> parts;
     int64_t nTime = wtx.GetTxTime();
@@ -48,40 +47,32 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
     uint256 hash = wtx.GetHash();
     std::map<std::string, std::string> mapValue = wtx.mapValue;
 
-    if (nNet > 0 || wtx.IsCoinBase())
-    {
+    if (nNet > 0 || wtx.IsCoinBase()) {
         //
         // Credit
         //
-        BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-        {
+        for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
+            const CTxOut& txout = wtx.tx->vout[i];
             isminetype mine = wallet->IsMine(txout);
-            if(mine)
-            {
+            if (mine) {
                 TransactionRecord sub(hash, nTime);
                 CTxDestination address;
-                sub.idx = parts.size(); // sequence number
+                sub.idx = i; // vout index
                 sub.credit = txout.nValue;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
-                if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*wallet, address))
-                {
+                if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*wallet, address)) {
                     // Received by Dynamic Address
                     sub.type = TransactionRecord::RecvWithAddress;
                     sub.address = CDynamicAddress(address).ToString();
-                }
-                else
-                {
+                } else {
                     // Received by IP connection (deprecated features), or a multisignature or other non-simple transaction
                     sub.type = TransactionRecord::RecvFromOther;
                     sub.address = mapValue["from"];
                 }
-                if (IsTransactionFluid(txout.scriptPubKey))
-                {
+                if (IsTransactionFluid(txout.scriptPubKey)) {
                     // Fluid type
                     sub.type = TransactionRecord::Fluid;
-                }
-                else if (wtx.IsCoinBase())
-                {
+                } else if (wtx.IsCoinBase()) {
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
@@ -89,43 +80,42 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 parts.append(sub);
             }
         }
-    }
-    else
-    {
+    } else {
         bool fAllFromMeDenom = true;
         int nFromMe = 0;
         bool involvesWatchAddress = false;
         isminetype fAllFromMe = ISMINE_SPENDABLE;
-        BOOST_FOREACH(const CTxIn& txin, wtx.vin)
-        {
-            if(wallet->IsMine(txin)) {
+        for (const CTxIn& txin : wtx.tx->vin) {
+            if (wallet->IsMine(txin)) {
                 fAllFromMeDenom = fAllFromMeDenom && wallet->IsDenominated(txin.prevout);
                 nFromMe++;
             }
             isminetype mine = wallet->IsMine(txin);
-            if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
-            if(fAllFromMe > mine) fAllFromMe = mine;
+            if (mine & ISMINE_WATCH_ONLY)
+                involvesWatchAddress = true;
+            if (fAllFromMe > mine)
+                fAllFromMe = mine;
         }
 
         isminetype fAllToMe = ISMINE_SPENDABLE;
         bool fAllToMeDenom = true;
         int nToMe = 0;
-        BOOST_FOREACH(const CTxOut& txout, wtx.vout) {
-            if(wallet->IsMine(txout)) {
+        for (const CTxOut& txout : wtx.tx->vout) {
+            if (wallet->IsMine(txout)) {
                 fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(txout.nValue);
                 nToMe++;
             }
             isminetype mine = wallet->IsMine(txout);
-            if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
-            if(fAllToMe > mine) fAllToMe = mine;
+            if (mine & ISMINE_WATCH_ONLY)
+                involvesWatchAddress = true;
+            if (fAllToMe > mine)
+                fAllToMe = mine;
         }
 
-        if(fAllFromMeDenom && fAllToMeDenom && nFromMe * nToMe) {
+        if (fAllFromMeDenom && fAllToMeDenom && nFromMe * nToMe) {
             parts.append(TransactionRecord(hash, nTime, TransactionRecord::PrivateSendDenominate, "", -nDebit, nCredit));
-            parts.last().involvesWatchAddress = false;   // maybe pass to TransactionRecord as constructor argument
-        }
-        else if (fAllFromMe && fAllToMe)
-        {
+            parts.last().involvesWatchAddress = false; // maybe pass to TransactionRecord as constructor argument
+        } else if (fAllFromMe && fAllToMe) {
             // Payment to self
             // TODO: this section still not accurate but covers most cases,
             // might need some additional work however
@@ -135,89 +125,135 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             sub.type = TransactionRecord::SendToSelf;
             sub.address = "";
 
-            if(mapValue["PS"] == "1")
-            {
+            if (mapValue["PS"] == "1") {
                 sub.type = TransactionRecord::PrivateSend;
                 CTxDestination address;
-                if (ExtractDestination(wtx.vout[0].scriptPubKey, address))
-                {
+                if (ExtractDestination(wtx.tx->vout[0].scriptPubKey, address)) {
                     // Sent to Dynamic Address
                     sub.address = CDynamicAddress(address).ToString();
-                }
-                else
-                {
+                } else {
                     // Sent to IP, or other non-address transaction like OP_EVAL
                     sub.address = mapValue["to"];
                 }
-            }
-            else
-            {
-                for (unsigned int nOut = 0; nOut < wtx.vout.size(); nOut++)
-                {
-                    const CTxOut& txout = wtx.vout[nOut];
-                    sub.idx = parts.size();
-                    if(IsTransactionFluid(txout.scriptPubKey)) sub.type = TransactionRecord::Fluid;
-                    if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
-                    if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
-                    if(nDebit - wtx.GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
+            } else {
+                sub.idx = parts.size();
+                if (wtx.tx->vin.size() == 1 && wtx.tx->vout.size() == 1 && CPrivateSend::IsCollateralAmount(nDebit) && CPrivateSend::IsCollateralAmount(nCredit) && CPrivateSend::IsCollateralAmount(-nNet)) {
+                    sub.type = TransactionRecord::PrivateSendCollateralPayment;
+                } else {
+                    for (const auto& txout : wtx.tx->vout) {
+                        if (txout.nValue == CPrivateSend::GetMaxCollateralAmount()) {
+                            sub.type = TransactionRecord::PrivateSendMakeCollaterals;
+                            break;
+                        }
+                        if (CPrivateSend::IsDenominatedAmount(txout.nValue)) {
+                            sub.type = TransactionRecord::PrivateSendCreateDenominations;
+                            break;
+                        }
+                        if (IsTransactionFluid(txout.scriptPubKey)) {
+                            sub.type = TransactionRecord::Fluid;
+                            break;
+                        }
+                    }
                 }
             }
-
             CAmount nChange = wtx.GetChange();
 
             sub.debit = -(nDebit - nChange);
             sub.credit = nCredit - nChange;
             parts.append(sub);
-            parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
-        }
-        else if (fAllFromMe)
-        {
+            parts.last().involvesWatchAddress = involvesWatchAddress; // maybe pass to TransactionRecord as constructor argument
+        } else if (fAllFromMe) {
             //
             // Debit
             //
-            CAmount nTxFee = nDebit - wtx.GetValueOut();
-
-            for (unsigned int nOut = 0; nOut < wtx.vout.size(); nOut++)
-            {
-                const CTxOut& txout = wtx.vout[nOut];
+            CAmount nTxFee = nDebit - wtx.tx->GetValueOut();
+            bool fDone = false;
+            if (wtx.tx->vin.size() == 1 && wtx.tx->vout.size() == 1 && CPrivateSend::IsCollateralAmount(nDebit) && nCredit == 0 // OP_RETURN
+                && CPrivateSend::IsCollateralAmount(-nNet)) {
+                TransactionRecord sub(hash, nTime);
+                sub.idx = 0;
+                sub.type = TransactionRecord::PrivateSendCollateralPayment;
+                sub.debit = -nDebit;
+                parts.append(sub);
+                fDone = true;
+            }
+            for (unsigned int nOut = 0; nOut < wtx.tx->vout.size() && !fDone; nOut++) {
+                const CTxOut& txout = wtx.tx->vout[nOut];
                 TransactionRecord sub(hash, nTime);
                 sub.idx = parts.size();
                 sub.involvesWatchAddress = involvesWatchAddress;
 
-                if(wallet->IsMine(txout))
-                {
+                if (wtx.tx->nVersion == BDAP_TX_VERSION && GetBDAPOpType(txout) > 0) {
+                    continue;
+                }
+                if (wallet->IsMine(txout)) {
                     // Ignore parts sent to self, as this is usually the change
                     // from a transaction sent back to our own address.
                     continue;
                 }
 
+                // Do not display stealth OP_RETURN outputs.
+                if (txout.IsData() && txout.nValue == 0)
+                    continue;
+
                 CTxDestination address;
-                if (ExtractDestination(txout.scriptPubKey, address))
-                {
+                if (ExtractDestination(txout.scriptPubKey, address)) {
                     // Sent to Dynamic Address
                     sub.type = TransactionRecord::SendToAddress;
                     sub.address = CDynamicAddress(address).ToString();
-                }
-                else
-                {
+                } else {
                     // Sent to IP, or other non-address transaction like OP_EVAL
                     sub.type = TransactionRecord::SendToOther;
                     sub.address = mapValue["to"];
                 }
-
-                if(IsTransactionFluid(txout.scriptPubKey)) 
-                {
-                    sub.type = TransactionRecord::Fluid;
+                if (wtx.tx->nVersion == BDAP_TX_VERSION && txout.scriptPubKey.IsUnspendable() && IsBDAPDataOutput(txout)) {
+                    int op1, op2;
+                    std::vector<std::vector<unsigned char> > vvchBDAPArgs;
+                    CScript scriptOp;
+                    if (GetBDAPOpScript(wtx.tx, scriptOp, vvchBDAPArgs, op1, op2)) {
+                        std::string errorMessage;
+                        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                            std::vector<unsigned char> vchData;
+                            std::vector<unsigned char> vchHash;
+                            CDomainEntry entry;
+                            GetBDAPData(txout, vchData, vchHash);
+                            entry.UnserializeFromData(vchData, vchHash);
+                            if (strOpType == "bdap_new_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::NewDomainUser;
+                            } else if (strOpType == "bdap_update_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::UpdateDomainUser;
+                            } else if (strOpType == "bdap_delete_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::DeleteDomainUser;
+                            } else if (strOpType == "bdap_revoke_account" && entry.ObjectTypeString() == "User Entry") {
+                                sub.type = TransactionRecord::RevokeDomainUser;
+                            } else if (strOpType == "bdap_new_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::NewDomainGroup;
+                            } else if (strOpType == "bdap_update_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::UpdateDomainGroup;
+                            } else if (strOpType == "bdap_delete_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::DeleteDomainGroup;
+                            } else if (strOpType == "bdap_revoke_account" && entry.ObjectTypeString() == "Group Entry") {
+                                sub.type = TransactionRecord::RevokeDomainGroup;
+                            }
+                        }
+                        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
+                            sub.type = TransactionRecord::LinkRequest;
+                        }
+                        else if (strOpType == "bdap_new_link_accept" || strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
+                            sub.type = TransactionRecord::LinkAccept;
+                        }
+                    }
                 }
-                else if(mapValue["PS"] == "1")
-                {
+                if (IsTransactionFluid(txout.scriptPubKey)) {
+                    sub.type = TransactionRecord::Fluid;
+                } else if (mapValue["PS"] == "1") {
                     sub.type = TransactionRecord::PrivateSend;
                 }
 
                 CAmount nValue = txout.nValue;
                 /* Add fee to first output */
-                if (nTxFee > 0)
-                {
+                if (nTxFee > 0) {
                     nValue += nTxFee;
                     nTxFee = 0;
                 }
@@ -225,9 +261,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
 
                 parts.append(sub);
             }
-        }
-        else
-        {
+        } else {
             //
             // Mixed debit transaction, can't break down payees
             //
@@ -239,7 +273,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
     return parts;
 }
 
-void TransactionRecord::updateStatus(const CWalletTx &wtx)
+void TransactionRecord::updateStatus(const CWalletTx& wtx)
 {
     AssertLockHeld(cs_main);
     // Determine transaction status
@@ -261,70 +295,48 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
     status.cur_num_blocks = chainActive.Height();
     status.cur_num_is_locks = nCompleteTXLocks;
 
-    if (!CheckFinalTx(wtx))
-    {
-        if (wtx.nLockTime < LOCKTIME_THRESHOLD)
-        {
+    if (!CheckFinalTx(wtx)) {
+        if (wtx.tx->nLockTime < LOCKTIME_THRESHOLD) {
             status.status = TransactionStatus::OpenUntilBlock;
-            status.open_for = wtx.nLockTime - chainActive.Height();
-        }
-        else
-        {
+            status.open_for = wtx.tx->nLockTime - chainActive.Height();
+        } else {
             status.status = TransactionStatus::OpenUntilDate;
-            status.open_for = wtx.nLockTime;
+            status.open_for = wtx.tx->nLockTime;
         }
     }
     // For generated transactions, determine maturity
-    else if(type == TransactionRecord::Generated)
-    {
-        if (wtx.GetBlocksToMaturity() > 0)
-        {
+    else if (type == TransactionRecord::Generated) {
+        if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;
 
-            if (wtx.IsInMainChain())
-            {
+            if (wtx.IsInMainChain()) {
                 status.matures_in = wtx.GetBlocksToMaturity();
 
                 // Check if the block was requested by anyone
                 if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
                     status.status = TransactionStatus::MaturesWarning;
-            }
-            else
-            {
+            } else {
                 status.status = TransactionStatus::NotAccepted;
             }
-        }
-        else
-        {
+        } else {
             status.status = TransactionStatus::Confirmed;
         }
-    }
-    else
-    {
-        if (status.depth < 0)
-        {
+    } else {
+        status.lockedByInstantSend = wtx.IsLockedByInstantSend();
+        if (status.depth < 0) {
             status.status = TransactionStatus::Conflicted;
-        }
-        else if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
-        {
+        } else if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0) {
             status.status = TransactionStatus::Offline;
-        }
-        else if (status.depth == 0)
-        {
+        } else if (status.depth == 0) {
             status.status = TransactionStatus::Unconfirmed;
             if (wtx.isAbandoned())
-				status.status = TransactionStatus::Abandoned;
-        }
-        else if (status.depth < RecommendedNumConfirmations)
-        {
+                status.status = TransactionStatus::Abandoned;
+        } else if (status.depth < RecommendedNumConfirmations) {
             status.status = TransactionStatus::Confirming;
-        }
-        else
-        {
+        } else {
             status.status = TransactionStatus::Confirmed;
         }
     }
-
 }
 
 bool TransactionRecord::statusUpdateNeeded()
@@ -342,4 +354,3 @@ int TransactionRecord::getOutputIndex() const
 {
     return idx;
 }
-

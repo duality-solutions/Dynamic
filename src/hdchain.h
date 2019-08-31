@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -8,6 +8,8 @@
 
 #include "key.h"
 #include "sync.h"
+
+#include "bip39.h"
 
 /* hd account data model */
 class CHDAccount
@@ -47,17 +49,16 @@ private:
     mutable CCriticalSection cs_accounts;
 
 public:
-
     CHDChain() : nVersion(CHDChain::CURRENT_VERSION) { SetNull(); }
-    CHDChain(const CHDChain& other) :
-        nVersion(other.nVersion),
-        id(other.id),
-        fCrypted(other.fCrypted),
-        vchSeed(other.vchSeed),
-        vchMnemonic(other.vchMnemonic),
-        vchMnemonicPassphrase(other.vchMnemonicPassphrase),
-        mapAccounts(other.mapAccounts)
-        {}
+    CHDChain(const CHDChain& other) : nVersion(other.nVersion),
+                                      id(other.id),
+                                      fCrypted(other.fCrypted),
+                                      vchSeed(other.vchSeed),
+                                      vchMnemonic(other.vchMnemonic),
+                                      vchMnemonicPassphrase(other.vchMnemonicPassphrase),
+                                      mapAccounts(other.mapAccounts)
+    {
+    }
 
     ADD_SERIALIZE_METHODS;
     template <typename Stream, typename Operation>
@@ -102,8 +103,8 @@ public:
 
     void Debug(std::string strName) const;
 
-    bool SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID);
-    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID);
+    bool SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH);
+    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH);
     bool GetMnemonic(SecureVector& vchMnemonicRet, SecureVector& vchMnemonicPassphraseRet) const;
     bool GetMnemonic(SecureString& ssMnemonicRet, SecureString& ssMnemonicPassphraseRet) const;
 
@@ -141,7 +142,6 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(this->nVersion);
-        nVersion = this->nVersion;
         READWRITE(extPubKey);
         READWRITE(hdchainID);
         READWRITE(nAccountIndex);

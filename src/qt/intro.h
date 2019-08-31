@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,8 +16,9 @@ static const bool DEFAULT_CHOOSE_DATADIR = false;
 
 class FreespaceChecker;
 
-namespace Ui {
-    class Intro;
+namespace Ui
+{
+class Intro;
 }
 
 /** Introduction screen (pre-GUI startup).
@@ -29,11 +30,11 @@ class Intro : public QDialog
     Q_OBJECT
 
 public:
-    explicit Intro(QWidget *parent = 0);
+    explicit Intro(QWidget* parent = 0);
     ~Intro();
 
     QString getDataDirectory();
-    void setDataDirectory(const QString &dataDir);
+    void setDataDirectory(const QString& dataDir);
 
     /**
      * Determine data directory. Let the user choose if the current one doesn't exist.
@@ -56,23 +57,23 @@ Q_SIGNALS:
     void stopThread();
 
 public Q_SLOTS:
-    void setStatus(int status, const QString &message, quint64 bytesAvailable);
+    void setStatus(int status, const QString& message, quint64 bytesAvailable);
 
 private Q_SLOTS:
-    void on_dataDirectory_textChanged(const QString &arg1);
+    void on_dataDirectory_textChanged(const QString& arg1);
     void on_ellipsisButton_clicked();
     void on_dataDirDefault_clicked();
     void on_dataDirCustom_clicked();
 
 private:
-    Ui::Intro *ui;
-    QThread *thread;
+    Ui::Intro* ui;
+    QThread* thread;
     QMutex mutex;
     bool signalled;
     QString pathToCheck;
 
     void startThread();
-    void checkPath(const QString &dataDir);
+    void checkPath(const QString& dataDir);
     QString getPathToCheck();
 
     friend class FreespaceChecker;

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,7 +20,7 @@ QT_END_NAMESPACE
 
 /** Widget for entering dynamic amounts.
   */
-class DynamicAmountField: public QWidget
+class DynamicAmountField : public QWidget
 {
     Q_OBJECT
 
@@ -29,9 +29,9 @@ class DynamicAmountField: public QWidget
     Q_PROPERTY(qint64 value READ value WRITE setValue NOTIFY valueChanged USER true)
 
 public:
-    explicit DynamicAmountField(QWidget *parent = 0);
+    explicit DynamicAmountField(QWidget* parent = 0);
 
-    CAmount value(bool *value=0) const;
+    CAmount value(bool* value = 0) const;
     void setValue(const CAmount& value);
 
     /** Set single step in satoshis **/
@@ -57,22 +57,21 @@ public:
     /** Qt messes up the tab chain by default in some cases (issue https://bugreports.qt-project.org/browse/QTBUG-10907),
         in these cases we have to set it up manually.
     */
-    QWidget *setupTabChain(QWidget *prev);
+    QWidget* setupTabChain(QWidget* prev);
 
 Q_SIGNALS:
     void valueChanged();
 
 protected:
     /** Intercept focus-in event and ',' key presses */
-    bool eventFilter(QObject *object, QEvent *event);
+    bool eventFilter(QObject* object, QEvent* event);
 
 private:
-    AmountSpinBox *amount;
-    QValueComboBox *unit;
+    AmountSpinBox* amount;
+    QValueComboBox* unit;
 
 private Q_SLOTS:
     void unitChanged(int idx);
-
 };
 
 #endif // DYNAMIC_QT_DYNAMICAMOUNTFIELD_H

@@ -6,12 +6,13 @@
 
 #include "test_dynamic.h"
 
+#include "bdap/stealth.h"
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "key.h"
 #include "validation.h"
-#include "miner.h"
+#include "miner/miner.h"
 #include "net_processing.h"
 #include "pubkey.h"
 #include "random.h"
@@ -34,14 +35,18 @@
 #include <boost/thread.hpp>
 
 std::unique_ptr<CConnman> g_connman;
+
 FastRandomContext insecure_rand_ctx(true);
+uint256 insecure_rand_seed = GetRandHash();
 
 extern bool fPrintToConsole;
 extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
+        RandomInit();
         ECC_Start();
+        ECC_Start_Stealth();
         SetupEnvironment();
         SetupNetworking();
         fPrintToDebugLog = false; // don't want to write to debug.log file
@@ -53,7 +58,8 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 BasicTestingSetup::~BasicTestingSetup()
 {
         ECC_Stop();
-         g_connman.reset();
+        ECC_Stop_Stealth();
+        g_connman.reset();
 }
 
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
@@ -124,7 +130,7 @@ TestChain100Setup::TestChain100Setup() : TestingSetup(CBaseChainParams::REGTEST)
     {
         std::vector<CMutableTransaction> noTxns;
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
-        coinbaseTxns.push_back(b.vtx[0]);
+        coinbaseTxns.push_back(*b.vtx[0]);
     }
 }
 
@@ -142,15 +148,16 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>&
     // Replace mempool-selected txns with just coinbase plus passed-in txns:
     block.vtx.resize(1);
     BOOST_FOREACH(const CMutableTransaction& tx, txns)
-        block.vtx.push_back(tx);
+        block.vtx.push_back(MakeTransactionRef(tx));
     // IncrementExtraNonce creates a valid coinbase and merkleRoot
     unsigned int extraNonce = 0;
-    IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
+    IncrementExtraNonce(block, chainActive.Tip(), extraNonce);
 
     while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
 
-    ProcessNewBlock(chainparams, &block, true, NULL, NULL);
-
+    std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
+    ProcessNewBlock(chainparams, shared_pblock, true, NULL);
+    
     CBlock result = block;
     return result;
 }
@@ -160,14 +167,14 @@ TestChain100Setup::~TestChain100Setup()
 }
 
 
-CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(CMutableTransaction &tx, CTxMemPool *pool) {
+CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction &tx, CTxMemPool *pool) {
     CTransaction txn(tx);
-    bool hasNoDependencies = pool ? pool->HasNoInputsOf(tx) : hadNoDependencies;
-    // Hack to assume either its completely dependent on other mempool txs or not at all
-    CAmount inChainValue = hasNoDependencies ? txn.GetValueOut() : 0;
+    return FromTx(txn, pool);
+}
 
-    return CTxMemPoolEntry(txn, nFee, nTime, dPriority, nHeight,
-                           hasNoDependencies, inChainValue, spendsCoinbase, sigOpCount, lp);
+CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CTransaction &txn, CTxMemPool *pool) {
+    return CTxMemPoolEntry(MakeTransactionRef(txn), nFee, nTime, dPriority, nHeight,
+                           txn.GetValueOut(), spendsCoinbase, sigOpCount, lp);
 }
 
 void Shutdown(void* parg)
@@ -183,4 +190,9 @@ void StartShutdown()
 bool ShutdownRequested()
 {
   return false;
+}
+
+void StartMnemonicRestart()
+{
+  exit(0);
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="en" version="2.0">
+<TS language="en" version="2.4">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -1322,7 +1322,7 @@ You retain control of your money at all times.&lt;hr&gt;
 &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;
 &lt;ol type=&#39;1&#39;&gt;
 &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations.
-These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
+These denominations are 0.001, 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
 &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &#39;Dynodes&#39;.
 These Dynodes are informed then that you are interested in mixing a certain denomination.
 No identifiable information is sent to the Dynodes, so they never know &#39;who&#39; you are.&lt;/li&gt;
@@ -1339,6 +1339,72 @@ This means those 2000 addresses last for about 200 mixing events. When 1900 of t
 It can only do this, however, if you have automatic backups enabled.&lt;br&gt;
 Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;
                 </translation>
+    </message>
+</context>
+<context>
+<name>MnemonicDialog</name>
+    <message>
+        <source>Import – recovery phrase/private key</source>
+        <translation>Import – recovery phrase/private key</translation>
+    </message>
+    <message>
+        <source>Import Mnemonic Phrase or Private Key</source>
+        <translation>Import Mnemonic Phrase or Private Key</translation>
+    </message>
+    <message>
+        <source>Import mnemonic</source>
+        <translation>Import mnemonic</translation>
+    </message>
+    <message>
+        <source>Input your mnemonic</source>
+        <translation>Input your mnemonic</translation>
+    </message>
+    <message>
+        <source>Import privatekey</source>
+        <translation>Import privatekey</translation>
+    </message>
+    <message>
+        <source>Import privatekey file</source>
+        <translation>Import privatekey file</translation>
+    </message>
+    <message>
+        <source>Input single privatekey</source>
+        <translation>Input single privatekey</translation>
+    </message>
+    <message>
+        <source>Input privatekey file</source>
+        <translation>Input privatekey file</translation>
+    </message>
+    <message>
+        <source>Separating by space</source>
+        <translation>Separating by space</translation>
+    </message>
+    <message>
+        <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
+        <translation>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
+    </message>
+    <message>
+        <source>Tips: The private key file is the file exported by Bitcoin-Core ‘dumpwallet filename’, not the .dat file.</source>
+        <translation>Tips: The private key file is the file exported by Bitcoin-Core ‘dumpwallet filename’, not the .dat file.</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Import</translation>
+    </message>
+    <message>
+        <source>Reimport</source>
+        <translation>Reimport</translation>
+    </message>
+    <message>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the ‘re-import’ button.</source>
+        <translation>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the ‘re-import’ button.</translation>
+    </message>
+</context>
+ <context>
+    <name>WalletChooseDialog</name>
+    <message>
+        <source>choose wallet</source>
+        <translation>choose wallet</translation>
     </message>
 </context>
 <context>
@@ -2568,6 +2634,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <location line="+2"/>
         <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import(I)...</source>
+        <translation>Import(I)...</translation>
+    </message>
+    <message>
+        <source>Import Mnemonic Phrase or Private Key</source>
+        <translation>Import Mnemonic Phrase or Private Key</translation>
+    </message>
+    <message>
+        <source>Choose File</source>
+        <translation>Choose File</translation>
     </message>
     <message>
         <location line="+139"/>
@@ -4091,6 +4169,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Min amount</translation>
     </message>
     <message>
+        <location line="+37"/>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <location line="+36"/>
         <source>Copy address</source>
         <translation>Copy address</translation>
@@ -4320,8 +4403,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>In this mode -genproclimit controls how many blocks are generated immediately.</translation>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
+        <translation>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</translation>
     </message>
     <message>
         <location line="+3"/>

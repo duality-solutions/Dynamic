@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,46 +19,43 @@
 
 // If we don't want a message to be processed by Qt, return true and set result to
 // the value that the window procedure should return. Otherwise return false.
-bool WinShutdownMonitor::nativeEventFilter(const QByteArray &eventType, void *pMessage, long *pnResult)
+bool WinShutdownMonitor::nativeEventFilter(const QByteArray& eventType, void* pMessage, long* pnResult)
 {
-       Q_UNUSED(eventType);
+    Q_UNUSED(eventType);
 
-       MSG *pMsg = static_cast<MSG *>(pMessage);
+    MSG* pMsg = static_cast<MSG*>(pMessage);
 
-       // Seed OpenSSL PRNG with Windows event data (e.g.  mouse movements and other user interactions)
-       if (RAND_event(pMsg->message, pMsg->wParam, pMsg->lParam) == 0) {
-            // Warn only once as this is performance-critical
-            static bool warned = false;
-            if (!warned) {
-                LogPrintf("%s: OpenSSL RAND_event() failed to seed OpenSSL PRNG with enough data.\n", __func__);
-                warned = true;
-            }
-       }
+    // Seed OpenSSL PRNG with Windows event data (e.g.  mouse movements and other user interactions)
+    if (RAND_event(pMsg->message, pMsg->wParam, pMsg->lParam) == 0) {
+        // Warn only once as this is performance-critical
+        static bool warned = false;
+        if (!warned) {
+            LogPrintf("%s: OpenSSL RAND_event() failed to seed OpenSSL PRNG with enough data.\n", __func__);
+            warned = true;
+        }
+    }
 
-       switch(pMsg->message)
-       {
-           case WM_QUERYENDSESSION:
-           {
-               // Initiate a client shutdown after receiving a WM_QUERYENDSESSION and block
-               // Windows session end until we have finished client shutdown.
-               StartShutdown();
-               *pnResult = FALSE;
-               return true;
-           }
+    switch (pMsg->message) {
+    case WM_QUERYENDSESSION: {
+        // Initiate a client shutdown after receiving a WM_QUERYENDSESSION and block
+        // Windows session end until we have finished client shutdown.
+        StartShutdown();
+        *pnResult = FALSE;
+        return true;
+    }
 
-           case WM_ENDSESSION:
-           {
-               *pnResult = FALSE;
-               return true;
-           }
-       }
+    case WM_ENDSESSION: {
+        *pnResult = FALSE;
+        return true;
+    }
+    }
 
-       return false;
+    return false;
 }
 
 void WinShutdownMonitor::registerShutdownBlockReason(const QString& strReason, const HWND& mainWinId)
 {
-    typedef BOOL (WINAPI *PSHUTDOWNBRCREATE)(HWND, LPCWSTR);
+    typedef BOOL(WINAPI * PSHUTDOWNBRCREATE)(HWND, LPCWSTR);
     PSHUTDOWNBRCREATE shutdownBRCreate = (PSHUTDOWNBRCREATE)GetProcAddress(GetModuleHandleA("User32.dll"), "ShutdownBlockReasonCreate");
     if (shutdownBRCreate == NULL) {
         qWarning() << "registerShutdownBlockReason: GetProcAddress for ShutdownBlockReasonCreate failed";

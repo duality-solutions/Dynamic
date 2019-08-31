@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,8 +12,9 @@
 
 class WalletModel;
 
-namespace Ui {
-    class AskPassphraseDialog;
+namespace Ui
+{
+class AskPassphraseDialog;
 }
 
 /** Multifunctional dialog to ask for passphrases. Used for encryption, unlocking, and changing the passphrase.
@@ -24,24 +25,24 @@ class AskPassphraseDialog : public QDialog
 
 public:
     enum Mode {
-        Encrypt,    /**< Ask passphrase twice and encrypt */
-        UnlockMixing,     /**< Ask passphrase and unlock only for mixing */
-        Unlock,     /**< Ask passphrase and unlock */
-        ChangePass, /**< Ask old passphrase + new passphrase twice */
-        Decrypt     /**< Ask passphrase and decrypt wallet */
+        Encrypt,      /**< Ask passphrase twice and encrypt */
+        UnlockMixing, /**< Ask passphrase and unlock only for mixing */
+        Unlock,       /**< Ask passphrase and unlock */
+        ChangePass,   /**< Ask old passphrase + new passphrase twice */
+        Decrypt       /**< Ask passphrase and decrypt wallet */
     };
 
-    explicit AskPassphraseDialog(Mode mode, QWidget *parent);
+    explicit AskPassphraseDialog(Mode mode, QWidget* parent);
     ~AskPassphraseDialog();
 
     void accept();
 
-    void setModel(WalletModel *model);
+    void setModel(WalletModel* model);
 
 private:
-    Ui::AskPassphraseDialog *ui;
+    Ui::AskPassphraseDialog* ui;
     Mode mode;
-    WalletModel *model;
+    WalletModel* model;
     bool fCapsLock;
 
 private Q_SLOTS:
@@ -49,8 +50,8 @@ private Q_SLOTS:
     void secureClearPassFields();
 
 protected:
-    bool event(QEvent *event);
-    bool eventFilter(QObject *object, QEvent *event);
+    bool event(QEvent* event);
+    bool eventFilter(QObject* object, QEvent* event);
 };
 
 #endif // DYNAMIC_QT_ASKPASSPHRASEDIALOG_H

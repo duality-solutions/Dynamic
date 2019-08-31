@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -38,7 +38,7 @@ void ThreadSendAlert(CConnman& connman)
     // Wait one minute so we get well connected. If we only need to print
     // but not to broadcast - do this right away.
     if (IsArgSet("-sendalert"))
-        MilliSleep(60*1000);
+        MilliSleep(60 * 1000);
 
     //
     // Alerts are relayed around the network until nRelayUntil, flood
@@ -49,29 +49,28 @@ void ThreadSendAlert(CConnman& connman)
     // Nodes never save alerts to disk, they are in-memory-only.
     //
     CAlert alert;
-    alert.nRelayUntil   = GetAdjustedTime() + 15 * 60;
-    alert.nExpiration   = GetAdjustedTime() + 30 * 60 * 60;
-    alert.nID           = 1;  // keep track of alert IDs somewhere
-    alert.nCancel       = 0;   // cancels previous messages up to this ID number
+    alert.nRelayUntil = GetAdjustedTime() + 15 * 60;
+    alert.nExpiration = GetAdjustedTime() + 30 * 60 * 60;
+    alert.nID = 1;     // keep track of alert IDs somewhere
+    alert.nCancel = 0; // cancels previous messages up to this ID number
 
     // These versions are protocol versions
-    alert.nMinVer       = 60800;
-    alert.nMaxVer       = 60800;
+    alert.nMinVer = 60800;
+    alert.nMaxVer = 70100;
 
     //
     //  1000 for Misc warnings like out of disk space and clock is wrong
     //  2000 for longer invalid proof-of-work chain
     //  Higher numbers mean higher priority
-    alert.nPriority     = 5000;
-    alert.strComment    = "";
-    alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality.solutions";
+    alert.nPriority = 5000;
+    alert.strComment = "";
+    alert.strStatusBar = "URGENT: Upgrade required: see https://www.duality.solutions";
 
     // Set specific client version/versions here. If setSubVer is empty, no filtering on subver is done:
     // alert.setSubVer.insert(std::string("/Dynamic:1.3.0.0/"));
 
     // Sign
-    if(!alert.Sign())
-    {
+    if (!alert.Sign()) {
         LogPrintf("ThreadSendAlert() : could not sign alert\n");
         return;
     }
@@ -81,8 +80,7 @@ void ThreadSendAlert(CConnman& connman)
     sBuffer << alert;
     CAlert alert2;
     sBuffer >> alert2;
-    if (!alert2.CheckSignature(Params().AlertKey()))
-    {
+    if (!alert2.CheckSignature(Params().AlertKey())) {
         printf("ThreadSendAlert() : CheckSignature failed\n");
         return;
     }
@@ -108,8 +106,7 @@ void ThreadSendAlert(CConnman& connman)
     int nSent = 0;
     {
         connman.ForEachNode([&alert2, &connman, &nSent](CNode* pnode) {
-            if (alert2.RelayTo(pnode, connman))
-            {
+            if (alert2.RelayTo(pnode, connman)) {
                 printf("ThreadSendAlert() : Sent alert to %s\n", pnode->addr.ToString().c_str());
                 nSent++;
             }

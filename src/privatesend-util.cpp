@@ -1,12 +1,11 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "privatesend-util.h"
 
-CKeyHolder::CKeyHolder(CWallet* pwallet) :
-    reserveKey(pwallet)
+CKeyHolder::CKeyHolder(CWallet* pwallet) : reserveKey(pwallet)
 {
     reserveKey.GetReservedKey(pubKey, false);
 }
@@ -27,33 +26,48 @@ CScript CKeyHolder::GetScriptForDestination() const
 }
 
 
-const CKeyHolder& CKeyHolderStorage::AddKey(CWallet* pwallet)
+CScript CKeyHolderStorage::AddKey(CWallet* pwallet)
 {
+    auto keyHolder = std::unique_ptr<CKeyHolder>(new CKeyHolder(pwallet));
+    auto script = keyHolder->GetScriptForDestination();
+
     LOCK(cs_storage);
-    storage.emplace_back(std::unique_ptr<CKeyHolder>(new CKeyHolder(pwallet)));
+    storage.emplace_back(std::move(keyHolder));
     LogPrintf("CKeyHolderStorage::%s -- storage size %lld\n", __func__, storage.size());
-    return *storage.back();
+    return script;
 }
 
-void CKeyHolderStorage::KeepAll(){
-    LOCK(cs_storage);
-    if (storage.size() > 0) {
-        for (auto &key : storage) {
+
+void CKeyHolderStorage::KeepAll()
+{
+    std::vector<std::unique_ptr<CKeyHolder> > tmp;
+    {
+        // don't hold cs_storage while calling KeepKey(), which might lock cs_wallet
+        LOCK(cs_storage);
+        std::swap(storage, tmp);
+    }
+
+    if (tmp.size() > 0) {
+        for (auto& key : tmp) {
             key->KeepKey();
         }
-        LogPrintf("CKeyHolderStorage::%s -- %lld keys kept\n", __func__, storage.size());
-        storage.clear();
+        LogPrintf("CKeyHolderStorage::%s -- %lld keys kept\n", __func__, tmp.size());
     }
 }
 
 void CKeyHolderStorage::ReturnAll()
 {
-    LOCK(cs_storage);
-    if (storage.size() > 0) {
-        for (auto &key : storage) {
+    std::vector<std::unique_ptr<CKeyHolder> > tmp;
+    {
+        // don't hold cs_storage while calling ReturnKey(), which might lock cs_wallet
+        LOCK(cs_storage);
+        std::swap(storage, tmp);
+    }
+
+    if (tmp.size() > 0) {
+        for (auto& key : tmp) {
             key->ReturnKey();
         }
-        LogPrintf("CKeyHolderStorage::%s -- %lld keys returned\n", __func__, storage.size());
-        storage.clear();
+        LogPrintf("CKeyHolderStorage::%s -- %lld keys returned\n", __func__, tmp.size());
     }
 }

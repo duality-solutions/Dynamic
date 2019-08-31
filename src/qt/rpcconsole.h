@@ -1,6 +1,6 @@
-// Copyright (c) 2009-2018 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,8 +21,9 @@ class ClientModel;
 class PlatformStyle;
 class RPCTimerInterface;
 
-namespace Ui {
-    class RPCConsole;
+namespace Ui
+{
+class RPCConsole;
 }
 
 QT_BEGIN_NAMESPACE
@@ -30,17 +31,17 @@ class QItemSelection;
 QT_END_NAMESPACE
 
 /** Local Dynamic RPC console. */
-class RPCConsole: public QDialog
+class RPCConsole : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit RPCConsole(QWidget *parent);
+    explicit RPCConsole(QWidget* parent);
     ~RPCConsole();
 
-    static bool RPCExecuteCommandLine(std::string &strResult, const std::string &strCommand);
+    static bool RPCExecuteCommandLine(std::string& strResult, const std::string& strCommand);
 
-    void setClientModel(ClientModel *model);
+    void setClientModel(ClientModel* model);
 
     enum MessageClass {
         MC_ERROR,
@@ -59,8 +60,8 @@ public:
     };
 
 protected:
-    virtual bool eventFilter(QObject* obj, QEvent *event);
-    void keyPressEvent(QKeyEvent *);
+    virtual bool eventFilter(QObject* obj, QEvent* event);
+    void keyPressEvent(QKeyEvent*);
 
 private Q_SLOTS:
     void on_lineEdit_returnPressed();
@@ -71,9 +72,9 @@ private Q_SLOTS:
     void on_sldGraphRange_valueChanged(int value);
     /** update traffic statistics */
     void updateTrafficStats(quint64 totalBytesIn, quint64 totalBytesOut);
-    void resizeEvent(QResizeEvent *event);
-    void showEvent(QShowEvent *event);
-    void hideEvent(QHideEvent *event);
+    void resizeEvent(QResizeEvent* event);
+    void showEvent(QShowEvent* event);
+    void hideEvent(QHideEvent* event);
     /** Show custom context menu on Peers tab */
     void showPeersTableContextMenu(const QPoint& point);
     /** Show custom context menu on Bans tab */
@@ -97,11 +98,11 @@ public Q_SLOTS:
     void walletUpgrade();
     void walletReindex();
 
-    void message(int category, const QString &message, bool html = false);
+    void message(int category, const QString& message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of Dynodes shown in the UI */        
-    void setDynodeCount(const QString &strDynodes);      
+    /** Set number of Dynodes shown in the UI */
+    void setDynodeCount(const QString& strDynodes);
     /** Set number of blocks shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Go forward or back in history */
@@ -109,7 +110,7 @@ public Q_SLOTS:
     /** Scroll console view to end */
     void scrollToEnd();
     /** Handle selection of peer in peers list */
-    void peerSelected(const QItemSelection &selected, const QItemSelection &deselected);
+    void peerSelected(const QItemSelection& selected, const QItemSelection& deselected);
     /** Handle selection caching before update */
     void peerLayoutAboutToChange();
     /** Handle updated peer information */
@@ -137,7 +138,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     // For RPC command executor
     void stopExecutor();
-    void cmdRequest(const QString &command);
+    void cmdRequest(const QString& command);
     /** Get restart command-line parameters and handle restart */
     void handleRestart(QStringList args);
 
@@ -148,10 +149,9 @@ private:
     /** Build parameter list for restart */
     void buildParameterlist(QString arg);
     /** show detailed information on ui about selected node */
-    void updateNodeDetail(const CNodeCombinedStats *stats);
+    void updateNodeDetail(const CNodeCombinedStats* stats);
 
-    enum ColumnWidths
-    {
+    enum ColumnWidths {
         ADDRESS_COLUMN_WIDTH = 200,
         SUBVERSION_COLUMN_WIDTH = 100,
         PING_COLUMN_WIDTH = 80,
@@ -159,16 +159,16 @@ private:
         BANTIME_COLUMN_WIDTH = 250
     };
 
-    Ui::RPCConsole *ui;
-    ClientModel *clientModel;
+    Ui::RPCConsole* ui;
+    ClientModel* clientModel;
     QStringList history;
     int historyPtr;
     QList<NodeId> cachedNodeids;
-    RPCTimerInterface *rpcTimerInterface;      
-    QMenu *peersTableContextMenu;
-    QMenu *banTableContextMenu;
+    RPCTimerInterface* rpcTimerInterface;
+    QMenu* peersTableContextMenu;
+    QMenu* banTableContextMenu;
     int consoleFontSize;
-    QCompleter *autoCompleter;
+    QCompleter* autoCompleter;
     QThread thread;
 };
 

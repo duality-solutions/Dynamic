@@ -46,6 +46,7 @@
         <file alias="synced">res/icons/drk/synced.png</file>
         <file alias="transaction_0">res/icons/drk/transaction0.png</file>
         <file alias="transaction_confirmed">res/icons/drk/transaction2.png</file>
+        <file alias="transaction_abandoned">res/icons/drk/transaction_abandoned.png</file>
         <file alias="transaction_conflicted">res/icons/drk/transaction_conflicted.png</file>
         <file alias="transaction_1">res/icons/drk/clock1.png</file>
         <file alias="transaction_2">res/icons/drk/clock2.png</file>
@@ -53,6 +54,7 @@
         <file alias="transaction_4">res/icons/drk/clock4.png</file>
         <file alias="transaction_5">res/icons/drk/clock5.png</file>
         <file alias="tx_mined">res/icons/drk/tx_mined.png</file>
+        <file alias="tx_bdap">res/icons/drk/bdap.png</file>
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>

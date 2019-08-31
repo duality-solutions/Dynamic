@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -22,8 +22,9 @@ class OptionsModel;
 class PlatformStyle;
 class WalletModel;
 
-namespace Ui {
-    class ReceiveCoinsDialog;
+namespace Ui
+{
+class ReceiveCoinsDialog;
 }
 
 QT_BEGIN_NAMESPACE
@@ -44,38 +45,38 @@ public:
         MINIMUM_COLUMN_WIDTH = 120
     };
 
-    explicit ReceiveCoinsDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    explicit ReceiveCoinsDialog(const PlatformStyle* platformStyle, QWidget* parent = 0);
     ~ReceiveCoinsDialog();
 
-    void setModel(WalletModel *model);
+    void setModel(WalletModel* model);
 
 public Q_SLOTS:
     void clear();
-    void reject();
-    void accept();
+    void reject() override;
+    void accept() override;
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    Ui::ReceiveCoinsDialog *ui;
-    GUIUtil::TableViewLastColumnResizingFixer *columnResizingFixer;
-    WalletModel *model;
-    QMenu *contextMenu;
-    const PlatformStyle *platformStyle;
-	
-	QModelIndex selectedRow();
+    Ui::ReceiveCoinsDialog* ui;
+    GUIUtil::TableViewLastColumnResizingFixer* columnResizingFixer;
+    WalletModel* model;
+    QMenu* contextMenu;
+    const PlatformStyle* platformStyle;
+
+    QModelIndex selectedRow();
     void copyColumnToClipboard(int column);
-    virtual void resizeEvent(QResizeEvent *event);
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 private Q_SLOTS:
     void on_receiveButton_clicked();
     void on_showRequestButton_clicked();
     void on_removeRequestButton_clicked();
-    void on_recentRequestsView_doubleClicked(const QModelIndex &index);
-    void recentRequestsView_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void on_recentRequestsView_doubleClicked(const QModelIndex& index);
+    void recentRequestsView_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void updateDisplayUnit();
-    void showMenu(const QPoint &point);
+    void showMenu(const QPoint& point);
     void copyAddress();
     void copyLabel();
     void copyMessage();

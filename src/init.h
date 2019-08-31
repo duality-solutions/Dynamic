@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,9 +11,7 @@
 #include <string>
 
 class CScheduler;
-#ifdef ENABLE_WALLET		
 class CWallet;
-#endif //ENABLE_WALLET		
 
 namespace boost
 {
@@ -22,7 +20,9 @@ class thread_group;
 
 void StartShutdown();
 void StartRestart();
+void StartMnemonicRestart();
 bool ShutdownRequested();
+bool MnemonicRestartRequested();
 /** Interrupt threads */
 void Interrupt(boost::thread_group& threadGroup);
 void Shutdown();
@@ -55,6 +55,7 @@ bool AppInitSanityChecks();
  */
 bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler);
 void PrepareShutdown();
+void SwapMnemonicWalletFile();
 
 /** The help message mode determines what help message to show */
 enum HelpMessageMode {

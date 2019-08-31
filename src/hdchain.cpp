@@ -1,12 +1,12 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "base58.h"
-#include "bip39.h"
-#include "chainparams.h"
 #include "hdchain.h"
+#include "base58.h"
+//#include "bip39.h"
+#include "chainparams.h"
 #include "tinyformat.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -67,16 +67,15 @@ void CHDChain::Debug(std::string strName) const
             CDynamicExtPubKey b58extpubkey;
             b58extpubkey.SetKey(extpubkey);
             std::cout << "extended public masterkey: " << b58extpubkey.ToString().c_str() << std::endl;
-        }
-    );
+        });
 }
 
-bool CHDChain::SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID)
+bool CHDChain::SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage)
 {
-    return SetMnemonic(SecureString(vchMnemonic.begin(), vchMnemonic.end()), SecureString(vchMnemonicPassphrase.begin(), vchMnemonicPassphrase.end()), fUpdateID);
+    return SetMnemonic(SecureString(vchMnemonic.begin(), vchMnemonic.end()), SecureString(vchMnemonicPassphrase.begin(), vchMnemonicPassphrase.end()), fUpdateID, selectLanguage);
 }
 
-bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID)
+bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage)
 {
     SecureString ssMnemonicTmp = ssMnemonic;
     if (fUpdateID) {
@@ -90,9 +89,11 @@ bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& s
         }
         // NOTE: default mnemonic passphrase is an empty string
 
-        // printf("mnemonic: %s\n", ssMnemonicTmp.c_str());
-        if (!CMnemonic::Check(ssMnemonicTmp)) {
-            throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+        //if importing mnemonic, mnemonic and mnemonic wallet file has already been checked. don't check again
+        if (!GetBoolArg("-skipmnemoniccheck", false)) {
+            if (!CMnemonic::Check(ssMnemonicTmp,selectLanguage)) {
+                throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+            }
         }
 
         CMnemonic::ToSeed(ssMnemonicTmp, ssMnemonicPassphrase, vchSeed);
@@ -101,6 +102,9 @@ bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& s
 
     vchMnemonic = SecureVector(ssMnemonicTmp.begin(), ssMnemonicTmp.end());
     vchMnemonicPassphrase = SecureVector(ssMnemonicPassphrase.begin(), ssMnemonicPassphrase.end());
+
+    //cleanup
+    ForceRemoveArg("-skipmnemoniccheck");
 
     return !IsNull();
 }
@@ -152,12 +156,12 @@ uint256 CHDChain::GetSeedHash()
 void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey& extKeyRet)
 {
     // Use BIP44 keypath scheme i.e. m / purpose' / coin_type' / account' / change / address_index
-    CExtKey masterKey;              //hd master key
-    CExtKey purposeKey;             //key at m/purpose'
-    CExtKey cointypeKey;            //key at m/purpose'/coin_type'
-    CExtKey accountKey;             //key at m/purpose'/coin_type'/account'
-    CExtKey changeKey;              //key at m/purpose'/coin_type'/account'/change
-    CExtKey childKey;               //key at m/purpose'/coin_type'/account'/change/address_index
+    CExtKey masterKey;   //hd master key
+    CExtKey purposeKey;  //key at m/purpose'
+    CExtKey cointypeKey; //key at m/purpose'/coin_type'
+    CExtKey accountKey;  //key at m/purpose'/coin_type'/account'
+    CExtKey changeKey;   //key at m/purpose'/coin_type'/account'/change
+    CExtKey childKey;    //key at m/purpose'/coin_type'/account'/change/address_index
 
     masterKey.SetMaster(&vchSeed[0], vchSeed.size());
 

@@ -1,15 +1,15 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "chainparams.h"
 #include "clientversion.h"
 #include "compat.h"
-#include "httpserver.h"
 #include "httprpc.h"
+#include "httpserver.h"
 #include "init.h"
 #include "noui.h"
 #include "rpcserver.h"
@@ -21,8 +21,8 @@
 
 #include <stdio.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
 
@@ -44,15 +44,13 @@
 
 void WaitForShutdown(boost::thread_group* threadGroup)
 {
-    bool fShutdown = ShutdownRequested();
+    bool fShutdown = ShutdownRequested() || MnemonicRestartRequested();
     // Tell the main threads to shutdown.
-    while (!fShutdown)
-    {
+    while (!fShutdown) {
         MilliSleep(200);
-        fShutdown = ShutdownRequested();
+        fShutdown = ShutdownRequested() || MnemonicRestartRequested();
     }
-    if (threadGroup)
-    {
+    if (threadGroup) {
         Interrupt(*threadGroup);
         threadGroup->join_all();
     }
@@ -76,18 +74,14 @@ bool AppInit(int argc, char* argv[])
     ParseParameters(argc, argv);
 
     // Process help and version before taking care about datadir
-    if (IsArgSet("-?") || IsArgSet("-h") ||  IsArgSet("-help") || IsArgSet("-version"))
-    {
+    if (IsArgSet("-?") || IsArgSet("-h") || IsArgSet("-help") || IsArgSet("-version")) {
         std::string strUsage = _("Dynamic Daemon") + " " + _("version") + " " + FormatFullVersion() + "\n";
 
-        if (IsArgSet("-version"))
-        {
+        if (IsArgSet("-version")) {
             strUsage += FormatParagraph(LicenseInfo());
-        }
-        else
-        {
+        } else {
             strUsage += "\n" + _("Usage:") + "\n" +
-                  "  dynamicd [options]                     " + _("Start Dynamic Daemon") + "\n";
+                        "  dynamicd [options]                     " + _("Start Dynamic Daemon") + "\n";
 
             strUsage += "\n" + HelpMessage(HMM_DYNAMICD);
         }
@@ -96,23 +90,19 @@ bool AppInit(int argc, char* argv[])
         return true;
     }
 
-    try
-    {
+    try {
         bool datadirFromCmdLine = IsArgSet("-datadir");
-        if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false)))
-        {
+        if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
             fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", GetArg("-datadir", "").c_str());
             return false;
         }
-        try
-        {
+        try {
             ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
         } catch (const std::exception& e) {
-            fprintf(stderr,"Error reading configuration file: %s\n", e.what());
+            fprintf(stderr, "Error reading configuration file: %s\n", e.what());
             return false;
         }
-        if (!datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false)))
-        {
+        if (!datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
             fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", GetArg("-datadir", "").c_str());
             return EXIT_FAILURE;
         }
@@ -126,8 +116,8 @@ bool AppInit(int argc, char* argv[])
 
         // parse dynode.conf
         std::string strErr;
-        if(!dynodeConfig.read(strErr)) {
-            fprintf(stderr,"Error reading Dynode configuration file: %s\n", strErr.c_str());
+        if (!dynodeConfig.read(strErr)) {
+            fprintf(stderr, "Error reading Dynode configuration file: %s\n", strErr.c_str());
             return false;
         }
 
@@ -137,8 +127,7 @@ bool AppInit(int argc, char* argv[])
             if (!IsSwitchChar(argv[i][0]) && !boost::algorithm::istarts_with(argv[i], "dynamic:"))
                 fCommandLine = true;
 
-        if (fCommandLine)
-        {
+        if (fCommandLine) {
             fprintf(stderr, "Error: There is no RPC client functionality in dynamicd anymore. Use the dynamic-cli utility instead.\n");
             exit(EXIT_FAILURE);
         }
@@ -147,24 +136,24 @@ bool AppInit(int argc, char* argv[])
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
-        if (!AppInitBasicSetup())
-        {
+        if (!AppInitBasicSetup()) {
             // InitError will have been called with detailed error, which ends up on console
             exit(EXIT_FAILURE);
         }
-        if (!AppInitParameterInteraction())
-        {
+        if (!AppInitParameterInteraction()) {
             // InitError will have been called with detailed error, which ends up on console
             exit(EXIT_FAILURE);
         }
-        if (!AppInitSanityChecks())
-        {
+        if (!AppInitSanityChecks()) {
             // InitError will have been called with detailed error, which ends up on console
             exit(EXIT_FAILURE);
         }
-        if (GetBoolArg("-daemon", false))
-        {
+        if (GetBoolArg("-daemon", false)) {
 #if HAVE_DECL_DAEMON
+#if defined(MAC_OSX)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
             fprintf(stdout, "Dynamic server starting\n");
 
             // Daemonize
@@ -172,6 +161,9 @@ bool AppInit(int argc, char* argv[])
                 fprintf(stderr, "Error: daemon() failed: %s\n", strerror(errno));
                 return false;
             }
+#if defined(MAC_OSX)
+#pragma GCC diagnostic pop
+#endif
 #else
             fprintf(stderr, "Error: -daemon is not supported on this operating system\n");
             return false;
@@ -179,15 +171,13 @@ bool AppInit(int argc, char* argv[])
         }
 
         fRet = AppInitMain(threadGroup, scheduler);
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {
         PrintExceptionContinue(NULL, "AppInit()");
     }
 
-    if (!fRet)
-    {
+    if (!fRet) {
         Interrupt(threadGroup);
         // threadGroup.join_all(); was left out intentionally here, because we didn't re-test all of
         // the startup-failure cases to make sure they don't result in a hang due to some

@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -26,7 +26,7 @@ enum governance_exception_type_enum_t {
 
 inline std::ostream& operator<<(std::ostream& os, governance_exception_type_enum_t eType)
 {
-    switch(eType) {
+    switch (eType) {
     case GOVERNANCE_EXCEPTION_NONE:
         os << "GOVERNANCE_EXCEPTION_NONE";
         break;
@@ -64,8 +64,8 @@ private:
 
 public:
     CGovernanceException(const std::string& strMessageIn = "",
-                         governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
-                         int nNodePenaltyIn = 0)
+        governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
+        int nNodePenaltyIn = 0)
         : strMessage(),
           eType(eTypeIn),
           nNodePenalty(nNodePenaltyIn)
@@ -92,7 +92,8 @@ public:
         return eType;
     }
 
-    int GetNodePenalty() const {
+    int GetNodePenalty() const
+    {
         return nNodePenalty;
     }
 };

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,6 +17,7 @@
 class DynamicGUI;
 class ClientModel;
 class MiningPage;
+class BdapPage;
 class OverviewPage;
 class PlatformStyle;
 class SendCoinsDialog;
@@ -43,41 +44,42 @@ class WalletView : public QStackedWidget
     Q_OBJECT
 
 public:
-    explicit WalletView(const PlatformStyle *platformStyle, QWidget *parent);
+    explicit WalletView(const PlatformStyle* platformStyle, QWidget* parent);
     ~WalletView();
 
-    void setDynamicGUI(DynamicGUI *gui);
+    void setDynamicGUI(DynamicGUI* gui);
     /** Set the client model.
         The client model represents the part of the core that communicates with the P2P network, and is wallet-agnostic.
     */
-    void setClientModel(ClientModel *clientModel);
+    void setClientModel(ClientModel* clientModel);
     /** Set the wallet model.
         The wallet model represents a dynamic wallet, and offers access to the list of transactions, address book and sending
         functionality.
     */
-    void setWalletModel(WalletModel *walletModel);
+    void setWalletModel(WalletModel* walletModel);
 
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     void showOutOfSyncWarning(bool fShow);
 
 private:
-    ClientModel *clientModel;
-    WalletModel *walletModel;
+    ClientModel* clientModel;
+    WalletModel* walletModel;
 
-    OverviewPage *overviewPage;
-    SendCoinsDialog *sendCoinsPage;
-    ReceiveCoinsDialog *receiveCoinsPage;
-    AddressBookPage *usedSendingAddressesPage;
-    AddressBookPage *usedReceivingAddressesPage;
-    QWidget *transactionsPage;
-    TransactionView *transactionView;
-    DynodeList *dynodeListPage;
-    MiningPage *miningPage;
+    OverviewPage* overviewPage;
+    SendCoinsDialog* sendCoinsPage;
+    ReceiveCoinsDialog* receiveCoinsPage;
+    AddressBookPage* usedSendingAddressesPage;
+    AddressBookPage* usedReceivingAddressesPage;
+    QWidget* transactionsPage;
+    TransactionView* transactionView;
+    DynodeList* dynodeListPage;
+    MiningPage* miningPage;
+    BdapPage* bdapPage;
 
-    QProgressDialog *progressDialog;
-    QLabel *transactionSum;
-    const PlatformStyle *platformStyle;
+    QProgressDialog* progressDialog;
+    QLabel* transactionSum;
+    const PlatformStyle* platformStyle;
 
 public Q_SLOTS:
     /** Switch to overview (home) page */
@@ -92,7 +94,9 @@ public Q_SLOTS:
     void gotoDynodePage();
     /** Switch to mining page */
     void gotoMiningPage();
-    
+    /** Switch to bdap page */
+    void gotoBdapPage();
+
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
@@ -110,7 +114,7 @@ public Q_SLOTS:
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
-    void unlockWallet(bool fAnonymizeOnly=false);
+    void unlockWallet(bool fAnonymizeOnly = false);
     /** Lock wallet */
     void lockWallet();
 
@@ -123,7 +127,7 @@ public Q_SLOTS:
     void updateEncryptionStatus();
 
     /** Show progress dialog e.g. for rescan */
-    void showProgress(const QString &title, int nProgress);
+    void showProgress(const QString& title, int nProgress);
 
     // Clicking on the lock icon will open the passphrase dialog
     void on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly = false);
@@ -138,7 +142,7 @@ Q_SIGNALS:
     /** Signal that we want to show the main window */
     void showNormalIfMinimized();
     /**  Fired when a message should be reported to the user */
-    void message(const QString &title, const QString &message, unsigned int style);
+    void message(const QString& title, const QString& message, unsigned int style);
     /** Encryption status of wallet changed */
     void encryptionStatusChanged(int status);
     /** HD-Enabled status of wallet changed (only possible during startup) */

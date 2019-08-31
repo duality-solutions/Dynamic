@@ -6,7 +6,6 @@
 #define DYNAMIC_ZMQ_ZMQNOTIFICATIONINTERFACE_H
 
 #include "validationinterface.h"
-
 #include <string>
 #include <map>
 
@@ -25,9 +24,13 @@ protected:
     void Shutdown();
 
     // CValidationInterface
-    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, const CBlock* pblock);
-    void UpdatedBlockTip(const CBlockIndex *pindex);
-    void NotifyTransactionLock(const CTransaction &tx);
+    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, int posInBlock) override;
+    void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) override;
+    void NotifyTransactionLock(const CTransaction &tx) override;
+    void NotifyGovernanceVote(const CGovernanceVote& vote) override;
+    void NotifyGovernanceObject(const CGovernanceObject& object) override;
+    void NotifyInstantSendDoubleSpendAttempt(const CTransaction &currentTx, const CTransaction &previousTx) override;
+
 
 private:
     CZMQNotificationInterface();

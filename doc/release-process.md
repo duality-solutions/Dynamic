@@ -15,11 +15,11 @@ Release Process
 
 ###tag version in git
 
-	git tag -s v(new version, e.g. 1.3.0.0)
+	git tag -s v(new version, e.g. 2.4.0.0)
 
 ###write release notes. git shortlog helps a lot, for example:
 
-	git shortlog --no-merges v(current version, e.g. 1.3.0.0)..v(new version, e.g. 1.4.0.0)
+	git shortlog --no-merges v(current version, e.g. 2.3.5.0)..v(new version, e.g. 2.4.0.0)
 
 * * *
 
@@ -32,7 +32,7 @@ Release Process
  From a directory containing the dynamic source, gitian-builder and gitian.sigs
 
 	export SIGNER=(your gitian key, ie bluematt, sipa, etc)
-	export VERSION=(new version, e.g. 1.3.0.0)
+	export VERSION=(new version, e.g. 2.4.0.0)
 	pushd ./dynamic
 	git checkout v${VERSION}
 	popd

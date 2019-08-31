@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_MINT_H
 #define FLUID_MINT_H
@@ -14,28 +14,32 @@ class CDynamicAddress;
 class CScript;
 class CTransaction;
 
-class CFluidMint {
+class CFluidMint
+{
 public:
-    static const int CURRENT_VERSION=1;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
     CAmount MintAmount;
     std::vector<unsigned char> DestinationAddress;
     int64_t nTimeStamp;
-    std::vector<std::vector<unsigned char>> SovereignAddresses;
+    std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidMint() { 
+    CFluidMint()
+    {
         SetNull();
     }
 
-    CFluidMint(const CTransaction& tx) {
+    CFluidMint(const CTransaction& tx)
+    {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidMint(const CScript& fluidScript) {
+    CFluidMint(const CScript& fluidScript)
+    {
         SetNull();
         UnserializeFromScript(fluidScript);
     }
@@ -55,7 +59,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
         READWRITE(MintAmount);
@@ -66,28 +71,41 @@ public:
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidMint& a, const CFluidMint& b) {
+    inline friend bool operator==(const CFluidMint& a, const CFluidMint& b)
+    {
         return (a.FluidScript == b.FluidScript && a.MintAmount == b.MintAmount && a.DestinationAddress == b.DestinationAddress && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidMint& a, const CFluidMint& b) {
+    inline friend bool operator!=(const CFluidMint& a, const CFluidMint& b)
+    {
         return !(a == b);
     }
 
-    inline CFluidMint operator=(const CFluidMint& b) {
+    friend bool operator<(const CFluidMint& a, const CFluidMint& b)
+    {
+        return (a.nTimeStamp < b.nTimeStamp);
+    }
+
+    friend bool operator>(const CFluidMint& a, const CFluidMint& b)
+    {
+        return (a.nTimeStamp > b.nTimeStamp);
+    }
+
+    inline CFluidMint operator=(const CFluidMint& b)
+    {
         FluidScript = b.FluidScript;
         MintAmount = b.MintAmount;
         DestinationAddress = b.DestinationAddress;
         nTimeStamp = b.nTimeStamp;
-        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses)
-        {
+        SovereignAddresses.clear(); //clear out previous entries
+        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }
         txHash = b.txHash;
         nHeight = b.nHeight;
         return *this;
     }
- 
+
     inline bool IsNull() const { return (nTimeStamp == 0); }
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
@@ -97,7 +115,8 @@ public:
 
 static CCriticalSection cs_fluid_mint;
 
-class CFluidMintDB : public CDBWrapper {
+class CFluidMintDB : public CDBWrapper
+{
 public:
     CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidMintEntry(const CFluidMint& entry, const int op);
@@ -111,6 +130,6 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
 bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut);
 bool CheckFluidMintDB();
 
-extern CFluidMintDB *pFluidMintDB;
+extern CFluidMintDB* pFluidMintDB;
 
 #endif // FLUID_MINT_H

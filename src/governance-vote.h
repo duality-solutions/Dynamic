@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -15,52 +15,21 @@ class CGovernanceVote;
 class CConnman;
 
 // INTENTION OF DYNODES REGARDING ITEM
-enum vote_outcome_enum_t  {
-    VOTE_OUTCOME_NONE      = 0,
-    VOTE_OUTCOME_YES       = 1,
-    VOTE_OUTCOME_NO        = 2,
-    VOTE_OUTCOME_ABSTAIN   = 3
+enum vote_outcome_enum_t {
+    VOTE_OUTCOME_NONE = 0,
+    VOTE_OUTCOME_YES = 1,
+    VOTE_OUTCOME_NO = 2,
+    VOTE_OUTCOME_ABSTAIN = 3
 };
 
 
 // SIGNAL VARIOUS THINGS TO HAPPEN:
-enum vote_signal_enum_t  {
-    VOTE_SIGNAL_NONE       = 0,
-    VOTE_SIGNAL_FUNDING    = 1, //   -- fund this object for it's stated amount
-    VOTE_SIGNAL_VALID      = 2, //   -- this object checks out in sentinel engine
-    VOTE_SIGNAL_DELETE     = 3, //   -- this object should be deleted from memory entirely
-    VOTE_SIGNAL_ENDORSED   = 4, //   -- officially endorsed by the network somehow (delegation)
-    VOTE_SIGNAL_NOOP1      = 5, // FOR FURTHER EXPANSION
-    VOTE_SIGNAL_NOOP2      = 6,
-    VOTE_SIGNAL_NOOP3      = 7,
-    VOTE_SIGNAL_NOOP4      = 8,
-    VOTE_SIGNAL_NOOP5      = 9,
-    VOTE_SIGNAL_NOOP6      = 10,
-    VOTE_SIGNAL_NOOP7      = 11,
-    VOTE_SIGNAL_NOOP8      = 12,
-    VOTE_SIGNAL_NOOP9      = 13,
-    VOTE_SIGNAL_NOOP10     = 14,
-    VOTE_SIGNAL_NOOP11     = 15,
-    VOTE_SIGNAL_CUSTOM1    = 16,  // SENTINEL CUSTOM ACTIONS
-    VOTE_SIGNAL_CUSTOM2    = 17,  //        16-35
-    VOTE_SIGNAL_CUSTOM3    = 18,
-    VOTE_SIGNAL_CUSTOM4    = 19,
-    VOTE_SIGNAL_CUSTOM5    = 20,
-    VOTE_SIGNAL_CUSTOM6    = 21,
-    VOTE_SIGNAL_CUSTOM7    = 22,
-    VOTE_SIGNAL_CUSTOM8    = 23,
-    VOTE_SIGNAL_CUSTOM9    = 24,
-    VOTE_SIGNAL_CUSTOM10   = 25,
-    VOTE_SIGNAL_CUSTOM11   = 26,
-    VOTE_SIGNAL_CUSTOM12   = 27,
-    VOTE_SIGNAL_CUSTOM13   = 28,
-    VOTE_SIGNAL_CUSTOM14   = 29,
-    VOTE_SIGNAL_CUSTOM15   = 30,
-    VOTE_SIGNAL_CUSTOM16   = 31,
-    VOTE_SIGNAL_CUSTOM17   = 32,
-    VOTE_SIGNAL_CUSTOM18   = 33,
-    VOTE_SIGNAL_CUSTOM19   = 34,
-    VOTE_SIGNAL_CUSTOM20   = 35
+enum vote_signal_enum_t {
+    VOTE_SIGNAL_NONE = 0,
+    VOTE_SIGNAL_FUNDING = 1,  //   -- fund this object for it's stated amount
+    VOTE_SIGNAL_VALID = 2,    //   -- this object checks out in sentinel engine
+    VOTE_SIGNAL_DELETE = 3,   //   -- this object should be deleted from memory entirely
+    VOTE_SIGNAL_ENDORSED = 4, //   -- officially endorsed by the network somehow (delegation)
 };
 
 static const int MAX_SUPPORTED_VOTE_SIGNAL = VOTE_SIGNAL_ENDORSED;
@@ -74,14 +43,14 @@ static const int MAX_SUPPORTED_VOTE_SIGNAL = VOTE_SIGNAL_ENDORSED;
 class CGovernanceVoting
 {
 public:
-    static vote_outcome_enum_t ConvertVoteOutcome(std::string strVoteOutcome);
-    static vote_signal_enum_t ConvertVoteSignal(std::string strVoteSignal);
+    static vote_outcome_enum_t ConvertVoteOutcome(const std::string& strVoteOutcome);
+    static vote_signal_enum_t ConvertVoteSignal(const std::string& strVoteSignal);
     static std::string ConvertOutcomeToString(vote_outcome_enum_t nOutcome);
     static std::string ConvertSignalToString(vote_signal_enum_t nSignal);
 };
 
 //
-// CGovernanceVote - Allow a Dynode to vote and broadcast throughout the network
+// CGovernanceVote - Allow a dynode node to vote and broadcast throughout the network
 //
 
 class CGovernanceVote
@@ -91,18 +60,22 @@ class CGovernanceVote
     friend bool operator<(const CGovernanceVote& vote1, const CGovernanceVote& vote2);
 
 private:
-    bool fValid; //if the vote is currently valid / counted
-    bool fSynced; //if we've sent this to our peers
+    bool fValid;     //if the vote is currently valid / counted
+    bool fSynced;    //if we've sent this to our peers
     int nVoteSignal; // see VOTE_ACTIONS above
-    CTxIn vinDynode;
+    COutPoint dynodeOutpoint;
     uint256 nParentHash;
     int nVoteOutcome; // see VOTE_OUTCOMES above
     int64_t nTime;
     std::vector<unsigned char> vchSig;
 
+    /** Memory only. */
+    const uint256 hash;
+    void UpdateHash() const;
+
 public:
     CGovernanceVote();
-    CGovernanceVote(COutPoint outpointDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
+    CGovernanceVote(const COutPoint& outpointDynodeIn, const uint256& nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
 
     bool IsValid() const { return fValid; }
 
@@ -110,25 +83,31 @@ public:
 
     int64_t GetTimestamp() const { return nTime; }
 
-    vote_signal_enum_t GetSignal() const  { return vote_signal_enum_t(nVoteSignal); }
+    vote_signal_enum_t GetSignal() const { return vote_signal_enum_t(nVoteSignal); }
 
-    vote_outcome_enum_t GetOutcome() const  { return vote_outcome_enum_t(nVoteOutcome); }
+    vote_outcome_enum_t GetOutcome() const { return vote_outcome_enum_t(nVoteOutcome); }
 
     const uint256& GetParentHash() const { return nParentHash; }
 
-    void SetTime(int64_t nTimeIn) { nTime = nTimeIn; }
+    void SetTime(int64_t nTimeIn)
+    {
+        nTime = nTimeIn;
+        UpdateHash();
+    }
 
     void SetSignature(const std::vector<unsigned char>& vchSigIn) { vchSig = vchSigIn; }
 
-    bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
+    bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
+    bool CheckSignature(const CPubKey& pubKeyDynode) const;
     bool IsValid(bool fSignatureCheck) const;
     void Relay(CConnman& connman) const;
 
-    std::string GetVoteString() const {
+    std::string GetVoteString() const
+    {
         return CGovernanceVoting::ConvertOutcomeToString(GetOutcome());
     }
 
-    const COutPoint& GetDynodeOutpoint() const { return vinDynode.prevout; }
+    const COutPoint& GetDynodeOutpoint() const { return dynodeOutpoint; }
 
     /**
     *   GetHash()
@@ -136,86 +115,41 @@ public:
     *   GET UNIQUE HASH WITH DETERMINISTIC VALUE OF THIS SPECIFIC VOTE
     */
 
-    uint256 GetHash() const
-    {
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinDynode;
-        ss << nParentHash;
-        ss << nVoteSignal;
-        ss << nVoteOutcome;
-        ss << nTime;
-        return ss.GetHash();
-    }
+    uint256 GetHash() const;
+    uint256 GetSignatureHash() const;
 
-    std::string ToString() const
-    {
-        std::ostringstream ostr;
-        ostr << vinDynode.ToString() << ":"
-             << nTime << ":"
-             << CGovernanceVoting::ConvertOutcomeToString(GetOutcome()) << ":"
-             << CGovernanceVoting::ConvertSignalToString(GetSignal());
-        return ostr.str();
-    }
-
-    /**
-    *   GetTypeHash()
-    *
-    *   GET HASH WITH DETERMINISTIC VALUE OF DYNODE-VIN/PARENT-HASH/VOTE-SIGNAL
-    *
-    *   This hash collides with previous Dynode votes when they update their votes on governance objects.
-    *   With 12.1 there's various types of votes (funding, valid, delete, etc), so this is the deterministic hash
-    *   that will collide with the previous vote and allow the system to update.
-    *
-    *   --
-    *
-    *   We do not include an outcome, because that can change when a Dynode updates their vote from yes to no
-    *   on funding a specific project for example.
-    *   We do not include a time because it will be updated each time the vote is updated, changing the hash
-    */
-    uint256 GetTypeHash() const
-    {
-        // CALCULATE HOW TO STORE VOTE IN governance.mapVotes
-
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinDynode;
-        ss << nParentHash;
-        ss << nVoteSignal;
-        //  -- no outcome
-        //  -- timeless
-        return ss.GetHash();
-    }
+    std::string ToString() const;
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vinDynode);
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        int nVersion = s.GetVersion();
+        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(nParentHash);
         READWRITE(nVoteOutcome);
         READWRITE(nVoteSignal);
         READWRITE(nTime);
-        READWRITE(vchSig);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
+        if (ser_action.ForRead())
+            UpdateHash();
     }
-
 };
-
-
-
-/**
-* 12.1.1 - CGovernanceVoteManager
-* -------------------------------
-*
-
-    GetVote(name, yes_no):
-        - caching function
-        - mark last accessed votes
-        - load serialized files from filesystem if needed
-        - calc answer
-        - return result
-
-    CacheUnused():
-        - Cache votes if lastused > 12h/24/48/etc
-
-*/
 
 #endif

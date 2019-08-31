@@ -1,19 +1,57 @@
 language: cpp
-compiler: gcc
-os: linux
+compiler:
+  - gcc
+os:
+  - linux
 sudo: required
-dist: trusty
-install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y build-essential libtool autotools-dev autoconf pkg-config libssl-dev libboost-all-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libcrypto++-dev libevent-dev
-  - sudo add-apt-repository -y ppa:silknetwork/silknetwork
-  - sudo apt-get update -y && sudo apt-get install -y libdb4.8-dev libdb4.8++-dev
-script:
-  - ./autogen.sh && ./configure --with-gui=qt5 && make
-
-deploy:
-  provider: releases
-  file: "dynamic-qt"
-  skip_cleanup: true
-  on:
-    tags: true
+dist: bionic
+env:
+  global:
+    - MAKETHREADS="-j2"
+    - MAIN_PACKAGES="build-essential libtool autotools-dev autoconf libssl-dev libboost-all-dev libcrypto++-dev libevent-dev"
+    - QT_PACKAGES="libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler"
+    - GPU_PACKAGES="ocl-icd-opencl-dev"
+    - EXTRA_PPA="ppa:bitcoin/bitcoin"
+    - EXTRA_PPA_PACKAGES="libdb4.8-dev libdb4.8++-dev"
+cache:
+  apt: true
+addons:
+  apt:
+    packages:
+      - pkg-config
+jobs:
+  include:
+      # Linux daemon and Qt wallet
+      - stage: build
+        name: 'Linux daemon and Qt wallet'
+        install:
+            - sudo apt-get install -y $MAIN_PACKAGES $QT_PACKAGES
+            - sudo add-apt-repository -y $EXTRA_PPA
+            - sudo apt-get update -y && sudo apt-get install -y $EXTRA_PPA_PACKAGES
+        script:
+          - ./autogen.sh 
+          - ./configure --with-gui=qt5 --disable-tests --disable-bench
+          - make $MAKETHREADS
+      # Linux daemon only with GPU
+      - stage: build
+        name: 'Linux daemon only with GPU'
+        install:
+            - sudo apt-get install -y $MAIN_PACKAGES
+            - sudo add-apt-repository -y $EXTRA_PPA
+            - sudo apt-get update -y && sudo apt-get install -y $EXTRA_PPA_PACKAGES
+            - sudo apt-get install -y $GPU_PACKAGES
+        script:
+          - ./autogen.sh
+          - ./configure --without-gui --enable-gpu --disable-tests --disable-bench
+          - make $MAKETHREADS
+      # Linux daemon only with tests
+      - stage: build
+        name: 'Linux daemon only with tests'
+        install:
+            - sudo apt-get install -y $MAIN_PACKAGES
+            - sudo add-apt-repository -y $EXTRA_PPA
+            - sudo apt-get update -y && sudo apt-get install -y $EXTRA_PPA_PACKAGES
+        script:
+          - ./autogen.sh
+          - ./configure --without-gui
+          - make $MAKETHREADS

@@ -6,10 +6,12 @@
 #ifndef DYNAMIC_CONSENSUS_CONSENSUS_H
 #define DYNAMIC_CONSENSUS_CONSENSUS_H
 
+/** The maximum allowed size for a transaction, in bytes */
+static const unsigned int MAX_TX_SIZE = 1000000; // 1 MB to match the default maximum network send size.
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 4194304; //4MB
 /** The maximum allowed number of signature check operations in a block (network rule) */
-static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
+static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE / 50;
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 10;
 

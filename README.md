@@ -1,18 +1,12 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 [![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
 
-Graph on Pull Request History
-====================================
-
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
-
-# **Dynamic (DYN) v2.3.5.0**
+# **Dynamic (DYN) v2.4.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2018 [Duality Blockchain Solutions](https://duality.solutions/)**
+**Copyright (c) 2016-2019 [Duality Blockchain Solutions](https://duality.solutions/)**
 
 What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------
@@ -31,16 +25,10 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
+* Max Block Size: 4MB
 
 
-[Dynamic(DYN)](https://duality.solutions/dynamic) is [Duality](https://duality.solutions/)’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. [Duality](https://duality.solutions/) uses company proceeds to place buy back orders on the [Dynamic(DYN)](https://duality.solutions/dynamic) market to keep inflation within acceptable bounds.
-
-[Dynamic(DYN)](https://duality.solutions/dynamic) lays the groundwork for offering BaaS(Blockchain as a Service) by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by [Duality](https://duality.solutions/) to adjust to a maturing market.
-
-As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and InstantSend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using PrivateSend.
-
-[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
-
+[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic can be used to run incentivized Dynodes; the second tier of nodes on the network processing, verifying, validating and storing data.
 
 **MainNet Parameters**
 P2P Port = 33300
@@ -114,27 +102,27 @@ For the versions used in the release, see [release-process.md](release-process.m
 System requirements
 --------------------
 
-C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
-memory available when compiling Dynamic.
+C++ compilers are memory-hungry. It is recommended to have at least 3 GB of memory available when compiling Dynamic.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
+
+It is required to build Dynamic on Ubuntu 18.04LTS(Bionic) or later due to C++14/GCC7 requirements. Also OpenSSL 1.1.0g is included in Ubuntu 18.04LTS and later, however it is suggested to use OpenSSL 1.1.1LTS.
+
 Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
     
-for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
+For Ubuntu 18.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
 
- db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
- You can add the repository using the following command:
+db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).  You can add the repository using the following command:
 
-        sudo add-apt-repository ppa:bitcoin/bitcoin
-        sudo apt-get update
+    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo apt-get update
 
- Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
- but using these will break binary wallet compatibility, and is not recommended.
+Ubuntu 18.04 and later have packages for libdb 5.3.21 but using these will break binary wallet compatibility, and is not recommended.
 
 for Debian 7 (Wheezy) and later:
  The oldstable repository contains db4.8 packages.
@@ -162,10 +150,7 @@ ZMQ dependencies (provides ZMQ API 4.x):
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
-If you want to build Dynamic-Qt, make sure that the required packages for Qt development
-are installed. Qt 5 is necessary to build the GUI.
-If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
-To build without GUI pass `--without-gui`.
+If you want to build Dynamic-Qt, make sure that the required packages for Qt development are installed. Qt 5 is necessary to build the GUI. If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5. To build without GUI pass `--without-gui`.
 
 For Qt 5 you need the following:
 
@@ -186,6 +171,8 @@ symbols, which reduces the executable size by about 90%.
 miniupnpc
 ---------
 
+The dependencies for miniupnpc are included above within the 'Dependency Build Instructions: Ubuntu & Debian' section, however, for any reason you wish to build the source, please follow these instructions.
+
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  See the configure options for upnp behavior desired:
@@ -204,38 +191,41 @@ To build:
 
 Berkeley DB
 -----------
-It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+It is recommended to use Berkeley DB 4.8 and is included in the dependencies above in the 'Dependency Build Instructions: Ubuntu & Debian' section.
 
-```bash
-DYNAMIC_ROOT=$(pwd)
+If you have to, or wish to build Berkeley DB 4.8 yourself:
 
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${DYNAMIC_ROOT}/db4"
-mkdir -p $BDB_PREFIX
+``` 
+    bash
+    DYNAMIC_ROOT=$(pwd)
 
-# Fetch the source and verify that it is not tampered with
-wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
-echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
-# -> db-4.8.30.NC.tar.gz: OK
-tar -xzvf db-4.8.30.NC.tar.gz
+    # Pick some path to install BDB to, here we create a directory within the dynamic directory
+    BDB_PREFIX="${DYNAMIC_ROOT}/db4"
+    mkdir -p $BDB_PREFIX
 
-# Build the library and install to our prefix
-cd db-4.8.30.NC/build_unix/
-#  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
-../dist/configure --prefix=/usr/local --enable-cxx
-make 
-sudo make install
+    # Fetch the source and verify that it is not tampered with
+    wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+    echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+    # -> db-4.8.30.NC.tar.gz: OK
+    tar -xzvf db-4.8.30.NC.tar.gz
 
-# Configure Dynamic to use our own-built instance of BDB
-cd $DYNAMIC_ROOT
-./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
+    # Build the library and install to our prefix
+    cd db-4.8.30.NC/build_unix/
+    #  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
+    ../dist/configure --prefix=/usr/local --enable-cxx
+    make 
+    sudo make install
+
+    # Configure Dynamic to use our own-built instance of BDB
+    cd $DYNAMIC_ROOT
+    ./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
 ```
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
 
 Boost
 -----
-If you need to build Boost yourself:
+If you need to build Boost yourself, in terminal enter:
 
     sudo su
     ./bootstrap.sh
@@ -244,8 +234,8 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your Dynamic installation more secure by making certain attacks impossible to
-exploit even if a vulnerability is found, binaries are hardened by default.
+To help make your Dynamic installation more secure by making certain attacks impossible to exploit even if a vulnerability is found, binaries are hardened by default.
+
 This can be disabled with:
 
 Hardening Flags:
@@ -268,10 +258,12 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-        scanelf -e ./dynamicd
+    scanelf -e ./dynamicd
 
+    
     The output should contain:
-     TYPE
+    
+    TYPE
     ET_DYN
 
 * Non-executable Stack
@@ -319,8 +311,8 @@ CPU's with AVX2 support:
         Broadwell E processor, Q3 2016
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
-        Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2018
+        Coffee Lake processor, Q4 2017
+
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
@@ -340,15 +332,52 @@ CPU's with AVX512 support:
         Knights Mill processor, 2017
         Skylake-SP processor, 2017
         Skylake-X processor, 2017
-        Cannonlake processor, expected in 2018
-        Ice Lake processor, expected in 2018
+        Cannonlake processor, expected in 2019
+        Ice Lake processor, expected in 2019
+       
+
+GPU Mining
+----------
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
+
+For OpenCL you need the following:
+
+    sudo apt-get install ocl-icd-opencl-dev
+    
+For CUDA please visit: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+    
+At configure time for OpenCL(Nvidia/AMD):
+
+    --enable-gpu 
+
+At configure time for CUDA(Nvidia):
+
+    --enable-gpu --enable-cuda
 
 Example Build Command
 --------------------
-Qt Wallet and Deamon, CLI version build:
+Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
 
-    ./autogen.sh && ./configure --with-gui && make
+    ./autogen.sh && ./configure --with-gui --disable-gpu && make
 
-CLI and Deamon Only Buld:
+CLI and Deamon Only build without GPU support and without AVX support:
 
-    ./autogen.sh && ./configure --without-gui && make
+    ./autogen.sh && ./configure --without-gui --disable-gpu && make
+
+Use Qt Creator as IDE
+------------------------
+You can use Qt Creator as IDE, for debugging and for manipulating forms, etc.
+Download Qt Creator from http://www.qt.io/download/. Download the "community edition" and only install Qt Creator (uncheck the rest during the installation process).
+
+1. Make sure you installed everything through homebrew mentioned above 
+2. Do a proper ./configure --with-gui=qt5 --enable-debug
+3. In Qt Creator do "New Project" -> Import Project -> Import Existing Project
+4. Enter "dynamic-qt" as project name, enter src/qt as location
+5. Leave the file selection as it is
+6. Confirm the "summary page"
+7. In the "Projects" tab select "Manage Kits..."
+8. Select the default "Desktop" kit and select "Clang (x86 64bit in /usr/bin)" as compiler
+9. Select LLDB as debugger (you might need to set the path to your installtion)
+10. Start debugging with Qt Creator
+
+

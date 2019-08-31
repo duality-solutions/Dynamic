@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,13 +19,13 @@
 /**
  * Map like container that keeps the N most recently added items
  */
-template<typename K, typename V, typename Size = uint32_t>
+template <typename K, typename V, typename Size = uint32_t>
 class CacheMultiMap
 {
 public:
     typedef Size size_type;
 
-    typedef CacheItem<K,V> item_t;
+    typedef CacheItem<K, V> item_t;
 
     typedef std::list<item_t> list_t;
 
@@ -33,7 +33,7 @@ public:
 
     typedef typename list_t::const_iterator list_cit;
 
-    typedef std::map<V,list_it> it_map_t;
+    typedef std::map<V, list_it> it_map_t;
 
     typedef typename it_map_t::iterator it_map_it;
 
@@ -48,8 +48,6 @@ public:
 private:
     size_type nMaxSize;
 
-    size_type nCurrentSize;
-
     list_t listItems;
 
     map_t mapIndex;
@@ -57,14 +55,13 @@ private:
 public:
     CacheMultiMap(size_type nMaxSizeIn = 0)
         : nMaxSize(nMaxSizeIn),
-          nCurrentSize(0),
           listItems(),
           mapIndex()
-    {}
+    {
+    }
 
-    CacheMultiMap(const CacheMap<K,V>& other)
+    CacheMultiMap(const CacheMap<K, V>& other)
         : nMaxSize(other.nMaxSize),
-          nCurrentSize(other.nCurrentSize),
           listItems(other.listItems),
           mapIndex()
     {
@@ -75,7 +72,6 @@ public:
     {
         mapIndex.clear();
         listItems.clear();
-        nCurrentSize = 0;
     }
 
     void SetMaxSize(size_type nMaxSizeIn)
@@ -83,48 +79,46 @@ public:
         nMaxSize = nMaxSizeIn;
     }
 
-    size_type GetMaxSize() const {
+    size_type GetMaxSize() const
+    {
         return nMaxSize;
     }
 
-    size_type GetSize() const {
-        return nCurrentSize;
+    size_type GetSize() const
+    {
+        return listItems.size();
     }
 
     bool Insert(const K& key, const V& value)
     {
-        if(nCurrentSize == nMaxSize) {
-           PruneLast();
-        }
         map_it mit = mapIndex.find(key);
-        if(mit == mapIndex.end()) {
-            mit = mapIndex.insert(std::pair<K,it_map_t>(key, it_map_t())).first;
+        if (mit == mapIndex.end()) {
+            mit = mapIndex.emplace(key, it_map_t()).first;
         }
         it_map_t& mapIt = mit->second;
 
-        if(mapIt.count(value) > 0) {
+        if (mapIt.count(value) > 0) {
             // Don't insert duplicates
             return false;
         }
 
+        if (listItems.size() == nMaxSize) {
+            PruneLast();
+        }
         listItems.push_front(item_t(key, value));
-        list_it lit = listItems.begin();
-
-        mapIt[value] = lit;
-        ++nCurrentSize;
+        mapIt.emplace(value, listItems.begin());
         return true;
     }
 
     bool HasKey(const K& key) const
     {
-        map_cit it = mapIndex.find(key);
-        return (it != mapIndex.end());
+        return (mapIndex.find(key) != mapIndex.end());
     }
 
     bool Get(const K& key, V& value) const
     {
         map_cit it = mapIndex.find(key);
-        if(it == mapIndex.end()) {
+        if (it == mapIndex.end()) {
             return false;
         }
         const it_map_t& mapIt = it->second;
@@ -136,12 +130,12 @@ public:
     bool GetAll(const K& key, std::vector<V>& vecValues)
     {
         map_cit mit = mapIndex.find(key);
-        if(mit == mapIndex.end()) {
+        if (mit == mapIndex.end()) {
             return false;
         }
         const it_map_t& mapIt = mit->second;
 
-        for(it_map_cit it = mapIt.begin(); it != mapIt.end(); ++it) {
+        for (it_map_cit it = mapIt.begin(); it != mapIt.end(); ++it) {
             const item_t& item = *(it->second);
             vecValues.push_back(item.value);
         }
@@ -150,7 +144,7 @@ public:
 
     void GetKeys(std::vector<K>& vecKeys)
     {
-        for(map_cit it = mapIndex.begin(); it != mapIndex.end(); ++it) {
+        for (map_cit it = mapIndex.begin(); it != mapIndex.end(); ++it) {
             vecKeys.push_back(it->first);
         }
     }
@@ -158,14 +152,13 @@ public:
     void Erase(const K& key)
     {
         map_it mit = mapIndex.find(key);
-        if(mit == mapIndex.end()) {
+        if (mit == mapIndex.end()) {
             return;
         }
         it_map_t& mapIt = mit->second;
 
-        for(it_map_it it = mapIt.begin(); it != mapIt.end(); ++it) {
+        for (it_map_it it = mapIt.begin(); it != mapIt.end(); ++it) {
             listItems.erase(it->second);
-            --nCurrentSize;
         }
 
         mapIndex.erase(mit);
@@ -174,33 +167,32 @@ public:
     void Erase(const K& key, const V& value)
     {
         map_it mit = mapIndex.find(key);
-        if(mit == mapIndex.end()) {
+        if (mit == mapIndex.end()) {
             return;
         }
         it_map_t& mapIt = mit->second;
 
         it_map_it it = mapIt.find(value);
-        if(it == mapIt.end()) {
+        if (it == mapIt.end()) {
             return;
         }
 
         listItems.erase(it->second);
-        --nCurrentSize;
         mapIt.erase(it);
 
-        if(mapIt.size() < 1) {
+        if (mapIt.empty()) {
             mapIndex.erase(mit);
         }
     }
 
-    const list_t& GetItemList() const {
+    const list_t& GetItemList() const
+    {
         return listItems;
     }
 
-    CacheMap<K,V>& operator=(const CacheMap<K,V>& other)
+    CacheMap<K, V>& operator=(const CacheMap<K, V>& other)
     {
         nMaxSize = other.nMaxSize;
-        nCurrentSize = other.nCurrentSize;
         listItems = other.listItems;
         RebuildIndex();
         return *this;
@@ -212,9 +204,8 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(nMaxSize);
-        READWRITE(nCurrentSize);
         READWRITE(listItems);
-        if(ser_action.ForRead()) {
+        if (ser_action.ForRead()) {
             RebuildIndex();
         }
     }
@@ -222,7 +213,7 @@ public:
 private:
     void PruneLast()
     {
-        if(nCurrentSize < 1) {
+        if (listItems.empty()) {
             return;
         }
 
@@ -232,31 +223,30 @@ private:
 
         map_it mit = mapIndex.find(item.key);
 
-        if(mit != mapIndex.end()) {
+        if (mit != mapIndex.end()) {
             it_map_t& mapIt = mit->second;
 
             mapIt.erase(item.value);
 
-            if(mapIt.size() < 1) {
+            if (mapIt.empty()) {
                 mapIndex.erase(item.key);
             }
         }
 
         listItems.pop_back();
-        --nCurrentSize;
     }
 
     void RebuildIndex()
     {
         mapIndex.clear();
-        for(list_it lit = listItems.begin(); lit != listItems.end(); ++lit) {
+        for (list_it lit = listItems.begin(); lit != listItems.end(); ++lit) {
             item_t& item = *lit;
             map_it mit = mapIndex.find(item.key);
-            if(mit == mapIndex.end()) {
-                mit = mapIndex.insert(std::pair<K,it_map_t>(item.key, it_map_t())).first;
+            if (mit == mapIndex.end()) {
+                mit = mapIndex.emplace(item.key, it_map_t()).first;
             }
             it_map_t& mapIt = mit->second;
-            mapIt[item.value] = lit;
+            mapIt.emplace(item.value, lit);
         }
     }
 };

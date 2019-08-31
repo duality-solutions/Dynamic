@@ -1,15 +1,15 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_QT_SPLASHSCREEN_H
 #define DYNAMIC_QT_SPLASHSCREEN_H
 
-#include <functional>
 #include <QSplashScreen>
+#include <functional>
 
 class CWallet;
 class NetworkStyle;
@@ -25,24 +25,25 @@ class SplashScreen : public QWidget
     Q_OBJECT
 
 public:
-    explicit SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle);
+    explicit SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle);
     ~SplashScreen();
 
 protected:
-    void paintEvent(QPaintEvent *event);
-    void closeEvent(QCloseEvent *event);
+    void paintEvent(QPaintEvent* event);
+    void closeEvent(QCloseEvent* event);
 
 public Q_SLOTS:
     /** Slot to call finish() method as it's not defined as slot */
-    void slotFinish(QWidget *mainWin);
+    void slotFinish(QWidget* mainWin);
 
     /** Show message and progress */
-    void showMessage(const QString &message, int alignment, const QColor &color);
-     
+    void showMessage(const QString& message, int alignment, const QColor& color);
+
     /** Sets the break action */
-    void setBreakAction(const std::function<void(void)> &action);
+    void setBreakAction(const std::function<void(void)>& action);
+
 protected:
-    bool eventFilter(QObject * obj, QEvent * ev);
+    bool eventFilter(QObject* obj, QEvent* ev);
 
 private:
     /** Connect core signals to splash screen */
@@ -59,7 +60,7 @@ private:
 
     QList<CWallet*> connectedWallets;
 
-    std::function<void(void)> breakAction; 
+    std::function<void(void)> breakAction;
 };
 
 #endif // DYNAMIC_QT_SPLASHSCREEN_H

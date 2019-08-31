@@ -1,6 +1,526 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.0.0**
+
+* [DHT] Add more UDP ports and fix saving key in wallet
+* [BDAP] Update enum item names so it doesn't overlap with Windows macros
+* Merge pull request #25 from duality-solutions/windows
+* [DHT] Add parameter info to RPC call error
+* [BDAP] More fixes to private key wallet saving
+* Merge pull request #26 from duality-solutions/dht-fixes2
+* [DHT] Fix put mutable value method
+* [DHT] Fix salt parsing in the put save data method
+* [DHT] Check signature and pubkey length before saving for put
+* [DHT] Fix put by using fixed sizes for pubkey and signature. Use variable sizes for salt and value
+* Merge pull request #27 from duality-solutions/fix-dht3
+* [DHT] Fix session event logging and searching memory maps
+* [DHT] Use multimap and implement locks session events
+* Resolve merge conflicts with v2.4-WIP
+* [DHT] Rework libtorrent event threads
+* [DHT] Fix async get operations
+* [DHT] Add function to remove old libtorrent events from memory multimap
+* [DHT] Fix MacOSX build warnings
+* Merge branch 'v2.4-WIP' of https://github.com/duality-solutions/dynamic into merge-public
+* [DHT] Fix put BDAP data function for mutable hash table database
+* [DHT] Add RPC command that returns all put message events in memory
+* [DHT] Add RPC command that returns all get mutable events in memory
+* [DHT] Fix blocking alert thread issue affecting puts
+* Merge branch 'v2.4-WIP' of https://github.com/duality-solutions/dynamic into merge-public
+* Merge pull request #29 from duality-solutions/fix-dht5
+* Merge branch 'master' into merge-public
+* Merge pull request #30 from duality-solutions/merge-public
+* [DHT] Fix put wait for reponse
+* [BDAP] Add dump bdap keys RPC command <dumpbdapkeys>
+* [BDAP] Add RPC command to import BDAP account private keys
+* Merge branch 'master' into fix-dht6
+* Merge pull request #31 from duality-solutions/fix-dht6
+* [BDAP] Fix build errors after merge conflicts
+* Merge pull request #32 from duality-solutions/hd-seed
+* [BDAP] Add RPC command to get local wallet accounts <mybdapaccounts>
+* Merge branch 'master' into myaccounts
+* Merge pull request #33 from duality-solutions/myaccounts
+* Update testnet spork address
+* Update print in ThreadSocketHandler
+* Fixes
+* Merge pull request #34 from duality-solutions/spencer
+* Fix Strings
+* Change uint256S to Int
+* Merge pull request #35 from duality-solutions/spencer
+* Merge pull request #36 from duality-solutions/chainwork
+* Merge pull request #37 from duality-solutions/newtestnet
+* [DHT] Revert CPubKey class and add AddCryptedDHTKey
+* [DHT] Fix segfault when shutdown before libtorrent session init
+* Add mnemonic import
+* Improve menu title
+* Update fluiddynode.cpp
+* Add second spork address to testnet
+* [DHT] Fixes to wallet encryption for Ed25519 keys
+* [DHT] Fix libtorrent event map for bootstrap event
+* [DHT] Cleanup storage debug.log usage
+* [DHT] Fix last wallet encryption issue for ed25519 keys
+* Merge pull request #39 from duality-solutions/dht-keys
+* [DHT] Fix segfault when saving BDAP hash table key
+* Merge pull request #258 from duality-solutions/v2.4-WIP
+* Resolve merge conflicts and fix mnemonic build error
+* Merge pull request #41 from duality-solutions/skfix
+* [BDAP] Move entries leveldb database into blocks directory
+* Merge pull request #40 from duality-solutions/dht-keys2
+* Fix non-standard and null data sign step and combine signatures
+* [Fluid] Add boost thread include to fluid db code files
+* Fix override warnings in keystore and crypter
+* [BDAP] Update certificate class, refactor and add category
+* [BDAP] Update link classes
+* [BDAP] Stub linking db and RPC commands
+* [BDAP] Refactor common utility functions to seperate file
+* [BDAP] Add invite message to link request class
+* [BDAP] Add generic script parsing for linking and domain entries
+* Remove second spork address for testnet
+* Add privatenet to chain parameters
+* Merge pull request #46 from duality-solutions/privatenet
+* Add privatenet seed nodes
+* [BDAP] Rearrange operation codes
+* [BDAP] Use op1 and op2 to get operation type
+* [BDAP] Fix update entry issue
+* [BDAP] Put users and groups in @public.bdap.io by default
+* Merge pull request #49 from duality-solutions/bdap-opcodes
+* Merge branch 'master' into bdap-updates
+* [BDAP] Fix issues caused by previous merge conflicts
+* Merge pull request #48 from duality-solutions/bdap-updates
+* Updated LibTorrent submodule, synced with root repo
+* [BDAP] Updates to link requests
+* [BDAP] Check if link request pubkey already exists in the mempool
+* [BDAP] Add shared pubkey to link requests
+* Merge pull request #51 from duality-solutions/linking
+* Merge pull request #50 from duality-solutions/fix-warnings
+* Merge public v2.4-WIP with private repo
+* Resolve merge conflicts with v2.4-WIP public repo
+* Sync public repo v2.4-WIP changes
+* Fix warnings for struct/class mismatch and missing overrides
+* Merge pull request #52 from duality-solutions/merge-public4
+* [BDAP] Fix link request from and to me functions
+* Update ReadMe
+* Update README.md
+* Update README.md
+* Merge pull request #54 from duality-solutions/ReadMeUpdate
+* Merge pull request #55 from duality-solutions/merge-public4
+* [BDAP] Fixes to linking and account db functions
+* Move endif to correct place
+* [BDAP] Rename entry channel to sidechain
+* [BDAP] Add link accept RPC command
+* [BDAP] Fixes to link consensus checks
+* [DHT] Fill Ed25519 private keys with zeros in destructor
+* [BDAP] Fixes to Leveldb link request and accept databases
+* [BDAP] More fixes for link request and accept consensus
+* [BDAP] Fix transaction display in Qt UI for account entries and links
+* [Fluid] Add initial sovereign addresses for privatenet
+* [BDAP] Use Instant Send when possible for BDAP txs
+* [BDAP] Fix mybdapaccounts after adding links
+* [BDAP] Add expire time and pubkey to user and group operation transaction
+* [BDAP] Implement link pending RPC commands
+* Sync with public v2.4-WIP branch 2019-01-10
+* Merge pull request #57 from duality-solutions/merge-public6
+* Fix Windows build issue for embedded libtorrent
+* Fix Windows Qt resource file so it will build
+* Update libtorrent synced with original repo on 2019-01-11
+* Merge pull request #53 from duality-solutions/linking2
+* Add MacOS framework CoreFoundation and SystemConfiguration to make
+* Update locales and add fully translated NL file
+* Merge branch 'master' of https://github.com/duality-solutions/Dynamic-private
+* Stub BIP39 Wordlist files for zh_CN/zh_TW/fr/it/jp/ko/es
+* fix final text for translations
+* Remove 1 ?
+* Merge pull request #58 from duality-solutions/locales
+* Update documentation
+* Merge pull request #59 from duality-solutions/readme
+* Update Docs
+* Merge pull request #60 from duality-solutions/readme
+* Fix mismatched parameters to LogPrint
+* Fix warning comparison between signed and unsigned integer expressions
+* Merge pull request #62 from duality-solutions/dm-bugfixes
+* Add BDAP to menubar and associated GUI
+* [DHT] Change alert threading to avoid segfault
+* [DHT] Change alert threading to avoid segfault
+* [BDAP] Fix linking destination and source address for request/accept
+* [BDAP] Fix registration days parameter for RPC commands
+* Merge pull request #64 from duality-solutions/updates
+* BDAP Whitepaper v0.1
+* Update BDAP.md
+* Update BDAP.md
+* Add DHT RPC Calls and link to code location.
+* Codify OP_RETURN
+* Update wording
+* Improve formatting
+* update dht link
+* link dynamic and sequence
+* Link BDAP references to website
+* Improve Layout
+* Add a para to intro
+* Add to technical information.
+* Link LDAP
+* Improve wording
+* Improve wording
+* Improve layout
+* Remove DYN and link Dynamic
+* Merge pull request #66 from duality-solutions/RPCWording
+* Update BDAP.md
+* Add BDAP AddUser modal, button event handlers and css
+* Update BDAP.md
+* Stub BDK section
+* [BDAP] Implement version 0 (public) linking without encryption
+* [DHT] Fix keymeta wallet issue when loading
+* [BDAP] Add signature proof verification for link requests
+* Update class info
+* Fix formatting
+* Stub further sections and tidy RPC sections
+* Outline stubs
+* Amend RPC section formatting to match
+* Remove `
+* Update libtorrent, allow larger mutable DHT entries (from 1000 to 5120 bytes)
+* Update Spanish Translation
+* Merge pull request #68 from duality-solutions/locales
+* Update dynamic_es.ts
+* Merge pull request #67 from duality-solutions/linking4
+* [BDAP GUI] Implement List All Users in TableWidget
+* [BDAP] Add ability to filter by users, groups or all in ListDirectories
+* [BDAP] Prevent creating duplicate links
+* [BDAP] Add completed link RPC command
+* [BDAP] Improve link request and accept database structure
+* [BDAP] Filter pending link RPC commands
+* [BDAP] Add delete link request and accept RPC command
+* [BDAP] Remove OP_RETURN data from delete domain account RPC
+* [BDAP GUI] Implement List All Groups in TableWidget. WIP
+* [BDAP GUI] Make BDAP Users table resize dynamically. WIP
+* [BDAP] Add create raw account transaction RPC command
+* [BDAP GUI] Make BDAP Groups table resize dynamically. Bugfixes. WIP
+* [BDAP GUI] Handle get user details. WIP
+* [BDAP GUI] Change ListDirectories output from condensed to full in order to populate expiration date
+* [BDAP GUI] Rearrange GUI. WIP
+* [BDAP GUI] Change refresh method, add My Users/Groups checkbox. WIP
+* Update importmnemonic RPC command example
+* [BDAP GUI] Tweak GUI, wire up My Groups checkbox. WIP
+* [BDAP] Add optional accountType parameter to RPC mybdapaccounts
+* [BDAP] Check if account exists in createrawbdapaccount RPC
+* [BDAP] Add RPC command to pay, sign and send a raw hex account
+* [BDAP] Fix mybdapaccounts help
+* [BDAP] Fix help for account RPC commands
+* Merge pull request #70 from duality-solutions/rpc-bdap
+* [BDAP] Fix DHT RPC comand help output
+* [BDAP] Add parameter names to all bdap RPC commands
+* [BDAP] Fix delete link consensus and wallet checks
+* Merge pull request #69 from duality-solutions/linking5
+* [BDAP GUI] Wire up search functionality. Save sort states.
+* [BDAP] Fix issue when trying to delete link multiple times
+* [BDAP GUI] Add BDAP Account Detail dialog box functionality
+* Less chatty debug.log file when not in debug mode
+* Add syncstatus RPC command for better info on chain status
+* Merge pull request #71 from duality-solutions/sync-status
+* Fix debug logging due to an extra category passed
+* Tweak syncstatus progress calculation
+* [BDAP GUI] Add User Dialog functionality. WIP
+* Merge branch 'master' into qt-mockups
+* [BDAP GUI] Tweak Add User Error Message reporting. WIP
+* [BDAP GUI] Display user details upon successful add user transaction
+* [BDAP GUI] Make My Users/Groups default view. Add record count display.
+* [BDAP GUI] Add add group functionality. Enable wordWrap for longer error messages.
+* [BDAP] Reduce linking logging when not in debug mode
+* [BDAP GUI] Add delete user/group functionality
+* [BDAP GUI] Add update BDAP user/group functionality
+* [BDAP] Add VGP encryption library to build
+* [BDAP] Add VGP encryption to link request
+* [BDAP] Update VGP submodule to most recent master branch
+* [BDAP] Add function to convert hex ed25519 pubkeys to bytes
+* [BDAP] Add, remove, get version number for encrypted data
+* [BDAP] Fix missing operation code translation
+* [BDAP] Decrypt v1 link data before adding to local wallet
+* [BDAP] Increase maximum link data size to 1592
+* [BDAP] Add more debug log print for links
+* Merge pull request #74 from duality-solutions/VGP
+* [BDAP GUI] Add user-friendly behavior, more error handling and cleanup
+* [BDAP GUI] Implement changes requested by PR reviewers
+* Merge pull request #73 from duality-solutions/qt-mockups
+* [BDAP] Update VGP library's gitignore
+* [VGP] Fix unit test and qt test make files
+* [BDAP QT] Remove net include from tablemodel class
+* Update German Translation
+* Stub BDAP UI translations to NL ts file
+* Pass placeholdertext through QObject::tr
+* [BDAP] Fix issue with deleting an account
+* [BDAP] Fix decrypting link request and accept data
+* [BDAP] Add missing license headers to code files
+* [Fluid] Fix get miner reward after first change
+* [Fluid] Move operations code to fluid directory
+* Bump client version to 2.4.6
+* Merge pull request #76 from duality-solutions/BDAP-Translate
+* Fixes for PS and UTXO sorting
+* Cleanup fee section
+* Increase Signatures Required and Total
+* Fix psq/psa conditions
+* Amend GetCollateralAmount and GetMaxCollateralAmount
+* Update denom info in locale
+* c++14 for travis
+* Increade skip DNS Thread
+* Use IN6ADDR_ANY_INIT instead of in6addr_any
+* Update select coin methods
+* Call InitializeCurrentBlockTip after importing has finished
+* Fix crash bug with duplicate inputs within a transaction
+* Add instantlock field to getrawtransaction rpc output
+* Use VersionBitsState instead of VersionBitsTipState to avoid cs_main lock
+* Remove unused instantsenddepth from init
+* Do not hold cs_main while emitting messages in WalletModel::prepareTransaction
+* Base psq/pstx thresholold on the total number of up to date dynodes
+* Workaround for MacOS Mojave Dark Mode
+* Rename SnTimer to DnTimer
+* BIP147
+* Fix gettxoutsetinfo RPC command
+* Update README.md
+* Fix frameFeeSelection CSS
+* Fix Mining Page Colour
+* Remove auto entry of ports to config file
+* Remove unused CheckWork function
+* Fix ZMQAbstractNotifier
+* Update Icons and Splashscreen
+* Update TestNet checkpoint and minchainwork
+* Light Purple for LockedbyInstantSend
+* Update TestNet seed IP's
+* Update Alert/Spork for TestNet
+* Update mainnet minchainwork
+* Add a column for IS lock status on Transactions tab
+* fixes for shutdown sequence
+* Automatic InstantSend locks for simple transactions and some fixes
+* [ZMQ] Notify when an IS double spend is attempted
+* Remove dummy confirmations in RPC API and GUI for InstantSend transactions
+* Update showSNConfEditor -> showDNConfEditor
+* Change default build to disable GPU miner
+* Do not ignore patches in depends
+* Force fvisibility=hidden when compiling on macos
+* PrivateSend spending txes should have "outgoing" icon on overview screen
+* Relay txes through DN network faster than through regular nodes
+* Update XTHIN code
+* Reduce Memory Imprint on DB
+* Add protected distructor for CValidationInterface
+* Amend DEFAULT_TRANSACTION_MAXFEE
+* Fix ' warning: delete called on non-final 'PeerLogicValidation' that has virtual functions but non-virtual destructor'
+* Add WakeMessageHandler call to UpdateBlockTip
+* Cleanup from changing "boost::lexical_cast<int>" with atoi
+* clang-format
+* Update info for testnet spork key
+* add missing file to makefile
+* Remove bdap from DIST_SUBDIRS in make file
+* Do not check for CUDA as default at configure time
+* Repair Send in ThreadSocketHandler
+* Repair nActiveStatePrev
+* Repair 'GUI: QColor::setRgb: RGB parameters out of range' warning
+* Fix segfault with nRefCount in net
+* Amend Check in dynode.cpp
+* minor things i missed
+* update sync.cpp/h
+* amend some versioning
+* Use unique_ptr for db copy
+* Use unique_ptr for wallet db env
+* Remove dummy constructor
+* Allow users to mix up to 16 rounds
+* Only allow 2.4 nodes to mix with 2.4 nodes or newer
+* remove unused variable from serialization
+* A couple of small fixes for mixing collaterals
+* Add an option to disable popups for PS mixing txes
+* Identify PS collateral payments in transaction list a bit more accurate
+* Add more variance to coin selection in PS mixing
+* Revert Require all participants to submit equal number of inputs
+* Split PS into Manager and Session and allow running multiple mixing sessions in parallel
+* Document Sporks
+* M-of-N-like sporks
+* Update ImportPrivKey command
+* adds rpc calls for and 'setprivatesendamount'
+* Add versioning to spork cache
+* extract sporkmanager from sporkmessage 
+* Save/load spork cache
+* Update HD Feature Base and update build-debian.md
+* Sweep and Update RPC files
+* Tidy chainparams and update block.cpp/h
+* [GPU] Fix debug block info
+* Update rpcwallet.cpp calls and add missing AbandonTransaction bits
+* Update miner code back with new pointers etc.
+* [GPU] Disable GPU info on configure failure 
+* Fix Spork Address for TestNet
+* Improve fee warning colour
+* Update Qt and fix usage of dustRelayFee
+* Fix segfault when sending a Qt transaction
+* Increase fileout version in WriteFeeEstimates
+* Amend Fee Structure
+* Protect CSporkManager with critical section
+* Fix wallet lock check in DoAutomaticDenominating
+* Move block template specific stuff from CBlock to CBlockTemplate
+* Fix activeDynode task scheduler
+* Show some info about the wallet dumped via dumpwallet and show warning
+* Make sure pwalletMain is not null whenever it's used in PS client
+* Update rpcdynode and add helpers
+* Switch RequestGovernanceObjectVotes from pointers to hashes
+* remove/update dns seeders
+* [GPU] Update obsolete macro AC_HELP_STRING
+* [GPU] Prevent crash when changing the slidebar too fast
+* [GPU] Optimise GPU Miner
+* Fix copy elision warning in opencl device.cpp
+* Supress OSX private field warnings
+* Fix comparator and supress warning
+* Supress MacOS build warnings for deprecated code
+* [Qt] Fix styling of PrivateSend option on sendcoinsdialog.ui
+* Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
+* [GPU] Fix GPU found block nonce before ProcessFoundSolution
+* [GPU] Update README for GPU Mining
+* [GPU] Seperate CPU and GPU miners to fix hashmeters
+* [GPU] Fix Qt mining page layout so it expands
+* [GPU] Fixes to miner UI controls
+* [GPU] Hide slider until sync completes/change batch size
+* [GPU] Split CPU/GPU UI thread allocation
+* [GPU] fix global and order members as they appear in initializer
+* [GPU] fix processingUnit batch size and minor code tweaks
+* [GPU] fix autoreplace
+* [GPU] move implementations out of definitions
+* [GPU] fix const char* instead of std::string
+* [GPU] fix unique_ptr null check
+* [GPU] remove redundant comments and whitespace
+* [GPU] fix thread names
+* [GPU] remove redundant comments and whitespace
+* [GPU] follow pattern and add this->
+* [GPU] remove redundant DynamicMiner function
+* [GPU] explicit boost::none for boost::bind
+* [GPU] fix boost::optional no value_or method error
+* [GPU] reorder constructor initialization
+* [GPU] move constructor code to base
+* [GPU] move hashTarget to protected variables
+* [GPU] fix non-pointer operand
+* [GPU] move protected variables
+* [GPU] fix CPUMiner constructor
+* [GPU] track chain tip
+* [GPU] remove name collison
+* [GPU] add device index to base class
+* [GPU] provide pblock to LoopChecks
+* [GPU] remove unused template from BaseMiner
+* [GPU] remove static from StartLoop
+* [GPU] c++11 compatibility
+* [GPU] cleanup thread constructor
+* [GPU] remove unused assignment
+* [GPU] nullptr comparisons
+* [GPU] use boost::shared_ptr as expected
+* [GPU] move transactionsUdatedLast to base class
+* [GPU] enable_gpu ifdef
+* [GPU] fix miner start loop call
+* [GPU] rename namespace to miners
+* [GPU] move threads to namespace
+* [GPU] fix ptr ptr semantics
+* [GPU] fix count hashes function params
+* [GPU] mark function as override
+* [GPU] bring back enable_gpu ifdef
+* [GPU] rename processing unit
+* [GPU] remove static from thread_group
+* [GPU] fix optional dereference
+* [GPU] rename check function and fix breaks
+* [GPU] use shared_ptr to manage thread_group ptr
+* [GPU] Refactor miners code
+* [GPU] Process hashes in batches
+* [GPU] Remove obvious type hint
+* [GPU] Device get total memory method
+* [GPU] OpenCL kernel static build rule
+* [GPU] Remove unsigned and signed int comparison
+* [GPU] Mac build fix attempt
+* [GPU] Disable CUDA in Travis
+* [GPU] Fix autoconf warnings
+* [GPU] Apple OpenCL linker flags
+* [GPU] Implement GPU Mining for both Daemon/Qt
+* [GPU] Split CUDA and OpenCL libraries
+* [GPU] Add CUDA/OpenCL Libraries for GPU Mining
+* Remove unused serialization method
+* Fix consts in txmempool
+* [depends] upgrade boost to 1.67.0
+* [depends] upgrade dbus to 1.13.4
+* [depends] update expad download path
+* [depends] upgrade freetype to 2.9.1
+* [depends] update libevent download path
+* [depends] upgrade libxcb to 1.13
+* [depends] upgrade miniupnpc to 2.1
+* [depends] upgrade native_biplist to 1.0.3
+* [depends] upgrade native_ccache to 3.4.2
+* [depends] update native_ds_store download path
+* [depends] upgrade native_mac_alias to 2.0.7
+* [depends] upgrade native_protobuf to 3.6.0
+* [depends] update openssl to 1.0.1k - Add RISC-V support
+* [depends] upgrade qt to 5.9.6
+* [depends] upgrade qrencode
+* [depends] upgrade xcb_proto to 1.13
+* [depends] upgrade xtrans to 1.3.5
+* [depends] upgrade zeromq to 4.2.5
+* [depends] add fix_configure_mac.patch file
+* [depends] add fix_no_printer.patch file
+* [depends] update mac-qmake.conf patch file
+* [BDAP] Add directory type function
+* [BDAP] Implement add new entry validation checking
+* [BDAP] Fix validation when syncing blocks from peers
+* [BDAP] Implement directory entry list RPC command
+* [BDAP] Add getdirectoryinfo RPC command
+* [BDAP] Add leveldb update method to db wrapper class
+* [BDAP] Fix validate input function; leveldb check not DOS
+* [BDAP] Update getdirectoryinfo help parameter
+* [BDAP] Implement update & delete entry tx validation checking
+* [BDAP] Fix saving tx hash in leveldb bdap database
+* [BDAP] Replace updatedirectory RPC command
+* [BDAP] Fix getdirectoryinfo return when entry not found
+* [BDAP] Fix expire time in RPC commands
+* [BDAP] Refactor directory to domainentry
+* [BDAP] Add domain entry link class for binding operations
+* [BDAP] Refactor domain entry certificate and move to its own class
+* [BDAP] Refactor domain entry checkpoints and move to its own class
+* [BDAP] Refactor domain entry channel data and move to its own class
+* [BDAP] Check if tx exists in memory pool for new domain entries
+* [BDAP] Update RPC command names
+* [BDAP] Check domain entry wallet address and encrypt pub key
+* [BDAP] Remove SignWalletAddress in domain entry. Only use WalletAddress
+* [BDAP] Check ownership in updatedomainentry RPC command
+* [BDAP] Fix domain entry so it populates block height
+* [BDAP] Add code to check domain entry's previous UTXO
+* Remove duplicate mem pool check in wallet available coins
+* [BDAP] Add link address to domain entry class
+* [BDAP] Check previous wallet address for update and delete txs
+* [BDAP] Add delete domain entry RPC command
+* [BDAP] Allow blank link address and encrypt pub key for delete operations
+* [Fluid] Fix segfault when running reindex
+* Move makekeypair to BDAP and change testnet spork pub key
+* [BDAP] Add identity and identity verification classes
+* [BDAP] Add missing operation codes
+* [BDAP] Adjust identity verification class
+* [BDAP] Fix domain entry object type enum
+* [BDAP] Add entry audit data class
+* [BDAP] Add new public group entry RPC command
+* [BDAP] Add list domain group entries RPC command
+* [BDAP] Add update and delete public group RPC commands
+* Corrected the documentation for Fluid RPC Calls
+* [BDAP] Refactor general functions and fix get op type
+* [BDAP] Improve transaction display in Qt UI
+* Added more seednodes
+* Remove double forcecompactdb arg
+* [Fluid] Refactor fluid code and remove index database
+* [BDAP] Remove fluid reference from domain entry
+* [Fluid] Add mining update and mint leveldb databases
+* [Fluid] Implement new fluid databases
+* [Fluid] Fix get fluid sovereigns RPC
+* [Fluid] Fixes to get last functions and RPC commands
+* [Fluid] Fix consensus issues with new db code
+* Drop delayed headers logic and fix duplicate initial headers sync
+* replace boost iterators with for
+* RPC: Add description for InstantSend-related fields of mempool entry
+* RPC: fix wallet lock check in
+* minor reformatting
+* Remove explicit wallet lock in DynodeList::StartAll()
+* Do not create dnb until dynodeSync is finished
+* Don't drop dnb's for outdated DN's
+* Fix previous commit and fix 2 Spork issues
+* PrepareDenominate fix
+* Sync DN list and DNW list from 3 peers max
+* Use correct protocol when serializing messages in reply to
+* Bump Versioning
+* Update dynamic_qt.m4 (Remove ability to build with Qt4)
+
+
 **Dynamic v2.3.5.0**
 
 * Fix crash bug with duplicate inputs within a transaction
@@ -191,6 +711,7 @@
 * Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
@@ -213,6 +734,7 @@
 * Update secp256k1
 * Fix fixed seeds
 * Update CHANGELOG
+
 
 **Dynamic v2.1.0.0**
 
@@ -298,6 +820,7 @@
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
 * Update CHANGELOG
+
 
 **Dynamic v2.0.0.0**
 
@@ -570,6 +1093,7 @@
 * Optimize CheckOutpoint
 * Update CHANGELOG
 
+
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values
@@ -632,6 +1156,7 @@
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.2**
 
 * [Sync] Fix issue with headers first sync
@@ -644,10 +1169,12 @@
 * Bump Governance/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 * Update CHANGELOG
+
 
 **Dynamic v1.3.0.0**
 
@@ -655,6 +1182,7 @@
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 * Update CHANGELOG
+
 
 **Dynamic v1.2.0.0**
 
@@ -698,6 +1226,7 @@
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
 * Update CHANGELOG
+
 
 **Dynamic v1.1.0.0**
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,17 +14,16 @@
 
 #include <map>
 #include <set>
-#include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <boost/foreach.hpp>
-#include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 namespace memusage
 {
-
 /** Compute the total memory used by allocating alloc bytes. */
 static size_t MallocUsage(size_t alloc);
 
@@ -39,8 +38,16 @@ static inline size_t DynamicUsage(const int64_t& v) { return 0; }
 static inline size_t DynamicUsage(const uint64_t& v) { return 0; }
 static inline size_t DynamicUsage(const float& v) { return 0; }
 static inline size_t DynamicUsage(const double& v) { return 0; }
-template<typename X> static inline size_t DynamicUsage(X * const &v) { return 0; }
-template<typename X> static inline size_t DynamicUsage(const X * const &v) { return 0; }
+template <typename X>
+static inline size_t DynamicUsage(X* const& v)
+{
+    return 0;
+}
+template <typename X>
+static inline size_t DynamicUsage(const X* const& v)
+{
+    return 0;
+}
 
 /** Compute the memory used for dynamically allocated but owned data structures.
  *  For generic data types, this is *not* recursive. DynamicUsage(vector<vector<int> >)
@@ -66,9 +73,8 @@ static inline size_t MallocUsage(size_t alloc)
 
 // STL data structures
 
-template<typename X>
-struct stl_tree_node
-{
+template <typename X>
+struct stl_tree_node {
 private:
     int color;
     void* parent;
@@ -77,8 +83,7 @@ private:
     X x;
 };
 
-struct stl_shared_counter
-{
+struct stl_shared_counter {
     /* Various platforms use different sized counters here.
      * Conservatively assume that they won't be larger than size_t. */
     void* class_type;
@@ -86,37 +91,37 @@ struct stl_shared_counter
     size_t weak_count;
 };
 
-template<typename X>
+template <typename X>
 static inline size_t DynamicUsage(const std::vector<X>& v)
 {
     return MallocUsage(v.capacity() * sizeof(X));
 }
 
-template<unsigned int N, typename X, typename S, typename D>
+template <unsigned int N, typename X, typename S, typename D>
 static inline size_t DynamicUsage(const prevector<N, X, S, D>& v)
 {
     return MallocUsage(v.allocated_memory());
 }
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t DynamicUsage(const std::set<X, Y>& s)
 {
     return MallocUsage(sizeof(stl_tree_node<X>)) * s.size();
 }
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t IncrementalDynamicUsage(const std::set<X, Y>& s)
 {
     return MallocUsage(sizeof(stl_tree_node<X>));
 }
 
-template<typename X, typename Y, typename Z>
+template <typename X, typename Y, typename Z>
 static inline size_t DynamicUsage(const std::map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X, Y> >)) * m.size();
 }
 
-template<typename X, typename Y, typename Z>
+template <typename X, typename Y, typename Z>
 static inline size_t IncrementalDynamicUsage(const std::map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X, Y> >));
@@ -124,25 +129,25 @@ static inline size_t IncrementalDynamicUsage(const std::map<X, Y, Z>& m)
 
 // indirectmap has underlying map with pointer as key
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t DynamicUsage(const indirectmap<X, Y>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X*, Y> >)) * m.size();
 }
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t IncrementalDynamicUsage(const indirectmap<X, Y>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X*, Y> >));
 }
 
-template<typename X>
+template <typename X>
 static inline size_t DynamicUsage(const std::unique_ptr<X>& p)
 {
     return p ? MallocUsage(sizeof(X)) : 0;
 }
 
-template<typename X>
+template <typename X>
 static inline size_t DynamicUsage(const std::shared_ptr<X>& p)
 {
     // A shared_ptr can either use a single continuous memory block for both
@@ -153,37 +158,36 @@ static inline size_t DynamicUsage(const std::shared_ptr<X>& p)
 
 // Boost data structures
 
-template<typename X>
-struct unordered_node : private X
-{
+template <typename X>
+struct unordered_node : private X {
 private:
     void* ptr;
 };
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t DynamicUsage(const boost::unordered_set<X, Y>& s)
 {
     return MallocUsage(sizeof(unordered_node<X>)) * s.size() + MallocUsage(sizeof(void*) * s.bucket_count());
 }
 
-template<typename X, typename Y, typename Z>
+template <typename X, typename Y, typename Z>
 static inline size_t DynamicUsage(const boost::unordered_map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(unordered_node<std::pair<const X, Y> >)) * m.size() + MallocUsage(sizeof(void*) * m.bucket_count());
 }
 
-template<typename X, typename Y>
+template <typename X, typename Y>
 static inline size_t DynamicUsage(const std::unordered_set<X, Y>& s)
 {
     return MallocUsage(sizeof(unordered_node<X>)) * s.size() + MallocUsage(sizeof(void*) * s.bucket_count());
 }
 
-template<typename X, typename Y, typename Z>
+template <typename X, typename Y, typename Z>
 static inline size_t DynamicUsage(const std::unordered_map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(unordered_node<std::pair<const X, Y> >)) * m.size() + MallocUsage(sizeof(void*) * m.bucket_count());
 }
 
-}
+} // namespace memusage
 
 #endif // DYNAMIC_MEMUSAGE_H

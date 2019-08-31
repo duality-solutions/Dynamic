@@ -6,13 +6,14 @@ AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
 DYNAMIC_CONFIG_INCLUDES=-I$(builddir)/config
-DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(LIBTORRENT_CPPFLAGS) $(LIBVGP_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
 
 LIBDYNAMIC_SERVER=libdynamic_server.a
 LIBDYNAMIC_WALLET=libdynamic_wallet.a
+LIBDYNAMIC_CONSENSUS=libdynamic_consensus.a
 LIBDYNAMIC_COMMON=libdynamic_common.a
 LIBDYNAMIC_CLI=libdynamic_cli.a
 LIBDYNAMIC_UTIL=libdynamic_util.a
@@ -30,11 +31,14 @@ $(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
 EXTRA_LIBRARIES += \
-  crypto/libdynamic_crypto.a \
-  libdynamic_util.a \
-  libdynamic_common.a \
-  libdynamic_server.a \
-  libdynamic_cli.a
+  $(LIBDYNAMIC_CRYPTO) \
+  $(LIBDYNAMIC_UTIL) \
+  $(LIBDYNAMIC_COMMON) \
+  $(LIBDYNAMIC_CONSENSUS) \
+  $(LIBDYNAMIC_SERVER) \
+  $(LIBDYNAMIC_CLI) \
+  $(LIBDYNAMIC_WALLET)
+
 if ENABLE_WALLET
 DYNAMIC_INCLUDES += $(BDB_CPPFLAGS)
 EXTRA_LIBRARIES += libdynamic_wallet.a
@@ -45,14 +49,15 @@ endif
 
 if BUILD_DYNAMIC_LIBS
 lib_LTLIBRARIES = libdynamicconsensus.la
-LIBDYNAMIC_CONSENSUS=libdynamicconsensus.la
+LIBDYNAMICCONSENSUS=libdynamicconsensus.la
 else
-LIBDYNAMIC_CONSENSUS=
+LIBDYNAMICCONSENSUS=
 endif
 
 bin_PROGRAMS =
 TESTS =
 BENCHMARKS =
+DHT_TESTS =
 
 if BUILD_DYNAMICD
   bin_PROGRAMS += dynamicd
@@ -70,11 +75,31 @@ DYNAMIC_CORE_H = \
   addressindex.h \
   addrman.h \
   alert.h \
-  amount.h \
-  arith_uint256.h \
   base58.h \
+  bdap/bdap.h \
+  bdap/domainentry.h \
+  bdap/domainentrydb.h \
+  bdap/fees.h \
+  bdap/linking.h \
+  bdap/linkingdb.h \
+  bdap/linkmanager.h \
+  bdap/linkstorage.h \
+  bdap/stealth.h \
+  bdap/utils.h \
+  bdap/vgpmessage.h \
+  bip39_chinese_simplified.h \
+  bip39_chinese_traditional.h \
   bip39_english.h \
+  bip39_french.h \
+  bip39_german.h \
+  bip39_italian.h \
+  bip39_japanese.h \
+  bip39_korean.h \
+  bip39_russian.h \
+  bip39_spanish.h \
+  bip39_ukrainian.h \
   bip39.h \
+  blockencodings.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -92,24 +117,36 @@ DYNAMIC_CORE_H = \
   compat/sanity.h \
   compressor.h \
   consensus/consensus.h \
-  consensus/merkle.h \
-  consensus/params.h \
-  consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  cuckoocache.h \
   dbwrapper.h \
+  dht/datachunk.h \
+  dht/dataheader.h \
+  dht/datarecord.h \
+  dht/dataset.h \
+  dht/ed25519.h \
+  dht/limits.h \
+  dht/mutable.h \
+  dht/mutabledb.h \
+  dht/session.h \
+  dht/sessionevents.h \
+  dht/settings.h \
+  dht/storage.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid/banaccount.h \
   fluid/fluid.h \
   fluid/fluiddb.h \
   fluid/fluiddynode.h \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
   fluid/fluidsovereign.h \
+  fluid/operations.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -117,7 +154,6 @@ DYNAMIC_CORE_H = \
   governance-validators.h \
   governance-vote.h \
   governance-votedb.h \
-  hash.h \
   hdchain.h \
   httprpc.h \
   httpserver.h \
@@ -131,43 +167,45 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
-  miner.h \
+  miner/impl/miner-cpu.h \
+  miner/impl/miner-gpu.h \
+  miner/internal/hash-rate-counter.h \
+  miner/internal/miner-base.h \
+  miner/internal/miner-context.h \
+  miner/internal/miners-controller.h \
+  miner/internal/miners-group.h \
+  miner/internal/thread-group.h \
+  miner/miner-util.h \
+  miner/miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
   netbase.h \
   netfulfilledman.h \
+  netmessagemaker.h \
   noui.h \
   ntp.h \
-  operations.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
   pow.h \
-  prevector.h \
-  primitives/block.h \
-  primitives/transaction.h \
   privatesend-client.h \
   privatesend.h \
   privatesend-server.h \
   privatesend-util.h \
   psnotificationinterface.h \
   protocol.h \
-  pubkey.h \
   random.h \
   reverselock.h \
+  reverse_iterator.h \
   rpcclient.h \
   rpcprotocol.h \
   rpcregister.h \
   rpcserver.h \
   scheduler.h \
-  script/interpreter.h \
-  script/script.h \
-  script/script_error.h \
   script/sigcache.h \
   script/sign.h \
   script/standard.h \
-  serialize.h \
   spentindex.h \
   spork.h \
   streams.h \
@@ -175,16 +213,15 @@ DYNAMIC_CORE_H = \
   support/allocators/zeroafterfree.h \
   support/cleanse.h \
   support/lockedpool.h \
+  support/events.h \
   sync.h \
   threadinterrupt.h \
   threadsafety.h \
   timedata.h \
-  tinyformat.h \
   torcontrol.h \
   txdb.h \
   txmempool.h \
   ui_interface.h \
-  uint256.h \
   undo.h \
   util.h \
   utilmoneystr.h \
@@ -192,7 +229,6 @@ DYNAMIC_CORE_H = \
   utiltime.h \
   validation.h \
   validationinterface.h \
-  version.h \
   versionbits.h \
   wallet/coincontrol.h \
   wallet/crypter.h \
@@ -221,15 +257,41 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  bdap/domainentry.cpp \
+  bdap/domainentrydb.cpp \
+  bdap/fees.cpp \
+  bdap/linking.cpp \
+  bdap/linkingdb.cpp \
+  bdap/linkmanager.cpp \
+  bdap/linkstorage.cpp \
+  bdap/rpcdomainentry.cpp \
+  bdap/rpclinking.cpp \
+  bdap/rpcrawbdap.cpp \
+  bdap/utils.cpp \
+  bdap/vgpmessage.cpp \
   dbwrapper.cpp \
+  dht/datachunk.cpp \
+  dht/dataheader.cpp \
+  dht/datarecord.cpp \
+  dht/dataset.cpp \
+  dht/limits.cpp \
+  dht/mutable.cpp \
+  dht/mutabledb.cpp \
+  dht/rpcdht.cpp \
+  dht/session.cpp \
+  dht/sessionevents.cpp \
+  dht/settings.cpp \
+  dht/storage.cpp \
   dynode.cpp \
   dynode-payments.cpp\
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
+  fluid/banaccount.cpp \
   fluid/fluid.cpp \
   fluid/fluiddb.cpp \
   fluid/fluiddynode.cpp \
@@ -237,6 +299,7 @@ libdynamic_server_a_SOURCES = \
   fluid/fluidmint.cpp \
   fluid/rpcfluid.cpp \
   fluid/fluidsovereign.cpp \
+  fluid/operations.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -249,13 +312,19 @@ libdynamic_server_a_SOURCES = \
   instantsend.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
-  miner.cpp \
+  miner/impl/miner-cpu.cpp \
+  miner/impl/miner-gpu.cpp \
+  miner/internal/hash-rate-counter.cpp \
+  miner/internal/miner-base.cpp \
+  miner/internal/miner-context.cpp \
+  miner/internal/miners-controller.cpp \
+  miner/miner-util.cpp \
+  miner/miner.cpp \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
-  operations.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
@@ -296,12 +365,12 @@ libdynamic_zmq_a_SOURCES = \
   zmq/zmqpublishnotifier.cpp
 endif
 
-
 # wallet: shared between dynamicd and dynamic-qt, but only linked
 # when wallet enabled
 libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
+  bdap/stealth.cpp \
   keepass.cpp \
   policy/rbf.cpp \
   privatesend-client.cpp \
@@ -319,21 +388,23 @@ libdynamic_wallet_a_SOURCES = \
 crypto_libdynamic_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_CONFIG_INCLUDES) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_SOURCES = \
-  crypto/common.h \
-  crypto/argon2d/argon2.h \
-  crypto/argon2d/core.h \
-  crypto/argon2d/encoding.h \
-  crypto/argon2d/thread.h \
   crypto/argon2d/argon2.c \
+  crypto/argon2d/argon2.h \
   crypto/argon2d/core.c \
+  crypto/argon2d/core.h \
   crypto/argon2d/encoding.c \
+  crypto/argon2d/encoding.h \
   crypto/argon2d/opt.c \
   crypto/argon2d/thread.c \
-  crypto/blake2/blake2b.c \
-  crypto/blake2/blake2.h \
+  crypto/argon2d/thread.h \
   crypto/blake2/blake2-impl.h \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blake2b.c \
   crypto/blake2/blamka-round-opt.h \
   crypto/blake2/blamka-round-ref.h \
+  crypto/chacha20.cpp \
+  crypto/chacha20.h \
+  crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
   crypto/hmac_sha512.cpp \
@@ -344,39 +415,70 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
+  crypto/sha256_avx2.cpp \
+  crypto/sha256_shani.cpp \
+  crypto/sha256_sse4.cpp \
+  crypto/sha256_sse41.cpp \
   crypto/sha512.cpp \
   crypto/sha512.h
+
+# consensus: shared between all executables that validate any consensus rules.
+libdynamic_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
+libdynamic_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdynamic_consensus_a_SOURCES = \
+  amount.cpp \
+  amount.h \
+  arith_uint256.cpp \
+  arith_uint256.h \
+  consensus/merkle.cpp \
+  consensus/merkle.h \
+  consensus/params.h \
+  consensus/validation.h \
+  hash.cpp \
+  hash.h \
+  prevector.h \
+  primitives/block.cpp \
+  primitives/block.h \
+  primitives/transaction.cpp \
+  primitives/transaction.h \
+  pubkey.cpp \
+  pubkey.h \
+  script/dynamicconsensus.cpp \
+  script/interpreter.cpp \
+  script/interpreter.h \
+  script/script.cpp \
+  script/script.h \
+  script/script_error.cpp \
+  script/script_error.h \
+  serialize.h \
+  tinyformat.h \
+  uint256.cpp \
+  uint256.h \
+  version.h
 
 # common: shared between dynamicd, and dynamic-qt and non-server tools
 libdynamic_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_common_a_SOURCES = \
-  amount.cpp \
-  arith_uint256.cpp \
   base58.cpp \
+  bdap/stealth.cpp \
   bip39.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
-  consensus/merkle.cpp \
   core_read.cpp \
   core_write.cpp \
-  hash.cpp \
+  dht/ed25519.cpp \
   hdchain.cpp \
   key.cpp \
   keystore.cpp \
   netaddress.cpp \
   netbase.cpp \
-  primitives/block.cpp \
-  primitives/transaction.cpp \
   protocol.cpp \
-  pubkey.cpp \
   scheduler.cpp \
-  script/interpreter.cpp \
-  script/script.cpp \
-  script/script_error.cpp \
   script/sign.cpp \
   script/standard.cpp \
+  wallet/wallet_ismine.cpp \
   $(DYNAMIC_CORE_H)
 
 # util: shared between all executables.
@@ -396,7 +498,6 @@ libdynamic_util_a_SOURCES = \
   support/lockedpool.cpp \
   sync.cpp \
   threadinterrupt.cpp \
-  uint256.cpp \
   util.cpp \
   utilmoneystr.cpp \
   utilstrencodings.cpp \
@@ -405,6 +506,7 @@ libdynamic_util_a_SOURCES = \
 
 if GLIBC_BACK_COMPAT
 libdynamic_util_a_SOURCES += compat/glibc_compat.cpp
+AM_LDFLAGS += $(COMPAT_LDFLAGS)
 endif
 
 # cli: shared between dynamic-cli and dynamic-qt
@@ -432,11 +534,14 @@ dynamicd_LDADD = \
   $(LIBDYNAMIC_COMMON) \
   $(LIBUNIVALUE) \
   $(LIBDYNAMIC_UTIL) \
+  $(LIBDYNAMIC_CONSENSUS) \
   $(LIBDYNAMIC_CRYPTO) \
+  $(LIBVGP) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBTORRENT)
 
 if ENABLE_ZMQ
 dynamicd_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
@@ -461,7 +566,9 @@ endif
 dynamic_cli_LDADD = \
   $(LIBDYNAMIC_CLI) \
   $(LIBUNIVALUE) \
-  $(LIBDYNAMIC_UTIL)
+  $(LIBDYNAMIC_UTIL) \
+  $(LIBDYNAMIC_CRYPTO)
+
 dynamic_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
@@ -479,8 +586,11 @@ dynamic_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBDYNAMIC_COMMON) \
   $(LIBDYNAMIC_UTIL) \
+  $(LIBDYNAMIC_CONSENSUS) \
   $(LIBDYNAMIC_CRYPTO) \
-  $(LIBSECP256K1)
+  $(LIBVGP) \
+  $(LIBSECP256K1)  \
+  $(LIBTORRENT)
 
 dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
@@ -488,27 +598,14 @@ dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 # dynamicconsensus library #
 if BUILD_DYNAMIC_LIBS
 include_HEADERS = script/dynamicconsensus.h
-libdynamicconsensus_la_SOURCES = \
-  crypto/hmac_sha512.cpp \
-  crypto/ripemd160.cpp \
-  crypto/sha1.cpp \
-  crypto/sha256.cpp \
-  crypto/sha512.cpp \
-  hash.cpp \
-  primitives/transaction.cpp \
-  pubkey.cpp \
-  script/dynamicconsensus.cpp \
-  script/interpreter.cpp \
-  script/script.cpp \
-  uint256.cpp \
-  utilstrencodings.cpp
+libdynamicconsensus_la_SOURCES = $(crypto_libdynamic_crypto_a_SOURCES) $(libdynamic_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
   libdynamicconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
 libdynamicconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libdynamicconsensus_la_LIBADD = $(LIBSECP256K1)
+libdynamicconsensus_la_LIBADD = $(LIBSECP256K1) $(BOOST_LIBS)
 libdynamicconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_DYNAMIC_INTERNAL
 libdynamicconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
@@ -517,10 +614,14 @@ endif
 
 CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a
 CLEANFILES += *.gcda *.gcno
+CLEANFILES += bdap/*.gcda bdap/*.gcno
+CLEANFILES += bdap/vgp/*.gcda bdap/vgp/*.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
+CLEANFILES += dht/*.gcda dht/*.gcno
 CLEANFILES += fluid/*.gcda fluid/*.gcno
+CLEANFILES += miner/*.gcda miner/*.gcno
 CLEANFILES += policy/*.gcda policy/*.gcno
 CLEANFILES += primitives/*.gcda primitives/*.gcno
 CLEANFILES += script/*.gcda script/*.gcno
@@ -567,6 +668,17 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
+endif
+
+if EMBEDDED_LIBTORRENT
+include Makefile.libtorrent.include
+#include Makefile.dht.test.include
+endif
+
+include Makefile.vgp.include
+
+if ENABLE_GPU
+include Makefile.gpu.include
 endif
 
 if ENABLE_TESTS

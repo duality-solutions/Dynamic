@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 
 
 #include "fluidsovereign.h"
@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidSovereignDB *pFluidSovereignDB = NULL;
+CFluidSovereignDB* pFluidSovereignDB = NULL;
 
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
 {
@@ -34,7 +34,7 @@ bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-        std::string strTimeStamp = vecSplitScript[5]; 
+        std::string strTimeStamp = vecSplitScript[5];
         int64_t tokenTimeStamp;
         if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
             entry.nTimeStamp = tokenTimeStamp;
@@ -58,30 +58,27 @@ bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& 
     return false;
 }
 
-bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx) {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
+bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
+{
     int nOut;
-    if(!GetFluidSovereignData(tx, *this, nOut))
-    {
+    if (!GetFluidSovereignData(tx, *this, nOut)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript) {
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
-    if(!GetFluidSovereignData(fluidScript, *this))
-    {
+bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
+{
+    if (!GetFluidSovereignData(fluidScript, *this)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData) {
+void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData)
+{
     CDataStream dsFluidOp(SER_NETWORK, PROTOCOL_VERSION);
     dsFluidOp << *this;
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
@@ -90,7 +87,7 @@ void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData) {
 std::vector<std::string> CFluidSovereign::SovereignAddressesStrings()
 {
     std::vector<std::string> vchAddressStrings;
-    for (const std::vector<unsigned char>& vchAddress: SovereignAddresses) {
+    for (const std::vector<unsigned char>& vchAddress : SovereignAddresses) {
         vchAddressStrings.push_back(StringFromCharVector(vchAddress));
     }
     return vchAddressStrings;
@@ -106,7 +103,7 @@ void CFluidSovereignDB::InitEmpty()
     if (IsEmpty()) {
         LOCK(cs_fluid_sovereign);
         CFluidParameters initSovereign;
-        std::vector<std::vector<unsigned char>> vchAddresses = initSovereign.InitialiseAddressCharVector();
+        std::vector<std::vector<unsigned char> > vchAddresses = initSovereign.InitialiseAddressCharVector();
         CFluidSovereign fluidSovereign;
         for (const std::vector<unsigned char>& sovereignId : vchAddresses) {
             fluidSovereign.SovereignAddresses.push_back(sovereignId);
@@ -114,25 +111,23 @@ void CFluidSovereignDB::InitEmpty()
         fluidSovereign.FluidScript = CharVectorFromString("init sovereign");
         fluidSovereign.nTimeStamp = 1;
         fluidSovereign.nHeight = 1;
-        if (!AddFluidSovereignEntry(fluidSovereign))
-        {
+        if (!AddFluidSovereignEntry(fluidSovereign)) {
             LogPrintf("CFluidSovereignDB::InitEmpty add failed.\n");
         }
     }
 }
 
-bool CFluidSovereignDB::AddFluidSovereignEntry(const CFluidSovereign& entry) 
+bool CFluidSovereignDB::AddFluidSovereignEntry(const CFluidSovereign& entry)
 {
     bool writeState = false;
     {
         LOCK(cs_fluid_sovereign);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) 
-                     && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
     }
     return writeState;
 }
 
-bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry) 
+bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry)
 {
     LOCK(cs_fluid_sovereign);
     returnEntry.SetNull();
@@ -145,21 +140,19 @@ bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight)
-                {
+                if (entry.nHeight > returnEntry.nHeight) {
                     returnEntry = entry;
                 }
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
     return true;
 }
 
-bool CFluidSovereignDB::GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& entries) 
+bool CFluidSovereignDB::GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& entries)
 {
     LOCK(cs_fluid_sovereign);
     std::pair<std::string, std::vector<unsigned char> > key;
@@ -171,14 +164,12 @@ bool CFluidSovereignDB::GetAllFluidSovereignRecords(std::vector<CFluidSovereign>
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (!entry.IsNull())
-                {
+                if (!entry.IsNull()) {
                     entries.push_back(entry);
                 }
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
@@ -198,8 +189,7 @@ bool CFluidSovereignDB::IsEmpty()
                 pcursor->GetValue(entry);
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return true;
         }
         return false;

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,11 +13,12 @@
 
 #include <boost/foreach.hpp>
 
-bool CKeyStore::AddKey(const CKey &key) {
+bool CKeyStore::AddKey(const CKey& key)
+{
     return AddKeyPubKey(key, key.GetPubKey());
 }
 
-bool CBasicKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const
+bool CBasicKeyStore::GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const
 {
     CKey key;
     if (!GetKey(address, key)) {
@@ -33,11 +34,42 @@ bool CBasicKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) con
     return true;
 }
 
-bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
+bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
 {
     LOCK(cs_KeyStore);
     mapKeys[pubkey.GetID()] = key;
     return true;
+}
+
+bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey)
+{
+    LOCK(cs_KeyStore);
+
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+    LogPrint("dht", "CBasicKeyStore::AddDHTKey, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                                                keyID.ToString(), key.GetPubKeyString(), 
+                                                key.GetPrivKeyString(), key.GetPrivSeedString());
+    if (keyID != key.GetID()) {
+        LogPrint("dht", "CBasicKeyStore::AddDHTKey GetID does't match \nvchPubKey.GetID() = %s, \nkey.GetID() = %s\n", 
+                                                                keyID.ToString(), key.GetID().ToString());
+        return false;
+    }
+    mapDHTKeys[keyID] = key;
+    return true;
+}
+
+bool CBasicKeyStore::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        DHTKeyMap::const_iterator mi = mapDHTKeys.find(address);
+        if (mi != mapDHTKeys.end())
+        {
+            keyOut = mi->second;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CBasicKeyStore::AddCScript(const CScript& redeemScript)
@@ -56,19 +88,18 @@ bool CBasicKeyStore::HaveCScript(const CScriptID& hash) const
     return mapScripts.count(hash) > 0;
 }
 
-bool CBasicKeyStore::GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const
+bool CBasicKeyStore::GetCScript(const CScriptID& hash, CScript& redeemScriptOut) const
 {
     LOCK(cs_KeyStore);
     ScriptMap::const_iterator mi = mapScripts.find(hash);
-    if (mi != mapScripts.end())
-    {
+    if (mi != mapScripts.end()) {
         redeemScriptOut = (*mi).second;
         return true;
     }
     return false;
 }
 
-static bool ExtractPubKey(const CScript &dest, CPubKey& pubKeyOut)
+static bool ExtractPubKey(const CScript& dest, CPubKey& pubKeyOut)
 {
     //TODO: Use Solver to extract this?
     CScript::const_iterator pc = dest.begin();
@@ -84,7 +115,7 @@ static bool ExtractPubKey(const CScript &dest, CPubKey& pubKeyOut)
     return true;
 }
 
-bool CBasicKeyStore::AddWatchOnly(const CScript &dest)
+bool CBasicKeyStore::AddWatchOnly(const CScript& dest)
 {
     LOCK(cs_KeyStore);
     setWatchOnly.insert(dest);
@@ -94,7 +125,7 @@ bool CBasicKeyStore::AddWatchOnly(const CScript &dest)
     return true;
 }
 
-bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest)
+bool CBasicKeyStore::RemoveWatchOnly(const CScript& dest)
 {
     LOCK(cs_KeyStore);
     setWatchOnly.erase(dest);
@@ -104,7 +135,7 @@ bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest)
     return true;
 }
 
-bool CBasicKeyStore::HaveWatchOnly(const CScript &dest) const
+bool CBasicKeyStore::HaveWatchOnly(const CScript& dest) const
 {
     LOCK(cs_KeyStore);
     return setWatchOnly.count(dest) > 0;
@@ -122,3 +153,11 @@ bool CBasicKeyStore::GetHDChain(CHDChain& hdChainRet) const
     return !hdChain.IsNull();
 }
 
+bool CBasicKeyStore::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const
+{
+    for (const std::pair<CKeyID, CKeyEd25519>& key : mapDHTKeys) {
+        vvchDHTPubKeys.push_back(key.second.GetPubKey());
+        LogPrint("dht", "CBasicKeyStore::GetDHTPubKeys -- pubkey = %s\n", key.second.GetPubKeyString());
+    }
+    return (vvchDHTPubKeys.size() > 0);
+}

@@ -1,9 +1,13 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
 
 #include "splashscreen.h"
 
@@ -12,8 +16,8 @@
 #include "clientversion.h"
 #include "guiutil.h"
 #include "init.h"
-#include "util.h"
 #include "ui_interface.h"
+#include "util.h"
 #include "version.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -24,10 +28,8 @@
 #include <QDesktopWidget>
 #include <QPainter>
 
-SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) :
-    QWidget(0, f), curAlignment(0)
+SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) : QWidget(0, f), curAlignment(0)
 {
-
     // transparent background
     setAttribute(Qt::WA_TranslucentBackground);
     setStyleSheet("background:transparent;");
@@ -35,13 +37,22 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     // no window decorations
     setWindowFlags(Qt::FramelessWindowHint);
 
-    QString font            = QApplication::font().toString();
+    QString font = QApplication::font().toString();
+
+    // networkstyle.cpp can't (yet) read themes, so we do it here to get the correct Splash-screen
+    QString splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash";
+    if(GetBoolArg("-regtest", false))
+        splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
+    if(GetBoolArg("-testnet", false))
+        splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
+    if(GetBoolArg("-privatenet", false))
+        splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
 
     // load the bitmap for writing some text over it
-    pixmap     = networkStyle->getSplashImage();
+    pixmap = networkStyle->getSplashImage();
 
     QPainter pixPaint(&pixmap);
-    pixPaint.setPen(QColor(100,100,100));
+    pixPaint.setPen(QColor(100, 100, 100));
 
     pixPaint.end();
 
@@ -60,17 +71,18 @@ SplashScreen::~SplashScreen()
     unsubscribeFromCoreSignals();
 }
 
-bool SplashScreen::eventFilter(QObject * obj, QEvent * ev) {
+bool SplashScreen::eventFilter(QObject* obj, QEvent* ev)
+{
     if (ev->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
-        if(keyEvent->text()[0] == 'q' && breakAction != nullptr) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+        if (keyEvent->text()[0] == 'q' && breakAction != nullptr) {
             breakAction();
         }
     }
     return QObject::eventFilter(obj, ev);
 }
 
-void SplashScreen::slotFinish(QWidget *mainWin)
+void SplashScreen::slotFinish(QWidget* mainWin)
 {
     Q_UNUSED(mainWin);
 
@@ -82,26 +94,26 @@ void SplashScreen::slotFinish(QWidget *mainWin)
     deleteLater(); // No more need for this
 }
 
-static void InitMessage(SplashScreen *splash, const std::string &message)
+static void InitMessage(SplashScreen* splash, const std::string& message)
 {
     QMetaObject::invokeMethod(splash, "showMessage",
         Qt::QueuedConnection,
         Q_ARG(QString, QString::fromStdString(message)),
-        Q_ARG(int, Qt::AlignBottom|Qt::AlignHCenter),
-        Q_ARG(QColor, QColor(200,150,200)));
+        Q_ARG(int, Qt::AlignBottom | Qt::AlignHCenter),
+        Q_ARG(QColor, QColor(200, 150, 200)));
 }
 
-static void ShowProgress(SplashScreen *splash, const std::string &title, int nProgress)
+static void ShowProgress(SplashScreen* splash, const std::string& title, int nProgress)
 {
     InitMessage(splash, title + strprintf("%d", nProgress) + "%");
 }
 
-void SplashScreen::setBreakAction(const std::function<void(void)> &action)
+void SplashScreen::setBreakAction(const std::function<void(void)>& action)
 {
     breakAction = action;
 }
 
-static void SetProgressBreakAction(SplashScreen *splash, const std::function<void(void)> &action)
+static void SetProgressBreakAction(SplashScreen* splash, const std::function<void(void)>& action)
 {
     QMetaObject::invokeMethod(splash, "setBreakAction",
         Qt::QueuedConnection,
@@ -133,13 +145,13 @@ void SplashScreen::unsubscribeFromCoreSignals()
     uiInterface.InitMessage.disconnect(boost::bind(InitMessage, this, _1));
     uiInterface.ShowProgress.disconnect(boost::bind(ShowProgress, this, _1, _2));
 #ifdef ENABLE_WALLET
-    Q_FOREACH(CWallet* const & pwallet, connectedWallets) {
+    Q_FOREACH (CWallet* const& pwallet, connectedWallets) {
         pwallet->ShowProgress.disconnect(boost::bind(ShowProgress, this, _1, _2));
     }
 #endif
 }
 
-void SplashScreen::showMessage(const QString &message, int alignment, const QColor &color)
+void SplashScreen::showMessage(const QString& message, int alignment, const QColor& color)
 {
     curMessage = message;
     curAlignment = alignment;
@@ -147,7 +159,7 @@ void SplashScreen::showMessage(const QString &message, int alignment, const QCol
     update();
 }
 
-void SplashScreen::paintEvent(QPaintEvent *event)
+void SplashScreen::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
@@ -156,7 +168,7 @@ void SplashScreen::paintEvent(QPaintEvent *event)
     painter.drawText(r, curAlignment, curMessage);
 }
 
-void SplashScreen::closeEvent(QCloseEvent *event)
+void SplashScreen::closeEvent(QCloseEvent* event)
 {
     StartShutdown(); // allows an "emergency" shutdown during startup
     event->ignore();
