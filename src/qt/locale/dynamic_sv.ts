@@ -5543,7 +5543,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>BDAP Länkdetalj</translation>
     </message>
     <message>
-        <source>Requetor:</source>
+        <source>Requestor:</source>
         <translation>Beställare:</translation>
     </message>
     <message>
