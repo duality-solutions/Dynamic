@@ -4975,12 +4975,17 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
         }
 
         if (EraseIndex) {
-            std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
-            std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
-            if (eraseIndexEd != setExternalKeyPool.end())
-                setExternalEdKeyPool.erase(eraseIndexEd);
-            if (eraseIndex != setExternalKeyPool.end())
-                setExternalKeyPool.erase(eraseIndex);
+            // Wallets before v2.4 do not have an external Ed25519 key pool.
+            if (setExternalEdKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
+                if (eraseIndexEd != setExternalKeyPool.end())
+                    setExternalEdKeyPool.erase(eraseIndexEd);
+            }
+            if (setExternalKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
+                if (eraseIndex != setExternalKeyPool.end())
+                    setExternalKeyPool.erase(eraseIndex);
+            }
         }
 
         return foundPubKey;
