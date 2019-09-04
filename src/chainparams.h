@@ -71,6 +71,17 @@ public:
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** Policy: Filter transactions that do not match well-defined patterns */
     bool RequireStandard() const { return fRequireStandard; }
+    /** The target time span between Proof-of-Stake blocks */
+    int64_t TargetPoSSpacing() const { return consensus.nPoSTargetSpacing; }
+    /** returns the coinstake maturity (min depth required) **/
+    int COINSTAKE_MIN_DEPTH() const { return nStakeMinDepth; }
+    bool HasStakeMinAgeOrDepth(const int contextHeight, const uint32_t contextTime, const int utxoFromBlockHeight, const uint32_t utxoFromBlockTime) const
+    {
+        return (contextHeight - utxoFromBlockHeight >= nStakeMinDepth);
+    }
+    /** returns the max future time (and drift in seconds) allowed for a block in the future **/
+    int FutureBlockTimeDrift(const bool isPoS) const { return nFutureTimeDriftPoS; }
+    uint32_t MaxFutureBlockTime(uint32_t time, const bool isPoS) const { return time + FutureBlockTimeDrift(isPoS); }
     /** Require addresses specified with "-externalip" parameter to be routable */
     bool RequireRoutableExternalIP() const { return fRequireRoutableExternalIP; }
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
@@ -123,6 +134,9 @@ protected:
     std::vector<std::string> vSporkAddresses;
     int nMinSporkKeys;
     std::string strDynodePaymentsPubKey;
+    int64_t nTargetPoSSpacing;
+    int nStakeMinDepth;
+    int nFutureTimeDriftPoS;
 };
 
 /**

@@ -215,6 +215,10 @@ extern CBlockIndex* pindexBestHeader;
 /** BDAP, only check when fully loaded **/
 extern bool fLoaded;
 
+/** Proof-of-Stake maps **/
+extern std::map<uint256, int64_t> mapRejectedBlocks;
+extern std::map<unsigned int, unsigned int> mapHashedBlocks;
+
 /** Minimum disk space required - used in CheckDiskSpace() */
 static const uint64_t nMinDiskSpace = 52428800;
 

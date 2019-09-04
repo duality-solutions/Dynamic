@@ -69,6 +69,23 @@ std::string base_blob<BITS>::ToString() const
     return (GetHex());
 }
 
+template <unsigned int BITS>
+base_blob<BITS>& base_blob<BITS>::operator>>=(unsigned int shift)
+{
+    base_blob<BITS> a(*this);
+    for (int i = 0; i < WIDTH; i++)
+        data[i] = 0;
+    int k = shift / 32;
+    shift = shift % 32;
+    for (int i = 0; i < WIDTH; i++) {
+        if (i - k - 1 >= 0 && shift != 0)
+            data[i - k - 1] |= (a.data[i] << (32 - shift));
+        if (i - k >= 0)
+            data[i - k] |= (a.data[i] >> shift);
+    }
+    return *this;
+}
+
 // Explicit instantiations for base_blob<160>
 template base_blob<160>::base_blob(const std::vector<unsigned char>&);
 template std::string base_blob<160>::GetHex() const;

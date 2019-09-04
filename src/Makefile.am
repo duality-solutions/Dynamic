@@ -177,6 +177,8 @@ DYNAMIC_CORE_H = \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
+  pos_kernel.h \
+  pos_stakeinput.h \
   pow.h \
   privatesend-client.h \
   privatesend.h \
@@ -322,6 +324,8 @@ libdynamic_server_a_SOURCES = \
   ntp.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
+  pos_kernel.cpp \
+  pos_stakeinput.cpp \
   pow.cpp \
   privatesend.cpp \
   privatesend-server.cpp \

@@ -154,3 +154,26 @@ int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& fr
     }
     return sign * r.GetLow64();
 }
+
+uint256 CBlockIndex::GetBlockTrust() const
+{
+    arith_uint256 bnTarget;
+    bnTarget.SetCompact(nBits);
+    if (bnTarget <= 0)
+        return ArithToUint256(0);
+
+    arith_uint256 bnReturn;
+    if (IsProofOfStake()) {
+        // Return trust score as usual
+        bnReturn = (arith_uint256(1) << 256) / (bnTarget + 1);
+    } else {
+        // Calculate work amount for block
+        arith_uint256 bnPoWTrust = ((~arith_uint256(0) >> 20) / (bnTarget + 1));
+        if (bnPoWTrust > 1) {
+            bnReturn = bnPoWTrust;
+        } else {
+            ArithToUint256(1);
+        }
+    }
+    return ArithToUint256(bnReturn);
+}

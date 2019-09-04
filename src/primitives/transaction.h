@@ -185,6 +185,17 @@ public:
         return (nValue == -1);
     }
 
+    void SetEmpty()
+    {
+        nValue = 0;
+        scriptPubKey.clear();
+    }
+
+    bool IsEmpty() const
+    {
+        return (nValue == 0 && scriptPubKey.empty());
+    }
+
     CAmount GetDustThreshold(const CFeeRate& minRelayTxFee) const
     {
         // "Dust" is defined in terms of CTransaction::minRelayTxFee, which has units satoshis-per-kilobyte.
@@ -266,6 +277,8 @@ public:
     CTransaction(const CMutableTransaction& tx);
     CTransaction(CMutableTransaction&& tx);
 
+    CTransaction& operator=(const CTransaction& tx);
+
     template <typename Stream>
     inline void Serialize(Stream& s) const
     {
@@ -314,6 +327,8 @@ public:
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
+
+    bool IsCoinStake() const;
 
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
