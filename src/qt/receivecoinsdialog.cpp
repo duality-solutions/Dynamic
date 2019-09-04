@@ -138,6 +138,13 @@ void ReceiveCoinsDialog::on_receiveButton_clicked()
     if (!model || !model->getOptionsModel() || !model->getAddressTableModel() || !model->getRecentRequestsTableModel())
         return;
 
+    //Check to see if wallet needs upgrading
+    if (model->getWallet()->WalletNeedsUpgrading()) {
+        QMessageBox::critical(this, tr("Older wallet version detected"),
+                tr("Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue."));
+        return;
+    }
+
     QString address;
     QString label = ui->reqLabel->text();
     if (ui->reuseAddress->isChecked()) {
