@@ -1,4 +1,4 @@
-<TS language="nl" version="2.0">
+<TS language="sv" version="2.0">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -5544,7 +5544,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Begäran:</translation>
+        <translation>Beställare:</translation>
     </message>
     <message>
         <source>Recipient:</source>
@@ -5556,11 +5556,11 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Länka publik nyckel (Begäran)</translation>
+        <translation>Länka publik nyckel (Mottagare)</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>begäranslänkadress:</translation>
+        <translation>Begäranslänkadress:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
@@ -5915,7 +5915,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Begäran:</translation>
+        <translation>Begäran: </translation>
     </message>
     <message>
         <source>Recipient: </source>
@@ -5931,7 +5931,7 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>begäranslänkadress:</translation>
+        <translation>Begäranslänkadress: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
@@ -6061,127 +6061,129 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Begärare, mottagare och länkmeddelande är obligatoriska fält</translation>
+        <translation>begäran, mottagare och länkmeddelande är obligatoriska fält</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Tips: om importprocessen avbryts (t.ex. ett strömavbrott eller en felaktig avstängning), vänligen ange återställningsfrasen eller den privata nyckeln och klicka på "Importera" knappen. </translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Välj Fil</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Importera mnemonic</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Importera återställningsfras</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Klistra in från urklipp</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>Rensa</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Ange din BIP39-kompatibla återställningsfras/Mnemonic</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Återställ Lösenordsfras</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Ange en lösenordsfras för att skydda din återställningsfras. (frivillig) </translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>Språk</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Varning</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>Se till att du säkerhetskopierar din återställningsfras och lösenordsfras - de kan inte återskapas!
+        Plånboken kommer att starta om efter att mnemonic har blivit importerad.
+        </translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>Importera</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>Återimport</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Skapa mnemonic</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Skapa ny återvinningsfras</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Kopiera till urklipp</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Bytes of Entropy</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>Generera</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>Validera</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Avbryt</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Importera privatekey</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>inmatning av privatekey</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>Tvinga skanna igen</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>exempel: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Importera privatekey fil</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>inmatning av privatekey fil</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>Bläddra</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Tips: Den privata nyckelfilen är filen som exporteras av Dynamic 'dumpwallet filename', inte .dat filen.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -6189,7 +6191,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Genom att importera en annan återställningsfras skapas ett nytt konto och ställs in som standard.
+        Plånboken får endast adresser från det nya importerade kontot.
+        Ditt gamla konto i plånboken kommer att byta namn till wallet.dat.before-mnemonic-import.&lt;isodate&gt; i din datakatalog.
+        </translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -6197,12 +6202,15 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Plånboken har redan laddat ett HD konto laddat.
+Genom att importera en annan återställningsfras skapas ett nytt konto och ställs in som standard.
+Plånboken får endast adresser från det nya importerade kontot.
+Ditt gamla konto i plånboken kommer att byta namn till wallet.dat.before-mnemonic-import.&lt;isodate&gt; i din datakatalog.
+        </translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Ange din BIP39 kompatibla återställningsfras/Mnemonic.</translation>
     </message>
 </context>
 </TS>
-
