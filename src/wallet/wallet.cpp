@@ -4876,7 +4876,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nIndex = *setKeyPool.begin();
         setKeyPool.erase(nIndex);
         if (!walletdb.ReadPool(nIndex, keypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [keypool]");
         }
         if (!HaveKey(keypool.vchPubKey.GetID())) {
             throw std::runtime_error(std::string(__func__) + ": unknown key in key pool");
@@ -4891,7 +4891,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nEdIndex = *setEdKeyPool.begin();
         setEdKeyPool.erase(nEdIndex);
         if (!walletdb.ReadEdPool(nEdIndex, edkeypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [edkeypool]");
         }
         if (edkeypool.fInternal != fInternal) {
             throw std::runtime_error(std::string(__func__) + ": keypool entry misclassified");
@@ -4975,12 +4975,17 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
         }
 
         if (EraseIndex) {
-            std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
-            std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
-            if (eraseIndexEd != setExternalKeyPool.end())
-                setExternalEdKeyPool.erase(eraseIndexEd);
-            if (eraseIndex != setExternalKeyPool.end())
-                setExternalKeyPool.erase(eraseIndex);
+            // Wallets before v2.4 do not have an external Ed25519 key pool.
+            if (setExternalEdKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
+                if (eraseIndexEd != setExternalKeyPool.end())
+                    setExternalEdKeyPool.erase(eraseIndexEd);
+            }
+            if (setExternalKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
+                if (eraseIndex != setExternalKeyPool.end())
+                    setExternalKeyPool.erase(eraseIndex);
+            }
         }
 
         return foundPubKey;
