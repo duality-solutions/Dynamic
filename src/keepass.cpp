@@ -10,7 +10,7 @@
 #include "clientversion.h"
 #include "protocol.h"
 #include "random.h"
-#include "rpcprotocol.h"
+#include "rpc/protocol.h"
 #include "support/cleanse.h" // for OPENSSL_cleanse()
 #include "wallet/crypter.h"
 

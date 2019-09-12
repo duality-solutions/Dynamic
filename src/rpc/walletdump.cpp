@@ -14,14 +14,14 @@
 #include "core_io.h"
 #include "init.h"
 #include "merkleblock.h"
-#include "rpcserver.h"
+#include "rpc/server.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "sync.h"
 #include "util.h"
 #include "utiltime.h"
 #include "validation.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 
 #include <univalue.h>
 #include <libtorrent/hex.hpp> // for to_hex and from_hex

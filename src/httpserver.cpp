@@ -8,7 +8,7 @@
 #include "chainparamsbase.h"
 #include "compat.h"
 #include "netbase.h"
-#include "rpcprotocol.h" // For HTTP status codes
+#include "rpc/protocol.h" // For HTTP status codes
 #include "sync.h"
 #include "ui_interface.h"
 #include "util.h"

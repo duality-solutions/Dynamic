@@ -10,9 +10,9 @@
 #include "bdapuserdetaildialog.h"
 #include "bdap/fees.h"
 #include "guiutil.h"
-#include "rpcregister.h"
-#include "rpcserver.h"
-#include "rpcclient.h"
+#include "rpc/register.h"
+#include "rpc/server.h"
+#include "rpc/client.h"
 #include "util.h"
 
 #include <boost/algorithm/string.hpp>

@@ -198,10 +198,11 @@ DYNAMIC_CORE_H = \
   random.h \
   reverselock.h \
   reverse_iterator.h \
-  rpcclient.h \
-  rpcprotocol.h \
-  rpcregister.h \
-  rpcserver.h \
+  rpc/client.h \
+  rpc/protocol.h \
+  rpc/register.h \
+  rpc/server.h \
+  rpc/wallet.h \
   scheduler.h \
   script/sigcache.h \
   script/sign.h \
@@ -233,7 +234,6 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
-  wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
@@ -268,9 +268,6 @@ libdynamic_server_a_SOURCES = \
   bdap/linkingdb.cpp \
   bdap/linkmanager.cpp \
   bdap/linkstorage.cpp \
-  bdap/rpcdomainentry.cpp \
-  bdap/rpclinking.cpp \
-  bdap/rpcrawbdap.cpp \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
   dbwrapper.cpp \
@@ -281,7 +278,6 @@ libdynamic_server_a_SOURCES = \
   dht/limits.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
-  dht/rpcdht.cpp \
   dht/session.cpp \
   dht/sessionevents.cpp \
   dht/settings.cpp \
@@ -297,7 +293,6 @@ libdynamic_server_a_SOURCES = \
   fluid/fluiddynode.cpp \
   fluid/fluidmining.cpp \
   fluid/fluidmint.cpp \
-  fluid/rpcfluid.cpp \
   fluid/fluidsovereign.cpp \
   fluid/operations.cpp \
   governance.cpp \
@@ -332,14 +327,19 @@ libdynamic_server_a_SOURCES = \
   privatesend-server.cpp \
   psnotificationinterface.cpp \
   rest.cpp \
-  rpcblockchain.cpp \
-  rpcdynode.cpp \
-  rpcgovernance.cpp \
-  rpcmining.cpp \
-  rpcmisc.cpp \
-  rpcnet.cpp \
-  rpcrawtransaction.cpp \
-  rpcserver.cpp \
+  rpc/blockchain.cpp \
+  rpc/dht.cpp \
+  rpc/domainentry.cpp \
+  rpc/dynode.cpp \
+  rpc/fluid.cpp \
+  rpc/governance.cpp \
+  rpc/linking.cpp \
+  rpc/mining.cpp \
+  rpc/misc.cpp \
+  rpc/net.cpp \
+  rpc/rawbdap.cpp \
+  rpc/rawtransaction.cpp \
+  rpc/server.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   spork.cpp \
@@ -375,10 +375,10 @@ libdynamic_wallet_a_SOURCES = \
   policy/rbf.cpp \
   privatesend-client.cpp \
   privatesend-util.cpp \
+  rpc/wallet.cpp \
+  rpc/walletdump.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
-  wallet/rpcdump.cpp \
-  wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
@@ -493,7 +493,7 @@ libdynamic_util_a_SOURCES = \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
   random.cpp \
-  rpcprotocol.cpp \
+  rpc/protocol.cpp \
   support/cleanse.cpp \
   support/lockedpool.cpp \
   sync.cpp \
@@ -512,7 +512,7 @@ endif
 libdynamic_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_cli_a_SOURCES = \
-  rpcclient.cpp \
+  rpc/client.cpp \
   $(DYNAMIC_CORE_H)
 
 nodist_libdynamic_util_a_SOURCES = $(srcdir)/obj/build.h

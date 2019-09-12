@@ -6,8 +6,8 @@
 
 #include "base58.h"
 #include "bdap/utils.h"
-#include "rpcclient.h"
-#include "rpcserver.h"
+#include "rpc/client.h"
+#include "rpc/server.h"
 #include "primitives/block.h"
 #include "txmempool.h"
 #include "serialize.h"

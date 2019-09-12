@@ -7,8 +7,8 @@
 #include "mnemonicdialog.h"
 #include "ui_mnemonicdialog.h"
 
-#include "rpcserver.h"
-#include "rpcclient.h"
+#include "rpc/server.h"
+#include "rpc/client.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #include "init.h"
