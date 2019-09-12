@@ -18,8 +18,8 @@
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "hash.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"

@@ -8,8 +8,8 @@
 #include "bdap/stealth.h"
 #include "bdap/utils.h"
 #include "core_io.h" // for EncodeHexTx
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "utilmoneystr.h"

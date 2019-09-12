@@ -34,7 +34,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "privatesend-client.h"
-#include "rpcprotocol.h"
+#include "rpc/protocol.h"
 #include "script/script.h"
 #include "script/sign.h"
 #include "spork.h"
