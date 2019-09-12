@@ -264,7 +264,7 @@
     </message>
     <message>
         <source>&amp;Transactions</source>
-        <translation>&amp;Vertalingen</translation>
+        <translation>&amp;Transacties</translation>
     </message>
     <message>
         <source>&amp;Dynodes</source>
