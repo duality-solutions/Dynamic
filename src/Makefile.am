@@ -87,17 +87,6 @@ DYNAMIC_CORE_H = \
   bdap/stealth.h \
   bdap/utils.h \
   bdap/vgpmessage.h \
-  bip39_chinese_simplified.h \
-  bip39_chinese_traditional.h \
-  bip39_english.h \
-  bip39_french.h \
-  bip39_german.h \
-  bip39_italian.h \
-  bip39_japanese.h \
-  bip39_korean.h \
-  bip39_russian.h \
-  bip39_spanish.h \
-  bip39_ukrainian.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -237,6 +226,17 @@ DYNAMIC_CORE_H = \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
+  wordlists/chinese_simplified.h \
+  wordlists/chinese_traditional.h \
+  wordlists/english.h \
+  wordlists/french.h \
+  wordlists/german.h \
+  wordlists/italian.h \
+  wordlists/japanese.h \
+  wordlists/korean.h \
+  wordlists/russian.h \
+  wordlists/spanish.h \
+  wordlists/ukrainian.h \
   warnings.h \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
