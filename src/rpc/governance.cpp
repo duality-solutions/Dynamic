@@ -17,7 +17,7 @@
 #include "governance.h"
 #include "init.h"
 #include "messagesigner.h"
-#include "rpcserver.h"
+#include "rpc/server.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validation.h"

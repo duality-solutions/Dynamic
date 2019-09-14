@@ -18,8 +18,8 @@
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "hash.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
@@ -973,8 +973,12 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
     std::string strOperationType = "denylink";
     int64_t iSequence = 0;
     CDataRecord record;
-    if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
-        throw std::runtime_error(strprintf("%s: ERRCODE: 5604 - Failed to get record\n", __func__));
+    if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record)) {
+        // return empty JSON 
+        UniValue oDeniedLink(UniValue::VOBJ);
+        oLink.push_back(Pair("denied_list", oDeniedLink));
+        return oLink;
+    }
 
     UniValue oDeniedLink(UniValue::VOBJ);
     CLinkDenyList denyList(record.RawData());

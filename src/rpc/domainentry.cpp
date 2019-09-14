@@ -8,8 +8,8 @@
 #include "bdap/utils.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "primitives/transaction.h"
 #include "spork.h"
 #include "wallet/wallet.h"

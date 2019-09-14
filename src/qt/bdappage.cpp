@@ -17,9 +17,9 @@
 #include "dynode-sync.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
-#include "rpcclient.h"
-#include "rpcregister.h"
-#include "rpcserver.h"
+#include "rpc/client.h"
+#include "rpc/register.h"
+#include "rpc/server.h"
 #include "ui_bdappage.h"
 #include "walletmodel.h"
 
