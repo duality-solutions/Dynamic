@@ -31,8 +31,8 @@
 
 #include "chain.h"
 #include "chainparams.h"
-#include "rpcserver.h"
-#include "rpcclient.h"
+#include "rpc/server.h"
+#include "rpc/client.h"
 
 
 #include <string>

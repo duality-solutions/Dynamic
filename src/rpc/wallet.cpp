@@ -5,10 +5,11 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "wallet.h"
+
 #include "amount.h"
 #include "base58.h"
 #include "chain.h"
-#include "coincontrol.h"
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
@@ -18,13 +19,13 @@
 #include "netbase.h"
 #include "policy/rbf.h"
 #include "privatesend-client.h"
-#include "rpcserver.h"
+#include "rpc/server.h"
 #include "timedata.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validation.h"
-#include "wallet.h"
-#include "walletdb.h"
+#include "wallet/coincontrol.h"
+#include "wallet/walletdb.h"
 
 #include <univalue.h>
 

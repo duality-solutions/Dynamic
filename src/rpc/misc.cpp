@@ -11,7 +11,7 @@
 #include "init.h"
 #include "net.h"
 #include "netbase.h"
-#include "rpcserver.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "timedata.h"
 #include "txmempool.h"

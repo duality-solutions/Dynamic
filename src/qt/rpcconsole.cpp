@@ -17,8 +17,8 @@
 #include "peertablemodel.h"
 
 #include "chainparams.h"
-#include "rpcclient.h"
-#include "rpcserver.h"
+#include "rpc/client.h"
+#include "rpc/server.h"
 #include "util.h"
 #include "validation.h"
 
