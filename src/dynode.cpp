@@ -632,7 +632,7 @@ uint256 CDynodeBroadcast::GetHash() const
 
 uint256 CDynodeBroadcast::GetSignatureHash() const
 {
-    // TODO: replace with "return SerializeHash(*this);" after migration to 70100
+    // TODO: replace with "return SerializeHash(*this);" after migration to 71000
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     ss << outpoint;
     ss << addr;
@@ -732,7 +732,7 @@ uint256 CDynodePing::GetHash() const
 {
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        // TODO: replace with "return SerializeHash(*this);" after migration to 70100
+        // TODO: replace with "return SerializeHash(*this);" after migration to 71000
         ss << dynodeOutpoint;
         ss << blockHash;
         ss << sigTime;
