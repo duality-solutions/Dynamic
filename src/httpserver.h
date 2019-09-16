@@ -11,7 +11,7 @@
 #include <string>
 
 
-static const int DEFAULT_HTTP_THREADS = 8;
+static const int DEFAULT_HTTP_THREADS = 4;
 static const int DEFAULT_HTTP_WORKQUEUE = 24;
 static const int DEFAULT_HTTP_SERVER_TIMEOUT = 30;
 
