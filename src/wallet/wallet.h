@@ -983,6 +983,14 @@ public:
      */
     void GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScriptPubKey) const;
     /**
+     * return BDAP Credit anmount
+     */
+    CAmount GetBDAPCredits() const;
+    /**
+     * return BDAP Credits in Dynamic
+     */
+    CAmount GetBDAPDynamicAmount() const;
+    /**
      * Shuffle and select coins until nTargetValue is reached while avoiding
      * small change; This method is stochastic for some inputs and upon
      * completion the coin set and corresponding actual target value is
