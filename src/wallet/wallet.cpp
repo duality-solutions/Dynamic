@@ -2565,6 +2565,11 @@ bool CWalletTx::IsEquivalentTo(const CWalletTx& _tx) const
     return CTransaction(tx1) == CTransaction(tx2);
 }
 
+bool CWalletTx::IsBDAP() const
+{
+    return tx->nVersion == BDAP_TX_VERSION ? true : false;
+}
+
 std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman)
 {
     std::vector<uint256> result;
@@ -2626,7 +2631,7 @@ CAmount CWallet::GetBalance() const
         LOCK2(cs_main, cs_wallet);
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
             const CWalletTx* pcoin = &(*it).second;
-            if (pcoin->IsTrusted())
+            if (pcoin->IsTrusted() && !pcoin->IsBDAP())
                 nTotal += pcoin->GetAvailableCredit();
         }
     }
