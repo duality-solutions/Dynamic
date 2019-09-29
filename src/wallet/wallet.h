@@ -537,6 +537,7 @@ public:
     bool RelayWalletTransaction(CConnman* connman, const std::string& strCommand = "tx");
 
     std::set<uint256> GetConflicts() const;
+    bool IsBDAP() const;
 };
 
 
