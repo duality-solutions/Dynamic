@@ -325,9 +325,7 @@ PaymentServer::~PaymentServer()
 }
 
 //
-// OSX-specific way of handling dynamic: URIs and PaymentRequest mime types.
-// Also used by paymentservertests.cpp and when opening a payment request file
-// via "Open URI..." menu entry.
+// OSX-specific way of handling dynamic: URIs
 //
 bool PaymentServer::eventFilter(QObject* object, QEvent* event)
 {
