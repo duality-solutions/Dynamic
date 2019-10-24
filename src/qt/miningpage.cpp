@@ -299,6 +299,13 @@ void MiningPage::changeNumberOfGPUThreads(int i, bool shutdown)
 
 void MiningPage::switchCPUMining()
 {
+    //Check to see if wallet needs upgrading
+    if (model->getWallet()->WalletNeedsUpgrading()) {
+        QMessageBox::critical(this, QObject::tr("Older wallet version detected"),
+                QObject::tr("Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue."));
+        return;
+    }
+
     fCPUMinerOn = !fCPUMinerOn;
     updateCPUPushSwitch();
     if (fCPUMinerOn) {

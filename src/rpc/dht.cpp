@@ -19,8 +19,8 @@
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "hash.h"
 #include "pubkey.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "util.h"
 #include "utilstrencodings.h"

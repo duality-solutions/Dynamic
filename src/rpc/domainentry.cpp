@@ -8,8 +8,8 @@
 #include "bdap/utils.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
-#include "rpcprotocol.h"
-#include "rpcserver.h"
+#include "rpc/protocol.h"
+#include "rpc/server.h"
 #include "primitives/transaction.h"
 #include "spork.h"
 #include "wallet/wallet.h"
@@ -173,6 +173,10 @@ UniValue adduser(const JSONRPCRequest& request)
            HelpExampleCli("adduser", "Alice \"Wonderland, Alice\"") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("adduser", "Alice \"Wonderland, Alice\""));
+
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw std::runtime_error("Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
 
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");
@@ -860,6 +864,10 @@ UniValue addgroup(const JSONRPCRequest& request)
            HelpExampleCli("addgroup", "Duality \"Duality Blockchain Solutions Group\"") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("addgroup", "Duality \"Duality Blockchain Solutions Group\""));
+
+    //Check to see if wallet needs upgrading
+    if(pwalletMain->WalletNeedsUpgrading())
+        throw std::runtime_error("Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
 
     if (!dynodeSync.IsBlockchainSynced()) {
         throw std::runtime_error("Error: Cannot create BDAP Objects while wallet is not synced.");

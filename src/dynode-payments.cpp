@@ -583,7 +583,7 @@ bool CDynodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq
         }
     }
 
-    LogPrint("dnpayments", "CDynodeBlockPayees::HasPayeeWithVotes -- ERROR: couldn't find any payee with %d+ votes\n", nVotesReq);
+    //LogPrint("dnpayments", "CDynodeBlockPayees::HasPayeeWithVotes -- ERROR: couldn't find any payee with %d+ votes\n", nVotesReq);
     return false;
 }
 

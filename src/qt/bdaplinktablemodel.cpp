@@ -10,9 +10,9 @@
 #include "spork.h"
 #include "sync.h"
 #include "validation.h" // for cs_main
-#include "rpcregister.h"
-#include "rpcserver.h"
-#include "rpcclient.h"
+#include "rpc/register.h"
+#include "rpc/server.h"
+#include "rpc/client.h"
 
 #include <QDebug>
 #include <QList>

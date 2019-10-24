@@ -34,7 +34,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "privatesend-client.h"
-#include "rpcprotocol.h"
+#include "rpc/protocol.h"
 #include "script/script.h"
 #include "script/sign.h"
 #include "spork.h"
@@ -2565,6 +2565,11 @@ bool CWalletTx::IsEquivalentTo(const CWalletTx& _tx) const
     return CTransaction(tx1) == CTransaction(tx2);
 }
 
+bool CWalletTx::IsBDAP() const
+{
+    return tx->nVersion == BDAP_TX_VERSION ? true : false;
+}
+
 std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman)
 {
     std::vector<uint256> result;
@@ -2626,7 +2631,7 @@ CAmount CWallet::GetBalance() const
         LOCK2(cs_main, cs_wallet);
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
             const CWalletTx* pcoin = &(*it).second;
-            if (pcoin->IsTrusted())
+            if (pcoin->IsTrusted() && !pcoin->IsBDAP())
                 nTotal += pcoin->GetAvailableCredit();
         }
     }
@@ -2889,6 +2894,34 @@ void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScri
             }
         }
     }
+}
+
+CAmount CWallet::GetBDAPCredits() const
+{
+    std::vector<std::pair<CTxOut, COutPoint>> vCredits;
+    pwalletMain->AvailableBDAPCredits(vCredits);
+    CAmount nTotalCredits = 0;
+    for (const std::pair<CTxOut, COutPoint>& credit : vCredits) {
+        int opCode1 = -1; int opCode2 = -1;
+        std::vector<std::vector<unsigned char>> vvch;
+        credit.first.GetBDAPOpCodes(opCode1, opCode2, vvch);
+        std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
+        const CDynamicAddress address = GetScriptAddress(credit.first.scriptPubKey);
+        if (strOpType == "bdap_move_asset") {
+            if (vvch.size() > 1) {
+                std::string strMoveDestination = stringFromVch(vvch[1]);
+                if (strMoveDestination == "BDAP") {
+                    nTotalCredits += credit.first.nValue;
+                }
+            }
+        }
+    }
+    return nTotalCredits;
+}
+
+CAmount CWallet::GetBDAPDynamicAmount() const
+{
+    return (GetBDAPCredits() * BDAP_CREDIT);
 }
 
 void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl* coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
@@ -4876,7 +4909,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nIndex = *setKeyPool.begin();
         setKeyPool.erase(nIndex);
         if (!walletdb.ReadPool(nIndex, keypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [keypool]");
         }
         if (!HaveKey(keypool.vchPubKey.GetID())) {
             throw std::runtime_error(std::string(__func__) + ": unknown key in key pool");
@@ -4891,7 +4924,7 @@ void CWallet::ReserveKeysFromKeyPools(int64_t& nIndex, CKeyPool& keypool, CEdKey
         nEdIndex = *setEdKeyPool.begin();
         setEdKeyPool.erase(nEdIndex);
         if (!walletdb.ReadEdPool(nEdIndex, edkeypool)) {
-            throw std::runtime_error(std::string(__func__) + ": read failed");
+            throw std::runtime_error(std::string(__func__) + ": read failed [edkeypool]");
         }
         if (edkeypool.fInternal != fInternal) {
             throw std::runtime_error(std::string(__func__) + ": keypool entry misclassified");
@@ -4975,12 +5008,17 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
         }
 
         if (EraseIndex) {
-            std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
-            std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
-            if (eraseIndexEd != setExternalKeyPool.end())
-                setExternalEdKeyPool.erase(eraseIndexEd);
-            if (eraseIndex != setExternalKeyPool.end())
-                setExternalKeyPool.erase(eraseIndex);
+            // Wallets before v2.4 do not have an external Ed25519 key pool.
+            if (setExternalEdKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndexEd = setExternalEdKeyPool.find(IndexToErase);
+                if (eraseIndexEd != setExternalKeyPool.end())
+                    setExternalEdKeyPool.erase(eraseIndexEd);
+            }
+            if (setExternalKeyPool.size() > 0) {
+                std::set<int64_t>::iterator eraseIndex = setExternalKeyPool.find(IndexToErase);
+                if (eraseIndex != setExternalKeyPool.end())
+                    setExternalKeyPool.erase(eraseIndex);
+            }
         }
 
         return foundPubKey;

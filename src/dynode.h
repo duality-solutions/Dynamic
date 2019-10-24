@@ -73,7 +73,7 @@ public:
             READWRITE(vchSig);
         }
         if (ser_action.ForRead() && s.size() == 0) {
-            // TODO: drop this after migration to 70100
+            // TODO: drop this after migration to 71000
             fSentinelIsCurrent = false;
             nSentinelVersion = DEFAULT_SENTINEL_VERSION;
             nDaemonVersion = DEFAULT_DAEMON_VERSION;
@@ -82,7 +82,7 @@ public:
         READWRITE(fSentinelIsCurrent);
         READWRITE(nSentinelVersion);
         if (ser_action.ForRead() && s.size() == 0) {
-            // TODO: drop this after migration to 70100
+            // TODO: drop this after migration to 71000
             nDaemonVersion = DEFAULT_DAEMON_VERSION;
             return;
         }

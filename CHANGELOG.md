@@ -1,6 +1,22 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.1.0**
+
+* [Qt] Update/Add Languages
+* [BDAP] Fix send BDAP transaction after removing credits from wallet GetBalance() method
+* [Wallet] Prevent transactions that require Ed25519 keys if wallet needs upgrading. Notify user.
+* [Wallet] Prevent ed25519 keypool crash when trying to erase from an empty set
+* [FIX] Fix locked wallet upgrade issues.
+* [RPC] Refactor all RPC code files in a seperate directory
+* [LOG] Silence LogPrint when not finding Dynodes with votes
+* [DHT] Return an empty JSON array when the denylink record is not found
+* [HD] Move mnemonic wordlists to separate directory
+* [FIX] Correct versioning for alert max version
+* [Wallet] Remove BDAP credits from GetBalance method
+* [BDAP] Fix send BDAP transaction after removing credits from wallet GetBalance() method
+
+
 **Dynamic v2.4.0.0**
 
 * [DHT] Add more UDP ports and fix saving key in wallet
