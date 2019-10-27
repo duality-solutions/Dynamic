@@ -1,5 +1,5 @@
 ---
-name: "dynamic-arm-2.4.1.0"
+name: "dynamic-arm-2.4.2.0"
 enable_cache: true
 suites:
 - "trusty"
