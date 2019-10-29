@@ -712,8 +712,6 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
 
         uint32_t nMonths;
         ParseUInt32(strMonths, &nMonths);
-        if (nMonths >= 10000)
-            nMonths = 24;
         if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
