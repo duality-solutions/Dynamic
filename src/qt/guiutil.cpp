@@ -1016,12 +1016,13 @@ QString formatNiceTimeOffset(qint64 secs)
 {
     // Represent time from last generated block in human readable text
     QString timeBehindText;
+    const int MINUTE_IN_SECONDS = 60;
     const int HOUR_IN_SECONDS = 60 * 60;
     const int DAY_IN_SECONDS = 24 * 60 * 60;
     const int WEEK_IN_SECONDS = 7 * 24 * 60 * 60;
     const int YEAR_IN_SECONDS = 31556952; // Average length of year in Gregorian calendar
-    if (secs < 60) {
-        timeBehindText = QObject::tr("%n second(s)", "", secs);
+    if (secs < MINUTE_IN_SECONDS) {
+        timeBehindText = QObject::tr("Less than 60 seconds behind");
     } else if (secs < 2 * HOUR_IN_SECONDS) {
         timeBehindText = QObject::tr("%n minute(s)", "", secs / 60);
     } else if (secs < 2 * DAY_IN_SECONDS) {
