@@ -653,6 +653,13 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
 
         uint32_t nMonths;
         ParseUInt32(strMonths, &nMonths);
+        if (nMonths > MAX_REGISTRATION_MONTHS)
+            nMonths = MAX_REGISTRATION_MONTHS;
+
+        int64_t nCurrentEpoch = GetTime();
+        int64_t nEpochAddMonths = AddMonthsToBlockTime(nBlockTime > 0 ? nBlockTime : nCurrentEpoch, nMonths);
+        if (nEpochAddMonths < nCurrentEpoch)
+            nMonths = MAX_REGISTRATION_MONTHS;
 
         if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
@@ -712,12 +719,19 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
 
         uint32_t nMonths;
         ParseUInt32(strMonths, &nMonths);
-        if (nMonths >= 10000)
-            nMonths = 24;
+        if (nMonths > MAX_REGISTRATION_MONTHS)
+            nMonths = MAX_REGISTRATION_MONTHS;
+
+        int64_t nCurrentEpoch = GetTime();
+        int64_t nEpochAddMonths = AddMonthsToBlockTime(nBlockTime > 0 ? nBlockTime : nCurrentEpoch, nMonths);
+        if (nEpochAddMonths < nCurrentEpoch)
+            nMonths = MAX_REGISTRATION_MONTHS;
+
         if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_ACCOUNT_ENTRY, entry.ObjectType(), (uint16_t)nMonths, monthlyFee, oneTimeFee, depositFee)) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
         }
+
         LogPrint("bdap", "%s -- nMonths %d, monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, 
                                 nMonths, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
         // extract amounts from tx.

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
-# **Dynamic (DYN) v2.4.1.0**
+# **Dynamic (DYN) v2.4.2.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 

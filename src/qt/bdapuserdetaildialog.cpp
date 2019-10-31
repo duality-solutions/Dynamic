@@ -110,9 +110,9 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
         if (keyName == "dht_publickey") publicKey = result.getValues()[i].get_str();
         if (keyName == "link_address") linkAddress = result.getValues()[i].get_str();
         if (keyName == "txid") txId = result.getValues()[i].get_str();
-        if (keyName == "expires_on") expirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
-        if (keyName == "expired") expired = ((result.getValues()[i].get_bool())?"true":"false");
-        if (keyName == "time") timeValue = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
+        if (keyName == "expires_on") expirationDate = FormatISO8601Date(result.getValues()[i].get_int64());
+        if (keyName == "expired") expired = ((result.getValues()[i].get_bool()) ? "true":"false");
+        if (keyName == "time") timeValue = FormatISO8601Date(result.getValues()[i].get_int64());
     } //for i
 
     ui->lineEditOID->setText(QString::fromStdString(oid));
