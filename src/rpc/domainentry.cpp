@@ -74,7 +74,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration months to int, only whole numbers allowed (no decimals)"));
         if (nMonths <= 0)
-            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error: registration months must be greater than 0"));
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + _("Error: registration months must be greater than 0"));
+        if (nMonths > MAX_REGISTRATION_MONTHS)
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3507 - " + _("Error: Registration period can not be more than 1,200 months (100 years)"));
     }
 
     CharString data;
@@ -104,7 +106,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + strMessage);
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3508 - " + strMessage);
 
     bool fUseInstantSend = false;
     //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
@@ -117,7 +119,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDomainEntry, oName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3507 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3509 - " + _("Failed to read from BDAP JSON object"));
     
     if (LogAcceptCategory("bdap")) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
@@ -448,8 +450,11 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (request.params.size() >= 3) {
         if (!ParseInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
+        if (nMonths < 0)
+            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Error: registration months must be greater than or equal to zero"));
+        if (nMonths > MAX_REGISTRATION_MONTHS)
+            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Error: Registration period can not be more than 1,200 months (100 years)"));
     }
-    //txUpdatedEntry.nExpireTime = AddMonthsToCurrentEpoch((short)nMonths);
 
     CharString data;
     txUpdatedEntry.Serialize(data);
@@ -479,7 +484,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + strMessage);
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3705 - " + strMessage);
 
     bool fUseInstantSend = false;
     //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
@@ -492,7 +497,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txUpdatedEntry, oName))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3706 - " + _("Failed to read from BDAP JSON object"));
     
     if (LogAcceptCategory("bdap")) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
