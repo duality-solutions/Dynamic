@@ -1,6 +1,19 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.2.0**
+
+* [BDAP] Set maximum months stored in local accounts db
+* [BDAP] Limit acount registration to 100 years
+* [Mempool] Don't check if standard tx for BDAP txs in accept to mempool
+* [BDAP] Remove maximum months for updated accounts
+* [BDAP] Fix add months to block and epoch times
+* [Util] Fix epoch to ISO date string conversion
+* Bump client and block version to v2.4.2.0
+* Increase minimum protocol to v2.4 (71000) or greater
+* [Wallet] Check txout instead of entire tx for BDAP
+
+
 **Dynamic v2.4.1.0**
 
 * [Qt] Update/Add Languages
