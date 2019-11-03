@@ -48,6 +48,7 @@ static const unsigned char ParseHex_expected[65] = {
     0xde, 0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57, 0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d,
     0x5f
 };
+
 BOOST_AUTO_TEST_CASE(util_ParseHex)
 {
     std::vector<unsigned char> result;
@@ -107,6 +108,10 @@ BOOST_AUTO_TEST_CASE(util_DateTimeStrFormat)
     BOOST_CHECK_EQUAL(FormatISO8601Date(0x7FFFFFFF), "2038-01-19");
     BOOST_CHECK_EQUAL(FormatISO8601Date(1317425777), "2011-09-30");
     BOOST_CHECK_EQUAL(FormatISO8601Date(4728497700), "2119-11-03");
+
+    BOOST_CHECK_EQUAL(AddMonthsToBlockTime(1546300800, 12), 1577836800); // Add 12 months to 2019-01-01 00:00:00
+    BOOST_CHECK_EQUAL(AddMonthsToBlockTime(1572607980, 600), 3150531180); // Add 600 months (50 years) to 2019-11-01 11:33:00
+    BOOST_CHECK_EQUAL(AddMonthsToBlockTime(1559404522, 1200), 4715078122); // Add 1,200 months (100 years) to 2019-06-01 03:55:22
 }
 
 BOOST_AUTO_TEST_CASE(util_ParseParameters)
