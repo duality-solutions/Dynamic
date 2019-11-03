@@ -48,7 +48,6 @@ static constexpr unsigned int MAX_SIGNATURE_LENGTH        = 65; // https://bitco
 static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 25; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_CHECKPOINT_HASH_LENGTH  = 64;
-static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
 static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubkeys are 32 bytes and 64 bytes when hex encoded.
 static constexpr unsigned int MAX_BDAP_LINK_MESSAGE       = 256;
 static constexpr unsigned int MAX_BDAP_SIGNATURE_PROOF    = 90; // TODO (bdap): Update to 65 or use MAX_SIGNATURE_LENGTH when you start a new chain.

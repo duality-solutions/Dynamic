@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <string>
 
+static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
+
 /**
  * GetTimeMicros() and GetTimeMillis() both return the system time, but in
  * different units. GetTime() returns the sytem time in seconds, but also
@@ -37,5 +39,10 @@ std::string DurationToDHMS(int64_t nDurationTime);
  */
 std::string FormatISO8601DateTime(int64_t nTime);
 std::string FormatISO8601Date(int64_t nTime);
-
+/**
+ * Used for BDAP registration conversion between months and epoch
+ */
+int64_t AddMonthsToCurrentEpoch(const short nMonths);
+int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths);
+uint16_t MonthsFromBlockToExpire(const uint32_t& nBlockTime, const uint64_t& nExpireTime);
 #endif // DYNAMIC_UTILTIME_H

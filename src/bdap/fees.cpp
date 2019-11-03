@@ -8,8 +8,6 @@
 #include "bdap/utils.h" // for GetObjectTypeString
 #include "util.h" // for LogPrintf
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <ctime>
 #include <limits>
 #include <map>
 
@@ -171,53 +169,6 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
     }
 
     return true;
-}
-
-int64_t AddMonthsToCurrentEpoch(const short nMonths)
-{
-    struct std::tm epoch_date;
-    epoch_date.tm_hour = 0;   epoch_date.tm_min = 0; epoch_date.tm_sec = 0;
-    epoch_date.tm_year = 70; epoch_date.tm_mon = 0; epoch_date.tm_mday = 1;
-
-    boost::gregorian::date dt = boost::gregorian::day_clock::universal_day();
-    short nYear = dt.year() + ((dt.month() + nMonths)/12);
-    short nMonth = (dt.month() + nMonths) % 12;
-    short nDay = dt.day();
-    //LogPrintf("%s -- nYear %d, nMonth %d, nDay %d\n", __func__, nYear, nMonth, nDay);
-    struct std::tm month_date;
-    month_date.tm_hour = 0;   month_date.tm_min = 0; month_date.tm_sec = 0;
-    month_date.tm_year = nYear - 1900; month_date.tm_mon = nMonth -1; month_date.tm_mday = nDay;
-
-    int64_t seconds = (int64_t)std::difftime(std::mktime(&month_date), std::mktime(&epoch_date));
-
-    return seconds + SECONDS_PER_DAY;
-}
-
-int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths)
-{
-    struct std::tm epoch_date;
-    epoch_date.tm_hour = 0;   epoch_date.tm_min = 0; epoch_date.tm_sec = 0;
-    epoch_date.tm_year = 70; epoch_date.tm_mon = 0; epoch_date.tm_mday = 1;
-
-    boost::gregorian::date dt = boost::posix_time::from_time_t(nBlockTime).date();
-    short nYear = dt.year() + ((dt.month() + nMonths)/12);
-    short nMonth = (dt.month() + nMonths) % 12;
-    short nDay = dt.day();
-    //LogPrintf("%s -- nYear %d, nMonth %d, nDay %d\n", __func__, nYear, nMonth, nDay);
-    struct std::tm month_date;
-    month_date.tm_hour = 0;   month_date.tm_min = 0; month_date.tm_sec = 0;
-    month_date.tm_year = nYear - 1900; month_date.tm_mon = nMonth -1; month_date.tm_mday = nDay;
-
-    int64_t seconds = (int64_t)std::difftime(std::mktime(&month_date), std::mktime(&epoch_date));
-
-    return seconds + SECONDS_PER_DAY;
-}
-
-uint16_t MonthsFromBlockToExpire(const uint32_t& nBlockTime, const uint64_t& nExpireTime)
-{
-    boost::gregorian::date dtBlock = boost::posix_time::from_time_t(nBlockTime).date();
-    boost::gregorian::date dtExpire = boost::posix_time::from_time_t(nExpireTime).date();
-    return (uint16_t)((dtExpire.year() - dtBlock.year())*12 + dtExpire.month() - dtBlock.month());
 }
 
 bool ExtractAmountsFromTx(const CTransactionRef& ptx, CAmount& dataAmount, CAmount& opAmount)
