@@ -1,6 +1,12 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.3.0**
+
+* [BDAP] Remove second month overrun check
+* Bump client and block version to 2.4.3.0
+
+
 **Dynamic v2.4.2.0**
 
 * [BDAP] Set maximum months stored in local accounts db
