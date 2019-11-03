@@ -25,7 +25,7 @@ static const int DNPAYMENTS_SIGNATURES_TOTAL = 20;
 // V1 - Last protocol version before update
 // V2 - Newest protocol version
 static const int MIN_DYNODE_PAYMENT_PROTO_VERSION_1 = 70900;
-static const int MIN_DYNODE_PAYMENT_PROTO_VERSION_2 = 71000;
+static const int MIN_DYNODE_PAYMENT_PROTO_VERSION_2 = 71050; // Only Dynodes > v2.4.4.0 will get paid after Spork 10 activation
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapDynodeBlocks;
