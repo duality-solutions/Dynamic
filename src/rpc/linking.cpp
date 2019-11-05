@@ -266,7 +266,13 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_REQUEST, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+
     LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
+
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
+    if (monthlyFee + oneTimeFee + depositFee > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
+
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
@@ -442,6 +448,10 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_LINK_ACCEPT, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
     LogPrint("bdap", "%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, FormatMoney(monthlyFee), FormatMoney(oneTimeFee), FormatMoney(depositFee));
+
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
+    if (monthlyFee + oneTimeFee + depositFee > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
     // Send the transaction
     CWalletTx wtx;

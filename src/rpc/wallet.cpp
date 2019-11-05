@@ -472,12 +472,12 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
 
 /*
 For BDAP transactions, 
-    - nDataAmount is burned in the OP_RUTRN transaction.
+    - nDataAmount is burned in the OP_RETURN transaction.
     - nOpAmount turns to BDAP credits and can only be used to fund BDAP fees
 */
 void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
 {
-    CAmount curBalance = pwalletMain->GetBalance();
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
 
     // Check amounts
     if (nOpAmount <= 0)
@@ -506,7 +506,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
-        if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
+        if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }

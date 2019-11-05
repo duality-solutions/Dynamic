@@ -983,10 +983,6 @@ public:
      */
     void GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScriptPubKey) const;
     /**
-     * return BDAP Credit anmount
-     */
-    CAmount GetBDAPCredits() const;
-    /**
      * return BDAP Credits in Dynamic
      */
     CAmount GetBDAPDynamicAmount() const;
