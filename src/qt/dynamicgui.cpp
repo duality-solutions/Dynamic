@@ -1101,7 +1101,11 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 #endif // ENABLE_WALLET
 
         tooltip += QString("<br>");
-        tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
+        if (secs < 60) {
+            tooltip += tr("Less than 60 seconds behind.");
+        } else {
+            tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
+        }        
         tooltip += QString("<br>");
         tooltip += tr("Transactions after this will not yet be visible.");
     } else if (fLiteMode) {
