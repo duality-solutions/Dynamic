@@ -2899,7 +2899,7 @@ void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScri
     }
 }
 
-CAmount CWallet::GetBDAPCredits() const
+CAmount CWallet::GetBDAPDynamicAmount() const
 {
     std::vector<std::pair<CTxOut, COutPoint>> vCredits;
     pwalletMain->AvailableBDAPCredits(vCredits);
@@ -2920,11 +2920,6 @@ CAmount CWallet::GetBDAPCredits() const
         }
     }
     return nTotalCredits;
-}
-
-CAmount CWallet::GetBDAPDynamicAmount() const
-{
-    return (GetBDAPCredits() * BDAP_CREDIT);
 }
 
 void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl* coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
@@ -3052,6 +3047,7 @@ void CWallet::AvailableBDAPCredits(std::vector<std::pair<CTxOut, COutPoint>>& vC
         }
     }
 }
+
 static void ApproximateBestSubset(std::vector<std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> > > vValue, const CAmount& nTotalLower, const CAmount& nTargetValue, std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
 {
     std::vector<char> vfIncluded;
