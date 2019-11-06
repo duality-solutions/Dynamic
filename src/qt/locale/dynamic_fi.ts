@@ -4551,785 +4551,786 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Needs Translating</translation>
+        <translation>Näytetyt tiedot saattavat olla vanhentuneita. Lompakko synkronoituu automaattisesti dynaamisen verkon kanssa, kun yhteys on muodostettu, mutta tämä prosessi ei ole vielä valmis. Tämä tarkoittaa, että viimeaikaiset tapahtumat eivät ole näkyvissä, ja saldo ei ole ajan tasalla ennen kuin tämä prosessi on saatu päätökseen.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Needs Translating</translation>
+        <translation>DYN: n käyttäminen ei ehkä ole mahdollista kyseisessä vaiheessa!</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Needs Translating</translation>
+        <translation>Jäljellä olevien lohkojen määrä</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>Needs Translating</translation>
+        <translation>tuntematon</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuntematon...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuntematon. Synkronoidaan otsikot (% 1)...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen lohkoaika</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Needs Translating</translation>
+        <translation>Edistyminen</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Needs Translating</translation>
+        <translation>Edistyksen lisäys tunnissa</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Needs Translating</translation>
+        <translation>lasketaan ...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Needs Translating</translation>
+        <translation>Arvioitu aika jäljellä synkronointiin</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Piilottaa</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>Piilottaa</translation>
     </message>
 </context>
 <context>
     <name>BdapAccountTableModel</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Objektin täydellinen polku</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Löytyneet tietueet: </translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää BDAP-käyttäjä</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Rekisteröitymiskuukaudet:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Käyttäjätunnus:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo uusi osoite</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän tunnus:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää ryhmä</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisätty käyttäjä onnistuneesti</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Tarve kääntää</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Löytyneet tietueet: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>kunnossa</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-linkin yksityiskohdat</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (pyytäjä):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (vastaanottaja):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjän linkin osoite:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajan linkin osoite:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Allekirjoitustodistus:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Aika:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vanhentunut:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Objektin täydellinen polku</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>käyttäjät</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitys- ja Poista-tapahtumat ovat käytettävissä, kun tämä on valittu</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Tarve kääntää</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Virkistää</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä käyttäjä</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>NPoista valittu käyttäjä luettelosta</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>Poista käyttäjä</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmät</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkit</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitys- ja Poista-tapahtumat ovat käytettävissä, kun tämä on valittu</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Näytä vain Omat ryhmät</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää uusi ryhmä</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää ryhmä</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä ryhmä</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Poista valittu ryhmä luettelosta</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Poista ryhmä</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää BDAP-ryhmä</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>Oletko varma, että haluat poistaa \</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvista tilin poistaminen</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-ryhmä</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-ryhmän tiedot</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-käyttäjä</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>Poistettu käyttäjä</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmä on poistettu onnistuneesti</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita haettava yleinen nimi</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita objektin koko polku etsiäksesi</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Odottaa hyväksyntää</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>Odottava pyyntö</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>Saattaa loppuun</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Virkistää</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön hakeja</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajahaku</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Hyväksyä</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>Poistaa</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää uusi linkki</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>Kieltää</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>Roskapostin</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvista Hyväksy linkki</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>Hyväksytty linkki</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa hyväksyvän linkin yksityiskohtia</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa pyyntölinkin yksityiskohtia</translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-tili</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Käyttäjätunnus:</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivittää</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän tunnus:</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä: </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitetty käyttäjä onnistuneesti</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän päivitys onnistui</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-linkin yksityiskohdat</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa hyväksyvän linkin yksityiskohtia</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä: </translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän: </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (pyytäjä): </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (vastaanottaja): </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjän linkin osoite: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajan linkin osoite: </translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>Allekirjoitustodistus: </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti: </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID: </translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>Aika: </translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>Huomaa, että tapahtumasi heijastuu vasta seuraavaan lohkoon.</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>Muodostua</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>Objektin täydellinen polku:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakon osoite:</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>DHT-julkinen avain:</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkin osoite:</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Aika:</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vanhentunut:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Lisää uusi linkki</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(vaaditaan)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>(valinnainen)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>Alkaen:</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>To:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää linkki</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Add Link-virhe</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjä, Vastaanottaja ja Linkin viesti ovat pakolliset kentät</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Vinkkejä: Jos tuonti keskeytyy (kuten sähkökatkos tai vahingossa tapahtuva sammutus), kirjoita palautuslause tai yksityinen avain uudelleen ja napsauta Tuo-painiketta.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Valitse tiedosto</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo muisto</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo palautuslauseg</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Liitä leikepöydältä</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>Seljetä</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita BIP39-yhteensopiva palautuslause / muistomerkki</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Palautussalause</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita salasana suojataksesi palautuslauseesi. (valinnainen)</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>Kieli</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Varoitus</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
 Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+        <translation>Varmista, että varmuuskopioit palautuslauseesi ja tunnuslauseesi - niitä ei voi palauttaa!
+Lompakko käynnistyy uudelleen, kun muistomerkki on tuotu.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuonti</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>Jälleentuontimenettely</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo muistion</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo uusi palautuslause</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Kopioi leikepöydälle</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Entropian tavu</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuottaa</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvistaa</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo yksityinen avain</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Syötä yksi yksityinen avain</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>Pakota uudelleen</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>esimerkki: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo yksityinen avaintiedosto</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Syötä yksityinen avaintiedosto</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>Selailla</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Vinkkejä: Yksityinen avaintiedosto on dynaamisen 'dumpwallet-tiedostonimi' vietämä tiedosto, ei .dat-tiedosto.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5337,7 +5338,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakkoon on jo ladattu HD-tili.
+Tuomalla uusi palautuslause luodaan uusi tili, joka asetetaan oletusasetukseksi.
+Lompakko vastaanottaa osoitteita vain uudesta tuodusta tilistä.
+Vanha tilisi lompakotiedosto nimetään uudelleen nimellä wallat.dat.before-mnemonic-import.&lt;isodate&gt; tietokantaan</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5345,11 +5349,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakkoon on jo ladattu HD-tili.
+Tuomalla uusi palautuslause luodaan uusi tili, joka asetetaan oletusasetukseksi.
+Lompakko vastaanottaa osoitteita vain uudesta tuodusta tilistä.
+Vanha tilisi lompakotiedosto nimetään uudelleen nimellä wallat.dat.before-mnemonic-import.&lt;isodate&gt; tietokantaan</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita BIP39-yhteensopiva palautuslause / muistomerkki.</translation>
     </message>
 </context>
 </TS>
