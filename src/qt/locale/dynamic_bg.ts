@@ -1829,7 +1829,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>&amp;Clear</source>
-        <translation>&amp;Изчисти</translation>
+        <translation>&amp;очиствам</translation>
     </message>
     <message>
         <source>Totals</source>
@@ -2076,7 +2076,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Изчистване</translation>
+        <translation>очиствам</translation>
     </message>
     <message>
         <source>Requested payments history</source>
@@ -4535,785 +4535,786 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Needs Translating</translation>
+        <translation>Показаната информация може да е остаряла. Вашият портфейл автоматично се синхронизира с динамичната мрежа след установяване на връзка, но този процес все още не е приключил. Това означава, че скорошните транзакции няма да бъдат видими и балансът няма да бъде актуален, докато този процес не приключи.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Needs Translating</translation>
+        <translation>Прекарването на DYN може да не е възможно по време на тази фаза!</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Needs Translating</translation>
+        <translation>Останало количество блокове</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>Needs Translating</translation>
+        <translation>неизвестен</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Needs Translating</translation>
+        <translation>Неизвестен...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Needs Translating</translation>
+        <translation>Непознат. Синхронизиране на заглавки (% 1)...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Needs Translating</translation>
+        <translation>блоковете последния път</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Needs Translating</translation>
+        <translation>прогрес</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Needs Translating</translation>
+        <translation>Увеличение на прогреса на час</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Needs Translating</translation>
+        <translation>изчисляване на...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Needs Translating</translation>
+        <translation>Прогнозно време остава до синхронизирането</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Крия</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>Крия</translation>
     </message>
 </context>
 <context>
     <name>BdapAccountTableModel</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка</translation>
     </message>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Често срещано име</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Обект пълен път</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Намерени записи: </translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете BDAP потребител</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>>Често срещано име:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Месеци на регистрация:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>User ID:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Създайте нов адрес</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавяне на потребител</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Идентификационен номер на групата:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете група</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Успешно добавен потребител</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Намерени записи: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>съобщение</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Добре</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Отказ</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Подробности за връзката BDAP</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>Заявител:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>Получател:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Публичен ключ за връзка (искател):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Публичен ключ за връзка (получател):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес за връзка на молбата:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес на връзката на получателя:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Доказателство за подпис:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Съобщение за връзка:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Време:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Просрочен:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Подробности за BDAP</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Заявител</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Получател</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Дата</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Заявител</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Получател</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Дата</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Често срещано име</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Обект пълен път</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност:</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Потребители</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Операциите за актуализиране и изтриване са налични, когато това е отметнато</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Показване само Моите потребители</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>опресняване</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете потребител</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавяне на потребител</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>Актуализиране на потребителя</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Изтрийте текущо избрания потребител от списъка</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>Изтриване на потребителя</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Групи</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>звена</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Операциите за актуализиране и изтриване са налични, когато това е отметнато</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Показване само Моите групи</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете нова група</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете група</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Група за актуализиране</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Изтрийте текущо избраната група от списъка</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Изтриване на група</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавете BDAP група</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>Сигурен ли си, че искаш да изтриеш \</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Потвърдете Изтриване на акаунта</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Актуализирайте BDAP Group</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Детайл за групата BDAP</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Подробности за BDAP</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Актуализиране на BDAP потребител</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>Успешно изтрит потребител</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>Групата е изтрита успешно</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете общо име за търсене</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете пълен път на обекта за търсене</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Заявител</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Получател</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Дата</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Предстои приемане</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>Висяща заявка</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>пълен</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Обновяване</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>Търсене на молби</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>Търсене на получател</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>приемам</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>Изтрий</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавяне на нова връзка</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>отричам</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>Спам</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Потвърдете Приемане на връзка</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>Връзката е успешно приета</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP в очакване на приемане на подробности за връзката</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP в очакване на подробна връзка за заявка</translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Актуализирайте BDAP акаунта</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>User ID:</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Често срещано име:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Дни на регистрация:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Добре</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>Актуализация</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Отказ</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Идентификационен номер на групата:</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност: </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>Успешно актуализиран потребител</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>Успешно актуализирана група</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>съобщение</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Детайл за връзка с BDAP</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP в очакване на приемане на подробности за връзката</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Дни на регистрация:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Добре</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност:</translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>Заявител: </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>Получател: </translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>Публичен ключ за връзка (искател): </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>Публичен ключ за връзка (получател): </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес на линка на заявителя: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес на връзката на получателя:</translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>Доказателство за подпис: </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>Съобщение за връзка: </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID: </translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>Време: </translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>Моля, обърнете внимание, че транзакцията ви няма да бъде отразена до следващия блок.</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Подробности за BDAP</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>форма</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Често срещано име:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>Обект пълен път:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес на портфейла:</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>Публичен ключ на DHT:</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес за връзка:</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TX ID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Време:</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок на годност:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Просрочен:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Добре</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>съобщение</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Добавяне на нова връзка</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(Задължително)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>(По желание)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>От:</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>Да се:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Съобщение за връзка:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Дни на регистрация:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавяне на връзка</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Отказ</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Грешка при добавяне на връзка</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>Заявителят, получателят и съобщението за връзка са задължителни полета</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Съвети: ако процесът на импортиране е прекъснат (като изключване на захранването или случайно изключване), моля, въведете отново фразата за възстановяване или частния ключ и кликнете върху бутона „Импортиране“.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Choose File</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Внос мнемоничен</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Импортиране на фраза за възстановяване</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Поставяне от клипборда</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>очиствам</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете вашата съвместима с BIP39 фраза за възстановяване / мнемонична</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Профил за възстановяване</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете парола, за да защитите вашата фраза за възстановяване. (По желание)</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>език</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Внимание</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
 Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+        <translation>Моля, уверете се, че архивирате вашата фраза за възстановяване и парола - те не могат да бъдат възстановени!
+Wallet ще се рестартира след импортирането на мнемонични.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>внос</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>Повторното внасяне</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Създайте мнемонично</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Създайте нова фраза за възстановяване</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Копиране в клипборда</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Байтове на ентропията</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>Генериране</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>ратифицирам</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Отказ</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Импортиране на частен ключ</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете единичен частен ключ</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>Force Rescan</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>пример: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Импортирайте файла с частния ключ</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете privatekey файл</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>паса</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Съвети: Файлът с частния ключ е файлът, експортиран от Dynamic „име на файл на dumpwallet“, а не .dat файла.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5321,7 +5322,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Wallet вече има зареден HD акаунт.
+Чрез импортирането на друга фраза за възстановяване ще се създаде нов акаунт и ще се зададе по подразбиране.
+Портфейлът ще получава на адреси само от новия импортиран акаунт.
+Вашият стар файл на портфейла на акаунта ще бъде преименуван на wallat.dat.before-mnemonic-import.&lt;isodate&gt; в вашата директория с данни</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5329,11 +5333,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Wallet вече има зареден HD акаунт.
+Чрез импортирането на друга фраза за възстановяване ще се създаде нов акаунт и ще се зададе по подразбиране.
+Портфейлът ще получава на адреси само от новия импортиран акаунт.
+Вашият стар файл на портфейла на акаунта ще бъде преименуван на wallat.dat.before-mnemonic-import.&lt;isodate&gt; в вашата директория с данни</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Въведете вашата съвместима с BIP39 фраза за възстановяване / мнемонична.</translation>
     </message>
 </context>
 </TS>
