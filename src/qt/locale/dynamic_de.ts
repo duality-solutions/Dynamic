@@ -5771,7 +5771,7 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Akzeptieren ausstehend</translation>
     </message>
     <message>
         <source>Pending Request</source>
