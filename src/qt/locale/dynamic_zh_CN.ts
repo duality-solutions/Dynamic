@@ -511,6 +511,10 @@
         <translation><numerusform>%n 已连接至动态币网络</numerusform></translation>
     </message>
     <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>同步标题（％1％）...</translation>
+    </message>
+    <message>
         <source>Synchronizing with network...</source>
         <translation>正在与网络同步...</translation>
     </message>
