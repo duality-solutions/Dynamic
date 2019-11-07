@@ -4812,6 +4812,10 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Virkistää</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Lisää käyttäjä</translation>
     </message>

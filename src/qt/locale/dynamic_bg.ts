@@ -4796,6 +4796,10 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>опресняване</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Добавете потребител</translation>
     </message>

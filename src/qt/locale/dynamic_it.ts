@@ -4114,6 +4114,10 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Ricaricare</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Aggiungi un utente</translation>
     </message>

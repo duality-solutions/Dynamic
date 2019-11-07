@@ -5664,6 +5664,10 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Uppdatera</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Lägg till en användare</translation>
     </message>

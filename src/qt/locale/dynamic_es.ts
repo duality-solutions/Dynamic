@@ -5642,6 +5642,10 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;Alerta Dynamic&quot; admin@foo
         <translation>Actualizar</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Agregar un usuario</translation>
     </message>

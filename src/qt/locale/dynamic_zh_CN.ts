@@ -4548,6 +4548,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>刷新</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation>全部刷新</translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>新增使用者</translation>
     </message>

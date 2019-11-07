@@ -5640,6 +5640,10 @@ rpcpassword =%s
         <translation>Needs Translating</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Needs Translating</translation>
     </message>
