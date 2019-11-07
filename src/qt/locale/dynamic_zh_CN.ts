@@ -371,6 +371,14 @@
         <translation>信息(&amp;I)</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>导入助记符/私钥...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>信息PRIVATESEND</translation>
+    </message>
+    <message>
         <source>Show diagnostic information</source>
         <translation>显示诊断信息</translation>
     </message>
@@ -411,6 +419,14 @@
         <translation>打开 &amp;配置文件</translation>
     </message>
     <message>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>钱包配置文件</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>打开Dynode配置文件</translation>
+    </message>
+    <message>
         <source>Open configuration file</source>
         <translation>打开配置文件</translation>
     </message>
@@ -425,6 +441,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;付款地址 </translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>与同伴联系...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -864,15 +884,15 @@ Address: %4
         <translation>请选择隐私等级。</translation>
     </message>
     <message>
-        <source>Use 2 separate dynodes to mix funds up to 1000 DYN</source>
+        <source>Use 2 separate Dynodes to mix funds up to 1000 DYN</source>
         <translation>使用2个独立的主节点混合资金最多1000动态币</translation>
     </message>
     <message>
-        <source>Use 8 separate dynodes to mix funds up to 1000 DYN</source>
+        <source>Use 8 separate Dynodes to mix funds up to 1000 DYN</source>
         <translation>使用8个独立的主节点混合资金最多1000动态币</translation>
     </message>
     <message>
-        <source>Use 16 separate dynodes</source>
+        <source>Use 16 separate Dynodes</source>
         <translation>使用16个独立主节点</translation>
     </message>
     <message>
@@ -1187,7 +1207,7 @@ Address: %4
         <translation>专家</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <source>This setting determines the amount of individual Dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
         <translation>此选项用以调整进行匿名化操作的主节点数量。&lt;br/&gt;越多的循环次数提供了更高级别的匿名性，同时也会花费更多的手续费</translation>
     </message>
     <message>
@@ -1456,6 +1476,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>开始/关闭 混合</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>开始混音 </translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>停止混合</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>您向主节点所提交的用以面额化混合的DYN,&lt;br&gt;当其他用户提交相同的面额化DYN数量时,将开始混合.</translation>
     </message>
@@ -1470,6 +1498,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Try Mix</source>
         <translation>尝试混合</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>信息</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>有关PRIVATESEND和混合的信息</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
@@ -1777,6 +1813,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>上一数据块时间</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>内存池</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>当前交易数</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>内存使用情况</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>调试日志文件</translation>
     </message>
@@ -1793,12 +1841,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>当前数据块数量</translation>
     </message>
     <message>
+        <source>CPU Mode:</source>
+        <translation>CPU模式:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU模式:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU挖掘：</translation>
+    </message>
+    <message>
         <source>Client version</source>
         <translation>客户端版本</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
         <translation>使用 BerkeleyDB 版本</translation>
+    </message>
+    <message>
+        <source>Datadir</source>
+        <translation>数据目录</translation>
     </message>
     <message>
         <source>Block chain</source>
@@ -2107,6 +2171,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Copy amount</source>
         <translation>复制金额</translation>
     </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>请求InstantSend</translation>
+    </message>
 </context>
 <context>
     <name>ReceiveRequestDialog</name>
@@ -2170,6 +2238,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>日期</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
         <source>Label</source>
         <translation>标签</translation>
     </message>
@@ -2180,6 +2252,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Amount</source>
         <translation>金额</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>要求的</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -2504,6 +2580,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no label)</source>
         <translation>(没有标签)</translation>
     </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>警告：目前无法估算费用。</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsEntry</name>
@@ -2578,6 +2658,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
         <translation>为这个地址输入一个标签，以便将它添加到您的地址簿</translation>
+    </message>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>从金额中扣除费用</translation>
     </message>
 </context>
 <context>
@@ -2963,6 +3047,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Address</source>
         <translation>地址</translation>
+    </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>地址 / 标签</translation>
     </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
@@ -3685,7 +3773,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>未激活安全模式，重新写入真正安全模式项目(默认: %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a dynode (0-1, default: %u)</source>
+        <source>Enable the client to act as a Dynode (0-1, default: %u)</source>
         <translation>激活客户端,使其作为主节点(0-1, 默认: %u)</translation>
     </message>
     <message>
@@ -3810,11 +3898,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>正在读取预算缓存...</translation>
     </message>
     <message>
-        <source>Loading dynode cache...</source>
+        <source>Loading Dynode cache...</source>
         <translation>正在读取主节点缓存...</translation>
     </message>
     <message>
-        <source>Loading dynode payment cache...</source>
+        <source>Loading Dynode payment cache...</source>
         <translation>正在读取主节点奖励缓存...</translation>
     </message>
     <message>
@@ -3898,7 +3986,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>指定连接超时毫秒数 (最小值: 1, 默认: %d)</translation>
     </message>
     <message>
-        <source>Specify dynode configuration file (default: %s)</source>
+        <source>Specify Dynode configuration file (default: %s)</source>
         <translation>指定主节点配置文件 (默认: %s)</translation>
     </message>
     <message>
@@ -3926,12 +4014,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>正在同步预算...</translation>
     </message>
     <message>
-        <source>Synchronizing dynode winners...</source>
+        <source>Synchronizing Dynode winners...</source>
         <translation>正在同步获得奖励的主节点...</translation>
     </message>
     <message>
-        <source>Synchronizing dynodes...</source>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>S同步Dynode付款...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
         <translation>正在同步主节点...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>同步管理对象...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
@@ -4111,7 +4207,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>以字节为单位设置最大的块(默认： %d)</translation>
     </message>
     <message>
-        <source>Set the dynode private key</source>
+        <source>Set the Dynode private key</source>
         <translation>设置主节点私钥</translation>
     </message>
     <message>
