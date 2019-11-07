@@ -6102,7 +6102,7 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Bitte stellen Sie sicher, dass Sie eine Sicherung Ihrer Wiederherstellungsphrase und Ihrer Passphrase angefertigt haben - diese sind nicht wiederherstellbar!
 		Die Wallet wird nachdem  import der mnemonic neu gestartet.</translation>
     </message>

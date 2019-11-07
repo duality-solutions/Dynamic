@@ -5197,7 +5197,7 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Needs Translating</translation>
     </message>
     <message>

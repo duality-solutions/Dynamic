@@ -5088,7 +5088,7 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Message de lien: /translation>
+        <translation>Message de lien: </translation>
     </message>
     <message>
         <source>TXID: </source>
@@ -5257,7 +5257,7 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Assurez-vous de sauvegarder votre phrase de récupération et votre phrase secrète - elles ne sont pas récupérables!
 Le portefeuille redémarre après l'importation de mnemonic.</translation>
     </message>

@@ -4420,7 +4420,7 @@ Più URL vengono separati da una barra verticale |.</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Nome comune:/translation>
+        <translation>Nome comune:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
@@ -4562,7 +4562,7 @@ Più URL vengono separati da una barra verticale |.</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Assicurati di eseguire il backup della frase di recupero e della passphrase: non sono recuperabili!
 Il portafoglio verrà riavviato dopo l'importazione di mnemonic.</translation>
     </message>

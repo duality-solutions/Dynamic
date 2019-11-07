@@ -4287,184 +4287,184 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Needs Translating</translation>
+        <translation>显示的信息可能已过时。建立连接后，您的钱包会自动与DYNAMIC网络同步，但是此过程尚未完成。这意味着将看不到最近的交易，并且在此过程完成之前，余额不会是最新的。</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Needs Translating</translation>
+        <translation>在该阶段可能无法花费DYN！</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Needs Translating</translation>
+        <translation>剩余块数</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>Needs Translating</translation>
+        <translation>不明</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Needs Translating</translation>
+        <translation>不明...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Needs Translating</translation>
+        <translation>不明。同步标题（％1）...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Needs Translating</translation>
+        <translation>最后一块到达时间</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Needs Translating</translation>
+        <translation>进展</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Needs Translating</translation>
+        <translation>平均每小时进度</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Needs Translating</translation>
+        <translation>正在计算...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Needs Translating</translation>
+        <translation>预计剩余时间</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;隐藏</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>隐藏</translation>
     </message>
 </context>
 <context>
     <name>BdapAccountTableModel</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP错误</translation>
     </message>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>对象完整路径</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>找到记录： </translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>添加BDAP用户</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名称：</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>注册的月数：</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>用户身份：</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>建立一个新地址</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>添加用户</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>组ID：</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>新增群组</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>成功添加用户</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>找到记录： </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>信息</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>好</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP链接的详细信息</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者：</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>接受者：</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>链接公共密钥（请求者)：</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>链接公共密钥（收件人）：</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者链接地址：</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>收件人链接地址：</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>签名证明：</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>连结讯息：</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>时间：</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
@@ -4952,120 +4952,121 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>提示：如果导入过程被中断（例如断电或意外关闭），请重新输入恢复短语或私钥，然后单击“导入”按钮。</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>选择一个文件</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>导入助记符</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>导入恢复短语</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>从剪贴板粘贴</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>肃清</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>输入与BIP39匹配的恢复短语/助记符</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>恢复短语</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>输入密码来保护您的恢复短语。 （可选的）</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>语言</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>警报</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>确保您备份了恢复短语和密码短语-它们不可恢复！
+导入助记符后，电子钱包将重新启动。</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>输入额</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>再进口</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>创建助记符</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>创建一个新的恢复短语</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>复制到剪贴板</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>熵字节</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>生成</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>验证</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>撤消</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>导入私钥</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>输入一个私钥</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>强制重新扫描</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>示例：L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>导入私钥文件</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>输入私钥文件</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>浏览</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>提示：私钥文件是由动态“ dumpwallet文件名”导出的文件，而不是.dat文件。</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5073,7 +5074,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>电子钱包已加载了高清帐户。
+通过导入其他恢复短语，将创建一个新帐户并将其设置为默认帐户。
+钱包将仅从新导入的帐户接收地址。
+助记符导入之前，您的旧帐户钱包文件将重命名为wallat.dat.。＆lt;isodate＆gt; 在您的数据目录中</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5081,11 +5085,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>电子钱包已加载了高清帐户。
+通过导入其他恢复短语，将创建一个新帐户并将其设置为默认帐户。
+钱包将仅从新导入的帐户接收地址。
+助记符导入之前，您的旧帐户钱包文件将重命名为wallat.dat.。＆lt;isodate＆gt; 在您的数据目录中</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>输入您的BIP39兼容恢复短语/助记符。</translation>
     </message>
 </context>
 </TS>

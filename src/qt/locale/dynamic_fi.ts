@@ -5260,7 +5260,7 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Varmista, että varmuuskopioit palautuslauseesi ja tunnuslauseesi - niitä ei voi palauttaa!
 Lompakko käynnistyy uudelleen, kun muistomerkki on tuotu.</translation>
     </message>
