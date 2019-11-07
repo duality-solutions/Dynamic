@@ -5445,29 +5445,6 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP Fehler</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Allgemeine Bezeichnung</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Vollständiger Pfad des Objekts</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Verfallsdatum</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Gefundene Einträge:</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5832,6 +5809,22 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>BDAP austehende Verknüpfungsdetails der Anforderung </translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Allgemeine Bezeichnung</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Vollständiger Pfad des Objekts</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Verfallsdatum</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Gefundene Einträge:</translation>
     </message>
 </context>
 <context>

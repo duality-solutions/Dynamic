@@ -4600,29 +4600,6 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Erreur BDAP</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Nom commun</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Chemin complet d'objet</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Date d'expiration</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Enregistrements trouvés: </translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -4987,6 +4964,22 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>Détails du lien de demande en attente BDAP</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Nom commun</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Chemin complet d'objet</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Date d'expiration</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Enregistrements trouvés: </translation>
     </message>
 </context>
 <context>

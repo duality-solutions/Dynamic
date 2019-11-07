@@ -4587,29 +4587,6 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP Грешка</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Често срещано име</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Обект пълен път</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Срок на годност</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Намерени записи: </translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -4974,6 +4951,22 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>BDAP в очакване на подробна връзка за заявка</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Често срещано име</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Обект пълен път</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Срок на годност</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Намерени записи: </translation>
     </message>
 </context>
 <context>

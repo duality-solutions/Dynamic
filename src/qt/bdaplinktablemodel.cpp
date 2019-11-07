@@ -103,13 +103,7 @@ public:
 
         inputtable->clearContents();
         inputtable->setRowCount(0);
-        inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
-        inputtable->setColumnCount(3);
-
-        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QObject::tr("Requestor")));
-        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QObject::tr("Recipient")));
-        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QObject::tr("Date")));
 
         //make columns resize dynamically
         QHeaderView* header = inputtable->horizontalHeader();

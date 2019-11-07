@@ -5442,29 +5442,6 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Needs Translating</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5828,6 +5805,22 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
         <translation>Needs Translating</translation>
     </message>
 </context>

@@ -4603,29 +4603,6 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP-virhe</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Yleinen nimi</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Objektin täydellinen polku</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Viimeinen käyttöpäivä</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Löytyneet tietueet: </translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -4990,6 +4967,22 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>BDAP odottaa pyyntölinkin yksityiskohtia</translation>
+    </message>
+     <message>
+        <source>Common Name</source>
+        <translation>Yleinen nimi</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Objektin täydellinen polku</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Viimeinen käyttöpäivä</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Löytyneet tietueet: </translation>
     </message>
 </context>
 <context>

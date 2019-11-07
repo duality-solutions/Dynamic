@@ -3905,29 +3905,6 @@ Più URL vengono separati da una barra verticale |.</translation>
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Errore BDAP</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Nome comune</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Percorso completo dell'oggetto</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Data di scadenza</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Record trovati: </translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -4292,6 +4269,22 @@ Più URL vengono separati da una barra verticale |.</translation>
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>Dettagli collegamento richiesta in sospeso BDAP</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Nome comune</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Percorso completo dell'oggetto</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Data di scadenza</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Record trovati: </translation>
     </message>
 </context>
 <context>

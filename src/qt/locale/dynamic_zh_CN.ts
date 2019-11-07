@@ -4704,29 +4704,6 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP错误</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>通用名</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>对象完整路径</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>到期日</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>找到记录： </translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -4862,7 +4839,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Date</source>
         <translation>日期</translation>
     </message>
-    </context>
+</context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
@@ -5091,6 +5068,22 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>待处理的BDAP链接请求的详细信息</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>通用名</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>对象完整路径</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>到期日</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>找到记录： </translation>
     </message>
 </context>
 <context>

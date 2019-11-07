@@ -5431,29 +5431,6 @@ rpcpassword =%s
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Needs Translating</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5817,6 +5794,22 @@ rpcpassword =%s
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
         <translation>Needs Translating</translation>
     </message>
 </context>

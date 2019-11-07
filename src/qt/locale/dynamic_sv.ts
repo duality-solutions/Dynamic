@@ -5455,29 +5455,6 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP Fel</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Vanligt namn</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Objektets Fulla sökväg</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Utgångsdatum</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Hittade Poster:</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5842,6 +5819,22 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>Väntar på begäran länkdetalj</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Vanligt namn</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Objektets Fulla sökväg</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Utgångsdatum</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Hittade Poster:</translation>
     </message>
 </context>
 <context>
