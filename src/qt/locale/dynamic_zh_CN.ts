@@ -3337,6 +3337,271 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
 </context>
 <context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>表格</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>筛选器清单：</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>节点数：</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>我的Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>所有Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>注意：本地钱包中的Dynodes的状态可能略有不正确。&lt;br /&gt;始终等待钱包同步其他数据，然后从另一个节点仔细检查&lt;br /&gt;如果您的Dynode应该正在运行，但是您仍然看不到&quot;ENABLED&quot; 在&quot;状态&quot;字段中 </translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>全部开始</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>起始别名</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>开始 &amp;MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp;更新状态</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>别名</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>协议</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>状态</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>活性</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>最后一次露面</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>收款人</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>您确定要启动所有Dynodes吗？</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>您确定要启动MISSING Dynodes吗？</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>确认缺少的 Dynodes启动</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>状态将在（秒）内自动更新：</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>命令目前不可用</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>在同步Dynode列表之前，您无法使用此命令</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>确认Dynode启动</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>您确定要启动Dynode吗 ％1？</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>请耐心等待...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>正在更新...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>成功启动Dynode。</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>已成功启动 ％d 个Dynodes，未能启动 ％d 个，共 ％d 个</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>表格</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>要使用的CPU线程数：</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>要使用的GPU设备数量：</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>您的哈希率（内置矿工）：</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>网络哈希率：</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>块之间的平均间距：</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>开始采矿</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>停止开采</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>残障人士</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>显示哈希表图形</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>明确</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>使用滑块选择要使用的CPU线程数</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>使用滑块选择要使用的GPU设备数量</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>这显示了挖矿时CPU的哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>这显示了挖矿时GPU的哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>这显示了动态网络的总体哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>这显示了您开采的区块之间的平均时间</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>“ Blockchain/Dynodes”未同步，请等到完全同步后再进行挖掘！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>单击开始挖掘开始挖掘！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>点击停止采矿以停止采矿！</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Deteniendo</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>开始</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>残障人士</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>所有开采的硬币将转到 ％1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>一旦DYNAMIC完成同步，滑块就会显示</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>此版本的DYNAMIC不支持GPU挖掘</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5分钟</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10分钟</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30分钟</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1小时</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8小时</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12小时</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1天</translation>
+    </message>
+</context>
+<context>
     <name>UnitDisplayStatusBarControl</name>
     </context>
 <context>
