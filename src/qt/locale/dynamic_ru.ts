@@ -5434,125 +5434,125 @@ rpcpassword =%s
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавить пользователя BDAP.</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Распространенное имя:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Месяцы регистрации:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Логин пользователя:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Создать новый адрес</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавить пользователя</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ID группы:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Добавить группу</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Пользователь успешно добавлен</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок годности</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Найдено записей: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>сообщение</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Хорошо</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP ссылка подробно</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>запрашивающий:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>Получатель:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Открытый ключ ссылки (запросчик):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Открытый ключ ссылки (Получатель):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес ссылки для запроса:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Адрес ссылки получателя:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Подпись Доказательство:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ссылка Сообщение:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Время:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Срок годности:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Истекший:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Информация о пользователе BDAP</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Ошибка BDAP</translation>
     </message>
     <message>
         <source>Requestor</source>
@@ -6174,7 +6174,7 @@ Your old account wallet file will be renamed to wallat.dat.before-mnemonic-impor
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Введите BIP39-совместимую фразу восстановления / мнемонику.</translation>
     </message>
 </context>
 </TS>
