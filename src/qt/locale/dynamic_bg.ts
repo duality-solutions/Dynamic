@@ -371,6 +371,22 @@
         <translation>Данни</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>Импортиране на мнемоничен / частен ключ ...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>PrivateSend информация</translation>
+    </message>
+    <message>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Отворете файла за конфигуриране на портфейла</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Отворете конфигурационния файл на Dynode</translation>
+    </message>
+    <message>
         <source>Show diagnostic information</source>
         <translation>Покажи диагностична информация</translation>
     </message>
@@ -425,6 +441,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Адреси за изпращане...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Свързване с връстници ...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1455,6 +1475,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Пусни/Спри Смесване</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>Започнете смесването</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Спрете смесването</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Информация</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>Деноминираните суми, които сте изпратили към Dynode. За смесване, другите потребители трябва да изпратят абсолютно същите деноминирани суми.</translation>
     </message>
@@ -1780,6 +1812,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Мрежа</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Памет памет</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Настоящ брой транзакции</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Използване на паметта</translation>
+    </message>
+    <message>
         <source>Last block time</source>
         <translation>Време на последния блок</translation>
     </message>
@@ -1802,6 +1846,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Client version</source>
         <translation>Версия на клиента</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>CPU режим:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU режим:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU минен：</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
@@ -2109,6 +2165,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Copy amount</source>
         <translation>Копирай сума</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>поискване InstantSend</translation>
     </message>
 </context>
 <context>
@@ -2582,6 +2642,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Enter a label for this address to add it to your address book</source>
         <translation>Въведете наименование за този адрес, за да го добавите в списъка с адреси</translation>
     </message>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>Извадете таксата от сумата</translation>
+    </message>
 </context>
 <context>
     <name>ShutdownWindow</name>
@@ -2971,6 +3035,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Address</source>
         <translation>Адрес</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Адрес / етикет</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Отворен за още %n блока</numerusform><numerusform>Отворен за още %n блока</numerusform></translation>
@@ -3264,6 +3332,267 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Unit to show amounts in. Click to select another unit.</source>
         <translation>Единица за показване на количеството.Клик за избиране на друга единица.</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>бланка</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Списък с филтри:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Брой на възлите:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Моите Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Всички Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Забележка: Състоянието на вашите Dynodes в локалния портфейл потенциално може да е леко неправилно. Винаги изчакайте портфейла да синхронизира допълнителни данни и след това проверете два пъти от друг възел, ако вашият Dynode трябва да работи, но все още продължавате не виждам &quot;ENABLED&quot; в &quot;Състояние&quot; област.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Започнете всички</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>Започнете псевдоним</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>начало &amp;MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp;Актуализиране на състоянието</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>псевдоним</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>адрес</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>протокол</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Състояние</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Активен</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Последно видян</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>получател</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Сигурни ли сте, че искате да стартирате ВСИЧКИ Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Сигурни ли сте, че искате да стартирате MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Потвърдете липсващите Dynodes start</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Състоянието ще се актуализира автоматично в (сек):</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>В момента командата не е достъпна</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>не можете да използвате тази команда, докато списъкът Dynode не се синхронизира</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Потвърдете старта на Dynode</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Сигурни ли сте, че искате да стартирате Dynode% 1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Моля Изчакай...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Актуализира ...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Успешно стартира Dynode.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>Успешно стартира %d Dynodes, не успя да стартира %d, общо %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>бланка</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Брой нишки CPU, които да използвате:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Брой GPU устройства, които да се използват:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>нашия хашрат (вграден миньор):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Мрежа на хешрат:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Средно разстояние между вашите блокове:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Започнете добив</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Спрете добив</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>хора с увреждания</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Покажете графика на хеш метър</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>ясно</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Използвайте плъзгача, за да изберете количеството CPU нишки, които да използвате</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Използвайте плъзгача, за да изберете количеството GPU устройства, които да използвате</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Това показва хештерът на вашия процесор по време на добив</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Това показва хешрета на вашия GPU по време на минно дело</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Това показва общия хешрат на Dynamic мрежата</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Това показва средното време между добитите блокове</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain / Dynodes не се синхронизират, моля изчакайте, докато се синхронизират напълно преди извличането!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Щракнете върху Старт на добив, за да започнете майнинг!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Кликнете върху Спиране на добив, за да завършите добив!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>спиране</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Стартиране</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>Всички добити монети ще отидат %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Слайдърът ще се покаже, когато Dynamic приключи синхронизирането</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>Извличането на GPU не се поддържа в тази версия на Dynamic</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5минути</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10минути</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30минути</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1час</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8часа</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12часа</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1ден</translation>
     </message>
 </context>
 <context>
@@ -4123,8 +4452,16 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Синхронизиране на Dynode победителите ...</translation>
     </message>
     <message>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Синхронизиране на Dynode плащания ...</translation>
+    </message>
+    <message>
         <source>Synchronizing Dynodes...</source>
         <translation>Синхронизиране на Dynodes ...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Синхронизиране на обекти за управление ...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
