@@ -4598,727 +4598,728 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm người dùng BDAP</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên gọi chung:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tháng đăng ký:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên người dùng:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Tạo một địa chỉ mới</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm người dùng</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Id nhóm:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm nhóm</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Đã thêm thành công người dùng</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Dữ liệu được tìm thấy: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>thông điệp</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>đồng ý</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Hủy bỏ</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết liên kết BDAP</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>Người nhận:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết khóa công khai (Người yêu cầu):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết khóa công khai (Người nhận):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ liên kết người yêu cầu:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ liên kết người nhận:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Chữ ký chứng minh:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tin nhắn liên kết:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Thời gian:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Đã hết hạn:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết người dùng BDAP</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Lỗi BDAP</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Người nhận</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Lỗi BDAP</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Người nhận</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên gọi chung</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Đường dẫn đối tượng đầy đủ</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Người dùng</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật và xóa giao dịch có sẵn khi điều này được kiểm tra</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Chỉ hiển thị Người dùng của tôi</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Làm tươi</translation>
     </message>
     <message>
         <source>Refresh All</source>
-        <translation></translation>
+        <translation>Làm mới tất cả</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm người dùng</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm người dùng</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật người dùng</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Xóa người dùng hiện được chọn khỏi danh sách</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>Xóa người dùng</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Các nhóm</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật và xóa giao dịch có sẵn khi điều này được kiểm tra</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Chỉ hiển thị Nhóm của tôi</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm một nhóm mới</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm nhóm</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật nhóm</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Xóa nhóm hiện được chọn khỏi danh sách</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Xóa nhóm</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm nhóm BDAP</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>Bạn có chắc chắn muốn xóa \"</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Xác nhận xóa tài khoản</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật nhóm BDAP</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết nhóm BDAP</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết người dùng BDAP</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật người dùng BDAP</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>Xóa thành công người dùng</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhóm đã xóa thành công</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Lỗi BDAP</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập tên chung để tìm kiếm</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập đối tượng đầy đủ đường dẫn để tìm kiếm</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Người nhận</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Đang chờ chấp nhận</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>Yêu cầu chờ xử lý</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>Hoàn thành</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Làm tươi</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>Yêu cầu tìm kiếm</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>Tìm kiếm người nhận</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Chấp nhận</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>Xóa bỏ</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm liên kết mới</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>Từ chối, phủ nhận</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>Thư rác</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Xác nhận liên kết chấp nhận</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết được chấp nhận thành công</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết liên kết chấp nhận chờ xử lý của BDAP</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết liên kết yêu cầu đang chờ xử lý của BDAP</translation>
     </message>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên gọi chung</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Đường dẫn đối tượng đầy đủ</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Dữ liệu được tìm thấy:</translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật tài khoản BDAP</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên người dùng:</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên gọi chung:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày đăng ký:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>đồng ý</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>Cập nhật</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Hủy bỏ</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Id nhóm:</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn: </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>Người dùng cập nhật thành công</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhóm cập nhật thành công</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>thông điệp</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết liên kết BDAP</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết liên kết chấp nhận chờ xử lý của BDAP</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày đăng ký:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>đồng ý</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn: </translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu: </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>Người nhận: </translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết khóa công khai (Người yêu cầu): </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>Liên kết khóa công khai (Người nhận): </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ liên kết người yêu cầu: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ liên kết người nhận: </translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>Chữ ký chứng minh: </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>Tin nhắn liên kết: </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID: </translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>Thời gian: </translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>Xin lưu ý rằng giao dịch của bạn sẽ không được phản ánh cho đến khối tiếp theo.</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Chi tiết người dùng BDAP</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>mẫu</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tên gọi chung:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>Đường dẫn đối tượng đầy đủ:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ ví:</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>Khóa công khai của DHT:</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Địa chỉ liên kết:</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TX ID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Thời gian:</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày hết hạn:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Đã hết hạn</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>đồng ý</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>thông điệp</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Lỗi BDAP</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Thêm liên kết mới</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(cần thiết)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>(không bắt buộc)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>Từ:</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>Đến:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Tin nhắn liên kết:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngày đăng ký:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Thêm liên kết</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Hủy bỏ</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Thêm liên kết lỗi</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>Người yêu cầu, người nhận và tin nhắn liên kết là các trường bắt buộc</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Mẹo: nếu quá trình nhập bị gián đoạn (chẳng hạn như cắt điện hoặc tắt do vô tình), vui lòng nhập lại cụm từ khôi phục hoặc khóa riêng và nhấp vào nút 'Nhập'.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Chọn tập tin</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập khẩu ghi nhớ</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập cụm từ khôi phục</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Dán từ clipboard</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>Thông thoáng</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập cụm từ khôi phục / ghi nhớ tuân thủ BIP39 của bạn</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Cụm mật khẩu phục hồi</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập cụm mật khẩu để bảo vệ Cụm từ khôi phục của bạn. (không bắt buộc)</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>Ngôn ngữ</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Cảnh báo</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
 Wallet will restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+        <translation>Vui lòng đảm bảo bạn sao lưu Cụm từ khôi phục và Cụm mật khẩu - chúng không thể khôi phục được!
+Ví sẽ khởi động lại sau khi nhập khẩu.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập khẩu</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập lại</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Tạo ghi nhớ</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Tạo cụm từ khôi phục mới</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Sao chép vào clipboard</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Byte của Entropy</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>Tạo</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>Xác thực</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Hủy bỏ</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập khóa riêng</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập khóa riêng</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>Buộc quét lại</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>ví dụ: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập tệp tin cá nhân</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập tệp khóa riêng</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>Duyệt</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Mẹo: Tệp khóa riêng là tệp được xuất bởi Dynamic 'tên tệp dumpwallet, không phải tệp .dat.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5326,7 +5327,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Ví đã có tài khoản HD được tải.
+Bằng cách nhập cụm từ khôi phục khác, một tài khoản mới sẽ được tạo và đặt làm mặc định.
+Ví sẽ chỉ nhận được địa chỉ từ tài khoản mới nhập.
+Tệp ví tài khoản cũ của bạn sẽ được đổi tên thành wallat.dat trước khi nhập dữ liệu.&lt;isodate&gt; trong thư mục dữ liệu của bạn</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5334,11 +5338,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Ví đã có tài khoản HD được tải.
+Bằng cách nhập cụm từ khôi phục khác, một tài khoản mới sẽ được tạo và đặt làm mặc định.
+Ví sẽ chỉ nhận được địa chỉ từ tài khoản mới nhập.
+Tệp ví tài khoản cũ của bạn sẽ được đổi tên thành wallat.dat trước khi nhập dữ liệu.&lt;isodate&gt; trong thư mục dữ liệu của bạn</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Nhập cụm từ khôi phục / ghi nhớ tuân thủ BIP39 của bạn.</translation>
     </message>
 </context>
 </TS>
