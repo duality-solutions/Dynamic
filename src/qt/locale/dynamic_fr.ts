@@ -407,8 +407,20 @@
         <translation>Afficher les options de réparation du  portefeuille</translation>
     </message>
     <message>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Ouvrir le fichier de configuration du portefeuille</translation>
+    </message>
+    <message>
         <source>Open &amp;Configuration File</source>
         <translation>Ouvrir Fichier de &amp;Configuration</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Ouvrir le fichier de configuration Dynode</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Ouvrir le fichier de configuration Dynode</translation>
     </message>
     <message>
         <source>Open configuration file</source>
@@ -501,6 +513,10 @@
     <message numerus="yes">
         <source>%n active connection(s) to Dynamic network</source>
         <translation><numerusform>%n connexion active au réseau Dynamic </numerusform><numerusform>%n connexions actives au réseau Dynamic </numerusform></translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Synchronisation des en-têtes (%1%)...</translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -4662,6 +4678,10 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
     <message>
         <source>Loading wallet...</source>
         <translation>Chargement du portefeuille...</translation>
+    </message>
+    <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>Assurez-vous de chiffrer votre portefeuille et de supprimer toutes les sauvegardes non chiffrées après avoir vérifié que le portefeuille fonctionne!</translation>
     </message>
     <message>
         <source>Dynode options:</source>
