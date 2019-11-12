@@ -1069,8 +1069,47 @@ Adresse : %4
         <translation>Définir les certificats SSL racine pour les requêtes de paiement (par défaut : -système-)</translation>
     </message>
     <message>
-        <source>Show splash screen on startup (default: 1)</source>
+        <source>PrivateSend information</source>
+        <translation>PrivateSend Information</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>&lt;h3&gt;Bases de PrivateSend&lt;/h3&gt;
+PrivateSend vous offre une véritable confidentialité financière en obscurcissant les origines de vos fonds.
+Toute la dynamique de votre portefeuille se compose de différentes entrées. que vous pouvez considérer comme des pièces distinctes et discrètes.&lt;br&gt;
+PrivateSend utilise un processus innovant pour mélanger vos entrées avec celles de deux autres personnes, sans que vos pièces ne quittent jamais votre portefeuille.
+Vous conservez le contrôle de votre argent à tout moment.&lt;hr&gt;
+&lt;b&gt;Le processus PrivateSend fonctionne comme suit:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSend commence par diviser les entrées de vos transactions en dénominations standard.
+Ces dénominations sont 0,001, 0,01 DYN, 0,1 DYN, 1 DYN, 10 DYN - un peu comme le papier-monnaie que vous utilisez tous les jours.&lt;/li&gt;
+&lt;li&gt;Votre portefeuille envoie ensuite des requêtes à des noeuds logiciels spécialement configurés sur le réseau, appelés "Dynodes".
+Ces Dynodes sont ensuite informés que vous souhaitez mélanger une certaine dénomination.
+Aucune information identifiable n’est transmise aux Dynodes, ils ne savent donc jamais qui est ce dernier. vous êtes.&lt;/li&gt;
+&lt;li&gt;Lorsque deux autres personnes envoient des messages similaires indiquant qu’elles souhaitent mélanger la même dénomination, une session de mixage commence.
+La Dynode mélange les entrées et donne des instructions aux trois utilisateurs. des portefeuilles pour payer l’entrée maintenant transformée.
+Votre portefeuille paye cette valeur directement à lui-même, mais à une adresse différente (appelée adresse de changement).&lt;/li&gt;
+&lt;li&gt;Afin de masquer complètement vos fonds, votre portefeuille doit répéter ce processus plusieurs fois avec chaque dénomination.
+Chaque fois que le processus est terminé, cela s'appelle un "round". Chaque tour de PrivateSend rend exponentiellement plus difficile la détermination de l'origine de vos fonds.&lt;/li&gt;
+&lt;li&gt; Ce processus de mélange se fait en arrière-plan sans aucune intervention de votre part. Lorsque vous souhaitez effectuer une transaction,
+vos fonds seront déjà anonymisés. Aucune attente supplémentaire n'est requise.&lt;/li&gt;
+&lt;/ol&gt; &lt;h&gt;
+&lt;b&gt;IMPORTANT:&lt;/b&gt; Votre portefeuille ne contient que 2 000 de ces adresses de changement. Chaque fois qu'un événement de mixage se produit, jusqu'à 9 adresses sont épuisées.
+Cela signifie que ces 2 000 adresses durent environ 200 événements de mélange. Lorsque 1900 d'entre eux sont utilisés, votre portefeuille doit créer plus d'adresses.
+Toutefois, cela ne peut se faire que si les sauvegardes automatiques sont activées.&lt;br&gt;
+Par conséquent, PrivateSend est également désactivé pour les utilisateurs dont les sauvegardes sont désactivées.&lt;h&gt;</translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>Choisir le répertoire de données au démarrage (par défaut: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
         <translation>Afficher l'écran d'accueil au démarrage (par défaut : 1)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>Réinitialiser toutes les modifications de paramètres effectuées sur l'interface graphique</translation>
     </message>
 </context>
 <context>
