@@ -479,6 +479,10 @@
         <translation>Opciones de línea de comando</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Importar clave mnemónica / privada ...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;Información de PrivateSend</translation>
     </message>
