@@ -427,6 +427,10 @@
         <translation>Adresses d'&amp;envoi...</translation>
     </message>
     <message>
+        <source>Connecting to peers...</source>
+        <translation>Connexion aux pairs...</translation>
+    </message>
+    <message>
         <source>Show the list of used sending addresses and labels</source>
         <translation>Afficher la liste d'adresses d'envoi et d'étiquettes utilisées</translation>
     </message>
@@ -449,6 +453,14 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>Options de ligne de &amp;commande</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Importer la clé mnémonique / privée ...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;PrivateSend des informations</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -601,6 +613,22 @@ Adresse : %4
         <source>Network Alert</source>
         <translation>Alerte réseau</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Soutenu</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Non supporté</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -639,6 +667,10 @@ Adresse : %4
     <message>
         <source>Change:</source>
         <translation>Monnaie :</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>basculer l'état de verrouillage</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -1784,6 +1816,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Horodatage du dernier bloc</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Pool de mémoire</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Nombre actuel de transactions</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Utilisation de la mémoire</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>Journal de débogage</translation>
     </message>
@@ -1798,6 +1842,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Current number of blocks</source>
         <translation>Nombre actuel de blocs</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>Mode CPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>Mode GPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU Mining</translation>
     </message>
     <message>
         <source>Client version</source>
@@ -1972,12 +2028,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Sortant :</translation>
     </message>
     <message>
-        <source>Welcome to the Dynamic RPC console.</source>
+        <source>Welcome to the %1 RPC console.</source>
         <translation>Bienvenue sur la console RPC de Dynamic.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Utiliser les touches de curseur pour naviguer dans l'historique et &lt;b&gt;Ctrl-L&lt;/b&gt; pour effacer l'écran.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Utiliser les touches de curseur pour naviguer dans l'historique et %1 pour effacer l'écran.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
@@ -2069,6 +2125,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>&amp;Amount:</source>
         <translation>&amp;Montant :</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>Demander InstantSend</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2181,6 +2241,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Étiquette</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Demandé</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Message</translation>
     </message>
@@ -2200,9 +2268,25 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no amount)</source>
         <translation>(aucun montant)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(aucun montant demandé)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Avertissement: l’estimation des frais n’est actuellement pas possible.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Ne payez que les frais requis de %1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Délai de confirmation cible:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Envoyer des pièces</translation>
@@ -2278,6 +2362,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Choose...</source>
         <translation>Choisissez...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Cacher</translation>
     </message>
     <message>
         <source>collapse fee-settings</source>
@@ -2514,6 +2602,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>S&amp;oustraire les frais du montant</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>Ceci est un paiement normal.</translation>
@@ -2975,6 +3067,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Adresse / étiquette</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Ouvert pour %n bloc de plus</numerusform><numerusform>Ouvert pour %n blocs de plus</numerusform></translation>
@@ -3261,6 +3357,271 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>to</source>
         <translation>à</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Formule</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Liste de filtres:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Nombre de nœuds:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Mes dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Tous les Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Remarque: le statut de vos Dynodes dans le portefeuille local peut potentiellement être légèrement incorrect.&lt;br /&gt;Attendez toujours que le portefeuille synchronise des données supplémentaires, puis vérifiez à nouveau auprès d'un autre nœud&lt;br /&gt;si votre Dynode devrait être en cours d'exécution, mais que le champ &quot;ENABLED&quot; ne soit toujours pas affiché dans le champ &quot;Status&quot;.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Tout commencer</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>Alias ​​de départ</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>Commencer MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp; Status de mise à jour</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protocole</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Actif</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Dernier vu</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Bénéficiaire</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Êtes-vous sûr de vouloir démarrer TOUS les Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Etes-vous sûr de vouloir commencer à MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Confirmer le démarrage manquant des Dynodes</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Confirmez l'absence de Dynodes startStatus sera mis à jour automatiquement en (secondes):</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>La commande n'est pas disponible pour le moment</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Vous ne pouvez pas utiliser cette commande jusqu'à ce que la liste Dynode soit synchronisée</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Confirmer le démarrage de Dynode</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Êtes-vous sûr de vouloir démarrer Dynode %1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>S'il vous plaît, attendez...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Mise à jour ...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Dynode a démarré avec succès.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>%d Dynodes lancés avec succès, échec du démarrage %d, total %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Formule</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Nombre de CPU threads à utiliser:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Nombre de périphériques GPU à utiliser:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Votre hashrate (mineur intégré):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Hashrate du réseau:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Espacement moyen entre vos blocs:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Commencer l'exploitation</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Arrêter l'exploitation minière</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Désactivé</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Afficher le graphique de compteur de hachage</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Nette</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Utilisez le curseur pour sélectionner la quantité de threads à utiliser.</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Utilisez le curseur pour sélectionner la quantité de périphériques GPU à utiliser</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Cela montre le hashrate de votre CPU lors de l'extraction</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Cela montre le hashrate de votre GPU lors de l'exploitation</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Cela montre le hashrate global du réseau Dynamic</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Cela montre le temps moyen entre les blocs que vous avez minés</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Les chaînes de blocs et les dynodes ne sont pas synchronisés, veuillez patienter jusqu'à la synchronisation complète avant l'extraction!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Cliquez sur Démarrer l'exploitation pour commencer l'exploitation!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Cliquez sur Arrêter l'exploitation pour terminer l'exploitation!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Arrêt</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Départ</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Désactivé</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>Toutes les pièces minées iront à %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Le curseur s'affichera une fois que la synchronisation sera terminée.</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>L'exploitation de GPU n'est pas prise en charge dans cette version de Dynamic</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 minutes</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 minutes</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 minutes</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 heure</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 heures</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 heures</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 journée</translation>
     </message>
 </context>
 <context>
@@ -4132,12 +4493,20 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
         <translation>Synchronisation des budgets...</translation>
     </message>
     <message>
-        <source>Synchronizing dynode winners...</source>
-        <translation>Synchronisation des dynodes vainqueurs...</translation>
+        <source>Synchronizing Dynode winners...</source>
+        <translation>Synchroniser les gagnants Dynode ...</translation>
     </message>
     <message>
-        <source>Synchronizing dynodes...</source>
-        <translation>Synchronisation des dynodes...</translation>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Synchroniser les paiements Dynode ...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>Synchroniser les dynodes ...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Synchroniser les objets de gouvernance ...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
