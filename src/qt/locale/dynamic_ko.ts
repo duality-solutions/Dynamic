@@ -383,6 +383,10 @@
         <translation>信息</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;니모닉 / 개인 키 가져 오기 ...</translation>
+    </message>
+    <message>
         <source>Show diagnostic information</source>
         <translation>显示诊断</translation>
     </message>
@@ -2019,6 +2023,18 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>클라이언트 버전</translation>
     </message>
     <message>
+        <source>CPU Mode:</source>
+        <translation>CPU 모드 :</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU 모드 :</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU 채굴 :</translation>
+    </message>
+    <message>
         <source>Using BerkeleyDB version</source>
         <translation>BerkeleyDB 버전 사용</translation>
     </message>
@@ -2755,6 +2771,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Warning: Unknown change address</source>
         <translation>경고: 알 수없는 변경 주소</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>경고 : 현재 요금 산정이 불가능합니다.</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -3697,7 +3717,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Number of CPU threads to use:</source>
-        <translation>사용할 스레드 수:</translation>
+        <translation>사용할 CPU 스레드 수 :</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>사용할 GPU 장치 수 :</translation>
     </message>
     <message>
         <source>Your hashrate (built-in miner):</source>
@@ -3770,6 +3794,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>All mined coins will go to %1</source>
         <translation>모든 채굴 된 동전은 %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>DYNAMIC의 동기화가 완료되면 슬라이더가 표시됩니다</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>이 버전의 DYNAMIC에서는 GPU 마이닝이 지원되지 않습니다.</translation>
     </message>
 </context>
 <context>
