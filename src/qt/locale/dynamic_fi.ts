@@ -407,12 +407,24 @@
         <translation>Näytä lompakon korjausvalinnat</translation>
     </message>
     <message>
-        <source>Open &amp;Configuration File</source>
-        <translation>Avaa &amp;Asetustiedosto</translation>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Avaa Wallet-määritystiedosto</translation>
     </message>
     <message>
         <source>Open configuration file</source>
-        <translation>Avaa asetustiedosto</translation>
+        <translation>Avaa määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Avaa Dynoden määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Avaa Dynoden määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>Avaa määritystiedosto</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
@@ -425,6 +437,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Lähettävät Osoitteet...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Yhdistetään vertaisiin ...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -449,6 +465,10 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Komentorivin valinnat</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Tuo muistomerkki / yksityinen avain ...</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -601,6 +621,22 @@ Osoite: %4
         <source>Network Alert</source>
         <translation>Verkkohälytys</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normaali</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Tuetut</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Tukematon</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -639,6 +675,10 @@ Osoite: %4
     <message>
         <source>Change:</source>
         <translation>Vaihtoraha:</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>vaihtaa lukituksen tila</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -1456,6 +1496,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Käynnistä/Lopeta Sekoitus</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>Aloita sekoittaminen </translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Lopeta sekoittaminen</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>Dynodelle lähetetyt denominoinnit.&lt;br&gt;Jotta sekoitus onnistuisi, täytyy muiden käyttäjien käyttää saman arvoisia denominointeja.</translation>
     </message>
@@ -1470,6 +1518,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Try Mix</source>
         <translation>Yritä Sekoittaa</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Tiedot</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>Tietoja PrivateSendistä ja miksauksesta</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
@@ -1785,6 +1841,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Viimeisimmän lohkon aika</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Muistiallas</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Tapahtumien nykyinen lukumäärä</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Muistin käyttö</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>Debug lokitiedosto</translation>
     </message>
@@ -1803,6 +1871,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Client version</source>
         <translation>Asiakasohjelman versio</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>CPU-tila:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU-tila:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU-louhinta:</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
@@ -1977,16 +2057,20 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ulos:</translation>
     </message>
     <message>
-        <source>Welcome to the Dynamic RPC console.</source>
+        <source>Welcome to the %1 RPC console.</source>
         <translation>Tervetuloa Dynamic RPC konsoliin.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Ylös- ja alas-nuolet selaavat historiaa ja &lt;b&gt;Ctrl-L&lt;/b&gt; tyhjentää ruudun.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Ylös- ja alas-nuolet selaavat historiaa ja %1 tyhjentää ruudun.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Kirjoita &lt;b&gt;help&lt;/b&gt; nähdäksesi käytettävissä olevat komennot.</translation>
+    </message>
+    <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>VAROITUS: Huijarit ovat olleet aktiivisia ja käskeneet käyttäjiä kirjoittamaan komentoja tähän, varastamaan lompakkonsa sisällön. Älä käytä tätä konsolia ymmärtämättä kokonaan komennon seuraamista.</translation>
     </message>
     <message>
         <source>%1 B</source>
@@ -2070,6 +2154,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     <message>
         <source>&amp;Amount:</source>
         <translation>&amp;Määrä</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>Pyydä InstantSend</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2182,6 +2270,14 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Nimi</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>Osoite</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Pyydetty</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Viesti</translation>
     </message>
@@ -2201,9 +2297,25 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <source>(no amount)</source>
         <translation>(ei määrää)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(summaa ei pyydetty)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Varoitus: Maksujen arviointi ei ole tällä hetkellä mahdollista.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Maksa vain vaadittu maksu %1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Vahvistusajan tavoite:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Lähetä</translation>
@@ -2515,6 +2627,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>Vähennä maksu summasta</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>Tämä on normaali maksu.</translation>
@@ -2976,6 +3092,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <source>Address</source>
         <translation>Osoite</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Osoitetarra</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Avoinna %n lisälohkolle</numerusform><numerusform>Avoinna %n lisälohkolle</numerusform></translation>
@@ -3262,6 +3382,271 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     <message>
         <source>to</source>
         <translation>-&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Muodostua</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Suodatinluettelo:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Solmun lukumäärä:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Minun Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Kaikki Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Huomaa: Dynodesi tila paikallisessa lompakossa voi olla hieman väärä.&lt;br / &gt;Odota aina lompakkoa synkronoivan lisätietoja ja tarkista sitten toisesta solmusta&lt;br /&gt;jos Dynodesi pitäisi olla käynnissä, mutta et silti näe &quot;ENABLED&quot; kohdassa &quot;Status&quot; ala.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Käynnistä kaikki</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>Aloita alias</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>Aloita &amp;MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp; Päivitä status</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Osoite</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokolla</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Aktiivinen</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Viimeksi nähty</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Saaja</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Haluatko varmasti käynnistää kaikki Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Haluatko varmasti aloittaa MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Vahvista puuttuvien Dynodes-käynnistys</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Tila päivitetään automaattisesti sekunnissa: </translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>Komento ei ole tällä hetkellä käytettävissä</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>et voi käyttää tätä komentoa, kunnes Dynode-luettelo on synkronoitu</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Vahvista Dynoden käynnistys</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>SHaluatko varmasti käynnistää Dynode %1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Odota...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Päivitetään...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Käynnistin Dynoden onnistuneesti.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>Käynnistettiin onnistuneesti %d dynodi, ei käynnistynyt %d, yhteensä %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Muodostua</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Käytettävien CPU-ketjujen lukumäärä:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Käytettävien GPU-laitteiden lukumäärä:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Hashrate (sisäänrakennettu kaivuri):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Verkko hashrate:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Keskimääräinen etäisyys lohkojen välillä:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Aloita kaivostoiminta</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Lopeta kaivos</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Liikuntarajoitteinen</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Näytä hash-mittarikaavio</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tyhjentää</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Valitse liukusäätimellä käytettävien CPU-ketjujen määrä</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Valitse liukusäätimellä käytettävien GPU-laitteiden määrä</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Tämä osoittaa prosessorin haaroituksen kaivostoiminnan aikana</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Tämä näyttää GPU: n hashrate louhinnan aikana</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Tämä osoittaa DYNAMIC-verkon kokonaishašatin</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Tämä osoittaa louhittujen lohkojen keskimääräisen ajan</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain / Dynodeja ei ole synkronoitu. Odota, kunnes synkronoidaan kokonaan ennen kaivosta!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Aloita louhinta napsauttamalla Aloita kaivostoiminta!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Napsauta Lopeta kaivos lopettaaksesi kaivoksen!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Pysähtymättä</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Aloittaminen</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Liikuntarajoitteinen</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>ll louhitut kolikot menevät kohtaan %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Liukusäädin näkyy, kun Dynamic on synkronoinnin lopettanut</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>GPU-kaivostoimintoa ei tueta tässä Dynamic-versiossa</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 minuutit</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 minuutit</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 minuutit</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 tunnin</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 tuntia</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 tuntia</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 päivä</translation>
     </message>
 </context>
 <context>
@@ -3979,12 +4364,20 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Ladataan budjetti välimuistia...</translation>
     </message>
     <message>
-        <source>Loading dynode cache...</source>
-        <translation>Ladataan dynode välimuistia...</translation>
+        <source>Loading Dynode cache...</source>
+        <translation>Ladataan Dynode välimuistia...</translation>
     </message>
     <message>
-        <source>Loading dynode payment cache...</source>
-        <translation>Ladataan dynode maksuvälimuistia...</translation>
+        <source>Loading Dynode payment cache...</source>
+        <translation>Ladataan Dynode maksuvälimuistia...</translation>
+    </message>
+    <message>
+        <source>Loading governance cache...</source>
+        <translation>Ladataan hallintovälimuistia ...</translation>
+    </message>
+    <message>
+        <source>Loading fulfilled requests cache...</source>
+        <translation>Ladataan täytettyjä pyyntöjä välimuistiin ...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
@@ -4140,7 +4533,19 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     </message>
     <message>
         <source>Synchronizing dynodes...</source>
-        <translation>Synkronoidaan dynodet...</translation>
+        <translation>Synkronoidaan dynodes...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Synkronoidaan Dynoden maksuja ...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>Synkronoidaan Dynodes...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Synkronoidaan hallintoobjekteja ...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
