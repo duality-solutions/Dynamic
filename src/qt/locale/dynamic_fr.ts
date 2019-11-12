@@ -1105,7 +1105,7 @@ Par conséquent, PrivateSend est également désactivé pour les utilisateurs do
     </message>
     <message>
         <source>Show splash screen on startup (default: %u)</source>
-        <translation>Afficher l'écran d'accueil au démarrage (par défaut : 1)</translation>
+        <translation>Afficher l'écran d'accueil au démarrage (par défaut : %u)</translation>
     </message>
     <message>
         <source>Reset all settings changes made over the GUI</source>
