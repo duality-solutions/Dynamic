@@ -479,6 +479,10 @@
         <translation>Kommandozeilenoptionen</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Mnemonik/privaten Schlüssel importieren...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;PrivateSend Information</translation>
     </message>
