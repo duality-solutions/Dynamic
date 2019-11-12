@@ -3898,55 +3898,55 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Отображаемая информация может быть устаревшей. Ваш кошелек автоматически синхронизируется с динамической сетью после установления соединения, но этот процесс еще не завершен. Это означает, что последние транзакции не будут видны, и баланс не будет обновляться, пока этот процесс не будет завершен.</translation>
+        <translation>显示的信息可能已过时。建立连接后，您的钱包会自动与DYNAMIC网络同步，但是此过程尚未完成。这意味着将看不到最近的交易，并且在此过程完成之前，余额不会是最新的.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Переводить DYN может быть невозможно на этом этапе!</translation>
+        <translation>在该阶段可能无法花费DYN！</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Количество оставшихся блоков</translation>
+        <translation>剩余区块数</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>неизвестный</translation>
+        <translation>未知</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Неизвестный...</translation>
+        <translation>未知...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Неизвестно. Синхронизация Заголовков (%1)...</translation>
+        <translation>未知.正在同步头文件(%1)...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Время последнего блока</translation>
+        <translation>最后的区块时间</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Прогресс</translation>
+        <translation>进度</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Прогресс (в час)</translation>
+        <translation>平均每小时进度</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>расчет...</translation>
+        <translation>正在计算...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Расчетное время, осталось до синхронизации</translation>
+        <translation>预计剩余时间</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>&amp;Скрыть</translation>
+        <translation>&amp;隐藏</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Скрыть</translation>
+        <translation>隐藏</translation>
     </message>
 </context>
 <context>
