@@ -621,6 +621,22 @@ Address: %4
         <source>Network Alert</source>
         <translation>Предупреждение от мрежата</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>нормален</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Поддържани</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Не се поддържа</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -1687,6 +1703,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
 <context>
     <name>PeerTableModel</name>
     <message>
+        <source>NodeId</source>
+        <translation>NodeId</translation>
+    </message>
+    <message>
+        <source>Node/Service</source>
+        <translation>възел/Обслужване</translation>
+    </message>
+    <message>
+        <source>Ping</source>
+        <translation>Ping</translation>
+    </message>
+    <message>
         <source>Address/Hostname</source>
         <translation>Адрес/Име на хост</translation>
     </message>
@@ -2245,6 +2273,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Сума</translation>
     </message>
     <message>
+        <source>Requested</source>
+        <translation>Заявени</translation>
+    </message>
+    <message>
         <source>(no label)</source>
         <translation>(няма наименование)</translation>
     </message>
@@ -2253,12 +2285,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(няма съобщение)</translation>
     </message>
     <message>
+        <source>(no amount requested)</source>
+        <translation>(не се иска сума)</translation>
+    </message>
+    <message>
         <source>(no amount)</source>
         <translation>(липсва сума)</translation>
     </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Предупреждение: В момента оценката на таксата не е възможна.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Платете само необходимата такса от% 1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Цел на времето за потвърждение:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Изпращане на монети</translation>
