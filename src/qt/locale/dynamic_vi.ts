@@ -4543,55 +4543,55 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Die angezeigten Informationen sind möglicherweise nicht mehr aktuell. Ihre Geld synchronisiert automatisch mit dem Dymamic Netzwerk, nachdem eine Verbindung hergestellt wurde, aber dieser Prozess ist noch nicht fertiggestellt. Dass heißt, dass die letzten Transaktionen nicht sichtbar sein werden und der Kontostand nicht auf den letzten Stand sein wird bis dieser Prozess fertiggestellt worden ist.</translation>
+        <translation>Các thông tin hiển thị có thể đã lỗi thời. Ví của bạn tự động đồng bộ hóa với mạng Động sau khi kết nối được thiết lập, nhưng quá trình này vẫn chưa hoàn tất. Điều này có nghĩa là các giao dịch gần đây sẽ không hiển thị và số dư sẽ không được cập nhật cho đến khi quá trình này hoàn tất.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Während dieser Phase ist das Ausgeben der DYN nicht möglich!</translation>
+        <translation>Chi tiêu DYN có thể không thể trong giai đoạn đó!</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Anzahl der verbleibenden Blöcke</translation>
+        <translation>Số lượng khối còn lại</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>unbekannt</translation>
+        <translation>không xác định</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Unbekannt...</translation>
+        <translation>không xác định...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Unbekannt. Sychronisierung der Kopfzeilen (%1)...</translation>
+        <translation>không xác định. Tiêu đề đồng bộ hóa (% 1) ...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Letzte Blockzeit</translation>
+        <translation>Thời gian chặn cuối cùng</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Fortschritt</translation>
+        <translation>Phát triển</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Stündlicher Fortschritt</translation>
+        <translation>Tăng tiến mỗi giờ</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Berechnung...</translation>
+        <translation>tính toán ...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Geschätzte Zeit bis zur Fertigstellung der Sychronisierung</translation>
+        <translation>Thời gian dự kiến ​​còn lại cho đến khi được đồng bộ hóa</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>&amp;Verstecken</translation>
+        <translation>&amp;Ẩn giấu</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Verstecken</translation>
+        <translation>Ẩn giấu</translation>
     </message>
 </context>
 <context>
