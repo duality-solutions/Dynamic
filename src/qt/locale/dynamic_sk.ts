@@ -4543,727 +4543,728 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať používateľa BDAP</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Spoločný názov:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Registračné mesiace:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ID používateľa:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Vytvorte novú adresu</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať používateľa</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ID skupiny:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať skupinu</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Používateľ bol úspešne pridaný</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Nájdených záznamov: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>správa</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Zrušiť</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detail odkazu BDAP</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>žiadateľ:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>príjemcu:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Prepojiť verejný kľúč (žiadateľ):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Prepojiť verejný kľúč (príjemca):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa odkazu žiadateľa:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa odkazu príjemcu:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Podpisový dôkaz:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Odkazová správa:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>čas:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>uplynula:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detaily používateľa BDAP</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Chyba BDAP</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>žiadateľ</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>príjemcu</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Chyba BDAP</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>žiadateľ</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>príjemcu</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Spoločný názov</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Objekt Plná cesta</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>užívatelia</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Ak je toto políčko začiarknuté, je k dispozícii aktualizácia a odstránenie transakcií</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Zobrazia sa iba moji používatelia</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Refresh All</source>
-        <translation></translation>
+        <translation>Obnoviť všetko</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridajte používateľa</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať používateľa</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>Aktualizujte používateľa</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Odstráňte aktuálne vybraného používateľa zo zoznamu</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>Odstrániť používateľa</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>skupiny</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>odkazy</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Ak je toto políčko začiarknuté, sú k dispozícii transakcie aktualizácie a mazania</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Zobrazte iba Moje skupiny</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridajte novú skupinu</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať skupinu</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Aktualizovať skupinu</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Odstráňte aktuálne vybranú skupinu zo zoznamu</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Odstrániť skupinu</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať skupinu BDAP</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>Naozaj chcete odstrániť \ "</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Potvrďte odstránenie účtu</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Aktualizovať skupinu BDAP</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Podrobnosti skupiny BDAP</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detaily používateľa BDAP</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Aktualizujte používateľa BDAP</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>Používateľ bol úspešne odstránený</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>Skupina bola úspešne odstránená</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Chyba BDAP</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte spoločný názov, ktorý chcete vyhľadať</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte úplnú cestu k vyhľadávaniu</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>žiadateľ</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>príjemcu</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Čaká sa na prijatie</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>Čakajúca požiadavka</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>kompletné</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>Hľadanie žiadateľa</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>Vyhľadávanie príjemcov</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>súhlasiť</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>vymazať</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať nový odkaz</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>poprieť</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>Nevyžiadaná pošta</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Potvrdiť prijatie odkazu</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>Odkaz bol úspešne prijatý</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Podrobnosti o prijatí prepojenia BDAP čakajú na prijatie</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detail odkazu na čakajúcu žiadosť BDAP</translation>
     </message>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Spoločný názov</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Objekt Plná cesta</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Nájdených záznamov: </translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Aktualizujte účet BDAP</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ID používateľa:</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Spoločný názov:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Dni registrácie:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>aktualizovať</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ID skupiny:</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby: </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>Používateľ bol úspešne aktualizovaný</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>Skupina bola úspešne aktualizovaná</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>správa</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detail odkazu BDAP</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Podrobnosti o prijatí prepojenia BDAP čakajú na prijatie</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Dni registrácie:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby: </translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>žiadateľ: </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>príjemcu: </translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>Prepojiť verejný kľúč (žiadateľ): </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>Prepojiť verejný kľúč (príjemca): </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa odkazu žiadateľa: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa odkazu príjemcu: </translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>Podpisový dôkaz: </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>Odkazová správa: </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>čas:</translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>Upozorňujeme, že vaša transakcia sa prejaví až v ďalšom bloku.</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>Detaily používateľa BDAP</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>formulár</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Spoločný názov:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>Úplná cesta k objektu:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa peňaženky:</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>Verejný kľúč DHT:</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Adresa odkazu:</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TX ID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>čas:</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Dátum spotreby:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>uplynula:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>správa</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Chyba BDAP</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Pridať nový odkaz</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(požadovaný)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>(Voliteľné)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>od:</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ak chcete:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Odkazová správa:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Dni registrácie:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Pridať odkaz</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>Chyba odkazu na pridanie BDAP</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>Polia Žiadateľ, Príjemca a Správa o prepojení sú povinné</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Tipy: Ak je proces importu prerušený (napríklad prerušenie napájania alebo neúmyselné vypnutie), znova zadajte frázu na obnovenie alebo súkromný kľúč a kliknite na tlačidlo „Importovať“.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Vyberte súbor</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Importovať mnemotechnické pomôcky</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Fráza obnovenia importu</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Prilepiť zo schránky</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>jasný</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte svoju frázu / mnemotechniku ​​kompatibilnú s BIP39</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Prístupová fráza na obnovenie</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Ak chcete chrániť frázu obnovenia, zadajte prístupovú frázu. (Voliteľné)</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>Jazyk</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Výstraha</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
 Wallet will restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+        <translation>Uistite sa, že ste zálohovali frázu obnovenia a prístupovú frázu - nedajú sa obnoviť!
+Po importovaní mnemotechnických prostriedkov sa peňaženka reštartuje.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>import</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>importovať</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Vytvorenie mnemotechniky</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Vytvorte novú frázu na obnovenie</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Skopírovať do schránky</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Bajty entropie</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>generovať</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>Potvrdiť</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Importovať súkromný kľúč</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte jeden súkromný kľúč</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>vynútiť vynútenie</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>príklad: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Importovať súbor súkromného kľúča</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte súbor súkromného kľúča</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>Prehliadať</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Tipy: Súbor súkromného kľúča je súbor exportovaný pomocou dynamického súboru dumpwallet filename, nie súboru .dat.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5271,7 +5272,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>V službe Peňaženka už je načítaný účet HD.
+Importovaním ďalšej vety na obnovenie sa vytvorí nový účet a nastaví sa ako predvolený.
+Peňaženka bude dostávať iba na adresy z nového importovaného účtu.
+Váš starý súbor s peňaženkou účtu bude premenovaný na wallat.dat. pred dovozom mnemotechnických prostriedkov.&lt;isodate&gt; vo vašom dátovom adresári</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5279,11 +5283,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>V službe Peňaženka už je načítaný účet HD.
+Importovaním ďalšej vety na obnovenie sa vytvorí nový účet a nastaví sa ako predvolený.
+Peňaženka bude dostávať iba na adresy z nového importovaného účtu.
+Váš starý súbor s peňaženkou účtu bude premenovaný na wallat.dat. pred dovozom mnemotechnických prostriedkov.&lt;isodate&gt; vo vašom dátovom adresári</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Zadajte svoju frázu / mnemotechniku ​​kompatibilnú s BIP39.</translation>
     </message>
 </context>
 </TS>
