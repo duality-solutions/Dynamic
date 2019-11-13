@@ -407,12 +407,24 @@
         <translation>Mostra as opções de reparação da carteira</translation>
     </message>
     <message>
-        <source>Open &amp;Configuration File</source>
-        <translation>Abrir Ficheiro de &amp;Configuração</translation>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Abrir arquivo de configuração da carteira</translation>
     </message>
     <message>
         <source>Open configuration file</source>
-        <translation>Abrir ficheiro de configuração</translation>
+        <translation>Abrir arquivo de configuração</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Abrir arquivo de configuração de Dynode</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Abrir arquivo de configuração de Dynode</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>Abrir arquivo de configuração</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
@@ -425,6 +437,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Endereços de envio...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Conectando aos pares...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -449,6 +465,14 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>Opções de linha de &amp;comandos</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Importar chave mnemônica/privada...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;PrivateSend Informações</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -597,6 +621,22 @@ Endereço: %4
         <source>Network Alert</source>
         <translation>Alerta de Rede</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/D</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Suportado</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Não suportado</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -635,6 +675,10 @@ Endereço: %4
     <message>
         <source>Change:</source>
         <translation>Troco:</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>alternar estado de bloqueio</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -1035,6 +1079,39 @@ Endereço: %4
     <message>
         <source>Show splash screen on startup (default: 1)</source>
         <translation>Mostrar ecrã de boas vindas no arranque (omissão: 1)</translation>
+    </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>PrivateSend Information</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>
+&lt;h3&gt;PrivateSend Básico&lt;/h3&gt;
+O PrivateSend oferece verdadeira privacidade financeira, obscurecendo as origens de seus fundos.
+Toda a dinâmica da sua carteira é composta por diferentes &#39;entradas&#39; que você pode pensar em moedas separadas e discretas.&lt;br&gt;
+O PrivateSend usa um processo inovador para misturar suas entradas com as de outras duas pessoas, sem que suas moedas deixem sua carteira.
+Você mantém o controle do seu dinheiro o tempo todo.&lt;hr&gt;
+&lt;b&gt;O processo PrivateSend funciona assim:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+O PrivateSend começa dividindo suas entradas de transação em denominações padrão.
+Essas denominações são 0,001, 0,01 DYN, 0,1 DYN, 1 DYN, 10 DYN - mais ou menos como o papel-moeda que você usa todos os dias.&lt;/li&gt;
+Sua carteira envia solicitações para nós de software especialmente configurados na rede, chamados "Dynodes".
+Esses Dynodes são informados que você está interessado em misturar uma determinada denominação.
+Nenhuma informação identificável é enviada aos Dynodes, para que eles nunca saibam quem é quem. você é.&lt;/li&gt;
+Quando duas outras pessoas enviam mensagens semelhantes, indicando que desejam misturar a mesma denominação, inicia-se uma sessão de mixagem.
+O Dynode combina as entradas e instrui todos os três usuários&#39; carteiras para pagar de volta a entrada agora transformada.
+Sua carteira paga essa denominação diretamente para si mesma, mas em um endereço diferente (chamado de endereço de alteração).&lt;/li&gt;
+Para ocultar totalmente seus fundos, sua carteira deve repetir esse processo várias vezes com cada denominação.
+Cada vez que o processo é concluído, ele é chamado de rodada. Cada rodada do PrivateSend torna exponencialmente mais difícil determinar a origem dos seus fundos.&lt;/li&gt;
+Este processo de mixagem ocorre em segundo plano sem nenhuma intervenção de sua parte. Quando você deseja fazer uma transação,
+seus fundos já serão anonimizados. Nenhuma espera adicional é necessária.&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;IMPORTANTE:&lt;/b&gt; Sua carteira contém apenas 2000 desses &#39;endereços alterados&#39;. Sempre que um evento de mixagem acontece, até 9 dos seus endereços são usados.
+Isso significa que esses 2000 endereços duram cerca de 200 eventos de mixagem. Quando 1900 deles são usados, sua carteira deve criar mais endereços.
+Só pode fazer isso, no entanto, se você tiver os backups automáticos ativados.&lt;br&gt;
+Conseqüentemente, os usuários com backups desabilitados também terão o PrivateSend desabilitado.  &lt;hr&gt;
+                </translation>
     </message>
 </context>
 <context>
@@ -1451,6 +1528,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Iniciar/Parar Mistura</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>Comece a Misturar</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Pare de Misturar</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>As denominações que foram submetidas para o Dynode.&lt;br&gt;Para misturar, outros utilizadores terão que submeter denominações iguais.</translation>
     </message>
@@ -1465,6 +1550,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Try Mix</source>
         <translation>Tentar Mistura</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Informações</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>Informações sobre PrivateSend e Mixing</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
@@ -1780,6 +1873,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Data do último bloco</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Conjunto de memórias</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Número atual de transações</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Uso de memória</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>Ficheiro de registo de depuração</translation>
     </message>
@@ -1794,6 +1899,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Current number of blocks</source>
         <translation>Número actual de blocos</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>Modo CPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>Modo GPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>Mineração de GPU:</translation>
     </message>
     <message>
         <source>Client version</source>
@@ -2062,6 +2179,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>&amp;Amount:</source>
         <translation>&amp;Quantia</translation>
     </message>
+   <message>
+        <source>Request InstantSend</source>
+        <translation>Solicitar InstantSend</translation>
+    </message>
     <message>
         <source>&amp;Request payment</source>
         <translation>&amp;Pedir pagamento</translation>
@@ -2173,6 +2294,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Rótulo</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>Endereço</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Requeridos</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Mensagem</translation>
     </message>
@@ -2192,9 +2321,25 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no amount)</source>
         <translation>(sem quantia)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(nenhuma quantia solicitada)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Aviso: atualmente, a estimativa de taxa não é possível.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Pague apenas a taxa exigida de %1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Objetivo do tempo de confirmação:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Enviar Moedas</translation>
@@ -2274,6 +2419,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>collapse fee-settings</source>
         <translation>fechar opções de taxa</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Ocultar</translation>
     </message>
     <message>
         <source>Minimize</source>
@@ -2494,6 +2643,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>S&amp;ubtrair taxa do valor</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>Este é um pagamento normal.</translation>
@@ -2955,6 +3108,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Address</source>
         <translation>Endereço</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Endereço / Etiqueta</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Aberta durante mais %n bloco</numerusform><numerusform>Aberta durante mais %n blocos</numerusform></translation>
@@ -3241,6 +3398,271 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>to</source>
         <translation>para</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Modelo</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Lista de filtros:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Contagem de nós:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Meus Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Todos os Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Nota: O status dos seus Dynodes na carteira local pode estar um pouco incorreto.&lt;br /&gt;Sempre espere a carteira sincronizar dados adicionais e verifique novamente em outro&lt;br /&gt;nó se o seu Dynode estiver em execução, mas você ainda não vê &quot;ENABLED&quot; no campo &quot;Status&quot;.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Começar tudo</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>Iniciar alias</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>Iniciar MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp;Atualizar o Status</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protocolo</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Ativo</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Visto pela última vez</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Beneficiário</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Tem certeza de que deseja iniciar TODOS os Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Tem certeza de que deseja iniciar o MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Confirme a falta do início dos Dynodes</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>O status será atualizado automaticamente em (s):</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>O comando não está disponível no momento</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Você não pode usar este comando até a lista Dynode ser sincronizada</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Confirme o início do Dynode</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Tem certeza de que deseja iniciar o Dynode %1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Por favor, espere...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Atualizando...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Iniciado com sucesso o Dynode.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>%d Dynodes iniciados com êxito, falha ao iniciar %d, total %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Modelo</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Número de threads da CPU a serem usados:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Número de dispositivos GPU a serem usados:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Seu hashrate (minerador embutido):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Hash de rede:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Espaçamento médio entre seus blocos:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Iniciar mineração</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Pare de minerar</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Desativado</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Mostrar gráfico do medidor de hash</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Límpido</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Use o controle deslizante para selecionar a quantidade de threads da CPU a serem usados</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Use o controle deslizante para selecionar a quantidade de dispositivos GPU a serem usados</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Isso mostra o hashrate da sua CPU durante a mineração</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Isso mostra o hashrate da sua GPU durante a mineração</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Isso mostra o hashrate geral da rede dinâmica</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Isso mostra o tempo médio entre os blocos que você minou</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain / Dynodes não são sincronizados, aguarde até que estejam totalmente sincronizados antes da mineração!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Clique em Iniciar mineração para começar a mineração!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Clique em parar a mineração para concluir a mineração!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Parando</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Iniciando</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Desativado</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>Todas as moedas extraídas vão para %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>O controle deslizante será exibido assim que o Dynamic terminar a sincronização</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>A mineração de GPU não é suportada nesta versão do Dynamic</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 minutos</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 minutos</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 minutos</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 hora</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 horas</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 horas</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 dia</translation>
     </message>
 </context>
 <context>
@@ -4138,6 +4560,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Loading wallet...</source>
         <translation>A carregar carteira...</translation>
+    </message>
+    <message>
+        <source>Loading banlist...</source>
+        <translation>Carregando banlist...</translation>
+    </message>
+    <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>Certifique-se de criptografar sua carteira e excluir todos os backups não criptografados depois de verificar se a carteira funciona!</translation>
     </message>
     <message>
         <source>Dynode options:</source>
