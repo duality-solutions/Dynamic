@@ -479,6 +479,10 @@
         <translation>Opdrachtregelopties</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Mnemonic/private sleutel importeren...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;PrivateSend informatie</translation>
     </message>
