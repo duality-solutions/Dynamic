@@ -658,6 +658,22 @@ Address: %4
         <source>Network Alert</source>
         <translation>网络报警</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>표준</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>해당 없음</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>지원</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>미지원</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
