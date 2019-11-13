@@ -201,7 +201,7 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DynamicGUI</name>
     <message>
         <source>Wallet</source>
         <translation>ウォレット</translation>
@@ -307,6 +307,10 @@
         <translation>送金先アドレス一覧… (&amp;S)</translation>
     </message>
     <message>
+        <source>Connecting to peers...</source>
+        <translation>ピアへの接続...</translation>
+    </message>
+    <message>
         <source>Show the list of used sending addresses and labels</source>
         <translation>使用済みの送金用アドレスとラベルの一覧を表示する</translation>
     </message>
@@ -335,6 +339,10 @@
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
+        <source>&amp;Tools</source>
+        <translation>道具(&amp;T)</translation>
+    </message>
+    <message>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
@@ -343,8 +351,12 @@
         <translation>タブツールバー</translation>
     </message>
     <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>ヘッダーを同期しています（％1％...</translation>
+    </message>
+    <message>
         <source>Synchronizing with network...</source>
-        <translation>ネットワークに同期中…</translation>
+        <translation>ネットワークと同期しています...</translation>
     </message>
     <message>
         <source>Importing blocks from disk...</source>
@@ -1054,12 +1066,178 @@
         <translation>状態：</translation>
     </message>
     <message>
-        <source>Recent transactions</source>
-        <translation>最近のトランザクション</translation>
+        <source>Enabled/Disabled</source>
+        <translation>有効/無効</translation>
+    </message>
+    <message>
+        <source>keys left: %1</source>
+        <translation>左キー： %1</translation>
+    </message>
+    <message>
+        <source>Completion:</source>
+        <translation>完了：</translation>
+    </message>
+    <message>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend残高：</translation>
+    </message>
+    <message>
+        <source>Amount and Rounds:</source>
+        <translation>金額とラウンド：</translation>
+    </message>
+    <message>
+        <source>0 DYN / 0 Rounds</source>
+        <translation>0 DYN / 0 ラウンド</translation>
+    </message>
+    <message>
+        <source>Submitted Denom:</source>
+        <translation>提出された額面：</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>n/a</translation>
     </message>
     <message>
         <source>N/A</source>
         <translation>N/A</translation>
+    </message>
+    <message>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
+    </message>
+    <message>
+        <source>Recent transactions</source>
+        <translation>最近のトランザクション</translation>
+    </message>
+    <message>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
+    </message>
+    <message>
+        <source>Start/Stop Mixing</source>
+        <translation>ミキシングの開始/停止</translation>
+    </message>
+    <message>
+        <source>Start Mixing</source>
+        <translation>ミキシングを開始</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>ミキシングを停止</translation>
+    </message>
+    <message>
+        <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>Dynodeに送信した金種＆lt;br＆gt;混合するには、他のユーザーがまったく同じ金種を送信する必要があります。</translation>
+    </message>
+    <message>
+        <source>(Last Message)</source>
+        <translation>（最後のメッセージ）</translation>
+    </message>
+    <message>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>PrivateSendリクエストを手動で送信してください。</translation>
+    </message>
+    <message>
+        <source>Try Mix</source>
+        <translation>ミックスを試す</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>情報</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>PrivateSendとミキシングに関する情報</translation>
+    </message>
+    <message>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>PrivateSendの現在のステータスをリセットします（Mixingの処理中にPrivateSendを中断できます。これは費用がかかります！）</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>リセットする</translation>
+    </message>
+    <message>
+        <source>out of sync</source>
+        <translation>非同期</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>無効</translation>
+    </message>
+    <message>
+        <source>Start PrivateSend Mixing</source>
+        <translation>PrivateSend Mixingを開始</translation>
+    </message>
+    <message>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>PrivateSend Mixingを停止</translation>
+    </message>
+    <message>
+        <source>No inputs detected</source>
+        <translation>入力が検出されません</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n Rounds</source>
+        <translation>
+            <numerusform>%n ラウンド</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
+        <translation>匿名化するのに十分な互換性のある入力＆lt;span 
+        style=＆apos;color:red;＆apos;＆gt;％1＆lt;/span＆gt;＆lt;br＆gt;は匿名化 ＆lt;span 
+        style=＆apos;color:red;＆apos;＆gt;％2＆lt;/span＆gt; 代わりに</translation>
+    </message>
+    <message>
+        <source>Overall progress</source>
+        <translation>全体的な進捗状況</translation>
+    </message>
+    <message>
+        <source>Denominated</source>
+        <translation>名称</translation>
+    </message>
+    <message>
+        <source>Anonymized</source>
+        <translation>匿名化</translation>
+    </message>
+    <message numerus="yes">
+        <source>Denominated inputs have %5 of %n rounds on average</source>
+        <translation>
+            <numerusform>額面金額は、平均で ％n の ％5 ラウンドです</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Found enough compatible inputs to anonymize %1</source>
+        <translation>％1を匿名化するのに十分な互換性のある入力が見つかりました</translation>
+    </message>
+    <message>
+        <source>Mixed</source>
+        <translation>混合</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>有効化</translation>
+    </message>
+    <message>
+        <source>Last PrivateSend message:</source>
+        <translation>最後のPrivateSendメッセージ：</translation>
+    </message>
+    <message>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSendは正常にリセットされました。</translation>
+    </message>
+    <message>
+        <source>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>内部のPrivateSend料金/取引を表示したくない場合は、[最も一般的な]を選択します。 「トランザクション」のタイプとしてタブ。</translation>
+    </message>
+    <message>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSendを使用するには少なくとも ％1 が必要です。</translation>
+    </message>
+    <message>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>ウォレットはロックされており、ユーザーはロック解除を拒否しました。 PrivateSendを無効にします。</translation>
     </message>
     </context>
 <context>
@@ -1886,6 +2064,10 @@
 </context>
 <context>
     <name>ShutdownWindow</name>
+    <message>
+        <source>Dynamic is shutting down...</source>
+        <translation>ダイナミックがシャットダウンしています...</translation>
+    </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
         <translation>このウィンドウが消えるまでコンピュータをシャットダウンしないで下さい。</translation>
@@ -2966,6 +3148,38 @@
     <message>
         <source>Loading wallet...</source>
         <translation>ウォレットを読み込んでいます…</translation>
+    </message>
+    <message>
+        <source>Loading banlist...</source>
+        <translation>禁止リストを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>ウォレットが機能することを確認したら、必ずウォレットを暗号化し、暗号化されていないバックアップをすべて削除してください！</translation>
+    </message>
+    <message>
+        <source>Dynode options:</source>
+        <translation>ダイノードオプション：</translation>
+    </message>
+    <message>
+        <source>Dynode queue is full.</source>
+        <translation>ダイノードキューがいっぱいです。</translation>
+    </message>
+    <message>
+        <source>Dynode:</source>
+        <translation>ダイノード：</translation>
+    </message>
+    <message>
+        <source>Missing input transaction information.</source>
+        <translation>入力トランザクション情報がありません。</translation>
+    </message>
+    <message>
+        <source>No funds detected in need of denominating.</source>
+        <translation>額面金額を必要とする資金は検出されませんでした。</translation>
+    </message>
+    <message>
+        <source>No matching denominations found for mixing.</source>
+        <translation>ミキシングに適した金種は見つかりませんでした。</translation>
     </message>
     <message>
         <source>Node relay options:</source>
