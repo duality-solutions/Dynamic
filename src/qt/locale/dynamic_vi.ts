@@ -229,7 +229,7 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DynamicGUI</name>
     <message>
         <source>Dynamic</source>
         <translation>Dynamic</translation>
@@ -404,15 +404,27 @@
     </message>
     <message>
         <source>Show wallet repair options</source>
-        <translation>Hiển thị các tuỳ chọn để sửa ví</translation>
+        <translation>Hiển thị tùy chọn sửa chữa ví</translation>
     </message>
     <message>
-        <source>Open &amp;Configuration File</source>
-        <translation>Mở Tệp &amp;Cấu hình</translation>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Mở tệp cấu hình ví</translation>
     </message>
     <message>
         <source>Open configuration file</source>
-        <translation>Mở tệp cấu hình</translation>
+        <translation>Mở tập tin cấu hình</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Mở tệp cấu hình Dynode</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Mở tệp cấu hình Dynode</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>Mở tập tin cấu hình</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
@@ -425,6 +437,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Gửi địa chỉ...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Kết nối với đồng nghiệp...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -449,6 +465,14 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Các Tuỳ chọn dòng lệnh</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Nhập khóa mnemonic/private...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;thông tin PrivateSend</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -489,6 +513,10 @@
     <message numerus="yes">
         <source>%n active connection(s) to Dynamic network</source>
         <translation><numerusform>%n kết nối hiện thời tới mạng lưới của Dynamic</numerusform></translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Tiêu đề đồng bộ hóa (%1)...</translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -601,6 +629,22 @@ Kiểu: %3
         <source>Network Alert</source>
         <translation>Cảnh báo mạng</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>Bình thường</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Supported</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Không được hỗ trợ</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -639,6 +683,10 @@ Kiểu: %3
     <message>
         <source>Change:</source>
         <translation>Trả lại:</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>chuyển trạng thái khóa</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -1039,6 +1087,39 @@ Kiểu: %3
     <message>
         <source>Show splash screen on startup (default: 1)</source>
         <translation>Hiển thị màn hình giới thiệu khi khởi động (ngầm định: 1)</translation>
+    </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>Thông tin PrivateSend</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>
+&lt;h3&gt;PrivateSend Basics&lt;/h3&gt;
+PrivateSend cung cấp cho bạn sự riêng tư tài chính thực sự bằng cách che khuất nguồn gốc của các khoản tiền của bạn.
+Tất cả Động trong ví của bạn bao gồm các đầu vào khác nhau mà bạn có thể nghĩ là các đồng tiền riêng biệt, riêng biệt.&lt;br&gt;
+PrivateSend sử dụng một quy trình sáng tạo để trộn đầu vào của bạn với đầu vào của hai người khác, mà không cần tiền của bạn rời khỏi ví của bạn.
+Bạn giữ quyền kiểm soát tiền của bạn mọi lúc.&lt;hr&gt;
+&lt;b&gt;Quá trình PrivateSend hoạt động như thế này:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSend bắt đầu bằng cách chia các đầu vào giao dịch của bạn thành các mệnh giá tiêu chuẩn.
+Các mệnh giá này là 0,001, 0,01 DYN, 0,1 DYN, 1 DYN, 10 DYN - giống như tiền giấy bạn sử dụng hàng ngày.&lt;/li&gt;
+&lt;li&gt;Ví của bạn sau đó gửi yêu cầu đến các nút phần mềm được cấu hình đặc biệt trên mạng, được gọi là &#39;Dynodes&#39;.
+Các Dynodes này được thông báo rằng bạn quan tâm đến việc trộn một mệnh giá nhất định.
+Không có thông tin nhận dạng nào được gửi đến Dynodes, vì vậy họ không bao giờ biết bạn là ai.&lt;/li&gt;
+&lt;li&gt;Khi hai người khác gửi tin nhắn tương tự, cho biết họ muốn trộn cùng một mệnh giá, một phiên trộn bắt đầu.
+Dynode trộn lẫn các đầu vào và hướng dẫn cả ba người dùng&#39; ví để trả đầu vào chuyển đổi trở lại cho chính họ.
+Ví của bạn trả tiền mệnh giá đó trực tiếp cho chính nó, nhưng ở một địa chỉ khác (được gọi là địa chỉ thay đổi).&lt;/li&gt;
+&lt;li&gt;Để che khuất hoàn toàn tiền của bạn, ví của bạn phải lặp lại quy trình này một số lần với mỗi mệnh giá.
+Mỗi khi quá trình hoàn thành, nó được gọi là một vòng. Mỗi vòng PrivateSend làm cho việc xác định tiền của bạn bắt nguồn từ đâu theo cấp số nhân.&lt;/li&gt;
+&lt;li&gt;TQuá trình trộn này xảy ra trong nền mà không có sự can thiệp nào từ phía bạn. Khi bạn muốn thực hiện một giao dịch,
+tiền của bạn sẽ được ẩn danh. Không phải chờ thêm là cần thiết.&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;QUAN TRỌNG:&lt;/b&gt; Ví của bạn chỉ chứa 2000 địa chỉ thay đổi này. Mỗi khi sự kiện trộn xảy ra, tối đa 9 địa chỉ của bạn sẽ được sử dụng hết.
+Điều này có nghĩa là 2000 địa chỉ đó tồn tại trong khoảng 200 sự kiện trộn. Khi 1900 trong số chúng được sử dụng, ví của bạn phải tạo thêm địa chỉ.
+Nó chỉ có thể làm điều này, tuy nhiên, nếu bạn đã bật sao lưu tự động.&lt;br&gt;
+Do đó, người dùng đã sao lưu bị vô hiệu hóa cũng sẽ bị tắt PrivateSend. &lt;hr&gt;
+                </translation>
     </message>
 </context>
 <context>
@@ -1455,6 +1536,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Bắt đầu/Tắt việc trộn</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>Bắt đầu trộn</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Dừng trộn</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>Mệnh giá mà bạn gửi cho Dynode. &lt;br&gt;Để trộn, những người dùng khác cũng cần gửi chính xác dùng loại mệnh giá đó.</translation>
     </message>
@@ -1469,6 +1558,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Try Mix</source>
         <translation>Thử Trộn</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Thông tin</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>Thông tin về PrivateSend và Trộn</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
@@ -1784,6 +1881,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Thời gian block cuối cùng</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Bộ nhớ</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Số lượng giao dịch hiện tại</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Sử dụng bộ nhớ</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>Debug log file</translation>
     </message>
@@ -1798,6 +1907,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Current number of blocks</source>
         <translation>Số khối hiện tại</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>Chế độ CPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>Chế độ GPU:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>Khai thác GPU:</translation>
     </message>
     <message>
         <source>Client version</source>
@@ -1972,16 +2093,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Ra:</translation>
     </message>
     <message>
-        <source>Welcome to the Dynamic RPC console.</source>
-        <translation>Chào mừng đến với giao tiếp Dynamic RPC</translation>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>Chào mừng đến với giao tiếp %1 RPC</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Sử dụng các phím mũi tên lên và xuống để xem lịch sử, và &lt;b&gt;Ctrl-L&lt;/b&gt; để xoá màn hình.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Sử dụng các phím mũi tên lên và xuống để xem lịch sử, và %1 để xoá màn hình.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Gõ &lt;b&gt;help&lt;/b&gt; để xem tổng thể các lệnh có thể dùng.</translation>
+    </message>
+    <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>CẢNH BÁO: Kẻ lừa đảo đã hoạt động, yêu cầu người dùng nhập lệnh tại đây, đánh cắp nội dung ví của họ. Không sử dụng bàn điều khiển này mà không hiểu đầy đủ về sự phân nhánh của lệnh.</translation>
     </message>
     <message>
         <source>%1 B</source>
@@ -2065,6 +2190,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>&amp;Amount:</source>
         <translation>&amp;Số tiền:</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>Yêu cầu InstantSend</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2177,6 +2306,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Nhãn</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>Địa chỉ nhà</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Yêu cầu</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Thông điệp</translation>
     </message>
@@ -2196,9 +2333,25 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no amount)</source>
         <translation>(không số tiền)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(không yêu cầu số tiền)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Cảnh báo: Dự toán phí hiện không thể thực hiện được.</source>
+        <translation>Warnung: Die Berechnung der Gebühr ist derzeit nicht möglich.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Chỉ trả phí yêu cầu của %1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Mục tiêu thời gian xác nhận:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Gửi tiền</translation>
@@ -2274,6 +2427,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Choose...</source>
         <translation>Chọn...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Ẩn giấu</translation>
     </message>
     <message>
         <source>collapse fee-settings</source>
@@ -2510,6 +2667,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>Trừ phí từ số tiền</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>Đây là giao dịch thông thường.</translation>
@@ -2971,6 +3132,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Address</source>
         <translation>Địa chỉ</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Địa chỉ / Nhãn</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Mở cho %n khối nữa</numerusform></translation>
@@ -3257,6 +3422,271 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>to</source>
         <translation>đến</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Mẫu</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Danh sách bộ lọc:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Đếm nút:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Dynodes của tôi</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Tất cả các triều đại</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Lưu ý: Trạng thái Dynodes của bạn trong ví cục bộ có thể có khả năng hơi không chính xác.&lt;br /&gt;Luôn chờ ví để đồng bộ hóa dữ liệu bổ sung và sau đó kiểm tra lại từ một nút khác&lt;br /&gt;nếu Dynode của bạn sẽ chạy nhưng bạn vẫn không thấy &quot;ENABLED&quot; trong trường &quot;Status&quot; thái.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>&quot;</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>bắt đầu bí danh</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>bắt đầu bí danh MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp; Cập nhật trạng thái</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Bí danh</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Địa chỉ nhà</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Giao thức</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Hoạt động</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Nhìn thấy lần cuối</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Người được trả tiền</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Bạn có chắc chắn muốn bắt đầu TẤT CẢ các Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Bạn có chắc chắn muốn bắt đầu MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Xác nhận thiếu Dynodes bắt đầu</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Trạng thái sẽ được cập nhật tự động trong (giây):</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>Lệnh không có sẵn ngay bây giờ</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Bạn không thể sử dụng lệnh này cho đến khi danh sách Dynode được đồng bộ hóa</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Xác nhận bắt đầu Dynode</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Bạn có chắc chắn muốn bắt đầu Dynode %1 không?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Xin vui lòng chờ...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Đang cập nhật ...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Bắt đầu thành công Dynode.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>Đã khởi động thành công %d Dynodes, không khởi động được %d, tổng %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>mẫu</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Số lượng luồng CPU để sử dụng:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Số thiết bị GPU sẽ sử dụng:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Hashrate của bạn (công cụ khai thác tích hợp):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Mạng hashrate:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Khoảng cách trung bình giữa các khối của bạn:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Bắt đầu khai thác</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Dừng khai thác</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Tàn tật</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Hiển thị biểu đồ Hash Hash</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>trong</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Sử dụng thanh trượt để chọn số lượng luồng CPU sẽ sử dụng</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Sử dụng thanh trượt để chọn lượng thiết bị GPU sẽ sử dụng</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Điều này cho thấy hashrate của CPU của bạn trong khi khai thác</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Điều này cho thấy hashrate của GPU của bạn trong khi khai thác</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Điều này cho thấy hàm băm tổng thể của mạng Động</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Điều này cho thấy thời gian trung bình giữa các khối bạn đã khai thác</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain / Dynodes không được đồng bộ hóa, vui lòng đợi cho đến khi được đồng bộ hóa hoàn toàn trước khi khai thác!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Nhấp vào Bắt đầu khai thác để bắt đầu khai thác!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Nhấp vào Dừng khai thác để hoàn tất khai thác!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Dừng lại</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Bắt đầu</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Tàn tật</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>Tất cả các đồng tiền được khai thác sẽ chuyển đến %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Slider sẽ hiển thị khi Dynamic kết thúc đồng bộ hóa</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>Khai thác GPU không được hỗ trợ trong phiên bản Động này</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 phút</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 phút</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 phút</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 giờ</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 giờ</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 giờ</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 day</translation>
     </message>
 </context>
 <context>
@@ -4127,12 +4557,20 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Đang đồng bộ ngân sách...</translation>
     </message>
     <message>
-        <source>Synchronizing dynode winners...</source>
-        <translation>Đồng bộ các dynode được chọn...</translation>
+        <source>Synchronizing Dynode winners...</source>
+        <translation>Đồng bộ các Dynode được chọn...</translation>
     </message>
     <message>
-        <source>Synchronizing dynodes...</source>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Đồng bộ hóa thanh toán Dynode...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
         <translation>Đang đồng bộ các dynode...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Đồng bộ hóa các đối tượng quản trị...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
@@ -4249,6 +4687,14 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <message>
         <source>Loading wallet...</source>
         <translation>Đang tải ví...</translation>
+    </message>
+    <message>
+        <source>Loading banlist...</source>
+        <translation>Đang tải danh sách...</translation>
+    </message>
+    <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>Đảm bảo mã hóa ví của bạn và xóa tất cả các bản sao lưu không được mã hóa sau khi bạn xác minh rằng ví đó hoạt động!</translation>
     </message>
     <message>
         <source>Dynode options:</source>
