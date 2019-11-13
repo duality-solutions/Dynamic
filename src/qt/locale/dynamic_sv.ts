@@ -480,6 +480,10 @@ Var vänlig och försök igen.</translation>
         <translation>Kommandoradsalternativ</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Importera mnemonic/privat nyckel...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;Skicka privat information</translation>
     </message>
@@ -5455,29 +5459,6 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP Fel</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Vanligt namn</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Objektets Fulla sökväg</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Utgångsdatum</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Hittade Poster:</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5664,6 +5645,10 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Uppdatera</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Lägg till en användare</translation>
     </message>
@@ -5838,6 +5823,22 @@ till exempel: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>Väntar på begäran länkdetalj</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Vanligt namn</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Objektets Fulla sökväg</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Utgångsdatum</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Hittade Poster:</translation>
     </message>
 </context>
 <context>

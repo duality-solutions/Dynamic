@@ -7,7 +7,7 @@
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>创建新地址</translation>
+        <translation>创建一个新地址</translation>
     </message>
     <message>
         <source>&amp;New</source>
@@ -43,7 +43,7 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>选择发款地址</translation>
+        <translation>选择付款地址</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
@@ -63,7 +63,7 @@
     </message>
     <message>
         <source>These are your Dynamic addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>这些是你要付款过去的动态币地址。在付款之前，务必要检查金额和收款地址是否正确。</translation>
+        <translation>这些是你要付款过去的动态币地址。在付款之前，务必检查金额和收款地址是否正确。</translation>
     </message>
     <message>
         <source>These are your Dynamic addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
@@ -181,7 +181,7 @@
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
-        <translation>您确定需要为钱包加密吗？</translation>
+        <translation>确定加密钱包？</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
@@ -189,7 +189,7 @@
     </message>
     <message>
         <source>Dynamic will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your Dynamic from being stolen by malware infecting your computer.</source>
-        <translation>动态币软体现在要关闭，以完成加密过程。请注意，加密钱包不能完全防止恶意软件入侵你的电脑盗取你的动态币。</translation>
+        <translation>动态币软件现在要关闭，以完成加密过程。请注意，加密钱包不能完全防止恶意软件入侵你的电脑盗取你的动态币。</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -201,7 +201,7 @@
     </message>
     <message>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation>由于一个本地错误，加密钱包的操作已经失败。您的钱包没能被加密。</translation>
+        <translation>由于一个本地错误，加密钱包的操作已经失败。您的钱包未能加密。</translation>
     </message>
     <message>
         <source>The supplied passphrases do not match.</source>
@@ -217,7 +217,7 @@
     </message>
     <message>
         <source>Wallet decryption failed</source>
-        <translation>钱包解密失败。</translation>
+        <translation>钱包解密失败</translation>
     </message>
     <message>
         <source>Wallet passphrase was successfully changed.</source>
@@ -340,7 +340,7 @@
     </message>
     <message>
         <source>&amp;Unlock Wallet...</source>
-        <translation>解锁钱包(&amp;U)</translation>
+        <translation>解锁钱包(&amp;U)...</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
@@ -369,6 +369,14 @@
     <message>
         <source>&amp;Information</source>
         <translation>信息(&amp;I)</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>导入助记符/私钥(&amp;)...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>匿名发送信息(&amp;)</translation>
     </message>
     <message>
         <source>Show diagnostic information</source>
@@ -411,12 +419,20 @@
         <translation>打开 &amp;配置文件</translation>
     </message>
     <message>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>打开钱包（&amp;）配置文件</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>打开Dynode配置文件</translation>
+    </message>
+    <message>
         <source>Open configuration file</source>
         <translation>打开配置文件</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
-        <translation>显示自动备份&amp;</translation>
+        <translation>显示自动备份（&amp;）</translation>
     </message>
     <message>
         <source>Show automatically created wallet backups</source>
@@ -424,7 +440,11 @@
     </message>
     <message>
         <source>&amp;Sending addresses...</source>
-        <translation>&amp;付款地址 </translation>
+        <translation>(&amp;)付款地址...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>与同伴联系...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -432,7 +452,7 @@
     </message>
     <message>
         <source>&amp;Receiving addresses...</source>
-        <translation>&amp;收款地址</translation>
+        <translation>(&amp;)新建接收地址...</translation>
     </message>
     <message>
         <source>Show the list of used receiving addresses and labels</source>
@@ -456,7 +476,9 @@
     </message>
     <message numerus="yes">
         <source>Processed %n blocks of transaction history.</source>
-        <translation><numerusform>已处理了%n个区块的交易记录.</numerusform></translation>
+        <translation>
+            <numerusform>已处理了%n个区块的交易记录.</numerusform>
+        </translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
@@ -488,7 +510,13 @@
     </message>
     <message numerus="yes">
         <source>%n active connection(s) to Dynamic network</source>
-        <translation><numerusform>%n 已连接至动态币网络</numerusform></translation>
+        <translation>
+            <numerusform>%n 已连接至动态币网络</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>正在同步头文件(%1%）...</translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -496,11 +524,11 @@
     </message>
     <message>
         <source>Importing blocks from disk...</source>
-        <translation>正在从磁盘导入数据块...</translation>
+        <translation>正在从磁盘导入区块...</translation>
     </message>
     <message>
         <source>Reindexing blocks on disk...</source>
-        <translation>正在为数据块建立索引...</translation>
+        <translation>正在为区块建立索引...</translation>
     </message>
     <message>
         <source>No block source available...</source>
@@ -512,15 +540,21 @@
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
-        <translation><numerusform>%n小时</numerusform></translation>
+        <translation>
+            <numerusform>%n小时</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation><numerusform>%n天</numerusform></translation>
+        <translation>
+            <numerusform>%n天</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation><numerusform>%n周</numerusform></translation>
+        <translation>
+            <numerusform>%n周</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 and %2</source>
@@ -528,11 +562,13 @@
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
-        <translation><numerusform>%n年</numerusform></translation>
+        <translation>
+            <numerusform>%n年</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 behind</source>
-        <translation>落后 %1 </translation>
+        <translation>落后 %1</translation>
     </message>
     <message>
         <source>Catching up...</source>
@@ -544,7 +580,7 @@
     </message>
     <message>
         <source>Transactions after this will not yet be visible.</source>
-        <translation>在此之后的交易尚未可见</translation>
+        <translation>在此之后的交易尚未可见.</translation>
     </message>
     <message>
         <source>Error</source>
@@ -638,7 +674,7 @@ Address: %4
     </message>
     <message>
         <source>Change:</source>
-        <translation>变更 : </translation>
+        <translation>变更：</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -821,8 +857,8 @@ Address: %4
         <translation>交易的优先级越高，被矿工收入数据块的速度也越快。</translation>
     </message>
     <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>如果优先级小于"中位数" ，标签将变成红色。</translation>
+        <source>This label turns red, if the priority is smaller than &quot;medium&quot;.</source>
+        <translation>如果优先级小于&quot;中位数&quot; ，标签将变成红色。</translation>
     </message>
     <message>
         <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
@@ -864,24 +900,24 @@ Address: %4
         <translation>请选择隐私等级。</translation>
     </message>
     <message>
-        <source>Use 2 separate dynodes to mix funds up to 1000 DYN</source>
+        <source>Use 2 separate Dynodes to mix funds up to 1000 DYN</source>
         <translation>使用2个独立的主节点混合资金最多1000动态币</translation>
     </message>
     <message>
-        <source>Use 8 separate dynodes to mix funds up to 1000 DYN</source>
+        <source>Use 8 separate Dynodes to mix funds up to 1000 DYN</source>
         <translation>使用8个独立的主节点混合资金最多1000动态币</translation>
     </message>
     <message>
-        <source>Use 16 separate dynodes</source>
+        <source>Use 16 separate Dynodes</source>
         <translation>使用16个独立主节点</translation>
     </message>
     <message>
         <source>This option is the quickest and will cost about ~0.025 DYN to anonymize 1000 DYN</source>
-        <translation>此选项为最快速度，需要支付0.025动态币/1000动态币的匿名处理费用。</translation>
+        <translation>此选项为最快速度，需要支付0.025动态币/1000动态币的匿名处理费用</translation>
     </message>
     <message>
         <source>This option is moderately fast and will cost about 0.05 DYN to anonymize 1000 DYN</source>
-        <translation>此选项为一般速度，需要支付0.05动态币/1000动态币的匿名处理费用。</translation>
+        <translation>此选项为一般速度，需要支付0.05动态币/1000动态币的匿名处理费用</translation>
     </message>
     <message>
         <source>0.1 DYN per 1000 DYN you anonymize.</source>
@@ -896,15 +932,15 @@ Address: %4
         <translation>匿名发送配置</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
         <translation>匿名发送已成功设置为一般(%1到2次循环)。可以通过打开动态币配置窗口来随时修改。</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
         <translation>匿名发送已成功设置为高(%1到8次循环)。可以通过打开动态币配置窗口来随时修改。</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
         <translation>匿名发送已成功设置为最高(%1到16次循环)。可以通过打开动态币配置窗口来随时修改。</translation>
     </message>
 </context>
@@ -947,16 +983,16 @@ Address: %4
         <translation>编辑发送地址</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dynamic address.</source>
-        <translation>输入的地址"%1"不是有效的动态币地址。</translation>
+        <source>The entered address &quot;%1&quot; is not a valid Dynamic address.</source>
+        <translation>输入的地址&quot;%1&quot;不是有效的动态币地址。</translation>
     </message>
     <message>
-        <source>The entered address "%1" is already in the address book.</source>
+        <source>The entered address &quot;%1&quot; is already in the address book.</source>
         <translation>输入的地址“%1”已经存在于地址簿中。</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
-        <translation>无法解锁钱包</translation>
+        <translation>无法解锁钱包.</translation>
     </message>
     <message>
         <source>New key generation failed.</source>
@@ -1025,13 +1061,12 @@ Address: %4
         <translation>在启动时选择数据目录（默认：0）</translation>
     </message>
     <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
+        <source>Set language, for example &quot;de_DE&quot; (default: system locale)</source>
         <translation>设置语言, 例如“zh-TW”（默认为系统语言）</translation>
     </message>
     <message>
         <source>Start minimized</source>
-        <translation>启动时最小化
-</translation>
+        <translation>启动时最小化</translation>
     </message>
     <message>
         <source>Set SSL root certificates for payment request (default: -system-)</source>
@@ -1073,7 +1108,7 @@ Address: %4
         <translation>动态币核心</translation>
     </message>
     <message>
-        <source>Error: Specified data directory "%1" cannot be created.</source>
+        <source>Error: Specified data directory &quot;%1&quot; cannot be created.</source>
         <translation>错误:指定的数据目录“%1”无法被创建.</translation>
     </message>
     <message>
@@ -1097,19 +1132,19 @@ Address: %4
     </message>
     <message>
         <source>Open payment request from URI or file</source>
-        <translation>打开来自URI或文件的付款请求 </translation>
+        <translation>打开来自URI或文件的付款请求</translation>
     </message>
     <message>
         <source>URI:</source>
-        <translation>URI: </translation>
+        <translation>URI:</translation>
     </message>
     <message>
         <source>Select payment request file</source>
-        <translation>选择付款请求文件 </translation>
+        <translation>选择付款请求文件</translation>
     </message>
     <message>
         <source>Select payment request file to open</source>
-        <translation>选择需要打开的付款请求文件 </translation>
+        <translation>选择需要打开的付款请求文件</translation>
     </message>
 </context>
 <context>
@@ -1124,7 +1159,7 @@ Address: %4
     </message>
     <message>
         <source>Automatically start Dynamic after logging in to the system.</source>
-        <translation>登录系统后自动启动动态币程序</translation>
+        <translation>登录系统后自动启动动态币程序.</translation>
     </message>
     <message>
         <source>&amp;Start Dynamic on system login</source>
@@ -1140,7 +1175,7 @@ Address: %4
     </message>
     <message>
         <source>Number of script &amp;verification threads</source>
-        <translation>脚本&amp;验证 进程数 </translation>
+        <translation>脚本&amp;验证 进程数</translation>
     </message>
     <message>
         <source>(0 = auto, &lt;0 = leave that many cores free)</source>
@@ -1151,7 +1186,7 @@ Address: %4
         <translation>匿名传送的循环次数</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <source>This amount acts as a threshold to turn off PrivateSend once it&apos;s reached.</source>
         <translation>此金额为关闭匿名发送的极限.</translation>
     </message>
     <message>
@@ -1187,8 +1222,8 @@ Address: %4
         <translation>专家</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>此选项用以调整进行匿名化操作的主节点数量。&lt;br/&gt;越多的循环次数提供了更高级别的匿名性，同时也会花费更多的手续费</translation>
+        <source>This setting determines the amount of individual Dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>此选项用以调整进行匿名化操作的主节点数量。&lt;br/&gt;越多的循环次数提供了更高级别的匿名性，同时也会花费更多的手续费.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -1236,7 +1271,7 @@ Address: %4
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
-        <translation>最小化窗口后仅显示托盘图标</translation>
+        <translation>最小化窗口后仅显示托盘图标.</translation>
     </message>
     <message>
         <source>&amp;Minimize to the tray instead of the taskbar</source>
@@ -1244,7 +1279,7 @@ Address: %4
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>当窗口关闭时程序最小化而不是退出。当使用该选项时，程序只能通过在菜单中选择退出来关闭</translation>
+        <translation>当窗口关闭时程序最小化而不是退出。当使用该选项时，程序只能通过在菜单中选择退出来关闭.</translation>
     </message>
     <message>
         <source>M&amp;inimize on close</source>
@@ -1298,7 +1333,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
-        <translation>恢复客户端的缺省设置</translation>
+        <translation>恢复客户端的缺省设置.</translation>
     </message>
     <message>
         <source>&amp;Reset Options</source>
@@ -1456,6 +1491,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>开始/关闭 混合</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>开始混合</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>停止混合</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>您向主节点所提交的用以面额化混合的DYN,&lt;br&gt;当其他用户提交相同的面额化DYN数量时,将开始混合.</translation>
     </message>
@@ -1465,14 +1508,22 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>尝试手动提交一次匿名化请求</translation>
+        <translation>尝试手动提交一次匿名化请求.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>尝试混合</translation>
     </message>
     <message>
-        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Info</source>
+        <translation>信息</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>有关PRIVATESEND和混合的信息</translation>
+    </message>
+    <message>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
         <translation>重置目前匿名状态(此操作可能会影响您目前正在执行的混合过程，并且产生费用!)</translation>
     </message>
     <message>
@@ -1501,11 +1552,13 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message numerus="yes">
         <source>%n Rounds</source>
-        <translation><numerusform>%n 次循环</numerusform></translation>
+        <translation>
+            <numerusform>%n 次循环</numerusform>
+        </translation>
     </message>
     <message>
-        <source>Not enough compatible inputs to anonymize &lt;span style='color:red;'&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style='color:red;'&gt;%2&lt;/span&gt; instead</source>
-        <translation>没有足够相容的输入来进行匿名处理&lt;span style='color:red;'&gt;%1&lt;/span&gt;,&lt;br&gt;将匿名处理 &lt;span style='color:red;'&gt;%2&lt;/span&gt; 作为代替</translation>
+        <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
+        <translation>没有足够相容的输入来进行匿名处理&lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;将匿名处理 &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; 作为代替</translation>
     </message>
     <message>
         <source>Overall progress</source>
@@ -1547,7 +1600,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>PrivateSend requires at least %1 to use.</source>
-        <translation>匿名化要求至少 %1 以使用</translation>
+        <translation>匿名化要求至少 %1 以使用.</translation>
     </message>
     <message>
         <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
@@ -1574,7 +1627,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
-        <translation>付款请求文件处理 </translation>
+        <translation>付款请求文件处理</translation>
     </message>
     <message>
         <source>Invalid payment address %1</source>
@@ -1593,7 +1646,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>付款请求被拒绝</translation>
     </message>
     <message>
-        <source>Payment request network doesn't match client network.</source>
+        <source>Payment request network doesn&apos;t match client network.</source>
         <translation>付款请求网络与客户端网络不符.</translation>
     </message>
     <message>
@@ -1777,6 +1830,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>上一数据块时间</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>内存池</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>当前交易数</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>内存使用情况</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>调试日志文件</translation>
     </message>
@@ -1793,12 +1858,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>当前数据块数量</translation>
     </message>
     <message>
+        <source>CPU Mode:</source>
+        <translation>CPU模式:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU模式:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU挖掘：</translation>
+    </message>
+    <message>
         <source>Client version</source>
         <translation>客户端版本</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
         <translation>使用 BerkeleyDB 版本</translation>
+    </message>
+    <message>
+        <source>Datadir</source>
+        <translation>数据目录</translation>
     </message>
     <message>
         <source>Block chain</source>
@@ -2029,7 +2110,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>R&amp;euse an existing receiving address (not recommended)</source>
-        <translation>重用现有的接收地址（不推荐）</translation>
+        <translation>(&amp;)重用现有的接收地址（不推荐）</translation>
     </message>
     <message>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dynamic network.</source>
@@ -2101,11 +2182,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Copy message</source>
-        <translation>复制消息 </translation>
+        <translation>复制消息</translation>
     </message>
     <message>
         <source>Copy amount</source>
         <translation>复制金额</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>请求InstantSend</translation>
     </message>
 </context>
 <context>
@@ -2170,6 +2255,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>日期</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
         <source>Label</source>
         <translation>标签</translation>
     </message>
@@ -2182,6 +2271,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>金额</translation>
     </message>
     <message>
+        <source>Requested</source>
+        <translation>要求的</translation>
+    </message>
+    <message>
         <source>(no label)</source>
         <translation>(没有标签)</translation>
     </message>
@@ -2191,7 +2284,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>(no amount)</source>
-        <translation>(无金额) </translation>
+        <translation>(无金额)</translation>
     </message>
 </context>
 <context>
@@ -2254,7 +2347,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Change:</source>
-        <translation>变更 : </translation>
+        <translation>变更 :</translation>
     </message>
     <message>
         <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
@@ -2281,15 +2374,13 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>最小化</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>
-如果自定手续费设定为1000 satoshis,而交易信息只有250字节的话,那么选择"每千位字节"就只会支付250 satoshis的手续费,&lt;br /&gt;而"至少"会支付1000 satoshis.
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自定手续费设定为0.00001000DYN/kB,而交易信息只有250字节的话,那么选择&quot;每千位字节&quot;就只会支付0.00000250DYN的手续费,&lt;br /&gt;而&quot;至少&quot;会支付0.00001000DYN.
 但如果交易信息大于一千字节,那么两者都要支付千字节费用.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>
-如果自定手续费设定为1000 satoshis,而交易信息只有250字节的话,那么选择"每千位字节"就只会支付250 satoshis的手续费,&lt;br /&gt;而"总共至少"会支付1000 satoshis.
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自定手续费设定为0.00001000DYN/kB,而交易信息只有250字节的话,那么选择&quot;每千位字节&quot;就只会支付0.00000250DYN的手续费,&lt;br /&gt;而&quot;总共至少&quot;会支付0.00001000DYN.
 但如果交易信息大于一千字节,那么两者都要支付千字节费用.</translation>
     </message>
     <message>
@@ -2454,7 +2545,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message numerus="yes">
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>预计在%n 个区块内开始确认.</numerusform></translation>
+        <translation>
+            <numerusform>预计在%n 个区块内开始确认.</numerusform>
+        </translation>
     </message>
     <message>
         <source>The recipient address is not valid, please recheck.</source>
@@ -2504,6 +2597,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no label)</source>
         <translation>(没有标签)</translation>
     </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>警告：目前无法估算费用。</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsEntry</name>
@@ -2549,7 +2646,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>A&amp;mount:</source>
-        <translation>金额(&amp;M)</translation>
+        <translation>金额(&amp;m):</translation>
     </message>
     <message>
         <source>Message:</source>
@@ -2564,10 +2661,6 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>这是个非有效的支付请求。</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>支付给:</translation>
-    </message>
-    <message>
         <source>Memo:</source>
         <translation>便条：</translation>
     </message>
@@ -2578,6 +2671,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
         <translation>为这个地址输入一个标签，以便将它添加到您的地址簿</translation>
+    </message>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>从金额中扣除费用(&amp;u)</translation>
     </message>
 </context>
 <context>
@@ -2678,12 +2775,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>清空所有验证消息栏</translation>
     </message>
     <message>
-        <source>Click "Sign Message" to generate signature</source>
-        <translation>单击“签名消息“产生签名。</translation>
+        <source>Click &quot;Sign Message&quot; to generate signature</source>
+        <translation>单击“签名消息“产生签名</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
-        <translation>输入的地址非法。</translation>
+        <translation>输入地址无效。</translation>
     </message>
     <message>
         <source>Please check the address and try again.</source>
@@ -2695,11 +2792,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Wallet unlock was cancelled.</source>
-        <translation>钱包解锁动作取消。</translation>
+        <translation>钱包解锁已被取消。</translation>
     </message>
     <message>
         <source>Private key for the entered address is not available.</source>
-        <translation>找不到输入地址关联的私钥。</translation>
+        <translation>输入地址的私钥不可用.</translation>
     </message>
     <message>
         <source>Message signing failed.</source>
@@ -2750,7 +2847,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>[testnet]</source>
-        <translation>[testnet]</translation>
+        <translation>[测试网]</translation>
     </message>
 </context>
 <context>
@@ -2764,7 +2861,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>对于%n个块开放</numerusform></translation>
+        <translation>
+            <numerusform>对于%n个块开放</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -2828,7 +2927,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message numerus="yes">
         <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>，通过%n多个节点广播</numerusform></translation>
+        <translation>
+            <numerusform>，通过%n多个节点广播</numerusform>
+        </translation>
     </message>
     <message>
         <source>Date</source>
@@ -2911,7 +3012,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>商店</translation>
     </message>
     <message>
-        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to "not accepted" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
         <translation>生成的动态币在可以使用前必须有 %1 个成熟的区块。当您生成了此区块后，它将被广播到网络中以加入区块链。如果它未成功进入区块链，其状态将变更为“不接受”并且不可使用。这可能偶尔会发生，如果另一个节点比你早几秒钟成功生成一个区块。</translation>
     </message>
     <message>
@@ -2964,9 +3065,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>Address</source>
         <translation>地址</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>地址 / 标签</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>对于%n个块开放</numerusform></translation>
+        <translation>
+            <numerusform>对于%n个块开放</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -2978,7 +3085,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Unconfirmed</source>
-        <translation>未确认的 </translation>
+        <translation>未确认的</translation>
     </message>
     <message>
         <source>Confirming (%1 of %2 recommended confirmations)</source>
@@ -2990,7 +3097,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Conflicted</source>
-        <translation>冲突的</translation>
+        <translation>发现冲突</translation>
     </message>
     <message>
         <source>Immature (%1 confirmations, will be available after %2)</source>
@@ -2998,7 +3105,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>This block was not received by any other nodes and will probably not be accepted!</source>
-        <translation>此数据块未被任何其他节点接收，可能不被接受！</translation>
+        <translation>此区块未被任何其他节点接收，可能不被接受！</translation>
     </message>
     <message>
         <source>Generated but not accepted</source>
@@ -3062,7 +3169,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Date and time that the transaction was received.</source>
-        <translation>接收到交易的时间</translation>
+        <translation>收到交易记录的日期和时间.</translation>
     </message>
     <message>
         <source>Type of transaction.</source>
@@ -3121,7 +3228,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>PrivateSended</source>
-        <translation>匿名发送</translation>
+        <translation>已匿名发送</translation>
     </message>
     <message>
         <source>PrivateSend Make Collateral Inputs</source>
@@ -3161,7 +3268,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Abandon transaction</source>
-        <translation>Abandon transaction</translation>
+        <translation>放弃交易</translation>
     </message>
     <message>
         <source>Copy address</source>
@@ -3249,8 +3356,266 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
 </context>
 <context>
-    <name>UnitDisplayStatusBarControl</name>
-    </context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>表格</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>筛选列表：</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>节点数：</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>我的Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>所有Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>注意：您在本地钱包中的Dynodes的状态可能不正确。&lt;br /&gt;请始终等待钱包同步其他数据，然后从另一个节点再次检查&lt;br /&gt;或许您的Dynode正在运行，但是您在&quot;状态&quot;字段中，仍然看不到&quot;ENABLED&quot;.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>全部开始（&amp;a)</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>启动alias（&amp;t）</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>开始 &amp;MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp;更新状态</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>协议</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>状态</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>活跃</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>最后一次上线</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>收款人</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>您确定要启动所有Dynodes吗？</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>您确定要启动MISSING Dynodes吗？</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>确认 missing Dynodes启动</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>状态将在（秒）内自动更新：</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>命令目前不可用</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>在同步Dynode列表之前，您无法使用此命令</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>确认Dynode启动</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>您确定要启动Dynode吗%1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>请等待...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>正在更新...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>成功启动Dynode。</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>已成功启动 ％d 个Dynodes，未能启动 ％d 个，共 ％d 个</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>表格</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>要使用的CPU线程数：</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>要使用的GPU设备数量：</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>您的哈希率（内置矿工）：</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>网络哈希率：</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>区块之间的平均间距：</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>开始挖矿</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>停止挖矿</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>无效</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>显示哈希表图形</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>使用滑块选择要使用的CPU线程数</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>使用滑块选择要使用的GPU设备数量</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>这显示了挖矿时CPU的哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>这显示了挖矿时GPU的哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>这显示了动态网络的总体哈希率</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>这显示了您挖矿的区块之间的平均时间</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>“ 区块链/主节点”未同步，请等到完全同步后再进行挖矿！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>单击&apos;开始挖矿&apos;按钮开始挖矿！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>点击 &apos;停止挖矿&apos;按钮停止挖矿！</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>正在停止</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>正在开始</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>所有挖矿的硬币将转到 %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>一旦DYNAMIC完成同步，滑块就会显示</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>此版本的DYNAMIC不支持GPU挖矿</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5分钟</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10分钟</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30分钟</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1小时</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8小时</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12小时</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1天</translation>
+    </message>
+</context>
 <context>
     <name>WalletFrame</name>
     <message>
@@ -3265,7 +3630,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>发送动态币</translation>
     </message>
     <message>
-        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
+        <source>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
         <translation>即时支付功能目前还不支持发送如此高的金额.目前限制在%1 动态币.</translation>
     </message>
 </context>
@@ -3312,7 +3677,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>dynamic</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
-        <translation>与提供地址绑定，持续监听。使用[host]:标记IPv6端口</translation>
+        <translation>绑定提供的地址及持续监听。使用[host]:标记IPv6端口</translation>
     </message>
     <message>
         <source>Cannot obtain a lock on data directory %s. Dynamic is probably already running.</source>
@@ -3320,11 +3685,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>为了匿名发送的正常发送,您可能需要再混淆一些币.</translation>
+        <translation>为了匿名发送的正常发送,您可能需要再混合一些币.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
-        <translation>进入回滚测试模式,它可使用特殊区块链来立刻解出区块.</translation>
+        <translation>进入回滚测试模式,它使用特殊的链立刻解决区块.</translation>
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
@@ -3344,11 +3709,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>即时支付功能需要6步确认，您可以稍后重试。</translation>
+        <translation>即时支付功能至少需要10个确认，您可以稍后重试。</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer. Dynamic is probably already running.</source>
-        <translation>无法绑定%s此计算机. 动态币核心应该已经在运行中了.</translation>
+        <translation>无法绑定%s此计算机. 动态币核心应该已在运行中.</translation>
     </message>
     <message>
         <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
@@ -3364,19 +3729,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
-        <translation>警告: 动态币网路对于区块链结的决定目前有分歧！看来有些矿工会有问题。</translation>
+        <translation>警告: 动态币网络没有完全同意！看来有些矿工会有问题。</translation>
     </message>
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>警告: 我们和某些连线的节点对于区块链结的决定不同！你可能需要升级，或是需要等其它的节点升级。</translation>
+        <translation>警告: 我们和某些连线的节点的决定不同！你可能需要升级，或是需要等其它的节点升级。</translation>
     </message>
     <message>
         <source>Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
-        <translation>警告: 读取钱包档wallet.dat 时发生错误！所有的密钥都正确读取了，但是交易资料或位址簿资料可能会缺少或不正确。</translation>
+        <translation>警告: 读取钱包档wallet.dat 时发生错误！所有的密钥都正确读取了，但是交易资料或地址簿资料可能会缺少或不正确。</translation>
     </message>
     <message>
         <source>Warning: wallet.dat corrupt, data salvaged! Original wallet.dat saved as wallet.{timestamp}.bak in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>警告: 钱包档wallet.dat 损坏，但资料被拯救回来了！原来的wallet.dat 会改储存在%s, 档名是wallet.{timestamp}.bak. 如果余额或交易资料有误，你应该要用备份资料复原回来。</translation>
+        <translation>警告: 钱包档wallet.dat 损坏，但资料被拯救回来了！原来的wallet.dat 会改储存在%s, 档名是wallet.{timestamp}.bak. 如果余额或交易资料有误，你应该要用备份资料恢复。</translation>
     </message>
     <message>
         <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
@@ -3396,7 +3761,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>添加一个可连接节点，并尝试保持连接开放。</translation>
+        <translation>添加要连接的节点并尝试保持连接打开</translation>
     </message>
     <message>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
@@ -3408,27 +3773,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Attempt to recover private keys from a corrupt wallet.dat</source>
-        <translation>尝试从已损坏的钱包文件中找回私钥</translation>
+        <translation>尝试从已损坏的钱包文件中恢复私钥</translation>
     </message>
     <message>
         <source>Block creation options:</source>
-        <translation>数据块创建选项：</translation>
+        <translation>区块创建选项：</translation>
     </message>
     <message>
-        <source>Can't denominate: no compatible inputs left.</source>
+        <source>Can&apos;t denominate: no compatible inputs left.</source>
         <translation>不能面额化：没有可匹配的输入。</translation>
     </message>
     <message>
         <source>Cannot downgrade wallet</source>
-        <translation>不能降级钱包</translation>
+        <translation>钱包不能降级</translation>
     </message>
     <message>
-        <source>Cannot resolve -bind address: '%s'</source>
-        <translation>不能解决 -绑定地址：'%s'</translation>
+        <source>Cannot resolve -bind address: &apos;%s&apos;</source>
+        <translation>不能解决 -绑定地址：&apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Cannot resolve -externalip address: '%s'</source>
-        <translation>不能解决 -外部ip地址：'%s'</translation>
+        <source>Cannot resolve -externalip address: &apos;%s&apos;</source>
+        <translation>不能解决 -外部ip地址：&apos;%s&apos;</translation>
     </message>
     <message>
         <source>Cannot write default address</source>
@@ -3452,7 +3817,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Corrupted block database detected</source>
-        <translation>已找到损坏的数据块</translation>
+        <translation>已找到损坏的数据区块</translation>
     </message>
     <message>
         <source>PrivateSend options:</source>
@@ -3460,7 +3825,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
-        <translation>排除故障/测试 选项：</translation>
+        <translation>调试/测试 选项：</translation>
     </message>
     <message>
         <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
@@ -3468,7 +3833,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Do you want to rebuild the block database now?</source>
-        <translation>你想要现在重建区块资料库吗？</translation>
+        <translation>你想要现在重建区块数据库吗？</translation>
     </message>
     <message>
         <source>Done loading</source>
@@ -3480,15 +3845,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
-        <translation>正在初始化数据库块错误</translation>
+        <translation>初始化数据库区块错误</translation>
     </message>
     <message>
         <source>Error initializing wallet database environment %s!</source>
-        <translation>正在初始钱包数据库环境错误 %s!</translation>
+        <translation>初始钱包数据库环境错误 %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
-        <translation>读取数据库块错误</translation>
+        <translation>读取数据库区块错误</translation>
     </message>
     <message>
         <source>Error loading wallet.dat</source>
@@ -3500,7 +3865,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Error opening block database</source>
-        <translation>正在打开数据库块错误</translation>
+        <translation>打开数据库区块错误</translation>
     </message>
     <message>
         <source>Error reading from database, shutting down.</source>
@@ -3524,11 +3889,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
-        <translation>监听端口失败。如果想使用此项 修改-listen=0</translation>
+        <translation>监听端口失败。如果想使用此项 修改-listen=0.</translation>
     </message>
     <message>
         <source>Failed to read block</source>
-        <translation>读取数据块失败</translation>
+        <translation>读取区块失败</translation>
     </message>
     <message>
         <source>An error occurred while setting up the RPC address %s port %u for listening: %s</source>
@@ -3552,7 +3917,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Fees (in DYN/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>如果手续费比这个值低,就视为没有付手续费(当产生交易时)(默认: %s)</translation>
+        <translation>如果手续费比这个值低,就视为没有付手续费(当用于中继时)(默认: %s)</translation>
     </message>
     <message>
         <source>Fees (in DYN/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
@@ -3560,19 +3925,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Found unconfirmed denominated outputs, will wait till they confirm to continue.</source>
-        <translation>未确认的面额化输出，将等待他们确认后继续。</translation>
+        <translation>未确认的面额化输出，等待确认后继续。</translation>
     </message>
     <message>
         <source>How thorough the block verification of -checkblocks is (0-4, default: %u)</source>
-        <translation>使用 -checkblocks 检查区块的仔细程度 (0-4, 默认:%u)</translation>
+        <translation>使用 -checkblocks 验证区块的仔细程度 (0-4, 默认:%u)</translation>
     </message>
     <message>
         <source>If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks (default: %u)</source>
         <translation>当没有设定 paytxfee 时, 自动包含可以让交易能在平均 n 个区块内开始确认的手续费 (默认: %u)</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
-        <translation>设定 -maxtxfee=&lt;金额&gt;  的金额无效: '%s' (必须大于最低转发手续费%s 以避免交易无法被确认)</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
+        <translation>设定 -maxtxfee=&lt;金额&gt;  的金额无效: &apos;%s&apos; (必须大于最低转发手续费%s 以避免交易无法被确认)</translation>
     </message>
     <message>
         <source>Maximum total fees to use in a single wallet transaction, setting too low may abort large transactions (default: %s)</source>
@@ -3584,11 +3949,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>输出除错信息(默认: %u,  &lt;category&gt;是可选项)</translation>
+        <translation>输出调试信息(默认: %u,  &lt;category&gt;是可选项)</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file (default: %u)</source>
-        <translation>发送追踪/debug信息而并非debug.log文件至控制台 (默认: %u)</translation>
+        <translation>发送追踪/调试信息而不是debug.log文件至控制台 (默认: %u)</translation>
     </message>
     <message>
         <source>Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)</source>
@@ -3611,8 +3976,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>警告: -maxtxfee 设定的金额过高! 这是一次交易就要支付的手续费.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
-        <translation>警告: 请检查电脑日期和时间是否正确！动态币核心没办法在时钟不准的情况下正常运作。</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
+        <translation>警告: 请检查电脑日期和时间是否正确！动态币核心无法在时钟不准的情况下正常运作。</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
@@ -3620,7 +3985,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
-        <translation>在白名单中的节点不会因为检测到DoS攻击而被停用. 来自这些节点的交易也一定会被转发, 即使说交易本神就来自记忆池. 适用于网关</translation>
+        <translation>在白名单中的节点不会因为检测到DoS攻击而被停用. 来自这些节点的交易也一定会被转发, 即使交易已在记忆池. 适用于网关</translation>
     </message>
     <message>
         <source>(33300 could be used only on mainnet)</source>
@@ -3645,8 +4010,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>总是通过DNS查询对等地址(默认: %u)</translation>
     </message>
     <message>
-        <source>Cannot resolve -whitebind address: '%s'</source>
-        <translation>不能解决 -whitebind 地址: '%s'</translation>
+        <source>Cannot resolve -whitebind address: &apos;%s&apos;</source>
+        <translation>不能解决 -whitebind 地址: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Connect through SOCKS5 proxy</source>
@@ -3670,7 +4035,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>PrivateSend is idle.</source>
-        <translation>匿名化处于空闲状态</translation>
+        <translation>匿名发送处于空闲状态.</translation>
     </message>
     <message>
         <source>PrivateSend request complete:</source>
@@ -3685,7 +4050,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>未激活安全模式，重新写入真正安全模式项目(默认: %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a dynode (0-1, default: %u)</source>
+        <source>Enable the client to act as a Dynode (0-1, default: %u)</source>
         <translation>激活客户端,使其作为主节点(0-1, 默认: %u)</translation>
     </message>
     <message>
@@ -3698,11 +4063,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
-        <translation>错误: 一个之名的内部错误, 到debug.log查看更多细节</translation>
+        <translation>错误: 发生了一个致命的内部错误, 有关详细信息，请参阅debug.log</translation>
     </message>
     <message>
-        <source>Error: Can't select current denominated inputs</source>
-        <translation>错误: 无法选择现在也面额化的输入</translation>
+        <source>Error: Can&apos;t select current denominated inputs</source>
+        <translation>错误: 无法选择当前面额的输入</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
@@ -3719,7 +4084,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Found enough users, signing ...</source>
-        <translation>用户数已满足，开始签名 ... </translation>
+        <translation>用户数已满足，开始签名...</translation>
     </message>
     <message>
         <source>Generate coins (default: %u)</source>
@@ -3731,11 +4096,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Imports blocks from external blk000??.dat file</source>
-        <translation>从其它来源的 blk000??.dat 档汇入区块</translation>
+        <translation>从其它来源的 blk000??.dat 文件导入区块</translation>
     </message>
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
-        <translation>在除错输出内容中包含网络IP地址(默认: %u)</translation>
+        <translation>在调试输出内容中包含网络IP地址(默认: %u)</translation>
     </message>
     <message>
         <source>Incompatible mode.</source>
@@ -3755,7 +4120,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
-        <translation>输入是无效的。</translation>
+        <translation>输入无效</translation>
     </message>
     <message>
         <source>InstantSend options:</source>
@@ -3766,32 +4131,32 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>存款不足。</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>无效-洋葱头地址：'%s'</translation>
+        <source>Invalid -onion address: &apos;%s&apos;</source>
+        <translation>无效-洋葱头地址：&apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>无效-代理地址：'%s'</translation>
+        <source>Invalid -proxy address: &apos;%s&apos;</source>
+        <translation>无效-代理地址：&apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s'</source>
-        <translation>设定 -maxtxfee=&lt;金额&gt; 的金额无效: '%s'</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>设定 -maxtxfee=&lt;金额&gt; 的金额无效: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>设定 --minrelaytxfee=&lt;金额&gt; 的金额无效: '%s'</translation>
+        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>设定 --minrelaytxfee=&lt;金额&gt; 的金额无效: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -mintxfee=&lt;amount&gt;: '%s'</source>
-        <translation>设定 -mintxfee=&lt;金额&gt; 的金额无效: '%s'</translation>
+        <source>Invalid amount for -mintxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>设定 -mintxfee=&lt;金额&gt; 的金额无效: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
-        <translation>设定 -paytxfee=&lt;金额&gt;  的金额无效: '%s' (至少要有%s)</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least %s)</source>
+        <translation>设定 -paytxfee=&lt;金额&gt;  的金额无效: &apos;%s&apos; (至少要有%s)</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>设定 -paytxfee=&lt;金额&gt; 的金额无效: '%s'</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>设定 -paytxfee=&lt;金额&gt; 的金额无效: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Last successful PrivateSend action was too recent.</source>
@@ -3803,23 +4168,23 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Listen for connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>Listen for connections on &lt;port&gt; (default: %u 或 testnet: %u)</translation>
+        <translation>监听 &lt;port&gt; 上的连接(默认: %u 或 测试网: %u)</translation>
     </message>
     <message>
         <source>Loading budget cache...</source>
         <translation>正在读取预算缓存...</translation>
     </message>
     <message>
-        <source>Loading dynode cache...</source>
+        <source>Loading Dynode cache...</source>
         <translation>正在读取主节点缓存...</translation>
     </message>
     <message>
-        <source>Loading dynode payment cache...</source>
-        <translation>正在读取主节点奖励缓存...</translation>
+        <source>Loading Dynode payment cache...</source>
+        <translation>正在读取主节点付款缓存...</translation>
     </message>
     <message>
         <source>Mixing in progress...</source>
-        <translation>混淆中...</translation>
+        <translation>硬币正在混合...</translation>
     </message>
     <message>
         <source>No Dynodes detected.</source>
@@ -3839,7 +4204,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Only accept block chain matching built-in checkpoints (default: %u)</source>
-        <translation>只接受与镶入检验点匹配的数据块链 (默认: %u)</translation>
+        <translation>只接受与内置检查点匹配的区块链 (默认: %u)</translation>
     </message>
     <message>
         <source>Only connect to nodes in network &lt;net&gt; (ipv4, ipv6 or onion)</source>
@@ -3851,11 +4216,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Run a thread to flush wallet periodically (default: %u)</source>
-        <translation>启用定期将变动写入​​钱包档的执行绪(默认: %u)</translation>
+        <translation>运行一个线程定期刷新钱包(默认: %u)</translation>
     </message>
     <message>
         <source>Send trace/debug info to debug.log file (default: %u)</source>
-        <translation>发送 追踪或除错 信息到debug.log中 (默认: %u)</translation>
+        <translation>发送追踪或调试信息到debug.log中 (默认: %u)</translation>
     </message>
     <message>
         <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
@@ -3883,7 +4248,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Sets the DB_PRIVATE flag in the wallet db environment (default: %u)</source>
-        <translation>在钱包资料库环境变数设定DB_PRIVATE 旗标(默认: %u)</translation>
+        <translation>在钱包资料库环境变数设定DB_PRIVATE标志(默认: %u)</translation>
     </message>
     <message>
         <source>Signing timed out.</source>
@@ -3898,7 +4263,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>指定连接超时毫秒数 (最小值: 1, 默认: %d)</translation>
     </message>
     <message>
-        <source>Specify dynode configuration file (default: %s)</source>
+        <source>Specify Dynode configuration file (default: %s)</source>
         <translation>指定主节点配置文件 (默认: %s)</translation>
     </message>
     <message>
@@ -3926,20 +4291,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>正在同步预算...</translation>
     </message>
     <message>
-        <source>Synchronizing dynode winners...</source>
+        <source>Synchronizing Dynode winners...</source>
         <translation>正在同步获得奖励的主节点...</translation>
     </message>
     <message>
-        <source>Synchronizing dynodes...</source>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>正在同步Dynode付款...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
         <translation>正在同步主节点...</translation>
     </message>
     <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>正在同步管理对象...</translation>
+    </message>
+    <message>
         <source>Synchronizing sporks...</source>
-        <translation>同步分叉...</translation>
+        <translation>正在同步分叉...</translation>
     </message>
     <message>
         <source>This is not a Dynode.</source>
-        <translation>这并不是一个主节点。</translation>
+        <translation>这不是一个主节点。</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -3947,8 +4320,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart Dynamic to complete</source>
-        <translation>錢包需要重寫: 請重新啓動達世幣核心來完成
-钱包需要重写: 请重新启动动态币核心来完成</translation>
+        <translation>钱包需要重写: 请重新启动动态币核心来完成</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
@@ -3964,19 +4336,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Invalid dynodepairingkey. Please see documenation.</source>
-        <translation>无效主节点私钥。请查阅文件材料。</translation>
+        <translation>无效主节点私钥。请查阅文档。</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>
         <translation>(设置 33300 为主网)</translation>
     </message>
     <message>
-        <source>Can't find random Dynode.</source>
+        <source>Can&apos;t find random Dynode.</source>
         <translation>无法找到随机主节点.</translation>
     </message>
     <message>
-        <source>Can't mix while sync in progress.</source>
-        <translation>无法在同步过程中进行混淆.</translation>
+        <source>Can&apos;t mix while sync in progress.</source>
+        <translation>无法在同步过程中进行混合.</translation>
     </message>
     <message>
         <source>Could not parse dynode.conf</source>
@@ -4012,7 +4384,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Loading block index...</source>
-        <translation>正在读取数据块索引...</translation>
+        <translation>正在读取区块索引...</translation>
     </message>
     <message>
         <source>Loading wallet... (%3.2f %%)</source>
@@ -4056,7 +4428,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Not enough file descriptors available.</source>
-        <translation>文件说明符不可用</translation>
+        <translation>文件说明符不可用.</translation>
     </message>
     <message>
         <source>Options:</source>
@@ -4080,11 +4452,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
-        <translation>从现在的blk000??.dat文件重新建立数据块链索引</translation>
+        <translation>从现在的blk000??.dat文件重新建立区块链索引</translation>
     </message>
     <message>
         <source>Rescan the block chain for missing wallet transactions</source>
-        <translation>对丢失的钱包交易重新扫描数据块链</translation>
+        <translation>对丢失的钱包交易重新扫描区块链</translation>
     </message>
     <message>
         <source>Rescanning...</source>
@@ -4092,15 +4464,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
-        <translation>运行至后台并且接受命令</translation>
+        <translation>后台运行并接受命令</translation>
     </message>
     <message>
         <source>Session not complete!</source>
-        <translation>对话未完成！</translation>
+        <translation>会话未完成！</translation>
     </message>
     <message>
         <source>Session timed out.</source>
-        <translation>对话超市</translation>
+        <translation>会话超时.</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -4111,16 +4483,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>以字节为单位设置最大的块(默认： %d)</translation>
     </message>
     <message>
-        <source>Set the dynode private key</source>
+        <source>Set the Dynode private key</source>
         <translation>设置主节点私钥</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
-        <translation>显示所有debug选项(使用： --help -help-debug)</translation>
+        <translation>显示所有调试选项(使用： --help -help-debug)</translation>
     </message>
     <message>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
-        <translation>客户启动时缩小debug.log文件(默认： 1 when no -debug)</translation>
+        <translation>客户端启动时缩小debug.log文件(默认：无-debug时为1)</translation>
     </message>
     <message>
         <source>Signing failed.</source>
@@ -4148,7 +4520,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>This help message</source>
-        <translation>此帮助信息</translation>
+        <translation>帮助信息</translation>
     </message>
     <message>
         <source>This is experimental software.</source>
@@ -4195,8 +4567,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>无法签署交叉信息，错误的密钥？</translation>
     </message>
     <message>
-        <source>Unknown network specified in -onlynet: '%s'</source>
-        <translation>在 -onlynet 指定了不明的网路别: '%s'</translation>
+        <source>Unknown network specified in -onlynet: &apos;%s&apos;</source>
+        <translation>在 -onlynet 指定了不明的网路别: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Unknown state: id = %u</source>
@@ -4228,7 +4600,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
-        <translation>验证数据块中...</translation>
+        <translation>验证区块中...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
@@ -4240,7 +4612,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Wallet is locked.</source>
-        <translation>钱包被锁。</translation>
+        <translation>钱包已锁。</translation>
     </message>
     <message>
         <source>Wallet options:</source>
@@ -4264,7 +4636,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Your entries added successfully.</source>
-        <translation>您的词条也添加成功.</translation>
+        <translation>词条添加成功.</translation>
     </message>
     <message>
         <source>Your transaction was accepted into the pool!</source>
@@ -4287,793 +4659,756 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Needs Translating</translation>
+        <translation>显示的信息可能已过时。建立连接后，您的钱包会自动与DYNAMIC网络同步，但是此过程尚未完成。这意味着将看不到最近的交易，并且在此过程完成之前，余额不会是最新的.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Needs Translating</translation>
+        <translation>在该阶段可能无法花费DYN！</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Needs Translating</translation>
+        <translation>剩余区块数</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>Needs Translating</translation>
+        <translation>未知</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Needs Translating</translation>
+        <translation>未知...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Needs Translating</translation>
+        <translation>未知.正在同步头文件(%1)...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Needs Translating</translation>
+        <translation>最后的区块时间</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Needs Translating</translation>
+        <translation>进度</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Needs Translating</translation>
+        <translation>平均每小时进度</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Needs Translating</translation>
+        <translation>正在计算...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Needs Translating</translation>
+        <translation>预计剩余时间</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;隐藏</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Needs Translating</translation>
-    </message>
-</context>
-<context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>隐藏</translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>添加BDAP用户</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名称：</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>注册的月数：</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>用户ID：</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>建立一个新地址</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>添加用户</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>群组ID：</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>新增群组</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>成功添加用户</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>找到记录： </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>信息</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>好</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP链接的详细信息</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者：</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>接受者：</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>链接公共密钥（请求者)：</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>链接公共密钥（收件人）：</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者链接地址：</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>收件人链接地址：</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>签名证明：</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>连结讯息：</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
-    </message>   
+        <translation>时间：</translation>
+    </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日：</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>已过期：</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>待接受的BDAP链接的详细信息</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>注册天数:</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>到期日： </translation>
+    </message>
+    <message>
+        <source>Requestor: </source>
+        <translation>请求者： </translation>
+    </message>
+    <message>
+        <source>Recipient: </source>
+        <translation>接受者： </translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor): </source>
+        <translation>链接公共密钥（请求者)： </translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient): </source>
+        <translation>链接公共密钥（收件人）： </translation>
+    </message>
+    <message>
+        <source>Requestor Link Address: </source>
+        <translation>请求者链接地址： </translation>
+    </message>
+    <message>
+        <source>Recipient Link Address: </source>
+        <translation>收件人链接地址: </translation>
+    </message>
+    <message>
+        <source>Signature Proof: </source>
+        <translation>签名证明： </translation>
+    </message>
+    <message>
+        <source>Link Message: </source>
+        <translation>连结讯息： </translation>
+    </message>
+    <message>
+        <source>TXID: </source>
+        <translation>TXID: </translation>
+    </message>
+    <message>
+        <source>Time: </source>
+        <translation>时间： </translation>
+    </message>
+    <message>
+        <source>Please note that your transaction will not be reflected until the next block.</source>
+        <translation>请注意，您的交易要到下一个程序段才会反映出来.</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP用户的详细信息</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP错误</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>接受者</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日期</translation>
     </message>
-    </context>
+</context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP错误</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>接受者</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日期</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>对象完整路径</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>用户</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>选择此选项时，可以使用更新和删除事务</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>只显示我的用户</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Refresh All</source>
+        <translation>全部刷新</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>添加一个用户</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>添加用户</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>更新用户</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>从列表中删除当前选择的用户</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>删除用户</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>群组</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>链接</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>只显示我的群组</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>添加一个新的群组</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>新增群组</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>更新群组</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>从列表中删除当前选择的群组</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;删除群组</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>添加BDAP群组</translation>
     </message>
     <message>
-        <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <source>Are you sure you want to delete \&quot;</source>
+        <translation>确定删除 \”</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>确认删除帐户</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>更新BDAP群组</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP群组详细信息</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP用户详细信息</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>更新BDAP用户</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>成功删除用户</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>成功删除群组</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP错误</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>输入通用名称进行搜索</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>输入要搜索的对象的完整路径</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>接受者</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日期</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>等待接受</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>待处理的请求</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>完成</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者搜索</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>收件人搜寻</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>接受</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>删除</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>添加新链接</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>拒绝</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>垃圾邮件</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>确认接受链接</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>成功接受链接</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>待接受的BDAP链接的详细信息</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>待处理的BDAP链接请求的详细信息</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>找到记录： </translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>更新BDAP帐户</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>用户ID：</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名称：</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>注册天数:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>好</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>更新</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>组ID：</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>到期日： </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>成功更新用户</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>成功更新群组</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
-    </message>
-</context>
-<context>
-    <name>BdapLinkDetailDialog</name>
-    <message>
-        <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Requestor: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Recipient: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Link Message: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>TXID: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Time: </source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>信息</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP用户详细信息</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>表格</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>通用名称：</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>对象完整路径:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>钱包地址：</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>DHT公钥：</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>链接地址：</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TX ID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>时间：</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>到期日：</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>已过期：</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>好</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>信息</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP错误</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP添加新链接</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(必要)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>（可选的)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>从：</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>至：</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>连结讯息：</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>注册天数:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>添加链接</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP添加链接错误</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>请求者，收件人和链接消息是必填字段</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
-        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the &apos;Import&apos; button.</source>
+        <translation>提示：如果导入过程被中断（例如断电或意外关闭），请重新输入恢复短语或私钥，然后单击“导入”按钮.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>选择文件</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>导入助记符</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>导入恢复短语</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>从剪贴板粘贴</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>清除</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>输入与BIP39匹配的恢复短语/助记符</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>恢复短语</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>输入密码来保护您的恢复短语.（可选的）</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>语言</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>警告</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>确保您备份了恢复短语和密码短语-它们不可恢复！
+导入助记符后，电子钱包将重新启动.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>导入</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>重新导入</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>创建助记符</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>创建一个新的恢复短语</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>复制到剪贴板</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>无序字节</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>生成</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>验证</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>撤消</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>导入私钥</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>输入一个私钥</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>强制重新扫描</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>示例：L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>导入私钥文件</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>输入私钥文件</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>浏览</translation>
     </message>
     <message>
-        <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Wallet already has an HD account loaded.
-By importing another recovery phrase a new account will be created and set as the default.
-The wallet will receive on addresses from the new imported account only.
-Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
-</source>
-        <translation>Needs Translating</translation>
+        <source>Tips: The private key file is the file exported by Dynamic &apos;dumpwallet filename&apos;, not the .dat file.</source>
+        <translation>提示：私钥文件是由动态“ dumpwallet文件名”导出的文件，而不是.dat文件。</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5081,11 +5416,15 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>钱包已加载HD帐户.
+通过导入其他恢复短语，将创建一个新帐户并将其设置为默认帐户.
+钱包将只接收从新导入的帐户地址.
+在助记符导入之前，您的旧帐户钱包文件将重命名为wallat.dat.。＆lt;isodate＆gt; 在您的数据目录中
+</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>输入您的BIP39兼容恢复短语/助记符。</translation>
     </message>
 </context>
 </TS>

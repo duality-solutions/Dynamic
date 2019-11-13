@@ -479,6 +479,10 @@
         <translation>Kommandozeilenoptionen</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Mnemonik/privaten Schlüssel importieren...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;PrivateSend Information</translation>
     </message>
@@ -2039,7 +2043,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>GPU Mining:</source>
-        <translation>GPU Mining</translation>
+        <translation>GPU Mining:</translation>
     </message>
     <message>
         <source>Client version</source>
@@ -5445,29 +5449,6 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>BDAP Fehler</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Allgemeine Bezeichnung</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Vollständiger Pfad des Objekts</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Verfallsdatum</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Gefundene Einträge:</translation>
-    </message>
-</context>
-<context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
@@ -5654,6 +5635,10 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
         <translation>Aktualisieren</translation>
     </message>
     <message>
+        <source>Refresh All</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Add a user</source>
         <translation>Einen Benutzer hinzufügen</translation>
     </message>
@@ -5771,7 +5756,7 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Akzeptieren ausstehend</translation>
     </message>
     <message>
         <source>Pending Request</source>
@@ -5828,6 +5813,22 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     <message>
         <source>BDAP Pending Request Link Detail</source>
         <translation>BDAP austehende Verknüpfungsdetails der Anforderung </translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>Allgemeine Bezeichnung</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Vollständiger Pfad des Objekts</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Verfallsdatum</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Gefundene Einträge:</translation>
     </message>
 </context>
 <context>
@@ -6102,7 +6103,7 @@ zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
+Wallet will restart after mnemonic has been imported.</source>
         <translation>Bitte stellen Sie sicher, dass Sie eine Sicherung Ihrer Wiederherstellungsphrase und Ihrer Passphrase angefertigt haben - diese sind nicht wiederherstellbar!
 		Die Wallet wird nachdem  import der mnemonic neu gestartet.</translation>
     </message>
