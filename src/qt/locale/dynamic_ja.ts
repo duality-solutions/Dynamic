@@ -572,8 +572,28 @@
 <context>
     <name>ClientModel</name>
     <message>
+        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <translation>合計: %1 (PS 互換性がある: %2 / 有効化: %3)</translation>
+    </message>
+    <message>
         <source>Network Alert</source>
-        <translation>ネットワーク警告</translation>
+        <translation>ネットワークアラート</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>普通</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>適用できません</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>サポート対象</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>未対応</translation>
     </message>
 </context>
 <context>
@@ -909,6 +929,49 @@
     <message>
         <source>Show splash screen on startup (default: 1)</source>
         <translation>起動時にスプラッシュ画面を表示する (デフォルト設定： 1)</translation>
+    </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>PrivateSend情報</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>
+PrivateSendは、資金の出所を不明瞭にすることにより、真の経済的プライバシーを提供します。
+ウォレットのすべてのDynamicは、別々の個別のコインと考えることができるさまざまな&#39;入力&#39;で構成されています。&lt;br&gt;
+PrivateSendは革新的なプロセスを使用して、コインを財布から取り出すことなく、入力を他の2人の入力と混合します。
+あなたは常にあなたのお金のコントロールを保持します。.&lt;hr&gt;
+&lt;b&gt;PrivateSendプロセスは次のように機能します:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSendは、トランザクション入力を標準額面に分解することから始まります。
+これらの額面は、0.001、0.01 DYN、0.1 DYN、1 DYN、10 DYNです。毎日使用する紙幣のようなものです。&lt;/li&gt;
+&lt;li&gt;その後、ウォレットは、&#39;DYNODES&#39;と呼ばれるネットワーク上の特別に構成されたソフトウェアノードにリクエストを送信します
+これらのDynodesは、特定の金種を混合することに関心があることを通知されます。
+識別可能な情報はDynodesに送信されないため、彼らは&#39;誰&#39;あなたは。&lt;/li&gt;
+&lt; li&gt;他の2人が同様のメッセージを送信し、同じ金種をミックスすることを示すと、ミキシングセッションが開始されます。
+Dynodeは入力を混合し、3人のユーザー全員に指示します。変換された入力を自分自身に返すウォレット。
+ウォレットはその額面を直接自分自身に支払いますが、別の住所（変更住所と呼ばれます）で支払われます。&lt;/li&gt;
+&lt;li&gt;資金を完全に隠すために、ウォレットは各金種でこのプロセスを何度も繰り返す必要があります。
+プロセスが完了するたびに、「ラウンド」と呼ばれます。 PrivateSendの各ラウンドでは、資金の発信元を特定するのが指数関数的に難しくなります。&lt;/li&gt;
+&lt;li&gt;このミキシングプロセスは、ユーザーの介入なしでバックグラウンドで実行されます。取引を行いたい場合、
+資金はすでに匿名化されています。追加の待機は必要ありません。&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;重要：&lt;/b&gt;ウォレットには、これらの アドレスの変更 が2000個しか含まれていません。ミキシングイベントが発生するたびに、最大9つのアドレスが使い果たされます。
+これは、それらの2000のアドレスが約200のミキシングイベントの間続くことを意味します。 1900個を使用する場合、ウォレットはさらにアドレスを作成する必要があります。
+ただし、自動バックアップを有効にしている場合のみ、これを行うことができます。&lt;br&gt;
+したがって、バックアップが無効になっているユーザーのPrivateSendも無効になります。 &lt;hr&gt;</translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>Wählen Sie beim Start ein Datenverzeichnis aus (Standard: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>Willkommensbildschirm beim Start anzeigen (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>Alle über die GUI vorgenommen Einstellungen zurücksetzen</translation>
     </message>
 </context>
 <context>
@@ -1261,7 +1324,7 @@
     </message>
     <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>Dynodeに送信した金種＆lt;br＆gt;混合するには、他のユーザーがまったく同じ金種を送信する必要があります。</translation>
+        <translation>Dynodeに送信した金種&lt;br&gt;混合するには、他のユーザーがまったく同じ金種を送信する必要があります。</translation>
     </message>
     <message>
         <source>(Last Message)</source>
@@ -1319,7 +1382,7 @@
     </message>
     <message>
         <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
-        <translation>匿名化するのに十分な互換性のある入力＆lt;span style=＆apos;color:red;＆apos;＆gt;%1＆lt;/span＆gt;,＆lt;br＆gt;は匿名化 ＆lt;span style=＆apos;color:red;＆apos;＆gt;%2＆lt;/span＆gt; 代わりに</translation>
+        <translation>匿名化するのに十分な互換性のある入力&lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;は匿名化 &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; 代わりに</translation>
     </message>
     <message>
         <source>Overall progress</source>
@@ -1523,6 +1586,10 @@
 <context>
     <name>RPCConsole</name>
     <message>
+        <source>Tools window</source>
+        <translation>Werkzeug Fenster</translation>
+    </message>
+    <message>
         <source>&amp;Information</source>
         <translation>情報 (&amp;I)</translation>
     </message>
@@ -1547,6 +1614,10 @@
         <translation>接続数</translation>
     </message>
     <message>
+        <source>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>現在のデータディレクトリからダイナミックデバッグログファイルを開きます。大きなログファイルの場合、これには数秒かかる場合があります。</translation>
+    </message>
+    <message>
         <source>&amp;Open</source>
         <translation>開く (&amp;O)</translation>
     </message>
@@ -1561,6 +1632,18 @@
     <message>
         <source>Last block time</source>
         <translation>最終ブロックの日時</translation>
+    </message>
+    <message>
+        <source>Memory Pool</source>
+        <translation>メモリプール</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>現在のトランザクション数</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>メモリ使用量</translation>
     </message>
     <message>
         <source>Debug log file</source>
@@ -1579,6 +1662,18 @@
         <translation>現在のブロック数</translation>
     </message>
     <message>
+        <source>CPU Mode:</source>
+        <translation>CPUモード：</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPUモード：</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPUマイニング：</translation>
+    </message>
+    <message>
         <source>Client version</source>
         <translation>クライアントのバージョン</translation>
     </message>
@@ -1587,8 +1682,16 @@
         <translation>使用中のBerkleyDBバージョン</translation>
     </message>
     <message>
+        <source>Datadir</source>
+        <translation>データディレクトリ</translation>
+    </message>
+    <message>
         <source>Block chain</source>
         <translation>ブロック チェーン</translation>
+    </message>
+    <message>
+        <source>Number of Dynodes</source>
+        <translation>Dynodesの数</translation>
     </message>
     <message>
         <source>&amp;Console</source>
@@ -1679,6 +1782,67 @@
         <translation>Ping時間</translation>
     </message>
     <message>
+        <source>&amp;Wallet Repair</source>
+        <translation>&amp;ウォレット修理</translation>
+    </message>
+    <message>
+        <source>Salvage wallet</source>
+        <translation>サルベージ財布</translation>
+    </message>
+    <message>
+        <source>Rescan blockchain files</source>
+        <translation>ブロックチェーンファイルを再スキャンする</translation>
+    </message>
+    <message>
+        <source>Recover transactions 1</source>
+        <translation>トランザクションを回復1</translation>
+    </message>
+    <message>
+        <source>Recover transactions 2</source>
+        <translation>トランザクションの回復2</translation>
+    </message>
+    <message>
+        <source>Upgrade wallet format</source>
+        <translation>ウォレット形式のアップグレード</translation>
+    </message>
+    <message>
+        <source>The buttons below will restart the wallet with command-line options to repair the wallet, fix issues with corrupt blockhain files or missing/obsolete transactions.</source>
+        <translation>以下のボタンは、コマンドラインオプションを使用してウォレットを再起動し、ウォレットを修復したり、破損したブロックハインファイルや欠落/廃止されたトランザクションの問題を修正します。</translation>
+    </message>
+    <message>
+        <source>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</source>
+        <translation>-salvagewallet: 破損したwallet.datから秘密鍵を回復しようとします。</translation>
+    </message>
+    <message>
+        <source>-rescan: Rescan the block chain for missing wallet transactions.</source>
+        <translation>-rescan: 欠落しているウォレットトランザクションのブロックチェーンを再スキャンします。</translation>
+    </message>
+    <message>
+        <source>-zapwallettxes=1: Recover transactions from blockchain (keep meta-data, e.g. account owner).</source>
+        <translation>-zapwallettxes=1: ブロックチェーンからトランザクションを回復します（メタデータを保持します（例：アカウント所有者）。</translation>
+    </message>
+    <message>
+        <source>-zapwallettxes=2: Recover transactions from blockchain (drop meta-data).</source>
+        <translation>-zapwallettxes=2: ブロックチェーンからトランザクションを回復します（メタデータをドロップします）。</translation>
+    </message>
+    <message>
+    
+        <source>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
+        <translation>-upgradewallet: 起動時にウォレットを最新の形式にアップグレードします。 （注：これはウォレット自体の更新ではありません！）</translation>
+    </message>
+    <message>
+        <source>Wallet repair options.</source>
+        <translation>ウォレットの修復オプション。</translation>
+    </message>
+    <message>
+        <source>Rebuild index</source>
+        <translation>インデックスを再構築</translation>
+    </message>
+    <message>
+        <source>-reindex: Rebuild block chain index from current blk000??.dat files.</source>
+        <translation>-reindex：現在のblk000 ??。datファイルからブロックチェーンインデックスを再構築します。</translation>
+    </message>
+    <message>
         <source>In:</source>
         <translation>入力：</translation>
     </message>
@@ -1687,7 +1851,11 @@
         <translation>出力：</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>%1 RPCコンソールへようこそ。</translation>
+    </message>
+    <message>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
         <translation>上下の矢印で履歴をたどれます。 &lt;b&gt;Ctrl-L&lt;/b&gt; でスクリーンを消去できます。</translation>
     </message>
     <message>
@@ -3559,6 +3727,14 @@
         <translation>RPC サービスのスレッド数を設定 (デフォルト設定： %d)</translation>
     </message>
     <message>
+        <source>Sets the DB_PRIVATE flag in the wallet db environment (default: %u)</source>
+        <translation>ウォレットdb環境でDB_PRIVATEフラグを設定します（デフォルト：%u）</translation>
+    </message>
+    <message>
+        <source>Signing timed out.</source>
+        <translation>署名がタイムアウトしました。</translation>
+    </message>
+    <message>
         <source>Specify configuration file (default: %s)</source>
         <translation>設定ファイルの指定 (デフォルト設定： %s)</translation>
     </message>
@@ -3567,12 +3743,68 @@
         <translation>接続のタイムアウトをミリセコンドで指定 (最小値： 1, デフォルト設定：: %d)</translation>
     </message>
     <message>
+        <source>Specify Dynode configuration file (default: %s)</source>
+        <translation>Dynode構成ファイルを指定します（デフォルト： %s）</translation>
+    </message>
+    <message>
         <source>Specify pid file (default: %s)</source>
         <translation>pid ファイルの指定 (デフォルト設定： %s)</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>トランザクション送信時に未検証のおつりを使用する (デフォルト設定： %u)</translation>
+    </message>
+    <message>
+        <source>Stop running after importing blocks from disk (default: %u)</source>
+        <translation>ディスクからブロックをインポートした後に実行を停止します（デフォルト： %u)</translation>
+    </message>
+    <message>
+        <source>Submitted following entries to Dynode: %u / %d</source>
+        <translation>次のエントリをDynodeに送信しました: %u / %d</translation>
+    </message>
+    <message>
+        <source>Submitted to Dynode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Dynodeに送信され、さらにエントリを待機しています ( %u / %d ) %s</translation>
+    </message>
+    <message>
+        <source>Submitted to Dynode, waiting in queue %s</source>
+        <translation>Dynodeに送信され、キューで待機しています %s</translation>
+    </message>
+    <message>
+        <source>Synchronization failed</source>
+        <translation>同期に失敗しました</translation>
+    </message>
+    <message>
+        <source>Synchronization finished</source>
+        <translation>同期が完了しました</translation>
+    </message>
+    <message>
+        <source>Synchronizing budgets...</source>
+        <translation>予算を同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode winners...</source>
+        <translation>Dynodeの勝者を同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Dynodeの支払いを同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>ダイノードの同期...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>ガバナンスオブジェクトの同期...</translation>
+    </message>
+    <message>
+        <source>Synchronizing sporks...</source>
+        <translation>スポークを同期しています...</translation>
+    </message>
+    <message>
+        <source>This is not a Dynode.</source>
+        <translation>これはダイノードではありません。</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -4610,7 +4842,7 @@ Your old account wallet file will be renamed to wallat.dat.before-mnemonic-impor
         <translation>ウォレットには既にHDアカウントが読み込まれています。
 別の復旧フレーズをインポートすると、新しいアカウントが作成され、デフォルトとして設定されます。
 ウォレットは、新しくインポートされたアカウントからのみアドレスを受け取ります。
-古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます＆lt;isodate＆gt;データディレクトリ内</translation>
+古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます&lt;isodate&gt;データディレクトリ内</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -4621,7 +4853,7 @@ Your old account wallet file will be renamed to wallat.dat.before-mnemonic-impor
         <translation>ウォレットには既にHDアカウントが読み込まれています。
 別の復旧フレーズをインポートすると、新しいアカウントが作成され、デフォルトとして設定されます。
 ウォレットは、新しくインポートされたアカウントからのみアドレスを受け取ります。
-古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます＆lt;isodate＆gt;データディレクトリ内</translation>
+古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます&lt;isodate&gt;データディレクトリ内</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
