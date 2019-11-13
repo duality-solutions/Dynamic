@@ -479,6 +479,10 @@
         <translation>Параметры командной строки</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Импортировать мнемонический/закрытый ключ...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;PrivateSend информация</translation>
     </message>
