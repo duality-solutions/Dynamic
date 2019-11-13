@@ -451,6 +451,10 @@
         <translation>Možnosti príkazového riadku</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Uvozi mnemotehnični/zasebni ključ...</translation>
+    </message>
+    <message>
         <source>Dynamic client</source>
         <translation>Dynamic klient</translation>
     </message>
