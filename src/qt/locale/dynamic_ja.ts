@@ -428,7 +428,7 @@
     </message>
     <message>
         <source>Open a dynamic: URI or payment request</source>
-        <translation>ダイナミックを開く：URIまたは支払い要求</translation>
+        <translation>dynamic：URIまたは支払い要求を開きます</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -449,12 +449,12 @@
     <message numerus="yes">
         <source>Processed %n block(s) of transaction history.</source>
         <translation>
-            <numerusform>トランザクション履歴の％nブロックを処理しました。</numerusform>
+            <numerusform>トランザクション履歴の %n ブロックを処理しました。</numerusform>
         </translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
-        <translation>追加データの同期：％p％</translation>
+        <translation>追加データの同期： %p%</translation>
     </message>
     <message>
         <source>Show the Dynamic help message to get a list with possible Dynamic command-line options</source>
@@ -482,7 +482,7 @@
     </message>
     <message>
         <source>Syncing Headers (%1%)...</source>
-        <translation>ヘッダーを同期しています（％1％...</translation>
+        <translation>ヘッダーを同期しています（%1%)...</translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -1319,9 +1319,7 @@
     </message>
     <message>
         <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
-        <translation>匿名化するのに十分な互換性のある入力＆lt;span 
-        style=＆apos;color:red;＆apos;＆gt;％1＆lt;/span＆gt;＆lt;br＆gt;は匿名化 ＆lt;span 
-        style=＆apos;color:red;＆apos;＆gt;％2＆lt;/span＆gt; 代わりに</translation>
+        <translation>匿名化するのに十分な互換性のある入力＆lt;span style=＆apos;color:red;＆apos;＆gt;%1＆lt;/span＆gt;,＆lt;br＆gt;は匿名化 ＆lt;span style=＆apos;color:red;＆apos;＆gt;%2＆lt;/span＆gt; 代わりに</translation>
     </message>
     <message>
         <source>Overall progress</source>
@@ -1338,12 +1336,12 @@
     <message numerus="yes">
         <source>Denominated inputs have %5 of %n rounds on average</source>
         <translation>
-            <numerusform>額面金額は、平均で ％n の ％5 ラウンドです</numerusform>
+            <numerusform>額面金額は、平均で %n の %5 ラウンドです</numerusform>
         </translation>
     </message>
     <message>
         <source>Found enough compatible inputs to anonymize %1</source>
-        <translation>％1を匿名化するのに十分な互換性のある入力が見つかりました</translation>
+        <translation>%1 を匿名化するのに十分な互換性のある入力が見つかりました</translation>
     </message>
     <message>
         <source>Mixed</source>
@@ -1367,7 +1365,7 @@
     </message>
     <message>
         <source>PrivateSend requires at least %1 to use.</source>
-        <translation>PrivateSendを使用するには少なくとも ％1 が必要です。</translation>
+        <translation>PrivateSendを使用するには少なくとも %1 が必要です。</translation>
     </message>
     <message>
         <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
@@ -1394,7 +1392,7 @@
     </message>
     <message>
         <source>Invalid payment address %1</source>
-        <translation>支払いのアドレス「%1」は無効です</translation>
+        <translation>支払いのアドレス %1 は無効です</translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1926,7 +1924,7 @@
     </message>
     <message>
         <source>Pay only the required fee of %1</source>
-        <translation>％1 の必要な料金のみお支払いください</translation>
+        <translation>%1 の必要な料金のみお支払いください</translation>
     </message>
     <message>
         <source>Confirmation time target:</source>
@@ -2900,7 +2898,7 @@
     </message>
     <message>
         <source>Are you sure you want to start Dynode %1?</source>
-        <translation>Dynode％1を起動してもよろしいですか？</translation>
+        <translation>Dynode %1 を起動してもよろしいですか？</translation>
     </message>
     <message>
         <source>Please wait...</source>
@@ -2916,7 +2914,7 @@
     </message>
     <message>
         <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
-        <translation>％d個のダイノードを正常に起動しました。％dの起動に失敗しました。合計％d</translation>
+        <translation>%d 個のダイノードを正常に起動しました。 %d の起動に失敗しました。合計 %d</translation>
     </message>
 </context>
 <context>
@@ -3015,7 +3013,7 @@
     </message>
     <message>
         <source>All mined coins will go to %1</source>
-        <translation>採掘されたコインはすべて％1に移動します</translation>
+        <translation>採掘されたコインはすべて %1 に移動します</translation>
     </message>
     <message>
         <source>Slider will show once Dynamic has finished syncing</source>
@@ -3478,11 +3476,11 @@
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>JSON-RPC接続をリッスンします（デフォルト： ％u またはテストネット： ％u）</translation>
+        <translation>JSON-RPC接続をリッスンします（デフォルト： %u またはテストネット： %u）</translation>
     </message>
     <message>
         <source>Listen for connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>JSON-RPC接続をリッスンします（デフォルト： ％u またはテストネット： ％u）</translation>
+        <translation>JSON-RPC接続をリッスンします（デフォルト： %u またはテストネット： %u）</translation>
     </message>
     <message>
         <source>Loading budget cache...</source>
@@ -3510,7 +3508,7 @@
     </message>
     <message>
         <source>Lock Dynodes from Dynode configuration file (default: %u)</source>
-        <translation>Dynode構成ファイルからのDynodeのロック（デフォルト： ％u）</translation>
+        <translation>Dynode構成ファイルからのDynodeのロック（デフォルト： %u）</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
