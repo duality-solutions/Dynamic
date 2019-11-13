@@ -480,6 +480,10 @@ Var vänlig och försök igen.</translation>
         <translation>Kommandoradsalternativ</translation>
     </message>
     <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Importera mnemonic/privat nyckel...</translation>
+    </message>
+    <message>
         <source>&amp;PrivateSend information</source>
         <translation>&amp;Skicka privat information</translation>
     </message>
