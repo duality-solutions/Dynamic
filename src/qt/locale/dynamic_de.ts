@@ -2043,7 +2043,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>GPU Mining:</source>
-        <translation>GPU Mining</translation>
+        <translation>GPU Mining:</translation>
     </message>
     <message>
         <source>Client version</source>
