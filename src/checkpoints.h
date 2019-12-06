@@ -24,6 +24,9 @@ namespace Checkpoints
 //! Returns last CBlockIndex* in mapBlockIndex that is a checkpoint
 CBlockIndex* GetLastCheckpoint(const CCheckpointData& data);
 
+//! Returns true if block passes checkpoint checks
+bool CheckBlock(int nHeight, const uint256& hash, bool fMatchesCheckpoint = false);
+
 } //namespace Checkpoints
 
 #endif // DYNAMIC_CHECKPOINTS_H

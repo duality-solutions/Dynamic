@@ -54,6 +54,11 @@ public:
     //! empty constructor
     Coin() : fCoinBase(false), nHeight(0) {}
 
+    bool IsNull() const
+    {
+        return !fCoinBase && nHeight == 0 && out.IsNull();
+    }
+
     bool IsCoinBase() const
     {
         return fCoinBase;
@@ -244,7 +249,7 @@ public:
      * on! To be safe, best to not hold the returned reference through any other
      * calls to this cache.
       */
-    const Coin& AccessCoin(const COutPoint& output) const;
+    const Coin AccessCoin(const COutPoint& output) const;
 
     /**
      * Add a coin. Set potential_overwrite to true if a non-pruned version may
