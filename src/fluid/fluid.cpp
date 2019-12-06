@@ -541,7 +541,7 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
     return false;
 }
 
-CAmount GetStandardPoWBlockPayment(const int nHeight)
+CAmount GetStandardPoWBlockPayment(const int& nHeight)
 {
     if (nHeight == 1) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
@@ -557,7 +557,7 @@ CAmount GetStandardPoWBlockPayment(const int nHeight)
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetStandardDynodePayment(const int nHeight)
+CAmount GetStandardDynodePayment(const int& nHeight)
 {
     if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
         LogPrint("fluid", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
@@ -565,6 +565,11 @@ CAmount GetStandardDynodePayment(const int nHeight)
     } else {
         return BLOCKCHAIN_INIT_REWARD; // 0 DYN
     }
+}
+
+CAmount GetStandardStakePayment(const int& nHeight)
+{
+    return INITIAL_STAKE_PAYMENT;
 }
 
 bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, const CAmount& txValue)

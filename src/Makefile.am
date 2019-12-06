@@ -377,10 +377,14 @@ libdynamic_wallet_a_SOURCES = \
   bdap/stealth.cpp \
   keepass.cpp \
   policy/rbf.cpp \
+  pos_kernel.cpp \
+  pos_stakeinput.cpp \
   privatesend-client.cpp \
   privatesend-util.cpp \
   rpc/wallet.cpp \
   rpc/walletdump.cpp \
+  uint256.cpp \
+  uint256.h \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/wallet.cpp \

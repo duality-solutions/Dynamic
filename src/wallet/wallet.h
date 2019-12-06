@@ -92,6 +92,7 @@ class CCoinControl;
 class COutput;
 class CReserveKey;
 class CScript;
+class CStakeInput;
 class CTxMemPool;
 class CWalletTx;
 
@@ -113,7 +114,8 @@ enum AvailableCoinsType {
     ONLY_DENOMINATED,
     ONLY_NONDENOMINATED,
     ONLY_1000, // find dynode outputs including locked ones (use with caution)
-    ONLY_PRIVATESEND_COLLATERAL
+    ONLY_PRIVATESEND_COLLATERAL,
+    STAKABLE_COINS // UTXO's that are valid for staking 
 };
 
 struct CompactTallyItem {
@@ -1363,7 +1365,8 @@ public:
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
     bool HaveStealthAddress(const CKeyID& address) const;
-
+    bool SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInputs, const CAmount& nTargetAmount, const int& blockHeight, const bool fPrecompute = false);
+    bool CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime);
 };
 
 /** A key allocated from the key pool. */

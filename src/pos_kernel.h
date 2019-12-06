@@ -7,8 +7,13 @@
 #ifndef DYNAMIC_POS_KERNEL_H
 #define DYNAMIC_POS_KERNEL_H
 
-#include "validation.h"
-#include "pos_stakeinput.h"
+#include <cstdint>
+#include <memory>
+
+class CBlock;
+class CBlockIndex;
+class CStakeInput;
+class uint256;
 
 // MODIFIER_INTERVAL: time to elapse before new modifier is computed
 static const unsigned int MODIFIER_INTERVAL = 60;

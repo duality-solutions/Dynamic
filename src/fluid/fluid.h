@@ -77,8 +77,9 @@ public:
 };
 
 /** Standard Reward Payment Determination Functions */
-CAmount GetStandardPoWBlockPayment(const int nHeight);
-CAmount GetStandardDynodePayment(const int nHeight);
+CAmount GetStandardPoWBlockPayment(const int& nHeight);
+CAmount GetStandardDynodePayment(const int& nHeight);
+CAmount GetStandardStakePayment(const int& nHeight);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount& nExpectedBlockValue, bool fDynodePaid);
 bool IsTransactionFluid(const CScript& txOut);

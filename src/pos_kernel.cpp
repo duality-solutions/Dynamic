@@ -4,16 +4,19 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "pos_stakeinput.h"
+#include "pos_kernel.h"
 
+#include "arith_uint256.h"
 #include "chainparams.h"
 #include "db.h"
 #include "policy/policy.h"
-#include "pos_kernel.h"
+#include "pos_stakeinput.h"
 #include "script/interpreter.h"
 #include "timedata.h"
+#include "uint256.h"
 #include "util.h"
 #include "utilmoneystr.h"
+#include "validation.h"
 
 #include <boost/assign/list_of.hpp>
 
