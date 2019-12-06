@@ -3,11 +3,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "pos_stakeinput.h"
+#include "pos/stakeinput.h"
 
 #include "chain.h"
 #include "chainparams.h"
-#include "pos_kernel.h"
+#include "pos/kernel.h"
 #include "validation.h"
 #include "wallet/wallet.h"
 

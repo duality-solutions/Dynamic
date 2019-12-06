@@ -4,13 +4,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "pos_kernel.h"
+#include "pos/kernel.h"
 
 #include "arith_uint256.h"
 #include "chainparams.h"
 #include "db.h"
 #include "policy/policy.h"
-#include "pos_stakeinput.h"
+#include "pos/stakeinput.h"
 #include "script/interpreter.h"
 #include "timedata.h"
 #include "uint256.h"
