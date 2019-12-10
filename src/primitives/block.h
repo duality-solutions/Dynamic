@@ -78,6 +78,9 @@ public:
     // network and disk
     std::vector<CTransactionRef> vtx;
 
+    // peercoin: block signature - signed by coin base txout[0]'s owner
+    std::vector<unsigned char> vchBlockSig;
+
     // memory only
     mutable CTxOut txoutDynode;                 // dynode payment
     mutable std::vector<CTxOut> voutSuperblock; // superblock payment
@@ -101,6 +104,8 @@ public:
     {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
+        if(vtx.size() > 1 && vtx[1]->IsCoinStake())
+            READWRITE(vchBlockSig);
     }
 
     void SetNull()
@@ -110,6 +115,7 @@ public:
         txoutDynode = CTxOut();
         voutSuperblock.clear();
         fChecked = false;
+        vchBlockSig.clear();
     }
 
     CBlockHeader GetBlockHeader() const
