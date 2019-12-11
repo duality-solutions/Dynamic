@@ -250,6 +250,16 @@ public:
         nSequenceId = 0;
         nTimeMax = 0;
 
+        nMint = 0;
+        nMoneySupply = 0;
+        nFlags = 0;
+        nStakeModifier = 0;
+        nStakeModifierV2 = uint256();
+        nStakeModifierChecksum = 0;
+        prevoutStake.SetNull();
+        nStakeTime = 0;
+
+        // block header
         nVersion = 0;
         hashMerkleRoot = uint256();
         nTime = 0;
@@ -262,7 +272,7 @@ public:
         SetNull();
     }
 
-    CBlockIndex(const CBlockHeader& block)
+    CBlockIndex(const CBlock& block)
     {
         SetNull();
 
@@ -271,6 +281,12 @@ public:
         nTime = block.nTime;
         nBits = block.nBits;
         nNonce = block.nNonce;
+
+        if (block.IsProofOfStake()) {
+            SetProofOfStake();
+            prevoutStake = block.vtx[1]->vin[0].prevout;
+            nStakeTime = block.nTime;
+        }
     }
 
     CDiskBlockPos GetBlockPos() const
@@ -466,6 +482,14 @@ public:
 
         // block hash
         READWRITE(hash);
+
+        if (IsProofOfStake()) {
+            READWRITE(nMint);
+            READWRITE(nMoneySupply);
+            READWRITE(nFlags);
+            READWRITE(prevoutStake);
+            READWRITE(nStakeTime);
+        }
         // block header
         READWRITE(this->nVersion);
         READWRITE(hashPrev);
