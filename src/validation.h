@@ -40,8 +40,9 @@ class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
-class CInv;
 class CConnman;
+class CInv;
+class CKeyStore;
 class CScriptCheck;
 class CTxMemPool;
 class CValidationInterface;
@@ -600,5 +601,9 @@ public:
     CServiceCredit(const std::string& op_str, const CAmount& value,const std::vector<std::vector<unsigned char>>& params)
         : OpType(op_str), nValue(value), vParameters(params) {}
 };
+
+// peercoin: Proof-of-Stake
+bool SignBlock(CBlock& block, const CKeyStore& keystore);
+bool CheckBlockSignature(const CBlock& block);
 
 #endif // DYNAMIC_VALIDATION_H

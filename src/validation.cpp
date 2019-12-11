@@ -34,6 +34,7 @@
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
+#include "keystore.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
 #include "pos/kernel.h"
@@ -41,6 +42,7 @@
 #include "pow.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
+#include "pubkey.h"
 #include "random.h"
 #include "rpc/server.h"
 #include "script/script.h"
@@ -4387,6 +4389,10 @@ static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned 
 
 bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<const CBlock> pblock, bool fForceProcessing, bool* fNewBlock)
 {
+
+    if (pblock->IsProofOfStake() && !CheckBlockSignature(*pblock))
+        return error("ProcessNewBlock() : bad proof-of-stake block signature");
+
     {
         CBlockIndex* pindex = NULL;
         if (fNewBlock)
@@ -5453,3 +5459,52 @@ public:
         mapBlockIndex.clear();
     }
 } instance_of_cmaincleanup;
+
+//! Begin Proof-of-Stake
+// peercoin: sign block
+typedef std::vector<unsigned char> valtype;
+bool SignBlock(CBlock& block, const CKeyStore& keystore)
+{
+    std::vector<valtype> vSolutions;
+    txnouttype whichType;
+    const CTxOut& txout = block.IsProofOfStake()? block.vtx[1]->vout[1] : block.vtx[0]->vout[0];
+
+    if (!Solver(txout.scriptPubKey, whichType, vSolutions))
+        return false;
+    if (whichType == TX_PUBKEY)
+    {
+        // Sign
+        const valtype& vchPubKey = vSolutions[0];
+        CKey key;
+        if (!keystore.GetKey(CKeyID(Hash160(vchPubKey)), key))
+            return false;
+        if (key.GetPubKey() != CPubKey(vchPubKey))
+            return false;
+        return key.Sign(block.GetHash(), block.vchBlockSig);
+    }
+    return false;
+}
+
+// peercoin: check block signature
+bool CheckBlockSignature(const CBlock& block)
+{
+    if ((block.GetHash() == Params().GetConsensus().hashGenesisBlock) || block.IsProofOfWork())
+        return block.vchBlockSig.empty();
+
+    CPubKey pubkey;
+    txnouttype whichType;
+    std::vector<valtype> vSolutions;
+    const CTxOut& txout = block.vtx[1]->vout[1];
+    if (!Solver(txout.scriptPubKey, whichType, vSolutions))
+        return false;
+    if (whichType == TX_PUBKEY || whichType == TX_PUBKEYHASH) {
+        valtype& vchPubKey = vSolutions[0];
+        pubkey = CPubKey(vchPubKey);
+    }
+
+    if (!pubkey.IsValid())
+        return error("%s: invalid pubkey %s", __func__, HexStr(pubkey));
+
+    return pubkey.Verify(block.GetHash(), block.vchBlockSig);
+}
+//! End Proof-of-Stake
