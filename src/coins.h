@@ -36,6 +36,7 @@ public:
 
     //! whether containing transaction was a coinbase
     unsigned int fCoinBase : 1;
+    bool fCoinStake;
 
     //! at which height this containing transaction was included in the active block chain
     uint32_t nHeight : 31;
@@ -48,11 +49,12 @@ public:
     {
         out.SetNull();
         fCoinBase = false;
+        fCoinStake = false;
         nHeight = 0;
     }
 
     //! empty constructor
-    Coin() : fCoinBase(false), nHeight(0) {}
+    Coin() : fCoinBase(false), fCoinStake(false), nHeight(0) {}
 
     bool IsNull() const
     {
@@ -64,6 +66,11 @@ public:
         return fCoinBase;
     }
 
+    bool IsCoinStake() const
+    {
+        return fCoinStake;
+    }
+
     template <typename Stream>
     void Serialize(Stream& s) const
     {
@@ -71,6 +78,9 @@ public:
         uint32_t code = nHeight * 2 + fCoinBase;
         ::Serialize(s, VARINT(code));
         ::Serialize(s, CTxOutCompressor(REF(out)));
+        // peercoin flags
+        unsigned int nFlag = fCoinStake? 1 : 0;
+        ::Serialize(s, VARINT(nFlag));
     }
 
     template <typename Stream>
@@ -81,6 +91,10 @@ public:
         nHeight = code >> 1;
         fCoinBase = code & 1;
         ::Unserialize(s, REF(CTxOutCompressor(out)));
+        // peercoin flags
+        unsigned int nFlag = 0;
+        ::Unserialize(s, VARINT(nFlag));
+        fCoinStake = nFlag & 1;
     }
 
     bool IsSpent() const

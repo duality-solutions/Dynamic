@@ -85,6 +85,8 @@ struct Params {
 
     uint256 defaultAssumeValid;
 
+    int nStakeMinDepth;
+
     int nMaxReorganizationDepth;
 
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
