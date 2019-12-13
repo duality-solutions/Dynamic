@@ -540,9 +540,18 @@ public:
     }
 
     /** Returns the index entry for the tip of this chain, or NULL if none. */
-    CBlockIndex* Tip() const
+    CBlockIndex* Tip(bool fProofOfStake = false) const
     {
-        return vChain.size() > 0 ? vChain[vChain.size() - 1] : NULL;
+        if (vChain.size() < 1)
+            return NULL;
+
+        CBlockIndex* pindex = vChain[vChain.size() - 1];
+
+        if (fProofOfStake) {
+            while (pindex && pindex->pprev && !pindex->IsProofOfStake())
+                pindex = pindex->pprev;
+        }
+        return pindex;
     }
 
     /** Returns the index entry at a particular height in this chain, or NULL if no such height exists. */
