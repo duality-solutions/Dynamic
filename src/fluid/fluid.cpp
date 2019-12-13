@@ -28,7 +28,8 @@ extern CWallet* pwalletMain;
 
 bool IsTransactionFluid(const CScript& txOut)
 {
-    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
+    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || 
+                txOut.IsProtocolInstruction(BDAP_REVOKE_TX) || txOut.IsProtocolInstruction(STAKE_MODIFY_TX));
 }
 
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
@@ -53,6 +54,8 @@ int GetFluidOpCode(const CScript& fluidScript)
         return OP_REWARD_MINING;
     } else if (fluidScript.IsProtocolInstruction(BDAP_REVOKE_TX)) {
         return OP_BDAP_REVOKE;
+    } else if (fluidScript.IsProtocolInstruction(STAKE_MODIFY_TX)) {
+        return OP_REWARD_STAKE;
     }
     return 0;
 }
@@ -132,7 +135,7 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
         std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
-        if (strOperationCode == "OP_MINT" || strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") {
+        if (strOperationCode == "OP_MINT" || strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE" || strOperationCode == "OP_REWARD_STAKE") {
             if (vecSplitScript.size() > 1) {
                 std::string strAmount = vecSplitScript[0];
                 CAmount fluidAmount;
@@ -148,6 +151,9 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
                         return false;
                     } else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
                         errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
+                        return false;
+                    } else if (strOperationCode == "OP_REWARD_STAKE" && (fluidAmount > FLUID_MAX_REWARD_FOR_STAKING)) {
+                            errorMessage = "CheckFluidOperationScript fluid OP_REWARD_STAKE amount exceeds maximum: " + strAmount;
                         return false;
                     }
                 }
@@ -340,7 +346,7 @@ bool CFluid::ExtractCheckTimestamp(const std::string& strOpCode, const std::stri
         return false;
 
     std::string ls;
-    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE") {
+    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE" || strOpCode == "OP_REWARD_STAKE") {
         ls = ptrs.at(1);
     }
     else if (strOpCode == "OP_BDAP_REVOKE") {
@@ -589,7 +595,7 @@ bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, 
         }
 
         if ((txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) ||
-                txOut.IsProtocolInstruction(MINING_MODIFY_TX)) &&
+                txOut.IsProtocolInstruction(MINING_MODIFY_TX) || txOut.IsProtocolInstruction(STAKE_MODIFY_TX))  &&
             !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-modify-parse-failure");
         }
@@ -674,7 +680,7 @@ bool CFluid::ExtractTimestampWithAddresses(const std::string& strOpCode, const C
         return false;
 
     std::string strTimeStamp;
-    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE") {
+    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE" || strOpCode == "OP_REWARD_STAKE") {
         strTimeStamp = ptrs.at(1);
     } else if (strOpCode == "OP_BDAP_REVOKE") {
         strTimeStamp = ptrs.at(0);

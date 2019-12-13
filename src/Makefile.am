@@ -135,6 +135,7 @@ DYNAMIC_CORE_H = \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
   fluid/fluidsovereign.h \
+  fluid/fluidstaking.h \
   fluid/operations.h \
   governance.h \
   governance-classes.h \
@@ -296,6 +297,7 @@ libdynamic_server_a_SOURCES = \
   fluid/fluidmining.cpp \
   fluid/fluidmint.cpp \
   fluid/fluidsovereign.cpp \
+  fluid/fluidstaking.cpp \
   fluid/operations.cpp \
   governance.cpp \
   governance-classes.cpp \

@@ -8,6 +8,7 @@
 #include "fluidmining.h"
 #include "fluidmint.h"
 #include "fluidsovereign.h"
+#include "fluidstaking.h"
 
 CAmount GetFluidDynodeReward(const int nHeight)
 {
@@ -50,6 +51,28 @@ CAmount GetFluidMiningReward(const int nHeight)
         return lastMiningRecord.MiningReward;
     } else {
         return GetStandardPoWBlockPayment(nHeight);
+    }
+}
+
+CAmount GetFluidStakingReward(const int nHeight)
+{
+    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
+        return GetStandardStakePayment(nHeight);
+
+    if (!CheckFluidStakingDB())
+        return GetStandardStakePayment(nHeight);
+
+    if (pFluidStakingDB->IsEmpty())
+        return GetStandardStakePayment(nHeight);
+
+    CFluidStaking lastStakeRecord;
+    if (!pFluidStakingDB->GetLastFluidStakingRecord(lastStakeRecord, nHeight))
+        return GetStandardStakePayment(nHeight);
+
+    if (lastStakeRecord.StakeReward > 0) {
+        return lastStakeRecord.StakeReward;
+    } else {
+        return GetStandardStakePayment(nHeight);
     }
 }
 
@@ -114,6 +137,18 @@ bool GetAllFluidMiningRecords(std::vector<CFluidMining>& miningEntries)
 {
     if (CheckFluidMiningDB()) {
         if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool GetAllFluidStakingRecords(std::vector<CFluidStaking>& stakingEntries)
+{
+    if (CheckFluidStakingDB()) {
+        if (!pFluidStakingDB->GetAllFluidStakingRecords(stakingEntries)) {
             return false;
         }
     } else {

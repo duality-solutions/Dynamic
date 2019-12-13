@@ -194,6 +194,7 @@ enum opcodetype {
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
     OP_BDAP_REVOKE = 0xc9,               // = BDAP delete using fluid protocol
+    OP_REWARD_STAKE = 0xca,              // = Fluid controlled block stake reward
 
     // BDAP directory access, user identity and certificate system
     OP_BDAP_NEW = 0x01,                  // = BDAP new entry
@@ -241,6 +242,7 @@ enum ProtocolCodes {
     BDAP_SIDECHAIN_TX = 16,
     BDAP_SIDECHAIN_CHECKPOINT = 17,
     BDAP_EXPIRE_TX = 18,
+    STAKE_MODIFY_TX = 19,
     NO_TX = 0
 };
 
@@ -675,7 +677,7 @@ public:
         return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
     }
 
-    bool IsProtocolInstruction(ProtocolCodes code) const
+    bool IsProtocolInstruction(const ProtocolCodes& code) const
     {
         switch (code) {
         case MINT_TX:
@@ -686,6 +688,9 @@ public:
             break;
         case MINING_MODIFY_TX:
             return (size() > 0 && *begin() == OP_REWARD_MINING);
+            break;
+        case STAKE_MODIFY_TX:
+            return (size() > 0 && *begin() == OP_REWARD_STAKE);
             break;
         case BDAP_REVOKE_TX:
             return (size() > 0 && *begin() == OP_BDAP_REVOKE);

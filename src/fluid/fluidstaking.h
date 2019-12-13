@@ -1,7 +1,7 @@
 // Copyright (c) 2019 Duality Blockchain Solutions Developers
 
-#ifndef FLUID_MINING
-#define FLUID_MINING
+#ifndef FLUID_STAKING
+#define FLUID_STAKING
 
 #include "amount.h"
 #include "dbwrapper.h"
@@ -13,30 +13,30 @@
 class CScript;
 class CTransaction;
 
-class CFluidMining
+class CFluidStaking
 {
 public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
-    CAmount MiningReward;
+    CAmount StakeReward;
     int64_t nTimeStamp;
     std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidMining()
+    CFluidStaking()
     {
         SetNull();
     }
 
-    CFluidMining(const CTransaction& tx)
+    CFluidStaking(const CTransaction& tx)
     {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidMining(const CScript& fluidScript)
+    CFluidStaking(const CScript& fluidScript)
     {
         SetNull();
         UnserializeFromScript(fluidScript);
@@ -44,9 +44,9 @@ public:
 
     inline void SetNull()
     {
-        nVersion = CFluidMining::CURRENT_VERSION;
+        nVersion = CFluidStaking::CURRENT_VERSION;
         FluidScript.clear();
-        MiningReward = -1;
+        StakeReward = -1;
         nTimeStamp = 0;
         SovereignAddresses.clear();
         txHash.SetNull();
@@ -60,37 +60,37 @@ public:
     {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
-        READWRITE(MiningReward);
+        READWRITE(StakeReward);
         READWRITE(VARINT(nTimeStamp));
         READWRITE(SovereignAddresses);
         READWRITE(txHash);
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidMining& a, const CFluidMining& b)
+    inline friend bool operator==(const CFluidStaking& a, const CFluidStaking& b)
     {
-        return (a.FluidScript == b.FluidScript && a.MiningReward == b.MiningReward && a.nTimeStamp == b.nTimeStamp);
+        return (a.FluidScript == b.FluidScript && a.StakeReward == b.StakeReward && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidMining& a, const CFluidMining& b)
+    inline friend bool operator!=(const CFluidStaking& a, const CFluidStaking& b)
     {
         return !(a == b);
     }
 
-    friend bool operator<(const CFluidMining& a, const CFluidMining& b)
+    friend bool operator<(const CFluidStaking& a, const CFluidStaking& b)
     {
         return (a.nTimeStamp < b.nTimeStamp);
     }
 
-    friend bool operator>(const CFluidMining& a, const CFluidMining& b)
+    friend bool operator>(const CFluidStaking& a, const CFluidStaking& b)
     {
         return (a.nTimeStamp > b.nTimeStamp);
     }
 
-    inline CFluidMining operator=(const CFluidMining& b)
+    inline CFluidStaking operator=(const CFluidStaking& b)
     {
         FluidScript = b.FluidScript;
-        MiningReward = b.MiningReward;
+        StakeReward = b.StakeReward;
         nTimeStamp = b.nTimeStamp;
         SovereignAddresses.clear(); //clear out previous entries
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
@@ -107,23 +107,23 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 };
 
-static CCriticalSection cs_fluid_mining;
+static CCriticalSection cs_fluid_staking;
 
-class CFluidMiningDB : public CDBWrapper
+class CFluidStakingDB : public CDBWrapper
 {
 public:
-    CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
-    bool AddFluidMiningEntry(const CFluidMining& entry, const int op);
-    bool GetLastFluidMiningRecord(CFluidMining& returnEntry, const int nHeight);
-    bool GetAllFluidMiningRecords(std::vector<CFluidMining>& entries);
+    CFluidStakingDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
+    bool AddFluidStakingEntry(const CFluidStaking& entry, const int op);
+    bool GetLastFluidStakingRecord(CFluidStaking& returnEntry, const int nHeight);
+    bool GetAllFluidStakingRecords(std::vector<CFluidStaking>& entries);
     bool IsEmpty();
     bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
-bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
-bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
-bool CheckFluidMiningDB();
+bool GetFluidStakingData(const CScript& scriptPubKey, CFluidStaking& entry);
+bool GetFluidStakingData(const CTransaction& tx, CFluidStaking& entry, int& nOut);
+bool CheckFluidStakingDB();
 
-extern CFluidMiningDB* pFluidMiningDB;
+extern CFluidStakingDB* pFluidStakingDB;
 
-#endif // FLUID_MINING
+#endif // FLUID_STAKING

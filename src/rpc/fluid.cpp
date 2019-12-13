@@ -13,6 +13,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidsovereign.h"
+#include "fluid/fluidstaking.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -42,7 +43,6 @@ struct DynodeCompareTimeStamp {
     }
 };
 
-
 struct MintCompareTimeStamp {
     bool operator()(const CFluidMint& a, const CFluidMint& b)
     {
@@ -50,9 +50,15 @@ struct MintCompareTimeStamp {
     }
 };
 
-
 struct MiningCompareTimeStamp {
     bool operator()(const CFluidMining& a, const CFluidMining& b)
+    {
+    return (a.nTimeStamp < b.nTimeStamp);
+    }
+};
+
+struct StakingCompareTimeStamp {
+    bool operator()(const CFluidStaking& a, const CFluidStaking& b)
     {
     return (a.nTimeStamp < b.nTimeStamp);
     }
@@ -76,6 +82,8 @@ opcodetype getOpcodeFromString(std::string input)
         return OP_RELEASE_ADDRESS;
     else if (input == "OP_BDAP_REVOKE")
         return OP_BDAP_REVOKE;
+    else if (input == "OP_REWARD_STAKE")
+        return OP_REWARD_STAKE;
     else
         return OP_RETURN;
 
@@ -211,7 +219,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "sendfluidtransaction \"OP_MINT || OP_REWARD_DYNODE || OP_REWARD_MINING || OP_BDAP_REVOKE\" \"hexstring\"\n"
+            "sendfluidtransaction \"OP_MINT || OP_REWARD_DYNODE || OP_REWARD_MINING || OP_REWARD_STAKE || OP_BDAP_REVOKE\" \"hexstring\"\n"
             "\nSend Fluid transactions to the network\n"
             "\nArguments:\n"
             "1. \"opcode\"  (string, required) The Fluid operation to be executed.\n"
@@ -240,7 +248,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
     if (!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
         throw std::runtime_error(strprintf("Instruction does not meet required quorum for validity. %s", message));
 
-    if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE) {
+    if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE || opcode == OP_REWARD_STAKE) {
         CWalletTx wtx;
         SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
@@ -423,6 +431,25 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         }
     }
     ret.push_back(Pair("mining_reward_history", oMining));
+    // load fluid staking update reward transaction history
+    UniValue oStaking(UniValue::VOBJ);
+    {
+        std::vector<CFluidStaking> stakingEntries;
+        if (!GetAllFluidStakingRecords(stakingEntries)) {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4006- " + _("Error getting fluid minting entries"));
+        }
+        int x = 1;
+        for (const CFluidStaking& stakingEntry : stakingEntries) {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("fluid_script", StringFromCharVector(stakingEntry.FluidScript)));
+            std::string addLabel = "reward_update_" + std::to_string(x);
+            oStaking.push_back(Pair(addLabel, obj));
+            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            x++;
+            nTotal++;
+        }
+    }
+    ret.push_back(Pair("staking_reward_history", oStaking));
     // load fluid BDAP account ban transaction history
     UniValue oAccountBan(UniValue::VOBJ);
     {
@@ -447,12 +474,16 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
+
         CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
 
-        CFluidMining lastMiningRecord;
         CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
+
+        CAmount stakingAmount = GetFluidStakingReward(chainActive.Tip()->nHeight);
+        obj.push_back(Pair("current_staking_reward", FormatMoney(stakingAmount)));
+
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));
     }
@@ -583,6 +614,37 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         }
     }
     ret.push_back(Pair("mining_reward_history", oMining));
+    // load fluid staking update reward transaction history
+    UniValue oStaking(UniValue::VOBJ);
+    {
+        std::vector<CFluidStaking> stakingEntries;
+        if (!GetAllFluidStakingRecords(stakingEntries)) {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4006 - " + _("Error getting fluid staking entries"));
+        }
+        int x = 1;
+        std::sort(stakingEntries.begin(), stakingEntries.end(), StakingCompareTimeStamp()); //sort entries by TimeStamp
+        for (const CFluidStaking& stakingEntry : stakingEntries) {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("operation", "Mining Reward Update"));
+            obj.push_back(Pair("amount", FormatMoney(stakingEntry.StakeReward)));
+            obj.push_back(Pair("timestamp", stakingEntry.nTimeStamp));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", stakingEntry.nTimeStamp)));
+            obj.push_back(Pair("block_height", (int)stakingEntry.nHeight));
+            obj.push_back(Pair("txid", stakingEntry.txHash.GetHex()));
+            int index = 1;
+            for (const std::vector<unsigned char>& vchAddress : stakingEntry.SovereignAddresses) {
+                std::string addLabel = "sovereign_address_" + std::to_string(index);
+                obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+                index++;
+            }
+            std::string addLabel = "reward_update_" + std::to_string(x);
+            oStaking.push_back(Pair(addLabel, obj));
+            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            x++;
+            nTotal++;
+        }
+    }
+    ret.push_back(Pair("staking_reward_history", oStaking));
     // load fluid ban account transaction history
     UniValue oBanAccounts(UniValue::VOBJ);
     {
@@ -619,11 +681,16 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
+
         CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
-        CFluidMining lastMiningRecord;
+
         CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
+
+        CAmount stakingAmount = GetFluidStakingReward(chainActive.Tip()->nHeight);
+        obj.push_back(Pair("current_staking_reward", FormatMoney(stakingAmount)));
+
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));
     }

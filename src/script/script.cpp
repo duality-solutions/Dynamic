@@ -256,6 +256,8 @@ const char* GetOpName(opcodetype opcode)
         return "OP_REWARD_DYNODE";
     case OP_REWARD_MINING:
         return "OP_REWARD_MINING";
+    case OP_REWARD_STAKE:
+        return "OP_REWARD_STAKE";
     case OP_SWAP_SOVEREIGN_ADDRESS:
         return "OP_SWAP_SOVEREIGN_ADDRESS";
     case OP_UPDATE_FEES:
