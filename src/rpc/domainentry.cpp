@@ -454,8 +454,6 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (request.params.size() >= 3) {
         if (!ParseUInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
-        if (nMonths < 0)
-            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Error: registration months must be greater than or equal to zero"));
         if (nMonths > MAX_REGISTRATION_MONTHS)
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Error: Registration period can not be more than 1,200 months (100 years)"));
     }
