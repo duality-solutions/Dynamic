@@ -326,11 +326,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         if (areWeMinting) {
             mintAddress = fluidMint.GetDestinationAddress();
             fluidIssuance = fluidMint.MintAmount;
-            if (!fProofOfStake) {
-                txNew.vout[0].nValue = blockReward + fluidIssuance;
-            } else {
-                txNew.vout[0].nValue = fluidIssuance;
-            }
+            txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
             txNew.vout[0].nValue = blockReward;
         }
