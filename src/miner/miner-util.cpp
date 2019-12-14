@@ -106,31 +106,28 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     txNew.vin[0].prevout.SetNull();
     txNew.vout.resize(1);
 
-    //Proof of Stake
-    block.vtx.push_back(MakeTransactionRef(txNew));
-
-    // ppcoin: if coinstake available add coinstake tx
-    static int64_t nLastCoinStakeSearchTime = GetAdjustedTime(); // only initialized at startup
-
+    CMutableTransaction txCoinStake;
     if (fProofOfStake) {
+        // ppcoin: if coinstake available add coinstake tx
+        static int64_t nLastCoinStakeSearchTime = GetAdjustedTime(); // only initialized at startup
         boost::this_thread::interruption_point();
         block.nTime = GetAdjustedTime();
         block.nBits = GetNextWorkRequired(pindexLast, block, chainparams.GetConsensus());
-        CMutableTransaction txCoinStake;
         int64_t nSearchTime = block.nTime; // search to current time
         bool fStakeFound = false;
         if (nSearchTime >= nLastCoinStakeSearchTime) {
             unsigned int nTxNewTime = 0;
             if (pwallet->CreateCoinStake(*pwallet, block.nBits, nSearchTime - nLastCoinStakeSearchTime, txCoinStake, nTxNewTime)) {
+                //For Proof of Stake blocks, the coinbase's first transaction output is empty
+                txNew.vout[0].SetEmpty();
+                block.vtx.push_back(MakeTransactionRef(txNew));
+                block.vtx.push_back(MakeTransactionRef(txCoinStake));
                 block.nTime = nTxNewTime;
-                block.vtx[0].vout[0].SetEmpty();
-                block.vtx.push_back(CTransactionRef(txCoinStake));
                 fStakeFound = true;
             }
             nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
             nLastCoinStakeSearchTime = nSearchTime;
         }
-
         if (!fStakeFound) {
             LogPrint("staking", "CreateNewBlock(): stake not found\n");
             return NULL;
@@ -179,8 +176,10 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         block.nTime = GetAdjustedTime();
         const int64_t nMedianTimePast = indexPrev->GetMedianTimePast();
 
-        // Add our coinbase tx as first transaction
-        block.vtx.emplace_back();
+        // Add our Proof-of-Work coinbase tx as first transaction
+        if (!fProofOfStake)
+            block.vtx.emplace_back();
+
         pblocktemplate->vTxFees.push_back(-1);   // updated at end
         pblocktemplate->vTxSigOps.push_back(-1); // updated at end
         block.nVersion = ComputeBlockVersion(indexPrev, chainparams.GetConsensus());
@@ -229,7 +228,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             const CTransaction& tx = iter->GetTx();
 
             bool fOrphan = false;
-            BOOST_FOREACH (CTxMemPool::txiter parent, mempool.GetMemPoolParents(iter)) {
+            for (CTxMemPool::txiter parent : mempool.GetMemPoolParents(iter)) {
                 if (!inBlock.count(parent)) {
                     fOrphan = true;
                     break;
@@ -294,7 +293,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             inBlock.insert(iter);
 
             // Add transactions that depend on this one to the priority queue
-            BOOST_FOREACH (CTxMemPool::txiter child, mempool.GetMemPoolChildren(iter)) {
+            for (CTxMemPool::txiter child : mempool.GetMemPoolChildren(iter)) {
                 if (fPriorityBlock) {
                     waitPriIter wpiter = waitPriMap.find(child);
                     if (wpiter != waitPriMap.end()) {
@@ -327,7 +326,11 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         if (areWeMinting) {
             mintAddress = fluidMint.GetDestinationAddress();
             fluidIssuance = fluidMint.MintAmount;
-            txNew.vout[0].nValue = blockReward + fluidIssuance;
+            if (!fProofOfStake) {
+                txNew.vout[0].nValue = blockReward + fluidIssuance;
+            } else {
+                txNew.vout[0].nValue = fluidIssuance;
+            }
         } else {
             txNew.vout[0].nValue = blockReward;
         }
@@ -344,7 +347,14 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
                 script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
             }
-            txNew.vout.push_back(CTxOut(fluidIssuance, script));
+            if (!fProofOfStake) {
+                txNew.vout.push_back(CTxOut(fluidIssuance, script));
+            }
+            else {
+                // Add fluid transaction to stake block coinbase.
+                txCoinStake.vout.push_back(CTxOut(fluidIssuance, script));
+                block.vtx[1] = MakeTransactionRef(std::move(txCoinStake));
+            }
             LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
         }
 
@@ -363,10 +373,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
             // Update block coinbase
             block.vtx[0] = MakeTransactionRef(std::move(txNew));
-            if (!fProofOfStake) {
-                block.vtx[0] = txNew;
-                pblocktemplate->vTxFees[0] = -nFees;
-            }
+            //block.vtx[0] = txNew;
+            pblocktemplate->vTxFees[0] = -nFees;
         }
 
         // Fill in header
