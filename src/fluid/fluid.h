@@ -34,6 +34,7 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_DYNODE = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN;    // Max minting amount per fluid transaction
+    static const CAmount FLUID_MAX_REWARD_FOR_STAKING = 1000 * COIN;// Max mining block reward using fluid OP_REWARD_STAKE
 
     std::vector<std::pair<std::string, CDynamicAddress> > InitialiseSovereignIdentities();
 

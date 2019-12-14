@@ -35,6 +35,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidsovereign.h"
+#include "fluid/fluidstaking.h"
 #include "governance.h"
 #include "httprpc.h"
 #include "httpserver.h"
@@ -361,6 +362,8 @@ void PrepareShutdown()
         pFluidDynodeDB = NULL;
         delete pFluidMiningDB;
         pFluidMiningDB = NULL;
+        delete pFluidStakingDB;
+        pFluidStakingDB = NULL;
         delete pFluidMintDB;
         pFluidMintDB = NULL;
         delete pFluidSovereignDB;
@@ -714,6 +717,10 @@ std::string LicenseInfo()
            FormatParagraph(strprintf(_("Copyright (C) 2009-%i The Bitcoin Core Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(strprintf(_("Copyright (C) 2014-%i The Dash Developers"), COPYRIGHT_YEAR)) + "\n" +
+           "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2017-%i The Particl Core developers"), COPYRIGHT_YEAR)) + "\n" +
+           "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2003-%i Arvid Norberg"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(_("This is experimental software.")) + "\n" +
            "\n" +
@@ -1716,6 +1723,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Fluid transaction DB's
                 delete pFluidDynodeDB;
                 delete pFluidMiningDB;
+                delete pFluidStakingDB;
                 delete pFluidMintDB;
                 delete pFluidSovereignDB;
                 delete pBanAccountDB;
@@ -1735,6 +1743,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Init Fluid transaction DB's
                 pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidStakingDB = new CFluidStakingDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);

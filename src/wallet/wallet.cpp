@@ -23,6 +23,7 @@
 #include "core_io.h"
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"
@@ -6518,7 +6519,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBi
 
             // Calculate reward
             CAmount nReward;
-            nReward = GetStandardStakePayment(chainActive.Height() + 1);
+            nReward = GetFluidStakingReward(chainActive.Height() + 1);
             nCredit += nReward;
 
             // Create the output transaction(s)

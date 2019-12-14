@@ -31,6 +31,7 @@
 #include "fluid/fluiddynode.h"
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
+#include "fluid/fluidstaking.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -2736,11 +2737,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::string strError = "";
     {
         CBlockIndex* prevIndex = pindex->pprev;
-        CAmount newMiningReward = GetFluidMiningReward(pindex->nHeight);
+        CAmount newMiningReward = 0;
         CAmount newDynodeReward = 0;
-        if (fDynodePaid)
-            newDynodeReward = GetFluidDynodeReward(pindex->nHeight);
-
+        if (block.IsProofOfWork()) {
+            newMiningReward = GetFluidMiningReward(pindex->nHeight);
+            if (fDynodePaid)
+                newDynodeReward = GetFluidDynodeReward(pindex->nHeight);
+        } else {
+            newMiningReward = GetFluidStakingReward(pindex->nHeight);
+        }
         CAmount newMintIssuance = 0;
         CDynamicAddress mintAddress;
         if (prevIndex->nHeight + 1 >= fluid.FLUID_ACTIVATE_HEIGHT) {
@@ -2786,6 +2791,16 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
                     }
                     pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
+                }
+            } else if (OpCode == OP_REWARD_STAKE) {
+                CFluidStaking fluidStaking(scriptFluid);
+                fluidStaking.nHeight = pindex->nHeight;
+                fluidStaking.txHash = tx.GetHash();
+                if (CheckFluidStakingDB()) {
+                    if (!CheckSignatureQuorum(fluidStaking.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-staking-address-signature");
+                    }
+                    pFluidStakingDB->AddFluidStakingEntry(fluidStaking, OP_REWARD_STAKE);
                 }
             } else if (OpCode == OP_MINT) {
                 CFluidMint fluidMint(scriptFluid);
@@ -3867,7 +3882,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, consensusParams, !IsPoS))
+    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
 
     // Check the merkle root.

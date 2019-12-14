@@ -84,12 +84,20 @@ public:
 // transactions that depend on transactions that aren't yet in the block.
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
+int64_t nLastCoinStakeSearchInterval = 0;
 
-std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript* scriptPubKeyIn)
+std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript* scriptPubKeyIn, CWallet* pwallet, bool fProofOfStake)
 {
     // Create new block
     std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     CBlock& block = pblocktemplate->block; // pointer for convenience
+
+    // Tip
+    CBlockIndex* pindexLast = nullptr;
+    {   // Don't keep cs_main locked
+        LOCK(cs_main);
+        pindexLast = chainActive.Tip();
+    }
 
     // Create coinbase tx with fluid issuance
     // TODO: Can this be made any more elegant?
@@ -97,6 +105,34 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull();
     txNew.vout.resize(1);
+
+    CMutableTransaction txCoinStake;
+    if (fProofOfStake) {
+        // ppcoin: if coinstake available add coinstake tx
+        static int64_t nLastCoinStakeSearchTime = GetAdjustedTime(); // only initialized at startup
+        boost::this_thread::interruption_point();
+        block.nTime = GetAdjustedTime();
+        block.nBits = GetNextWorkRequired(pindexLast, block, chainparams.GetConsensus());
+        int64_t nSearchTime = block.nTime; // search to current time
+        bool fStakeFound = false;
+        if (nSearchTime >= nLastCoinStakeSearchTime) {
+            unsigned int nTxNewTime = 0;
+            if (pwallet->CreateCoinStake(*pwallet, block.nBits, nSearchTime - nLastCoinStakeSearchTime, txCoinStake, nTxNewTime)) {
+                //For Proof of Stake blocks, the coinbase's first transaction output is empty
+                txNew.vout[0].SetEmpty();
+                block.vtx.push_back(MakeTransactionRef(txNew));
+                block.vtx.push_back(MakeTransactionRef(txCoinStake));
+                block.nTime = nTxNewTime;
+                fStakeFound = true;
+            }
+            nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+            nLastCoinStakeSearchTime = nSearchTime;
+        }
+        if (!fStakeFound) {
+            LogPrint("staking", "CreateNewBlock(): stake not found\n");
+            return NULL;
+        }
+    }
 
     // Largest block you're willing to create:
     unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
@@ -140,8 +176,10 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         block.nTime = GetAdjustedTime();
         const int64_t nMedianTimePast = indexPrev->GetMedianTimePast();
 
-        // Add our coinbase tx as first transaction
-        block.vtx.emplace_back();
+        // Add our Proof-of-Work coinbase tx as first transaction
+        if (!fProofOfStake)
+            block.vtx.emplace_back();
+
         pblocktemplate->vTxFees.push_back(-1);   // updated at end
         pblocktemplate->vTxSigOps.push_back(-1); // updated at end
         block.nVersion = ComputeBlockVersion(indexPrev, chainparams.GetConsensus());
@@ -190,7 +228,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             const CTransaction& tx = iter->GetTx();
 
             bool fOrphan = false;
-            BOOST_FOREACH (CTxMemPool::txiter parent, mempool.GetMemPoolParents(iter)) {
+            for (CTxMemPool::txiter parent : mempool.GetMemPoolParents(iter)) {
                 if (!inBlock.count(parent)) {
                     fOrphan = true;
                     break;
@@ -255,7 +293,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             inBlock.insert(iter);
 
             // Add transactions that depend on this one to the priority queue
-            BOOST_FOREACH (CTxMemPool::txiter child, mempool.GetMemPoolChildren(iter)) {
+            for (CTxMemPool::txiter child : mempool.GetMemPoolChildren(iter)) {
                 if (fPriorityBlock) {
                     waitPriIter wpiter = waitPriMap.find(child);
                     if (wpiter != waitPriMap.end()) {
@@ -305,30 +343,42 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
                 script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
             }
-            txNew.vout.push_back(CTxOut(fluidIssuance, script));
+            if (!fProofOfStake) {
+                txNew.vout.push_back(CTxOut(fluidIssuance, script));
+            }
+            else {
+                // Add fluid transaction to stake block coinbase.
+                txCoinStake.vout.push_back(CTxOut(fluidIssuance, script));
+                block.vtx[1] = MakeTransactionRef(std::move(txCoinStake));
+            }
             LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
         }
 
         // Update coinbase transaction with additional info about dynode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, blockReward, pblocktemplate->txoutDynode, pblocktemplate->voutSuperblock);
-        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
-        //             nHeight, blockReward, block.txoutDynode.ToString(), txNew.ToString());
+        if (!fProofOfStake) {
+            FillBlockPayments(txNew, nHeight, blockReward, pblocktemplate->txoutDynode, pblocktemplate->voutSuperblock);
+            // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
+            //             nHeight, blockReward, block.txoutDynode.ToString(), txNew.ToString());
+            nLastBlockTx = nBlockTx;
+            nLastBlockSize = nBlockSize;
+            LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
 
-        nLastBlockTx = nBlockTx;
-        nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
+            CAmount blockAmount = blockReward + fluidIssuance;
+            LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
-        CAmount blockAmount = blockReward + fluidIssuance;
-        LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
-
-        // Update block coinbase
-        block.vtx[0] = MakeTransactionRef(std::move(txNew));
-        pblocktemplate->vTxFees[0] = -nFees;
+            // Update block coinbase
+            block.vtx[0] = MakeTransactionRef(std::move(txNew));
+            //block.vtx[0] = txNew;
+            pblocktemplate->vTxFees[0] = -nFees;
+        }
 
         // Fill in header
         block.hashPrevBlock = indexPrev->GetBlockHash();
-        UpdateTime(block, chainparams.GetConsensus(), indexPrev);
+
+        if (!fProofOfStake)
+            UpdateTime(block, chainparams.GetConsensus(), indexPrev);
+
         block.nBits = GetNextWorkRequired(indexPrev, block, chainparams.GetConsensus());
         block.nNonce = 0;
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(*block.vtx[0]);
