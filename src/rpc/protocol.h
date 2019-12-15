@@ -97,7 +97,9 @@ enum RPCErrorCode {
     RPC_DHT_PUBKEY_MISMATCH = -408,        //! DHT public key mismatch
     //! Fluid errors
     RPC_FLUID_ERROR = -500,                //! Unspecified fluid error
-    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp 
+    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp
+    //! Proof of Stake erros
+    RPC_PROOF_OF_STAKE_INACTIVE = -600,    //! Spork for Proof of Stake not yet activated
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);

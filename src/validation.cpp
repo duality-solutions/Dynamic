@@ -113,6 +113,7 @@ int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 bool fLoaded = false;
 bool fStealthTx = false;
+int64_t nReserveBalance = 0;
 
 uint256 hashAssumeValid;
 

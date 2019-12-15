@@ -806,8 +806,6 @@ private:
 
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 
-    bool fFileBacked;
-
     std::set<int64_t> setInternalKeyPool;
     std::set<int64_t> setExternalKeyPool;
 
@@ -842,6 +840,8 @@ public:
     mutable CCriticalSection cs_wallet;
 
     const std::string strWalletFile;
+
+    bool fFileBacked;
 
     bool fNeedToRescanTransactions = false;
     CBlockIndex* rescan_index = nullptr;
@@ -1368,6 +1368,7 @@ public:
     bool HaveStealthAddress(const CKeyID& address) const;
     bool SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInputs, const CAmount& nTargetAmount, const int& blockHeight, const bool fPrecompute = false);
     bool CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime);
+    bool MintableCoins();
 };
 
 /** A key allocated from the key pool. */
