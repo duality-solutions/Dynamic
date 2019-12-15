@@ -3277,7 +3277,7 @@ static const CRPCCommand commands[] =
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
         {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
         {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},
-        {"wallet", "setstakesplitthreshold", &setstakesplitthreshold, false, {}},
+        {"wallet", "setstakesplitthreshold", &setstakesplitthreshold, false, {"amount"}},
         {"wallet", "settxfee", &settxfee, true, {"amount"}},
         {"wallet", "signmessage", &signmessage, true, {"address", "message"}},
         {"wallet", "walletlock", &walletlock, true, {}},
