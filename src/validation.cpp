@@ -61,6 +61,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "wallet/wallet.h"
 #include "warnings.h"
 
 #include <atomic>
