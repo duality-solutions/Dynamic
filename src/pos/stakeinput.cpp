@@ -91,7 +91,7 @@ bool CDynamicStake::GetModifier(uint64_t& nStakeModifier)
 
 CDataStream CDynamicStake::GetUniqueness()
 {
-    //The unique identifier for a PIV stake is the outpoint
+    //The unique identifier for a DYN stake is the outpoint
     CDataStream ss(SER_NETWORK, 0);
     ss << nPosition << txFrom.GetHash();
     return ss;

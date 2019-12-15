@@ -2749,6 +2749,113 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     return obj;
 }
 
+// ppcoin: reserve balance from being staked for network protection
+UniValue reservebalance(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 2)
+        throw std::runtime_error(
+            "reservebalance ( reserve amount )\n"
+            "\nShow or set the reserve amount not participating in network protection\n"
+            "If no parameters provided current setting is printed.\n"
+
+            "\nArguments:\n"
+            "1. reserve     (boolean, optional) is true or false to turn balance reserve on or off.\n"
+            "2. amount      (numeric, optional) is a real and rounded to cent.\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"reserve\": true|false,     (boolean) Status of the reserve balance\n"
+            "  \"amount\": x.xxxx       (numeric) Amount reserved\n"
+            "}\n"
+
+            "\nExamples:\n" +
+            HelpExampleCli("reservebalance", "true 5000") + HelpExampleRpc("reservebalance", "true 5000"));
+
+    if (request.params.size() > 0) {
+        bool fReserve = request.params[0].get_bool();
+        if (fReserve) {
+            if (request.params.size() == 1)
+                throw std::runtime_error("must provide amount to reserve balance.\n");
+            CAmount nAmount = AmountFromValue(request.params[1]);
+            nAmount = (nAmount / CENT) * CENT; // round to cent
+            if (nAmount < 0)
+                throw std::runtime_error("amount cannot be negative.\n");
+            nReserveBalance = nAmount;
+        } else {
+            if (request.params.size() > 1)
+                throw std::runtime_error("cannot specify amount to turn off reserve.\n");
+            nReserveBalance = 0;
+        }
+    }
+
+    UniValue result(UniValue::VOBJ);
+    result.push_back(Pair("reserve", (nReserveBalance > 0)));
+    result.push_back(Pair("amount", ValueFromAmount(nReserveBalance)));
+    return result;
+}
+
+// presstab HyperStake
+UniValue setstakesplitthreshold(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "setstakesplitthreshold value\n"
+            "\nThis will set the output size of your stakes to never be below this number\n" +
+            HelpRequiringPassphrase() + "\n"
+
+            "\nArguments:\n"
+            "1. value   (numeric, required) Threshold value between 1 and 999999\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"threshold\": n,    (numeric) Threshold value set\n"
+            "  \"saved\": true|false    (boolean) 'true' if successfully saved to the wallet file\n"
+            "}\n"
+
+            "\nExamples:\n" +
+            HelpExampleCli("setstakesplitthreshold", "5000") + HelpExampleRpc("setstakesplitthreshold", "5000"));
+
+    EnsureWalletIsUnlocked();
+
+    uint64_t nStakeSplitThreshold = request.params[0].get_int();
+
+    if (nStakeSplitThreshold > 999999)
+        throw std::runtime_error("Value out of range, max allowed is 999999");
+
+    CWalletDB walletdb(pwalletMain->strWalletFile);
+    LOCK(pwalletMain->cs_wallet);
+    {
+        bool fFileBacked = pwalletMain->fFileBacked;
+
+        UniValue result(UniValue::VOBJ);
+        pwalletMain->nStakeSplitThreshold = nStakeSplitThreshold;
+        result.push_back(Pair("threshold", int(pwalletMain->nStakeSplitThreshold)));
+        if (fFileBacked) {
+            walletdb.WriteStakeSplitThreshold(nStakeSplitThreshold);
+            result.push_back(Pair("saved", "true"));
+        } else
+            result.push_back(Pair("saved", "false"));
+
+        return result;
+    }
+}
+
+// presstab HyperStake
+UniValue getstakesplitthreshold(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getstakesplitthreshold\n"
+            "Returns the threshold for stake splitting\n"
+
+            "\nResult:\n"
+            "n      (numeric) Threshold value\n"
+
+            "\nExamples:\n" +
+            HelpExampleCli("getstakesplitthreshold", "") + HelpExampleRpc("getstakesplitthreshold", ""));
+
+    return int(pwalletMain->nStakeSplitThreshold);
+}
 
 UniValue keepass(const JSONRPCRequest& request)
 {
@@ -3142,6 +3249,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getreceivedbyaddress", &getreceivedbyaddress, false, {"address", "minconf", "addlocked"}},
         {"wallet", "gettransaction", &gettransaction, false, {"txid", "include_watchonly"}},
         {"wallet", "getunconfirmedbalance", &getunconfirmedbalance, false, {}},
+        {"wallet", "getstakesplitthreshold", &getstakesplitthreshold, false, {}},
         {"wallet", "getwalletinfo", &getwalletinfo, false, {}},
         {"wallet", "importmulti", &importmulti, true, {"requests", "options"}},
         {"wallet", "importprivkey", &importprivkey, true, {"privkey", "label", "rescan"}},
@@ -3162,12 +3270,14 @@ static const CRPCCommand commands[] =
         {"wallet", "listunspent", &listunspent, false, {"minconf", "maxconf", "addresses", "include_unsafe"}},
         {"wallet", "lockunspent", &lockunspent, true, {"unlock", "transactions"}},
         {"wallet", "move", &movecmd, false, {"fromaccount", "toaccount", "amount", "minconf", "comment"}},
+        {"wallet", "reservebalance", &reservebalance, true, {"amount"}},
         {"wallet", "sendfrom", &sendfrom, false, {"fromaccount", "toaddress", "amount", "minconf", "addlocked", "comment", "comment_to"}},
         {"wallet", "sendmany", &sendmany, false, {"fromaccount", "amounts", "minconf", "addlocked", "comment", "subtractfeefrom"}},
         {"wallet", "sendtoaddress", &sendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
         {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
         {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},
+        {"wallet", "setstakesplitthreshold", &setstakesplitthreshold, false, {}},
         {"wallet", "settxfee", &settxfee, true, {"amount"}},
         {"wallet", "signmessage", &signmessage, true, {"address", "message"}},
         {"wallet", "walletlock", &walletlock, true, {}},

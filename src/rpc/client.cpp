@@ -149,6 +149,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressdeltas", 0, "addresses"},
         {"getaddressutxos", 0, "addresses"},
         {"getaddressmempool", 0, "addresses"},
+        {"reservebalance", 0},
+        {"reservebalance", 1},
+        {"setstakesplitthreshold", 0},
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},

@@ -1267,6 +1267,13 @@ bool AppInitParameterInteraction()
     RegisterWalletRPCCommands(tableRPC);
 #endif
 
+    if (IsArgSet("-reservebalance")) {
+        if (!ParseMoney(GetArg("-reservebalance", ""), nReserveBalance)) {
+            InitError(_("Invalid amount for -reservebalance=<amount>"));
+            return false;
+        }
+    }
+    
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
     if (nConnectTimeout <= 0)
         nConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
