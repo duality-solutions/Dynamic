@@ -3059,11 +3059,11 @@ std::map<CDynamicAddress, std::vector<COutput> > CWallet::AvailableCoinsByAddres
 
     std::map<CDynamicAddress, std::vector<COutput> > mapCoins;
     for (COutput out : vCoins) {
-        if (maxCoinValue > 0 && out.tx->vout[out.i].nValue > maxCoinValue)
+        if (maxCoinValue > 0 && out.tx->tx->vout[out.i].nValue > maxCoinValue)
             continue;
 
         CTxDestination address;
-        if (!ExtractDestination(out.tx->vout[out.i].scriptPubKey, address))
+        if (!ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, address))
             continue;
 
         mapCoins[CDynamicAddress(address)].push_back(out);
@@ -6783,7 +6783,7 @@ void CWallet::AutoCombineDust()
             COutPoint outpt(out.tx->GetHash(), out.i);
             coinControl->Select(outpt);
             vRewardCoins.push_back(out);
-            nTotalRewardsValue += out.Value();
+            nTotalRewardsValue += out.tx->tx->GetValueOut();
 
             // Combine to the threshold and not way above
             if (nTotalRewardsValue > nAutoCombineThreshold * COIN)
@@ -6805,9 +6805,10 @@ void CWallet::AutoCombineDust()
         if (vRewardCoins.size() <= 1)
             continue;
 
-        std::vector<std::pair<CScript, CAmount> > vecSend;
+        std::vector<CRecipient> vecSend;
         CScript scriptPubKey = GetScriptForDestination(it->first.Get());
-        vecSend.push_back(std::make_pair(scriptPubKey, nTotalRewardsValue));
+        CRecipient recipient = {scriptPubKey, nTotalRewardsValue, false};
+        vecSend.push_back(recipient);
 
         //Send change to same address
         CTxDestination destMyAddress;
@@ -6822,11 +6823,11 @@ void CWallet::AutoCombineDust()
         CReserveKey keyChange(this); // this change address does not end up being used, because change is returned with coin control switch
         std::string strErr;
         CAmount nFeeRet = 0;
-
+        int nChangePosInOut = 0;
         // 10% safety margin to avoid "Insufficient funds" errors
-        vecSend[0].second = nTotalRewardsValue - (nTotalRewardsValue / 10);
+        vecSend[0].nAmount = nTotalRewardsValue - (nTotalRewardsValue / 10);
 
-        if (!CreateTransaction(vecSend, wtx, keyChange, nFeeRet, strErr, coinControl, ALL_COINS, false, CAmount(0))) {
+        if (!CreateTransaction(vecSend, wtx, keyChange, nFeeRet, nChangePosInOut, strErr, coinControl, true, ALL_COINS, false, false)) {
             LogPrintf("AutoCombineDust createtransaction failed, reason: %s\n", strErr);
             continue;
         }
@@ -6835,7 +6836,8 @@ void CWallet::AutoCombineDust()
         if (!maxSize && nTotalRewardsValue < nAutoCombineThreshold * COIN && nFeeRet > 0)
             continue;
 
-        if (!CommitTransaction(wtx, keyChange)) {
+        CValidationState state;
+        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
             LogPrintf("AutoCombineDust transaction commit failed\n");
             continue;
         }
@@ -6872,14 +6874,14 @@ bool CWallet::MultiSend()
             continue;
 
         COutPoint outpoint(out.tx->GetHash(), out.i);
-        bool sendMSonMNReward = fMultiSendDynodeReward && outpoint.IsDynodeReward(out.tx);
-        bool sendMSOnStake = fMultiSendStake && out.tx->IsCoinStake() && !sendMSonMNReward; //output is either mnreward or stake reward, not both
+        bool sendMSonDNReward = false;
+        bool sendMSOnStake = fMultiSendStake && out.tx->tx->IsCoinStake() && !sendMSonDNReward; //output is either dnreward or stake reward, not both
 
-        if (!(sendMSOnStake || sendMSonMNReward))
+        if (!(sendMSOnStake || sendMSonDNReward))
             continue;
 
         CTxDestination destMyAddress;
-        if (!ExtractDestination(out.tx->vout[out.i].scriptPubKey, destMyAddress)) {
+        if (!ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, destMyAddress)) {
             LogPrintf("Multisend: failed to extract destination\n");
             continue;
         }
@@ -6903,7 +6905,7 @@ bool CWallet::MultiSend()
         CWalletTx wtx;
         CReserveKey keyChange(this); // this change address does not end up being used, because change is returned with coin control switch
         CAmount nFeeRet = 0;
-        std::vector<std::pair<CScript, CAmount> > vecSend;
+        std::vector<CRecipient> vecSend;
 
         // loop through multisend vector and add amounts and addresses to the sending vector
         const isminefilter filter = ISMINE_SPENDABLE;
@@ -6914,27 +6916,29 @@ bool CWallet::MultiSend()
             CDynamicAddress strAddSend(vMultiSend[i].first);
             CScript scriptPubKey;
             scriptPubKey = GetScriptForDestination(strAddSend.Get());
-            vecSend.push_back(std::make_pair(scriptPubKey, nAmount));
+            CRecipient recipient = { scriptPubKey, nAmount, false };
+            vecSend.push_back(recipient);
         }
 
         //get the fee amount
         CWalletTx wtxdummy;
         std::string strErr;
-        CreateTransaction(vecSend, wtxdummy, keyChange, nFeeRet, strErr, &cControl, ALL_COINS, false, CAmount(0));
-        CAmount nLastSendAmount = vecSend[vecSend.size() - 1].second;
+        int nChangePosInOut = 0;
+        CreateTransaction(vecSend, wtxdummy, keyChange, nFeeRet, nChangePosInOut, strErr, &cControl, true, ALL_COINS, false, false);
+        CAmount nLastSendAmount = vecSend[vecSend.size() - 1].nAmount;
         if (nLastSendAmount < nFeeRet + 500) {
             LogPrintf("%s: fee of %d is too large to insert into last output\n", __func__, nFeeRet + 500);
             return false;
         }
-        vecSend[vecSend.size() - 1].second = nLastSendAmount - nFeeRet - 500;
+        vecSend[vecSend.size() - 1].nAmount = nLastSendAmount - nFeeRet - 500;
 
         // Create the transaction and commit it to the network
-        if (!CreateTransaction(vecSend, wtx, keyChange, nFeeRet, strErr, &cControl, ALL_COINS, false, CAmount(0))) {
+        if (!CreateTransaction(vecSend, wtxdummy, keyChange, nFeeRet, nChangePosInOut, strErr, &cControl, true, ALL_COINS, false, false)) {
             LogPrintf("MultiSend createtransaction failed\n");
             return false;
         }
-
-        if (!CommitTransaction(wtx, keyChange)) {
+        CValidationState state;
+        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
             LogPrintf("MultiSend transaction commit failed\n");
             return false;
         } else
