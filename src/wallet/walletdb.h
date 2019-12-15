@@ -117,7 +117,7 @@ public:
     bool WriteStakeSplitThreshold(uint64_t nStakeSplitThreshold);
     bool WriteMultiSend(std::vector<std::pair<std::string, int> > vMultiSend);
     bool EraseMultiSend(std::vector<std::pair<std::string, int> > vMultiSend);
-    bool WriteMSettings(bool fMultiSendStake, bool fMultiSendMasternode, int nLastMultiSendHeight);
+    bool WriteMSettings(bool fMultiSendStake, bool fMultiSendDynode, int nLastMultiSendHeight);
     bool WriteMSDisabledAddresses(std::vector<std::string> vDisabledAddresses);
     bool EraseMSDisabledAddresses(std::vector<std::string> vDisabledAddresses);
     bool WriteAutoCombineSettings(bool fEnable, CAmount nCombineThreshold);

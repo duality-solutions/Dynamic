@@ -908,6 +908,19 @@ public:
     uint64_t nStakeSplitThreshold;
     int nStakeSetUpdateTime;
 
+    //MultiSend
+    std::vector<std::pair<std::string, int> > vMultiSend;
+    bool fMultiSendStake;
+    bool fMultiSendDynodeReward;
+    bool fMultiSendNotify;
+    std::string strMultiSendChangeAddress;
+    int nLastMultiSendHeight;
+    std::vector<std::string> vDisabledAddresses;
+
+    //Auto Combine Inputs
+    bool fCombineDust;
+    CAmount nAutoCombineThreshold;
+
     CWallet()
     {
         SetNull();
@@ -948,6 +961,28 @@ public:
         nStakeSplitThreshold = 2000;
         nHashInterval = 22;
         nStakeSetUpdateTime = 300; // 5 minutes
+        //MultiSend
+        vMultiSend.clear();
+        fMultiSendStake = false;
+        fMultiSendDynodeReward = false;
+        fMultiSendNotify = false;
+        strMultiSendChangeAddress = "";
+        nLastMultiSendHeight = 0;
+        vDisabledAddresses.clear();
+        //Auto Combine Dust
+        fCombineDust = false;
+        nAutoCombineThreshold = 0;
+    }
+
+    bool isMultiSendEnabled()
+    {
+        return fMultiSendDynodeReward || fMultiSendStake;
+    }
+
+    void setMultiSendDisabled()
+    {
+        fMultiSendDynodeReward = false;
+        fMultiSendStake = false;
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -983,6 +1018,8 @@ public:
         AssertLockHeld(cs_wallet);
         return nWalletMaxVersion >= wf;
     }
+
+    std::map<CDynamicAddress, std::vector<COutput> > AvailableCoinsByAddress(bool fConfirmed = true, CAmount maxCoinValue = 0);
 
     /**
      * populate vCoins with vector of available COutputs.
@@ -1366,9 +1403,11 @@ public:
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
     bool HaveStealthAddress(const CKeyID& address) const;
+    bool MintableCoins();
     bool SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInputs, const CAmount& nTargetAmount, const int& blockHeight, const bool fPrecompute = false);
     bool CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime);
-    bool MintableCoins();
+    bool MultiSend();
+    void AutoCombineDust();
 };
 
 /** A key allocated from the key pool. */
