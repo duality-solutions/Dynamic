@@ -9,8 +9,8 @@
 
 #include "staker.h"
 
-#ifdef ENABLE_WALLET
 #include "chain.h"
+#include "chainparams.h"
 #include "dynode-sync.h"
 #include "miner/miner-util.h"
 #include "net.h"
@@ -32,10 +32,10 @@
 //
 // Internal stake minter
 //
-bool ProcessStakeBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
+bool ProcessStakeBlockFound(const std::shared_ptr<const CBlock> pblock, CWallet& wallet, CReserveKey& reservekey)
 {
     LogPrintf("%s: Proof-of-Stake block found: %s\n", __func__, pblock->ToString());
-    LogPrintf("%s: Generated %s\n", __func__, FormatMoney(pblock->vtx[0].vout[0].nValue));
+    LogPrintf("%s: Generated %s\n", __func__, FormatMoney(pblock->vtx[0]->vout[0].nValue));
 
     // Found a solution
     {
@@ -56,22 +56,28 @@ bool ProcessStakeBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reserv
     // Inform about the new block
     GetMainSignals().BlockFound(pblock->GetHash());
 
+    bool fNewBlock = false;
     // Process this block the same as if we had received it from another node
-    CValidationState state;
-    if (!ProcessNewBlock(state, NULL, pblock)) {
-        return error("PIVXMiner : ProcessNewBlock, block not accepted");
-    }
+    if (!ProcessNewBlock(Params(), pblock, true, &fNewBlock))
+        return error("Dynamic Staker: ProcessStakeBlockFound, block not accepted");
 
-    for (CNode* node : vNodes) {
-        node->PushInventory(CInv(MSG_BLOCK, pblock->GetHash()));
-    }
+    CConnman& connman = *g_connman;
+    connman.ForEachNode([pblock](CNode* pnode) {
+        if (pnode->nVersion != 0)
+        {
+        	pnode->PushInventory(CInv(MSG_BLOCK, pblock->GetHash()));
+        }
+    });
 
     return true;
 }
 
+bool fMintableCoins = false;
+int nMintableLastCheck = 0;
+
 void DynamicStakeMinter(CWallet* pwallet)
 {
-    LogPrintf("Dynamic stake minter started\n");
+    LogPrintf("%s: Dynamic stake minter started\n", __func__);
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dyn-minter");
     bool fProofOfStake = true;
@@ -79,6 +85,7 @@ void DynamicStakeMinter(CWallet* pwallet)
     CReserveKey reservekey(pwallet);
     unsigned int nExtraNonce = 0;
     bool fLastLoopOrphan = false;
+    CConnman& connman = *g_connman;
     while (fProofOfStake) {
         //control the amount of times the client will check for mintable coins
         if ((GetTime() - nMintableLastCheck > 5 * 60)) // 5 minute check time
@@ -86,8 +93,7 @@ void DynamicStakeMinter(CWallet* pwallet)
             nMintableLastCheck = GetTime();
             fMintableCoins = pwallet->MintableCoins();
         }
-
-        while (vNodes.empty() || pwallet->IsLocked() || !fMintableCoins ||
+        while (connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 || pwallet->IsLocked() || !fMintableCoins ||
                (pwallet->GetBalance() > 0 && nReserveBalance >= pwallet->GetBalance()) || 
                !dynodeSync.IsSynced() || !sporkManager.IsSporkActive(SPORK_31_PROOF_OF_STAKE_ENABLED )) 
        	{
@@ -100,7 +106,7 @@ void DynamicStakeMinter(CWallet* pwallet)
                 fMintableCoins = pwallet->MintableCoins();
             }
         }
-
+        LogPrintf("%s: Dynamic stake minter initialized.\n", __func__);
         //search our map of hashed blocks, see if bestblock has been hashed yet
         if (mapHashedBlocks.count(chainActive.Tip()->nHeight) && !fLastLoopOrphan)
         {
@@ -114,21 +120,21 @@ void DynamicStakeMinter(CWallet* pwallet)
         //
         // Create new block
         //
-        unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
         CBlockIndex* pindexPrev = chainActive.Tip();
         if (!pindexPrev)
             continue;
 
-        std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(CScript(), pwallet, fProofOfStake));
+        CScript scriptStake;
+        std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), &scriptStake, pwallet, fProofOfStake));
         if (!pblocktemplate.get())
             continue;
 
-        CBlock* pblock = &pblocktemplate->block;
-        IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+        const std::shared_ptr<const CBlock> pblock = std::make_shared<const CBlock>(pblocktemplate->block);
+        IncrementExtraNonce(pblocktemplate->block, pindexPrev, nExtraNonce);
 
         //Stake miner main
         LogPrintf("%s : proof-of-stake block found %s \n", __func__, pblock->GetHash().ToString().c_str());
-        if (!SignBlock(*pblock, *pwallet)) {
+        if (!SignBlock(pblocktemplate->block, *pwallet)) {
             LogPrintf("%s: Signing new block with UTXO key failed \n", __func__);
             continue;
         }
@@ -147,12 +153,10 @@ void DynamicStakeMinter(CWallet* pwallet)
         continue;
     }
 }
-#endif // ENABLE_WALLET
 
 // ppcoin: stake minter thread
 void ThreadStakeMinter()
 {
-#ifdef ENABLE_WALLET
     boost::this_thread::interruption_point();
     LogPrintf("ThreadStakeMinter started\n");
     CWallet* pwallet = pwalletMain;
@@ -160,11 +164,9 @@ void ThreadStakeMinter()
         DynamicStakeMinter(pwallet);
         boost::this_thread::interruption_point();
     } catch (std::exception& e) {
-        LogPrintf("ThreadStakeMinter() exception \n");
+        LogPrintf("ThreadStakeMinter() exception: %s \n", e.what());
     } catch (...) {
         LogPrintf("ThreadStakeMinter() error \n");
     }
     LogPrintf("ThreadStakeMinter exiting,\n");
-#endif // ENABLE_WALLET
 }
-
