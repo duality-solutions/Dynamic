@@ -8,11 +8,7 @@
 #ifndef DYNAMIC_POS_STAKER_H
 #define DYNAMIC_POS_STAKER_H
 
-#ifdef ENABLE_WALLET
-
 /** Run the stake minting thread */
 void ThreadStakeMinter();
-
-#endif // ENABLE_WALLET
 
 #endif // DYNAMIC_POS_STAKER_H

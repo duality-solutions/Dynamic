@@ -147,10 +147,12 @@ void DynamicStakeMinter(CWallet* pwallet)
         continue;
     }
 }
+#endif // ENABLE_WALLET
 
 // ppcoin: stake minter thread
 void ThreadStakeMinter()
 {
+#ifdef ENABLE_WALLET
     boost::this_thread::interruption_point();
     LogPrintf("ThreadStakeMinter started\n");
     CWallet* pwallet = pwalletMain;
@@ -163,6 +165,6 @@ void ThreadStakeMinter()
         LogPrintf("ThreadStakeMinter() error \n");
     }
     LogPrintf("ThreadStakeMinter exiting,\n");
+#endif // ENABLE_WALLET
 }
 
-#endif // ENABLE_WALLET

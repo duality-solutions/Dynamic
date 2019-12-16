@@ -54,6 +54,7 @@
 #endif // ENABLE_WALLET
 #include "compat/sanity.h"
 #include "consensus/validation.h"
+#include "pos/staker.h"
 #include "privatesend-server.h"
 #include "psnotificationinterface.h"
 #include "rpc/register.h"
@@ -2146,6 +2147,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->postInitProcess(threadGroup);
+
+    if (GetBoolArg("-staking", true)) {
+        // ppcoin:mint proof-of-stake blocks in the background
+        threadGroup.create_thread(boost::bind(&ThreadStakeMinter));
+    }
 #endif
 
     threadGroup.create_thread(boost::bind(&ThreadSendAlert, boost::ref(connman)));
