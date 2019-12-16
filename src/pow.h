@@ -37,7 +37,7 @@ class uint256;
 #define BIGINT_DIVIDE(x, y) x / y
 #define BIGINT_GREATER_THAN(x, y) (x > y)
 
-const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex);
+const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 
 bool CheckForkIsTrue(const CBlockIndex* pindexLast, bool fTableFlip = false);
 

@@ -17,9 +17,9 @@
 
 #include <algorithm>
 
-const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
+const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake)
 {
-    while (pindex && pindex->pprev)
+    while (pindex && pindex->pprev && (pindex->IsProofOfStake() != fProofOfStake))
         pindex = pindex->pprev;
     return pindex;
 }
