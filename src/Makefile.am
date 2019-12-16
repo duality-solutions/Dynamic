@@ -180,6 +180,7 @@ DYNAMIC_CORE_H = \
   policy/rbf.h \
   pos/kernel.h \
   pos/stakeinput.h \
+  pos/staker.h \
   pow.h \
   privatesend-client.h \
   privatesend.h \
@@ -328,6 +329,7 @@ libdynamic_server_a_SOURCES = \
   policy/policy.cpp \
   pos/kernel.cpp \
   pos/stakeinput.cpp \
+  pos/staker.cpp \
   pow.cpp \
   privatesend.cpp \
   privatesend-server.cpp \
