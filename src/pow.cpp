@@ -24,11 +24,13 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
     return pindex;
 }
 
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
+unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, bool fProofOfStake, const Consensus::Params& params)
 {
+    arith_uint256 targetLimit = fProofOfStake ? UintToArith256(params.posLimit) : UintToArith256(params.powLimit);
+
     assert(pindexLast != nullptr);
     if (pindexLast->nHeight + 1 <= params.nUpdateDiffAlgoHeight)
-        return UintToArith256(params.powLimit).GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
+        return targetLimit.GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
 
     // Find the first block in the averaging interval
     const CBlockIndex* pindexFirst = pindexLast;
@@ -55,13 +57,13 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         nActualTimespan = params.MaxActualTimespan();
 
     // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    const arith_uint256 ntargetLimit = fProofOfStake ? UintToArith256(params.posLimit) : UintToArith256(params.powLimit);
     arith_uint256 bnNew{bnAvg};
     bnNew /= params.AveragingWindowTimespan();
     bnNew *= nActualTimespan;
 
-    if (bnNew > bnPowLimit)
-        bnNew = bnPowLimit;
+    if (bnNew > ntargetLimit)
+        bnNew = ntargetLimit;
 
     /// debug print
     LogPrint("pow", "GetNextWorkRequired RETARGET\n");

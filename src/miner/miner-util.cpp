@@ -62,7 +62,7 @@ int64_t UpdateTime(CBlockHeader& block, const Consensus::Params& cparams, const 
 
     // Updating time can change work required on testnet:
     if (cparams.fPowAllowMinDifficultyBlocks)
-        block.nBits = GetNextWorkRequired(indexPrev, block, cparams);
+        block.nBits = GetNextWorkRequired(indexPrev, block, false, cparams);
 
     return new_time - old_time;
 }
@@ -112,7 +112,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         static int64_t nLastCoinStakeSearchTime = GetAdjustedTime(); // only initialized at startup
         boost::this_thread::interruption_point();
         block.nTime = GetAdjustedTime();
-        block.nBits = GetNextWorkRequired(pindexLast, block, chainparams.GetConsensus());
+        block.nBits = GetNextWorkRequired(pindexLast, block, false, chainparams.GetConsensus());
         int64_t nSearchTime = block.nTime; // search to current time
         bool fStakeFound = false;
         if (nSearchTime >= nLastCoinStakeSearchTime) {
@@ -379,7 +379,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         if (!fProofOfStake)
             UpdateTime(block, chainparams.GetConsensus(), indexPrev);
 
-        block.nBits = GetNextWorkRequired(indexPrev, block, chainparams.GetConsensus());
+        block.nBits = GetNextWorkRequired(indexPrev, block, false, chainparams.GetConsensus());
         block.nNonce = 0;
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(*block.vtx[0]);
 

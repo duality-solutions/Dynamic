@@ -151,7 +151,7 @@ public:
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.posLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 675; // 675 blocks = 1 day
 
@@ -609,7 +609,7 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.posLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 20;
 

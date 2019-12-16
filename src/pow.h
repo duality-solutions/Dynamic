@@ -42,7 +42,7 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
 bool CheckForkIsTrue(const CBlockIndex* pindexLast, bool fTableFlip = false);
 
 unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params&);
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params&);
+unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, bool fProofOfStake, const Consensus::Params&);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
