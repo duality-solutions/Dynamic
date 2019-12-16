@@ -6495,8 +6495,6 @@ bool CWallet::SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInp
     return true;
 }
 
-
-
 // ppcoin: create coin stake transaction
 bool CWallet::CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime)
 {
