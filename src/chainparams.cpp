@@ -141,7 +141,6 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nPoSTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
@@ -152,7 +151,9 @@ public:
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.nStakeMinDepth = 600;
+        consensus.posLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
+        consensus.nStakeMinDepth = 675; // 675 blocks = 1 day
 
         consensus.nMaxReorganizationDepth = 100;
 
@@ -300,7 +301,6 @@ public:
         consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nPoSTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -308,7 +308,9 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.nStakeMinDepth = 100;
+        consensus.posLimit = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
+        consensus.nStakeMinDepth = 20;
 
         consensus.nMaxReorganizationDepth = 100;
 
@@ -453,7 +455,6 @@ public:
         consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nPoSTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -461,6 +462,8 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
+        consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 0;
 
         consensus.nMaxReorganizationDepth = 100;
@@ -606,7 +609,9 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.nStakeMinDepth = 100;
+        consensus.posLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
+        consensus.nStakeMinDepth = 20;
 
         consensus.nMaxReorganizationDepth = 100;
 

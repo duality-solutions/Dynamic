@@ -61,17 +61,17 @@ static const bool DEFAULT_LOGTHREADNAMES = false;
 /**
  * Default average PoW block span time.
  */
-static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Dynamic average block span time is set to 128 seconds
+static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Proof-of-Work average block span time is set to 128 seconds
 /**
  * Maximum amount of time that a block timestamp is allowed to exceed the
  * current network-adjusted time before the block will be accepted.
  */
-static const int64_t DEFAULT_AVERAGE_POS_BLOCK_TIME = 60; // Dynamic average block span time is set to 60 seconds for Proof-of-Stake
+static const int64_t DEFAULT_AVERAGE_POS_BLOCK_TIME = 1 * 64; // Proof-of-Stake average block span time is set to 64 seconds 
 /**
  * Maximum amount of time that a block timestamp is allowed to exceed the
  * current network-adjusted time before the block will be accepted.
  */
-static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * DEFAULT_AVERAGE_POW_BLOCK_TIME; // ~26 minutes for Dynamic or 12 blocks
+static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * DEFAULT_AVERAGE_POW_BLOCK_TIME; // ~12.8 minutes for Dynamic or 12 blocks
 
 /** Signals for translation. */
 class CTranslationInterface

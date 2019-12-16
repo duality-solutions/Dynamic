@@ -75,17 +75,19 @@ struct Params {
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
-    int64_t nPoSTargetSpacing;
     int64_t nPowTargetTimespan;
     int64_t nPowAveragingWindow;
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
     int64_t nMinimumChainWork;
+    /**Proof of Stake parameters */
+    uint256 posLimit;
+    int64_t nPosTargetSpacing;
+    int nStakeMinDepth;
 
     uint256 defaultAssumeValid;
 
-    int nStakeMinDepth;
 
     int nMaxReorganizationDepth;
 
