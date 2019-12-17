@@ -106,6 +106,9 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     txNew.vin[0].prevout.SetNull();
     txNew.vout.resize(1);
 
+    // Add dummy coinbase tx as first transaction
+    block.vtx.emplace_back();
+
     CMutableTransaction txCoinStake;
     if (fProofOfStake) {
         // ppcoin: if coinstake available add coinstake tx
@@ -120,7 +123,6 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             if (pwallet->CreateCoinStake(*pwallet, block.nBits, nSearchTime - nLastCoinStakeSearchTime, txCoinStake, nTxNewTime)) {
                 //For Proof of Stake blocks, the coinbase's first transaction output is empty
                 txNew.vout[0].SetEmpty();
-                block.vtx.push_back(MakeTransactionRef(txNew));
                 block.vtx.push_back(MakeTransactionRef(txCoinStake));
                 block.nTime = nTxNewTime;
                 fStakeFound = true;
@@ -176,10 +178,6 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         block.nTime = GetAdjustedTime();
         const int64_t nMedianTimePast = indexPrev->GetMedianTimePast();
 
-        // Add our Proof-of-Work coinbase tx as first transaction
-        if (!fProofOfStake)
-            block.vtx.emplace_back();
-
         pblocktemplate->vTxFees.push_back(-1);   // updated at end
         pblocktemplate->vTxSigOps.push_back(-1); // updated at end
         block.nVersion = ComputeBlockVersion(indexPrev, chainparams.GetConsensus());
@@ -189,7 +187,6 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             block.nVersion = GetArg("-blockversion", block.nVersion);
 
         int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST) ? nMedianTimePast : block.GetBlockTime();
-
 
         bool fPriorityBlock = nBlockPrioritySize > 0;
         if (fPriorityBlock) {
@@ -328,7 +325,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             fluidIssuance = fluidMint.MintAmount;
             txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
-            txNew.vout[0].nValue = blockReward;
+            if (!fProofOfStake)
+                txNew.vout[0].nValue = blockReward;
         }
 
         CScript script;
@@ -371,6 +369,9 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             block.vtx[0] = MakeTransactionRef(std::move(txNew));
             //block.vtx[0] = txNew;
             pblocktemplate->vTxFees[0] = -nFees;
+        }
+        else {
+            block.vtx[0] = MakeTransactionRef(std::move(txNew));
         }
 
         // Fill in header

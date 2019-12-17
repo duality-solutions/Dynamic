@@ -45,6 +45,6 @@ unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHead
 unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params&);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
-bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
+bool CheckProofOfWork(const uint256& hash, const unsigned int nBits, const Consensus::Params&);
 
 #endif // DYNAMIC_POW_H

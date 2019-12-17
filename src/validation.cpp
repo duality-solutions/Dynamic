@@ -1740,9 +1740,10 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
     }
 
     // Check the header
-    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
-        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
-
+    if (block.IsProofOfWork()) {
+        if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+    }
     return true;
 }
 
@@ -1951,15 +1952,14 @@ bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoins
         if (nValueIn < tx.GetValueOut())
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-in-belowout", false,
                 strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn), FormatMoney(tx.GetValueOut())));
+        // Tally transaction fees
+        CAmount nTxFee = nValueIn - tx.GetValueOut();
+        if (nTxFee < 0)
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-negative");
+        nFees += nTxFee;
+        if (!MoneyRange(nFees))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-outofrange");
     }
-    
-    // Tally transaction fees
-    CAmount nTxFee = nValueIn - tx.GetValueOut();
-    if (nTxFee < 0)
-        return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-negative");
-    nFees += nTxFee;
-    if (!MoneyRange(nFees))
-        return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-outofrange");
     return true;
 }
 } // namespace Consensus
@@ -2440,6 +2440,30 @@ bool GetBlockHash(uint256& hashRet, int nBlockHeight)
     return true;
 }
 
+bool CheckProofOfStakeAmount(const CBlock& block, const CAmount& blockReward, std::string& strErrorRet) {
+    CAmount nInputAmount = 0;
+    CTransactionRef stakeTxIn = block.vtx[1];
+    // Inputs
+    std::vector<CTxIn> vInputs;
+    for (const CTxIn& stakeIn : stakeTxIn->vin) {
+        vInputs.push_back(stakeIn);
+    }
+    const bool fHasInputs = !vInputs.empty();
+    const CCoinsViewCache coins(pcoinsTip);
+    for (const CTransactionRef& tx : block.vtx) {
+        if(tx->IsCoinStake())
+            continue;
+        if(fHasInputs) {
+            for (const CTxIn& txIn : vInputs){
+                const Coin coin = coins.AccessCoin(txIn.prevout);
+                nInputAmount += coin.out.nValue;
+            }
+        }
+    }
+    //LogPrintf("%s: out %d, in %d, blockReward %d\n", __func__, FormatMoney(block.vtx[1]->GetValueOut()), FormatMoney(nInputAmount), FormatMoney(blockReward));
+    return (block.vtx[1]->GetValueOut() - nInputAmount) <= blockReward;
+}
+
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
@@ -2760,10 +2784,19 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         }
         nExpectedBlockValue = newMintIssuance + newMiningReward + newDynodeReward;
 
-        if (!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
-            return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        if (block.IsProofOfWork()) {
+            // check Proof-of-Work and Dynode amount paid
+            if (!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
+                return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+            }
+        } else {
+            // check Proof-of-Stake amount paid
+            if (!CheckProofOfStakeAmount(block, nExpectedBlockValue, strError)) {
+                return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-stake-amount");
+            }
         }
-        if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
+        // Do not pay Dynodes for Proof-of-Stake blocks
+        if (block.IsProofOfWork() && !IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
             mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
             return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
                 REJECT_INVALID, "bad-cb-payee");
@@ -3884,7 +3917,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
+    if (!IsPoS && !CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
 
     // Check the merkle root.
@@ -4122,9 +4155,10 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
                 return state.Invalid(error("%s: block %s is marked invalid", __func__, hash.ToString()), 0, "duplicate");
             return true;
         }
-
-        if (!CheckBlockHeader(block, state, chainparams.GetConsensus()))
-            return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
+        if (block.IsProofOfWork()) {
+            if (!CheckBlockHeader(block, state, chainparams.GetConsensus()))
+                return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
+        }
 
         // Get prev block index
         CBlockIndex* pindexPrev = NULL;
@@ -4177,6 +4211,9 @@ bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidatio
 
 static bool CheckWork(const CBlock& block)
 {
+    if (block.IsProofOfStake())
+        return true;
+
     uint256 hash = block.GetHash();
     arith_uint256 hash_target = arith_uint256().SetCompact(block.nBits);
     if (UintToArith256(hash) > hash_target)
@@ -4362,7 +4399,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
         const CCoinsViewCache coins(pcoinsTip);
         for (const CTxIn& in: stakeTxIn->vin) {
             const Coin coin = coins.AccessCoin(in.prevout);
-            if(!coin.IsNull() && !isBlockFromFork){
+            if(coin.IsNull() && !isBlockFromFork){
                 // No coins on the main chain
                 return error("%s: coin stake inputs not available on main chain, received height %d vs current %d", __func__, nHeight, chainActive.Height());
             }

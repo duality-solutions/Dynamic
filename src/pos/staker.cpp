@@ -34,8 +34,7 @@
 //
 bool ProcessStakeBlockFound(const std::shared_ptr<const CBlock> pblock, CWallet& wallet, CReserveKey& reservekey)
 {
-    LogPrintf("%s: Proof-of-Stake block found: %s\n", __func__, pblock->ToString());
-    LogPrintf("%s: Generated %s\n", __func__, FormatMoney(pblock->vtx[0]->vout[0].nValue));
+    LogPrintf("%s: Proof-of-Stake block found, vchBlockSig size %d:\n%s\n", __func__, pblock->vchBlockSig.size(), pblock->ToString());
 
     // Found a solution
     {
@@ -129,18 +128,16 @@ void DynamicStakeMinter(CWallet* pwallet)
         if (!pblocktemplate.get())
             continue;
 
-        const std::shared_ptr<const CBlock> pblock = std::make_shared<const CBlock>(pblocktemplate->block);
         IncrementExtraNonce(pblocktemplate->block, pindexPrev, nExtraNonce);
 
         //Stake miner main
-        LogPrintf("%s : proof-of-stake block found %s \n", __func__, pblock->GetHash().ToString().c_str());
         if (!SignBlock(pblocktemplate->block, *pwallet)) {
             LogPrintf("%s: Signing new block with UTXO key failed \n", __func__);
             continue;
         }
 
-        LogPrintf("%s : proof-of-stake block was signed %s \n",  __func__, pblock->GetHash().ToString().c_str());
         SetThreadPriority(THREAD_PRIORITY_NORMAL);
+        const std::shared_ptr<const CBlock> pblock = std::make_shared<const CBlock>(pblocktemplate->block);
         if (!ProcessStakeBlockFound(pblock, *pwallet, reservekey)) {
             fLastLoopOrphan = true;
             continue;

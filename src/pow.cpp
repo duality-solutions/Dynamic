@@ -73,7 +73,7 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
 }
 
 
-bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
+bool CheckProofOfWork(const uint256& hash, const unsigned int nBits, const Consensus::Params& params)
 {
     bool fNegative;
     bool fOverflow;
