@@ -3748,7 +3748,7 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
             pindexNew->hashProofOfStake = mapProofOfStake[hash];
         }
         // compute v2 stake modifier
-        if (block.vtx.size() > 2)
+        if (block.vtx.size() > 1)
             pindexNew->nStakeModifierV2 = ComputeStakeModifier(pindexNew->pprev, block.vtx[1]->vin[0].prevout.hash);
     }
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
