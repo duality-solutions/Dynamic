@@ -4338,8 +4338,8 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
                     continue;
                 if(fHasInputs) {
                     // Check if coinstake input is double spent inside the same block
-                    for (const CTxIn& pivIn : vInputs){
-                        if(pivIn.prevout == in.prevout){
+                    for (const CTxIn& stakeIn : vInputs){
+                        if(stakeIn.prevout == in.prevout){
                             // double spent coinstake input inside block
                             return error("%s: double spent coinstake input inside block", __func__);
                         }

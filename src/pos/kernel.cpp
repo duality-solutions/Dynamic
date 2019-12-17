@@ -393,9 +393,9 @@ bool initStakeInput(const CBlock block, std::unique_ptr<CStakeInput>& stake, int
         return error("%s : VerifySignature failed on coinstake %s", __func__, ptx->GetHash().ToString().c_str());
 
     const CTransaction& txPrev = *ptxPrev.get();
-    CDynamicStake* pivInput = new CDynamicStake();
-    pivInput->SetInput(txPrev, txin.prevout.n);
-    stake = std::unique_ptr<CStakeInput>(pivInput);
+    CDynamicStake* stakeInput = new CDynamicStake();
+    stakeInput->SetInput(txPrev, txin.prevout.n);
+    stake = std::unique_ptr<CStakeInput>(stakeInput);
 
     return true;
 }
