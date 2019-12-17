@@ -2148,7 +2148,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (pwalletMain)
         pwalletMain->postInitProcess(threadGroup);
 
-    if (GetBoolArg("-staking", true)) {
+    if (GetBoolArg("-staking", false)) {
         // ppcoin:mint proof-of-stake blocks in the background
         threadGroup.create_thread(boost::bind(&ThreadStakeMinter));
     }
