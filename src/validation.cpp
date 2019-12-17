@@ -4155,10 +4155,9 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
                 return state.Invalid(error("%s: block %s is marked invalid", __func__, hash.ToString()), 0, "duplicate");
             return true;
         }
-        if (block.IsProofOfWork()) {
-            if (!CheckBlockHeader(block, state, chainparams.GetConsensus()))
-                return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
-        }
+        
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), false))
+            return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
 
         // Get prev block index
         CBlockIndex* pindexPrev = NULL;
