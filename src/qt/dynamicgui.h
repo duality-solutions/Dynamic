@@ -99,6 +99,7 @@ public:
     void removeAllWallets();
 #endif // ENABLE_WALLET
     bool enableWallet;
+    bool fMultiSend = false;
     QLabel* labelWalletEncryptionIcon;
 
 protected:
@@ -115,6 +116,7 @@ private:
 
     UnitDisplayStatusBarControl* unitDisplayControl;
     QLabel* labelWalletHDStatusIcon;
+    QLabel* labelStakingIcon;
     QPushButton* labelConnectionsIcon;
     QLabel* labelBlocksIcon;
     QLabel* progressBarLabel;
@@ -262,6 +264,8 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
+
+    void setStakingStatus();
 #endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();
