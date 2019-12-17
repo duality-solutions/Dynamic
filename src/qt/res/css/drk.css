@@ -2139,3 +2139,10 @@ QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate:pressed {
     border: 1px groove gray
 }
 */
+
+/* MultiSendDialog*/
+QDialog#MultiSendDialog {
+    background-color:#000000;
+    color:#FFFFFF;
+    border:2px solid white;
+}

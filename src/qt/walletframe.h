@@ -77,7 +77,9 @@ public Q_SLOTS:
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
     void gotoVerifyMessageTab(QString addr = "");
-
+    /** Show MultiSend Dialog **/
+    void gotoMultiSendDialog();
+    
     /** Encrypt the wallet */
     void encryptWallet(bool status);
     /** Backup the wallet */

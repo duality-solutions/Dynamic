@@ -21,6 +21,8 @@ enum DataOutputTypes
     DO_STEALTH_PREFIX       = 2,
 };
 
+class CTransaction;
+
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
 {
@@ -69,6 +71,8 @@ public:
 
     std::string ToString() const;
     std::string ToStringShort() const;
+    bool IsDynodeReward(const CTransaction* tx) const;
+
 };
 
 /** An input of a transaction.  It contains the location of the previous
