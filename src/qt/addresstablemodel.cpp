@@ -10,6 +10,7 @@
 #include "guiutil.h"
 #include "walletmodel.h"
 
+#include "askpassphrasedialog.h"
 #include "base58.h"
 #include "wallet/wallet.h"
 
@@ -337,7 +338,7 @@ QString AddressTableModel::addRow(const QString& type, const QString& label, con
         CPubKey newKey;
         std::vector<unsigned char> newEdKey;
         if (!wallet->GetKeysFromPool(newKey, newEdKey, false)) {
-            WalletModel::UnlockContext ctx(walletModel->requestUnlock());
+            WalletModel::UnlockContext ctx(walletModel->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, true));
             if (!ctx.isValid()) {
                 // Unlock wallet failed or was cancelled
                 editStatus = WALLET_UNLOCK_FAILURE;

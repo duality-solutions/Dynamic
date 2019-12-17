@@ -8,6 +8,8 @@
 #ifndef DYNAMIC_QT_WALLETFRAME_H
 #define DYNAMIC_QT_WALLETFRAME_H
 
+#include "askpassphrasedialog.h"
+
 #include <QFrame>
 #include <QMap>
 
@@ -85,7 +87,8 @@ public Q_SLOTS:
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
-    void unlockWallet();
+    void unlockWallet(AskPassphraseDialog::Context context);
+    void unlockWallet(bool setContext);
     /** Lock wallet */
     void lockWallet();
 

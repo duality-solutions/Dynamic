@@ -108,14 +108,23 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="0">
+      <widget class="QCheckBox" name="anonymizationCheckBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.</string>
+       </property>
+       <property name="text">
+        <string>For mixing and staking only</string>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="statuslabel">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

@@ -612,6 +612,10 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(vMasterKey, fForMixingOnly)) {
+                if (fForMixingOnly) {
+                    fWalletUnlockMixingOnly = fForMixingOnly;
+                    return true;
+                }
                 if (fNeedToUpgradeWallet) {
                     if (SyncEdKeyPool()) {
                         SetMinVersion(FEATURE_HD);

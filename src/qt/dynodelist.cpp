@@ -371,7 +371,7 @@ void DynodeList::on_startButton_clicked()
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
     if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
-        WalletModel::UnlockContext ctx(walletModel->requestUnlock());
+        WalletModel::UnlockContext ctx(walletModel->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, true));
 
         if (!ctx.isValid())
             return; // Unlock wallet was cancelled
@@ -397,7 +397,7 @@ void DynodeList::on_startAllButton_clicked()
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
     if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
-        WalletModel::UnlockContext ctx(walletModel->requestUnlock());
+        WalletModel::UnlockContext ctx(walletModel->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, true));
 
         if (!ctx.isValid())
             return; // Unlock wallet was cancelled
@@ -430,7 +430,7 @@ void DynodeList::on_startMissingButton_clicked()
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
     if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
-        WalletModel::UnlockContext ctx(walletModel->requestUnlock());
+        WalletModel::UnlockContext ctx(walletModel->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, true));
 
         if (!ctx.isValid())
             return; // Unlock wallet was cancelled

@@ -612,7 +612,7 @@ void OverviewPage::togglePrivateSend()
 
         // if wallet is locked, ask for a passphrase
         if (walletModel->getEncryptionStatus() == WalletModel::Locked) {
-            WalletModel::UnlockContext ctx(walletModel->requestUnlock(true));
+            WalletModel::UnlockContext ctx(walletModel->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, true));
             if (!ctx.isValid()) {
                 //unlock was cancelled
                 privateSendClient.nCachedNumBlocks = std::numeric_limits<int>::max();

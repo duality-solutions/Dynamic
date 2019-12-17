@@ -164,6 +164,7 @@ void WalletView::setClientModel(ClientModel* _clientModel)
 void WalletView::setWalletModel(WalletModel* _walletModel)
 {
     this->walletModel = _walletModel;
+
     // Put transaction list in tabs
     overviewPage->setWalletModel(_walletModel);
     receiveCoinsPage->setModel(_walletModel);
@@ -194,7 +195,7 @@ void WalletView::setWalletModel(WalletModel* _walletModel)
             this, SLOT(processNewTransaction(QModelIndex, int, int)));
 
         // Ask for passphrase if needed
-        connect(_walletModel, SIGNAL(requireUnlock(bool)), this, SLOT(unlockWallet(bool)));
+        connect(_walletModel, SIGNAL(requireUnlock(AskPassphraseDialog::Context)), this, SLOT(unlockWallet(AskPassphraseDialog::Context)));
 
         // Show progress dialog
         connect(_walletModel, SIGNAL(showProgress(QString, int)), this, SLOT(showProgress(QString, int)));
@@ -315,8 +316,8 @@ void WalletView::encryptWallet(bool status)
 {
     if (!walletModel)
         return;
-    AskPassphraseDialog dlg(status ? AskPassphraseDialog::Encrypt : AskPassphraseDialog::Decrypt, this);
-    dlg.setModel(walletModel);
+    AskPassphraseDialog dlg(status ? AskPassphraseDialog::Mode::Encrypt : AskPassphraseDialog::Mode::Decrypt, this, 
+                            walletModel, AskPassphraseDialog::Context::Encrypt);
     dlg.exec();
 
     updateEncryptionStatus();
@@ -342,20 +343,18 @@ void WalletView::backupWallet()
 
 void WalletView::changePassphrase()
 {
-    AskPassphraseDialog dlg(AskPassphraseDialog::ChangePass, this);
-    dlg.setModel(walletModel);
+    AskPassphraseDialog dlg(AskPassphraseDialog::Mode::ChangePass, this, walletModel, AskPassphraseDialog::Context::ChangePass);
     dlg.exec();
 }
 
-void WalletView::unlockWallet(bool fForMixingOnly)
+void WalletView::unlockWallet(AskPassphraseDialog::Context context)
 {
     if (!walletModel)
         return;
     // Unlock wallet when requested by wallet model
 
     if (walletModel->getEncryptionStatus() == WalletModel::Locked || walletModel->getEncryptionStatus() == WalletModel::UnlockedForMixingOnly) {
-        AskPassphraseDialog dlg(fForMixingOnly ? AskPassphraseDialog::UnlockMixing : AskPassphraseDialog::Unlock, this);
-        dlg.setModel(walletModel);
+        AskPassphraseDialog dlg(AskPassphraseDialog::Mode::UnlockMixing, this, walletModel, context);
         dlg.exec();
     }
 }
@@ -407,7 +406,7 @@ void WalletView::showProgress(const QString& title, int nProgress)
         progressDialog->setValue(nProgress);
 }
 
-void WalletView::on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly)
+void WalletView::on_labelWalletEncryptionIcon_clicked(AskPassphraseDialog::Context context)
 {
     if (!walletModel)
         return;
@@ -415,8 +414,7 @@ void WalletView::on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly)
     if (walletModel->getEncryptionStatus() == WalletModel::Unlocked) {
         walletModel->setWalletLocked(true);
     } else {
-        AskPassphraseDialog dlg(fForMixingOnly ? AskPassphraseDialog::UnlockMixing : AskPassphraseDialog::Unlock, this);
-        dlg.setModel(walletModel);
+        AskPassphraseDialog dlg(AskPassphraseDialog::Mode::UnlockMixing, this, walletModel, context);
         dlg.exec();
     }
 }

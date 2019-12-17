@@ -254,6 +254,8 @@ RES_ICONS = \
   qt/res/icons/drk/receive.png \
   qt/res/icons/drk/remove.png \
   qt/res/icons/drk/send.png \
+  qt/res/icons/drk/staking_active.png \
+  qt/res/icons/drk/staking_inactive.png \
   qt/res/icons/drk/synced.png \
   qt/res/icons/drk/transaction_abandoned.png \
   qt/res/icons/drk/transaction_conflicted.png \

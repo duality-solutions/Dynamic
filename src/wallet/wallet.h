@@ -842,6 +842,7 @@ public:
     const std::string strWalletFile;
 
     bool fFileBacked;
+    bool fForMixingOnly;
 
     bool fNeedToRescanTransactions = false;
     CBlockIndex* rescan_index = nullptr;

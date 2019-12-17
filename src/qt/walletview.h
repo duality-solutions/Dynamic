@@ -9,7 +9,7 @@
 #define DYNAMIC_QT_WALLETVIEW_H
 
 #include "amount.h"
-
+#include "askpassphrasedialog.h"
 #include "dynodelist.h"
 
 #include <QStackedWidget>
@@ -114,7 +114,7 @@ public Q_SLOTS:
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
-    void unlockWallet(bool fAnonymizeOnly = false);
+    void unlockWallet(AskPassphraseDialog::Context context);
     /** Lock wallet */
     void lockWallet();
 
@@ -130,7 +130,7 @@ public Q_SLOTS:
     void showProgress(const QString& title, int nProgress);
 
     // Clicking on the lock icon will open the passphrase dialog
-    void on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly = false);
+    void on_labelWalletEncryptionIcon_clicked(AskPassphraseDialog::Context context);
 
     /** User has requested more information about the out of sync state */
     void requestedSyncWarningInfo();

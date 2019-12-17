@@ -40,6 +40,8 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TX_STATUS_LOCKED QColor(150, 20, 150) // light purple
 /* Transaction list -- Fluid TX status decoration - default color */
 #define COLOR_FLUID_TX QColor(0, 100, 255) // blue
+/* Transaction list -- TX status decoration - stake (BlueViolet #8A2BE2) */
+#define COLOR_STAKE QColor(138,43,226)
 /* Tooltips longer than this (in characters) are converted into rich text,
    so that they can be word-wrapped.
  */

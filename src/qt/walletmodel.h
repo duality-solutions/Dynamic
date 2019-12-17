@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_QT_WALLETMODEL_H
 #define DYNAMIC_QT_WALLETMODEL_H
 
+#include "askpassphrasedialog.h"
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
 
@@ -172,9 +173,10 @@ public:
     // Wallet encryption
     bool setWalletEncrypted(bool encrypted, const SecureString& passphrase);
     // Passphrase only needed when unlocking
-    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), bool fMixing = false);
+    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), bool mixingOnly = false);
     bool changePassphrase(const SecureString& oldPass, const SecureString& newPass);
-
+    // Is wallet unlocked for mixing only?
+    bool isMixingOnlyUnlocked();
     // Wallet backup
     bool backupWallet(const QString& filename);
 
@@ -204,7 +206,8 @@ public:
         void CopyFrom(const UnlockContext& rhs);
     };
 
-    UnlockContext requestUnlock(bool fForMixingOnly = false);
+    UnlockContext requestUnlock(AskPassphraseDialog::Context context, bool relock = false);
+
 
     bool getPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const;
     bool havePrivKey(const CKeyID& address) const;

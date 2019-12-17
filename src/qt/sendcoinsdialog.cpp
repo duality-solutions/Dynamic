@@ -9,6 +9,7 @@
 #include "ui_sendcoinsdialog.h"
 
 #include "addresstablemodel.h"
+#include "askpassphrasedialog.h"
 #include "clientmodel.h"
 #include "coincontroldialog.h"
 #include "dynamicunits.h"
@@ -275,7 +276,7 @@ void SendCoinsDialog::on_sendButton_clicked()
     // will call relock
     WalletModel::EncryptionStatus encStatus = model->getEncryptionStatus();
     if (encStatus == model->Locked || encStatus == model->UnlockedForMixingOnly) {
-        WalletModel::UnlockContext ctx(model->requestUnlock());
+        WalletModel::UnlockContext ctx(model->requestUnlock(AskPassphraseDialog::Context::Send_DYN, true));
         if (!ctx.isValid()) {
             // Unlock wallet was cancelled
             fNewRecipientAllowed = true;
@@ -584,6 +585,8 @@ void SendCoinsDialog::updateInstantSend()
 
 void SendCoinsDialog::processSendCoinsReturn(const WalletModel::SendCoinsReturn& sendCoinsReturn, const QString& msgArg)
 {
+    bool fAskForUnlock = false;
+
     QPair<QString, CClientUIInterface::MessageBoxFlags> msgParams;
     // Default to a warning message, override if error message is needed
     msgParams.second = CClientUIInterface::MSG_WARNING;
@@ -626,6 +629,18 @@ void SendCoinsDialog::processSendCoinsReturn(const WalletModel::SendCoinsReturn&
     case WalletModel::OK:
     default:
         return;
+    }
+
+    // Unlock wallet if it wasn't fully unlocked already
+    if(fAskForUnlock) {
+        model->requestUnlock(AskPassphraseDialog::Context::Unlock_Full, false);
+        if(model->getEncryptionStatus () != WalletModel::Unlocked) {
+            msgParams.first = tr("Error: The wallet was unlocked only to mixing coins. Unlock canceled.");
+        }
+        else {
+            // Wallet unlocked
+            return;
+        }
     }
 
     Q_EMIT message(tr("Send Coins"), msgParams.first, msgParams.second);
