@@ -72,9 +72,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     // Fluid type
                     sub.type = TransactionRecord::Fluid;
-                } else if (wtx.IsCoinBase()) {
+                } else if (wtx.IsCoinBase() && !wtx.IsCoinStake()) {
                     // Generated
                     sub.type = TransactionRecord::Generated;
+                } else if (wtx.IsCoinBase() && wtx.IsCoinStake()) {
+                    // Staked
+                    sub.type = TransactionRecord::Stake;
                 }
 
                 parts.append(sub);
@@ -305,7 +308,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
         }
     }
     // For generated transactions, determine maturity
-    else if (type == TransactionRecord::Generated) {
+    else if (type == TransactionRecord::Generated || type == TransactionRecord::Stake) {
         if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;
 

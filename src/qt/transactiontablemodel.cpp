@@ -365,6 +365,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("Payment to yourself");
     case TransactionRecord::Generated:
         return tr("Mined");
+    case TransactionRecord::Stake:
+        return tr("Stake");
     case TransactionRecord::NewDomainUser:
     case TransactionRecord::UpdateDomainUser:
     case TransactionRecord::DeleteDomainUser:
@@ -402,6 +404,8 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::Fluid:
         return QIcon(":/icons/" + theme + "/fluid");
     case TransactionRecord::Generated:
+        return QIcon(":/icons/" + theme + "/tx_mined");
+    case TransactionRecord::Stake:
         return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::RecvWithAddress:
@@ -445,6 +449,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
+    case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
@@ -483,6 +488,7 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
+    case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::NewDomainUser:
@@ -664,6 +670,9 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         }
         if (index.column() == Amount && (rec->type) == TransactionRecord::Fluid) {
             return COLOR_FLUID_TX;
+        }
+        if (index.column() == Amount && (rec->type) == TransactionRecord::Stake) {
+            return COLOR_STAKE;
         }
         if (index.column() == Amount && (rec->credit + rec->debit) < 0) {
             return COLOR_NEGATIVE;

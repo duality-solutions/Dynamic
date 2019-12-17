@@ -81,6 +81,7 @@ public:
         Other,
         Fluid,
         Generated,
+        Stake,
         SendToAddress,
         SendToOther,
         RecvWithAddress,
