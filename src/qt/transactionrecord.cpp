@@ -75,7 +75,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 } else if (wtx.IsCoinBase() && !wtx.IsCoinStake()) {
                     // Generated
                     sub.type = TransactionRecord::Generated;
-                } else if (wtx.IsCoinBase() && wtx.IsCoinStake()) {
+                } else if (wtx.IsCoinStake()) {
                     // Staked
                     sub.type = TransactionRecord::Stake;
                 }
