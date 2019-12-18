@@ -74,10 +74,10 @@ public:
     /** The target time span between Proof-of-Stake blocks */
     int64_t TargetPosSpacing() const { return consensus.nPosTargetSpacing; }
     /** returns the coinstake maturity (min depth required) **/
-    int COINSTAKE_MIN_DEPTH() const { return nStakeMinDepth; }
+    int COINSTAKE_MIN_DEPTH() const { return consensus.nStakeMinDepth; }
     bool HasStakeMinAgeOrDepth(const int contextHeight, const uint32_t contextTime, const int utxoFromBlockHeight, const uint32_t utxoFromBlockTime) const
     {
-        return (contextHeight - utxoFromBlockHeight >= nStakeMinDepth);
+        return (contextHeight - utxoFromBlockHeight >= COINSTAKE_MIN_DEPTH());
     }
     /** returns the max future time (and drift in seconds) allowed for a block in the future **/
     int FutureBlockTimeDrift(const bool isPoS) const { return nFutureTimeDriftPoS; }
@@ -135,7 +135,6 @@ protected:
     int nMinSporkKeys;
     std::string strDynodePaymentsPubKey;
     int64_t nTargetPosSpacing;
-    int nStakeMinDepth;
     int nFutureTimeDriftPoS;
 };
 
