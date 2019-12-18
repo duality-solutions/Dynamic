@@ -406,11 +406,11 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::Fluid:
         return QIcon(":/icons/" + theme + "/fluid");
     case TransactionRecord::DNReward:
-        return QIcon(":/icons/" + theme + "/tx_mined");
+        return QIcon(":/icons/" + theme + "/dynode_network");
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::Stake:
-        return QIcon(":/icons/" + theme + "/tx_mined");
+        return QIcon(":/icons/" + theme + "/pos");
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
@@ -420,17 +420,24 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::SendToOther:
         return QIcon(":/icons/" + theme + "/tx_output");
     case TransactionRecord::NewDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::UpdateDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::DeleteDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::RevokeDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::NewDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::UpdateDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::DeleteDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::RevokeDomainGroup:
-        return QIcon(":/icons/" + theme + "/tx_bdap");
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::LinkRequest:
     case TransactionRecord::LinkAccept:
-        return QIcon(":/icons/" + theme + "/tx_bdap");
+        return QIcon(":/icons/" + theme + "/bdap");
     default:
         return QIcon(":/icons/" + theme + "/tx_inout");
     }

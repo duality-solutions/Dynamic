@@ -376,7 +376,7 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(miningAction);
 
-    bdapAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&BDAP"), this);
+    bdapAction = new QAction(QIcon(":/icons/" + theme + "/bdap"), tr("&BDAP"), this);
     bdapAction->setStatusTip(tr("BDAP"));
     bdapAction->setToolTip(bdapAction->statusTip());
     bdapAction->setCheckable(true);
