@@ -338,6 +338,11 @@ bool Stake(const CBlockIndex* pindexPrev, CStakeInput* stakeInput, unsigned int 
 
     // check for maturity (min age/depth) requirements
     if (!Params().HasStakeMinAgeOrDepth(prevHeight + 1, nTimeTx, nHeightBlockFrom, nTimeBlockFrom))
+        return error("%s : min depth violation - height=%d - nTimeTx=%d, nTimeBlockFrom=%d, nHeightBlockFrom=%d",
+                         __func__, prevHeight + 1, nTimeTx, nTimeBlockFrom, nHeightBlockFrom);
+
+    // check for maturity (min age/depth) requirements
+    if (Params().GetConsensus().nStakeMinAge > GetAdjustedTime() - nTimeBlockFrom)
         return error("%s : min age violation - height=%d - nTimeTx=%d, nTimeBlockFrom=%d, nHeightBlockFrom=%d",
                          __func__, prevHeight + 1, nTimeTx, nTimeBlockFrom, nHeightBlockFrom);
 
