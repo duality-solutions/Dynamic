@@ -55,6 +55,8 @@ private Q_SLOTS:
     void on_cancelButton_clicked();
     void on_hideTrayIcon_stateChanged(int fState);
 
+    void updateHideOrphans(bool fHide);
+
     void showRestartWarning(bool fPersistent = false);
     void clearStatusLabel();
     void updateProxyValidationState();

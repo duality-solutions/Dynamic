@@ -110,6 +110,15 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fLowKeysWarning", true);
 #endif // ENABLE_WALLET
 
+    if (!settings.contains("fHideZeroBalances"))
+        settings.setValue("fHideZeroBalances", true);
+    fHideZeroBalances = settings.value("fHideZeroBalances").toBool();
+
+    if (!settings.contains("fHideOrphans"))
+        settings.setValue("fHideOrphans", false);
+    fHideOrphans = settings.value("fHideOrphans").toBool();
+
+
     // These are shared with the core or have a command-line parameter
     // and we want command-line parameters to overwrite the GUI settings.
     //
@@ -160,6 +169,8 @@ void OptionsModel::Init(bool resetSettings)
         addOverriddenOption("-privatesendmultisession");
     privateSendClient.fPrivateSendMultiSession = settings.value("fPrivateSendMultiSession").toBool();
 #endif
+    if (!settings.contains("nStakeSplitThreshold"))
+        settings.setValue("nStakeSplitThreshold", 1);
 
     // Network
     if (!settings.contains("fUseUPnP"))
@@ -286,6 +297,14 @@ QVariant OptionsModel::data(const QModelIndex& index, int role) const
         case PrivateSendMultiSession:
             return settings.value("fPrivateSendMultiSession");
 #endif
+        case HideZeroBalances:
+            return settings.value("fHideZeroBalances");
+        case HideOrphans:
+            return settings.value("fHideOrphans");
+        case StakeSplitThreshold:
+            if (pwalletMain)
+                return QVariant((int)pwalletMain->nStakeSplitThreshold);
+            return settings.value("nStakeSplitThreshold");
         case DisplayUnit:
             return nDisplayUnit;
         case ThirdPartyTxUrls:
@@ -448,6 +467,20 @@ bool OptionsModel::setData(const QModelIndex& index, const QVariant& value, int 
             }
             break;
 #endif
+        case StakeSplitThreshold:
+            settings.setValue("nStakeSplitThreshold", value.toInt());
+            setStakeSplitThreshold(value.toInt());
+            break;
+        case HideZeroBalances:
+            fHideZeroBalances = value.toBool();
+            settings.setValue("fHideZeroBalances", fHideZeroBalances);
+            Q_EMIT hideZeroBalancesChanged(fHideZeroBalances);
+            break;
+        case HideOrphans:
+            fHideOrphans = value.toBool();
+            settings.setValue("fHideOrphans", fHideOrphans);
+            Q_EMIT hideOrphansChanged(fHideOrphans);
+            break;
         case DisplayUnit:
             setDisplayUnit(value);
             break;
@@ -521,6 +554,24 @@ void OptionsModel::setDisplayUnit(const QVariant& value)
         nDisplayUnit = value.toInt();
         settings.setValue("nDisplayUnit", nDisplayUnit);
         Q_EMIT displayUnitChanged(nDisplayUnit);
+    }
+}
+
+/* Update StakeSplitThreshold's value in wallet */
+void OptionsModel::setStakeSplitThreshold(int value)
+{
+    // XXX: maybe it's worth to wrap related stuff with WALLET_ENABLE ?
+    uint64_t nStakeSplitThreshold;
+
+    nStakeSplitThreshold = value;
+    if (pwalletMain && pwalletMain->nStakeSplitThreshold != nStakeSplitThreshold) {
+        CWalletDB walletdb(pwalletMain->strWalletFile);
+        LOCK(pwalletMain->cs_wallet);
+        {
+            pwalletMain->nStakeSplitThreshold = nStakeSplitThreshold;
+            if (pwalletMain->fFileBacked)
+                walletdb.WriteStakeSplitThreshold(nStakeSplitThreshold);
+        }
     }
 }
 
