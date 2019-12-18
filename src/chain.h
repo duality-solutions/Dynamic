@@ -432,6 +432,11 @@ public:
     //! Efficiently find an ancestor of this block.
     CBlockIndex* GetAncestor(int height);
     const CBlockIndex* GetAncestor(int height) const;
+
+    //! Check if index contains the block header only
+    bool BlockHeaderOnly() const {
+        return nStatus <= 2;
+    }
 };
 
 arith_uint256 GetBlockProof(const CBlockIndex& block);
