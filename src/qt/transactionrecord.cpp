@@ -105,7 +105,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     sub.type = TransactionRecord::Generated;
                 } else if (wtx.IsCoinStake()) {
                     // Staked
-                    sub.type = TransactionRecord::Stake;
+                    continue;
                 }
 
                 parts.append(sub);
