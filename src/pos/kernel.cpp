@@ -335,16 +335,15 @@ bool Stake(const CBlockIndex* pindexPrev, CStakeInput* stakeInput, unsigned int 
 
     const uint32_t nTimeBlockFrom = pindexFrom->nTime;
     const int nHeightBlockFrom = pindexFrom->nHeight;
-
-    // check for maturity (min age/depth) requirements
-    if (!Params().HasStakeMinAgeOrDepth(prevHeight + 1, nTimeTx, nHeightBlockFrom, nTimeBlockFrom))
-        return error("%s : min depth violation - height=%d - nTimeTx=%d, nTimeBlockFrom=%d, nHeightBlockFrom=%d",
-                         __func__, prevHeight + 1, nTimeTx, nTimeBlockFrom, nHeightBlockFrom);
-
-    // check for maturity (min age/depth) requirements
+    // check for maturity (min age) requirements
     if (Params().GetConsensus().nStakeMinAge > GetAdjustedTime() - nTimeBlockFrom)
         return error("%s : min age violation - height=%d - nTimeTx=%d, nTimeBlockFrom=%d, nHeightBlockFrom=%d",
                          __func__, prevHeight + 1, nTimeTx, nTimeBlockFrom, nHeightBlockFrom);
+
+    // check for maturity (min depth) requirements
+    const int nHeight = pindexPrev->nHeight + 1;
+    if (nHeight < nHeightBlockFrom + Params().COINSTAKE_MIN_DEPTH())
+        return error("%s : min depth violation, nHeight=%d, nHeightBlockFrom=%d", __func__, nHeight, nHeightBlockFrom);
 
     // iterate the hashing
     bool fSuccess = false;
@@ -418,7 +417,16 @@ bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, std::uniq
     if (!pindexfrom)
         return error("%s : Failed to find the block index for stake origin", __func__);
 
-    unsigned int nTxTime = block.nTime;
+    const unsigned int nTxTime = block.nTime;
+    const int nBlockFromHeight = pindexfrom->nHeight;
+    const unsigned int nBlockFromTime = pindexfrom->nTime;
+    //check for maturity (min depth) requirements
+    if (!Params().HasStakeMinDepth(nPreviousBlockHeight + 1, nBlockFromHeight))
+        return error("%s : min depth violation - height=%d - nHeightBlockFrom=%d", __func__, nPreviousBlockHeight, nBlockFromHeight);
+
+    //check for maturity (min age) requirements
+    if (!Params().HasStakeMinAge(nTxTime, nBlockFromTime))
+        return error("%s : min age violation - nTimeTx=%d, nTimeBlockFrom=%d", __func__, nTxTime, nBlockFromTime);
 
     if (!CheckStakeKernelHash(pindexPrev, block.nBits, stake.get(), nTxTime, hashProofOfStake, true))
         return error("%s : INFO: check kernel failed on coinstake %s, hashProof=%s", __func__,
