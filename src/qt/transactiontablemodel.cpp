@@ -316,7 +316,7 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord* wtx) cons
         status = tr("This block was not received by any other nodes and will probably not be accepted!");
         break;
     case TransactionStatus::NotAccepted:
-        status = tr("Generated but not accepted");
+        status = tr("Orphan Block - Generated but not accepted. This does not impact your holdings.");
         break;
     }
 
@@ -363,6 +363,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("Sent to");
     case TransactionRecord::SendToSelf:
         return tr("Payment to yourself");
+    case TransactionRecord::DNReward:
+        return tr("Dynode Reward");
     case TransactionRecord::Generated:
         return tr("Mined");
     case TransactionRecord::Stake:
@@ -403,6 +405,8 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     switch (wtx->type) {
     case TransactionRecord::Fluid:
         return QIcon(":/icons/" + theme + "/fluid");
+    case TransactionRecord::DNReward:
+        return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::Stake:
@@ -448,6 +452,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::SendToAddress:
+    case TransactionRecord::DNReward:
     case TransactionRecord::Generated:
     case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
@@ -487,6 +492,11 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
     case TransactionRecord::Fluid:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
+    case TransactionRecord::DNReward: {
+        QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
+        if (label.isEmpty())
+            return COLOR_BAREADDRESS;
+    }
     case TransactionRecord::Generated:
     case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
@@ -560,7 +570,7 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord* wtx)
         return QIcon(":/icons/" + theme + "/transaction_conflicted");
     case TransactionStatus::Immature: {
         int total = wtx->status.depth + wtx->status.matures_in;
-        int part = (wtx->status.depth * 4 / total) + 1;
+        int part = (wtx->status.depth * 5 / total) + 1;
         return QIcon(QString(":/icons/" + theme + "/transaction_%1").arg(part));
     }
     case TransactionStatus::MaturesWarning:
@@ -593,7 +603,7 @@ QString TransactionTableModel::formatTooltip(const TransactionRecord* rec) const
 {
     QString tooltip = formatTxStatus(rec) + QString("\n") + formatTxType(rec);
     if (rec->type == TransactionRecord::RecvFromOther || rec->type == TransactionRecord::SendToOther ||
-        rec->type == TransactionRecord::SendToAddress || rec->type == TransactionRecord::RecvWithAddress) {
+        rec->type == TransactionRecord::SendToAddress || rec->type == TransactionRecord::RecvWithAddress || rec->type == TransactionRecord::DNReward) {
         tooltip += QString(" ") + formatTxToAddress(rec, true);
     }
     return tooltip;
@@ -668,11 +678,24 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         if (!rec->status.countsForBalance && rec->status.status != TransactionStatus::Immature) {
             return COLOR_UNCONFIRMED;
         }
-        if (index.column() == Amount && (rec->type) == TransactionRecord::Fluid) {
+        // Fluid Transactions
+        if (rec->type == TransactionRecord::Fluid) {
             return COLOR_FLUID_TX;
         }
-        if (index.column() == Amount && (rec->type) == TransactionRecord::Stake) {
-            return COLOR_STAKE;
+        // Dynode Rewards
+        if (rec->type == TransactionRecord::DNReward) {
+                return COLOR_DYNODE_REWARD;
+        }
+        // Generated Rewards
+        if (rec->type == TransactionRecord::Generated) {
+                return COLOR_GENERATED;
+        }
+        // Stake Rewards
+        if (rec->type == TransactionRecord::Stake) {
+            if (rec->status.status == TransactionStatus::Conflicted || rec->status.status == TransactionStatus::NotAccepted)
+                return COLOR_ORPHAN;
+            else
+                return COLOR_STAKE;
         }
         if (index.column() == Amount && (rec->credit + rec->debit) < 0) {
             return COLOR_NEGATIVE;

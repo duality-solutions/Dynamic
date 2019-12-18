@@ -36,12 +36,19 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TX_STATUS_DANGER QColor(200, 100, 100)
 /* Transaction list -- TX status decoration - default color */
 #define COLOR_BLACK QColor(0, 0, 0)
-/* Transaction list -- TX status decoration - LockedByInstantSend color */
-#define COLOR_TX_STATUS_LOCKED QColor(150, 20, 150) // light purple
-/* Transaction list -- Fluid TX status decoration - default color */
-#define COLOR_FLUID_TX QColor(0, 100, 255) // blue
-/* Transaction list -- TX status decoration - stake (Gold #DAA520) */
-#define COLOR_STAKE QColor(218,165,32)
+/* Transaction list -- TX status decoration - Locked by InstantSend (Dark Blue) */
+#define COLOR_TX_STATUS_LOCKED QColor(3, 71, 130)
+/* Transaction list -- TX status decoration - Fluid Transaction (Light Blue) */
+#define COLOR_FLUID_TX QColor(0, 100, 255)
+/* Transaction list -- TX status decoration - Dynode Reward (Purple)*/
+#define COLOR_DYNODE_REWARD QColor(191, 0, 255)
+/* Transaction list -- TX status decoration - Generated (Gold) */
+#define COLOR_GENERATED QColor(212, 175, 55)
+/* Transaction list -- TX status decoration - stake (Green) */
+#define COLOR_STAKE QColor(141,182,0)
+/* Transaction list -- TX status decoration - orphan (Light Gray) */
+#define COLOR_ORPHAN QColor(211, 211, 211)
+
 /* Tooltips longer than this (in characters) are converted into rich text,
    so that they can be word-wrapped.
  */
