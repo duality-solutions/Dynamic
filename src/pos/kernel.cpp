@@ -401,7 +401,7 @@ bool initStakeInput(const CBlock block, std::unique_ptr<CStakeInput>& stake, int
 }
 
 // Check kernel hash target and coinstake signature
-bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake, std::unique_ptr<CStakeInput>& stake, int nPreviousBlockHeight)
+bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, std::unique_ptr<CStakeInput>& stake, const int& nPreviousBlockHeight)
 {
     // Initialize the stake object
     if(!initStakeInput(block, stake, nPreviousBlockHeight))

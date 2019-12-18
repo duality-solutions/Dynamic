@@ -154,6 +154,8 @@ public:
         consensus.posLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 675; // 675 blocks = 1 day
+        consensus.nStakeMinAge = 1 * 60 * 60 * 24; // 1 day minimum stake age
+        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
 
         consensus.nMaxReorganizationDepth = 100;
 
@@ -311,6 +313,8 @@ public:
         consensus.posLimit = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 20;
+        consensus.nStakeMinAge = 1 * 60 * 60;     // 1 hour minimum stake age
+        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
 
         consensus.nMaxReorganizationDepth = 100;
 
@@ -465,6 +469,8 @@ public:
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 0;
+        consensus.nStakeMinAge = 1 * 60 * 60;     // 1 hour minimum stake age
+        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
 
         consensus.nMaxReorganizationDepth = 100;
 
@@ -612,6 +618,8 @@ public:
         consensus.posLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
         consensus.nStakeMinDepth = 20;
+        consensus.nStakeMinAge = 1 * 60 * 60;     // 1 hour minimum stake age
+        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
 
         consensus.nMaxReorganizationDepth = 100;
 

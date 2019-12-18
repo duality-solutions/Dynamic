@@ -3902,6 +3902,11 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
+    // Check timestamp
+    if (block.GetBlockTime() > GetAdjustedTime() + consensusParams.nMaxClockDrift)
+        return state.Invalid(error("CheckBlockHeader() : block timestamp too far in the future"),
+                             REJECT_INVALID, "time-too-new");
+
     return true;
 }
 
@@ -3950,6 +3955,10 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     for (unsigned int i = 1; i < block.vtx.size(); i++)
         if (block.vtx[i]->IsCoinBase())
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
+
+    // Check timestamp
+    if (block.GetBlockTime() > GetAdjustedTime() + consensusParams.nMaxClockDrift)
+        return state.DoS(50, error("CheckBlock() : coinbase timestamp is too early"), REJECT_INVALID, "bad-cb-time");
 
     if (IsPoS) {
         // Coinbase output should be empty if proof-of-stake block
