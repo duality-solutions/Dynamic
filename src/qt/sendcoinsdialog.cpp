@@ -622,6 +622,9 @@ void SendCoinsDialog::processSendCoinsReturn(const WalletModel::SendCoinsReturn&
         msgParams.first = tr("Payment request expired.");
         msgParams.second = CClientUIInterface::MSG_ERROR;
         break;
+    case WalletModel::MixStakeOnlyMode:
+        msgParams.first = tr("Wallet unlocked for mixing and staking only, unable to create transaction.");
+        break;
     // included to prevent a compiler warning.
     case WalletModel::OK:
     default:

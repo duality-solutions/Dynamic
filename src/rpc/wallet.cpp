@@ -57,6 +57,8 @@ void EnsureWalletIsUnlocked()
 {
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet unlocked for mixing and staking only.");
 }
 
 void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
@@ -424,6 +426,9 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     if (pwalletMain->GetBroadcastTransactions() && !g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
+
     CScript scriptPubKey;
     std::vector<uint8_t> vStealthData;
     bool fStealthAddress = false;
@@ -487,6 +492,10 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
+
+    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -530,6 +539,10 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     if (nOneTimeFee + nDepositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendLinkingTransaction insufficient funds");
 
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
+
+    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -577,6 +590,9 @@ void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealt
     if (nColorAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("%s insufficient funds", __func__));
 
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
+    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -617,6 +633,9 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
 
     if (nValue > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
 
     // Parse Dynamic address
     CScript scriptPubKey = generatedScript;
@@ -683,6 +702,9 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
 
     if (nValue > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
 
     LogPrintf("%s - Script public key to be sent over to the burn transaction processing: %s\n", __func__, ScriptToAsmStr(burnScript));
 
@@ -2320,13 +2342,15 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     strWalletPass = request.params[0].get_str().c_str();
 
     int64_t nSleepTime = request.params[1].get_int64();
-
     bool fForMixingOnly = false;
-    if (request.params.size() >= 3)
-        fForMixingOnly = request.params[2].get_bool();
 
-    if (fForMixingOnly && !pwalletMain->IsLocked(true) && pwalletMain->IsLocked())
-        throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked for mixing only.");
+    if (request.params.size() > 2)
+        fWalletUnlockMixStakeOnly = request.params[2].get_bool();
+    else
+        fWalletUnlockMixStakeOnly = false;
+
+    if (fWalletUnlockMixStakeOnly && !pwalletMain->IsLocked(true) && pwalletMain->IsLocked())
+        throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked for staking and mixing only.");
 
     if (!pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already fully unlocked.");
@@ -2340,9 +2364,21 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     nWalletUnlockTime = GetTime() + nSleepTime;
     RPCRunLater("lockwallet", boost::bind(LockWallet, pwalletMain), nSleepTime);
 
+    UniValue ret(UniValue::VOBJ);
+    ret.push_back(Pair("mixstakeonly", fForMixingOnly));
+
     return NullUniValue;
 }
 
+// Used only in one place - WalletModel::setWalletLocked.
+void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds)
+{
+    wallet->TopUpKeyPoolCombo(); //TopUpKeyPool();
+
+    LOCK(cs_nWalletUnlockTime);
+    nWalletUnlockTime = GetTime() + nSeconds;
+    RPCRunLater("lockwallet", boost::bind(LockWallet, wallet), nSeconds);
+}
 
 UniValue walletpassphrasechange(const JSONRPCRequest& request)
 {

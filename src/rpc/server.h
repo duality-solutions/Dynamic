@@ -22,6 +22,7 @@
 #include <boost/function.hpp>
 
 class CRPCCommand;
+class CWallet;
 
 namespace RPCServer
 {
@@ -205,6 +206,7 @@ extern std::string HelpExampleCli(const std::string& methodname, const std::stri
 extern std::string HelpExampleRpc(const std::string& methodname, const std::string& args);
 
 extern void EnsureWalletIsUnlocked();
+extern void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds);
 
 bool StartRPC();
 void InterruptRPC();

@@ -130,6 +130,8 @@ UniValue importprivkey(const JSONRPCRequest& request)
 
     if (!fGood)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+    if (fWalletUnlockMixStakeOnly)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
 
     CKey key = vchSecret.GetKey();
     if (!key.IsValid())
@@ -1000,6 +1002,8 @@ UniValue dumpprivkey(const JSONRPCRequest& request)
         CDynamicAddress address;
         if (!address.SetString(strAddress))
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+        if (fWalletUnlockMixStakeOnly)
+            throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
         CKeyID keyID;
         if (!address.GetKeyID(keyID))
             throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");

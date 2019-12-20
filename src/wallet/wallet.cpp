@@ -61,6 +61,7 @@ CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 unsigned int nTxConfirmTarget = DEFAULT_TX_CONFIRM_TARGET;
 bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
 bool fSendFreeTransactions = DEFAULT_SEND_FREE_TRANSACTIONS;
+bool fWalletUnlockMixStakeOnly = WALLET_UNLOCKED_FOR_MIXING_STAKING_ONLY;
 
 const char* DEFAULT_WALLET_DAT = "wallet.dat";
 const char* DEFAULT_WALLET_DAT_MNEMONIC = "wallet_mnemonic.dat";
