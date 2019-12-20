@@ -1406,7 +1406,7 @@ void DynamicGUI::setEncryptionStatus(int status)
     case WalletModel::Unlocked:
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(QIcon(":/icons/" + theme + "/lock_open").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-        labelWalletEncryptionIcon->setToolTip(fWalletUnlockMixStakeOnly ? tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing and staking</b>") : tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        labelWalletEncryptionIcon->setToolTip(fWalletUnlockMixStakeOnly ? tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing and staking only</b>") : tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing and staking</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(false);
