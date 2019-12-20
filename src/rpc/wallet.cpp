@@ -1040,7 +1040,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
     CAmount nAmount = 0;
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
-        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
             continue;
 
         BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout)
@@ -1092,7 +1092,7 @@ UniValue getreceivedbyaccount(const JSONRPCRequest& request)
     CAmount nAmount = 0;
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
-        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
             continue;
 
         BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
@@ -1539,7 +1539,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
 
-        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
             continue;
 
         int nDepth = wtx.GetDepthInMainChain();
@@ -1773,7 +1773,19 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
                         entry.push_back(Pair("category", "immature"));
                     else
                         entry.push_back(Pair("category", "generate"));
-                } else {
+                }
+                else if (wtx.IsCoinStake())
+                {
+                    if (wtx.GetDepthInMainChain() < 1)
+                            entry.push_back(Pair("category", "stake-orphan"));
+                        else if (wtx.GetBlocksToMaturity() > 0)
+                            entry.push_back(Pair("category", "stake"));
+                        else
+                            entry.push_back(Pair("category", "stake-mint"));
+
+                } 
+                else 
+                {
                     entry.push_back(Pair("category", "receive"));
                 }
                 entry.push_back(Pair("amount", ValueFromAmount(r.amount)));

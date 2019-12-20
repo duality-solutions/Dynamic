@@ -95,6 +95,7 @@ UniValue getinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("balance", ValueFromAmount(pwalletMain->GetBalance())));
         if (!fLiteMode)
             obj.push_back(Pair("privatesend_balance", ValueFromAmount(pwalletMain->GetAnonymizedBalance())));
+        obj.push_back(Pair("stake",         ValueFromAmount(pwalletMain->GetStake())));
     }
 #endif
     obj.push_back(Pair("blocks", (int)chainActive.Height()));
