@@ -43,7 +43,7 @@ public:
 
 public Q_SLOTS:
     void privateSendStatus();
-    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void setBalance(const CAmount& balance, const CAmount& total, const CAmount& stake, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchOnlyStake, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void hideOrphans(bool fHide);
 
 Q_SIGNALS:
@@ -56,12 +56,16 @@ private:
     ClientModel* clientModel;
     WalletModel* walletModel;
     CAmount currentBalance;
+    CAmount currentTotal;
+    CAmount currentStake;
     CAmount currentUnconfirmedBalance;
     CAmount currentImmatureBalance;
     CAmount currentAnonymizedBalance;
     CAmount currentWatchOnlyBalance;
     CAmount currentWatchUnconfBalance;
     CAmount currentWatchImmatureBalance;
+    CAmount currentWatchOnlyStake;
+
     int nDisplayUnit;
     bool fShowAdvancedPSUI;
 
