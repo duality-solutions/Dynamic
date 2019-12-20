@@ -17,8 +17,15 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: Controlled via Fluid Protocol
 * PoW Reward Start Height: Block 5,137
+* PoS Mining Algorithm: Blake2b
+* PoS Period: Unlimited
+* PoS Target Spacing: 128 Seconds
+* PoS Reward per Block: Controlled via Fluid Protocol
+* PoS Reward Start Height: Controlled via SPORK activation
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
+* PoS Blocks: ~675 per day
+* Total Blocks Per Day: ~1350
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 17 Blocks
 * Dynode Reward: Controlled via Fluid Protocol
@@ -28,7 +35,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Max Block Size: 4MB
 
 
-[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic can be used to run incentivized Dynodes; the second tier of nodes on the network processing, verifying, validating and storing data.
+[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic utlises Proof-of-Work & Proof-of-Stake mining, and can be used to run incentivized Dynodes; the second tier of nodes on the network used for BDAP, the DHT, and processing, verifying, validating and storing data.
 
 **MainNet Parameters**
 P2P Port = 33300
