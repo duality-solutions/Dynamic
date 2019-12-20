@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>576</width>
-    <height>540</height>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -439,7 +439,7 @@ QTabBar { alignment: left; }</string>
       </palette>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -3112,7 +3112,6 @@ QTabBar { alignment: left; }</string>
             </property>
            </widget>
           </item>
-          
           <item>
            <widget class="QCheckBox" name="spendZeroConfChange">
             <property name="palette">
@@ -3538,16 +3537,16 @@ QTabBar { alignment: left; }</string>
             </property>
            </widget>
           </item>
-        <item>
-          <widget class="QCheckBox" name="checkBoxHideOrphans">
-           <property name="toolTip">
-            <string>Hide orphans in transaction lists</string>
-           </property>
-           <property name="text">
-            <string>Hide orphans</string>
-           </property>
-          </widget>
-         </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxHideOrphans">
+            <property name="toolTip">
+             <string>Hide orphans in transaction lists</string>
+            </property>
+            <property name="text">
+             <string>Hide orphans</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -3575,7 +3574,7 @@ QTabBar { alignment: left; }</string>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4_Wallet">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="labelprivateSendRoundsText">
            <property name="toolTip">
             <string>This setting determines the amount of individual Dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</string>
            </property>
@@ -3602,7 +3601,7 @@ QTabBar { alignment: left; }</string>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="labelprivateSendAmountText">
            <property name="toolTip">
             <string>This amount acts as a threshold to turn off PrivateSend once it's reached.</string>
            </property>
@@ -7875,7 +7874,7 @@ https://www.transifex.com/projects/p/dynamic/</string>
           <widget class="QValueComboBox" name="digits"/>
          </item>
         </layout>
-       </item>     
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6_Display">
          <item>
