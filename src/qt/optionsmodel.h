@@ -50,7 +50,6 @@ public:
         ThreadsScriptVerif,      // int
         DatabaseCache,           // int
         SpendZeroConfChange,     // bool
-        HideZeroBalances,        // bool
         HideOrphans,             // bool
         ShowDynodesTab,          // bool
         ShowAdvancedPSUI,        // bool
@@ -100,7 +99,6 @@ private:
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
-    bool fHideZeroBalances;
     bool fHideOrphans;
     bool fShowAdvancedPSUI;
     /* settings that were overriden by command-line */
@@ -117,7 +115,6 @@ Q_SIGNALS:
     void privateSentAmountChanged();
     void advancedPSUIChanged(bool);
     void coinControlFeaturesChanged(bool);
-    void hideZeroBalancesChanged(bool);
     void hideOrphansChanged(bool);
     void hideTrayIconChanged(bool);
 };

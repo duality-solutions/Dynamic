@@ -110,10 +110,6 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fLowKeysWarning", true);
 #endif // ENABLE_WALLET
 
-    if (!settings.contains("fHideZeroBalances"))
-        settings.setValue("fHideZeroBalances", true);
-    fHideZeroBalances = settings.value("fHideZeroBalances").toBool();
-
     if (!settings.contains("fHideOrphans"))
         settings.setValue("fHideOrphans", false);
     fHideOrphans = settings.value("fHideOrphans").toBool();
@@ -297,8 +293,6 @@ QVariant OptionsModel::data(const QModelIndex& index, int role) const
         case PrivateSendMultiSession:
             return settings.value("fPrivateSendMultiSession");
 #endif
-        case HideZeroBalances:
-            return settings.value("fHideZeroBalances");
         case HideOrphans:
             return settings.value("fHideOrphans");
         case StakeSplitThreshold:
@@ -470,11 +464,6 @@ bool OptionsModel::setData(const QModelIndex& index, const QVariant& value, int 
         case StakeSplitThreshold:
             settings.setValue("nStakeSplitThreshold", value.toInt());
             setStakeSplitThreshold(value.toInt());
-            break;
-        case HideZeroBalances:
-            fHideZeroBalances = value.toBool();
-            settings.setValue("fHideZeroBalances", fHideZeroBalances);
-            Q_EMIT hideZeroBalancesChanged(fHideZeroBalances);
             break;
         case HideOrphans:
             fHideOrphans = value.toBool();

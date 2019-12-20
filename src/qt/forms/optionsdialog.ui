@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>576</width>
-    <height>494</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -971,27 +971,6 @@ QTabBar { alignment: left; }</string>
        <string>W&amp;allet</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_Wallet">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2_Wallet">
-         <item>
-          <widget class="QLabel" name="labelStakeSplitThresholdText">
-           <property name="text">
-            <string>Stake split threshold:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spinBoxStakeSplitThreshold">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>999999</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
@@ -3133,6 +3112,7 @@ QTabBar { alignment: left; }</string>
             </property>
            </widget>
           </item>
+          
           <item>
            <widget class="QCheckBox" name="spendZeroConfChange">
             <property name="palette">
@@ -3558,8 +3538,39 @@ QTabBar { alignment: left; }</string>
             </property>
            </widget>
           </item>
+        <item>
+          <widget class="QCheckBox" name="checkBoxHideOrphans">
+           <property name="toolTip">
+            <string>Hide orphans in transaction lists</string>
+           </property>
+           <property name="text">
+            <string>Hide orphans</string>
+           </property>
+          </widget>
+         </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2_Wallet">
+         <item>
+          <widget class="QLabel" name="labelStakeSplitThresholdText">
+           <property name="text">
+            <string>Stake split threshold:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBoxStakeSplitThreshold">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>999999</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4_Wallet">
@@ -7864,50 +7875,10 @@ https://www.transifex.com/projects/p/dynamic/</string>
           <widget class="QValueComboBox" name="digits"/>
          </item>
         </layout>
-       </item>
+       </item>     
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3_Display">
-            <item>
-             <widget class="QCheckBox" name="checkBoxHideZeroBalances">
-              <property name="toolTip">
-               <string>Hide empty balances</string>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>Hide empty balances</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="checkBoxHideOrphans">
-              <property name="toolTip">
-               <string>Hide orphans in transaction lists</string>
-              </property>
-              <property name="text">
-               <string>Hide orphans</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6_Display">
-         <item>        
+        <layout class="QHBoxLayout" name="horizontalLayout_6_Display">
+         <item>
           <widget class="QLabel" name="thirdPartyTxUrlsLabel">
            <property name="toolTip">
             <string>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items.&lt;br/&gt;%s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</string>
