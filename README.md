@@ -361,6 +361,22 @@ At configure time for CUDA(Nvidia):
 
     --enable-gpu --enable-cuda
 
+
+PoS (Proof of Stake) Mining
+--------------------------
+To enable PoS (Proof of Stake) mining within the wallet you must have confirmed funds available. Add this line to your dynamic.conf file to enable staking:
+    
+    staking=1
+
+or run the daemon with:
+
+    ./src/dynamicd -staking=1
+
+or Qt wallet with:
+
+    ./src/qt/dynamic-qt -staking=1
+
+
 Example Build Command
 --------------------
 Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
