@@ -80,7 +80,7 @@ static bool SelectBlockFromCandidates(
 
         CDataStream ss(SER_GETHASH, 0);
         ss << hashProof << nStakeModifierPrev;
-        uint256 hashSelection = Hash(ss.begin(), ss.end());
+        uint256 hashSelection = HashBlake2b(ss.begin(), ss.end());
 
         // the selection hash is divided by 2**32 so that proof-of-stake block
         // is always favored over proof-of-work block. this is to preserve
@@ -315,7 +315,7 @@ bool GetHashProofOfStake(const CBlockIndex* pindexPrev, CStakeInput* stake, cons
     CDataStream ss(modifier_ss);
     // Calculate hash
     ss << nTimeBlockFrom << ssUniqueID << nTimeTx;
-    hashProofOfStakeRet = Hash(ss.begin(), ss.end());
+    hashProofOfStakeRet = HashBlake2b(ss.begin(), ss.end());
 
     if (fVerify) {
         LogPrint("staking", "%s :{ nStakeModifier=%s\n"
