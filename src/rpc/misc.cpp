@@ -108,6 +108,8 @@ UniValue getinfo(const JSONRPCRequest& request)
     if (pwalletMain) {
         obj.push_back(Pair("keypoololdest", pwalletMain->GetOldestKeyPoolTime()));
         obj.push_back(Pair("keypoolsize", (int)pwalletMain->GetKeyPoolSize()));
+        obj.push_back(Pair("encrypted",   pwalletMain->IsCrypted()));
+        obj.push_back(Pair("mixstakeonly",   fWalletUnlockMixStakeOnly));
     }
     if (pwalletMain && pwalletMain->IsCrypted())
         obj.push_back(Pair("unlocked_until", nWalletUnlockTime));

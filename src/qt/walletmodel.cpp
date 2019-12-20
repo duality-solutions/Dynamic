@@ -20,6 +20,7 @@
 #include "keystore.h"
 #include "net.h" // for g_connman
 #include "privatesend-client.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "sync.h"
 #include "ui_interface.h"
@@ -228,6 +229,9 @@ void WalletModel::updateAddressBookLabels(const CTxDestination& dest, const std:
 
 WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
 {
+    if (fWalletUnlockMixStakeOnly)
+        return MixStakeOnlyMode;
+
     CAmount total = 0;
     bool fSubtractFeeFromAmount = false;
     QList<SendCoinsRecipient> recipients = transaction.getRecipients();
@@ -486,14 +490,25 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString& passphr
     }
 }
 
-bool WalletModel::setWalletLocked(bool locked, const SecureString& passPhrase, bool fMixing)
+bool WalletModel::setWalletLocked(bool locked, const SecureString& passPhrase, int64_t nSeconds, bool fMixing)
 {
-    if (locked) {
+    if(locked)
+    {
         // Lock
         return wallet->Lock(fMixing);
-    } else {
+    }
+    else
+    {
         // Unlock
-        return wallet->Unlock(passPhrase, fMixing);
+        if (!wallet->Unlock(passPhrase))
+            return false;
+
+        fWalletUnlockMixStakeOnly = fMixing;
+
+        if (nSeconds > 0)  // seconds
+            relockWalletAfterDuration(wallet, nSeconds);
+
+        return true;
     }
 }
 

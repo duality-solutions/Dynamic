@@ -48,6 +48,7 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
+extern bool fWalletUnlockMixStakeOnly;
 
 //Set the following 2 constants together
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
@@ -69,6 +70,8 @@ static const CAmount MIN_FINAL_CHANGE = MIN_CHANGE / 2;
 static const bool DEFAULT_SPEND_ZEROCONF_CHANGE = true;
 //! Default for -sendfreetransactions
 static const bool DEFAULT_SEND_FREE_TRANSACTIONS = false;
+//! Default for -walletunlockmixstakeonly
+static const bool WALLET_UNLOCKED_FOR_MIXING_STAKING_ONLY = false;
 //! Default for -walletrejectlongchains
 static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS = false;
 //! -txconfirmtarget default
@@ -769,7 +772,7 @@ private:
     bool fNeedToUpdateKeyPools = false;
     bool fNeedToUpdateLinks = false;
     bool fNeedToUpgradeWallet = false;
-
+    
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
     mutable bool fAnonymizableTallyCachedNonDenom;

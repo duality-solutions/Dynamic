@@ -123,7 +123,8 @@ public:
         TransactionCreationFailed, // Error returned when wallet is still locked
         TransactionCommitFailed,
         AbsurdFee,
-        PaymentRequestExpired
+        PaymentRequestExpired,
+        MixStakeOnlyMode
     };
 
     enum EncryptionStatus {
@@ -173,7 +174,7 @@ public:
     // Wallet encryption
     bool setWalletEncrypted(bool encrypted, const SecureString& passphrase);
     // Passphrase only needed when unlocking
-    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), bool fMixing = false);
+    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), int64_t nSeconds = 0, bool fMixing = false);
     bool changePassphrase(const SecureString& oldPass, const SecureString& newPass);
 
     // Wallet backup
