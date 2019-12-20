@@ -6,6 +6,7 @@
 #include "utilstrencodings.h"
 #include "test/test_dynamic.h"
 
+#include <string>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -81,6 +82,14 @@ BOOST_AUTO_TEST_CASE(siphash)
         BOOST_CHECK_EQUAL(SipHashUint256(k1, k2, x), sip256.Finalize());
         BOOST_CHECK_EQUAL(SipHashUint256Extra(k1, k2, x, n), sip288.Finalize());
     }*/
+}
+
+BOOST_AUTO_TEST_CASE(blake2b_hash)
+{
+    std::string strTestHash = "Test Blake2b Hash Function";
+    uint256 hashTry1 = HashBlake2b(strTestHash.begin(), strTestHash.end());
+    uint256 hashTry2 = HashBlake2b(strTestHash.begin(), strTestHash.end());
+    BOOST_CHECK_EQUAL(hashTry1.ToString(), hashTry2.ToString());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
