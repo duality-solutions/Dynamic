@@ -1,6 +1,20 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.4.0**
+
+[Qt] Update Splashscreen for v2.4.4.0
+[RPC] More user-friendly error message when partially signing
+[Qt] Translations Updated
+[BDAP] Show fee required in the insufficient funds error message
+[BDAP] Use new epoch to string format function in Qt
+[Tests] Add unit test for new add months to epoch function
+[Util] Refactor add months to epoch functions
+[Test] Add unit tests for new format ISO date and time
+[BDAP] Fix comparison between signed and unsigned warning
+[RPC] Fix dynode-list bug
+
+
 **Dynamic v2.4.3.0**
 
 * [BDAP] Remove second month overrun check
@@ -568,6 +582,7 @@
 * [Fluid] Fixes to get last functions and RPC commands
 * [Fluid] Fix consensus issues with new db code
 * Update changelog and cleanup fluid to do lists/comments
+
 
 **Dynamic v2.3.0.0**
 
