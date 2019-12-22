@@ -3734,6 +3734,9 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
         pindexNew->BuildSkip();
 
+        //update previous block pointer
+        pindexNew->pprev->pnext = pindexNew;
+        
         // ppcoin: compute chain trust score (doesn't appear to be used)
         // pindexNew->bnChainTrust = (pindexNew->pprev ? pindexNew->pprev->bnChainTrust : 0) + pindexNew->GetBlockTrust();
 
@@ -3756,6 +3759,11 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
     if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
         pindexBestHeader = pindexNew;
+    
+    //update previous block pointer
+    if (pindexNew->nHeight)
+        pindexNew->pprev->pnext = pindexNew;
+
     setDirtyBlockIndex.insert(pindexNew);
 
     return pindexNew;
