@@ -24,6 +24,7 @@
 #include "validation.h"
 #include "wallet/wallet.h"
 
+#include <algorithm>
 #include <queue>
 
 bool ProcessBlockFound(const CBlock& block, const CChainParams& chainparams)
@@ -120,12 +121,15 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         bool fStakeFound = false;
         if (nSearchTime >= nLastCoinStakeSearchTime) {
             unsigned int nTxNewTime = 0;
+            CBlockIndex* pindexPrev = chainActive.Tip();
             if (pwallet->CreateCoinStake(*pwallet, block.nBits, nSearchTime - nLastCoinStakeSearchTime, txCoinStake, nTxNewTime)) {
-                //For Proof of Stake blocks, the coinbase's first transaction output is empty
-                txNew.vout[0].SetEmpty();
-                block.vtx.push_back(MakeTransactionRef(txCoinStake));
-                block.nTime = nTxNewTime;
-                fStakeFound = true;
+                if (block.nTime >= std::max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - chainparams.GetConsensus().nMaxClockDrift)) {
+                    //For Proof of Stake blocks, the coinbase's first transaction output is empty
+                    txNew.vout[0].SetEmpty();
+                    block.vtx.push_back(MakeTransactionRef(txCoinStake));
+                    block.nTime = nTxNewTime;
+                    fStakeFound = true;
+                }
             }
             nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
             nLastCoinStakeSearchTime = nSearchTime;

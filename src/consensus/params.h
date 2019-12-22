@@ -85,9 +85,10 @@ struct Params {
     uint256 posLimit;
     int64_t nPosTargetSpacing;
     int nStakeMinDepth;
+    int64_t nStakeMinAge;
+    int64_t nMaxClockDrift;
 
     uint256 defaultAssumeValid;
-
 
     int nMaxReorganizationDepth;
 
