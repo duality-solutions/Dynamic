@@ -140,7 +140,6 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     if (pnext)
         result.push_back(Pair("nextblockhash", pnext->GetBlockHash().GetHex()));
     
-    result.push_back(Pair("modifier", strprintf("%016x", blockindex->nStakeModifier)));
     result.push_back(Pair("moneysupply",ValueFromAmount(blockindex->nMoneySupply)));
 
     //////////
@@ -164,7 +163,6 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
         stakeData.push_back(Pair("BlockFromHeight", stake.get()->GetIndexFrom()->nHeight));
         stakeData.push_back(Pair("hashProofOfStake", hashProofOfStakeRet.GetHex()));
         stakeData.push_back(Pair("stakeModifierHeight", (std::to_string(stake->getStakeModifierHeight()))));
-        stakeData.push_back(Pair("stakeModifier", (std::to_string(blockindex->nStakeModifier))));
         stakeData.push_back(Pair("stakeModifierV2", blockindex->nStakeModifierV2.ToString()));
         stakeData.push_back(Pair("stakeTime", (std::to_string(blockindex->nStakeTime))));
         stakeData.push_back(Pair("hashProofOfStake", blockindex->hashProofOfStake.ToString()));

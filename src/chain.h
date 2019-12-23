@@ -212,10 +212,9 @@ public:
     };
     unsigned int nFlags; // ppcoin: block index flags
     uint256 GetBlockTrust() const;
-    uint64_t nStakeModifier;             // hash modifier for proof-of-stake
     COutPoint prevoutStake;
     unsigned int nStakeTime;
-    uint256 hashProofOfStake;
+    uint256 hashProofOfStake; // hash modifier for proof-of-stake
     int64_t nMint;
     int64_t nMoneySupply;
     uint256 nStakeModifierV2;
@@ -252,7 +251,6 @@ public:
         nMint = 0;
         nMoneySupply = 0;
         nFlags = 0;
-        nStakeModifier = 0;
         nStakeModifierV2 = uint256();
         prevoutStake.SetNull();
         nStakeTime = 0;
@@ -388,13 +386,6 @@ public:
         return (nFlags & BLOCK_STAKE_MODIFIER);
     }
 
-    void SetStakeModifier(uint64_t nModifier, bool fGeneratedStakeModifier)
-    {
-        nStakeModifier = nModifier;
-        if (fGeneratedStakeModifier)
-            nFlags |= BLOCK_STAKE_MODIFIER;
-    }
-
     std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s)",
@@ -489,7 +480,6 @@ public:
         READWRITE(nMint);
         READWRITE(nMoneySupply);
         READWRITE(nFlags);
-        READWRITE(nStakeModifier);
         READWRITE(nStakeModifierV2);
         if (IsProofOfStake()) {
             READWRITE(prevoutStake);
