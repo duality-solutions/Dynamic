@@ -215,8 +215,6 @@ public:
     COutPoint prevoutStake;
     unsigned int nStakeTime;
     uint256 hashProofOfStake; // hash modifier for proof-of-stake
-    int64_t nMint;
-    int64_t nMoneySupply;
     uint256 nStakeModifierV2;
 
     //! block header
@@ -248,8 +246,6 @@ public:
         nSequenceId = 0;
         nTimeMax = 0;
 
-        nMint = 0;
-        nMoneySupply = 0;
         nFlags = 0;
         nStakeModifierV2 = uint256();
         prevoutStake.SetNull();
@@ -477,8 +473,6 @@ public:
         // block hash
         READWRITE(hash);
 
-        READWRITE(nMint);
-        READWRITE(nMoneySupply);
         READWRITE(nFlags);
         READWRITE(nStakeModifierV2);
         if (IsProofOfStake()) {
