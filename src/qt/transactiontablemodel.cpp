@@ -710,7 +710,9 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         if (index.column() == ToAddress) {
             return addressColor(rec);
         }
-        break;
+        // To avoid overriding above conditional formats a default text color for this QTableView is not defined in stylesheet,
+        // so we must always return a color here
+        return COLOR_BLACK;
     case TypeRole:
         return rec->type;
     case DateRole:
