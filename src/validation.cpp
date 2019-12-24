@@ -2894,8 +2894,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (fJustCheck)
         return true;
 
-    if (block.IsProofOfStake() && pindex->nStakeModifier == 0)
+    if (block.IsProofOfStake() && pindex->nStakeModifier == 0) {
         pindex->nStakeModifier = ComputeStakeModifier(pindex->pprev, block.vtx[1]->vin[0].prevout.hash);
+        pindex->prevoutStake = block.vtx[1]->vin[0].prevout;
+    }
 
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS)) {
@@ -3755,8 +3757,10 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
                 LogPrintf("AddToBlockIndex() : hashProofOfStake not found in map \n");
         }
         // compute v2 stake modifier
-        if (block.vtx.size() > 1)
+        if (block.vtx.size() > 1) {
             pindexNew->nStakeModifier = ComputeStakeModifier(pindexNew->pprev, block.vtx[1]->vin[0].prevout.hash);
+            pindexNew->prevoutStake = block.vtx[1]->vin[0].prevout;
+        }
     }
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
