@@ -2460,8 +2460,14 @@ bool CheckProofOfStakeAmount(const CBlock& block, const CAmount& blockReward, st
             }
         }
     }
+    CAmount nStakeReward = block.vtx[1]->GetValueOut() - nInputAmount;
     //LogPrintf("%s: out %d, in %d, blockReward %d\n", __func__, FormatMoney(block.vtx[1]->GetValueOut()), FormatMoney(nInputAmount), FormatMoney(blockReward));
-    return (block.vtx[1]->GetValueOut() - nInputAmount) <= blockReward;
+    if (nStakeReward > blockReward) {
+        strErrorRet = strprintf("coinbase pays too much (actual=%s vs limit=%s), exceeded block reward", FormatMoney(nStakeReward), FormatMoney(blockReward));
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -2598,7 +2604,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
-
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
         const uint256 txhash = tx.GetHash();
