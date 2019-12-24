@@ -38,7 +38,7 @@ uint256 ComputeStakeModifier(const CBlockIndex* pindexPrev, const uint256& kerne
 
     CHashWriter ss(SER_GETHASH, 0);
     ss << kernel;
-    ss << pindexPrev->nStakeModifierV2;
+    ss << pindexPrev->nStakeModifier;
 
     return ss.GetHash();
 }
@@ -89,7 +89,7 @@ bool GetHashProofOfStake(const CBlockIndex* pindexPrev, CStakeInput* stake, cons
 
     // Hash the modifier
     // Modifier v2
-    modifier_ss << pindexPrev->nStakeModifierV2;
+    modifier_ss << pindexPrev->nStakeModifier;
 
     CDataStream ss(modifier_ss);
     // Calculate hash

@@ -395,7 +395,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 
                 //Proof Of Stake
                 pindexNew->nFlags = diskindex.nFlags;
-                pindexNew->nStakeModifierV2 = diskindex.nStakeModifierV2;
+                pindexNew->nStakeModifier = diskindex.nStakeModifier;
                 pindexNew->prevoutStake = diskindex.prevoutStake;
                 pindexNew->nStakeTime = diskindex.nStakeTime;
                 pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
