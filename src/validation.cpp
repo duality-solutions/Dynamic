@@ -3753,7 +3753,6 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
         if (pindexNew->IsProofOfStake()) {
             if (!mapProofOfStake.count(hash))
                 LogPrintf("AddToBlockIndex() : hashProofOfStake not found in map \n");
-            pindexNew->hashProofOfStake = mapProofOfStake[hash];
         }
         // compute v2 stake modifier
         if (block.vtx.size() > 1)

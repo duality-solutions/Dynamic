@@ -213,8 +213,6 @@ public:
     unsigned int nFlags; // ppcoin: block index flags
     uint256 GetBlockTrust() const;
     COutPoint prevoutStake;
-    unsigned int nStakeTime;
-    uint256 hashProofOfStake; // hash modifier for proof-of-stake
     uint256 nStakeModifier;
 
     //! block header
@@ -249,8 +247,6 @@ public:
         nFlags = 0;
         nStakeModifier = uint256();
         prevoutStake.SetNull();
-        nStakeTime = 0;
-        hashProofOfStake = uint256();
         // block header
         nVersion = 0;
         hashMerkleRoot = uint256();
@@ -277,7 +273,6 @@ public:
         if (block.IsProofOfStake()) {
             SetProofOfStake();
             prevoutStake = block.vtx[1]->vin[0].prevout;
-            nStakeTime = block.nTime;
         }
     }
 
@@ -477,12 +472,8 @@ public:
         READWRITE(nStakeModifier);
         if (IsProofOfStake()) {
             READWRITE(prevoutStake);
-            READWRITE(nStakeTime);
-            READWRITE(hashProofOfStake);
         } else if (ser_action.ForRead()) {
             const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
-            const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
-            const_cast<CDiskBlockIndex*>(this)->hashProofOfStake = uint256();
         }
 
         // block header

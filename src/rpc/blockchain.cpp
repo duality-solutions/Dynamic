@@ -161,8 +161,6 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
         stakeData.push_back(Pair("BlockFromHeight", stake.get()->GetIndexFrom()->nHeight));
         stakeData.push_back(Pair("hashProofOfStake", hashProofOfStakeRet.GetHex()));
         stakeData.push_back(Pair("stakeModifier", blockindex->nStakeModifier.ToString()));
-        stakeData.push_back(Pair("stakeTime", (std::to_string(blockindex->nStakeTime))));
-        stakeData.push_back(Pair("hashProofOfStake", blockindex->hashProofOfStake.ToString()));
         stakeData.push_back(Pair("nFlags", (std::to_string(blockindex->nFlags))));
         stakeData.push_back(Pair("prevoutStake", blockindex->prevoutStake.ToStringShort()));
         result.push_back(Pair("CoinStake", stakeData));
