@@ -2894,6 +2894,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (fJustCheck)
         return true;
 
+    if (block.IsProofOfStake() && pindex->nStakeModifierV2 == 0)
+        pindex->nStakeModifierV2 = ComputeStakeModifier(pindex->pprev, block.vtx[1]->vin[0].prevout.hash);
+
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS)) {
         if (pindex->GetUndoPos().IsNull()) {
