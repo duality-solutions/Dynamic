@@ -30,10 +30,6 @@ public:
     virtual bool CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal) = 0;
     virtual CDataStream GetUniqueness() = 0;
     virtual uint256 GetSerialHash() const = 0;
-
-    virtual uint64_t getStakeModifierHeight() const {
-        return 0;
-    }
 };
 
 class CDynamicStake : public CStakeInput
@@ -57,8 +53,6 @@ public:
     bool CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut = uint256Zero) override;
     bool CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal) override;
     uint256 GetSerialHash() const override { return uint256(0); }
-
-    uint64_t getStakeModifierHeight() const override { return nStakeModifierHeight; }
 };
 
 #endif //DYNAMIC_POS_STAKEINPUT_H
