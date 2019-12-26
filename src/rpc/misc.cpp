@@ -1107,9 +1107,6 @@ UniValue echo(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
 UniValue getstakingstatus(const JSONRPCRequest& request)
 {
-    if (!sporkManager.IsSporkActive(SPORK_31_PROOF_OF_STAKE_ENABLED ))
-        throw JSONRPCError(RPC_PROOF_OF_STAKE_INACTIVE, strprintf("Proof of Stake is not yet activated."));
-
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getstakingstatus\n"
@@ -1126,6 +1123,9 @@ UniValue getstakingstatus(const JSONRPCRequest& request)
 
             "\nExamples:\n" +
             HelpExampleCli("getstakingstatus", "") + HelpExampleRpc("getstakingstatus", ""));
+
+    if (!sporkManager.IsSporkActive(SPORK_31_PROOF_OF_STAKE_ENABLED ))
+        throw JSONRPCError(RPC_PROOF_OF_STAKE_INACTIVE, strprintf("Proof of Stake is not yet activated."));
 
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
