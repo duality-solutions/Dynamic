@@ -84,6 +84,7 @@ struct Params {
     /**Proof of Stake parameters */
     uint256 posLimit;
     int64_t nPosTargetSpacing;
+    int64_t nTargetPosTimespan;
     int nStakeMinDepth;
     int64_t nStakeMinAge;
     int64_t nMaxClockDrift;

@@ -64,7 +64,7 @@ bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, const unsigned int nBit
     // Check if proof-of-stake hash meets target protocol
     const bool res = (UintToArith256(hashProofOfStake) < bnTarget);
 
-    if (fVerify || res) {
+    if (res) {
         LogPrint("staking", "%s : Proof Of Stake:"
                             "\nssUniqueID=%s"
                             "\nnTimeTx=%d"

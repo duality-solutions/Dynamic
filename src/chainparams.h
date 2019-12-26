@@ -73,6 +73,7 @@ public:
     bool RequireStandard() const { return fRequireStandard; }
     /** The target time span between Proof-of-Stake blocks */
     int64_t TargetPosSpacing() const { return consensus.nPosTargetSpacing; }
+    int64_t TargetPosTimespan() const { return consensus.nTargetPosTimespan; }
     /** returns the coinstake maturity (min depth required) **/
     int COINSTAKE_MIN_DEPTH() const { return consensus.nStakeMinDepth; }
     bool HasStakeMinDepth(const int contextHeight, const int utxoFromBlockHeight) const
