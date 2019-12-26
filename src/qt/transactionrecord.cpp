@@ -339,11 +339,10 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
     else if (type == TransactionRecord::Generated || type == TransactionRecord::Stake || type == TransactionRecord::DNReward) {
         if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;
+            status.matures_in = wtx.GetBlocksToMaturity();
 
-            if (wtx.IsInMainChain()) {
-                status.matures_in = wtx.GetBlocksToMaturity();
-
-                // Check if the block was requested by anyone
+            if (pindex && chainActive.Contains(pindex)) {
+                // Check if the block was requested by anyone                
                 if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
                     status.status = TransactionStatus::MaturesWarning;
             } else {
@@ -351,6 +350,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
             }
         } else {
             status.status = TransactionStatus::Confirmed;
+            status.matures_in = 0;
         }
     } else {
         status.lockedByInstantSend = wtx.IsLockedByInstantSend();

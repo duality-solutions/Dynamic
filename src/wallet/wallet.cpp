@@ -6561,6 +6561,9 @@ bool CWallet::SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInp
             if (!Params().HasStakeMinAge(GetAdjustedTime(), utxoBlock->GetBlockTime()))
                 continue;
 
+            if (blockHeight - nHeightBlockFrom < COINBASE_MATURITY)
+                continue;
+
             //add to our stake set
             nAmountSelected += out.tx->tx->vout[out.i].nValue;
 

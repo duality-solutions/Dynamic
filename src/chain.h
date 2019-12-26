@@ -212,13 +212,8 @@ public:
     };
     unsigned int nFlags; // ppcoin: block index flags
     uint256 GetBlockTrust() const;
-    uint64_t nStakeModifier;             // hash modifier for proof-of-stake
     COutPoint prevoutStake;
-    unsigned int nStakeTime;
-    uint256 hashProofOfStake;
-    int64_t nMint;
-    int64_t nMoneySupply;
-    uint256 nStakeModifierV2;
+    uint256 nStakeModifier;
 
     //! block header
     int nVersion;
@@ -249,14 +244,9 @@ public:
         nSequenceId = 0;
         nTimeMax = 0;
 
-        nMint = 0;
-        nMoneySupply = 0;
         nFlags = 0;
-        nStakeModifier = 0;
-        nStakeModifierV2 = uint256();
+        nStakeModifier = uint256();
         prevoutStake.SetNull();
-        nStakeTime = 0;
-        hashProofOfStake = uint256();
         // block header
         nVersion = 0;
         hashMerkleRoot = uint256();
@@ -283,7 +273,6 @@ public:
         if (block.IsProofOfStake()) {
             SetProofOfStake();
             prevoutStake = block.vtx[1]->vin[0].prevout;
-            nStakeTime = block.nTime;
         }
     }
 
@@ -388,13 +377,6 @@ public:
         return (nFlags & BLOCK_STAKE_MODIFIER);
     }
 
-    void SetStakeModifier(uint64_t nModifier, bool fGeneratedStakeModifier)
-    {
-        nStakeModifier = nModifier;
-        if (fGeneratedStakeModifier)
-            nFlags |= BLOCK_STAKE_MODIFIER;
-    }
-
     std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s)",
@@ -486,19 +468,12 @@ public:
         // block hash
         READWRITE(hash);
 
-        READWRITE(nMint);
-        READWRITE(nMoneySupply);
         READWRITE(nFlags);
         READWRITE(nStakeModifier);
-        READWRITE(nStakeModifierV2);
         if (IsProofOfStake()) {
             READWRITE(prevoutStake);
-            READWRITE(nStakeTime);
-            READWRITE(hashProofOfStake);
         } else if (ser_action.ForRead()) {
             const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
-            const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
-            const_cast<CDiskBlockIndex*>(this)->hashProofOfStake = uint256();
         }
 
         // block header

@@ -24,11 +24,52 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
     return pindex;
 }
 
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
+unsigned int GetNextStakeWorkRequired(const CBlockIndex* pindex, const Consensus::Params& params)
+{
+    const CBlockIndex* pindexLast = GetLastBlockIndex(pindex, true);
+    if (!pindexLast)
+        if (Params().NetworkIDString() == CBaseChainParams::REGTEST)
+            return pindexLast->nBits;
+
+    arith_uint256 targetLimit = UintToArith256(params.posLimit);
+
+    const int64_t nTargetSpacing = params.nPosTargetSpacing;
+    const int64_t nTargetTimespan = params.nTargetPosTimespan;
+
+    int64_t nActualSpacing = 0;
+    if (pindexLast->nHeight != 0)
+        nActualSpacing = pindexLast->GetBlockTime() - pindexLast->pprev->GetBlockTime();
+    if (nActualSpacing < 0)
+        nActualSpacing = 1;
+    if (nActualSpacing > nTargetSpacing*10)
+        nActualSpacing = nTargetSpacing*10;
+
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    arith_uint256 bnNew;
+    bnNew.SetCompact(pindexLast->nBits);
+
+    int64_t nInterval = nTargetTimespan / nTargetSpacing;
+    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+    if (bnNew <= 0 || bnNew > targetLimit)
+        bnNew = targetLimit;
+
+    return bnNew.GetCompact();
+}
+
+unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, bool fProofOfStake, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
+
+    if (fProofOfStake)
+        return GetNextStakeWorkRequired(pindexLast, params);
+
+    arith_uint256 targetLimit = UintToArith256(params.powLimit);
+
     if (pindexLast->nHeight + 1 <= params.nUpdateDiffAlgoHeight)
-        return UintToArith256(params.powLimit).GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
+        return targetLimit.GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
 
     // Find the first block in the averaging interval
     const CBlockIndex* pindexFirst = pindexLast;
@@ -55,13 +96,13 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         nActualTimespan = params.MaxActualTimespan();
 
     // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    const arith_uint256 ntargetLimit = UintToArith256(params.powLimit);
     arith_uint256 bnNew{bnAvg};
     bnNew /= params.AveragingWindowTimespan();
     bnNew *= nActualTimespan;
 
-    if (bnNew > bnPowLimit)
-        bnNew = bnPowLimit;
+    if (bnNew > ntargetLimit)
+        bnNew = ntargetLimit;
 
     /// debug print
     LogPrint("pow", "GetNextWorkRequired RETARGET\n");
@@ -71,7 +112,6 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
 
     return bnNew.GetCompact();
 }
-
 
 bool CheckProofOfWork(const uint256& hash, const unsigned int nBits, const Consensus::Params& params)
 {
