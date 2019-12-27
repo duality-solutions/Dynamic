@@ -3926,7 +3926,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     // These are checks that are independent of context.
     const bool IsPoS = block.IsProofOfStake();
     if (IsPoS)
-        LogPrintf("%s: Proof of stake found. block=%s, sig-size = %d, signature %s, \n", __func__, block.GetHash().ToString(), block.vchBlockSig.size(), EncodeBase64(&block.vchBlockSig[0], block.vchBlockSig.size()));
+        LogPrintf("%s: Proof of stake found. block=%s, sig-size = %d, signature %s\n", __func__, block.GetHash().ToString(), block.vchBlockSig.size(), EncodeBase64(&block.vchBlockSig[0], block.vchBlockSig.size()));
 
     if (block.fChecked)
         return true;
