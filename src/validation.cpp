@@ -4069,6 +4069,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
+    LogPrintf("%s: hash %s, fProofOfStake %s\n", __func__, hash.ToString(), fProofOfStake ? "true" : "false");
     if (block.nBits != GetNextWorkRequired(pindexPrev, block, fProofOfStake, consensusParams)) {
         return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
             REJECT_INVALID, "bad-diffbits");
