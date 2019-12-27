@@ -412,8 +412,6 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/blake2/blake2-impl.h \
   crypto/blake2/blake2.h \
   crypto/blake2/blake2b.c \
-  crypto/blake2/blamka-round-opt.h \
-  crypto/blake2/blamka-round-ref.h \
   crypto/chacha20.cpp \
   crypto/chacha20.h \
   crypto/common.h \
