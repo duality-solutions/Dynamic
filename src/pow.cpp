@@ -74,11 +74,21 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
     // Find the first block in the averaging interval
     const CBlockIndex* pindexFirst = pindexLast;
     arith_uint256 bnTot{0};
-    for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
-        arith_uint256 bnTmp;
-        bnTmp.SetCompact(pindexFirst->nBits);
-        bnTot += bnTmp;
+    int i = 0;
+    int nPoWBlocks = 0;
+    while (params.nPowAveragingWindow > nPoWBlocks) {
+        if (pindexFirst->IsProofOfWork()) {
+            arith_uint256 bnTmp;
+            bnTmp.SetCompact(pindexFirst->nBits);
+            bnTot += bnTmp;
+            nPoWBlocks++;
+        }
         pindexFirst = pindexFirst->pprev;
+        if (pindexFirst->nHeight == 0)
+            break;
+        i++;
+        if (i > 1000)
+            break;
     }
     arith_uint256 bnAvg{bnTot / params.nPowAveragingWindow};
 
