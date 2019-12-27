@@ -36,7 +36,7 @@ public:
 
     //! whether containing transaction was a coinbase
     unsigned int fCoinBase : 1;
-    bool fCoinStake;
+    bool fCoinStake = false;
 
     //! at which height this containing transaction was included in the active block chain
     uint32_t nHeight : 31;
