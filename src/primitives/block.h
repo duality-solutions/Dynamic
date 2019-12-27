@@ -141,6 +141,11 @@ public:
         return !IsProofOfStake();
     }
 
+    bool IsHeaderOnly() const
+    {
+        return (vtx.size() == 0);
+    }
+
     std::string ToString() const;
 };
 
