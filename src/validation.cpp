@@ -5587,6 +5587,9 @@ bool SignBlock(CBlock& block, const CKeyStore& keystore)
 // peercoin: check block signature
 bool CheckBlockSignature(const CBlock& block)
 {
+    if (block.IsHeaderOnly())
+        return true;
+
     if ((block.GetHash() == Params().GetConsensus().hashGenesisBlock) || block.IsProofOfWork())
         return block.vchBlockSig.empty();
 
