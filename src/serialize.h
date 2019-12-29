@@ -182,6 +182,8 @@ enum {
     SER_NETWORK = (1 << 0),
     SER_DISK = (1 << 1),
     SER_GETHASH = (1 << 2),
+    // modifiers
+    SER_POSMARKER       = (1 << 18),  // Proof-of-Stake: for sending block headers with PoS marker, to allow headers-first syncronization
 };
 
 #define READWRITE(obj) (::SerReadWrite(s, (obj), ser_action))

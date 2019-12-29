@@ -29,6 +29,8 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
+    // Proof-of-Stake: copy from CBlockIndex.nFlags from other clients. We need this information because we are using headers-first syncronization.
+    int32_t nFlags;
 
     CBlockHeader()
     {
@@ -46,6 +48,8 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
+            READWRITE(nFlags);
     }
 
     void SetNull()
@@ -56,6 +60,7 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        nFlags = 0;
     }
 
     bool IsNull() const
@@ -69,6 +74,17 @@ public:
     {
         return (int64_t)nTime;
     }
+
+    bool IsHeaderProofOfStake() const
+    {
+        return (nFlags > 0);
+    }
+
+    bool IsHeaderProofOfWork() const
+    {
+        return !IsHeaderProofOfStake();
+    }
+
 };
 
 
@@ -127,6 +143,7 @@ public:
         block.nTime = nTime;
         block.nBits = nBits;
         block.nNonce = nNonce;
+        block.nFlags = nFlags;
         return block;
     }
 
