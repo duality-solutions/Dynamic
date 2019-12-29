@@ -12,7 +12,10 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 71200;
+static const int PROTOCOL_VERSION = 71300;
+
+// Proof-of-Stake: used to communicate with clients that don't know how to send PoS information in headers
+static const int PROTOCOL_VERSION_BEFORE_POS = 71200; 
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;
