@@ -1503,13 +1503,13 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         Misbehaving(pfrom->GetId(), 1);
         return false;
     }
-
+    /*
     // Proof-of-Stake: set/unset network serialization mode for new clients
     if (pfrom->nVersion <= PROTOCOL_VERSION_BEFORE_POS)
         vRecv.SetType(vRecv.GetType() & ~SER_POSMARKER);
     else
         vRecv.SetType(vRecv.GetType() | SER_POSMARKER);
-
+    */
     // At this point, the outgoing message serialization version can't change.
     const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
 
