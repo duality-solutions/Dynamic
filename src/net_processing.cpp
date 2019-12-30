@@ -122,6 +122,13 @@ struct QueuedBlock {
 };
 std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> > mapBlocksInFlight;
 
+/** peercoin: blocks that are waiting to be processed, the key points to previous CBlockIndex entry */
+struct WaitElement {
+    std::shared_ptr<CBlock> pblock;
+        int64_t time;
+};
+std::map<CBlockIndex*, WaitElement> mapBlocksWait;
+
 /** Stack of nodes which we have set to announce using compact blocks */
 std::list<NodeId> lNodesAnnouncingHeaderAndIDs;
 
@@ -1304,7 +1311,7 @@ inline void static SendBlockTransactions(const CBlock& block, const BlockTransac
 
 bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
 {
-    LogPrint("net", "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->id);
+    LogPrint("staking", "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->id);
 
     if (IsArgSet("-dropmessagestest") && GetRand(GetArg("-dropmessagestest", 0)) == 0) {
         LogPrintf("dropmessagestest DROPPING RECV MESSAGE\n");
@@ -2523,9 +2530,13 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     {
         std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
         vRecv >> *pblock;
-
+        int64_t nTimeNow = GetSystemTimeInSeconds();
         LogPrint("net", "received block %s peer=%d\n", pblock->GetHash().ToString(), pfrom->id);
 
+        BlockMap::iterator miPrev = mapBlockIndex.find(pblock->hashPrevBlock);
+        if (miPrev == mapBlockIndex.end()) {
+            return error("previous header not found");
+        }
         // Process all blocks from whitelisted peers, even if not requested,
         // unless we're still syncing with the network.
         // Such an unrequested block may still be processed, subject to the
@@ -2540,11 +2551,82 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             // mapBlockSource is only used for sending reject messages and DoS scores,
             // so the race between here and cs_main in ProcessNewBlock is fine.
             mapBlockSource.emplace(hash, std::make_pair(pfrom->GetId(), true));
+            // peercoin: store in memory until we can connect it to some chain
+            WaitElement we; 
+            we.pblock = pblock; 
+            we.time = nTimeNow;
+            mapBlocksWait[miPrev->second] = we;
         }
-        bool fNewBlock = false;
-        ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock);
-        if (fNewBlock)
-            pfrom->nLastBlockTime = GetTime();
+        
+        static CBlockIndex* pindexLastAccepted = nullptr;
+        if (pindexLastAccepted == nullptr)
+            pindexLastAccepted = chainActive.Tip();
+        bool fContinue = true;
+        // peercoin: accept as many blocks as we possibly can from mapBlocksWait
+        while (fContinue) {
+            fContinue = false;
+            bool fSelected = false;
+            bool forceProcessing = false;
+            CBlockIndex* pindexPrev;
+            std::shared_ptr<CBlock> pblock;
+
+            {
+            LOCK(cs_main);
+            // peercoin: try to select next block in a constant time
+            std::map<CBlockIndex*, WaitElement>::iterator it = mapBlocksWait.find(pindexLastAccepted);
+            if (it != mapBlocksWait.end() && pindexLastAccepted != nullptr) {
+                pindexPrev = it->first;
+                pblock = it->second.pblock;
+                mapBlocksWait.erase(pindexPrev);
+                fContinue = true;
+                fSelected = true;
+            } else
+            // otherwise: try to scan for it
+            for (auto& pair : mapBlocksWait) {
+                pindexPrev = pair.first;
+                pblock = pair.second.pblock;
+                const uint256 hash(pblock->GetHash());
+                // remove blocks that were not connected in 60 seconds
+                if (nTimeNow > pair.second.time + 60) {
+                    mapBlocksWait.erase(pindexPrev);
+                    fContinue = true;
+                    MarkBlockAsReceived(hash);
+                    break;
+                }
+                if (!pindexPrev->IsValid(BLOCK_VALID_TRANSACTIONS)) {
+                    if (pindexPrev->nStatus & BLOCK_FAILED_MASK) {
+                        mapBlocksWait.erase(pindexPrev);  // prev block was rejected
+                        fContinue = true;
+                        MarkBlockAsReceived(hash);
+                        break;
+                    }
+                    continue;   // prev block was not (yet) accepted on disk, skip to next one
+                }
+
+                mapBlocksWait.erase(pindexPrev);
+                fContinue = true;
+                fSelected = true;
+                break;
+            }
+            if (!fSelected)
+                continue;
+
+            const uint256 hash(pblock->GetHash());
+
+            // Also always process if we requested the block explicitly, as we may
+            // need it even though it is not a candidate for a new best tip.
+            forceProcessing |= MarkBlockAsReceived(hash);
+            // mapBlockSource is only used for sending reject messages and DoS scores,
+            // so the race between here and cs_main in ProcessNewBlock is fine.
+            mapBlockSource.emplace(hash, std::make_pair(pfrom->GetId(), true));
+            }   // LOCK(cs_main);
+
+            bool fNewBlock = false;
+            ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock);
+            if (fNewBlock)
+                pfrom->nLastBlockTime = GetTime();
+
+        }
     }
 
 
