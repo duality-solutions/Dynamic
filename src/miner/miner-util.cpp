@@ -135,8 +135,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             nLastCoinStakeSearchTime = nSearchTime;
         }
         if (!fStakeFound) {
-            LogPrint("staking", "CreateNewBlock(): stake not found\n");
-            return NULL;
+            LogPrintf("%s(): stake not found\n", __func__);
+            return nullptr;
         }
     }
 
@@ -390,8 +390,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
         CValidationState state;
         if (!TestBlockValidity(state, chainparams, block, indexPrev, false, false)) {
-            LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", txNew.ToString());
-            throw std::runtime_error(tfm::format("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
+            LogPrintf("%s(): TestBlockValidity failed:\n%s\n", __func__, block.ToString());
+            return nullptr;
         }
     }
 
