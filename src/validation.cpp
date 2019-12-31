@@ -2518,6 +2518,21 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck))
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
 
+    if (block.IsProofOfStake()) {
+        uint256 hashProofOfStake = uint256(0);
+        std::unique_ptr<CStakeInput> stake;
+        CBlockIndex* pindexPrev = pindex->pprev;
+        if (!CheckProofOfStake(block, hashProofOfStake, stake, pindexPrev->nHeight))
+            return state.DoS(100, error("%s: proof of stake check failed", __func__));
+
+        if (!stake)
+            return error("%s: null stake ptr", __func__);
+
+        uint256 hash = block.GetHash();
+        if(!mapProofOfStake.count(hash)) // add to mapProofOfStake
+            mapProofOfStake.insert(std::make_pair(hash, hashProofOfStake));
+    }
+
     // verify that the view's current state corresponds to the previous block
     uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
     assert(hashPrevBlock == view.GetBestBlock());
@@ -4277,22 +4292,6 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     if (block.GetHash() != Params().GenesisBlock().GetHash() && !CheckWork(block))
         return false;
 
-    bool isPoS = false;
-    if (block.IsProofOfStake()) {
-        isPoS = true;
-        uint256 hashProofOfStake = uint256(0);
-        std::unique_ptr<CStakeInput> stake;
-        if (!CheckProofOfStake(block, hashProofOfStake, stake, pindexPrev->nHeight))
-            return state.DoS(100, error("%s: proof of stake check failed", __func__));
-
-        if (!stake)
-            return error("%s: null stake ptr", __func__);
-
-        uint256 hash = block.GetHash();
-        if(!mapProofOfStake.count(hash)) // add to mapProofOfStake
-            mapProofOfStake.insert(std::make_pair(hash, hashProofOfStake));
-    }
-
     CBlockIndex* pindexDummy = NULL;
     CBlockIndex*& pindex = ppindex ? *ppindex : pindexDummy;
     if (!AcceptBlockHeader(block, state, chainparams, &pindex))
@@ -4336,7 +4335,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
         return error("%s: %s", __func__, FormatStateMessage(state));
     }
 
-    if (isPoS) {
+    if (block.IsProofOfStake()) {
         LOCK(cs_main);
 
         // Blocks arrives in order, so if prev block is not the tip then we are on a fork.
@@ -4369,12 +4368,12 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
             }
         }
         // Check whether is a fork or not
+        /*
         if (isBlockFromFork) {
             // Start at the block we're adding on to
             CBlockIndex *prev = pindexPrev;
 
             CBlock bl;
-            //bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
             if (!ReadBlockFromDisk(bl, prev, chainparams.GetConsensus()))
                 return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex());
 
@@ -4412,7 +4411,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
                     return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex());
 
             }
-        }
+        }*/
 
         // TODO (PoS): review this code conversion
         // Check if the inputs were spent on the main chain
