@@ -2909,10 +2909,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (fJustCheck)
         return true;
 
-    if (block.IsProofOfStake() && pindex->nStakeModifier == 0) {
+    uint256 nZero = uint256(0);
+    if (block.IsProofOfStake() && pindex->nStakeModifier == nZero) {
         pindex->nStakeModifier = ComputeStakeModifier(pindex->pprev, block.vtx[1]->vin[0].prevout.hash);
         pindex->prevoutStake = block.vtx[1]->vin[0].prevout;
     }
+    if (block.IsProofOfStake() && pindex->nStakeModifier == nZero)
+        LogPrintf("%s: Error, nStakeModifier is zero. pindex->pprev null %, prevout %s\n", __func__, pindex->pprev ? "false" : "true", block.vtx[1]->vin[0].prevout.ToString());
 
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS)) {

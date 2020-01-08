@@ -38,6 +38,7 @@ class uint256;
 #define BIGINT_GREATER_THAN(x, y) (x > y)
 
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
+int64_t GetNetworkHashRate(int lookup, int height);
 
 bool CheckForkIsTrue(const CBlockIndex* pindexLast, bool fTableFlip = false);
 

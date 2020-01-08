@@ -17,11 +17,92 @@
 
 #include <algorithm>
 
+CBlockIndex* NonConstGetLastBlockIndex(CBlockIndex* pindex, bool fProofOfStake)
+{
+    while (pindex && pindex->pprev && (pindex->IsProofOfStake() != fProofOfStake))
+        pindex = pindex->pprev;
+    return pindex;
+}
+
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake)
 {
     while (pindex && pindex->pprev && (pindex->IsProofOfStake() != fProofOfStake))
         pindex = pindex->pprev;
     return pindex;
+}
+
+/**
+ * Return average network hashes per second based on the last 'lookup' blocks,
+ * or from the last difficulty change if 'lookup' is nonpositive.
+ * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
+ */
+int64_t GetNetworkHashRate(int lookup, int height)
+{
+    CBlockIndex* pb = NonConstGetLastBlockIndex(chainActive.Tip(), false);
+
+    if (height >= 0 && height < chainActive.Height())
+        pb = chainActive[height];
+
+    if (pb == NULL || !pb->nHeight)
+        return 0;
+
+    // If lookup is -1, then use blocks since last difficulty change.
+    if (lookup <= 0)
+        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+
+    // If lookup is larger than chain, then set it to chain length.
+    if (lookup > pb->nHeight)
+        lookup = pb->nHeight;
+
+    CBlockIndex* pb0 = pb;
+    int64_t minTime = pb0->GetBlockTime();
+    int64_t maxTime = minTime;
+    int nPoWBlocksChecked = 0;
+    int32_t nBlocksChecked = 0;
+    int i = 0;
+    arith_uint256 workDiff = 0;
+    int64_t timeDiff = 0;
+    std::vector<std::pair<uint32_t, int64_t>> vAverageHashRates;
+    while (lookup > nPoWBlocksChecked) {
+        pb0 = pb0->pprev;
+        // Skip Proof-of-Stake blocks in network hash rate calculation
+        if (pb0->IsProofOfWork()) {
+            if (nBlocksChecked == -1) {
+                pb = pb0;
+                nBlocksChecked = 0;
+                continue;
+            }
+            int64_t time = pb0->GetBlockTime();
+            minTime = std::min(time, minTime);
+            maxTime = std::max(time, maxTime);
+            timeDiff = maxTime - minTime;
+            if (timeDiff > 0) {
+                workDiff = pb->nChainWork - pb0->nChainWork;
+                nPoWBlocksChecked++;
+                nBlocksChecked++;
+            }
+        } else {
+            if (nBlocksChecked > 1) {
+                LogPrint("pow", "%s: nBlocksChecked %d, difficulty %d\n", __func__, nBlocksChecked, workDiff.getdouble() / timeDiff);
+                vAverageHashRates.push_back(std::make_pair(nBlocksChecked, workDiff.getdouble() / timeDiff));
+            }
+            // reset
+            nBlocksChecked = -1;
+        }
+        i++;
+        if (i >= 1000)
+            break;
+    }
+    int64_t nDifficulty = 0;
+    for (const std::pair<uint32_t, int64_t>& avg : vAverageHashRates)
+        nDifficulty = nDifficulty + (avg.first * avg.second);
+
+    if (nPoWBlocksChecked == 0)
+        return 0;
+
+    LogPrint("pow", "%s: PoW Blocks Checked %d, Time Difference %d, Difficulty %d\n", __func__, nPoWBlocksChecked, timeDiff, nDifficulty / nPoWBlocksChecked);
+
+    return nDifficulty / nPoWBlocksChecked;
 }
 
 unsigned int GetNextStakeWorkRequired(const CBlockIndex* pindex, const Consensus::Params& params)

@@ -337,7 +337,7 @@ UniValue getdifficulty(const JSONRPCRequest& request)
             HelpExampleCli("getdifficulty", "") + HelpExampleRpc("getdifficulty", ""));
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("proof-of-work",        GetDifficulty()));
+    obj.push_back(Pair("proof-of-work",        GetDifficulty(GetLastBlockIndex(chainActive.Tip(), false))));
     obj.push_back(Pair("proof-of-stake",       GetDifficulty(GetLastBlockIndex(chainActive.Tip(), true))));
     obj.push_back(Pair("search-interval",      (int)nLastCoinStakeSearchInterval));
     return obj;
