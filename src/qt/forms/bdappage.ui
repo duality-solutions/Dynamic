@@ -111,6 +111,21 @@ QTabBar { alignment: left; }
            <attribute name="verticalHeaderStretchLastSection">
             <bool>false</bool>
            </attribute>
+           <column>
+            <property name="text">
+             <string>Common Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Object Full Path</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Expiration Date</string>
+            </property>
+           </column>
           </widget>
          </item>
          <item>
@@ -200,10 +215,17 @@ QTabBar { alignment: left; }
               </sizepolicy>
              </property>
              <property name="text">
-              <string/>
+              <string>Records found: </string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelNumRecordsFound">
+             <property name="text">
+              <string>0</string>
              </property>
             </widget>
            </item>
@@ -294,6 +316,21 @@ QTabBar { alignment: left; }
            <attribute name="horizontalHeaderStretchLastSection">
             <bool>true</bool>
            </attribute>
+           <column>
+            <property name="text">
+             <string>Common Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Object Full Path</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Expiration Date</string>
+            </property>
+           </column>
           </widget>
          </item>
          <item>
@@ -387,10 +424,17 @@ QTabBar { alignment: left; }
               </sizepolicy>
              </property>
              <property name="text">
-              <string/>
+              <string>Records found: </string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelNumGroupsFound">
+             <property name="text">
+              <string>0</string>
              </property>
             </widget>
            </item>
@@ -476,8 +520,23 @@ QTabBar { alignment: left; }
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
              <property name="columnCount">
-              <number>0</number>
+              <number>3</number>
              </property>
+             <column>
+              <property name="text">
+               <string>Requestor</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Recipient</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Date</string>
+              </property>
+             </column>
             </widget>
            </item>
            <item>
@@ -638,8 +697,23 @@ QTabBar { alignment: left; }
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
              <property name="columnCount">
-              <number>0</number>
+              <number>3</number>
              </property>
+             <column>
+              <property name="text">
+               <string>Requestor</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Recipient</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Date</string>
+              </property>
+             </column>
             </widget>
            </item>
            <item>
@@ -770,8 +844,23 @@ QTabBar { alignment: left; }
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
              <property name="columnCount">
-              <number>0</number>
+              <number>3</number>
              </property>
+             <column>
+              <property name="text">
+               <string>Requestor</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Recipient</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Date</string>
+              </property>
+             </column>
             </widget>
            </item>
            <item>

@@ -95,8 +95,8 @@ in the getinfo-output. If the numbers match, the installation is completed.
 ```
 dynamic-cli getinfo
 {
-  "version": 2040000,
-  "protocolversion": 71000,
+  "version": 2040400,
+  "protocolversion": 71050,
   "walletversion": 204000,
   "balance": 0.00000000,
   "privatesend_balance": 0.00000000,

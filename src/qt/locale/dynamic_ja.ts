@@ -201,7 +201,7 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DynamicGUI</name>
     <message>
         <source>Wallet</source>
         <translation>ウォレット</translation>
@@ -223,16 +223,40 @@
         <translation>送る (&amp;S)</translation>
     </message>
     <message>
+        <source>Send coins to a Dynamic address</source>
+        <translation>コインをDYNAMICに送信します住所</translation>
+    </message>
+    <message>
         <source>&amp;Receive</source>
         <translation>受信 (&amp;R)</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and dynamic: URIs)</source>
+        <translation>支払いのリクエスト（QRコードと動的：URIを生成）</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
         <translation>取引(&amp;T)</translation>
     </message>
     <message>
+        <source>&amp;Dynodes</source>
+        <translation>&amp;Dynodes</translation>
+    </message>
+    <message>
+        <source>&amp;Mining</source>
+        <translation>&amp;マイニング</translation>
+    </message>
+    <message>
         <source>Browse transaction history</source>
         <translation>取引履歴を閲覧</translation>
+    </message>
+    <message>
+        <source>Browse Dynodes</source>
+        <translation>ダイノードを閲覧する</translation>
+    </message>
+    <message>
+        <source>Mine Dynamic(DYN)</source>
+        <translation>マインダイナミック（DYN）</translation>
     </message>
     <message>
         <source>E&amp;xit</source>
@@ -241,6 +265,14 @@
     <message>
         <source>Quit application</source>
         <translation>アプリケーションを終了</translation>
+    </message>
+    <message>
+        <source>&amp;About Dynamic</source>
+        <translation>&amp;Dynamicについて</translation>
+    </message>
+    <message>
+        <source>Show information about Dynamic</source>
+        <translation>Dynamicに関する情報を表示する</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -261,6 +293,10 @@
     <message>
         <source>Show or hide the main Window</source>
         <translation>メイン ウインドウを表示または非表示</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for Dynamic</source>
+        <translation>Dynamicの構成オプションを変更する</translation>
     </message>
     <message>
         <source>&amp;Encrypt Wallet...</source>
@@ -303,8 +339,76 @@
         <translation>情報 (&amp;I)</translation>
     </message>
     <message>
+        <source>Show diagnostic information</source>
+        <translation>診断情報を表示する</translation>
+    </message>
+    <message>
+        <source>&amp;Debug console</source>
+        <translation>&amp;デバッグコンソール</translation>
+    </message>
+    <message>
+        <source>Open debugging console</source>
+        <translation>デバッグコンソールを開く</translation>
+    </message>
+    <message>
+        <source>&amp;Network Monitor</source>
+        <translation>&amp;ネットワークモニター</translation>
+    </message>
+    <message>
+        <source>Show network monitor</source>
+        <translation>ネットワークモニターを表示する</translation>
+    </message>
+    <message>
+        <source>&amp;Peers list</source>
+        <translation>&amp;ピアリスト</translation>
+    </message>
+    <message>
+        <source>Show peers info</source>
+        <translation>ピア情報を表示</translation>
+    </message>
+    <message>
+        <source>Wallet &amp;Repair</source>
+        <translation>ウォレット修理</translation>
+    </message>
+    <message>
+        <source>Show wallet repair options</source>
+        <translation>ウォレットの修復オプションを表示する</translation>
+    </message>
+    <message>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>ウォレット構成ファイルを開く</translation>
+    </message>
+    <message>
+        <source>Open configuration file</source>
+        <translation>設定ファイルを開く</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Dynode構成ファイルを開く</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Dynode構成ファイルを開く</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>設定ファイルを開く</translation>
+    </message>
+    <message>
+        <source>Show Automatic &amp;Backups</source>
+        <translation>自動バックアップを表示</translation>
+    </message>
+    <message>
+        <source>Show automatically created wallet backups</source>
+        <translation>自動的に作成されたウォレットバックアップを表示する</translation>
+    </message>
+    <message>
         <source>&amp;Sending addresses...</source>
         <translation>送金先アドレス一覧… (&amp;S)</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>ピアへの接続...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -323,8 +427,38 @@
         <translation>URI を開く… (&amp;U)</translation>
     </message>
     <message>
+        <source>Open a dynamic: URI or payment request</source>
+        <translation>dynamic：URIまたは支払い要求を開きます</translation>
+    </message>
+    <message>
         <source>&amp;Command-line options</source>
         <translation>コマンドラインオプション (&amp;C)</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;ニーモニック/秘密鍵をインポート...</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;PrivateSend情報</translation>
+    </message>
+    <message>
+        <source>Dynamic client</source>
+        <translation>Dynamic クライアント</translation>
+    </message>
+    <message numerus="yes">
+        <source>Processed %n block(s) of transaction history.</source>
+        <translation>
+            <numerusform>トランザクション履歴の %n ブロックを処理しました。</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Synchronizing additional data: %p%</source>
+        <translation>追加データの同期： %p%</translation>
+    </message>
+    <message>
+        <source>Show the Dynamic help message to get a list with possible Dynamic command-line options</source>
+        <translation>ダイナミックヘルプメッセージを表示して、可能なダイナミックコマンドラインオプションのリストを取得します</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -335,6 +469,10 @@
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
+        <source>&amp;Tools</source>
+        <translation>道具(&amp;T)</translation>
+    </message>
+    <message>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
@@ -343,8 +481,12 @@
         <translation>タブツールバー</translation>
     </message>
     <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>ヘッダーを同期しています（%1%)...</translation>
+    </message>
+    <message>
         <source>Synchronizing with network...</source>
-        <translation>ネットワークに同期中…</translation>
+        <translation>ネットワークと同期しています...</translation>
     </message>
     <message>
         <source>Importing blocks from disk...</source>
@@ -430,8 +572,28 @@
 <context>
     <name>ClientModel</name>
     <message>
+        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <translation>合計: %1 (PS 互換性がある: %2 / 有効化: %3)</translation>
+    </message>
+    <message>
         <source>Network Alert</source>
-        <translation>ネットワーク警告</translation>
+        <translation>ネットワークアラート</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>普通</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>適用できません</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>サポート対象</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>未対応</translation>
     </message>
 </context>
 <context>
@@ -471,6 +633,10 @@
     <message>
         <source>Change:</source>
         <translation>釣り銭：</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>ロック状態を切り替える</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -764,6 +930,49 @@
         <source>Show splash screen on startup (default: 1)</source>
         <translation>起動時にスプラッシュ画面を表示する (デフォルト設定： 1)</translation>
     </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>PrivateSend情報</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>
+PrivateSendは、資金の出所を不明瞭にすることにより、真の経済的プライバシーを提供します。
+ウォレットのすべてのDynamicは、別々の個別のコインと考えることができるさまざまな&#39;入力&#39;で構成されています。&lt;br&gt;
+PrivateSendは革新的なプロセスを使用して、コインを財布から取り出すことなく、入力を他の2人の入力と混合します。
+あなたは常にあなたのお金のコントロールを保持します。.&lt;hr&gt;
+&lt;b&gt;PrivateSendプロセスは次のように機能します:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSendは、トランザクション入力を標準額面に分解することから始まります。
+これらの額面は、0.001、0.01 DYN、0.1 DYN、1 DYN、10 DYNです。毎日使用する紙幣のようなものです。&lt;/li&gt;
+&lt;li&gt;その後、ウォレットは、&#39;DYNODES&#39;と呼ばれるネットワーク上の特別に構成されたソフトウェアノードにリクエストを送信します
+これらのDynodesは、特定の金種を混合することに関心があることを通知されます。
+識別可能な情報はDynodesに送信されないため、彼らは&#39;誰&#39;あなたは。&lt;/li&gt;
+&lt; li&gt;他の2人が同様のメッセージを送信し、同じ金種をミックスすることを示すと、ミキシングセッションが開始されます。
+Dynodeは入力を混合し、3人のユーザー全員に指示します。変換された入力を自分自身に返すウォレット。
+ウォレットはその額面を直接自分自身に支払いますが、別の住所（変更住所と呼ばれます）で支払われます。&lt;/li&gt;
+&lt;li&gt;資金を完全に隠すために、ウォレットは各金種でこのプロセスを何度も繰り返す必要があります。
+プロセスが完了するたびに、「ラウンド」と呼ばれます。 PrivateSendの各ラウンドでは、資金の発信元を特定するのが指数関数的に難しくなります。&lt;/li&gt;
+&lt;li&gt;このミキシングプロセスは、ユーザーの介入なしでバックグラウンドで実行されます。取引を行いたい場合、
+資金はすでに匿名化されています。追加の待機は必要ありません。&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;重要：&lt;/b&gt;ウォレットには、これらの アドレスの変更 が2000個しか含まれていません。ミキシングイベントが発生するたびに、最大9つのアドレスが使い果たされます。
+これは、それらの2000のアドレスが約200のミキシングイベントの間続くことを意味します。 1900個を使用する場合、ウォレットはさらにアドレスを作成する必要があります。
+ただし、自動バックアップを有効にしている場合のみ、これを行うことができます。&lt;br&gt;
+したがって、バックアップが無効になっているユーザーのPrivateSendも無効になります。 &lt;hr&gt;</translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>Wählen Sie beim Start ein Datenverzeichnis aus (Standard: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>Willkommensbildschirm beim Start anzeigen (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>Alle über die GUI vorgenommen Einstellungen zurücksetzen</translation>
+    </message>
 </context>
 <context>
     <name>Intro</name>
@@ -987,7 +1196,7 @@
     <name>OverviewPage</name>
     <message>
         <source>Form</source>
-        <translation>フォーム</translation>
+        <translation>形式</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1054,12 +1263,176 @@
         <translation>状態：</translation>
     </message>
     <message>
-        <source>Recent transactions</source>
-        <translation>最近のトランザクション</translation>
+        <source>Enabled/Disabled</source>
+        <translation>有効/無効</translation>
+    </message>
+    <message>
+        <source>keys left: %1</source>
+        <translation>左キー： %1</translation>
+    </message>
+    <message>
+        <source>Completion:</source>
+        <translation>完了：</translation>
+    </message>
+    <message>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend残高：</translation>
+    </message>
+    <message>
+        <source>Amount and Rounds:</source>
+        <translation>金額とラウンド：</translation>
+    </message>
+    <message>
+        <source>0 DYN / 0 Rounds</source>
+        <translation>0 DYN / 0 ラウンド</translation>
+    </message>
+    <message>
+        <source>Submitted Denom:</source>
+        <translation>提出された額面：</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>n/a</translation>
     </message>
     <message>
         <source>N/A</source>
         <translation>N/A</translation>
+    </message>
+    <message>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
+    </message>
+    <message>
+        <source>Recent transactions</source>
+        <translation>最近のトランザクション</translation>
+    </message>
+    <message>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
+    </message>
+    <message>
+        <source>Start/Stop Mixing</source>
+        <translation>ミキシングの開始/停止</translation>
+    </message>
+    <message>
+        <source>Start Mixing</source>
+        <translation>ミキシングを開始</translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>ミキシングを停止</translation>
+    </message>
+    <message>
+        <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>Dynodeに送信した金種&lt;br&gt;混合するには、他のユーザーがまったく同じ金種を送信する必要があります。</translation>
+    </message>
+    <message>
+        <source>(Last Message)</source>
+        <translation>（最後のメッセージ）</translation>
+    </message>
+    <message>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>PrivateSendリクエストを手動で送信してください。</translation>
+    </message>
+    <message>
+        <source>Try Mix</source>
+        <translation>ミックスを試す</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>情報</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>PrivateSendとミキシングに関する情報</translation>
+    </message>
+    <message>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>PrivateSendの現在のステータスをリセットします（Mixingの処理中にPrivateSendを中断できます。これは費用がかかります！）</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>リセットする</translation>
+    </message>
+    <message>
+        <source>out of sync</source>
+        <translation>非同期</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>無効</translation>
+    </message>
+    <message>
+        <source>Start PrivateSend Mixing</source>
+        <translation>PrivateSend Mixingを開始</translation>
+    </message>
+    <message>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>PrivateSend Mixingを停止</translation>
+    </message>
+    <message>
+        <source>No inputs detected</source>
+        <translation>入力が検出されません</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n Rounds</source>
+        <translation>
+            <numerusform>%n ラウンド</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
+        <translation>匿名化するのに十分な互換性のある入力&lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;は匿名化 &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; 代わりに</translation>
+    </message>
+    <message>
+        <source>Overall progress</source>
+        <translation>全体的な進捗状況</translation>
+    </message>
+    <message>
+        <source>Denominated</source>
+        <translation>名称</translation>
+    </message>
+    <message>
+        <source>Anonymized</source>
+        <translation>匿名化</translation>
+    </message>
+    <message numerus="yes">
+        <source>Denominated inputs have %5 of %n rounds on average</source>
+        <translation>
+            <numerusform>額面金額は、平均で %n の %5 ラウンドです</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Found enough compatible inputs to anonymize %1</source>
+        <translation>%1 を匿名化するのに十分な互換性のある入力が見つかりました</translation>
+    </message>
+    <message>
+        <source>Mixed</source>
+        <translation>混合</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>有効化</translation>
+    </message>
+    <message>
+        <source>Last PrivateSend message:</source>
+        <translation>最後のPrivateSendメッセージ：</translation>
+    </message>
+    <message>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSendは正常にリセットされました。</translation>
+    </message>
+    <message>
+        <source>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>内部のPrivateSend料金/取引を表示したくない場合は、[最も一般的な]を選択します。 「トランザクション」のタイプとしてタブ。</translation>
+    </message>
+    <message>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSendを使用するには少なくとも %1 が必要です。</translation>
+    </message>
+    <message>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>ウォレットはロックされており、ユーザーはロック解除を拒否しました。 PrivateSendを無効にします。</translation>
     </message>
     </context>
 <context>
@@ -1082,7 +1455,7 @@
     </message>
     <message>
         <source>Invalid payment address %1</source>
-        <translation>支払いのアドレス「%1」は無効です</translation>
+        <translation>支払いのアドレス %1 は無効です</translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1213,6 +1586,10 @@
 <context>
     <name>RPCConsole</name>
     <message>
+        <source>Tools window</source>
+        <translation>Werkzeug Fenster</translation>
+    </message>
+    <message>
         <source>&amp;Information</source>
         <translation>情報 (&amp;I)</translation>
     </message>
@@ -1237,6 +1614,10 @@
         <translation>接続数</translation>
     </message>
     <message>
+        <source>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>現在のデータディレクトリからダイナミックデバッグログファイルを開きます。大きなログファイルの場合、これには数秒かかる場合があります。</translation>
+    </message>
+    <message>
         <source>&amp;Open</source>
         <translation>開く (&amp;O)</translation>
     </message>
@@ -1251,6 +1632,18 @@
     <message>
         <source>Last block time</source>
         <translation>最終ブロックの日時</translation>
+    </message>
+    <message>
+        <source>Memory Pool</source>
+        <translation>メモリプール</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>現在のトランザクション数</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>メモリ使用量</translation>
     </message>
     <message>
         <source>Debug log file</source>
@@ -1269,6 +1662,18 @@
         <translation>現在のブロック数</translation>
     </message>
     <message>
+        <source>CPU Mode:</source>
+        <translation>CPUモード：</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPUモード：</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPUマイニング：</translation>
+    </message>
+    <message>
         <source>Client version</source>
         <translation>クライアントのバージョン</translation>
     </message>
@@ -1277,8 +1682,16 @@
         <translation>使用中のBerkleyDBバージョン</translation>
     </message>
     <message>
+        <source>Datadir</source>
+        <translation>データディレクトリ</translation>
+    </message>
+    <message>
         <source>Block chain</source>
         <translation>ブロック チェーン</translation>
+    </message>
+    <message>
+        <source>Number of Dynodes</source>
+        <translation>Dynodesの数</translation>
     </message>
     <message>
         <source>&amp;Console</source>
@@ -1369,6 +1782,67 @@
         <translation>Ping時間</translation>
     </message>
     <message>
+        <source>&amp;Wallet Repair</source>
+        <translation>&amp;ウォレット修理</translation>
+    </message>
+    <message>
+        <source>Salvage wallet</source>
+        <translation>サルベージ財布</translation>
+    </message>
+    <message>
+        <source>Rescan blockchain files</source>
+        <translation>ブロックチェーンファイルを再スキャンする</translation>
+    </message>
+    <message>
+        <source>Recover transactions 1</source>
+        <translation>トランザクションを回復1</translation>
+    </message>
+    <message>
+        <source>Recover transactions 2</source>
+        <translation>トランザクションの回復2</translation>
+    </message>
+    <message>
+        <source>Upgrade wallet format</source>
+        <translation>ウォレット形式のアップグレード</translation>
+    </message>
+    <message>
+        <source>The buttons below will restart the wallet with command-line options to repair the wallet, fix issues with corrupt blockhain files or missing/obsolete transactions.</source>
+        <translation>以下のボタンは、コマンドラインオプションを使用してウォレットを再起動し、ウォレットを修復したり、破損したブロックハインファイルや欠落/廃止されたトランザクションの問題を修正します。</translation>
+    </message>
+    <message>
+        <source>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</source>
+        <translation>-salvagewallet: 破損したwallet.datから秘密鍵を回復しようとします。</translation>
+    </message>
+    <message>
+        <source>-rescan: Rescan the block chain for missing wallet transactions.</source>
+        <translation>-rescan: 欠落しているウォレットトランザクションのブロックチェーンを再スキャンします。</translation>
+    </message>
+    <message>
+        <source>-zapwallettxes=1: Recover transactions from blockchain (keep meta-data, e.g. account owner).</source>
+        <translation>-zapwallettxes=1: ブロックチェーンからトランザクションを回復します（メタデータを保持します（例：アカウント所有者）。</translation>
+    </message>
+    <message>
+        <source>-zapwallettxes=2: Recover transactions from blockchain (drop meta-data).</source>
+        <translation>-zapwallettxes=2: ブロックチェーンからトランザクションを回復します（メタデータをドロップします）。</translation>
+    </message>
+    <message>
+    
+        <source>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
+        <translation>-upgradewallet: 起動時にウォレットを最新の形式にアップグレードします。 （注：これはウォレット自体の更新ではありません！）</translation>
+    </message>
+    <message>
+        <source>Wallet repair options.</source>
+        <translation>ウォレットの修復オプション。</translation>
+    </message>
+    <message>
+        <source>Rebuild index</source>
+        <translation>インデックスを再構築</translation>
+    </message>
+    <message>
+        <source>-reindex: Rebuild block chain index from current blk000??.dat files.</source>
+        <translation>-reindex：現在のblk000 ??。datファイルからブロックチェーンインデックスを再構築します。</translation>
+    </message>
+    <message>
         <source>In:</source>
         <translation>入力：</translation>
     </message>
@@ -1377,7 +1851,11 @@
         <translation>出力：</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>%1 RPCコンソールへようこそ。</translation>
+    </message>
+    <message>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
         <translation>上下の矢印で履歴をたどれます。 &lt;b&gt;Ctrl-L&lt;/b&gt; でスクリーンを消去できます。</translation>
     </message>
     <message>
@@ -1458,6 +1936,10 @@
     <message>
         <source>&amp;Amount:</source>
         <translation>総額 (&amp;A)：</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>InstantSendをリクエストする</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -1570,6 +2052,14 @@
         <translation>ラベル</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>住所</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>リクエストされました</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>メッセージ</translation>
     </message>
@@ -1589,9 +2079,25 @@
         <source>(no amount)</source>
         <translation>（金額なし）</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>（金額は要求されません）</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>警告：現在、料金の見積もりはできません。</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>%1 の必要な料金のみお支払いください</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>確認時間の目標：</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>コインを送る</translation>
@@ -1667,6 +2173,10 @@
     <message>
         <source>Choose...</source>
         <translation>選択…</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>隠す</translation>
     </message>
     <message>
         <source>collapse fee-settings</source>
@@ -1828,6 +2338,10 @@
 <context>
     <name>SendCoinsEntry</name>
     <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>金額から料金を引く</translation>
+    </message>
+    <message>
         <source>This is a normal payment.</source>
         <translation>これは通常の支払です。</translation>
     </message>
@@ -1886,6 +2400,10 @@
 </context>
 <context>
     <name>ShutdownWindow</name>
+    <message>
+        <source>Dynamic is shutting down...</source>
+        <translation>ダイナミックがシャットダウンしています...</translation>
+    </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
         <translation>このウィンドウが消えるまでコンピュータをシャットダウンしないで下さい。</translation>
@@ -2200,6 +2718,10 @@
         <source>Address</source>
         <translation>アドレス</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>住所/ラベル</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>%n 以上のブロックを開く</numerusform></translation>
@@ -2434,6 +2956,271 @@
     <message>
         <source>to</source>
         <translation>から</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>形式</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>フィルターリスト：</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>ノード数：</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>私のダイノード</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>すべてのダイノード</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>ウォレットが追加データを同期するのを常に待ってから、Dynodeを実行する必要があるが、&quot;STATUS&quot;フィールドに&quot;ENABLED&quot;が表示されない場合は、別のノードから再確認してください。</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>すべて開始</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>エイリアスを開始</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>MISSINGを開始</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>最新状況</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>エイリアス</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>住所</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>プロトコル</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>アクティブ</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>最後に見たのは</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>受取人</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>すべてのDynodeを起動してもよろしいですか？</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>MISSING Dynodesを開始してもよろしいですか？</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>欠落しているダイノードの開始を確認する</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>ステータスは（秒）で自動的に更新されます：</translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>コマンドは現在利用できません</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Dynodeリストが同期されるまで、このコマンドは使用できません</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>ダイノードの開始を確認</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Dynode %1 を起動してもよろしいですか？</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>お待ちください...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>更新しています...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Dynodeを正常に開始しました。</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>%d 個のダイノードを正常に起動しました。 %d の起動に失敗しました。合計 %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>形式</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>使用するCPUスレッドの数：</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>使用するGPUデバイスの数：</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>ハッシュレート（ビルトインマイナー）：</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>ネットワークハッシュレート：</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>ブロック間の平均間隔：</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>マイニングを開始</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>マイニングを停止</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>使用禁止</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>ハッシュメーターグラフを表示</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>クリア</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>スライダーを使用して、使用するCPUスレッドの量を選択します</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>スライダーを使用して、使用するGPUデバイスの量を選択します</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>これは、マイニング中のCPUのハッシュレートを示します</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>これは、マイニング中のGPUのハッシュレートを示しています</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>これは、動的ネットワークの全体的なハッシュレートを示しています</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>これは、マイニングしたブロック間の平均時間を示しています</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>ブロックチェーン/ダイノードは同期されていません。マイニングする前に完全に同期されるまでお待ちください！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>[マイニングを開始]をクリックして、マイニングを開始します！</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>マイニングを終了するには、マイニングを停止をクリックしてください！</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>停止中</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>起動</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>無効</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>採掘されたコインはすべて %1 に移動します</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>ダイナミックの同期が完了すると、スライダーが表示されます</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>GPUマイニングは、このバージョンのDynamicではサポートされていません</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 分</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 分</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 分</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 時</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 時間</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 時間</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 日</translation>
     </message>
 </context>
 <context>
@@ -2857,11 +3644,39 @@
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>&lt;port&gt; で JSON-RPC 接続をリスン (デフォルト設定： %u、testnet は %u)</translation>
+        <translation>JSON-RPC接続をリッスンします（デフォルト： %u またはテストネット： %u）</translation>
     </message>
     <message>
         <source>Listen for connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>接続のリッスンを &lt;port&gt; で行う (デフォルト設定： %u、testnet: %u)</translation>
+        <translation>JSON-RPC接続をリッスンします（デフォルト： %u またはテストネット： %u）</translation>
+    </message>
+    <message>
+        <source>Loading budget cache...</source>
+        <translation>予算キャッシュを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Loading Dynode cache...</source>
+        <translation>Dynodeキャッシュを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Loading Dynode payment cache...</source>
+        <translation>Dynode支払いキャッシュを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Loading governance cache...</source>
+        <translation>ガバナンスキャッシュを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Loading fulfilled requests cache...</source>
+        <translation>満たされたリクエストのキャッシュを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Lock is already in place.</source>
+        <translation>ロックはすでに配置されています。</translation>
+    </message>
+    <message>
+        <source>Lock Dynodes from Dynode configuration file (default: %u)</source>
+        <translation>Dynode構成ファイルからのDynodeのロック（デフォルト： %u）</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
@@ -2912,6 +3727,14 @@
         <translation>RPC サービスのスレッド数を設定 (デフォルト設定： %d)</translation>
     </message>
     <message>
+        <source>Sets the DB_PRIVATE flag in the wallet db environment (default: %u)</source>
+        <translation>ウォレットdb環境でDB_PRIVATEフラグを設定します（デフォルト：%u）</translation>
+    </message>
+    <message>
+        <source>Signing timed out.</source>
+        <translation>署名がタイムアウトしました。</translation>
+    </message>
+    <message>
         <source>Specify configuration file (default: %s)</source>
         <translation>設定ファイルの指定 (デフォルト設定： %s)</translation>
     </message>
@@ -2920,12 +3743,68 @@
         <translation>接続のタイムアウトをミリセコンドで指定 (最小値： 1, デフォルト設定：: %d)</translation>
     </message>
     <message>
+        <source>Specify Dynode configuration file (default: %s)</source>
+        <translation>Dynode構成ファイルを指定します（デフォルト： %s）</translation>
+    </message>
+    <message>
         <source>Specify pid file (default: %s)</source>
         <translation>pid ファイルの指定 (デフォルト設定： %s)</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>トランザクション送信時に未検証のおつりを使用する (デフォルト設定： %u)</translation>
+    </message>
+    <message>
+        <source>Stop running after importing blocks from disk (default: %u)</source>
+        <translation>ディスクからブロックをインポートした後に実行を停止します（デフォルト： %u)</translation>
+    </message>
+    <message>
+        <source>Submitted following entries to Dynode: %u / %d</source>
+        <translation>次のエントリをDynodeに送信しました: %u / %d</translation>
+    </message>
+    <message>
+        <source>Submitted to Dynode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Dynodeに送信され、さらにエントリを待機しています ( %u / %d ) %s</translation>
+    </message>
+    <message>
+        <source>Submitted to Dynode, waiting in queue %s</source>
+        <translation>Dynodeに送信され、キューで待機しています %s</translation>
+    </message>
+    <message>
+        <source>Synchronization failed</source>
+        <translation>同期に失敗しました</translation>
+    </message>
+    <message>
+        <source>Synchronization finished</source>
+        <translation>同期が完了しました</translation>
+    </message>
+    <message>
+        <source>Synchronizing budgets...</source>
+        <translation>予算を同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode winners...</source>
+        <translation>Dynodeの勝者を同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Dynodeの支払いを同期しています...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>ダイノードの同期...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>ガバナンスオブジェクトの同期...</translation>
+    </message>
+    <message>
+        <source>Synchronizing sporks...</source>
+        <translation>スポークを同期しています...</translation>
+    </message>
+    <message>
+        <source>This is not a Dynode.</source>
+        <translation>これはダイノードではありません。</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -2966,6 +3845,38 @@
     <message>
         <source>Loading wallet...</source>
         <translation>ウォレットを読み込んでいます…</translation>
+    </message>
+    <message>
+        <source>Loading banlist...</source>
+        <translation>禁止リストを読み込んでいます...</translation>
+    </message>
+    <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>ウォレットが機能することを確認したら、必ずウォレットを暗号化し、暗号化されていないバックアップをすべて削除してください！</translation>
+    </message>
+    <message>
+        <source>Dynode options:</source>
+        <translation>ダイノードオプション：</translation>
+    </message>
+    <message>
+        <source>Dynode queue is full.</source>
+        <translation>ダイノードキューがいっぱいです。</translation>
+    </message>
+    <message>
+        <source>Dynode:</source>
+        <translation>ダイノード：</translation>
+    </message>
+    <message>
+        <source>Missing input transaction information.</source>
+        <translation>入力トランザクション情報がありません。</translation>
+    </message>
+    <message>
+        <source>No funds detected in need of denominating.</source>
+        <translation>額面金額を必要とする資金は検出されませんでした。</translation>
+    </message>
+    <message>
+        <source>No matching denominations found for mixing.</source>
+        <translation>ミキシングに適した金種は見つかりませんでした。</translation>
     </message>
     <message>
         <source>Node relay options:</source>
@@ -3141,733 +4052,786 @@
     </message>
 </context>
 <context>
-    <name>BdapAccountTableModel</name>
+    <name>ModalOverlay</name>
     <message>
-        <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
+        <translation>表示される情報は古くなっている可能性があります。接続が確立された後、ウォレットはDYNAMICネットワークと自動的に同期しますが、このプロセスはまだ完了していません。つまり、最近のトランザクションは表示されず、このプロセスが完了するまで残高は最新になりません。</translation>
     </message>
     <message>
-        <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <source>Spending DYN may not be possible during that phase!</source>
+        <translation>その段階では、DYNを使用できない場合があります！</translation>
     </message>
     <message>
-        <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <source>Amount of blocks left</source>
+        <translation>残ったブロックの量</translation>
     </message>
     <message>
-        <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <source>unknown</source>
+        <translation>未知の</translation>
     </message>
     <message>
-        <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <source>Unknown...</source>
+        <translation>未知の...</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>未知の. ヘッダーの同期 (%1)...</translation>
+    </message>
+    <message>
+        <source>Last block time</source>
+        <translation>最終ブロック時間</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>進捗</translation>
+    </message>
+    <message>
+        <source>Progress increase per Hour</source>
+        <translation>1時間あたりの進捗の増加</translation>
+    </message>
+    <message>
+        <source>calculating...</source>
+        <translation>計算する...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>同期されるまでの残り時間</translation>
+    </message>
+    <message>
+        <source>&amp;Hide</source>
+        <translation>&amp;隠す</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>隠す</translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPユーザーを追加</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>一般名：</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>登録の月：</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーID：</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>新しい住所を作成する</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを追加する</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>グループID：</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>グループを追加</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを追加しました</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>見つかったレコード：</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>メッセージ</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>キャンセル</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPリンクの詳細</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者：</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>受取人：</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>リンク公開鍵（リクエスター）：</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>リンク公開鍵（受信者）：</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>リクエスターリンクアドレス：</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>受信者リンクアドレス：</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>署名証明：</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>リンクメッセージ：</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>時間：</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限：</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>期限切れ：</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPユーザーの詳細</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPエラー</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>受取人</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日付</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPエラー</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>受取人</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日付</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>一般名</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>オブジェクトのフルパス</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザー</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>これをチェックすると、更新および削除トランザクションが利用可能になります</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーのみを表示</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>リフレッシュ</translation>
+    </message>
+    <message>
+        <source>Refresh All</source>
+        <translation>すべて更新</translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを追加する</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを追加する</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを更新</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>現在選択されているユーザーをリストから削除します</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを削除</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>グループ</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>リンク</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>これをチェックすると、更新および削除トランザクションが利用可能になります</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>自分のグループのみを表示</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>新しいグループを追加する</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>グループを追加</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>更新グループ</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>現在選択されているグループをリストから削除します</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>グループを削除</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPグループを追加</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>消去してもよろしいですか \"</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>アカウントの削除を確認</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPグループの更新</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPグループの詳細</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPユーザーの詳細</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPユーザーの更新</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを削除しました</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>グループを削除しました</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPエラー</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>検索する共通名を入力してください</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>検索するオブジェクトのフルパスを入力してください</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>受取人</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>日付</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>承認待ち</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>保留中の要求</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>コンプリート</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>リフレッシュ</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者検索</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>受信者検索</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>受け入れる</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>削除する</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>新しいリンクを追加</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>拒否する</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>スパム</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>承諾リンクの確認</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>正常に受け入れられたリンク</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Pending Accept Linkの詳細</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP保留中のリクエストリンクの詳細</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>一般名</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>オブジェクトのフルパス</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>有効期限</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>見つかったレコード： </translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPアカウントを更新</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーID：</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>一般名：</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>登録日：</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>更新</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>キャンセル</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>グループID：</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限： </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>ユーザーを更新しました</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>グループを更新しました</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>メッセージ</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPリンクの詳細</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Pending Accept Linkの詳細</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>登録日：</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限： </translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>依頼者： </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>受取人： </translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>リンク公開鍵（リクエスター）： </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>リンク公開鍵（受信者）： </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>リクエスターリンクアドレス： </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>受信者リンクアドレス： </translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>署名証明： </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>リンクメッセージ： </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID: </translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>時間： </translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>取引は次のブロックまで反映されないことに注意してください。</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPユーザーの詳細</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>形式</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>一般名：</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>オブジェクトのフルパス：</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>ウォレットの住所：</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>DHT公開鍵：</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>リンクアドレス：</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TX ID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>時間：</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>有効期限：</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>期限切れ：</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>メッセージ</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPエラー</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP新しいリンクを追加</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>（必須）</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>（オプション）</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>から：</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>に：</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>リンクメッセージ：</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>登録日：</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>リンクを追加</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>キャンセル</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAPリンクエラーの追加</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>要求者、受信者、リンクメッセージは必須フィールドです</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>ヒント：インポートプロセスが中断された場合（停電や偶発的なシャットダウンなど）、回復フレーズまたは秘密キーを再入力して、[インポート]ボタンをクリックしてください。</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>ファイルを選ぶ</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>ニーモニックのインポート</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>回復フレーズのインポート</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>クリップボードから貼り付け</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>クリアー</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>BIP39準拠のリカバリフレーズ/ニーモニックを入力してください</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>回復パスフレーズ</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>回復フレーズを保護するためのパスフレーズを入力します。 （オプション）</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>言語</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>警告</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>必ず、リカバリフレーズとパスフレーズをバックアップしてください-リカバリできません！
+ニーモニックがインポートされると、ウォレットが再起動します。</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>インポート</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>再インポート</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>ニーモニックを作成する</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>新しい回復フレーズを作成する</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>クリップボードにコピー</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>エントロピーのバイト</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>生む</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>検証</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>キャンセル</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>秘密鍵をインポートする</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>単一の秘密鍵を入力</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>再スキャンを強制する</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>例：L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>秘密鍵ファイルをインポートする</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>入力秘密鍵ファイル</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>ブラウズ</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>ヒント：秘密鍵ファイルは、.datファイルではなく、動的な「dumpwalletファイル名」によってエクスポートされるファイルです。</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -3875,7 +4839,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>ウォレットには既にHDアカウントが読み込まれています。
+別の復旧フレーズをインポートすると、新しいアカウントが作成され、デフォルトとして設定されます。
+ウォレットは、新しくインポートされたアカウントからのみアドレスを受け取ります。
+古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます&lt;isodate&gt;データディレクトリ内</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -3883,11 +4850,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>ウォレットには既にHDアカウントが読み込まれています。
+別の復旧フレーズをインポートすると、新しいアカウントが作成され、デフォルトとして設定されます。
+ウォレットは、新しくインポートされたアカウントからのみアドレスを受け取ります。
+古いアカウントのウォレットファイルは、ニーモニックインポートの前にwallat.datに名前が変更されます&lt;isodate&gt;データディレクトリ内</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>BIP39準拠のリカバリフレーズ/ニーモニックを入力します。</translation>
     </message>
 </context>
 </TS>

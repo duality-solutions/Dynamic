@@ -58,6 +58,7 @@ public:
     QTableWidget* getPendingRequestTable();
     
     QLabel* getUserStatus();
+    QLabel* getNumRecordsFound();
     QLabel* getGroupStatus();
     bool getMyUserCheckBoxChecked();
     bool getMyGroupCheckBoxChecked();

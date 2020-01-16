@@ -407,12 +407,24 @@
         <translation>Näytä lompakon korjausvalinnat</translation>
     </message>
     <message>
-        <source>Open &amp;Configuration File</source>
-        <translation>Avaa &amp;Asetustiedosto</translation>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Avaa Wallet-määritystiedosto</translation>
     </message>
     <message>
         <source>Open configuration file</source>
-        <translation>Avaa asetustiedosto</translation>
+        <translation>Avaa määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Avaa Dynoden määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Avaa Dynoden määritystiedosto</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>Avaa määritystiedosto</translation>
     </message>
     <message>
         <source>Show Automatic &amp;Backups</source>
@@ -425,6 +437,10 @@
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Lähettävät Osoitteet...</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Yhdistetään vertaisiin ...</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -449,6 +465,10 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Komentorivin valinnat</translation>
+    </message>
+    <message>
+        <source>&amp;Import mnemonic/private key...</source>
+        <translation>&amp;Tuo muistomerkki / yksityinen avain ...</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -601,6 +621,22 @@ Osoite: %4
         <source>Network Alert</source>
         <translation>Verkkohälytys</translation>
     </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normaali</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Tuetut</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Tukematon</translation>
+    </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
@@ -639,6 +675,10 @@ Osoite: %4
     <message>
         <source>Change:</source>
         <translation>Vaihtoraha:</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>vaihtaa lukituksen tila</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -1456,6 +1496,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Käynnistä/Lopeta Sekoitus</translation>
     </message>
     <message>
+        <source>Start Mixing</source>
+        <translation>Aloita sekoittaminen </translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Lopeta sekoittaminen</translation>
+    </message>
+    <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>Dynodelle lähetetyt denominoinnit.&lt;br&gt;Jotta sekoitus onnistuisi, täytyy muiden käyttäjien käyttää saman arvoisia denominointeja.</translation>
     </message>
@@ -1470,6 +1518,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Try Mix</source>
         <translation>Yritä Sekoittaa</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Tiedot</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>Tietoja PrivateSendistä ja miksauksesta</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
@@ -1785,6 +1841,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Viimeisimmän lohkon aika</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>Muistiallas</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Tapahtumien nykyinen lukumäärä</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Muistin käyttö</translation>
+    </message>
+    <message>
         <source>Debug log file</source>
         <translation>Debug lokitiedosto</translation>
     </message>
@@ -1803,6 +1871,18 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Client version</source>
         <translation>Asiakasohjelman versio</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>CPU-tila:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU-tila:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU-louhinta:</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
@@ -1977,16 +2057,20 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ulos:</translation>
     </message>
     <message>
-        <source>Welcome to the Dynamic RPC console.</source>
+        <source>Welcome to the %1 RPC console.</source>
         <translation>Tervetuloa Dynamic RPC konsoliin.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Ylös- ja alas-nuolet selaavat historiaa ja &lt;b&gt;Ctrl-L&lt;/b&gt; tyhjentää ruudun.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Ylös- ja alas-nuolet selaavat historiaa ja %1 tyhjentää ruudun.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Kirjoita &lt;b&gt;help&lt;/b&gt; nähdäksesi käytettävissä olevat komennot.</translation>
+    </message>
+    <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>VAROITUS: Huijarit ovat olleet aktiivisia ja käskeneet käyttäjiä kirjoittamaan komentoja tähän, varastamaan lompakkonsa sisällön. Älä käytä tätä konsolia ymmärtämättä kokonaan komennon seuraamista.</translation>
     </message>
     <message>
         <source>%1 B</source>
@@ -2070,6 +2154,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     <message>
         <source>&amp;Amount:</source>
         <translation>&amp;Määrä</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>Pyydä InstantSend</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2182,6 +2270,14 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Nimi</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>Osoite</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Pyydetty</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Viesti</translation>
     </message>
@@ -2201,9 +2297,25 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <source>(no amount)</source>
         <translation>(ei määrää)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(summaa ei pyydetty)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Varoitus: Maksujen arviointi ei ole tällä hetkellä mahdollista.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Maksa vain vaadittu maksu %1</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Vahvistusajan tavoite:</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>Lähetä</translation>
@@ -2515,6 +2627,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>Vähennä maksu summasta</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>Tämä on normaali maksu.</translation>
@@ -2976,6 +3092,10 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <source>Address</source>
         <translation>Osoite</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Osoitetarra</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
         <translation><numerusform>Avoinna %n lisälohkolle</numerusform><numerusform>Avoinna %n lisälohkolle</numerusform></translation>
@@ -3262,6 +3382,271 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     <message>
         <source>to</source>
         <translation>-&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Muodostua</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Suodatinluettelo:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Solmun lukumäärä:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Minun Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Kaikki Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Huomaa: Dynodesi tila paikallisessa lompakossa voi olla hieman väärä.&lt;br / &gt;Odota aina lompakkoa synkronoivan lisätietoja ja tarkista sitten toisesta solmusta&lt;br /&gt;jos Dynodesi pitäisi olla käynnissä, mutta et silti näe &quot;ENABLED&quot; kohdassa &quot;Status&quot; ala.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Käynnistä kaikki</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>Aloita alias</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>Aloita &amp;MISSING</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp; Päivitä status</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Osoite</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokolla</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Aktiivinen</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Viimeksi nähty</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Saaja</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>ENABLED</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>MISSING</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Haluatko varmasti käynnistää kaikki Dynodes?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Haluatko varmasti aloittaa MISSING Dynodes?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Vahvista puuttuvien Dynodes-käynnistys</translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Tila päivitetään automaattisesti sekunnissa: </translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>Komento ei ole tällä hetkellä käytettävissä</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>et voi käyttää tätä komentoa, kunnes Dynode-luettelo on synkronoitu</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Vahvista Dynoden käynnistys</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>SHaluatko varmasti käynnistää Dynode %1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Odota...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Päivitetään...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Käynnistin Dynoden onnistuneesti.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>Käynnistettiin onnistuneesti %d dynodi, ei käynnistynyt %d, yhteensä %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Muodostua</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Käytettävien CPU-ketjujen lukumäärä:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Käytettävien GPU-laitteiden lukumäärä:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Hashrate (sisäänrakennettu kaivuri):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Verkko hashrate:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Keskimääräinen etäisyys lohkojen välillä:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Aloita kaivostoiminta</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Lopeta kaivos</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Liikuntarajoitteinen</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Näytä hash-mittarikaavio</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tyhjentää</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Valitse liukusäätimellä käytettävien CPU-ketjujen määrä</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Valitse liukusäätimellä käytettävien GPU-laitteiden määrä</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Tämä osoittaa prosessorin haaroituksen kaivostoiminnan aikana</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Tämä näyttää GPU: n hashrate louhinnan aikana</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Tämä osoittaa DYNAMIC-verkon kokonaishašatin</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Tämä osoittaa louhittujen lohkojen keskimääräisen ajan</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain / Dynodeja ei ole synkronoitu. Odota, kunnes synkronoidaan kokonaan ennen kaivosta!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Aloita louhinta napsauttamalla Aloita kaivostoiminta!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Napsauta Lopeta kaivos lopettaaksesi kaivoksen!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Pysähtymättä</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Aloittaminen</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Liikuntarajoitteinen</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>ll louhitut kolikot menevät kohtaan %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Liukusäädin näkyy, kun Dynamic on synkronoinnin lopettanut</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>GPU-kaivostoimintoa ei tueta tässä Dynamic-versiossa</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 minuutit</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 minuutit</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 minuutit</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 tunnin</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 tuntia</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 tuntia</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 päivä</translation>
     </message>
 </context>
 <context>
@@ -3979,12 +4364,20 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Ladataan budjetti välimuistia...</translation>
     </message>
     <message>
-        <source>Loading dynode cache...</source>
-        <translation>Ladataan dynode välimuistia...</translation>
+        <source>Loading Dynode cache...</source>
+        <translation>Ladataan Dynode välimuistia...</translation>
     </message>
     <message>
-        <source>Loading dynode payment cache...</source>
-        <translation>Ladataan dynode maksuvälimuistia...</translation>
+        <source>Loading Dynode payment cache...</source>
+        <translation>Ladataan Dynode maksuvälimuistia...</translation>
+    </message>
+    <message>
+        <source>Loading governance cache...</source>
+        <translation>Ladataan hallintovälimuistia ...</translation>
+    </message>
+    <message>
+        <source>Loading fulfilled requests cache...</source>
+        <translation>Ladataan täytettyjä pyyntöjä välimuistiin ...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
@@ -4140,7 +4533,19 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     </message>
     <message>
         <source>Synchronizing dynodes...</source>
-        <translation>Synkronoidaan dynodet...</translation>
+        <translation>Synkronoidaan dynodes...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Synkronoidaan Dynoden maksuja ...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>Synkronoidaan Dynodes...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Synkronoidaan hallintoobjekteja ...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
@@ -4551,785 +4956,783 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
     <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
-        <translation>Needs Translating</translation>
+        <translation>Näytetyt tiedot saattavat olla vanhentuneita. Lompakko synkronoituu automaattisesti dynaamisen verkon kanssa, kun yhteys on muodostettu, mutta tämä prosessi ei ole vielä valmis. Tämä tarkoittaa, että viimeaikaiset tapahtumat eivät ole näkyvissä, ja saldo ei ole ajan tasalla ennen kuin tämä prosessi on saatu päätökseen.</translation>
     </message>
     <message>
         <source>Spending DYN may not be possible during that phase!</source>
-        <translation>Needs Translating</translation>
+        <translation>DYN: n käyttäminen ei ehkä ole mahdollista kyseisessä vaiheessa!</translation>
     </message>
     <message>
         <source>Amount of blocks left</source>
-        <translation>Needs Translating</translation>
+        <translation>Jäljellä olevien lohkojen määrä</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>Needs Translating</translation>
+        <translation>tuntematon</translation>
     </message>
     <message>
         <source>Unknown...</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuntematon...</translation>
     </message>
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuntematon. Synkronoidaan otsikot (% 1)...</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen lohkoaika</translation>
     </message>
     <message>
         <source>Progress</source>
-        <translation>Needs Translating</translation>
+        <translation>Edistyminen</translation>
     </message>
     <message>
         <source>Progress increase per Hour</source>
-        <translation>Needs Translating</translation>
+        <translation>Edistyksen lisäys tunnissa</translation>
     </message>
     <message>
         <source>calculating...</source>
-        <translation>Needs Translating</translation>
+        <translation>lasketaan ...</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
-        <translation>Needs Translating</translation>
+        <translation>Arvioitu aika jäljellä synkronointiin</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Piilottaa</translation>
     </message>
     <message>
         <source>Hide</source>
-        <translation>Needs Translating</translation>
-    </message>
-</context>
-<context>
-    <name>BdapAccountTableModel</name>
-    <message>
-        <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
-    </message>
-    <message>
-        <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Piilottaa</translation>
     </message>
 </context>
 <context>
     <name>BdapAddUserDialog</name>
     <message>
         <source>Add BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää BDAP-käyttäjä</translation>
     </message>
     <message>
         <source>Common name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Registration months:</source>
-        <translation>Needs Translating</translation>
+        <translation>Rekisteröitymiskuukaudet:</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Käyttäjätunnus:</translation>
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo uusi osoite</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän tunnus:</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää ryhmä</translation>
     </message>
     <message>
         <source>Successfully added user</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisätty käyttäjä onnistuneesti</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Tarve kääntää</translation>
     </message>
     <message>
         <source>Records found: </source>
-        <translation>Needs Translating</translation>
+        <translation>Löytyneet tietueet: </translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>kunnossa</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-linkin yksityiskohdat</translation>
     </message>
     <message>
         <source>Requestor:</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän:</translation>
     </message>
     <message>
         <source>Recipient:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor):</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (pyytäjä):</translation>
     </message>
     <message>
         <source>Link Public Key (Recipient):</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (vastaanottaja):</translation>
     </message>
     <message>
         <source>Requestor Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjän linkin osoite:</translation>
     </message>
     <message>
         <source>Recipient Link Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajan linkin osoite:</translation>
     </message>
     <message>
         <source>Signature Proof:</source>
-        <translation>Needs Translating</translation>
+        <translation>Allekirjoitustodistus:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti:</translation>
     </message>
     <message>
         <source>TXID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Aika:</translation>
     </message>   
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vanhentunut:</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
     </context>
 <context>
     <name>BdapLinkTablePriv</name>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
 </context>
 <context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi</translation>
     </message>
     <message>
         <source>Object Full Path</source>
-        <translation>Needs Translating</translation>
+        <translation>Objektin täydellinen polku</translation>
     </message>
     <message>
         <source>Expiration Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä</translation>
     </message>
     <message>
         <source>Users</source>
-        <translation>Needs Translating</translation>
+        <translation>käyttäjät</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitys- ja Poista-tapahtumat ovat käytettävissä, kun tämä on valittu</translation>
     </message>
     <message>
         <source>Only display My Users</source>
-        <translation>Needs Translating</translation>
+        <translation>Tarve kääntää</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Virkistää</translation>
+    </message>
+    <message>
+        <source>Refresh All</source>
+        <translation></translation>
     </message>
     <message>
         <source>Add a user</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Add User</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää käyttäjä</translation>
     </message>
     <message>
         <source>Update User</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä käyttäjä</translation>
     </message>
     <message>
         <source>Delete the currently selected user from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>NPoista valittu käyttäjä luettelosta</translation>
     </message>
     <message>
         <source>Delete User</source>
-        <translation>Needs Translating</translation>
+        <translation>Poista käyttäjä</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmät</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkit</translation>
     </message>
     <message>
         <source>Update and Delete transactions are available when this is checked</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitys- ja Poista-tapahtumat ovat käytettävissä, kun tämä on valittu</translation>
     </message>
     <message>
         <source>Only display My Groups</source>
-        <translation>Needs Translating</translation>
+        <translation>Näytä vain Omat ryhmät</translation>
     </message>
     <message>
         <source>Add a new group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää uusi ryhmä</translation>
     </message>
     <message>
         <source>Add Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää ryhmä</translation>
     </message>
     <message>
         <source>Update Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä ryhmä</translation>
     </message>
     <message>
         <source>Delete the currently selected group from the list</source>
-        <translation>Needs Translating</translation>
+        <translation>Poista valittu ryhmä luettelosta</translation>
     </message>
     <message>
         <source>&amp;Delete Group</source>
-        <translation>Needs Translating</translation>
+        <translation>&amp;Poista ryhmä</translation>
     </message>
     <message>
         <source>Add BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää BDAP-ryhmä</translation>
     </message>
     <message>
         <source>Are you sure you want to delete \"</source>
-        <translation>Needs Translating</translation>
+        <translation>Oletko varma, että haluat poistaa \</translation>
     </message>
     <message>
         <source>Confirm Delete Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvista tilin poistaminen</translation>
     </message>
     <message>
         <source>Update BDAP Group</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-ryhmä</translation>
     </message>
     <message>
         <source>BDAP Group Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-ryhmän tiedot</translation>
     </message>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>Update BDAP User</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-käyttäjä</translation>
     </message>
     <message>
         <source>Successfully deleted user</source>
-        <translation>Needs Translating</translation>
+        <translation>Poistettu käyttäjä</translation>
     </message>
     <message>
         <source>Successfully deleted group</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmä on poistettu onnistuneesti</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
     <message>
         <source>Enter common name to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita haettava yleinen nimi</translation>
     </message>
     <message>
         <source>Enter object full path to search</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita objektin koko polku etsiäksesi</translation>
     </message>
     <message>
         <source>Requestor</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän</translation>
     </message>
     <message>
         <source>Recipient</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivämäärä</translation>
     </message>
     <message>
         <source>Pending Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Odottaa hyväksyntää</translation>
     </message>
     <message>
         <source>Pending Request</source>
-        <translation>Needs Translating</translation>
+        <translation>Odottava pyyntö</translation>
     </message>
     <message>
         <source>Complete</source>
-        <translation>Needs Translating</translation>
+        <translation>Saattaa loppuun</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Needs Translating</translation>
+        <translation>Virkistää</translation>
     </message>
     <message>
         <source>Requestor search</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön hakeja</translation>
     </message>
     <message>
         <source>Recipient search</source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajahaku</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation>Needs Translating</translation>
+        <translation>Hyväksyä</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation>Needs Translating</translation>
+        <translation>Poistaa</translation>
     </message>
     <message>
         <source>Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää uusi linkki</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation>Needs Translating</translation>
+        <translation>Kieltää</translation>
     </message>
     <message>
         <source>Spam</source>
-        <translation>Needs Translating</translation>
+        <translation>Roskapostin</translation>
     </message>
     <message>
         <source>Confirm Accept Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvista Hyväksy linkki</translation>
     </message>
     <message>
         <source>Successfully accepted link</source>
-        <translation>Needs Translating</translation>
+        <translation>Hyväksytty linkki</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa hyväksyvän linkin yksityiskohtia</translation>
     </message>
     <message>
         <source>BDAP Pending Request Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa pyyntölinkin yksityiskohtia</translation>
+    </message>
+     <message>
+        <source>Common Name</source>
+        <translation>Yleinen nimi</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>Objektin täydellinen polku</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>Viimeinen käyttöpäivä</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>Löytyneet tietueet: </translation>
     </message>
 </context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
         <source>Update BDAP Account</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitä BDAP-tili</translation>
     </message>
     <message>
         <source>User ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Käyttäjätunnus:</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivittää</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>Group ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän tunnus:</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä: </translation>
     </message>
     <message>
         <source>Successfully updated user</source>
-        <translation>Needs Translating</translation>
+        <translation>Päivitetty käyttäjä onnistuneesti</translation>
     </message>
     <message>
         <source>Successfully updated group</source>
-        <translation>Needs Translating</translation>
+        <translation>Ryhmän päivitys onnistui</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
 </context>
 <context>
     <name>BdapLinkDetailDialog</name>
     <message>
         <source>BDAP Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-linkin yksityiskohdat</translation>
     </message>
     <message>
         <source>BDAP Pending Accept Link Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP odottaa hyväksyvän linkin yksityiskohtia</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>Expiration date: </source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä: </translation>
     </message>
     <message>
         <source>Requestor: </source>
-        <translation>Needs Translating</translation>
+        <translation>Pyytäjän: </translation>
     </message>
     <message>
         <source>Recipient: </source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottaja:</translation>
     </message>
     <message>
         <source>Link Public Key (Requestor): </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (pyytäjä): </translation>
     </message>
     <message>
         <source>Link Public Key (Recipient): </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki julkiseen avaimeen (vastaanottaja): </translation>
     </message>
     <message>
         <source>Requestor Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjän linkin osoite: </translation>
     </message>
     <message>
         <source>Recipient Link Address: </source>
-        <translation>Needs Translating</translation>
+        <translation>Vastaanottajan linkin osoite: </translation>
     </message>
     <message>
         <source>Signature Proof: </source>
-        <translation>Needs Translating</translation>
+        <translation>Allekirjoitustodistus: </translation>
     </message>
     <message>
         <source>Link Message: </source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti: </translation>
     </message>
     <message>
         <source>TXID: </source>
-        <translation>Needs Translating</translation>
+        <translation>TXID: </translation>
     </message>
     <message>
         <source>Time: </source>
-        <translation>Needs Translating</translation>
+        <translation>Aika: </translation>
     </message>
     <message>
         <source>Please note that your transaction will not be reflected until the next block.</source>
-        <translation>Needs Translating</translation>
+        <translation>Huomaa, että tapahtumasi heijastuu vasta seuraavaan lohkoon.</translation>
     </message>
 </context>
 <context>
     <name>BdapUserDetailDialog</name>
     <message>
         <source>BDAP User Detail</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-käyttäjän tiedot</translation>
     </message>
     <message>
         <source>Form</source>
-        <translation>Needs Translating</translation>
+        <translation>Muodostua</translation>
     </message>
     <message>
         <source>Common Name:</source>
-        <translation>Needs Translating</translation>
+        <translation>Yleinen nimi:</translation>
     </message>
     <message>
         <source>Object Full Path:</source>
-        <translation>Needs Translating</translation>
+        <translation>Objektin täydellinen polku:</translation>
     </message>
     <message>
         <source>Wallet Address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakon osoite:</translation>
     </message>
     <message>
         <source>DHT Public Key:</source>
-        <translation>Needs Translating</translation>
+        <translation>DHT-julkinen avain:</translation>
     </message>
     <message>
         <source>Link address:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkin osoite:</translation>
     </message>
     <message>
         <source>TX ID:</source>
-        <translation>Needs Translating</translation>
+        <translation>TXID:</translation>
     </message>
     <message>
         <source>Time:</source>
-        <translation>Needs Translating</translation>
+        <translation>Aika:</translation>
     </message>
     <message>
         <source>Expiration Date:</source>
-        <translation>Needs Translating</translation>
+        <translation>Viimeinen käyttöpäivä:</translation>
     </message>
     <message>
         <source>Expired:</source>
-        <translation>Needs Translating</translation>
+        <translation>Vanhentunut:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation>Needs Translating</translation>
+        <translation>Kunnossa</translation>
     </message>
     <message>
         <source>message</source>
-        <translation>Needs Translating</translation>
+        <translation>viesti</translation>
     </message>
     <message>
         <source>BDAP Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP-virhe</translation>
     </message>
 </context>
 <context>
     <name>BdapAddLinkDialog</name>
     <message>
         <source>BDAP Add New Link</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Lisää uusi linkki</translation>
     </message>
     <message>
         <source>(required)</source>
-        <translation>Needs Translating</translation>
+        <translation>(vaaditaan)</translation>
     </message>
     <message>
         <source>(optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>(valinnainen)</translation>
     </message>
     <message>
         <source>From:</source>
-        <translation>Needs Translating</translation>
+        <translation>Alkaen:</translation>
     </message>
     <message>
         <source>To:</source>
-        <translation>Needs Translating</translation>
+        <translation>To:</translation>
     </message>
     <message>
         <source>Link Message:</source>
-        <translation>Needs Translating</translation>
+        <translation>Linkki viesti:</translation>
     </message>
     <message>
         <source>Registration Days:</source>
-        <translation>Needs Translating</translation>
+        <translation>Ilmoittautumispäivät:</translation>
     </message>
     <message>
         <source>Add Link</source>
-        <translation>Needs Translating</translation>
+        <translation>Lisää linkki</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>BDAP Add Link Error</source>
-        <translation>Needs Translating</translation>
+        <translation>BDAP Add Link-virhe</translation>
     </message>
     <message>
         <source>Requestor, Recipient and Link Message are required fields</source>
-        <translation>Needs Translating</translation>
+        <translation>Pyynnön esittäjä, Vastaanottaja ja Linkin viesti ovat pakolliset kentät</translation>
     </message>
 </context>
 <context>
     <name>MnemonicDialog</name>
     <message>
         <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
-        <translation>Needs Translating</translation>
+        <translation>Vinkkejä: Jos tuonti keskeytyy (kuten sähkökatkos tai vahingossa tapahtuva sammutus), kirjoita palautuslause tai yksityinen avain uudelleen ja napsauta Tuo-painiketta.</translation>
     </message>
     <message>
         <source>Choose File</source>
-        <translation>Needs Translating</translation>
+        <translation>Valitse tiedosto</translation>
     </message>
     <message>
         <source>Import mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo muisto</translation>
     </message>
     <message>
         <source>Import Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo palautuslauseg</translation>
     </message>
     <message>
         <source>Paste from clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Liitä leikepöydältä</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Needs Translating</translation>
+        <translation>Seljetä</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita BIP39-yhteensopiva palautuslause / muistomerkki</translation>
     </message>
     <message>
         <source>Recovery Passphrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Palautussalause</translation>
     </message>
     <message>
         <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita salasana suojataksesi palautuslauseesi. (valinnainen)</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation>Needs Translating</translation>
+        <translation>Kieli</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation>Needs Translating</translation>
+        <translation>Varoitus</translation>
     </message>
     <message>
         <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</source>
-        <translation>Needs Translating</translation>
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>Varmista, että varmuuskopioit palautuslauseesi ja tunnuslauseesi - niitä ei voi palauttaa!
+Lompakko käynnistyy uudelleen, kun muistomerkki on tuotu.</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuonti</translation>
     </message>
     <message>
         <source>Reimport</source>
-        <translation>Needs Translating</translation>
+        <translation>Jälleentuontimenettely</translation>
     </message>
     <message>
         <source>Create mnemonic</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo muistion</translation>
     </message>
     <message>
         <source>Create New Recovery Phrase</source>
-        <translation>Needs Translating</translation>
+        <translation>Luo uusi palautuslause</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation>Needs Translating</translation>
+        <translation>Kopioi leikepöydälle</translation>
     </message>
     <message>
         <source>Bytes of Entropy</source>
-        <translation>Needs Translating</translation>
+        <translation>Entropian tavu</translation>
     </message>
     <message>
         <source>Generate</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuottaa</translation>
     </message>
     <message>
         <source>Validate</source>
-        <translation>Needs Translating</translation>
+        <translation>Vahvistaa</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Needs Translating</translation>
+        <translation>Peruuttaa</translation>
     </message>
     <message>
         <source>Import privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo yksityinen avain</translation>
     </message>
     <message>
         <source>Input single privatekey</source>
-        <translation>Needs Translating</translation>
+        <translation>Syötä yksi yksityinen avain</translation>
     </message>
     <message>
         <source>Force Rescan</source>
-        <translation>Needs Translating</translation>
+        <translation>Pakota uudelleen</translation>
     </message>
     <message>
         <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
-        <translation>Needs Translating</translation>
+        <translation>esimerkki: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
     </message>
     <message>
         <source>Import privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Tuo yksityinen avaintiedosto</translation>
     </message>
     <message>
         <source>Input privatekey file</source>
-        <translation>Needs Translating</translation>
+        <translation>Syötä yksityinen avaintiedosto</translation>
     </message>
     <message>
         <source>Browse</source>
-        <translation>Needs Translating</translation>
+        <translation>Selailla</translation>
     </message>
     <message>
         <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
-        <translation>Needs Translating</translation>
+        <translation>Vinkkejä: Yksityinen avaintiedosto on dynaamisen 'dumpwallet-tiedostonimi' vietämä tiedosto, ei .dat-tiedosto.</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5337,7 +5740,10 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakkoon on jo ladattu HD-tili.
+Tuomalla uusi palautuslause luodaan uusi tili, joka asetetaan oletusasetukseksi.
+Lompakko vastaanottaa osoitteita vain uudesta tuodusta tilistä.
+Vanha tilisi lompakotiedosto nimetään uudelleen nimellä wallat.dat.before-mnemonic-import.&lt;isodate&gt; tietokantaan</translation>
     </message>
     <message>
         <source>Wallet already has an HD account loaded.
@@ -5345,11 +5751,14 @@ By importing another recovery phrase a new account will be created and set as th
 The wallet will receive on addresses from the new imported account only.
 Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
 </source>
-        <translation>Needs Translating</translation>
+        <translation>Lompakkoon on jo ladattu HD-tili.
+Tuomalla uusi palautuslause luodaan uusi tili, joka asetetaan oletusasetukseksi.
+Lompakko vastaanottaa osoitteita vain uudesta tuodusta tilistä.
+Vanha tilisi lompakotiedosto nimetään uudelleen nimellä wallat.dat.before-mnemonic-import.&lt;isodate&gt; tietokantaan</translation>
     </message>
     <message>
         <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
-        <translation>Needs Translating</translation>
+        <translation>Kirjoita BIP39-yhteensopiva palautuslause / muistomerkki.</translation>
     </message>
 </context>
 </TS>

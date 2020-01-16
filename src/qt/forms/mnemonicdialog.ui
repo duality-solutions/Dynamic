@@ -354,7 +354,7 @@ font-weight: bold;</string>
             <widget class="QLabel" name="label_8">
              <property name="text">
               <string>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
-Wallet wil restart after mnemonic has been imported.</string>
+Wallet will restart after mnemonic has been imported.</string>
              </property>
             </widget>
            </item>

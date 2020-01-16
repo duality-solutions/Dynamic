@@ -390,13 +390,12 @@ UniValue dynode(const JSONRPCRequest& request)
             std::string strStatus = fFound ? dn.GetStatus() : "MISSING";
 
             UniValue dnObj(UniValue::VOBJ);
-            dnObj.push_back(Pair("alias", dne.getAlias()));
             dnObj.push_back(Pair("address", dne.getIp()));
             dnObj.push_back(Pair("privateKey", dne.getPrivKey()));
             dnObj.push_back(Pair("txHash", dne.getTxHash()));
             dnObj.push_back(Pair("outputIndex", dne.getOutputIndex()));
             dnObj.push_back(Pair("status", strStatus));
-            resultObj.push_back(Pair("dynode", dnObj));
+            resultObj.push_back(Pair(dne.getAlias(), dnObj));
         }
 
         return resultObj;

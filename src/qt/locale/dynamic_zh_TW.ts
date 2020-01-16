@@ -3894,4 +3894,813 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>當啟動時</translation>
     </message>
     </context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
+        <translation>顯示的信息可能已過時。建立連接後，您的錢包會自動與DYNAMIC網絡同步，但是此過程尚未完成。這意味著將看不到最近的交易，並且在此過程完成之前，餘額不會是最新的。</translation>
+    </message>
+    <message>
+        <source>Spending DYN may not be possible during that phase!</source>
+        <translation>在該階段可能無法花費DYN！</translation>
+    </message>
+    <message>
+        <source>Amount of blocks left</source>
+        <translation>剩餘塊數</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <source>Unknown...</source>
+        <translation>未知...</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>未知.同步標題(%1)...</translation>
+    </message>
+    <message>
+        <source>Last block time</source>
+        <translation>最後封鎖時間</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>進展</translation>
+    </message>
+    <message>
+        <source>Progress increase per Hour</source>
+        <translation>每小時進度增加</translation>
+    </message>
+    <message>
+        <source>calculating...</source>
+        <translation>計算...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>估計到同步為止的剩餘時間</translation>
+    </message>
+    <message>
+        <source>&amp;Hide</source>
+        <translation>&amp;隱藏</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>隱藏</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddUserDialog</name>
+    <message>
+        <source>Add BDAP User</source>
+        <translation>添加BDAP用戶</translation>
+    </message>
+    <message>
+        <source>Common name:</source>
+        <translation>通用名稱：</translation>
+    </message>
+    <message>
+        <source>Registration months:</source>
+        <translation>註冊月份：</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>用戶身份：</translation>
+    </message>
+    <message>
+        <source>Create a new address</source>
+        <translation>建立一個新地址</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>添加用戶</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>群組編號：</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>新增群組</translation>
+    </message>
+    <message>
+        <source>Successfully added user</source>
+        <translation>成功添加用戶</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>截止日期</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>找到的記錄： </translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>信息</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>BDAP鏈接詳細信息</translation>
+    </message>
+    <message>
+        <source>Requestor:</source>
+        <translation>請求者：</translation>
+    </message>
+    <message>
+        <source>Recipient:</source>
+        <translation>接受者：</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor):</source>
+        <translation>鏈接公鑰（請求者）：</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient):</source>
+        <translation>鏈接公鑰（收件人）：</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address:</source>
+        <translation>請求者鏈接地址：</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address:</source>
+        <translation>收件人鏈接地址：</translation>
+    </message>
+    <message>
+        <source>Signature Proof:</source>
+        <translation>簽名證明：</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>連結訊息：</translation>
+    </message>
+    <message>
+        <source>TXID:</source>
+        <translation>TXID：</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>時間：</translation>
+    </message>   
+    <message>
+        <source>Expiration Date:</source>
+        <translation>截止日期：</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>已過期：</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkTableModel</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>BDAP用戶詳細信息</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>BDAP錯誤</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>請求者</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>接受者</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>日期</translation>
+    </message>
+    </context>
+<context>
+    <name>BdapLinkTablePriv</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>BDAP錯誤</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>請求者</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>接受者</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>日期</translation>
+    </message>
+</context>
+<context>
+    <name>BdapPage</name>
+    <message>
+        <source>Common Name</source>
+        <translation>通用名</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>對象全路徑</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>截止日期</translation>
+    </message>
+    <message>
+        <source>Users</source>
+        <translation>用戶數</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>選中此選項後，更新和刪除事務可用</translation>
+    </message>
+    <message>
+        <source>Only display My Users</source>
+        <translation>僅顯示我的用戶</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Refresh All</source>
+        <translation>全部刷新</translation>
+    </message>
+    <message>
+        <source>Add a user</source>
+        <translation>新增使用者</translation>
+    </message>
+    <message>
+        <source>Add User</source>
+        <translation>添加用戶</translation>
+    </message>
+    <message>
+        <source>Update User</source>
+        <translation>更新用戶</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected user from the list</source>
+        <translation>從列表中刪除當前選擇的用戶</translation>
+    </message>
+    <message>
+        <source>Delete User</source>
+        <translation>刪除用戶</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>團體</translation>
+    </message>
+    <message>
+        <source>Links</source>
+        <translation>鏈接</translation>
+    </message>
+    <message>
+        <source>Update and Delete transactions are available when this is checked</source>
+        <translation>選中此選項後，更新和刪除事務可用</translation>
+    </message>
+    <message>
+        <source>Only display My Groups</source>
+        <translation>僅顯示我的群組</translation>
+    </message>
+    <message>
+        <source>Add a new group</source>
+        <translation>新增群組</translation>
+    </message>
+    <message>
+        <source>Add Group</source>
+        <translation>新增群組</translation>
+    </message>
+    <message>
+        <source>Update Group</source>
+        <translation>更新組</translation>
+    </message>
+    <message>
+        <source>Delete the currently selected group from the list</source>
+        <translation>從列表中刪除當前選定的組</translation>
+    </message>
+    <message>
+        <source>&amp;Delete Group</source>
+        <translation>&amp;刪除群組</translation>
+    </message>
+    <message>
+        <source>Add BDAP Group</source>
+        <translation>添加BDAP組</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete \"</source>
+        <translation>你確定你要刪除 \”</translation>
+    </message>
+    <message>
+        <source>Confirm Delete Account</source>
+        <translation>確認刪除帳戶</translation>
+    </message>
+    <message>
+        <source>Update BDAP Group</source>
+        <translation>更新BDAP組</translation>
+    </message>
+    <message>
+        <source>BDAP Group Detail</source>
+        <translation>BDAP組詳細信息</translation>
+    </message>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>BDAP用戶詳細信息</translation>
+    </message>
+    <message>
+        <source>Update BDAP User</source>
+        <translation>更新BDAP用戶</translation>
+    </message>
+    <message>
+        <source>Successfully deleted user</source>
+        <translation>成功刪除用戶</translation>
+    </message>
+    <message>
+        <source>Successfully deleted group</source>
+        <translation>成功刪除群組</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>BDAP錯誤</translation>
+    </message>
+    <message>
+        <source>Enter common name to search</source>
+        <translation>輸入常用名稱進行搜索</translation>
+    </message>
+    <message>
+        <source>Enter object full path to search</source>
+        <translation>輸入對象完整路徑進行搜索</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>請求者</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>接受者</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>日期</translation>
+    </message>
+    <message>
+        <source>Pending Accept</source>
+        <translation>待接受</translation>
+    </message>
+    <message>
+        <source>Pending Request</source>
+        <translation>待處理請求</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>完成</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Requestor search</source>
+        <translation>請求者搜索</translation>
+    </message>
+    <message>
+        <source>Recipient search</source>
+        <translation>收件人搜尋</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>接受</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>刪除</translation>
+    </message>
+    <message>
+        <source>Add New Link</source>
+        <translation>添加新鏈接</translation>
+    </message>
+    <message>
+        <source>Deny</source>
+        <translation>拒絕</translation>
+    </message>
+    <message>
+        <source>Spam</source>
+        <translation>垃圾郵件</translation>
+    </message>
+    <message>
+        <source>Confirm Accept Link</source>
+        <translation>確認接受鏈接</translation>
+    </message>
+    <message>
+        <source>Successfully accepted link</source>
+        <translation>成功接受鏈接</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>BDAP待接受鏈接詳細信息</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Request Link Detail</source>
+        <translation>BDAP待處理請求鏈接詳細信息</translation>
+    </message>
+    <message>
+        <source>Common Name</source>
+        <translation>通用名</translation>
+    </message>
+    <message>
+        <source>Object Full Path</source>
+        <translation>對象全路徑</translation>
+    </message>
+    <message>
+        <source>Expiration Date</source>
+        <translation>截止日期</translation>
+    </message>
+    <message>
+        <source>Records found: </source>
+        <translation>找到的記錄： </translation>
+    </message>
+</context>
+<context>
+    <name>BdapUpdateAccountDialog</name>
+    <message>
+        <source>Update BDAP Account</source>
+        <translation>更新BDAP帳戶</translation>
+    </message>
+    <message>
+        <source>User ID:</source>
+        <translation>用戶身份：</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>通用名稱：</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>登記天數：</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好</translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation>更新資料</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Group ID:</source>
+        <translation>群組編號：</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>截止日期： </translation>
+    </message>
+    <message>
+        <source>Successfully updated user</source>
+        <translation>成功更新用戶</translation>
+    </message>
+    <message>
+        <source>Successfully updated group</source>
+        <translation>組更新成功</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>信息</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>BDAP鏈接詳細信息</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>BDAP待接受鏈接詳細信息</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>登記天數：</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>截止日期： </translation>
+    </message>
+    <message>
+        <source>Requestor: </source>
+        <translation>請求者： </translation>
+    </message>
+    <message>
+        <source>Recipient: </source>
+        <translation>接受者：</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor): </source>
+        <translation>鏈接公鑰（請求者）： </translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient): </source>
+        <translation>鏈接公鑰（收件人）： </translation>
+    </message>
+    <message>
+        <source>Requestor Link Address: </source>
+        <translation>請求者鏈接地址： </translation>
+    </message>
+    <message>
+        <source>Recipient Link Address: </source>
+        <translation>收件人鏈接地址： </translation>
+    </message>
+    <message>
+        <source>Signature Proof: </source>
+        <translation>簽名證明： </translation>
+    </message>
+    <message>
+        <source>Link Message: </source>
+        <translation>連結訊息： </translation>
+    </message>
+    <message>
+        <source>TXID: </source>
+        <translation>TXID: </translation>
+    </message>
+    <message>
+        <source>Time: </source>
+        <translation>時間： </translation>
+    </message>
+    <message>
+        <source>Please note that your transaction will not be reflected until the next block.</source>
+        <translation>請注意，您的交易要到下一個程序段才會反映出來。</translation>
+    </message>
+</context>
+<context>
+    <name>BdapUserDetailDialog</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>BDAP用戶詳細信息</translation>
+    </message>
+    <message>
+        <source>Form</source>
+        <translation>格式</translation>
+    </message>
+    <message>
+        <source>Common Name:</source>
+        <translation>通用名稱：</translation>
+    </message>
+    <message>
+        <source>Object Full Path:</source>
+        <translation>對象完整路徑：</translation>
+    </message>
+    <message>
+        <source>Wallet Address:</source>
+        <translation>錢包地址：</translation>
+    </message>
+    <message>
+        <source>DHT Public Key:</source>
+        <translation>DHT公鑰：</translation>
+    </message>
+    <message>
+        <source>Link address:</source>
+        <translation>鏈接地址：</translation>
+    </message>
+    <message>
+        <source>TX ID:</source>
+        <translation>TX ID:</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>時間：</translation>
+    </message>
+    <message>
+        <source>Expiration Date:</source>
+        <translation>截止日期：</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>已過期：</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好</translation>
+    </message>
+    <message>
+        <source>message</source>
+        <translation>信息</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>BDAP錯誤</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddLinkDialog</name>
+    <message>
+        <source>BDAP Add New Link</source>
+        <translation>BDAP添加新鏈接</translation>
+    </message>
+    <message>
+        <source>(required)</source>
+        <translation>（需要）</translation>
+    </message>
+    <message>
+        <source>(optional)</source>
+        <translation>（可選的）</translation>
+    </message>
+    <message>
+        <source>From:</source>
+        <translation>從：</translation>
+    </message>
+    <message>
+        <source>To:</source>
+        <translation>至：</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>連結訊息：</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>登記天數：</translation>
+    </message>
+    <message>
+        <source>Add Link</source>
+        <translation>添加鏈接</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>BDAP Add Link Error</source>
+        <translation>BDAP添加鏈接錯誤</translation>
+    </message>
+    <message>
+        <source>Requestor, Recipient and Link Message are required fields</source>
+        <translation>請求者，收件人和鏈接消息是必填字段</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Import' button.</source>
+        <translation>提示：如果導入過程被中斷（例如斷電或意外關機），請重新輸入恢復短語或私鑰，然後單擊“導入”按鈕。</translation>
+    </message>
+    <message>
+        <source>Choose File</source>
+        <translation>選擇文件</translation>
+    </message>
+    <message>
+        <source>Import mnemonic</source>
+        <translation>導入助記符</translation>
+    </message>
+    <message>
+        <source>Import Recovery Phrase</source>
+        <translation>導入恢復短語</translation>
+    </message>
+    <message>
+        <source>Paste from clipboard</source>
+        <translation>從剪貼板粘貼</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>明確</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic</source>
+        <translation>輸入您符合BIP39的恢復短語/助記符</translation>
+    </message>
+    <message>
+        <source>Recovery Passphrase</source>
+        <translation>恢復密碼</translation>
+    </message>
+    <message>
+        <source>Enter a passphrase to protect your Recovery Phrase. (optional)</source>
+        <translation>輸入密碼來保護您的恢復短語。 （可選的）</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>語言</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>警告</translation>
+    </message>
+    <message>
+        <source>Please ensure you backup your Recovery Phrase and Passphrase - they are not recoverable!
+Wallet will restart after mnemonic has been imported.</source>
+        <translation>請確保您備份了恢復短語和密碼短語-它們不可恢復！
+導入助記符後，電子錢包將重新啟動。</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>進口</translation>
+    </message>
+    <message>
+        <source>Reimport</source>
+        <translation>重新導入</translation>
+    </message>
+    <message>
+        <source>Create mnemonic</source>
+        <translation>創建助記符</translation>
+    </message>
+    <message>
+        <source>Create New Recovery Phrase</source>
+        <translation>創建新的恢復短語</translation>
+    </message>
+    <message>
+        <source>Copy to clipboard</source>
+        <translation>複製到剪貼板</translation>
+    </message>
+    <message>
+        <source>Bytes of Entropy</source>
+        <translation>熵字節</translation>
+    </message>
+    <message>
+        <source>Generate</source>
+        <translation>生成</translation>
+    </message>
+    <message>
+        <source>Validate</source>
+        <translation>驗證</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Import privatekey</source>
+        <translation>導入私鑰</translation>
+    </message>
+    <message>
+        <source>Input single privatekey</source>
+        <translation>輸入單個私鑰</translation>
+    </message>
+    <message>
+        <source>Force Rescan</source>
+        <translation>強制重新掃描</translation>
+    </message>
+    <message>
+        <source>example: L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</source>
+        <translation>示例：L2pVnppu4S12FDFTn6sCoyvfCU4QiedHVxNyqJQ63Kty6gGRm1Mz</translation>
+    </message>
+    <message>
+        <source>Import privatekey file</source>
+        <translation>導入私鑰文件</translation>
+    </message>
+    <message>
+        <source>Input privatekey file</source>
+        <translation>輸入私鑰文件</translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation>瀏覽</translation>
+    </message>
+    <message>
+        <source>Tips: The private key file is the file exported by Dynamic 'dumpwallet filename', not the .dat file.</source>
+        <translation>提示：私鑰文件是動態“ dumpwallet文件名”導出的文件，而不是.dat文件。</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>電子錢包已經加載了高清帳戶。
+通過導入另一個恢復短語，將創建一個新帳戶並將其設置為默認帳戶。
+錢包將僅從新導入的帳戶接收地址。
+您的舊帳戶錢包文件將重命名為wallat.dat。＆lt; isodate＆gt;。在您的數據目錄中</translation>
+    </message>
+    <message>
+        <source>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new imported account only.
+Your old account wallet file will be renamed to wallat.dat.before-mnemonic-import.&lt;isodate&gt; in your data directory
+</source>
+        <translation>電子錢包已經加載了高清帳戶。
+通過導入另一個恢復短語，將創建一個新帳戶並將其設置為默認帳戶。
+錢包將僅從新導入的帳戶接收地址。
+您的舊帳戶錢包文件將重命名為wallat.dat。＆lt; isodate＆gt;。在您的數據目錄中</translation>
+    </message>
+    <message>
+        <source>Enter your BIP39 compliant Recovery Phrase/Mnemonic.</source>
+        <translation>輸入您的BIP39兼容的恢復短語/助記符。</translation>
+    </message>
+</context>
 </TS>

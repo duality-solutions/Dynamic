@@ -1102,10 +1102,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     // sure that such transactions will be mined (unless we're on
     // -testnet/-regtest).
     const CChainParams& chainparams = Params();
-    if (fRequireStandard && tx.nVersion >= 2 && tx.nVersion != BDAP_TX_VERSION && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
-        return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
+    if (fRequireStandard && tx.nVersion  > CTransaction::MAX_STANDARD_VERSION && tx.nVersion != BDAP_TX_VERSION && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
+        return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version-tx");
     }
-    
+
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
     if (fRequireStandard && !fIsBDAP && !IsStandardTx(tx, reason) && !fluidTransaction)

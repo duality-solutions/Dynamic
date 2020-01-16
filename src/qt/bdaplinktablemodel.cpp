@@ -7,12 +7,13 @@
 #include "bdappage.h"
 #include "guiconstants.h"
 #include "guiutil.h"
-#include "spork.h"
-#include "sync.h"
-#include "validation.h" // for cs_main
+#include "rpc/client.h"
 #include "rpc/register.h"
 #include "rpc/server.h"
-#include "rpc/client.h"
+#include "spork.h"
+#include "sync.h"
+#include "utiltime.h"
+#include "validation.h" // for cs_main
 
 #include <QDebug>
 #include <QList>
@@ -102,13 +103,7 @@ public:
 
         inputtable->clearContents();
         inputtable->setRowCount(0);
-        inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
-        inputtable->setColumnCount(3);
-
-        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QObject::tr("Requestor")));
-        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QObject::tr("Recipient")));
-        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QObject::tr("Date")));
 
         //make columns resize dynamically
         QHeaderView* header = inputtable->horizontalHeader();
@@ -128,7 +123,7 @@ public:
                 // "requestor_fqdn", "recipient_fqdn", "time", "link_message"
                 if (keyName == "requestor_fqdn") getRequestor = getIdFromPath(result[i].getValues()[j].get_str());
                 if (keyName == "recipient_fqdn") getRecipient = getIdFromPath(result[i].getValues()[j].get_str());
-                if (keyName == "time") getDate = DateTimeStrFormat("%Y-%m-%d", result[i].getValues()[j].get_int64());
+                if (keyName == "time") getDate = FormatISO8601Date(result[i].getValues()[j].get_int64());
                 if (keyName == "link_message") getMessage = result[i].getValues()[j].get_str();
 
             }

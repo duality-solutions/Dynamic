@@ -69,9 +69,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     txDomainEntry.LinkAddress = vchFromString(sxAddr.ToString());
 
-    int32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 1 year or 12 months
+    uint32_t nMonths = DEFAULT_REGISTRATION_MONTHS; // default to 1 year or 12 months
     if (request.params.size() >= 3) {
-        if (!ParseInt32(request.params[2].get_str(), &nMonths))
+        if (!ParseUInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration months to int, only whole numbers allowed (no decimals)"));
         if (nMonths <= 0)
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + _("Error: registration months must be greater than 0"));
@@ -107,6 +107,10 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3508 - " + strMessage);
+
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
+    if (monthlyFee + oneTimeFee + depositFee > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
     bool fUseInstantSend = false;
     //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
@@ -446,9 +450,9 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    int32_t nMonths = 0;
+    uint32_t nMonths = 0;
     if (request.params.size() >= 3) {
-        if (!ParseInt32(request.params[2].get_str(), &nMonths))
+        if (!ParseUInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
         if (nMonths < 0)
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Error: registration months must be greater than or equal to zero"));
@@ -485,6 +489,10 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3705 - " + strMessage);
+
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
+    if (monthlyFee + oneTimeFee + depositFee > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
     bool fUseInstantSend = false;
     //if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))

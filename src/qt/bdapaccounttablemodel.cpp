@@ -7,11 +7,12 @@
 #include "bdappage.h"
 #include "guiconstants.h"
 #include "guiutil.h"
-#include "sync.h"
-#include "validation.h" // for cs_main
+#include "rpc/client.h"
 #include "rpc/register.h"
 #include "rpc/server.h"
-#include "rpc/client.h"
+#include "sync.h"
+#include "utiltime.h"
+#include "validation.h" // for cs_main
 
 #include <QDebug>
 #include <QList>
@@ -101,16 +102,7 @@ public:
 
         inputtable->clearContents();
         inputtable->setRowCount(0);
-        inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
-        inputtable->setColumnCount(3);
-        inputtable->setColumnWidth(0, COMMONNAME_COLWIDTH); //Common Name (fixed)
-        inputtable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
-        //inputtable->setColumnWidth(2, 175);
-
-        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QObject::tr("Common Name")));
-        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QObject::tr("Object Full Path")));
-        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QObject::tr("Expiration Date")));
 
         //Parse results and populate QWidgetTable
         for (size_t i {0} ; i < result.size() ; ++i) {
@@ -153,7 +145,7 @@ public:
 
         std::string statusString = "Records found: " + std::to_string(recordsFound);
 
-        statusDisplay->setText(QObject::tr(statusString.c_str()));
+        statusDisplay->setText(std::to_string(recordsFound).c_str());
 
     } //refreshAccounts
 
@@ -176,15 +168,17 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
                                                       bdapPage(parent),
                                                       timer(0)
 {
-    
     currentIndex = bdapPage->getCurrentIndex();
     userTable = bdapPage->getUserTable();
     groupTable = bdapPage->getGroupTable();
-    userStatus = bdapPage->getUserStatus();
-    groupStatus = bdapPage->getGroupStatus();
-
-        
-    columns << tr("Common Name") << tr("Object Full Path") << tr("Expiration Date");
+    userStatus = bdapPage->getNumRecordsFound();
+    groupStatus = bdapPage->getNumRecordsFound();
+    userTable->setColumnWidth(0, COMMONNAME_COLWIDTH); //Common Name (fixed)
+    userTable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
+    userTable->setColumnWidth(2, 175);
+    groupTable->setColumnWidth(0, COMMONNAME_COLWIDTH); //Common Name (fixed)
+    groupTable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
+    groupTable->setColumnWidth(2, 175);
     priv.reset(new BdapAccountTablePriv());
     // default to unsorted
     priv->sortColumn = -1;
@@ -279,7 +273,7 @@ void BdapAccountTableModel::refreshUsers()
     searchUserPath = bdapPage->getPathUserSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable,userStatus,myUsersChecked,searchUserCommon,searchUserPath);
+    priv->refreshAccounts(userTable, userStatus, myUsersChecked, searchUserCommon, searchUserPath);
     Q_EMIT layoutChanged();
 }
 
@@ -290,7 +284,7 @@ void BdapAccountTableModel::refreshGroups()
     searchGroupPath = bdapPage->getPathGroupSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(groupTable,groupStatus,myGroupsChecked,searchGroupCommon,searchGroupPath);
+    priv->refreshAccounts(groupTable, groupStatus, myGroupsChecked, searchGroupCommon, searchGroupPath);
     Q_EMIT layoutChanged();
 }
 

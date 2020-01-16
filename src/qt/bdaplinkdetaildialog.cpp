@@ -6,10 +6,11 @@
 #include "ui_bdaplinkdetaildialog.h"
 
 #include "guiutil.h"
+#include "rpc/client.h"
 #include "rpc/register.h"
 #include "rpc/server.h"
-#include "rpc/client.h"
 #include "util.h"
+#include "utiltime.h"
 
 #include <stdio.h>
 
@@ -88,14 +89,14 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
         if (keyName == "txid") txId = result.getValues()[i].get_str();
         if (keyName == "accept_txid") acceptTXID = result.getValues()[i].get_str();
 
-        if (keyName == "expires_on") expirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
-        if (keyName == "accept_expires_on") acceptExpirationDate = DateTimeStrFormat("%Y-%m-%d", result.getValues()[i].get_int64());
+        if (keyName == "expires_on") expirationDate = FormatISO8601Date(result.getValues()[i].get_int64());
+        if (keyName == "accept_expires_on") acceptExpirationDate = FormatISO8601Date(result.getValues()[i].get_int64());
 
         if (keyName == "expired") expired = ((result.getValues()[i].get_bool())?"true":"false");
         if (keyName == "accept_expired") acceptexpired = ((result.getValues()[i].get_bool())?"true":"false");
 
-        if (keyName == "time") timeValue = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
-        if (keyName == "accept_time") acceptTime = DateTimeStrFormat("%Y-%m-%d %H:%M", result.getValues()[i].get_int64());
+        if (keyName == "time") timeValue = FormatISO8601DateTime(result.getValues()[i].get_int64());
+        if (keyName == "accept_time") acceptTime = FormatISO8601DateTime(result.getValues()[i].get_int64());
 
     } //for i
 
