@@ -312,9 +312,6 @@ void PrepareShutdown()
     g_connman.reset();
 
     if (!fLiteMode && !fRPCInWarmup) {
-        // STORE DATA CACHES INTO SERIALIZED DAT FILES
-        CFlatDB<CDynodeMan> flatdb1("dncache.dat", "magicDynodeCache");
-        flatdb1.Dump(dnodeman);
         CFlatDB<CDynodePayments> flatdb2("dnpayments.dat", "magicDynodePaymentsCache");
         flatdb2.Dump(dnpayments);
         CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
@@ -2002,13 +1999,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!fLiteMode) {
         boost::filesystem::path pathDB = GetDataDir();
         std::string strDBName;
-
-        strDBName = "dncache.dat";
-        uiInterface.InitMessage(_("Loading Dynode cache..."));
-        CFlatDB<CDynodeMan> flatdb1(strDBName, "magicDynodeCache");
-        if (!flatdb1.Load(dnodeman)) {
-            return InitError(_("Failed to load Dynode cache from") + "\n" + (pathDB / strDBName).string());
-        }
 
         if (dnodeman.size()) {
             strDBName = "dnpayments.dat";
