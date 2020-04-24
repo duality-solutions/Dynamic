@@ -76,6 +76,7 @@ DYNAMIC_CORE_H = \
   addrman.h \
   alert.h \
   base58.h \
+  bdap/auditdata.h \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
@@ -265,6 +266,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  bdap/auditdata.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/fees.cpp \
@@ -335,6 +337,7 @@ libdynamic_server_a_SOURCES = \
   privatesend-server.cpp \
   psnotificationinterface.cpp \
   rest.cpp \
+  rpc/audits.cpp \
   rpc/blockchain.cpp \
   rpc/dht.cpp \
   rpc/domainentry.cpp \

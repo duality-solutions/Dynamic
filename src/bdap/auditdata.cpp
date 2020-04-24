@@ -1,28 +1,16 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2020 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdap/auditdata.h"
 
+#include "bdap/bdap.h"
 #include "bdap/utils.h"
 #include "hash.h"
+#include "serialize.h"
 #include "streams.h"
 
-
-namespace BDAP {
-    std::string GetAuditTypeString(unsigned int nAuditType)
-    {
-        switch ((BDAP::AuditType)nAuditType) {
-
-            case BDAP::AuditType::UNKNOWN:
-                return "Unknown";
-             case BDAP::AuditType::HASH_POINTER_AUDIT:
-                return "User Entry";
-            default:
-                return "Unknown";
-        }
-    }
-}
+#include <univalue.h>
 
 void CAuditData::Serialize(std::vector<unsigned char>& vchData) 
 {
@@ -66,6 +54,21 @@ bool CAuditData::UnserializeFromTx(const CTransactionRef& tx)
     if(!UnserializeFromData(vchData, vchHash))
     {
         return false;
+    }
+    return true;
+}
+
+bool CAuditData::ValidateValues(std::string& strErrorMessage)
+{
+    if (OwnerFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+        strErrorMessage = "Invalid BDAP audit owner FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
+        return false;
+    }
+    for(const CharString& vchHash : vAuditData) {
+        if (vchHash.size() > MAX_BDAP_AUDIT_HASH_SIZE) {
+            strErrorMessage = "Invalid audit length. Can not have more than " + std::to_string(MAX_BDAP_AUDIT_HASH_SIZE) + " characters.";
+            return false;
+        }
     }
     return true;
 }
