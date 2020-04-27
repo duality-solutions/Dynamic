@@ -78,6 +78,7 @@ enum RPCErrorCode {
     RPC_WALLET_ENCRYPTION_FAILED = -16,    //! Failed to encrypt the wallet
     RPC_WALLET_ALREADY_UNLOCKED = -17,     //! Wallet is already unlocked
     RPC_WALLET_NEEDS_UPGRADING = -18,      //! Wallet needs upgrading
+    RPC_WALLET_PRIV_KEY_NOT_FOUND = -19,   //! Can not get the private key from the local wallet
     //! BDAP errors
     RPC_BDAP_ERROR = -300,                 //! Unspecified BDAP error
     RPC_BDAP_SPORK_INACTIVE = -301,        //! BDAP spork is not active

@@ -9,15 +9,16 @@
 #include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "core_io.h" // needed for ScriptToAsmStr
+#include "dynode-sync.h"
 #include "dynodeman.h"
 #include "rpc/protocol.h"
 #include "rpc/server.h"
 #include "primitives/transaction.h"
 #include "spork.h"
-#include "wallet/wallet.h"
+#include "timedata.h"
 #include "utilmoneystr.h"
 #include "validation.h"
-#include "dynode-sync.h"
+#include "wallet/wallet.h"
 
 #include <univalue.h>
 
@@ -57,41 +58,59 @@ static UniValue AddAudit(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\""));
 
+    EnsureWalletIsUnlocked();
+
     std::string strAudits = request.params[1].get_str();
     CharString vchOwnerFQDN;
-    CDomainEntry txDomainEntry;
-    CAuditData txAuditData;
+    CAuditData auditData;
+    if (strAudits.find(",") > 0) {
+        std::vector<std::string> vAudits = split(strAudits, ',');
+        for(const std::string& strAuditHash : vAudits)
+            auditData.vAuditData.push_back(vchFromString(strAuditHash));
+    } else {
+        auditData.vAuditData.push_back(vchFromValue(strAudits));
+    }
+    auditData.nTimeStamp = GetAdjustedTime();
     CPubKey pubWalletKey;
+    CAudit txAudit(auditData);
     if (request.params.size() == 3) {
+        // TODO: add ability to use specified wallet address
         std::string strOwnerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strOwnerFQDN);
+        vchOwnerFQDN = vchFromString(strOwnerFQDN);
         // Check if name exists
-        if (!GetDomainEntry(vchOwnerFQDN, txDomainEntry))
+        CDomainEntry domainEntry;
+        if (!GetDomainEntry(vchOwnerFQDN, domainEntry))
             throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strOwnerFQDN));
-        // ***** make sure account wallet address is used to sign audit record.
-        txAuditData.OwnerFullObjectPath = txDomainEntry.vchFullObjectPath();
+
+        txAudit.vchOwnerFullObjectPath = domainEntry.vchFullObjectPath();
+
+        CDynamicAddress address = domainEntry.GetWalletAddress();
+        CKeyID keyID;
+        if (!address.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "BDAP account wallet address does not refer to a key");
+
+        CKey walletKey;
+        if (!pwalletMain->GetKey(keyID, walletKey))
+            throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Private key for address " + address.ToString() + " is not known");
+
+        if (!txAudit.Sign(walletKey))
+            throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Signing audit data failed.");
+
+        pubWalletKey = walletKey.GetPubKey();
+        //LogPrintf("%s: txAudit CheckSignature %s\n", __func__, txAudit.CheckSignature(pubWalletKey.Raw()) ? "Valid" : "Invalid");
+
     } else {
         CharString vchEd25519PubKey;
         if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchEd25519PubKey, false))
             throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }
 
-    if (strAudits.find(",") > 0) {
-        std::vector<std::string> vAudits = split(strAudits, ',');
-        for(const std::string& strAuditHash : vAudits) {
-            LogPrintf("%s -- strAuditHash %s\n", __func__, strAuditHash);
-            txAuditData.vAuditData.push_back(vchFromString(strAuditHash));
-        }
-    } else {
-        LogPrintf("%s -- strAuditHash %s\n", __func__, strAudits);
-        txAuditData.vAuditData.push_back(vchFromValue(strAudits));
-    }
     // Create BDAP operation script
     CScript scriptPubKey;
-    std::vector<unsigned char> vchAuditCount = vchFromString(std::to_string(txAuditData.vAuditData.size()));
-    std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
+    std::vector<unsigned char> vchAuditCount = vchFromString(std::to_string(auditData.vAuditData.size()));
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_AUDIT) 
-                 << vchFullObjectPath << vchAuditCount << OP_2DROP << OP_2DROP;
+                 << vchOwnerFQDN << vchAuditCount << OP_2DROP << OP_2DROP;
 
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
@@ -102,35 +121,36 @@ static UniValue AddAudit(const JSONRPCRequest& request)
 
     // Create BDAP OP_RETURN script
     CharString data;
-    txAuditData.Serialize(data);
+    txAudit.Serialize(data);
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
     // Get BDAP fees
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_AUDIT;
     CAmount monthlyFee, oneTimeFee, depositFee;
-    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_AUDIT, bdapType, txAuditData.vAuditData.size(), monthlyFee, oneTimeFee, depositFee))
+    if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_AUDIT, bdapType, auditData.vAuditData.size(), monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
+    //LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
-    if (!txAuditData.ValidateValues(strMessage))
+    if (!txAudit.ValidateValues(strMessage))
         throw JSONRPCError(RPC_BDAP_AUDIT_INVALID, strprintf("Invalid audit transaction. %s", strMessage));
 
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
+    //LogPrintf("%s --txAudit %s\n", __func__, txAudit.ToString());
     bool fUseInstantSend = false;
     // Send the transaction
     CWalletTx wtx;
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
-    txAuditData.txHash = wtx.GetHash();
-
+    txAudit.txHash = wtx.GetHash();
     UniValue oAuditTransaction(UniValue::VOBJ);
+    BuildAuditJson(txAudit, oAuditTransaction);
     return oAuditTransaction;
 #else
-     throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Add audit transaction is not available when the wallet is disabled."));
+    throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Add audit transaction is not available when the wallet is disabled."));
 #endif
 }
 
@@ -154,9 +174,9 @@ UniValue audit_rpc(const JSONRPCRequest& request)
             "  add                - Add new audit or list of audits\n"
             "  get                - Get audit by hash or BDAP account\n"
             "\nExamples:\n"
-            + HelpExampleCli("audit add", "testuser@public.bdap.io 0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026") +
+            + HelpExampleCli("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser@public.bdap.io\"") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("audit add", "testuser@public.bdap.io 0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026"));
+            + HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser@public.bdap.io\""));
     }
     if (strCommand == "add" || strCommand == "get") {
         if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
