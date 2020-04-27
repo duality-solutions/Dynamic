@@ -76,7 +76,7 @@ DYNAMIC_CORE_H = \
   addrman.h \
   alert.h \
   base58.h \
-  bdap/auditdata.h \
+  bdap/audit.h \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
@@ -266,7 +266,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  bdap/auditdata.cpp \
+  bdap/audit.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/fees.cpp \

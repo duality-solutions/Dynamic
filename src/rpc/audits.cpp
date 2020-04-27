@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/auditdata.h"
+#include "bdap/audit.h"
 //#include "bdap/auditdatadb.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
