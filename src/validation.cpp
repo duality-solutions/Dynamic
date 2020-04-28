@@ -967,25 +967,23 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         fIsBDAP = true;
         CScript scriptBDAPOp;
         std::vector<std::vector<unsigned char>> vvch;
+        CScript scriptOp;
         int op1, op2;
         if (!GetBDAPOpScript(ptx, scriptBDAPOp, vvch, op1, op2))
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-script-error");
 
         std::string strErrorMessage;
-        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+        vchCharString vvchOpParameters;
+        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
+            return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
+        }
+        const std::string strOpType = GetBDAPOpTypeString(op1, op2);
         if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
             CDomainEntry domainEntry(ptx);
             if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-account-txn-already-in-mempool " + strErrorMessage);
             }
-            int op1, op2;
-            CScript scriptOp;
-            vchCharString vvchOpParameters;
-            if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
-            }
-            const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-            if (strOperationType == "bdap_new_account") {
+            if (strOpType == "bdap_new_account") {
                 CDomainEntry findDomainEntry;
                 if (GetDomainEntry(domainEntry.vchFullObjectPath(), findDomainEntry))
                 {
@@ -993,63 +991,60 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                     return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
                 }
             }
-            else if (strOperationType == "bdap_update_account") {
-                CDomainEntry entry;
-                CDomainEntry prevEntry;
-                std::vector<unsigned char> vchData;
-                std::vector<unsigned char> vchHash;
-                int nDataOut;
-                bool bData = GetBDAPData(ptx, vchData, vchHash, nDataOut);
-                if (bData && !entry.UnserializeFromData(vchData, vchHash)) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-data-failed" + strErrorMessage);
-                }
-
-                if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
-                }
-                CTransactionRef pPrevTx;
-                uint256 hashBlock;
-                if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
-                }
-                // Get current wallet address used for BDAP tx
-                CScript scriptPubKey = scriptBDAPOp;
-                CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
-                // Get previous wallet address used for BDAP tx
-                CScript prevScriptPubKey;
-                GetBDAPOpScript(pPrevTx, prevScriptPubKey);
-                CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
-                if (txAddress.ToString() != prevAddress.ToString()) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
-                }
+        } else if (strOpType == "bdap_update_account") {
+            CDomainEntry entry;
+            CDomainEntry prevEntry;
+            std::vector<unsigned char> vchData;
+            std::vector<unsigned char> vchHash;
+            int nDataOut;
+            bool bData = GetBDAPData(ptx, vchData, vchHash, nDataOut);
+            if (bData && !entry.UnserializeFromData(vchData, vchHash)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-data-failed" + strErrorMessage);
             }
-            else if (strOperationType == "bdap_delete_account") {
-                if (!(vvchOpParameters.size() > 0))
-                    return state.Invalid(false, REJECT_INVALID, "bdap-delete-account-get-object-path" + strErrorMessage);
 
-                std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
-                CDomainEntry prevEntry;
-                if (!pDomainEntryDB->GetDomainEntryInfo(vchFullObjectPath, prevEntry)) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
-                }
-                CTransactionRef pPrevTx;
-                uint256 hashBlock;
-                if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
-                }
-                // Get current wallet address used for BDAP tx
-                CScript scriptPubKey = scriptBDAPOp;
-                CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
-                // Get previous wallet address used for BDAP tx
-                CScript prevScriptPubKey;
-                GetBDAPOpScript(pPrevTx, prevScriptPubKey);
-                CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
-                if (txAddress.ToString() != prevAddress.ToString()) {
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
-                }
+            if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
             }
-        }
-        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+            CTransactionRef pPrevTx;
+            uint256 hashBlock;
+            if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
+            }
+            // Get current wallet address used for BDAP tx
+            CScript scriptPubKey = scriptBDAPOp;
+            CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+            // Get previous wallet address used for BDAP tx
+            CScript prevScriptPubKey;
+            GetBDAPOpScript(pPrevTx, prevScriptPubKey);
+            CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+            if (txAddress.ToString() != prevAddress.ToString()) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
+            }
+        } else if (strOpType == "bdap_delete_account") {
+            if (!(vvchOpParameters.size() > 0))
+                return state.Invalid(false, REJECT_INVALID, "bdap-delete-account-get-object-path" + strErrorMessage);
+
+            std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
+            CDomainEntry prevEntry;
+            if (!pDomainEntryDB->GetDomainEntryInfo(vchFullObjectPath, prevEntry)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
+            }
+            CTransactionRef pPrevTx;
+            uint256 hashBlock;
+            if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
+            }
+            // Get current wallet address used for BDAP tx
+            CScript scriptPubKey = scriptBDAPOp;
+            CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+            // Get previous wallet address used for BDAP tx
+            CScript prevScriptPubKey;
+            GetBDAPOpScript(pPrevTx, prevScriptPubKey);
+            CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+            if (txAddress.ToString() != prevAddress.ToString()) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
+            }
+        } else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
             if (vvch.size() > 3)
@@ -1074,8 +1069,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 if (GetDomainEntryPubKey(vchSharedPubKey, prevEntry))
                     return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey-entry");
             }
-        }
-        else if (strOpType == "bdap_move_asset") {
+        } else if (strOpType == "bdap_move_asset") {
             if (vvch.size() != 2)
                 return state.Invalid(false, REJECT_INVALID, "bdap-move-invalid-parameter-size");
             std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
