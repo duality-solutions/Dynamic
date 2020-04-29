@@ -73,6 +73,7 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     auditData.nTimeStamp = GetAdjustedTime();
     CPubKey pubWalletKey;
     CAudit txAudit(auditData);
+    bool signedAudit = false;
     if (request.params.size() == 3) {
         // TODO: add ability to use specified wallet address
         std::string strOwnerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -97,6 +98,7 @@ static UniValue AddAudit(const JSONRPCRequest& request)
         if (!txAudit.Sign(walletKey))
             throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Signing audit data failed.");
 
+        signedAudit = true;
         pubWalletKey = walletKey.GetPubKey();
         //LogPrintf("%s: txAudit CheckSignature %s\n", __func__, txAudit.CheckSignature(pubWalletKey.Raw()) ? "Valid" : "Invalid");
 
@@ -109,8 +111,13 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchAuditCount = vchFromString(std::to_string(auditData.vAuditData.size()));
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_AUDIT) 
-                 << vchOwnerFQDN << vchAuditCount << OP_2DROP << OP_2DROP;
+    if (signedAudit) {
+        scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_AUDIT) 
+                 << vchAuditCount << vchOwnerFQDN << pubWalletKey.Raw() << OP_2DROP << OP_2DROP << OP_DROP; 
+    } else {
+        scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_AUDIT) 
+                 << vchAuditCount << OP_2DROP << OP_DROP; 
+    }
 
     CKeyID keyWalletID = pubWalletKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);

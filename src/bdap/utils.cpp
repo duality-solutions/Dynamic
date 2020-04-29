@@ -359,6 +359,9 @@ std::string GetOpCodeType(const std::string& strOpCode)
     else if (strOpCode == "bdap_move_asset") {
         return "asset";
     }
+    else if (strOpCode == "bdap_new_audit") {
+        return "audit";
+    }
     else {
         return "unknown";
     }
@@ -401,6 +404,9 @@ std::string GetBDAPOpTypeString(const int& op1, const int& op2)
     }
     else if (op1 == OP_BDAP_MOVE && op2 == OP_BDAP_ASSET) {
         return "bdap_move_asset";
+    }
+    else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_AUDIT) {
+        return "bdap_new_audit";
     }
     else {
         return "unknown";
@@ -568,6 +574,9 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     }
     else if (strPrefix == "5 15") {
         strOpType = "bdap_move_asset";
+    }
+    else if (strPrefix == "1 9") {
+        strOpType = "bdap_new_audit";
     }
     else {
         return false;
