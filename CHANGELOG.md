@@ -1,6 +1,13 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.4.1**
+
+* Use std::function and std::bind in scheduler instead of boost/std mix
+* [Dynode] Do not call sentinel methods when spork is inactive
+* [Dynode] Remove dncache.dat file
+
+
 **Dynamic v2.4.4.0**
 
 * [Qt] Update Splashscreen for v2.4.4.0

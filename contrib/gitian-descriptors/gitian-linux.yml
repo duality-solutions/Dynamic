@@ -1,5 +1,5 @@
 ---
-name: "dynamic-linux-2.4.4.0"
+name: "dynamic-linux-2.4.4.1"
 enable_cache: true
 suites:
 - "trusty"
@@ -16,7 +16,7 @@ packages:
 - "faketime"
 - "bsdmainutils"
 - "binutils-gold"
-reference_datetime: "2017-01-01 00:00:00"
+reference_datetime: "2020-01-01 00:00:00"
 remotes:
 - "url": "https://github.com/duality-solutions/dynamic.git"
   "dir": "dynamic"

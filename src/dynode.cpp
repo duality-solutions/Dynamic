@@ -199,7 +199,11 @@ void CDynode::Check(bool fForce)
 
     if (fWaitForPing && !fOurDynode) {
         // ...but if it was already expired before the initial check - return right away
-        if (IsExpired() || IsSentinelPingExpired() || IsNewStartRequired()) {
+        bool isSentinelPingExpired = false;
+        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG))
+            isSentinelPingExpired = IsSentinelPingExpired();
+
+        if (IsExpired() || isSentinelPingExpired || IsNewStartRequired()) {
             LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state, waiting for ping\n", outpoint.ToStringShort(), GetStateString());
             return;
         }
@@ -222,19 +226,20 @@ void CDynode::Check(bool fForce)
             }
             return;
         }
+        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG)) {
+            // part 1: expire based on dynamicd ping
+            bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
+            bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(DYNODE_SENTINEL_PING_MAX_SECONDS);
+            LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
-        // part 1: expire based on dynamicd ping
-        bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(DYNODE_SENTINEL_PING_MAX_SECONDS);
-        LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-            outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-
-        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) && fSentinelPingExpired) {
-            nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
-            if (nActiveStatePrev != nActiveState) {
-                LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
+            if (fSentinelPingExpired) {
+                nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
+                if (nActiveStatePrev != nActiveState) {
+                    LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
+                }
+                return;
             }
-            return;
         }
     }
 
@@ -252,18 +257,20 @@ void CDynode::Check(bool fForce)
 
     if (!fWaitForPing || fOurDynode) {
         // part 2: expire based on sentinel info
-        bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
+        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG)) {
+            bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
+            bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
 
-        LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-            outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
+            LogPrint("dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
-        if (sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) && fSentinelPingExpired) {
-            nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
-            if (nActiveStatePrev != nActiveState) {
-                LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
+            if (fSentinelPingExpired) {
+                nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
+                if (nActiveStatePrev != nActiveState) {
+                    LogPrint("dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
+                }
+                return;
             }
-            return;
         }
     }
 
