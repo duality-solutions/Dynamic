@@ -17,6 +17,7 @@
 
 #include "support/allocators/secure.h"
 
+#include <QIntValidator>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QPushButton>
