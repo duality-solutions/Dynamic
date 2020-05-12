@@ -893,7 +893,7 @@ UniValue addgroup(const JSONRPCRequest& request)
 
 UniValue mybdapaccounts(const JSONRPCRequest& request)
 {
-    if (request.params.size() > 1)
+    if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
             "mybdapaccounts\n"
             + HelpRequiringPassphrase() +
@@ -912,6 +912,7 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("mybdapaccounts", ""));
 
+    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
@@ -1038,6 +1039,7 @@ UniValue getcredits(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("getcredits", ""));
 
+    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
 
