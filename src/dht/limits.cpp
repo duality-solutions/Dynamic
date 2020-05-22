@@ -38,7 +38,6 @@ std::multimap<std::string, CAllowDataCode> mapAllowedData = {
     {"test",        CAllowDataCode("test",      8,     0,     0)},
 };
 
-
 bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage)
 {
     strErrorMessage = "";
@@ -65,7 +64,7 @@ bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::stri
             iAllowed++;
             continue;
         }
-        if (nSlots > iAllowed->second.nMaximumSlots) {
+        if ((uint16_t)nSlots > iAllowed->second.nMaximumSlots) {
             strErrorMessage = strprintf("%sAllow data type found but too many slots (%d) used. Max slots = %d\n", strErrorMessage, nSlots, iAllowed->second.nMaximumSlots);
             iAllowed++;
             continue;
@@ -84,4 +83,14 @@ bool CheckPubKey(const std::vector<unsigned char>& vchPubKey)
         return true;
 
     return false;
+}
+
+
+uint16_t GetMaximumSlots(const std::string& salt)
+{
+    std::multimap<std::string, CAllowDataCode>::iterator iRecord = mapAllowedData.find(salt);
+    if (iRecord != mapAllowedData.end())
+        return iRecord->second.nMaximumSlots;
+
+    return 0;
 }
