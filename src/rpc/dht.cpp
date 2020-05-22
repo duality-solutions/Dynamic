@@ -11,6 +11,7 @@
 #include "dht/dataheader.h" // for CRecordHeader
 #include "dht/datarecord.h" // for CDataRecord
 #include "dht/ed25519.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
@@ -144,7 +145,7 @@ static UniValue PutMutable(const JSONRPCRequest& request)
         DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = vchFromValue(request.params[1]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(key.GetPubKeyBytes());
@@ -360,7 +361,7 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     iSequence++;
     uint16_t nVersion = 1;
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     const std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
     bool fEncrypt = true;
     if (request.params.size() > 4)
@@ -464,7 +465,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     iSequence++;
     uint16_t nVersion = 0;
     uint32_t nExpire = 0;
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
@@ -972,7 +973,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = vchFromValue(request.params[4]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     bool fEncrypt = true;
@@ -1101,7 +1102,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     uint16_t nVersion = 0;
     uint32_t nExpire = 0;
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
