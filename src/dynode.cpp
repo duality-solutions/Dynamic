@@ -460,14 +460,14 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 
     // make sure addr is valid
     if (!IsValidNetAddr()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
             outpoint.ToStringShort(), addr.ToString());
         return false;
     }
 
     // make sure signature isn't in the future (past is OK)
     if (sigTime > GetAdjustedTime() + 60 * 60) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- Signature rejected, too far into the future: Dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- Signature rejected, too far into the future: Dynode=%s\n", outpoint.ToStringShort());
         nDos = 1;
         return false;
     }
@@ -479,7 +479,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     }
 
     if (nProtocolVersion < dnpayments.GetMinDynodePaymentsProto()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", outpoint.ToStringShort(), nProtocolVersion);
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", outpoint.ToStringShort(), nProtocolVersion);
         nActiveState = DYNODE_UPDATE_REQUIRED;
     }
 
@@ -487,7 +487,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     pubkeyScript = GetScriptForDestination(pubKeyCollateralAddress.GetID());
 
     if (pubkeyScript.size() != 25) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- pubKeyCollateralAddress has the wrong size\n");
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- pubKeyCollateralAddress has the wrong size\n");
         nDos = 100;
         return false;
     }
@@ -496,7 +496,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     pubkeyScript2 = GetScriptForDestination(pubKeyDynode.GetID());
 
     if (pubkeyScript2.size() != 25) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- pubKeyDynode has the wrong size\n");
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- pubKeyDynode has the wrong size\n");
         nDos = 100;
         return false;
     }
@@ -896,7 +896,7 @@ bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos
     {
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CDynodePing::CheckAndUpdate -- Dynode ping is invalid, block hash is too old: dynode=%s  blockHash=%s\n", dynodeOutpoint.ToStringShort(), blockHash.ToString());
+            LogPrint("dynode", "CDynodePing::CheckAndUpdate -- Dynode ping is invalid, block hash is too old: dynode=%s  blockHash=%s\n", dynodeOutpoint.ToStringShort(), blockHash.ToString());
             // nDos = 1;
             return false;
         }
