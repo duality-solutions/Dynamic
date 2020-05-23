@@ -32,7 +32,7 @@ public:
     uint32_t Category() const { return category; }
     std::string What() const { return what; }
     std::int64_t Timestamp() const { return timestamp; }
-    std::string ToString() const;
+    virtual std::string ToString() const;
 
     inline CEvent operator=(const CEvent& b) {
         message = b.Message();
@@ -74,6 +74,8 @@ public:
     inline friend bool operator!=(const CMutableGetEvent& a, const CMutableGetEvent& b) {
         return !(a == b);
     }
+
+    std::string ToString() const override;
 
     inline CMutableGetEvent operator=(const CMutableGetEvent& b) {
         pubkey = b.PublicKey();
