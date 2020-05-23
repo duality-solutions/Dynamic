@@ -519,7 +519,7 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
     // this broadcast is older than the one that we already have - it's bad and should never happen
     // unless someone is doing something fishy
     if (pdn->sigTime > sigTime) {
-        LogPrintf("CDynodeBroadcast::Update -- Bad sigTime %d (existing broadcast is at %d) for Dynode %s %s\n",
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Bad sigTime %d (existing broadcast is at %d) for Dynode %s %s\n",
             sigTime, pdn->sigTime, outpoint.ToStringShort(), addr.ToString());
         return false;
     }
@@ -528,26 +528,26 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 
     // Dynode is banned by PoSe
     if (pdn->IsPoSeBanned()) {
-        LogPrintf("CDynodeBroadcast::Update -- Banned by PoSe, Dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Banned by PoSe, Dynode=%s\n", outpoint.ToStringShort());
         return false;
     }
 
     // IsVnAssociatedWithPubkey is validated once in CheckOutpoint, after that they just need to match
     if (pdn->pubKeyCollateralAddress != pubKeyCollateralAddress) {
-        LogPrintf("CDynodeBroadcast::Update -- Got mismatched pubKeyCollateralAddress and vin\n");
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Got mismatched pubKeyCollateralAddress and vin\n");
         nDos = 33;
         return false;
     }
 
     if (!CheckSignature(nDos)) {
-        LogPrintf("CDynodeBroadcast::Update -- CheckSignature() failed, dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- CheckSignature() failed, dynode=%s\n", outpoint.ToStringShort());
         return false;
     }
 
     // if there was no Dynode broadcast recently or if it matches our Dynode privkey...
     if (!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDynodeMode && pubKeyDynode == activeDynode.pubKeyDynode)) {
         // take the newest entry
-        LogPrintf("CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
         if (pdn->UpdateFromNewBroadcast(*this, connman)) {
             pdn->Check();
             Relay(connman);
