@@ -27,7 +27,6 @@ class CMutableGetEvent;
 
 typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<int, EventPair> EventTypeMap;
-typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
 
 static constexpr int DHT_BOOTSTRAP_ALERT_TYPE_CODE = 62;
 static constexpr int STATS_ALERT_TYPE_CODE = 70;
@@ -98,7 +97,7 @@ private:
     //std::string GetSessionStatePath();
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
     bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
-
+    bool CheckRecordMap(const CMutableGetEvent& event);
 };
 
 uint32_t GetLastPutDate(const HashRecordKey& recordKey);
