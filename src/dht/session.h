@@ -65,11 +65,10 @@ public:
     std::string strErrorMessage;
     bool fShutdown = false;
     EventTypeMap m_EventTypeMap;
-    DHTGetEventMap m_DHTGetEventMap;
+    
     libtorrent::dht_stats_alert* DHTStats = nullptr;
     libtorrent::session_stats_alert* SessionStats = nullptr;
     CCriticalSection cs_EventMap;
-    CCriticalSection cs_DHTGetEventMap;
 
     CHashTableSession() : strName(""), vDataEntries(CDataRecordBuffer(32)), strErrorMessage(""), fShutdown(false) {};
 
@@ -77,7 +76,7 @@ public:
 
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
-                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence = 0);
     /** Get a mutable record in the libtorrent DHT */
     bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
     bool SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
@@ -90,13 +89,13 @@ public:
     void StopEventListener();
     bool ReannounceEntry(const CMutableData& mutableData);
     void GetEvents(const int64_t& startTime, std::vector<CEvent>& events);
+    bool RemoveDHTGetEvent(const std::string& infoHash);
 
 private:
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
     //bool LoadSessionState();
     //int SaveSessionState();
     //std::string GetSessionStatePath();
-    bool RemoveDHTGetEvent(const std::string& infoHash);
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
     bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 

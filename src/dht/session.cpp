@@ -11,6 +11,7 @@
 #include "dht/sessionevents.h"
 #include "dht/datachunk.h"
 #include "dht/dataheader.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "dht/settings.h"
@@ -67,6 +68,8 @@ static uint64_t nGetErrors = 0;
 static bool fStarted;
 static bool fReannounceStarted = false;
 static bool fRun;
+CCriticalSection cs_DHTGetEventMap;
+DHTGetEventMap m_DHTGetEventMap;
 
 namespace DHT {
     typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
@@ -133,6 +136,16 @@ namespace DHT {
             }
         }
     }
+}
+
+bool RemoveDHTGetEvent(const std::string& infoHash)
+{
+    if (arraySessions.size() > 0) {
+        std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
+        pairSession.second->RemoveDHTGetEvent(infoHash);
+        return true;
+    }
+    return false;
 }
 
 void CHashTableSession::StopEventListener()
@@ -564,7 +577,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
 }
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
-                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative)
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence)
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key),recordSalt);
     RemoveDHTGetEvent(infoHash);
@@ -575,7 +588,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
-        if (FindDHTGetEvent(infoHash, data)) {
+        if (FindDHTGetEvent(infoHash, data) && data.SequenceNumber() >= nMinSequence) {
             std::string strData = data.Value();
             // TODO (DHT): check the last position for the single quote character
             if (strData.substr(0, 1) == "'") {
@@ -605,18 +618,19 @@ static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& ke
 
 bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
 {
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
+    int nHeaderSeq = 0;
+    bool fAuthoritative = true;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     uint16_t nHeaderAttempts = 3;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     CRecordHeader header;
-    if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+    if (!SubmitGet(public_key, strHeaderSalt, 15000, strHeaderHex, iSequence, fAuthoritative)) {
         unsigned int i = 0;
         while (i < nHeaderAttempts) {
             strHeaderHex = "";
             if (header.IsNull()) {
-                if (SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                if (SubmitGet(public_key, strHeaderSalt, 15000, strHeaderHex, iSequence, fAuthoritative)) {
                     break;
                 }
             }
@@ -626,16 +640,18 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
             i++;
         }
     }
+
+    // if header matches previous entry, only get missing chunks.
     if (strHeaderHex == "")
         return false; // Header failed, so don't try to get the rest of the record.
-
+    nHeaderSeq = iSequence;
     header.LoadHex(strHeaderHex);
     if (!header.IsNull() && header.nChunks > 0) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
-            if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
+            if (!SubmitGet(public_key, strChunkSalt, 15000, strChunk, iSequence, fAuthoritative, nHeaderSeq)) {
                 strErrorMessage = "Failed to get record chunk.";
                 return false;
             }
@@ -693,7 +709,7 @@ static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigne
 
 bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     strErrorMessage = "";
     // Get the headers first
     for (const CLinkInfo& linkInfo : vchLinkInfo) {
@@ -793,15 +809,22 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
 void CHashTableSession::AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
 {
     LOCK(cs_DHTGetEventMap);
-    if (m_DHTGetEventMap.find(infoHash) == m_DHTGetEventMap.end()) {
+    std::map<std::string, CMutableGetEvent>::iterator iEvent = m_DHTGetEventMap.find(infoHash);
+    if (iEvent == m_DHTGetEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
+        LogPrint("dnt", "AddToDHTGetEventMap Not found -- infohash = %s, event %s\n", infoHash, event.ToString());
         m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
         // event found. Update entry in DHT event map
-        LogPrint("dht", "AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
-        m_DHTGetEventMap[infoHash] = event;
+        // check seq is greater than existing record
+        if (event.SequenceNumber() > iEvent->second.SequenceNumber()) {
+            LogPrint("dnt", "AddToDHTGetEventMap Found -- infohash = %s, event %s\n", infoHash, event.ToString());
+            m_DHTGetEventMap[infoHash] = event;
+        } else {
+            if (event.SequenceNumber() < iEvent->second.SequenceNumber())
+                LogPrint("dnt", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
+        }
     }
 }
 
@@ -920,9 +943,13 @@ bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64>
     libtorrent::entry entryHeaderHex(record.HeaderHex);
     DHT::PutBytes newPut;
     newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key), strHeaderSalt);
+    RemoveDHTGetEvent(infoHash);
     for (const CDataChunk& chunk : record.GetChunks()) {
         libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
         newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        infoHash = GetInfoHash(aux::to_hex(public_key), chunk.Salt);
+        RemoveDHTGetEvent(infoHash);
         LogPrintf("%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
     }
     DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
