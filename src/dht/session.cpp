@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2020 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -41,6 +41,10 @@
 #include <fstream>
 #include <thread>
 
+typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
+// <record infohash, last requence>
+typedef std::map<std::string, std::int64_t> RecordMap;
+
 using namespace libtorrent;
 
 static constexpr size_t nThreads = 8;
@@ -69,7 +73,9 @@ static bool fStarted;
 static bool fReannounceStarted = false;
 static bool fRun;
 CCriticalSection cs_DHTGetEventMap;
+CCriticalSection cs_RecordMap;
 DHTGetEventMap m_DHTGetEventMap;
+RecordMap m_RecordMap;
 
 namespace DHT {
     typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
@@ -580,7 +586,6 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence)
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key),recordSalt);
-    RemoveDHTGetEvent(infoHash);
     if (!SubmitGet(public_key, recordSalt))
         return false;
     MilliSleep(40);
@@ -806,25 +811,50 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
     return true;
 }
 
+bool CHashTableSession::CheckRecordMap(const CMutableGetEvent& event)
+{
+    LOCK(cs_RecordMap);
+    std::map<std::string, std::int64_t>::iterator iRecord = m_RecordMap.find(event.RecordInfoHash());
+    if (iRecord == m_RecordMap.end()) {
+        m_RecordMap.insert(std::make_pair(event.RecordInfoHash(), event.SequenceNumber()));
+        return true;
+    } else {
+        if (event.SequenceNumber() > iRecord->second) {
+            m_RecordMap[event.RecordInfoHash()] = event.SequenceNumber();
+            return true;
+        } else {
+            if (event.SequenceNumber() == iRecord->second) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void CHashTableSession::AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
 {
-    LOCK(cs_DHTGetEventMap);
-    std::map<std::string, CMutableGetEvent>::iterator iEvent = m_DHTGetEventMap.find(infoHash);
-    if (iEvent == m_DHTGetEventMap.end()) {
-        // event not found. Add a new entry to DHT event map
-        LogPrint("dnt", "AddToDHTGetEventMap Not found -- infohash = %s, event %s\n", infoHash, event.ToString());
-        m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
+    if (CheckRecordMap(event)) {
+        LOCK(cs_DHTGetEventMap);
+        std::map<std::string, CMutableGetEvent>::iterator iEvent = m_DHTGetEventMap.find(infoHash);
+        if (iEvent == m_DHTGetEventMap.end()) {
+            // event not found. Add a new entry to DHT event map
+            LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s, event %s\n", infoHash, event.ToString());
+            m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
+        }
+        else {
+            // event found. Update entry in DHT event map
+            // check seq is greater than existing record
+            if (event.SequenceNumber() > iEvent->second.SequenceNumber()) {
+                LogPrint("dht", "AddToDHTGetEventMap Found -- infohash = %s, event %s\n", infoHash, event.ToString());
+                m_DHTGetEventMap[infoHash] = event;
+            } else {
+                if (event.SequenceNumber() < iEvent->second.SequenceNumber())
+                    LogPrint("dht", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
+            }
+        }
     }
     else {
-        // event found. Update entry in DHT event map
-        // check seq is greater than existing record
-        if (event.SequenceNumber() > iEvent->second.SequenceNumber()) {
-            LogPrint("dnt", "AddToDHTGetEventMap Found -- infohash = %s, event %s\n", infoHash, event.ToString());
-            m_DHTGetEventMap[infoHash] = event;
-        } else {
-            if (event.SequenceNumber() < iEvent->second.SequenceNumber())
-                LogPrint("dnt", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
-        }
+        LogPrint("dht", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
     }
 }
 

@@ -70,6 +70,16 @@ CMutableGetEvent::CMutableGetEvent(const std::string& _message, const int _type,
     infohash = GetInfoHash(pubkey, salt);
 }
 
+std::string CMutableGetEvent::RecordInfoHash() const
+{
+    std::size_t pos = salt.find(":");
+    if (pos != std::string::npos) {
+        std::string opCode = salt.substr(0, pos);
+        return GetInfoHash(pubkey, opCode);
+    }
+    return infohash;
+}
+
 std::string CMutableGetEvent::ToString() const {
     return strprintf(
         CEvent::ToString() + 
