@@ -178,6 +178,14 @@ bool CHashTableSession::ReannounceEntry(const CMutableData& mutableData)
     return false;
 }
 
+bool IsSaltHeader(const std::string& strSalt)
+{
+    if (strSalt.substr(strSalt.length() - 2) == ":0") {
+        return true;
+    }
+    return false;
+}
+
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
 {
     if (!dhtSession) {
@@ -217,7 +225,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
                     LogPrint("dht", "%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
                         , __func__, aux::to_hex(pGet->key), pGet->salt, pGet->item.to_string(), strAlertMessage, strAlertTypeName, iAlertCategory);
 
-                    if (pGet->item.to_string() != "<uninitialized>") {
+                    if (pGet->item.to_string() != "<uninitialized>" && (!IsSaltHeader(pGet->salt) || pGet->authoritative)) {
                         const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
@@ -623,7 +631,7 @@ static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& ke
 
 bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
 {
-    int64_t nTimeout = 60000;
+    int64_t nTimeout = 20000;
     int nHeaderSeq = 0;
     bool fAuthoritative = true;
     uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
