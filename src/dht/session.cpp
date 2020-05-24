@@ -623,6 +623,7 @@ static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& ke
 
 bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
 {
+    int64_t nTimeout = 60000;
     int nHeaderSeq = 0;
     bool fAuthoritative = true;
     uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
@@ -630,12 +631,12 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     CRecordHeader header;
-    if (!SubmitGet(public_key, strHeaderSalt, 15000, strHeaderHex, iSequence, fAuthoritative)) {
+    if (!SubmitGet(public_key, strHeaderSalt, nTimeout, strHeaderHex, iSequence, fAuthoritative)) {
         unsigned int i = 0;
         while (i < nHeaderAttempts) {
             strHeaderHex = "";
             if (header.IsNull()) {
-                if (SubmitGet(public_key, strHeaderSalt, 15000, strHeaderHex, iSequence, fAuthoritative)) {
+                if (SubmitGet(public_key, strHeaderSalt, nTimeout, strHeaderHex, iSequence, fAuthoritative)) {
                     break;
                 }
             }
@@ -656,7 +657,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
-            if (!SubmitGet(public_key, strChunkSalt, 15000, strChunk, iSequence, fAuthoritative, nHeaderSeq)) {
+            if (!SubmitGet(public_key, strChunkSalt, nTimeout, strChunk, iSequence, fAuthoritative, nHeaderSeq)) {
                 strErrorMessage = "Failed to get record chunk.";
                 return false;
             }
