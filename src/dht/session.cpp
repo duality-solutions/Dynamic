@@ -620,6 +620,35 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     return false;
 }
 
+bool CHashTableSession::SubmitGetAuthoritative(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence)
+{
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key),recordSalt);
+    if (!SubmitGet(public_key, recordSalt))
+        return false;
+    MilliSleep(40);
+    CMutableGetEvent data;
+    int64_t startTime = GetTimeMillis();
+    while (timeout > GetTimeMillis() - startTime)
+    {
+        if (FindDHTGetEvent(infoHash, data) && data.Authoritative()) {
+            std::string strData = data.Value();
+            // TODO (DHT): check the last position for the single quote character
+            if (strData.substr(0, 1) == "'") {
+                recordValue = strData.substr(1, strData.size() - 2);
+            }
+            else {
+                recordValue = strData;
+            }
+            lastSequence = data.SequenceNumber();
+            LogPrint("dht", "CHashTableSession::%s -- salt = %s, value = %s, seq = %d\n", __func__, recordSalt, recordValue, lastSequence);
+            return true;
+        }
+        MilliSleep(10);
+    }
+    return false;
+}
+
 static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& key32)
 {
     std::vector<unsigned char> vchKey;
@@ -1037,6 +1066,18 @@ bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_k
         return false;
 
     return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
+}
+
+bool SubmitGetAuthoritative(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence)
+{
+    if (nSessionThread >= nThreads)
+        return false;
+
+    if (!arraySessions[nSessionThread].second)
+        return false;
+
+    return arraySessions[nSessionThread].second->SubmitGetAuthoritative(public_key, recordSalt, timeout, recordValue, lastSequence);
 }
 
 bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 

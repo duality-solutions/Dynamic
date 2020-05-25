@@ -67,13 +67,12 @@ static UniValue GetMutable(const JSONRPCRequest& request)
     std::string strValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-    bool fAuthoritative;
-    fRet = DHT::SubmitGet(0, pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
+    fRet = DHT::SubmitGetAuthoritative(0, pubKey, strSalt, 20000, strValue, iSequence);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
         result.push_back(Pair("Sequence Number", iSequence));
-        result.push_back(Pair("Authoritative", fAuthoritative ? "True" : "False"));
+        result.push_back(Pair("Authoritative", "True"));
         result.push_back(Pair("DHT Entry Value", strValue));
     }
     else {
@@ -138,11 +137,10 @@ static UniValue PutMutable(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
-    bool fAuthoritative = false;
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
+        DHT::SubmitGetAuthoritative(0, pubKey, strOperationType, 20000, strGetLastValue, iSequence);
         iSequence++;
     }
     uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
@@ -349,11 +347,10 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -452,11 +449,10 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -959,12 +955,11 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -1087,12 +1082,11 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())

@@ -76,6 +76,9 @@ public:
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
                             std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence = 0);
+    bool SubmitGetAuthoritative(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence);
+
     /** Get a mutable record in the libtorrent DHT */
     bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
     bool SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
@@ -126,7 +129,8 @@ namespace DHT
     void GetDHTStats(CSessionStats& stats);
     bool ReannounceEntry(const CMutableData& mutableData);
     void GetEvents(const int64_t& startTime, std::vector<CEvent>& events);
-
+    bool SubmitGetAuthoritative(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence);
 }
 
 #endif // DYNAMIC_DHT_SESSION_H
