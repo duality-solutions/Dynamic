@@ -600,7 +600,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("p2sh", CDynamicAddress(CScriptID(script)).ToString()));
     }
 
-    /** ASSETS START */
+    /** ASSET START */
     if (type.isStr() && type.get_str() == ASSET_TRANSFER_STRING) {
         if (!AreAssetsDeployed())
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
@@ -672,8 +672,8 @@ UniValue decodescript(const JSONRPCRequest& request)
     } else {
 
     }
-    /** ASSETS END */
-    
+    /** ASSET END */
+
     return r;
 }
 

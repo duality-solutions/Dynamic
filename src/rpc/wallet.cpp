@@ -1798,7 +1798,7 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
             }
         }
     }
-    /** ASSETS START */
+    /** ASSET START */
     if (AreAssetsDeployed()) {
         if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
             for (const CAssetOutputEntry &data : listAssetsReceived){
@@ -1848,7 +1848,7 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
             }
         }
     }
-    /** ASSETS END */
+    /** ASSET END */
 }
 
 void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccount, UniValue& ret)
