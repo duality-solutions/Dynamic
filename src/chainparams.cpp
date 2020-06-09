@@ -183,6 +183,22 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 4032;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 3226; // 80% of 4032
 
+/** ASSET START **/
+        // Deployment of Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
+
+        // Deployment of MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
+/** ASSET END **/
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 215493;
 
@@ -259,6 +275,46 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
+        /** ASSET START **/
+        // Burn Amounts
+        nIssueAssetBurnAmount = 500 * COIN; // TODO
+        nReissueAssetBurnAmount = 100 * COIN; // TODO
+        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
+        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
+        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
+        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
+        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
+        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
+
+        // Burn Addresses
+        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
+        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
+        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
+        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
+        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
+        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
+        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
+        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
+        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
+
+        //Global Burn Address
+        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
+
+        // DGW Activation
+        nDGWActivationBlock = 10000000; // TODO
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
+        nMinReorganizationPeers = 4; // TODO
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
+
+        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
+        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
+        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
+
+        nKAAAWWWPOWActivationTime = 3572480000; // TODO
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
+        /** ASSET END **/
     }
 };
 static CMainParams mainParams;
@@ -343,6 +399,22 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 100;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
 
+/** ASSET START **/
+        // Deployment of Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
+
+        // Deployment of MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
+/** ASSET END **/
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 210; // 210
 
@@ -417,6 +489,46 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
+        /** ASSET START **/
+        // Burn Amounts
+        nIssueAssetBurnAmount = 500 * COIN; // TODO
+        nReissueAssetBurnAmount = 100 * COIN; // TODO
+        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
+        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
+        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
+        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
+        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
+        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
+
+        // Burn Addresses
+        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
+        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
+        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
+        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
+        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
+        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
+        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
+        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
+        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
+
+        //Global Burn Address
+        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
+
+        // DGW Activation
+        nDGWActivationBlock = 10000000; // TODO
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
+        nMinReorganizationPeers = 4; // TODO
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
+
+        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
+        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
+        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
+
+        nKAAAWWWPOWActivationTime = 3572480000; // TODO
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
+        /** ASSET END **/
     }
 };
 static CTestNetParams testNetParams;
@@ -493,6 +605,22 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 999999999999ULL;
 
+/** ASSET START **/
+        // Deployment of Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
+
+        // Deployment of MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
+/** ASSET END **/
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 0;
 
@@ -566,6 +694,46 @@ public:
         consensus.vDeployments[d].nStartTime = nStartTime;
         consensus.vDeployments[d].nTimeout = nTimeout;
     }
+        /** ASSET START **/
+        // Burn Amounts
+        nIssueAssetBurnAmount = 500 * COIN; // TODO
+        nReissueAssetBurnAmount = 100 * COIN; // TODO
+        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
+        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
+        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
+        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
+        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
+        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
+
+        // Burn Addresses
+        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
+        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
+        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
+        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
+        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
+        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
+        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
+        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
+        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
+
+        //Global Burn Address
+        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
+
+        // DGW Activation
+        nDGWActivationBlock = 10000000; // TODO
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
+        nMinReorganizationPeers = 4; // TODO
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
+
+        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
+        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
+        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
+
+        nKAAAWWWPOWActivationTime = 3572480000; // TODO
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
+        /** ASSET END **/
 };
 static CRegTestParams regTestParams;
 
@@ -635,6 +803,23 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
+
+
+/** ASSET START **/
+        // Deployment of Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
+
+        // Deployment of MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
+/** ASSET END **/
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 210; // 210
@@ -708,6 +893,46 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
+        /** ASSET START **/
+        // Burn Amounts
+        nIssueAssetBurnAmount = 500 * COIN; // TODO
+        nReissueAssetBurnAmount = 100 * COIN; // TODO
+        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
+        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
+        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
+        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
+        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
+        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
+
+        // Burn Addresses
+        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
+        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
+        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
+        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
+        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
+        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
+        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
+        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
+        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
+
+        //Global Burn Address
+        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
+
+        // DGW Activation
+        nDGWActivationBlock = 10000000; // TODO
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
+        nMinReorganizationPeers = 4; // TODO
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
+
+        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
+        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
+        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
+
+        nKAAAWWWPOWActivationTime = 3572480000; // TODO
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
+        /** ASSET END **/
     }
 };
 static CPrivateNetParams privateNetParams;
