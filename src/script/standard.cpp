@@ -298,6 +298,16 @@ CScript GetScriptForDestination(const CTxDestination& dest)
     return script;
 }
 
+/** ASSET START */
+CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest)
+{
+    CScript script;
+
+    boost::apply_visitor(CNullAssetScriptVisitor(&script), dest);
+    return script;
+}
+/** ASSET END */
+
 CScript GetScriptForRawPubKey(const CPubKey& pubKey)
 {
     return CScript() << std::vector<unsigned char>(pubKey.begin(), pubKey.end()) << OP_CHECKSIG;

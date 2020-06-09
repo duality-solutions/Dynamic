@@ -89,4 +89,9 @@ CScript GetScriptForDestination(const CTxDestination& dest);
 CScript GetScriptForRawPubKey(const CPubKey& pubkey);
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
 
+/** ASSET START */
+/** Generate a script that contains an address used for qualifier, and restricted assets data transactions */
+CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest);
+/** ASSET END */
+
 #endif // DYNAMIC_SCRIPT_STANDARD_H
