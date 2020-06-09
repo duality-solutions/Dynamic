@@ -75,6 +75,15 @@ DYNAMIC_CORE_H = \
   addressindex.h \
   addrman.h \
   alert.h \
+  assets/assets.h \
+  assets/assetdb.h \
+  assets/assettypes.h \
+  assets/messages.h \
+  assets/myassetsdb.h \
+  assets/restricteddb.h \
+  assets/snapshotrequestdb.h \
+  assets/assetsnapshotdb.h \
+  assets/rewards.h \
   base58.h \
   bdap/audit.h \
   bdap/auditdb.h \
@@ -263,6 +272,15 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  assets/assets.cpp \
+  assets/assetdb.cpp \
+  assets/assettypes.cpp \
+  assets/messages.cpp \
+  assets/myassetsdb.cpp \
+  assets/restricteddb.cpp \
+  assets/snapshotrequestdb.cpp \
+  assets/assetsnapshotdb.cpp \
+  assets/rewards.cpp \
   blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
@@ -340,6 +358,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpc/audits.cpp \
+  rpc/assets.cpp \
   rpc/blockchain.cpp \
   rpc/dht.cpp \
   rpc/domainentry.cpp \
@@ -347,6 +366,7 @@ libdynamic_server_a_SOURCES = \
   rpc/fluid.cpp \
   rpc/governance.cpp \
   rpc/linking.cpp \
+  rpc/messages.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \
