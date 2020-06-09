@@ -1285,6 +1285,82 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
     }
 }
 
+/* ASSET START */
+void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensusParams, CConnman* connman, const std::atomic<bool>& interruptMsgProc)
+{
+    std::deque<CInvAsset>::iterator it = pfrom->vRecvAssetGetData.begin();
+    std::vector<CInvAsset> vNotFound;
+    const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
+    LOCK(cs_main);
+
+    while (it != pfrom->vRecvAssetGetData.end()) {
+        // Don't bother if send buffer is too full to respond anyway
+        if (pfrom->fPauseSend)
+            break;
+
+        const CInvAsset &inv = *it;
+        {
+            if (interruptMsgProc)
+                return;
+
+            it++;
+
+            if (!IsAssetNameValid(inv.name)) {
+                vNotFound.push_back(inv);
+                continue;
+            }
+
+            UNUSED_VAR bool push = false;
+            auto currentActiveAssetCache = GetCurrentAssetCache();
+            if (currentActiveAssetCache) {
+                CNewAsset asset;
+                int height;
+                uint256 hash;
+                if (currentActiveAssetCache->GetAssetMetaDataIfExists(inv.name, asset, height, hash)) {
+                    auto data = CDatabasedAssetData(asset, height, hash);
+                    passetsCache->Put(inv.name, data);
+                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                    push = true;
+                } else {
+                    CDatabasedAssetData data;
+                    data.asset.strName = "_NF"; // Return _NF for NOT Found
+                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                }
+            }
+
+//            if (!push) {
+//                vNotFound.push_back(inv);
+//            }
+        }
+    }
+
+    pfrom->vRecvAssetGetData.erase(pfrom->vRecvAssetGetData.begin(), it);
+
+//    if (!vNotFound.empty()) {
+//        // Let the peer know that we didn't find what it asked for, so it doesn't
+//        // have to wait around forever. Currently only SPV clients actually care
+//        // about this message: it's needed when they are recursively walking the
+//        // dependencies of relevant unconfirmed transactions. SPV clients want to
+//        // do that because they want to know about (and store and rebroadcast and
+//        // risk analyze) the dependencies of transactions relevant to them, without
+//        // having to download the entire memory pool.
+//        for (auto assetinv : vNotFound) {
+//            CDatabasedAssetData data;
+//            data.asset.strName = "_NF"; // Return _NF for NOT Found
+//            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+//        }
+//    }
+}
+
+uint32_t GetFetchFlags(CNode* pfrom) {
+    uint32_t nFetchFlags = 0;
+    if ((pfrom->GetLocalServices() & NODE_WITNESS) && State(pfrom->GetId())->fHaveWitness) {
+        nFetchFlags |= MSG_WITNESS_FLAG;
+    }
+    return nFetchFlags;
+}
+/* ASSET END */
+
 inline void static SendBlockTransactions(const CBlock& block, const BlockTransactionsRequest& req, CNode* pfrom, CConnman& connman)
 {
     BlockTransactions resp(req);
