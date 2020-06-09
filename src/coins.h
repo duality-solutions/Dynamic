@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include <assets/assets.h>
+#include <assets/assetdb.h>
 #include <boost/foreach.hpp>
 #include <unordered_map>
 
@@ -276,7 +278,7 @@ public:
      * If no unspent output exists for the passed outpoint, this call
      * has no effect.
      */
-    bool SpendCoin(const COutPoint& outpoint, Coin* moveto = nullptr);
+    bool SpendCoin(const COutPoint &outpoint, Coin* moveto = nullptr, CAssetsCache* assetsCache = nullptr);
 
     /**
      * Push the modifications applied to this cache to its base.
@@ -330,7 +332,7 @@ private:
 // It assumes that overwrites are only possible for coinbase transactions,
 // TODO: pass in a boolean to limit these possible overwrites to known
 // (pre-BIP34) cases.
-void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight);
+void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight, uint256 blockHash, bool check = false, CAssetsCache* assetsCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
 
 //! Utility function to find any unspent output with a given txid.
 // This function can be quite expensive because in the event of a transaction
