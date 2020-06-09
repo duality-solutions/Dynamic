@@ -600,6 +600,80 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("p2sh", CDynamicAddress(CScriptID(script)).ToString()));
     }
 
+    /** ASSETS START */
+    if (type.isStr() && type.get_str() == ASSET_TRANSFER_STRING) {
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
+
+        CAssetTransfer transfer;
+        std::string address;
+
+        if (!TransferAssetFromScript(script, transfer, address))
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the transfer asset script");
+
+        r.push_back(Pair("asset_name", transfer.strName));
+        r.push_back(Pair("amount", ValueFromAmount(transfer.nAmount)));
+        if (!transfer.message.empty())
+            r.push_back(Pair("message", transfer.message));
+        if (transfer.nExpireTime)
+            r.push_back(Pair("expire_time", transfer.nExpireTime));
+
+    } else if (type.isStr() && type.get_str() == ASSET_REISSUE_STRING) {
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
+
+        CReissueAsset reissue;
+        std::string address;
+
+        if (!ReissueAssetFromScript(script, reissue, address))
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the reissue asset script");
+
+        r.push_back(Pair("asset_name", reissue.strName));
+        r.push_back(Pair("amount", ValueFromAmount(reissue.nAmount)));
+
+        bool reissuable = reissue.nReissuable ? true : false;
+        r.push_back(Pair("reissuable", reissuable));
+
+        if (reissue.strIPFSHash != "")
+            r.push_back(Pair("new_ipfs_hash", EncodeAssetData(reissue.strIPFSHash)));
+
+    } else if (type.isStr() && type.get_str() == ASSET_NEW_STRING) {
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
+
+        CNewAsset asset;
+        std::string ownerAsset;
+        std::string address;
+
+        if(AssetFromScript(script, asset, address)) {
+            r.push_back(Pair("asset_name", asset.strName));
+            r.push_back(Pair("amount", ValueFromAmount(asset.nAmount)));
+            r.push_back(Pair("units", asset.units));
+
+            bool reissuable = asset.nReissuable ? true : false;
+            r.push_back(Pair("reissuable", reissuable));
+
+            bool hasIPFS = asset.nHasIPFS ? true : false;
+            r.push_back(Pair("hasIPFS", hasIPFS));
+
+            if (hasIPFS)
+                r.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+        }
+        else if (OwnerAssetFromScript(script, ownerAsset, address))
+        {
+            r.push_back(Pair("asset_name", ownerAsset));
+            r.push_back(Pair("amount", ValueFromAmount(OWNER_ASSET_AMOUNT)));
+            r.push_back(Pair("units", OWNER_UNITS));
+        }
+        else
+        {
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the new asset script");
+        }
+    } else {
+
+    }
+    /** ASSETS END */
+    
     return r;
 }
 
