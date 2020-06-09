@@ -179,6 +179,11 @@ private:
     void operator=(const CWalletDB&);
 };
 
+/* ASSET START */
+//! Compacts BDB state so that wallet.dat is self-contained (if there are changes)
+void MaybeCompactWalletDB();
+/* ASSET END */
+
 void ThreadFlushWalletDB();
 
 #endif // DYNAMIC_WALLET_WALLETDB_H

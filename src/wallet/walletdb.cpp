@@ -1003,6 +1003,38 @@ DBErrors CWalletDB::ZapWalletTx(CWallet* pwallet, std::vector<CWalletTx>& vWtx)
     return DB_LOAD_OK;
 }
 
+/* ASSET START */
+void MaybeCompactWalletDB()
+{
+    static std::atomic<bool> fOneThread(false);
+    if (fOneThread.exchange(true)) {
+        return;
+    }
+    if (!gArgs.GetBoolArg("-flushwallet", DEFAULT_FLUSHWALLET)) {
+        return;
+    }
+
+    for (CWalletRef pwallet : vpwallets) {
+        CWalletDBWrapper& dbh = pwallet->GetDBHandle();
+
+        unsigned int nUpdateCounter = dbh.nUpdateCounter;
+
+        if (dbh.nLastSeen != nUpdateCounter) {
+            dbh.nLastSeen = nUpdateCounter;
+            dbh.nLastWalletUpdate = GetTime();
+        }
+
+        if (dbh.nLastFlushed != nUpdateCounter && GetTime() - dbh.nLastWalletUpdate >= 2) {
+            if (CDB::PeriodicFlush(dbh)) {
+                dbh.nLastFlushed = nUpdateCounter;
+            }
+        }
+    }
+
+    fOneThread = false;
+}
+/* ASSET END */
+
 void ThreadFlushWalletDB()
 {
     // Make this thread recognisable as the wallet flushing thread
