@@ -18,6 +18,10 @@ static const unsigned char REJECT_DUST = 0x41;
 static const unsigned char REJECT_INSUFFICIENTFEE = 0x42;
 static const unsigned char REJECT_CHECKPOINT = 0x43;
 
+/** ASSET START */
+static const unsigned char REJECT_MAXREORGDEPTH = 0x44;
+/** ASSET END */
+
 /** Capture information about block/transaction validation */
 class CValidationState
 {
