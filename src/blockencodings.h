@@ -10,6 +10,7 @@
 #include <memory>
 
 class CTxMemPool;
+class CDatabasedAssetData;
 
 // Dumb helper to handle CTransaction compression at serialize-time
 struct TransactionCompressor {
