@@ -78,12 +78,12 @@ static CTxDestination DecodeDestination(const std::string& str, const CChainPara
 /* ASSET START*/
 bool IsValidDestinationString(const std::string& str, const CChainParams& params)
 {
-    return CRavenAddress(str).IsValid(params);
+    return CDynamicAddress(str).IsValid(params);
 }
 
 bool IsValidDestinationString(const std::string& str)
 {
-    return CRavenAddress(str).IsValid();
+    return CDynamicAddress(str).IsValid();
 }
 /* ASSET END */
 
