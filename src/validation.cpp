@@ -6174,21 +6174,21 @@ bool AreAssetsDeployed() {
     return fAssetsIsActive;
 }
 
-bool IsRip5Active()
+bool IsMsgRestAssetIsActive()
 {
-    if (fRip5IsActive)
+    if (fMsgRestAssetIsActive)
         return true;
 
     const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MSG_REST_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
-        fRip5IsActive = true;
+        fMsgRestAssetIsActive = true;
 
-    return fRip5IsActive;
+    return fMsgRestAssetIsActive;
 }
 
 bool AreMessagesDeployed() {
 
-    return IsRip5Active();
+    return IsMsgRestAssetIsActive();
 }
 
 bool AreTransferScriptsSizeDeployed() {
@@ -6205,7 +6205,7 @@ bool AreTransferScriptsSizeDeployed() {
 
 bool AreRestrictedAssetsDeployed() {
 
-    return IsRip5Active();
+    return IsMsgRestAssetIsActive();
 }
 
 bool IsMessagingActive(unsigned int nBlockNumber) {

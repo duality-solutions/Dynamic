@@ -668,7 +668,7 @@ bool AreMessagesDeployed();
 
 bool AreRestrictedAssetsDeployed();
 
-bool IsRip5Active();
+bool IsMsgRestAssetIsActive();
 
 
 bool AreTransferScriptsSizeDeployed();
