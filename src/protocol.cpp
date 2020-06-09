@@ -274,3 +274,22 @@ const std::vector<std::string>& getAllNetMessageTypes()
 {
     return allNetMessageTypesVec;
 }
+
+/* ASSET START */
+CInvAsset::CInvAsset()
+{
+    name = "";
+}
+
+CInvAsset::CInvAsset(std::string strName) : name(strName){}
+
+bool operator<(const CInvAsset& a, const CInvAsset& b)
+{
+    return a.name < b.name;
+}
+
+std::string CInvAsset::ToString() const
+{
+    return strprintf("%s %s", "CInvAsset for asset: ", name);
+}
+/* ASSET END */

@@ -1778,6 +1778,42 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         ProcessGetData(pfrom, chainparams.GetConsensus(), connman, interruptMsgProc);
     }
 
+    /* ASSET START */
+    else if (strCommand == NetMsgType::GETASSETDATA)
+    {
+        if (IsInitialBlockDownload()) {
+            LogPrint(BCLog::NET, "Ignoring getassetdata from peer=%d because node is in initial block download\n", pfrom->GetId());
+            return true;
+        }
+
+        std::vector<CInvAsset> vInvAsset;
+        vRecv >> vInvAsset;
+
+        if (vInvAsset.size() > MAX_ASSET_INV_SZ)
+        {
+            LOCK(cs_main);
+            Misbehaving(pfrom->GetId(), 20);
+            return error("message getassetdata size() = %u", vInvAsset.size());
+        }
+
+        for (auto item : vInvAsset) {
+            if (item.name.size() > MAX_ASSET_LENGTH) {
+                LOCK(cs_main);
+                Misbehaving(pfrom->GetId(), 100);
+                return error("message getassetdata assetname size() = %u", item.name.size());
+            }
+        }
+
+        LogPrint(BCLog::NET, "received getassetdata (%u invassetsz) peer=%d\n", vInvAsset.size(), pfrom->GetId());
+
+        if (vInvAsset.size() > 0) {
+            LogPrint(BCLog::NET, "received getassetdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
+        }
+
+        pfrom->vRecvAssetGetData.insert(pfrom->vRecvAssetGetData.end(), vInvAsset.begin(), vInvAsset.end());
+        ProcessAssetGetData(pfrom, chainparams.GetConsensus(), connman, interruptMsgProc);
+    }
+    /* ASSET END */
 
     else if (strCommand == NetMsgType::GETBLOCKS) {
         CBlockLocator locator;

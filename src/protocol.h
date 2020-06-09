@@ -396,4 +396,28 @@ public:
     uint256 hash;
 };
 
+/*ASSET START */
+/** inv message data */
+class CInvAsset
+{
+public:
+    CInvAsset();
+    CInvAsset(std::string name);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(name);
+    }
+
+    friend bool operator<(const CInvAsset& a, const CInvAsset& b);
+
+    std::string ToString() const;
+
+public:
+    std::string name; // block height that asset data should come from
+};
+/* ASSET END */
 #endif // DYNAMIC_PROTOCOL_H
