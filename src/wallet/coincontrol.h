@@ -15,6 +15,13 @@ class CCoinControl
 {
 public:
     CTxDestination destChange;
+
+/* ASSET START */
+
+    //! If set, all asset change will be sent to this address, if not destChange will be used
+    CTxDestination assetDestChange;
+/* ASSET END */
+
     bool fUsePrivateSend;
     bool fUseInstantSend;
     //! If false, allows unselected inputs, but requires all selected inputs be used
@@ -34,7 +41,7 @@ public:
     //! Name of the asset that is selected, used when sending assets with coincontrol
     std::string strAssetSelected;
     /** ASSET END */
-    
+
     CCoinControl()
     {
         SetNull();
@@ -52,6 +59,10 @@ public:
         nFeeRate = CFeeRate(0);
         fOverrideFeeRate = false;
         nConfirmTarget = 0;
+/* ASSET START */
+        strAssetSelected = "";
+        setAssetsSelected.clear();
+/* ASSET END */
     }
 
     bool HasSelected() const
@@ -69,10 +80,26 @@ public:
         setSelected.insert(output);
     }
 
+/* ASSET START */
+    void SelectAsset(const COutPoint& output)
+    {
+        setAssetsSelected.insert(output);
+    }
+/* ASSET END */
+
     void UnSelect(const COutPoint& output)
     {
         setSelected.erase(output);
     }
+
+/* ASSET START */
+   void UnSelectAsset(const COutPoint& output)
+    {
+        setAssetsSelected.erase(output);
+        if (!setSelected.size())
+            strAssetSelected = "";
+    }
+/* ASSET END */
 
     void UnSelectAll()
     {
@@ -86,6 +113,9 @@ public:
 
 private:
     std::set<COutPoint> setSelected;
+/* ASSET START */
+    std::set<COutPoint> setAssetsSelected;
+/* ASSET END */
 };
 
 #endif // DYNAMIC_COINCONTROL_H
