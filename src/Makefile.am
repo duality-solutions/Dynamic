@@ -148,6 +148,7 @@ DYNAMIC_CORE_H = \
   fluid/fluidsovereign.h \
   fluid/fluidstaking.h \
   fluid/operations.h \
+  fs.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -531,6 +532,7 @@ libdynamic_util_a_SOURCES = \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
+  fs.cpp \
   random.cpp \
   rpc/protocol.cpp \
   support/cleanse.cpp \
