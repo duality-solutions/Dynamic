@@ -33,6 +33,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidstaking.h"
+#include "fs.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"

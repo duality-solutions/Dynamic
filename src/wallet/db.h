@@ -9,6 +9,7 @@
 #define DYNAMIC_WALLET_DB_H
 
 #include "clientversion.h"
+#include "fs.h"
 #include "serialize.h"
 #include "streams.h"
 #include "sync.h"

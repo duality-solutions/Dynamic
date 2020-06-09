@@ -8,6 +8,7 @@
 #include "rpc/server.h"
 
 #include "base58.h"
+#include "fs.h"
 #include "init.h"
 #include "random.h"
 #include "sync.h"

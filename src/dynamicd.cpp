@@ -8,6 +8,7 @@
 #include "chainparams.h"
 #include "clientversion.h"
 #include "compat.h"
+#include "fs.h"
 #include "httprpc.h"
 #include "httpserver.h"
 #include "init.h"

@@ -7,6 +7,7 @@
 
 #include "dbwrapper.h"
 
+#include "fs.h"
 #include "random.h"
 #include "util.h"
 
