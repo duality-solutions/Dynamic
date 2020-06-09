@@ -30,6 +30,11 @@ public:
     //! Override the default confirmation target, 0 = use default
     int nConfirmTarget;
 
+    /** ASSET START */
+    //! Name of the asset that is selected, used when sending assets with coincontrol
+    std::string strAssetSelected;
+    /** ASSET END */
+    
     CCoinControl()
     {
         SetNull();
