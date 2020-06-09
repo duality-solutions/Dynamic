@@ -383,6 +383,62 @@ void PrepareShutdown()
         // LibTorrent DHT Netowrk Services
         delete pMutableDataDB;
         pMutableDataDB = NULL;
+/** ASSET START */
+        delete passets;
+        passets = nullptr;
+
+        delete passetsdb;
+        passetsdb = nullptr;
+
+        delete passetsCache;
+        passetsCache = nullptr;
+
+        delete pMessagesCache;
+        pMessagesCache = nullptr;
+
+        delete pMessageSubscribedChannelsCache;
+        pMessageSubscribedChannelsCache = nullptr;
+
+        delete pMessagesSeenAddressCache;
+        pMessagesSeenAddressCache = nullptr;
+
+        delete pmessagechanneldb;
+        pmessagechanneldb = nullptr;
+
+        delete pmessagedb;
+        pmessagedb = nullptr;
+
+        delete pmyrestricteddb;
+        pmyrestricteddb = nullptr;
+
+        delete passetsVerifierCache;
+        passetsVerifierCache = nullptr;
+
+        delete passetsQualifierCache;
+        passetsQualifierCache = nullptr;
+
+        delete passetsRestrictionCache;
+        passetsRestrictionCache = nullptr;
+
+        delete passetsGlobalRestrictionCache;
+        passetsGlobalRestrictionCache = nullptr;
+
+        delete prestricteddb;
+        prestricteddb = nullptr;
+
+        delete pmessagechanneldb;
+        pmessagechanneldb = nullptr;
+
+        delete pSnapshotRequestDb;
+        pSnapshotRequestDb = nullptr;
+
+        delete pAssetSnapshotDb;
+        pAssetSnapshotDb = nullptr;
+
+        delete pDistributeSnapshotDb;
+        pDistributeSnapshotDb = nullptr;
+
+/** ASSET END */
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
