@@ -711,6 +711,9 @@ public:
     CCriticalSection cs_sendProcessing;
 
     std::deque<CInv> vRecvGetData;
+/* ASSET START */
+    std::deque<CInvAsset> vRecvAssetGetData;
+/* ASSET END */
     uint64_t nRecvBytes;
     std::atomic<int> nRecvVersion;
 
