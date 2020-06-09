@@ -75,6 +75,7 @@ public:
 
     std::string ToString() const;
     std::string ToStringShort() const;
+    std::string ToSerializedString() const;
     bool IsDynodeReward(const CTransaction* tx) const;
 
 };
@@ -344,7 +345,7 @@ public:
     bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
 
     /** ASSET END */
-    
+
     /**
      * Get the total transaction size in bytes, including witness data.
      * "Total Size" defined in BIP141 and BIP144.

@@ -22,6 +22,15 @@ std::string COutPoint::ToStringShort() const
     return strprintf("%s-%u", hash.ToString().substr(0, 64), n);
 }
 
+/* ASSET START */
+std::string COutPoint::ToSerializedString() const
+{
+    CDataStream stream(PROTOCOL_VERSION, SER_DISK);
+    stream << *this;
+    return stream.str();
+}
+/* ASSET END */
+
 bool COutPoint::IsDynodeReward(const CTransaction* tx) const
 {
     if(!tx->IsCoinStake())
