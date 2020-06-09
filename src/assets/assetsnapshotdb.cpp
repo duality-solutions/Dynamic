@@ -38,12 +38,12 @@ CAssetSnapshotDB::CAssetSnapshotDB(size_t nCacheSize, bool fMemory, bool fWipe) 
 bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     const std::string & p_assetName, int p_height)
 {
-    LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Adding snapshot for '%s' at height %d\n",
+    LogPrint("rewards", "AddAssetOwnershipSnapshot: Adding snapshot for '%s' at height %d\n",
         p_assetName.c_str(), p_height);
 
     //  Retrieve ownership interest for the asset at this height
     if (passetsdb == nullptr) {
-        LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Invalid assets DB!\n");
+        LogPrint("rewards", "AddAssetOwnershipSnapshot: Invalid assets DB!\n");
         return false;
     }
 
@@ -52,7 +52,7 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     int totalEntryCount;
 
     if (!passetsdb->AssetAddressDir(tempOwnersAndAmounts, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
-        LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+        LogPrint("rewards", "AddAssetOwnershipSnapshot: Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
         return false;
     }
 
@@ -63,14 +63,14 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     for (int retrievalOffset = 0; retrievalOffset < totalEntryCount; retrievalOffset += MAX_RETRIEVAL_COUNT) {
         //  Retrieve the specified segment of addresses
         if (!passetsdb->AssetAddressDir(tempOwnersAndAmounts, totalEntryCount, false, p_assetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
-            LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+            LogPrint("rewards", "AddAssetOwnershipSnapshot: Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
             errorsOccurred = true;
             break;
         }
 
         //  Verify that some addresses were returned
         if (tempOwnersAndAmounts.size() == 0) {
-            LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: No addresses were retrieved.\n");
+            LogPrint("rewards", "AddAssetOwnershipSnapshot: No addresses were retrieved.\n");
             continue;
         }
 
@@ -82,7 +82,7 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
                 ownersAndAmounts.insert(currPair);
             }
             else {
-                LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Address '%s' is invalid.\n", currPair.first.c_str());
+                LogPrint("rewards", "AddAssetOwnershipSnapshot: Address '%s' is invalid.\n", currPair.first.c_str());
             }
         }
 
@@ -90,11 +90,11 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     }
 
     if (errorsOccurred) {
-        LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Errors occurred while acquiring ownership info for asset '%s'.\n", p_assetName.c_str());
+        LogPrint("rewards", "AddAssetOwnershipSnapshot: Errors occurred while acquiring ownership info for asset '%s'.\n", p_assetName.c_str());
         return false;
     }
     if (ownersAndAmounts.size() == 0) {
-        LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: No owners exist for asset '%s'.\n", p_assetName.c_str());
+        LogPrint("rewards", "AddAssetOwnershipSnapshot: No owners exist for asset '%s'.\n", p_assetName.c_str());
         return false;
     }
 
@@ -102,7 +102,7 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     CAssetSnapshotDBEntry snapshotEntry(p_assetName, p_height, ownersAndAmounts);
 
     if (Write(std::make_pair(SNAPSHOTCHECK_FLAG, snapshotEntry.heightAndName), snapshotEntry)) {
-        LogPrint(BCLog::REWARDS, "AddAssetOwnershipSnapshot: Successfully added snapshot for '%s' at height %d (ownerCount = %d).\n",
+        LogPrint("rewards", "AddAssetOwnershipSnapshot: Successfully added snapshot for '%s' at height %d (ownerCount = %d).\n",
             p_assetName.c_str(), p_height, ownersAndAmounts.size());
         return true;
     }
@@ -116,13 +116,13 @@ bool CAssetSnapshotDB::RetrieveOwnershipSnapshot(
     //  Load up the snapshot entries at this height
     std::string heightAndName = std::to_string(p_height) + p_assetName;
 
-    LogPrint(BCLog::REWARDS, "%s : Attempting to retrieve snapshot: heightAndName='%s'\n",
+    LogPrint("rewards", "%s : Attempting to retrieve snapshot: heightAndName='%s'\n",
         __func__,
         heightAndName.c_str());
 
     bool succeeded = Read(std::make_pair(SNAPSHOTCHECK_FLAG, heightAndName), p_snapshotEntry);
 
-    LogPrint(BCLog::REWARDS, "%s : Retrieval of snapshot for '%s' %s!\n",
+    LogPrint("rewards", "%s : Retrieval of snapshot for '%s' %s!\n",
         __func__,
         heightAndName.c_str(),
         succeeded ? "succeeded" : "failed");
@@ -136,13 +136,13 @@ bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
     //  Load up the snapshot entries at this height
     std::string heightAndName = std::to_string(p_height) + p_assetName;
 
-    LogPrint(BCLog::REWARDS, "%s : Attempting to remove snapshot: heightAndName='%s'\n",
+    LogPrint("rewards", "%s : Attempting to remove snapshot: heightAndName='%s'\n",
         __func__,
         heightAndName.c_str());
 
     bool succeeded = Erase(std::make_pair(SNAPSHOTCHECK_FLAG, heightAndName), true);
 
-    LogPrint(BCLog::REWARDS, "%s : Removal of snapshot for '%s' %s!\n",
+    LogPrint("rewards", "%s : Removal of snapshot for '%s' %s!\n",
         __func__,
         heightAndName.c_str(),
         succeeded ? "succeeded" : "failed");
