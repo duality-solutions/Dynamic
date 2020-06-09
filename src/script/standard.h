@@ -51,7 +51,13 @@ enum txnouttype {
     TX_PUBKEYHASH,
     TX_SCRIPTHASH,
     TX_MULTISIG,
-    TX_NULL_DATA
+    TX_NULL_DATA,
+    /** ASSET START */
+    TX_NEW_ASSET,
+    TX_REISSUE_ASSET,
+    TX_TRANSFER_ASSET,
+    TX_RESTRICTED_ASSET_DATA //!< unspendable OP_RAVEN_ASSET script that carries data
+    /** ASSET END */
 };
 
 class CNoDestination

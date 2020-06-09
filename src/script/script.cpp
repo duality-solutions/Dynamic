@@ -463,6 +463,133 @@ bool CScript::IsPayToScriptHash() const
             (*this)[22] == OP_EQUAL);
 }
 
+/** ASSET START */
+bool CScript::IsAssetScript() const
+{
+    int nType = 0;
+    bool isOwner = false;
+    int start = 0;
+    return IsAssetScript(nType, isOwner, start);
+}
+
+bool CScript::IsAssetScript(int& nType, bool& isOwner) const
+{
+    int start = 0;
+    return IsAssetScript(nType, isOwner, start);
+}
+
+bool CScript::IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const
+{
+    if (this->size() > 31) {
+        if ((*this)[25] == OP_DYN_ASSET) { // OP_DYN_ASSET is always in the 25 index of the script if it exists
+            int index = -1;
+            if ((*this)[27] == DYN_D) { // Check to see if DYN starts at 27 ( this->size() < 105)
+                if ((*this)[28] == DYN_Y)
+                    if ((*this)[29] == DYN_N)
+                        index = 30;
+            } else {
+                if ((*this)[28] == DYN_D) // Check to see if DYN starts at 28 ( this->size() >= 105)
+                    if ((*this)[29] == DYN_Y)
+                        if ((*this)[30] == DYN_N)
+                            index = 31;
+            }
+
+            if (index > 0) {
+                nStartingIndex = index + 1; // Set the index where the asset data begins. Use to serialize the asset data into asset objects
+                if ((*this)[index] == DYN_T) { // Transfer first anticipating more transfers than other assets operations
+                    nType = TX_TRANSFER_ASSET;
+                    return true;
+                } else if ((*this)[index] == DYN_Q && this->size() > 39) {
+                    nType = TX_NEW_ASSET;
+                    fIsOwner = false;
+                    return true;
+                } else if ((*this)[index] == DYN_O) {
+                    nType = TX_NEW_ASSET;
+                    fIsOwner = true;
+                    return true;
+                } else if ((*this)[index] == DYN_R) {
+                    nType = TX_REISSUE_ASSET;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool CScript::IsNewAsset() const
+{
+
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return !fIsOwner && nType == TX_NEW_ASSET;
+
+    return false;
+}
+
+bool CScript::IsOwnerAsset() const
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return fIsOwner && nType == TX_NEW_ASSET;
+
+    return false;
+}
+
+bool CScript::IsReissueAsset() const
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return nType == TX_REISSUE_ASSET;
+
+    return false;
+}
+
+bool CScript::IsTransferAsset() const
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return nType == TX_TRANSFER_ASSET;
+
+    return false;
+}
+
+bool CScript::IsNullAsset() const
+{
+    return IsNullAssetTxDataScript() || IsNullGlobalRestrictionAssetTxDataScript() || IsNullAssetVerifierTxDataScript();
+}
+
+bool CScript::IsNullAssetTxDataScript() const
+{
+    return (this->size() > 23 &&
+            (*this)[0] == OP_DYN_ASSET &&
+            (*this)[1] == 0x14);
+}
+
+bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
+{
+    // 1 OP_DYN_ASSET followed by two OP_RESERVED + atleast 4 characters for the restricted name $ABC
+    return (this->size() > 6 &&
+            (*this)[0] == OP_DYN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] == OP_RESERVED);
+}
+
+
+bool CScript::IsNullAssetVerifierTxDataScript() const
+{
+    // 1 OP_DYN_ASSET followed by one OP_RESERVED
+    return (this->size() > 3 &&
+            (*this)[0] == OP_DYN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] != OP_RESERVED);
+}
+/** ASSET END */
+
 bool CScript::IsPayToPublicKey() const
 {
     // Remove BDAP portion of the script

@@ -213,6 +213,10 @@ enum opcodetype {
     OP_BDAP_SIDECHAIN_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
     OP_BDAP_ASSET = 0x0f,                // = BDAP asset
 
+    /** ASSET START */
+    OP_DYN_ASSET = 0xd0,
+    /** ASSET END */
+
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -660,6 +664,22 @@ public:
 
     bool IsPayToScriptHash() const;
 
+    /** ASSET START */
+    enum class txnouttype;
+    bool IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const;
+    bool IsAssetScript(int& nType, bool& fIsOwner) const;
+    bool IsAssetScript() const;
+    bool IsNewAsset() const;
+    bool IsOwnerAsset() const;
+    bool IsReissueAsset() const;
+    bool IsTransferAsset() const;
+    bool IsAsset() const;
+    bool IsNullAsset() const; // Checks all three of the NULL Asset Tx types
+    bool IsNullAssetTxDataScript() const;
+    bool IsNullAssetVerifierTxDataScript() const;
+    bool IsNullGlobalRestrictionAssetTxDataScript() const;
+    /** ASSET END */
+    
     /** Used for obsolete pay-to-pubkey addresses indexing. */
     bool IsPayToPublicKey() const;
 

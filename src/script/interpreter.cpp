@@ -971,6 +971,11 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     }
                 } break;
 
+                /** ASSET START */
+                    case OP_DYN_ASSET:
+                        break;
+                /** ASSET END */
+                        
                 default:
                     return set_error(serror, SCRIPT_ERR_BAD_OPCODE);
                 }
