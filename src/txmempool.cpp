@@ -1097,6 +1097,29 @@ void CTxMemPool::_clear()
     blockSinceLastRollingFeeBump = false;
     rollingMinimumFeeRate = 0;
     ++nTransactionsUpdated;
+/** ASSET START */
+    mapAssetToHash.clear();
+    mapHashToAsset.clear();
+    mapAddressesMarkedFrozen.clear();
+    mapHashToAddressMarkedFrozen.clear();
+    mapAssetMarkedGlobalFrozen.clear();
+    mapHashMarkedGlobalFrozen.clear();
+    mapAddressesQualifiersChanged.clear();
+    mapHashQualifiersChanged.clear();
+    mapAssetVerifierChanged.clear();
+    mapHashVerifierChanged.clear();
+
+    mapHashToAddressAddedTag.clear();
+    mapAddressAddedTag.clear();
+    mapHashToAddressRemoveTag.clear();
+    mapAddressRemoveTag.clear();
+
+    mapGlobalFreezingAssetTransactions.clear();
+    mapHashGlobalFreezingAssetTransactions.clear();
+
+    mapGlobalUnFreezingAssetTransactions.clear();
+    mapHashGlobalUnFreezingAssetTransactions.clear();
+/** ASSET END */
 }
 
 void CTxMemPool::clear()

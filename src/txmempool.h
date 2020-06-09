@@ -494,6 +494,43 @@ public:
     mutable CCriticalSection cs;
     indexed_transaction_set mapTx;
 
+/** ASSET START */
+    std::map<std::string, uint256> mapAssetToHash;
+    std::map<uint256, std::string> mapHashToAsset;
+
+    /** Restricted assets maps */
+    // Helper maps for when addresses are marked as frozen
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressesMarkedFrozen;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressMarkedFrozen;
+
+    // Helper maps for when restricted assets are globally frozen
+    std::map<std::string, std::set<uint256>> mapAssetMarkedGlobalFrozen;
+    std::map<uint256, std::set<std::string>> mapHashMarkedGlobalFrozen;
+
+    // Helper maps for when qualifiers are added or removed from addresses
+    std::map<std::string, std::set<uint256>> mapAddressesQualifiersChanged;
+    std::map<uint256, std::set<std::string>> mapHashQualifiersChanged;
+
+    // Helper maps for when verifier string are changed
+    std::map<std::string, std::set<uint256>> mapAssetVerifierChanged;
+    std::map<uint256, std::set<std::string>> mapHashVerifierChanged;
+
+    // Helper map for when an asset already in mempool that is globally freezing
+    std::map<std::string, std::set<uint256>> mapGlobalFreezingAssetTransactions;
+    std::map<uint256, std::set<std::string>> mapHashGlobalFreezingAssetTransactions;
+
+    // Helper map for when a qualfier is added to an address
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressAddedTag;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressAddedTag;
+
+    // Helper map for when a qualfier is added to an address
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressRemoveTag;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressRemoveTag;
+
+    std::map<std::string, std::set<uint256>> mapGlobalUnFreezingAssetTransactions;
+    std::map<uint256, std::set<std::string>> mapHashGlobalUnFreezingAssetTransactions;
+/** ASSET END */
+    
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
     std::vector<std::pair<uint256, txiter> > vTxHashes; //!< All tx hashes/entries in mapTx, in random order
 
