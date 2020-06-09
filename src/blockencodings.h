@@ -220,4 +220,31 @@ public:
     ReadStatus FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing);
 };
 
+/* ASSET START */
+class SerializedAssetData {
+public:
+    std::string name;
+    int8_t units;
+    CAmount amount;
+    int8_t reissuable;
+    int8_t hasIPFS;
+    std::string ipfs;
+    int32_t nHeight;
+
+    SerializedAssetData(const CDatabasedAssetData &assetData);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(name);
+        READWRITE(amount);
+        READWRITE(units);
+        READWRITE(reissuable);
+        READWRITE(hasIPFS);
+        READWRITE(ipfs);
+        READWRITE(nHeight);
+    }
+/* ASSET END */
+};
 #endif
