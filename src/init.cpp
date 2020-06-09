@@ -1893,7 +1893,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                               passetsCache->Size());
 
                     // Check for changed -disablemessaging state
-                    if (gArgs.GetArg("-disablemessaging", false)) {
+                    if (GetBoolArg("-disablemessaging", false)) {
                         LogPrintf("Messaging is disabled\n");
                         fMessaging = false;
                     } else {
@@ -2279,10 +2279,13 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // Start the DHT Torrent networks in the background
     const bool fMultiSessions = GetArg("-multidhtsessions", true);
     StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
+    SetRPCWarmupFinished();
 
 /* ASSET START */
+#ifdef ENABLE_WALLET
+    StartWallets(scheduler);
     // ********************************************************* Step 12.5: Init Msg Channel list
-    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
+    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !GetBoolArg("-disablewallet", false)) {
         bool found;
         if (!pmessagechanneldb->ReadFlag("init", found)) {
             uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
@@ -2296,10 +2299,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 #endif
 /* ASSET END */
-    
+
     // ********************************************************* Step 13: finished
 
-    SetRPCWarmupFinished();
+
     uiInterface.InitMessage(_("Done loading"));
 
 #ifdef ENABLE_WALLET
@@ -2315,47 +2318,4 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     threadGroup.create_thread(boost::bind(&ThreadSendAlert, boost::ref(connman)));
 
     return !fRequestShutdown;
-}
-
-bool OpenWallets()
-{
-    if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
-        LogPrintf("Wallet disabled!\n");
-        return true;
-    }
-
-    for (const std::string& walletFile : gArgs.GetArgs("-wallet")) {
-        CWallet * const pwallet = CWallet::CreateWalletFromFile(walletFile);
-        if (!pwallet) {
-            return false;
-        }
-        vpwallets.push_back(pwallet);
-    }
-
-    return true;
-}
-
-void StartWallets(CScheduler& scheduler) {
-    for (CWalletRef pwallet : vpwallets) {
-        pwallet->postInitProcess(scheduler);
-    }
-}
-
-void FlushWallets() {
-    for (CWalletRef pwallet : vpwallets) {
-        pwallet->Flush(false);
-    }
-}
-
-void StopWallets() {
-    for (CWalletRef pwallet : vpwallets) {
-        pwallet->Flush(true);
-    }
-}
-
-void CloseWallets() {
-    for (CWalletRef pwallet : vpwallets) {
-        delete pwallet;
-    }
-    vpwallets.clear();
 }
