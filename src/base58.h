@@ -35,6 +35,12 @@ std::string EncodeDestination(const CTxDestination& dest);
  * Decode a tx destination as a base58-encoded string.
  */
 CTxDestination DecodeDestination(const std::string& str);
+
+/* ASSET START*/
+bool IsValidDestinationString(const std::string& str);
+bool IsValidDestinationString(const std::string& str, const CChainParams& params);
+/* ASSET END */
+
 /**
  * Encode a byte sequence as a base58-encoded string.
  * pbegin and pend cannot be NULL, unless both are.

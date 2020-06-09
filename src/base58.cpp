@@ -74,6 +74,19 @@ static CTxDestination DecodeDestination(const std::string& str, const CChainPara
     data.clear();
     return CNoDestination();
 }
+
+/* ASSET START*/
+bool IsValidDestinationString(const std::string& str, const CChainParams& params)
+{
+    return CRavenAddress(str).IsValid(params);
+}
+
+bool IsValidDestinationString(const std::string& str)
+{
+    return CRavenAddress(str).IsValid();
+}
+/* ASSET END */
+
 } // namespace
 
 CTxDestination DecodeDestination(const std::string& str)
