@@ -190,12 +190,12 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot)
 {
     if (p_wallet->IsLocked()) {
-        LogPrint("Skipping distribution: Wallet is locked!\n");
+        LogPrint("rewards", "Skipping distribution: Wallet is locked!\n");
         return;
     }
 
     if (IsInitialBlockDownload()) {
-        LogPrint("Skipping distribution: Syncing Chain!\n");
+        LogPrint("rewards", "Skipping distribution: Syncing Chain!\n");
         return;
     }
 
@@ -203,14 +203,14 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
     CAssetSnapshotDBEntry snapshotEntry;
 
     if (!pAssetSnapshotDb->RetrieveOwnershipSnapshot(p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.nHeight, snapshotEntry)) {
-        LogPrint("Failed to retrieve ownership snapshot!\n");
+        LogPrint("rewards", "Failed to retrieve ownership snapshot!\n");
         return;
     }
 
     //  Generate payment transactions and store in the payments DB
     std::vector<OwnerAndAmount> paymentDetails;
     if (!GenerateDistributionList(p_rewardSnapshot, paymentDetails)) {
-        LogPrint("Failed to generate payment details!\n");
+        LogPrint("rewards", "Failed to generate payment details!\n");
         return;
     }
 
@@ -225,26 +225,26 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
             if (walletTx) {
                 int depth = walletTx->GetDepthInMainChain();
                 if (depth < 0) {
-                    LogPrint("Failed distribution: Tx conflict with another tx: %s: number of block back %d!\n", txid.GetHex(), depth);
+                    LogPrint("rewards", "Failed distribution: Tx conflict with another tx: %s: number of block back %d!\n", txid.GetHex(), depth);
                     return;
                 } else if (depth == 0) {
-                    LogPrint("Tx is in the mempool! %s\n", txid.GetHex());
+                    LogPrint("rewards", "Tx is in the mempool! %s\n", txid.GetHex());
                     return;
                 } else if (depth > 0) {
-                    LogPrint("Tx is in a block %s!\n", txid.GetHex());
+                    LogPrint("rewards", "Tx is in a block %s!\n", txid.GetHex());
                     continue;
                 }
             } else {
-                LogPrint("Failed to get wallet Tx: %s\n", txid.GetHex());
+                LogPrint("rewards", "Failed to get wallet Tx: %s\n", txid.GetHex());
             }
         } else {
-            LogPrint("Didn't find transaction in database creating new transaction: %s %s %d %d\n", p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount, i);
+            LogPrint("rewards", "Didn't find transaction in database creating new transaction: %s %s %d %d\n", p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount, i);
             // Create a new transaction and database it
             int start = i * MAX_PAYMENTS_PER_TRANSACTION;
             uint256 retTxid;
             std::string change = "";
             if (!BuildTransaction(p_wallet, p_rewardSnapshot, paymentDetails, start, change, retTxid)) {
-                LogPrint("Failed to build Tx: distribute: %s, amount: %d\n", p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount);
+                LogPrint("rewards", "Failed to build Tx: distribute: %s, amount: %d\n", p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount);
                 return;
             }
             pDistributeSnapshotDb->AddDistributeTransaction(p_rewardSnapshot.GetHash(), i, retTxid);
@@ -265,7 +265,7 @@ bool BuildTransaction(
     CRewardSnapshot copyRewardSnapshot = p_rewardSnapshot;
     auto rewardSnapshotHash = p_rewardSnapshot.GetHash();
 
-    LogPrint("Generating transactions for payments...\n");
+    LogPrint("rewards", "Generating transactions for payments...\n");
 
     //  Transfer the specified amount of the asset from the source to the target
     CCoinControl ctrl;
@@ -286,7 +286,7 @@ bool BuildTransaction(
         if (p_walletPtr->GetBroadcastTransactions() && !g_connman) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::NETWORK_ERROR;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint("Error: Peer-to-peer functionality missing or disabled\n");
+            LogPrint("rewards", "Error: Peer-to-peer functionality missing or disabled\n");
             return false;
         }
 
@@ -310,7 +310,7 @@ bool BuildTransaction(
         if (totalPaymentAmt > curBalance) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::LOW_FUNDS;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots[rewardSnapshotHash]);
-            LogPrint("Insufficient funds: total payment %lld > available balance %lld\n",
+            LogPrint("rewards", "Insufficient funds: total payment %lld > available balance %lld\n",
                      totalPaymentAmt, curBalance);
             return false;
         }
@@ -337,7 +337,7 @@ bool BuildTransaction(
         if (!p_walletPtr->CommitTransaction(*txnPtr.get(), *reserveKeyPtr.get(), g_connman.get(), state)) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::FAILED_COMMIT_TRANSACTION;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint("%s\n", state.GetRejectReason());
+            LogPrint("rewards", "%s\n", state.GetRejectReason());
             return false;
         }
     }
@@ -364,7 +364,7 @@ bool BuildTransaction(
         if (nTotalAssetAmount > totalAssetBalance) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::LOW_REWARDS;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots[rewardSnapshotHash]);
-            LogPrint("Insufficient asset funds: total payment %lld > available balance %lld\n",
+            LogPrint("rewards", "Insufficient asset funds: total payment %lld > available balance %lld\n",
                      nTotalAssetAmount, totalAssetBalance);
             return false;
         }
@@ -380,13 +380,13 @@ bool BuildTransaction(
         if (!p_walletPtr->CommitTransaction(*txnPtr.get(), *reserveKeyPtr.get(), g_connman.get(), state)) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::FAILED_COMMIT_TRANSACTION;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint("%s\n", state.GetRejectReason());
+            LogPrint("rewards", "%s\n", state.GetRejectReason());
             return false;
         }
     }
 
     retTxid = txnPtr->GetHash();
-    LogPrint("Transaction generation succeeded : %s\n", retTxid.GetHex());
+    LogPrint("rewards", "Transaction generation succeeded : %s\n", retTxid.GetHex());
 
     return true;
 }
