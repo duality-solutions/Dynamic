@@ -5154,7 +5154,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             /** ASSET END */
             // Create change script that will be used if we need change
             // TODO: pass in scriptChange instead of reservekey so
-            // change transaction isn't always pay-to-raven-address
+            // change transaction isn't always pay-to-dynamic-address
             CScript scriptChange;
             CScript assetScriptChange;
 
