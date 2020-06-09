@@ -11,6 +11,7 @@
 #define DYNAMIC_WALLET_WALLET_H
 
 #include "amount.h"
+#include "assets/assettypes.h"
 #include "base58.h"
 #include "bdap/linkstorage.h"
 #include "rpc/wallet.h"
@@ -40,6 +41,11 @@
 #include <boost/thread.hpp>
 
 extern CWallet* pwalletMain;
+
+/* ASSET START */
+typedef CWallet* CWalletRef;
+extern std::vector<CWalletRef> vpwallets;
+/* ASSET END */
 
 /**
  * Settings
@@ -559,6 +565,36 @@ public:
     bool IsBDAP() const;
 };
 
+/* ASSET START */
+class CInputCoin {
+public:
+    CInputCoin(const CWalletTx* walletTx, unsigned int i)
+    {
+        if (!walletTx)
+            throw std::invalid_argument("walletTx should not be null");
+        if (i >= walletTx->tx->vout.size())
+            throw std::out_of_range("The output index is out of range");
+
+        outpoint = COutPoint(walletTx->GetHash(), i);
+        txout = walletTx->tx->vout[i];
+    }
+
+    COutPoint outpoint;
+    CTxOut txout;
+
+    bool operator<(const CInputCoin& rhs) const {
+        return outpoint < rhs.outpoint;
+    }
+
+    bool operator!=(const CInputCoin& rhs) const {
+        return outpoint != rhs.outpoint;
+    }
+
+    bool operator==(const CInputCoin& rhs) const {
+        return outpoint == rhs.outpoint;
+    }
+};
+/* ASSET END */
 
 class COutput
 {
@@ -1250,6 +1286,38 @@ public:
      * calling CreateTransaction();
      */
     bool FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool overrideEstimatedFeeRate, const CFeeRate& specificFeeRate, int& nChangePosInOut, std::string& strFailReason, bool includeWatching, bool lockUnspents, const std::set<int>& setSubtractFeeFromOutputs, bool keepReserveKey = true, const CTxDestination& destChange = CNoDestination());
+
+
+    /* ASSET START STUBBED*/
+    /*
+    bool CreateTransactionWithAssets(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination destination, const AssetType& assetType, bool sign = true);
+
+    bool CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                                                     std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
+
+    bool CreateTransactionWithReissueAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                                                    std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, bool sign = true);
+
+    bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                           std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
+
+    /**
+     * Create a new transaction paying the recipients with a set of coins
+     * selected by SelectCoins(); Also create the change output, when needed
+     * @note passing nChangePosInOut as -1 will result in setting a random position
+     */
+    /*
+    bool CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                           std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination dest, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign = true);
+
+    bool CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
+                              int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const std::vector<CNewAsset> assets, const CTxDestination destination, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign);
+
+    bool CreateNewChangeAddress(CReserveKey& reservekey, CKeyID& keyID, std::string& strFailReason);
+    */
+    /** ASSET END */
+
 
     /**
      * Create a new transaction paying the recipients with a set of coins
