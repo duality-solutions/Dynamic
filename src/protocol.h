@@ -270,6 +270,26 @@ extern const char* DNGOVERNANCEOBJECTVOTE;
 extern const char* DNVERIFY;
 // BDAP VGP Secure Message
 extern const char* VGPMESSAGE;
+/**
+ * Contains a AssetDataRequest.
+ * Peer should respond with assetdata
+ * @since protocol version ***** // todo
+ */
+extern const char *GETASSETDATA;
+
+/**
+ * Contains a AssetData
+ * Sent in response to a "getassetdata" message.
+ * @since protocol version ***** // todo
+ */
+extern const char *ASSETDATA;
+
+/**
+ * The asstnotfound message is a reply to a getassetdata message which requested an
+ * object the receiving node does not have available for relay.
+ * @since protocol version 70018.
+ */
+    extern const char *ASSETNOTFOUND;
 }; // namespace NetMsgType
 
 /* Get a vector of all valid message types (see above) */

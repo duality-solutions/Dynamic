@@ -3190,6 +3190,32 @@ bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interr
                 pto->vAddrToSend.shrink_to_fit();
         }
 
+        //
+        // Message: getassetdata
+        //
+        if (pto->nVersion >= ASSETDATA_VERSION && pto->fGetAssetData) {
+            LOCK(pto->cs_inventory);
+
+            pto->fGetAssetData = false;
+
+            // Produce a vector with all candidates for sending
+            std::vector<CInvAsset> vInvAssets;
+            vInvAssets.reserve(std::max<size_t>(pto->setInventoryAssetsSend.size(), INVENTORY_BROADCAST_MAX));
+
+            // Add asset inv
+            for (auto& it : pto->setInventoryAssetsSend) {
+                vInvAssets.push_back(CInvAsset(it));
+                if (vInvAssets.size() == MAX_ASSET_INV_SZ) {
+                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
+                    vInvAssets.clear();
+                }
+            }
+            pto->setInventoryAssetsSend.clear();
+
+            if (!vInvAssets.empty())
+                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
+        }
+
         // Start block sync
         if (pindexBestHeader == NULL)
             pindexBestHeader = chainActive.Tip();
