@@ -1798,6 +1798,57 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
             }
         }
     }
+    /** ASSETS START */
+    if (AreAssetsDeployed()) {
+        if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
+            for (const CAssetOutputEntry &data : listAssetsReceived){
+                UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
+
+                entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
+                entry.push_back(Pair("asset_name", data.assetName));
+                entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
+                entry.push_back(Pair("destination", EncodeDestination(data.destination)));
+                entry.push_back(Pair("vout", data.vout));
+                entry.push_back(Pair("category", "receive"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
+                retAssets.push_back(entry);
+            }
+        }
+
+        if ((!listAssetsSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount)) {
+            for (const CAssetOutputEntry &data : listAssetsSent) {
+                UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
+
+                entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
+                entry.push_back(Pair("asset_name", data.assetName));
+                entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
+                entry.push_back(Pair("destination", EncodeDestination(data.destination)));
+                entry.push_back(Pair("vout", data.vout));
+                entry.push_back(Pair("category", "send"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
+                retAssets.push_back(entry);
+            }
+        }
+    }
+    /** ASSETS END */
 }
 
 void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccount, UniValue& ret)
