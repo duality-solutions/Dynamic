@@ -2,6 +2,7 @@
 #define DYNAMIC_TEST_TEST_DYNAMIC_H
 
 #include "chainparamsbase.h"
+#include "fs.h"
 #include "key.h"
 #include "pubkey.h"
 #include "txdb.h"
