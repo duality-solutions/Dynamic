@@ -57,8 +57,11 @@ class CValidationInterface;
 class CValidationState;
 struct ChainTxData;
 
-class CAssetsDB;
 class CAssets;
+class CAssetsCache;
+class CAssetsDB;
+class CMessage;
+class CNullAssetTxData;
 class CSnapshotRequestDB;
 
 struct LockPoints;
@@ -198,6 +201,7 @@ extern uint256 g_best_block;
 extern std::atomic_bool fImporting;
 extern bool fReindex;
 extern int nScriptCheckThreads;
+extern bool fMessaging;
 extern bool fTxIndex;
 extern bool fAssetIndex;
 extern bool fIsBareMultisigStd;
@@ -427,6 +431,10 @@ namespace Consensus
  * Preconditions: tx.IsCoinBase() is false.
  */
 bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight);
+
+/* ASSET START */
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0,  std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData = nullptr);
+/* ASSET END */
 
 } // namespace Consensus
 

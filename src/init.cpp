@@ -438,7 +438,7 @@ void PrepareShutdown()
         delete pDistributeSnapshotDb;
         pDistributeSnapshotDb = nullptr;
 
-/** ASSET END */
+        /** ASSET END */
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -2279,6 +2279,24 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // Start the DHT Torrent networks in the background
     const bool fMultiSessions = GetArg("-multidhtsessions", true);
     StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
+
+/* ASSET START */
+    // ********************************************************* Step 12.5: Init Msg Channel list
+    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
+        bool found;
+        if (!pmessagechanneldb->ReadFlag("init", found)) {
+            uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
+            std::string strLoadError;
+            if (!ScanForMessageChannels(strLoadError)) {
+                LogPrintf("%s : Failed to scan for message channels, %s\n", __func__, strLoadError);
+            } else {
+                pmessagechanneldb->WriteFlag("init", true);
+            }
+        }
+    }
+#endif
+/* ASSET END */
+    
     // ********************************************************* Step 13: finished
 
     SetRPCWarmupFinished();
