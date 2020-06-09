@@ -249,6 +249,19 @@ struct COutputEntry {
     int vout;
 };
 
+/** ASSET START */
+struct CAssetOutputEntry
+{
+    txnouttype type;
+    std::string assetName;
+    CTxDestination destination;
+    CAmount nAmount;
+    std::string message;
+    int64_t expireTime;
+    int vout;
+};
+/** ASSET END */
+
 /** A transaction with a merkle branch linking it to the block chain. */
 class CMerkleTx
 {
@@ -757,6 +770,10 @@ private:
      */
     bool SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl *coinControl = NULL, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = true) const;
 
+/** ASSET START */
+    bool SelectAssets(const std::map<std::string, std::vector<COutput> >& mapAvailableAssets, const std::map<std::string, CAmount>& mapAssetTargetValue, std::set<CInputCoin>& setCoinsRet, std::map<std::string, CAmount>& nValueRet) const;
+/** ASSET END */
+
     CWalletDB* pwalletdbEncryption;
 
     //! the current wallet version: clients below this version are not able to load the wallet
@@ -1024,6 +1041,34 @@ public:
 
     std::map<CDynamicAddress, std::vector<COutput> > AvailableCoinsByAddress(bool fConfirmed = true, CAmount maxCoinValue = 0);
 
+/** ASSET START */
+    /**
+     * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
+     */
+    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins,
+                            bool fGetRVN = true, bool fOnlyAssets = false,
+                            bool fOnlySafe = true, const CCoinControl *coinControl = nullptr,
+                            const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                            const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+
+    /**
+     * Helper function that calls AvailableCoinsAll, used for transfering assets
+     */
+    void AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe = true,
+                         const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                         const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                         const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
+
+    /**
+     * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and RVN
+     */
+    void AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                                  bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                                  const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                                  const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
+/** ASSET END */
+
     /**
      * populate vCoins with vector of available COutputs.
      */
@@ -1040,6 +1085,14 @@ public:
      * return BDAP Credits in Dynamic
      */
     CAmount GetBDAPDynamicAmount() const;
+
+/** ASSET START */
+    /**
+     * Return list of available assets and locked assets grouped by non-change output address.
+     */
+    std::map<CTxDestination, std::vector<COutput>> ListAssets() const;
+/** ASSET END */
+
     /**
      * Shuffle and select coins until nTargetValue is reached while avoiding
      * small change; This method is stochastic for some inputs and upon
@@ -1047,6 +1100,10 @@ public:
      * assembled
      */
     bool SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, uint64_t nMaxAncestors, std::vector<COutput> vCoins, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = false) const;
+
+/** ASSET START */
+    bool SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMine, const int nConfTheirs, const uint64_t nMaxAncestors, const std::string& strAssetName, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
+/** ASSET END */
 
     // Coin selection
     bool SelectPSInOutPairsByDenominations(int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector< std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet);

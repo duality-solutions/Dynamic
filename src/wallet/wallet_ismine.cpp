@@ -81,6 +81,56 @@ isminetype IsMine(const CKeyStore& keystore, const CScript& scriptPubKey)
             return ISMINE_SPENDABLE;
         break;
     }
+    /** ASSET START */
+        case TX_NEW_ASSET: {
+            if (!AreAssetsDeployed())
+                return ISMINE_NO;
+            keyID = CKeyID(uint160(vSolutions[0]));
+            if (sigversion != SIGVERSION_BASE) {
+                CPubKey pubkey;
+                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
+                    isInvalid = true;
+                    return ISMINE_NO;
+                }
+            }
+            if (keystore.HaveKey(keyID))
+                return ISMINE_SPENDABLE;
+            break;
+
+        }
+
+        case TX_TRANSFER_ASSET: {
+            if (!AreAssetsDeployed())
+                return ISMINE_NO;
+            keyID = CKeyID(uint160(vSolutions[0]));
+            if (sigversion != SIGVERSION_BASE) {
+                CPubKey pubkey;
+                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
+                    isInvalid = true;
+                    return ISMINE_NO;
+                }
+            }
+            if (keystore.HaveKey(keyID))
+                return ISMINE_SPENDABLE;
+            break;
+        }
+
+        case TX_REISSUE_ASSET: {
+            if (!AreAssetsDeployed())
+                return ISMINE_NO;
+            keyID = CKeyID(uint160(vSolutions[0]));
+            if (sigversion != SIGVERSION_BASE) {
+                CPubKey pubkey;
+                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
+                    isInvalid = true;
+                    return ISMINE_NO;
+                }
+            }
+            if (keystore.HaveKey(keyID))
+                return ISMINE_SPENDABLE;
+            break;
+        }
+    /** ASSET END*/
     }
 
     if (keystore.HaveWatchOnly(scriptPubKey)) {
