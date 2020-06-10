@@ -49,7 +49,7 @@ private:
     mutable CCriticalSection cs_accounts;
 
 public:
-    CHDChain() : nVersion(CHDChain::CURRENT_VERSION) { SetNull(); }
+    CHDChain(CWallet* pw): pwallet(pw) { SetNull(); }
     CHDChain(const CHDChain& other) : nVersion(other.nVersion),
                                       id(other.id),
                                       fCrypted(other.fCrypted),

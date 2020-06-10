@@ -19,6 +19,21 @@
 #include <utility>
 #include <vector>
 
+/**
+ * Overview of wallet database classes:
+ *
+ * - CDBEnv is an environment in which the database exists (has no analog in dbwrapper.h)
+ * - CWalletDBWrapper represents a wallet database (similar to CDBWrapper in dbwrapper.h)
+ * - CDB is a low-level database transaction (similar to CDBBatch in dbwrapper.h)
+ * - CWalletDB is a modifier object for the wallet, and encapsulates a database
+ *   transaction as well as methods to act on the database (no analog in
+ *   dbwrapper.h)
+ *
+ * The latter two are named confusingly, in contrast to what the names CDB
+ * and CWalletDB suggest they are transient transaction objects and don't
+ * represent the database itself.
+ */
+
 static const bool DEFAULT_FLUSHWALLET = true;
 
 class CAccount;
@@ -81,12 +96,37 @@ public:
 };
 
 /** Access to the wallet database */
-class CWalletDB : public CDB
+class CWalletDB
 {
+private:
+template <typename K, typename T>
+bool WriteIC(const K& key, const T& value, bool fOverwrite = true)
+{
+    if (!batch.Write(key, value, fOverwrite)) {
+        return false;
+    }
+    m_dbw.IncrementUpdateCounter();
+    return true;
+}
+
+template <typename K>
+bool EraseIC(const K& key)
+{
+    if (!batch.Erase(key)) {
+        return false;
+    }
+    m_dbw.IncrementUpdateCounter();
+    return true;
+}
+
 public:
-    CWalletDB(const std::string& strFilename, const char* pszMode = "r+", bool fFlushOnClose = true) : CDB(strFilename, pszMode, fFlushOnClose)
+    explicit CWalletDB(CWalletDBWrapper& dbw, const char* pszMode = "r+", bool _fFlushOnClose = true) :
+        batch(dbw, pszMode, _fFlushOnClose),
+        m_dbw(dbw)
     {
     }
+    CWalletDB(const CWalletDB&) = delete;
+    CWalletDB& operator=(const CWalletDB&) = delete;
 
     bool WriteName(const std::string& strAddress, const std::string& strName);
     bool EraseName(const std::string& strAddress);
@@ -175,8 +215,8 @@ public:
     bool ReadStealthKeyQueue(const CKeyID& keyId, CStealthKeyQueueData& sxKeyMeta);
 
 private:
-    CWalletDB(const CWalletDB&);
-    void operator=(const CWalletDB&);
+    CDB batch;
+    CWalletDBWrapper& m_dbw;
 };
 
 /* ASSET START */

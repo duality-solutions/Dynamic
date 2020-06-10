@@ -78,6 +78,8 @@ UniValue getinfo(const JSONRPCRequest& request)
             HelpExampleCli("getinfo", "") + HelpExampleRpc("getinfo", ""));
 
 #ifdef ENABLE_WALLET
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
@@ -334,6 +336,8 @@ UniValue validateaddress(const JSONRPCRequest& request)
             HelpExampleCli("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"") + HelpExampleRpc("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\""));
 
 #ifdef ENABLE_WALLET
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
@@ -444,6 +448,12 @@ CScript _createmultisig_redeemScript(const UniValue& params)
 
 UniValue createmultisig(const JSONRPCRequest& request)
 {
+#ifdef ENABLE_WALLET
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+#else
+    CWallet * const pwallet = nullptr;
+#endif
+    
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 2) {
         std::string msg = "createmultisig nrequired [\"key\",...]\n"
                           "\nCreates a multi-signature address with n signature of m keys required.\n"

@@ -92,6 +92,58 @@ public:
 
 extern CDBEnv bitdb;
 
+/** An instance of this class represents one database.
+ * For BerkeleyDB this is just a (env, strFile) tuple.
+ **/
+class CWalletDBWrapper
+{
+    friend class CDB;
+public:
+    /** Create dummy DB handle */
+    CWalletDBWrapper() : nUpdateCounter(0), nLastSeen(0), nLastFlushed(0), nLastWalletUpdate(0), env(nullptr)
+    {
+    }
+
+    /** Create DB handle to real database */
+    CWalletDBWrapper(CDBEnv *env_in, const std::string &strFile_in) :
+        nUpdateCounter(0), nLastSeen(0), nLastFlushed(0), nLastWalletUpdate(0), env(env_in), strFile(strFile_in)
+    {
+    }
+
+    /** Rewrite the entire database on disk, with the exception of key pszSkip if non-zero
+     */
+    bool Rewrite(const char* pszSkip=nullptr);
+
+    /** Back up the entire database to a file.
+     */
+    bool Backup(const std::string& strDest);
+
+    /** Get a name for this database, for debugging etc.
+     */
+    std::string GetName() const { return strFile; }
+
+    /** Make sure all changes are flushed to disk.
+     */
+    void Flush(bool shutdown);
+
+    void IncrementUpdateCounter();
+
+    std::atomic<unsigned int> nUpdateCounter;
+    unsigned int nLastSeen;
+    unsigned int nLastFlushed;
+    int64_t nLastWalletUpdate;
+
+private:
+    /** BerkeleyDB specific */
+    CDBEnv *env;
+    std::string strFile;
+
+    /** Return whether this database handle is a dummy for testing.
+     * Only to be used at a low level, application should ideally not care
+     * about this.
+     */
+    bool IsDummy() { return env == nullptr; }
+};
 
 /** RAII class that provides access to a Berkeley database */
 class CDB
@@ -102,19 +154,19 @@ protected:
     DbTxn* activeTxn;
     bool fReadOnly;
     bool fFlushOnClose;
-
-    explicit CDB(const std::string& strFilename, const char* pszMode = "r+", bool fFlushOnCloseIn = true);
-    ~CDB() { Close(); }
+    CDBEnv *env;
 
 public:
+    explicit CDB(CWalletDBWrapper& dbw, const char* pszMode = "r+", bool fFlushOnCloseIn=true);
+    ~CDB() { Close(); }
+
+    CDB(const CDB&) = delete;
+    CDB& operator=(const CDB&) = delete;
+
     void Flush();
     void Close();
 
-private:
-    CDB(const CDB&);
-    void operator=(const CDB&);
-
-protected:
+public:
     template <typename K, typename T>
     bool Read(const K& key, T& value)
     {
@@ -309,7 +361,7 @@ public:
         return Write(std::string("version"), nVersion);
     }
 
-    bool static Rewrite(const std::string& strFile, const char* pszSkip = NULL);
+    bool static Rewrite(CWalletDBWrapper& dbw, const char* pszSkip = nullptr);
 };
 
 #endif // DYNAMIC_WALLET_DB_H

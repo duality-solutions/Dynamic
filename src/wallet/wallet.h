@@ -848,6 +848,9 @@ private:
 
     void SyncMetaData(std::pair<TxSpends::iterator, TxSpends::iterator>);
 
+    /* the HD chain data model (external chain counters) */
+    CHDChain hdChain;
+    
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal /*= false*/);
 
@@ -885,6 +888,8 @@ private:
      */
     bool AddWatchOnly(const CScript& dest) override;
 
+    std::unique_ptr<CWalletDBWrapper> dbw;
+
 public:
     /*
      * Main wallet lock.
@@ -896,6 +901,25 @@ public:
     mutable CCriticalSection cs_wallet;
 
     const std::string strWalletFile;
+
+    /** Get database handle used by this wallet. Ideally this function would
+     * not be necessary.
+     */
+    CWalletDBWrapper& GetDBHandle()
+    {
+        return *dbw;
+    }
+
+    /** Get a name for this wallet for logging/debugging purposes.
+     */
+    std::string GetName() const
+    {
+        if (dbw) {
+            return dbw->GetName();
+        } else {
+            return "dummy";
+        }
+    }
 
     bool fFileBacked;
 
@@ -977,12 +1001,14 @@ public:
     bool fCombineDust;
     CAmount nAutoCombineThreshold;
 
-    CWallet()
+    // Create wallet with dummy database handle
+    CWallet(): hdChain(this), dbw(new CWalletDBWrapper())
     {
         SetNull();
     }
 
-    CWallet(const std::string& strWalletFileIn) : strWalletFile(strWalletFileIn)
+    // Create wallet with passed-in database handle
+    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : hdChain(this), dbw(std::move(dbw_in))
     {
         SetNull();
 
