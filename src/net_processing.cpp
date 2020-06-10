@@ -1355,7 +1355,7 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
 uint32_t GetFetchFlags(CNode* pfrom) {
     uint32_t nFetchFlags = 0;
     if (pfrom->GetLocalServices()) {
-        nFetchFlags |= MSG_WITNESS_FLAG;
+        nFetchFlags;
     }
     return nFetchFlags;
 }
