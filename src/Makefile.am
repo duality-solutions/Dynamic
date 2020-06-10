@@ -206,6 +206,7 @@ DYNAMIC_CORE_H = \
   rpc/client.h \
   rpc/protocol.h \
   rpc/register.h \
+  rpc/safemode.h \
   rpc/server.h \
   rpc/wallet.h \
   scheduler.h \
@@ -374,6 +375,7 @@ libdynamic_server_a_SOURCES = \
   rpc/net.cpp \
   rpc/rawbdap.cpp \
   rpc/rawtransaction.cpp \
+  rpc/safemode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
