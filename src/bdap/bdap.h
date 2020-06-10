@@ -35,6 +35,8 @@ typedef std::vector<CheckPoint> vCheckPoints; // << height, block hash >>
 static constexpr unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
 static constexpr unsigned int MAX_OBJECT_NAME_LENGTH      = 63;
 static constexpr unsigned int MAX_OBJECT_FULL_PATH_LENGTH = (MAX_OBJECT_NAME_LENGTH * 3) + 2; // domain + ou + object name + 2 dot chars
+static constexpr unsigned int MAX_ALGORITHM_TYPE_LENGTH   = 32;
+static constexpr unsigned int MAX_DATA_DESCRIPTION_LENGTH = 128;
 static constexpr unsigned int MAX_COMMON_NAME_LENGTH      = 95;
 static constexpr unsigned int MAX_ORG_NAME_LENGTH         = 95;
 static constexpr unsigned int MAX_WALLET_ADDRESS_LENGTH   = 105; // Stealth addresses are 102 chars in length plus 3 for a prefix. Regular addresses are 34 chars.

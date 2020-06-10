@@ -113,7 +113,7 @@ bool CAudit::ValidateValues(std::string& strErrorMessage) const
     if (!auditData.ValidateValues(strErrorMessage))
         return false;
 
-    if (vchAuditData.size() == 0)
+    if (auditData.vAuditData.size() == 0)
         return false;
 
     if (vchOwnerFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) {
@@ -123,6 +123,16 @@ bool CAudit::ValidateValues(std::string& strErrorMessage) const
 
     if (vchSignature.size() > MAX_SIGNATURE_LENGTH) {
         strErrorMessage = "Invalid BDAP audit signature length. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchAlgorithmType.size() > MAX_ALGORITHM_TYPE_LENGTH) {
+        strErrorMessage = "Invalid Algorithm Type length. Can not have more than " + std::to_string(MAX_ALGORITHM_TYPE_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchDescription.size() > MAX_DATA_DESCRIPTION_LENGTH) {
+        strErrorMessage = "Invalid Data Description length. Can not have more than " + std::to_string(MAX_DATA_DESCRIPTION_LENGTH) + " characters.";
         return false;
     }
 
@@ -184,6 +194,8 @@ std::string CAudit::ToString() const
         "    nVersion             = %d\n"
         "    Audit Count          = %d\n"
         "    Audit Data           = %s\n"
+        "    Algorithm Type       = %s\n"
+        "    Description          = %s\n"
         "    nTimeStamp           = %d\n"
         "    Owner                = %s\n"
         "    Signed               = %s\n"
@@ -191,6 +203,8 @@ std::string CAudit::ToString() const
         auditData.nVersion,
         auditData.vAuditData.size(),
         strAuditData,
+        stringFromVch(vchAlgorithmType),
+        stringFromVch(vchDescription),
         auditData.nTimeStamp,
         stringFromVch(vchOwnerFullObjectPath),
         IsSigned() ? "True" : "False"
@@ -208,6 +222,8 @@ bool BuildAuditJson(const CAudit& audit, UniValue& oAudit)
     oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
     oAudit.push_back(Pair("owner", stringFromVch(audit.vchOwnerFullObjectPath)));
     oAudit.push_back(Pair("signed", audit.IsSigned() ? "True" : "False"));
+    oAudit.push_back(Pair("algorithm type", stringFromVch(audit.vchAlgorithmType)));
+    oAudit.push_back(Pair("description", stringFromVch(audit.vchDescription)));
     oAudit.push_back(Pair("txid", audit.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= audit.nHeight-1) {
         CBlockIndex *pindex = chainActive[audit.nHeight-1];
