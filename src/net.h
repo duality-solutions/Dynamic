@@ -779,8 +779,9 @@ public:
 
 /* ASSET START */
     bool fGetAssetData;
+    std::set<std::string> setInventoryAssetsSend;
 /* ASSET END */
-    
+
     // inventory based relay
     CRollingBloomFilter filterInventoryKnown;
     // Set of transaction ids we still have to announce.
@@ -936,6 +937,14 @@ public:
             vInventoryOtherToSend.push_back(inv);
         }
     }
+
+/* ASSET START */
+    void PushAssetInventory(const std::string& name)
+    {
+        LOCK(cs_inventory);
+        setInventoryAssetsSend.insert(name);
+    }
+/* ASSET END */
 
     void PushBlockHash(const uint256& hash)
     {
