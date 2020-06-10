@@ -104,6 +104,12 @@ public:
         return out.IsNull();
     }
 
+/* ASSET START */
+    bool IsAsset() const {
+        return out.scriptPubKey.IsAssetScript();
+    }
+/* ASSET END */
+    
     size_t DynamicMemoryUsage() const
     {
         return memusage::DynamicUsage(out.scriptPubKey);
