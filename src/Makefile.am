@@ -240,6 +240,7 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
+  wallet/feebumper.h \
   wallet/init.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
@@ -420,6 +421,7 @@ libdynamic_wallet_a_SOURCES = \
   uint256.h \
   wallet/crypter.cpp \
   wallet/db.cpp \
+  wallet/feebumper.cpp \
   wallet/init.cpp \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
