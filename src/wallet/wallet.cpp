@@ -3904,13 +3904,13 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
             }
 
         if (LogAcceptCategory(BCLog::SELECTCOINS)) {
-            LogPrint(BCLog::SELECTCOINS, "SelectAssets() best subset: ");
+            LogPrint("SelectCoins", "SelectAssets() best subset: ");
             for (unsigned int i = 0; i < vValue.size(); i++) {
                 if (vfBest[i]) {
-                    LogPrint(BCLog::SELECTCOINS, "%s : %s", strAssetName, FormatMoney(vValue[i].second));
+                    LogPrint("SelectCoins", "%s : %s", strAssetName, FormatMoney(vValue[i].second));
                 }
             }
-            LogPrint(BCLog::SELECTCOINS, "total %s : %s\n", strAssetName, FormatMoney(nBest));
+            LogPrint("SelectCoins", "total %s : %s\n", strAssetName, FormatMoney(nBest));
         }
     }
 

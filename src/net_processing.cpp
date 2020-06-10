@@ -1286,7 +1286,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
 }
 
 /* ASSET START */
-void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensusParams, CConnman* connman, const std::atomic<bool>& interruptMsgProc)
+void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensusParams, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
 {
     std::deque<CInvAsset>::iterator it = pfrom->vRecvAssetGetData.begin();
     std::vector<CInvAsset> vNotFound;
@@ -1319,12 +1319,12 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
                 if (currentActiveAssetCache->GetAssetMetaDataIfExists(inv.name, asset, height, hash)) {
                     auto data = CDatabasedAssetData(asset, height, hash);
                     passetsCache->Put(inv.name, data);
-                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                    connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
                     push = true;
                 } else {
                     CDatabasedAssetData data;
                     data.asset.strName = "_NF"; // Return _NF for NOT Found
-                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                    connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
                 }
             }
 
@@ -1782,7 +1782,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     else if (strCommand == NetMsgType::GETASSETDATA)
     {
         if (IsInitialBlockDownload()) {
-            LogPrint(BCLog::NET, "Ignoring getassetdata from peer=%d because node is in initial block download\n", pfrom->GetId());
+            LogPrint("net", "Ignoring getassetdata from peer=%d because node is in initial block download\n", pfrom->GetId());
             return true;
         }
 
@@ -1804,10 +1804,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
         }
 
-        LogPrint(BCLog::NET, "received getassetdata (%u invassetsz) peer=%d\n", vInvAsset.size(), pfrom->GetId());
+        LogPrint("net", "received getassetdata (%u invassetsz) peer=%d\n", vInvAsset.size(), pfrom->GetId());
 
         if (vInvAsset.size() > 0) {
-            LogPrint(BCLog::NET, "received getassetdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
+            LogPrint("net", "received getassetdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
         }
 
         pfrom->vRecvAssetGetData.insert(pfrom->vRecvAssetGetData.end(), vInvAsset.begin(), vInvAsset.end());
@@ -3206,14 +3206,14 @@ bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interr
             for (auto& it : pto->setInventoryAssetsSend) {
                 vInvAssets.push_back(CInvAsset(it));
                 if (vInvAssets.size() == MAX_ASSET_INV_SZ) {
-                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
+                    connman.PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
                     vInvAssets.clear();
                 }
             }
             pto->setInventoryAssetsSend.clear();
 
             if (!vInvAssets.empty())
-                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
+                connman.PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
         }
 
         // Start block sync

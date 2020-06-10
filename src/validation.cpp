@@ -4132,7 +4132,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
             }
         }
         int64_t nTimeAssetsEnd = GetTimeMicros(); nTimeAssetTasks += nTimeAssetsEnd - nTimeAssetsStart;
-        LogPrint(BCLog::BENCH, "  - Compute Asset Tasks total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetsEnd - nTimeAssetsStart) * MILLI, nTimeAssetsEnd * MICRO, nTimeAssetsEnd * MILLI / nBlocksTotal);
+        LogPrint("bench", "  - Compute Asset Tasks total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetsEnd - nTimeAssetsStart) * MILLI, nTimeAssetsEnd * MICRO, nTimeAssetsEnd * MILLI / nBlocksTotal);
         /** ASSET END */
 
         nTime3 = GetTimeMicros();
@@ -4146,7 +4146,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         bool assetFlushed = assetCache.Flush();
         assert(assetFlushed);
         int64_t nTimeAssetFlushFinished = GetTimeMicros(); nTimeAssetFlush += nTimeAssetFlushFinished - nTimeAssetsFlush;
-        LogPrint(BCLog::BENCH, "  - Flush Assets: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetFlushFinished - nTimeAssetsFlush) * MILLI, nTimeAssetFlush * MICRO, nTimeAssetFlush * MILLI / nBlocksTotal);
+        LogPrint("bench", "  - Flush Assets: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetFlushFinished - nTimeAssetsFlush) * MILLI, nTimeAssetFlush * MICRO, nTimeAssetFlush * MILLI / nBlocksTotal);
         /** ASSET END */
     }
     int64_t nTime4 = GetTimeMicros();
@@ -4181,13 +4181,13 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
             for (auto const & assetEntry : assetsToSnapshot) {
                 //  Add a snapshot entry for the target asset ownership
                 if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetEntry.assetName, pindexNew->nHeight)) {
-                   LogPrint(BCLog::REWARDS, "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
+                   LogPrint("rewards", "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
                        assetEntry.assetName.c_str(), pindexNew->nHeight);
                 }
             }
         }
         else {
-            LogPrint(BCLog::REWARDS, "ConnectTip: Failed to load payable Snapshot Requests at height %d!\n", pindexNew->nHeight);
+            LogPrint("rewards", "ConnectTip: Failed to load payable Snapshot Requests at height %d!\n", pindexNew->nHeight);
         }
     }
 
