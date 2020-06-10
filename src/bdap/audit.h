@@ -13,11 +13,13 @@
 class CKey;
 class UniValue;
 
+typedef std::vector<unsigned char> AuditData;
+
 class CAuditData {
 public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
-    std::vector<CharString> vAuditData; // vector of hashes that points to the document being audited
+    std::vector<AuditData> vAuditData; // vector of hashes that points to the document being audited
     int64_t nTimeStamp;
 
     CAuditData() {
@@ -70,7 +72,7 @@ public:
 class CAudit
 {
 public:
-    std::vector<unsigned char> vchAuditData;
+    std::vector<unsigned char> vchAuditData; // serialized CAuditData class
     std::vector<unsigned char> vchOwnerFullObjectPath;  // name of the owner's full domain entry path
     std::vector<unsigned char> vchSignature; // signature using the owners wallet public key
     unsigned int nHeight;

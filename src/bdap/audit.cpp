@@ -109,11 +109,20 @@ int CAudit::Version() const
 
 bool CAudit::ValidateValues(std::string& strErrorMessage) const
 {
+    CAuditData auditData(vchAuditData);
+    if (!auditData.ValidateValues(strErrorMessage))
+        return false;
+
     if (vchAuditData.size() == 0)
         return false;
 
     if (vchOwnerFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) {
-        strErrorMessage = "Invalid BDAP audit owner FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
+        strErrorMessage = "Invalid BDAP audit owner FQDN length. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchSignature.size() > MAX_SIGNATURE_LENGTH) {
+        strErrorMessage = "Invalid BDAP audit signature length. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
         return false;
     }
 
