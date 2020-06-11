@@ -6,6 +6,8 @@
 #ifndef DYNAMIC_MESSAGES_H
 #define DYNAMIC_MESSAGES_H
 
+#include "sync.h"
+
 #include <uint256.h>
 #include <serialize.h>
 
