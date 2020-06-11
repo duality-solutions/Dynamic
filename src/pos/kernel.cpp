@@ -172,7 +172,7 @@ bool initStakeInput(const CBlock block, std::unique_ptr<CStakeInput>& stake, int
                      __func__, txin.prevout.hash.GetHex(), block.GetHash().GetHex());
 
     //verify signature and script
-    if (!VerifyScript(txin.scriptSig, ptxPrev->vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(ptx.get(), 0)))
+    if (!VerifyScript(txin.scriptSig, ptxPrev->vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(ptx.get(), SIGVERSION_BASE, ptxPrev->vout[txin.prevout.n].nValue)))
         return error("%s : VerifySignature failed on coinstake %s", __func__, ptx->GetHash().ToString().c_str());
 
     const CTransaction& txPrev = *ptxPrev.get();
