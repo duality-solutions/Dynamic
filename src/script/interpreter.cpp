@@ -1093,9 +1093,51 @@ public:
         // Serialize nLockTime
         ::Serialize(s, txTo.nLockTime);
     }
+
+    uint256 GetPrevoutHash(const CTransaction &txTo)
+    {
+        CHashWriter ss(SER_GETHASH, 0);
+        for (const auto &txin : txTo.vin)
+        {
+            ss << txin.prevout;
+        }
+        return ss.GetHash();
+    }
+
+    uint256 GetSequenceHash(const CTransaction &txTo)
+    {
+        CHashWriter ss(SER_GETHASH, 0);
+        for (const auto &txin : txTo.vin)
+        {
+            ss << txin.nSequence;
+        }
+        return ss.GetHash();
+    }
+
+    uint256 GetOutputsHash(const CTransaction &txTo)
+    {
+        CHashWriter ss(SER_GETHASH, 0);
+        for (const auto &txout : txTo.vout)
+        {
+            ss << txout;
+        }
+        return ss.GetHash();
+    }
 };
 
 } // namespace
+
+PrecomputedTransactionData::PrecomputedTransactionData(const CTransaction &txTo)
+{
+    // Cache is calculated only for transactions with witness
+    if (txTo.HasWitness())
+    {
+        hashPrevouts = GetPrevoutHash(txTo);
+        hashSequence = GetSequenceHash(txTo);
+        hashOutputs = GetOutputsHash(txTo);
+        ready = true;
+    }
+}
 
 uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType)
 {
