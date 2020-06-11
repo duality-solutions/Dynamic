@@ -34,6 +34,8 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
+extern bool EnsureWalletIsAvailable(bool avoidException);
+
 void CheckRestrictedAssetTransferInputs(const CWalletTx& transaction, const std::string& asset_name) {
     // Do a validity check before commiting the transaction
     if (IsAssetNameAnRestricted(asset_name)) {
@@ -114,15 +116,14 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
 #ifdef ENABLE_WALLET
 UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string tag_name = request.params[0].get_str();
@@ -175,7 +176,7 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
     }
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
@@ -186,7 +187,7 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     if (change_address == "") {
         CKeyID keyID;
         std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
+        if (!pwalletMain->CreateNewChangeAddress(reservekey, keyID, strFailReason))
             throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
 
         change_address = EncodeDestination(keyID);
@@ -203,12 +204,12 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     vecAssetData.push_back(std::make_pair(CNullAssetTxData(tag_name, flag), address));
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecAssetData))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecAssetData))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -219,15 +220,14 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
 
 UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &flag)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string restricted_name = request.params[0].get_str();
@@ -275,7 +275,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
     }
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
@@ -284,7 +284,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     if (change_address == "") {
         CKeyID keyID;
         std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
+        if (!pwalletMain->CreateNewChangeAddress(reservekey, keyID, strFailReason))
             throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
 
         change_address = EncodeDestination(keyID);
@@ -302,12 +302,12 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     vecAssetData.push_back(std::make_pair(CNullAssetTxData(restricted_name.substr(0, restricted_name.size()), flag), address));
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecAssetData))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecAssetData))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -319,15 +319,14 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
 
 UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t &flag)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string restricted_name = request.params[0].get_str();
@@ -372,7 +371,7 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
     }
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
@@ -381,7 +380,7 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     if (change_address == "") {
         CKeyID keyID;
         std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
+        if (!pwalletMain->CreateNewChangeAddress(reservekey, keyID, strFailReason))
             throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
 
         change_address = EncodeDestination(keyID);
@@ -399,12 +398,12 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     vecGlobalAssetData.push_back(CNullAssetTxData(restricted_name.substr(0, restricted_name.size()), flag));
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, nullptr, &vecGlobalAssetData))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, nullptr, &vecGlobalAssetData))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -448,15 +447,14 @@ UniValue issue(const JSONRPCRequest& request)
             + HelpExampleCli("issue", "\"ASSET_NAME#uniquetag\"")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string assetName = request.params[0].get_str();
@@ -498,18 +496,19 @@ UniValue issue(const JSONRPCRequest& request)
         // Create a new address
         std::string strAccount;
 
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
+        if (!pwalletMain->IsLocked()) {
+            pwalletMain->TopUpKeyPoolCombo();
         }
 
         // Generate a new key that is added to wallet
         CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
+        std::vector<unsigned char> newEdKey; //not really using this here, keeps keypools synced
+        if (!pwalletMain->GetKeysFromPool(newKey, newEdKey, false)) {
             throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
         }
         CKeyID keyID = newKey.GetID();
 
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
+        pwalletMain->SetAddressBook(keyID, strAccount, "receive");
 
         address = EncodeDestination(keyID);
     }
@@ -550,8 +549,8 @@ UniValue issue(const JSONRPCRequest& request)
     int64_t expireTime = 0;
 
     // Check the message data
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(ipfs_hash, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(ipfs_hash, expireTime);
 
     // check for required unique asset params
     if ((assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) && (nAmount != COIN || units != 0 || reissuable)) {
@@ -565,7 +564,7 @@ UniValue issue(const JSONRPCRequest& request)
 
     CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     std::pair<int, std::string> error;
@@ -574,12 +573,12 @@ UniValue issue(const JSONRPCRequest& request)
     crtl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
-    if (!CreateAssetTransaction(pwallet, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
+    if (!CreateAssetTransaction(pwalletMain, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -614,15 +613,14 @@ UniValue issueunique(const JSONRPCRequest& request)
                 + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"]\' \'[\"first_hash\",\"second_hash\"]\'")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
 
     const std::string rootName = request.params[0].get_str();
@@ -660,18 +658,19 @@ UniValue issueunique(const JSONRPCRequest& request)
         // Create a new address
         std::string strAccount;
 
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
+        if (!pwalletMain->IsLocked()) {
+            pwalletMain->TopUpKeyPoolCombo();
         }
 
         // Generate a new key that is added to wallet
         CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
+        std::vector<unsigned char> newEdKey; //not really using this here, keeps keypools synced
+        if (!pwalletMain->GetKeysFromPool(newKey, newEdKey, false)) {
             throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
         }
         CKeyID keyID = newKey.GetID();
 
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
+        pwalletMain->SetAddressBook(keyID, strAccount, "receive");
 
         address = EncodeDestination(keyID);
     }
@@ -711,7 +710,7 @@ UniValue issueunique(const JSONRPCRequest& request)
         assets.push_back(asset);
     }
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     std::pair<int, std::string> error;
@@ -721,12 +720,12 @@ UniValue issueunique(const JSONRPCRequest& request)
     crtl.destChange = DecodeDestination(changeAddress);
 
     // Create the Transaction
-    if (!CreateAssetTransaction(pwallet, crtl, assets, address, error, transaction, reservekey, nRequiredFee))
+    if (!CreateAssetTransaction(pwalletMain, crtl, assets, address, error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -935,13 +934,12 @@ UniValue listmyassets(const JSONRPCRequest &request)
                   + HelpExampleCli("listmyassets", "\"ASSET*\" true 10 20 1")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string filter = "*";
     if (request.params.size() > 0)
@@ -1016,8 +1014,8 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 //
                 // get amount for this outpoint
                 CAmount txAmount = 0;
-                auto it = pwallet->mapWallet.find(out.tx->GetHash());
-                if (it == pwallet->mapWallet.end()) {
+                auto it = pwalletMain->mapWallet.find(out.tx->GetHash());
+                if (it == pwalletMain->mapWallet.end()) {
                     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
                 }
                 const CWalletTx* wtx = out.tx;
@@ -1169,15 +1167,14 @@ UniValue transfer(const JSONRPCRequest& request)
                 + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     std::string asset_name = request.params[0].get_str();
 
@@ -1213,8 +1210,8 @@ UniValue transfer(const JSONRPCRequest& request)
         }
     }
 
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(message, expireTime);
 
     std::string dyn_change_address = "";
     if (request.params.size() > 5) {
@@ -1240,7 +1237,7 @@ UniValue transfer(const JSONRPCRequest& request)
     CAssetTransfer transfer(asset_name, nAmount, DecodeAssetData(message), expireTime);
 
     vTransfers.emplace_back(std::make_pair(transfer, to_address));
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
@@ -1249,7 +1246,7 @@ UniValue transfer(const JSONRPCRequest& request)
     ctrl.assetDestChange = asset_change_dest;
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Do a validity check before commiting the transaction
@@ -1257,7 +1254,7 @@ UniValue transfer(const JSONRPCRequest& request)
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -1295,15 +1292,14 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
             + HelpExampleRpc("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"to_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 154652365")
             );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     std::string asset_name = request.params[0].get_str();
 
@@ -1344,8 +1340,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
         }
     }
 
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(message, expireTime);
 
     std::string dyn_change_address = "";
     if (request.params.size() > 6) {
@@ -1369,13 +1365,13 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
     CCoinControl ctrl;
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
-    pwallet->AvailableAssets(mapAssetCoins);
+    pwalletMain->AvailableAssets(mapAssetCoins);
 
     // Set the change addresses
     ctrl.destChange = dyn_change_dest;
@@ -1402,7 +1398,7 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     }
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
     throw JSONRPCError(error.first, error.second);
 
     // Do a validity check before commiting the transaction
@@ -1410,7 +1406,7 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
     throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -1448,15 +1444,14 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
                 + HelpExampleRpc("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\", 156545652")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     std::string asset_name = request.params[0].get_str();
 
@@ -1488,8 +1483,8 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
         }
     }
 
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(message, expireTime);
 
     std::string dyn_change_address = "";
     if (request.params.size() > 6) {
@@ -1514,13 +1509,13 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
     CCoinControl ctrl;
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
-    pwallet->AvailableAssets(mapAssetCoins);
+    pwalletMain->AvailableAssets(mapAssetCoins);
 
     // Set the change addresses
     ctrl.destChange = dyn_change_dest;
@@ -1547,7 +1542,7 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     }
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Do a validity check before commiting the transaction
@@ -1555,7 +1550,7 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
@@ -1592,16 +1587,15 @@ UniValue reissue(const JSONRPCRequest& request)
                 + HelpExampleRpc("reissue", "\"ASSET_NAME\" 20 \"address\" \"change_address\" \"true\" 8 \"Qmd286K6pohQcTKYqnS1YhWrCiS4gz7Xi34sdwMe9USZ7u\"")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
     // To send a transaction the wallet must be unlocked
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Get that paramaters
     std::string asset_name = request.params[0].get_str();
@@ -1634,13 +1628,13 @@ UniValue reissue(const JSONRPCRequest& request)
     int64_t expireTime = 0;
 
     // Check the message data
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(newipfs, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(newipfs, expireTime);
 
     CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeAssetData(newipfs));
 
     std::pair<int, std::string> error;
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
@@ -1648,7 +1642,7 @@ UniValue reissue(const JSONRPCRequest& request)
     crtl.destChange = DecodeDestination(changeAddress);
 
     // Create the Transaction
-    if (!CreateReissueAssetTransaction(pwallet, crtl, reissueAsset, address, error, transaction, reservekey, nRequiredFee))
+    if (!CreateReissueAssetTransaction(pwalletMain, crtl, reissueAsset, address, error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     std::string strError = "";
@@ -1657,7 +1651,7 @@ UniValue reissue(const JSONRPCRequest& request)
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -2357,15 +2351,14 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
                 + HelpExampleCli("issuequalifierasset", "\"#ASSET_NAME\"")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string assetName = request.params[0].get_str();
@@ -2406,18 +2399,19 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
         // Create a new address
         std::string strAccount;
 
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
+        if (!pwalletMain->IsLocked()) {
+            pwalletMain->TopUpKeyPoolCombo();
         }
 
         // Generate a new key that is added to wallet
         CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
+        std::vector<unsigned char> newEdKey; //not really using this here, keeps keypools synced
+        if (!pwalletMain->GetKeysFromPool(newKey, newEdKey, false)) {
             throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
         }
         CKeyID keyID = newKey.GetID();
 
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
+        pwalletMain->SetAddressBook(keyID, strAccount, "receive");
 
         address = EncodeDestination(keyID);
     }
@@ -2453,12 +2447,12 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
     int64_t expireTime = 0;
 
     // Check the message data
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(ipfs_hash, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(ipfs_hash, expireTime);
 
     CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     std::pair<int, std::string> error;
@@ -2467,12 +2461,12 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
     crtl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
-    if (!CreateAssetTransaction(pwallet, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
+    if (!CreateAssetTransaction(pwalletMain, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -2513,15 +2507,15 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
                 + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 0 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string assetName = request.params[0].get_str();
@@ -2602,12 +2596,12 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
     int64_t expireTime = 0;
 
     // Check the message data
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(ipfs_hash, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(ipfs_hash, expireTime);
 
     CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     std::pair<int, std::string> error;
@@ -2616,12 +2610,12 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
     crtl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
-    if (!CreateAssetTransaction(pwallet, crtl, asset, to_address, error, transaction, reservekey, nRequiredFee, &verifierStripped))
+    if (!CreateAssetTransaction(pwalletMain, crtl, asset, to_address, error, transaction, reservekey, nRequiredFee, &verifierStripped))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -2660,15 +2654,14 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
                 + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     // Check asset name and infer assetType
     std::string assetName = request.params[0].get_str();
@@ -2739,12 +2732,12 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
     int64_t expireTime = 0;
 
     // Check the message data
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(new_ipfs_data, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(new_ipfs_data, expireTime);
 
     CReissueAsset reissueAsset(assetName, nAmount, newUnits, reissuable ? 1 : 0, DecodeAssetData(new_ipfs_data));
 
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
     std::pair<int, std::string> error;
@@ -2755,7 +2748,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
     std::string verifierStripped = GetStrippedVerifierString(verifier_string);
 
     // Create the Transaction
-    if (!CreateReissueAssetTransaction(pwallet, crtl, reissueAsset, to_address, error, transaction, reservekey, nRequiredFee, fChangeVerifier ? &verifierStripped : nullptr))
+    if (!CreateReissueAssetTransaction(pwalletMain, crtl, reissueAsset, to_address, error, transaction, reservekey, nRequiredFee, fChangeVerifier ? &verifierStripped : nullptr))
         throw JSONRPCError(error.first, error.second);
 
     std::string strError = "";
@@ -2764,7 +2757,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     UniValue result(UniValue::VARR);
@@ -2799,15 +2792,14 @@ UniValue transferqualifier(const JSONRPCRequest& request)
                 + HelpExampleCli("transferqualifier", "\"#QUALIFIER\" 20 \"to_address\" \"change_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     std::string asset_name = request.params[0].get_str();
 
@@ -2852,8 +2844,8 @@ UniValue transferqualifier(const JSONRPCRequest& request)
         }
     }
 
-    if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+    //if (fMessageCheck)
+    //    CheckIPFSTxidMessage(message, expireTime);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -2861,7 +2853,7 @@ UniValue transferqualifier(const JSONRPCRequest& request)
     CAssetTransfer transfer(asset_name, nAmount, DecodeAssetData(message), expireTime);
 
     vTransfers.emplace_back(std::make_pair(transfer, to_address));
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
@@ -2869,12 +2861,12 @@ UniValue transferqualifier(const JSONRPCRequest& request)
     ctrl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
