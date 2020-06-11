@@ -1353,11 +1353,7 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
 }
 
 uint32_t GetFetchFlags(CNode* pfrom) {
-    uint32_t nFetchFlags = 0;
-    if (pfrom->GetLocalServices()) {
-        nFetchFlags;
-    }
-    return nFetchFlags;
+    return 0;
 }
 /* ASSET END */
 
