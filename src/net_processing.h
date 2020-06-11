@@ -39,6 +39,10 @@ public:
     void BlockChecked(const CBlock& block, const CValidationState& state) override;
     void NewPoWValidBlock(const CBlockIndex* pindex, const std::shared_ptr<const CBlock>& pblock) override;
 
+    void InitializeNode(CNode* pnode) override;
+    void FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime) override;
+    /** Process protocol messages received from a given node */
+    bool ProcessMessages(CNode* pfrom, std::atomic<bool>& interrupt) override;
     /**
     * Send queued protocol messages to be sent to a give node.
     *
