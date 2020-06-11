@@ -4670,50 +4670,37 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
             break;
 
         const CBlockIndex* pindexFork;
-        ConnectTrace connectTrace;
         bool fInitialDownload;
         {
             LOCK(cs_main);
-            { // TODO: Tempoarily ensure that mempool removals are notified before
-                // connected transactions.  This shouldn't matter, but the abandoned
-                // state of transactions in our wallet is currently cleared when we
-                // receive another notification and there is a race condition where
-                // notification of a connected conflict might cause an outside process
-                // to abandon a transaction and then have it inadvertantly cleared by
-                // the notification that the conflicted transaction was evicted.
-                MemPoolConflictRemovalTracker mrt(mempool);
-                CBlockIndex* pindexOldTip = chainActive.Tip();
-                if (pindexMostWork == NULL) {
-                    pindexMostWork = FindMostWorkChain();
-                }
+            ConnectTrace connectTrace(mempool); // Destructed before cs_main is unlocked
 
-                // Whether we have anything to do at all.
-                if (pindexMostWork == NULL || pindexMostWork == chainActive.Tip())
-                    return true;
+            MemPoolConflictRemovalTracker mrt(mempool);
+            CBlockIndex* pindexOldTip = chainActive.Tip();
+            if (pindexMostWork == NULL) {
+                pindexMostWork = FindMostWorkChain();
+            }
 
-                bool fInvalidFound = false;
-                std::shared_ptr<const CBlock> nullBlockPtr;
-                if (!ActivateBestChainStep(state, chainparams, pindexMostWork, pblock && pblock->GetHash() == pindexMostWork->GetBlockHash() ? pblock : nullBlockPtr, fInvalidFound, connectTrace))
-                    return false;
+            // Whether we have anything to do at all.
+            if (pindexMostWork == NULL || pindexMostWork == chainActive.Tip())
+                return true;
 
-                if (fInvalidFound) {
-                    // Wipe cache, we may need another branch now.
-                    pindexMostWork = NULL;
-                }
-                pindexNewTip = chainActive.Tip();
-                pindexFork = chainActive.FindFork(pindexOldTip);
-                fInitialDownload = IsInitialBlockDownload();
+            bool fInvalidFound = false;
+            std::shared_ptr<const CBlock> nullBlockPtr;
+            if (!ActivateBestChainStep(state, chainparams, pindexMostWork, pblock && pblock->GetHash() == pindexMostWork->GetBlockHash() ? pblock : nullBlockPtr, fInvalidFound, connectTrace))
+                return false;
 
-                // throw all transactions though the signal-interface
+            if (fInvalidFound) {
+                // Wipe cache, we may need another branch now.
+                pindexMostWork = NULL;
+            }
+            pindexNewTip = chainActive.Tip();
+            pindexFork = chainActive.FindFork(pindexOldTip);
+            fInitialDownload = IsInitialBlockDownload();
 
-            } // MemPoolConflictRemovalTracker destroyed and conflict evictions are notified
-
-            // Transactions in the connnected block are notified
-            for (const auto& pair : connectTrace.blocksConnected) {
-                assert(pair.second);
-                const CBlock& block = *(pair.second);
-                for (unsigned int i = 0; i < block.vtx.size(); i++)
-                    GetMainSignals().SyncTransaction(*block.vtx[i], pair.first, i);
+            for (const PerBlockConnectTrace& trace : connectTrace.GetBlocksConnected()) {
+                assert(trace.pblock && trace.pindex);
+                GetMainSignals().BlockConnected(trace.pblock, trace.pindex, *trace.conflictedTxs);
             }
         }
         // When we reach this point, we switched to a new tip (stored in pindexNewTip).
