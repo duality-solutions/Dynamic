@@ -547,18 +547,18 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats& stats)
 
 void RegisterNodeSignals(CNodeSignals& nodeSignals)
 {
-    nodeSignals.ProcessMessages.connect(&ProcessMessages);
-    nodeSignals.SendMessages.connect(&SendMessages);
-    nodeSignals.InitializeNode.connect(&InitializeNode);
-    nodeSignals.FinalizeNode.connect(&FinalizeNode);
+    nodeSignals.ProcessMessages.connect(&PeerLogicValidation::ProcessMessages);
+    nodeSignals.SendMessages.connect(&PeerLogicValidation::SendMessages);
+    nodeSignals.InitializeNode.connect(&PeerLogicValidation::InitializeNode);
+    nodeSignals.FinalizeNode.connect(&PeerLogicValidation::FinalizeNode);
 }
 
 void UnregisterNodeSignals(CNodeSignals& nodeSignals)
 {
-    nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
-    nodeSignals.SendMessages.disconnect(&SendMessages);
-    nodeSignals.InitializeNode.disconnect(&InitializeNode);
-    nodeSignals.FinalizeNode.disconnect(&FinalizeNode);
+    nodeSignals.ProcessMessages.disconnect(&PeerLogicValidation::ProcessMessages);
+    nodeSignals.SendMessages.disconnect(&PeerLogicValidation::SendMessages);
+    nodeSignals.InitializeNode.disconnect(&PeerLogicValidation::InitializeNode);
+    nodeSignals.FinalizeNode.disconnect(&PeerLogicValidation::FinalizeNode);
 }
 
 //////////////////////////////////////////////////////////////////////////////
