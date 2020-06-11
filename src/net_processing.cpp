@@ -1352,9 +1352,6 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
 //    }
 }
 
-uint32_t GetFetchFlags(CNode* pfrom) {
-    return 0;
-}
 /* ASSET END */
 
 inline void static SendBlockTransactions(const CBlock& block, const BlockTransactionsRequest& req, CNode* pfrom, CConnman& connman)
