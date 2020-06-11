@@ -13,6 +13,7 @@
 #include "pow.h"
 #include "ui_interface.h"
 #include "uint256.h"
+#include "validation.h"
 
 #include <stdint.h>
 
