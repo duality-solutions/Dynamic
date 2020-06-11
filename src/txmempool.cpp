@@ -1141,6 +1141,22 @@ void CTxMemPool::clear()
     _clear();
 }
 
+/** ASSET START */
+static void CheckInputsAndUpdateCoins(const CTransaction& tx, CCoinsViewCache& mempoolDuplicate, const int64_t spendheight) {
+    CValidationState state;
+    CAmount txfee = 0;
+    bool fCheckResult = tx.IsCoinBase() || Consensus::CheckTxInputs(tx, state, mempoolDuplicate, spendheight, txfee);
+
+    if (AreAssetsDeployed()) {
+        std::vector<std::pair<std::string, uint256>> vReissueAssets;
+        bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate, passets, false, vReissueAssets);
+        assert(fCheckResult && fCheckAssets);
+    } else
+        assert(fCheckResult);
+    UpdateCoins(tx, mempoolDuplicate, 1000000);
+}
+/** ASSET END */
+
 void CTxMemPool::check(const CCoinsViewCache* pcoins) const
 {
     if (nCheckFrequency == 0)
@@ -1250,7 +1266,7 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
             bool fCheckResult = entry->GetTx().IsCoinBase() ||
                                 Consensus::CheckTxInputs(entry->GetTx(), state, mempoolDuplicate, nSpendHeight);
             assert(fCheckResult);
-            UpdateCoins(entry->GetTx(), mempoolDuplicate, 1000000);
+            CheckInputsAndUpdateCoins(entry->GetTx(), mempoolDuplicate, spendheight);
             stepsSinceLastRemove = 0;
         }
     }

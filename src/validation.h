@@ -53,6 +53,7 @@ class CInv;
 class CKeyStore;
 class CScriptCheck;
 class CTxMemPool;
+class CTxUndo;
 class CValidationInterface;
 class CValidationState;
 struct ChainTxData;
@@ -411,6 +412,8 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
 
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
+
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
 
 /** Transaction validation functions */
 
