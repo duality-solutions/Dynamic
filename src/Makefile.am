@@ -225,6 +225,7 @@ DYNAMIC_CORE_H = \
   threadinterrupt.h \
   threadsafety.h \
   timedata.h \
+  timestampindex.h \
   torcontrol.h \
   txdb.h \
   txmempool.h \

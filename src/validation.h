@@ -12,6 +12,7 @@
 #include "config/dynamic-config.h"
 #endif
 
+#include "addressindex.h"
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
@@ -20,6 +21,7 @@
 #include "script/script_error.h"
 #include "spentindex.h"
 #include "sync.h"
+#include "timestampindex.h"
 #include "versionbits.h"
 
 #include <algorithm>
