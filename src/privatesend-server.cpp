@@ -551,10 +551,13 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
     int i = 0;
     int nTxInIndex = -1;
     CScript sigPubKey = CScript();
+    CAmount amount = 0;
 
     for (const auto& entry : vecEntries) {
-        for (const auto& txout : entry.vecTxOut)
+        for (const auto& txout : entry.vecTxOut) {
             txNew.vout.push_back(txout);
+            amount += txout.nValue;
+        }
 
         for (const auto& txpsin : entry.vecTxPSIn) {
             txNew.vin.push_back(txpsin);
@@ -570,7 +573,7 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
     if (nTxInIndex >= 0) { //might have to do this one input at a time?
         txNew.vin[nTxInIndex].scriptSig = txin.scriptSig;
         LogPrint("privatesend", "CPrivateSendServer::IsInputScriptSigValid -- verifying scriptSig %s\n", ScriptToAsmStr(txin.scriptSig).substr(0, 24));
-        if (!VerifyScript(txNew.vin[nTxInIndex].scriptSig, sigPubKey, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, MutableTransactionSignatureChecker(&txNew, nTxInIndex))) {
+        if (!VerifyScript(txNew.vin[nTxInIndex].scriptSig, sigPubKey, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, MutableTransactionSignatureChecker(&txNew, nTxInIndex, amount))) {
             LogPrint("privatesend", "CPrivateSendServer::IsInputScriptSigValid -- VerifyScript() failed on input %d\n", nTxInIndex);
             return false;
         }
