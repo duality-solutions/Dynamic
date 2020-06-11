@@ -31,6 +31,8 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
+extern bool EnsureWalletIsAvailable(bool avoidException);
+
 std::string MessageActivationWarning()
 {
     return AreMessagesDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0005.mediawiki\n";
@@ -324,15 +326,14 @@ UniValue sendmessage(const JSONRPCRequest& request) {
                 + HelpExampleCli("sendmessage", "\"ASSET_NAME!\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
         );
 
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, pwallet->cs_wallet);
+    LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    EnsureWalletIsUnlocked(pwallet);
+    EnsureWalletIsUnlocked();
 
     std::string asset_name = request.params[0].get_str();
     std::string ipfs_hash = request.params[1].get_str();
@@ -360,7 +361,7 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
-    pwallet->AvailableAssets(mapAssetCoins);
+    pwalletMain->AvailableAssets(mapAssetCoins);
 
     if (!mapAssetCoins.count(asset_name)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
@@ -372,19 +373,19 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     std::string address = EncodeDestination(dest);
 
     vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, OWNER_ASSET_AMOUNT, DecodeAssetData(ipfs_hash), expire_time), address));
-    CReserveKey reservekey(pwallet);
+    CReserveKey reservekey(pwalletMain);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
     CCoinControl ctrl;
 
     // Create the Transaction
-    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    if (!CreateTransferAssetTransaction(pwalletMain, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
 
     // Send the Transaction to the network
     std::string txid;
-    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    if (!SendAssetTransaction(pwalletMain, transaction, reservekey, error, txid))
         throw JSONRPCError(error.first, error.second);
 
     // Display the transaction id
