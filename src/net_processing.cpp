@@ -274,7 +274,7 @@ void PushNodeVersion(CNode* pnode, CConnman& connman, int64_t nTime)
         LogPrint("net", "send version message: version %d, blocks=%d, us=%s, peer=%d\n", PROTOCOL_VERSION, nNodeStartingHeight, addrMe.ToString(), nodeid);
 }
 
-void InitializeNode(CNode* pnode, CConnman& connman)
+void PeerLogicValidation::InitializeNode(CNode* pnode)
 {
     CAddress addr = pnode->addr;
     std::string addrName = pnode->GetAddrName();
@@ -287,7 +287,7 @@ void InitializeNode(CNode* pnode, CConnman& connman)
         PushNodeVersion(pnode, connman, GetTime());
 }
 
-void FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime)
+void PeerLogicValidation::FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime)
 {
     fUpdateConnectionTime = false;
     LOCK(cs_main);
@@ -3000,7 +3000,7 @@ static bool SendRejectsAndCheckIfBanned(CNode* pnode, CConnman& connman)
     return false;
 }
 
-bool ProcessMessages(CNode* pfrom, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
+bool PeerLogicValidation::ProcessMessages(CNode* pfrom, const std::atomic<bool>& interruptMsgProc)
 {
     const CChainParams& chainparams = Params();
     //
@@ -3107,6 +3107,135 @@ bool ProcessMessages(CNode* pfrom, CConnman& connman, const std::atomic<bool>& i
     return fMoreWork;
 }
 
+void PeerLogicValidation::ConsiderEviction(CNode *pto, int64_t time_in_seconds)
+{
+    AssertLockHeld(cs_main);
+
+    CNodeState &state = *State(pto->GetId());
+    const CNetMsgMaker msgMaker(pto->GetSendVersion());
+
+    if (!state.m_chain_sync.m_protect && IsOutboundDisconnectionCandidate(pto) && state.fSyncStarted) {
+        // This is an outbound peer subject to disconnection if they don't
+        // announce a block with as much work as the current tip within
+        // CHAIN_SYNC_TIMEOUT + HEADERS_RESPONSE_TIME seconds (note: if
+        // their chain has more work than ours, we should sync to it,
+        // unless it's invalid, in which case we should find that out and
+        // disconnect from them elsewhere).
+        if (state.pindexBestKnownBlock != nullptr && state.pindexBestKnownBlock->nChainWork >= chainActive.Tip()->nChainWork) {
+            if (state.m_chain_sync.m_timeout != 0) {
+                state.m_chain_sync.m_timeout = 0;
+                state.m_chain_sync.m_work_header = nullptr;
+                state.m_chain_sync.m_sent_getheaders = false;
+            }
+        } else if (state.m_chain_sync.m_timeout == 0 || (state.m_chain_sync.m_work_header != nullptr && state.pindexBestKnownBlock != nullptr && state.pindexBestKnownBlock->nChainWork >= state.m_chain_sync.m_work_header->nChainWork)) {
+            // Our best block known by this peer is behind our tip, and we're either noticing
+            // that for the first time, OR this peer was able to catch up to some earlier point
+            // where we checked against our tip.
+            // Either way, set a new timeout based on current tip.
+            state.m_chain_sync.m_timeout = time_in_seconds + CHAIN_SYNC_TIMEOUT;
+            state.m_chain_sync.m_work_header = chainActive.Tip();
+            state.m_chain_sync.m_sent_getheaders = false;
+        } else if (state.m_chain_sync.m_timeout > 0 && time_in_seconds > state.m_chain_sync.m_timeout) {
+            // No evidence yet that our peer has synced to a chain with work equal to that
+            // of our tip, when we first detected it was behind. Send a single getheaders
+            // message to give the peer a chance to update us.
+            if (state.m_chain_sync.m_sent_getheaders) {
+                // They've run out of time to catch up!
+                LogPrintf("Disconnecting outbound peer %d for old chain, best known block = %s\n", pto->GetId(), state.pindexBestKnownBlock != nullptr ? state.pindexBestKnownBlock->GetBlockHash().ToString() : "<none>");
+                pto->fDisconnect = true;
+            } else {
+                LogPrint(BCLog::NET, "sending getheaders to outbound peer=%d to verify chain work (current best known block:%s, benchmark blockhash: %s)\n", pto->GetId(), state.pindexBestKnownBlock != nullptr ? state.pindexBestKnownBlock->GetBlockHash().ToString() : "<none>", state.m_chain_sync.m_work_header->GetBlockHash().ToString());
+                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(state.m_chain_sync.m_work_header->pprev), uint256()));
+                state.m_chain_sync.m_sent_getheaders = true;
+                constexpr int64_t HEADERS_RESPONSE_TIME = 120; // 2 minutes
+                // Bump the timeout to allow a response, which could clear the timeout
+                // (if the response shows the peer has synced), reset the timeout (if
+                // the peer syncs to the required work but not to our tip), or result
+                // in disconnect (if we advance to the timeout and pindexBestKnownBlock
+                // has not sufficiently progressed)
+                state.m_chain_sync.m_timeout = time_in_seconds + HEADERS_RESPONSE_TIME;
+            }
+        }
+    }
+}
+
+void PeerLogicValidation::EvictExtraOutboundPeers(int64_t time_in_seconds)
+{
+    // Check whether we have too many outbound peers
+    int extra_peers = connman->GetExtraOutboundCount();
+    if (extra_peers > 0) {
+        // If we have more outbound peers than we target, disconnect one.
+        // Pick the outbound peer that least recently announced
+        // us a new block, with ties broken by choosing the more recent
+        // connection (higher node id)
+        NodeId worst_peer = -1;
+        int64_t oldest_block_announcement = std::numeric_limits<int64_t>::max();
+
+        LOCK(cs_main);
+
+        connman->ForEachNode([&](CNode* pnode) {
+            // Ignore non-outbound peers, or nodes marked for disconnect already
+            if (!IsOutboundDisconnectionCandidate(pnode) || pnode->fDisconnect) return;
+            CNodeState *state = State(pnode->GetId());
+            if (state == nullptr) return; // shouldn't be possible, but just in case
+            // Don't evict our protected peers
+            if (state->m_chain_sync.m_protect) return;
+            if (state->m_last_block_announcement < oldest_block_announcement || (state->m_last_block_announcement == oldest_block_announcement && pnode->GetId() > worst_peer)) {
+                worst_peer = pnode->GetId();
+                oldest_block_announcement = state->m_last_block_announcement;
+            }
+        });
+        if (worst_peer != -1) {
+            bool disconnected = connman->ForNode(worst_peer, [&](CNode *pnode) {
+                // Only disconnect a peer that has been connected to us for
+                // some reasonable fraction of our check-frequency, to give
+                // it time for new information to have arrived.
+                // Also don't disconnect any peer we're trying to download a
+                // block from.
+                CNodeState &state = *State(pnode->GetId());
+                if (time_in_seconds - pnode->nTimeConnected > MINIMUM_CONNECT_TIME && state.nBlocksInFlight == 0) {
+                    LogPrint(BCLog::NET, "disconnecting extra outbound peer=%d (last block announcement received at time %d)\n", pnode->GetId(), oldest_block_announcement);
+                    pnode->fDisconnect = true;
+                    return true;
+                } else {
+                    LogPrint(BCLog::NET, "keeping outbound peer=%d chosen for eviction (connect time: %d, blocks_in_flight: %d)\n", pnode->GetId(), pnode->nTimeConnected, state.nBlocksInFlight);
+                    return false;
+                }
+            });
+            if (disconnected) {
+                // If we disconnected an extra peer, that means we successfully
+                // connected to at least one peer after the last time we
+                // detected a stale tip. Don't try any more extra peers until
+                // we next detect a stale tip, to limit the load we put on the
+                // network from these extra connections.
+                connman->SetTryNewOutboundPeer(false);
+            }
+        }
+    }
+}
+
+void PeerLogicValidation::CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams)
+{
+    if (connman == nullptr) return;
+
+    int64_t time_in_seconds = GetTime();
+
+    EvictExtraOutboundPeers(time_in_seconds);
+
+    if (time_in_seconds > m_stale_tip_check_time) {
+        LOCK(cs_main);
+        // Check whether our tip is stale, and if so, allow using an extra
+        // outbound peer
+        if (TipMayBeStale(consensusParams)) {
+            LogPrintf("Potential stale tip detected, will try using extra outbound peer (last tip update: %d seconds ago)\n", time_in_seconds - g_last_tip_update);
+            connman->SetTryNewOutboundPeer(true);
+        } else if (connman->GetTryNewOutboundPeer()) {
+            connman->SetTryNewOutboundPeer(false);
+        }
+        m_stale_tip_check_time = time_in_seconds + STALE_CHECK_INTERVAL;
+    }
+}
+
 class CompareInvMempoolOrder
 {
     CTxMemPool* mp;
@@ -3125,7 +3254,7 @@ public:
     }
 };
 
-bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
+bool PeerLogicValidation::SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
     {

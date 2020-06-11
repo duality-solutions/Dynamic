@@ -73,6 +73,9 @@
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
+#include "assets/assets.h"
+#include "assets/assetdb.h"
+#include "assets/snapshotrequestdb.h"
 #ifdef ENABLE_WALLET
 #include "keepass.h"
 #include "wallet/db.h"
@@ -333,7 +336,13 @@ void PrepareShutdown()
         flatdb6.Dump(sporkManager);
     }
 
-    UnregisterNodeSignals(GetNodeSignals());
+    // Because these depend on each-other, we make sure that neither can be
+    // using the other before destroying them.
+    UnregisterValidationInterface(peerLogic.get());
+    if(g_connman) g_connman->Stop();
+    peerLogic.reset();
+    g_connman.reset();
+
     if (fDumpMempoolLater)
         DumpMempool();
 
@@ -1573,9 +1582,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     g_connman = std::unique_ptr<CConnman>(new CConnman(GetRand(std::numeric_limits<uint64_t>::max()), GetRand(std::numeric_limits<uint64_t>::max())));
     CConnman& connman = *g_connman;
 
-    peerLogic.reset(new PeerLogicValidation(&connman));
+    peerLogic.reset(new PeerLogicValidation(&connman, scheduler));
     RegisterValidationInterface(peerLogic.get());
-    RegisterNodeSignals(GetNodeSignals());
 
     // sanitize comments per BIP-0014, format user agent and check total size
     std::vector<std::string> uacomments;
