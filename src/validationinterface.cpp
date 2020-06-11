@@ -31,6 +31,9 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn)
     g_signals.NotifyGovernanceVote.connect(boost::bind(&CValidationInterface::NotifyGovernanceVote, pwalletIn, _1));
     g_signals.NotifyBDAPUpdate.connect(boost::bind(&CValidationInterface::NotifyBDAPUpdate, pwalletIn, _1, _2));
     g_signals.NotifyInstantSendDoubleSpendAttempt.connect(boost::bind(&CValidationInterface::NotifyInstantSendDoubleSpendAttempt, pwalletIn, _1, _2));
+/* ASSET START */
+    g_signals.NewAssetMessage.connect(boost::bind(&CValidationInterface::NewAssetMessage, pwalletIn, _1));
+/* ASSET END */
 }
 
 void UnregisterValidationInterface(CValidationInterface* pwalletIn)
@@ -52,6 +55,9 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn)
     g_signals.NotifyGovernanceVote.disconnect(boost::bind(&CValidationInterface::NotifyGovernanceVote, pwalletIn, _1));
     g_signals.NotifyBDAPUpdate.disconnect(boost::bind(&CValidationInterface::NotifyBDAPUpdate, pwalletIn, _1, _2));
     g_signals.NotifyInstantSendDoubleSpendAttempt.disconnect(boost::bind(&CValidationInterface::NotifyInstantSendDoubleSpendAttempt, pwalletIn, _1, _2));
+/* ASSET START */
+    g_signals.NewAssetMessage.disconnect(boost::bind(&CValidationInterface::NewAssetMessage, pwalletIn, _1));
+/* ASSET END */
 }
 
 void UnregisterAllValidationInterfaces()
@@ -73,4 +79,7 @@ void UnregisterAllValidationInterfaces()
     g_signals.NotifyGovernanceVote.disconnect_all_slots();
     g_signals.NotifyBDAPUpdate.disconnect_all_slots();
     g_signals.NotifyInstantSendDoubleSpendAttempt.disconnect_all_slots();
+/* ASSET START */
+    g_signals.NewAssetMessage.disconnect_all_slots();
+/* ASSET END */
 }

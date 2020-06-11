@@ -8192,6 +8192,12 @@ bool CWallet::MultiSend()
     return true;
 }
 
+void CWallet::UpdateMyRestrictedAssets(std::string& address, std::string& asset_name, int type, uint32_t date)
+{
+    LOCK(cs_wallet);
+    NotifyMyRestrictedAssetsChanged(this, address, asset_name, type, date);
+}
+
 CKeyPool::CKeyPool()
 {
     nTime = GetTime();

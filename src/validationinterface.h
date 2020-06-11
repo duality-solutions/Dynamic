@@ -17,6 +17,7 @@ struct CBlockLocator;
 class CConnman;
 class CGovernanceVote;
 class CGovernanceObject;
+class CMessage;
 class CReserveScript;
 class CTransaction;
 class CValidationInterface;
@@ -53,6 +54,7 @@ protected:
     virtual void ResetRequestCount(const uint256& hash){};
     virtual void NewPoWValidBlock(const CBlockIndex* pindex, const std::shared_ptr<const CBlock>& block) {}
     virtual void NotifyBDAPUpdate(const char* value, const char* action) {}
+    virtual void NewAssetMessage(const CMessage &message) {};
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterAllValidationInterfaces();
@@ -104,6 +106,10 @@ struct CMainSignals {
     boost::signals2::signal<void(const CBlockIndex*, const std::shared_ptr<const CBlock>&)> NewPoWValidBlock;
     /** Notifies listeners of an updated BDAP action */
     boost::signals2::signal<void(const char* value, const char* action)> NotifyBDAPUpdate;
+/* ASSET START */
+    boost::signals2::signal<void (const CMessage &)> NewAssetMessage;
+    boost::signals2::signal<void (const std::string &)> AssetInventory;
+/* ASSET END  */
 };
 
 CMainSignals& GetMainSignals();

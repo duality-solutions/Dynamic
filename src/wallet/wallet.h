@@ -1452,6 +1452,9 @@ public:
     //! Flush wallet (bitdb flush)
     void Flush(bool shutdown = false);
 
+    void UpdateMyRestrictedAssets(std::string& address, std::string& asset_name,
+                                  int type, uint32_t date);
+    
     //! Verify the wallet database and perform salvage if required
     static bool Verify();
 

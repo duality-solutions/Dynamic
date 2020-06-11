@@ -19,6 +19,7 @@ enum DeploymentPos {
 /** ASSET START */
     DEPLOYMENT_ASSETS, // Deployment of Assets
     DEPLOYMENT_MSG_REST_ASSETS, // Deployment of Messaging/Restricted Assets
+    DEPLOYMENT_TRANSFER_SCRIPT_SIZE,
 /* ASSET END */
     DEPLOYMENT_BIP147, // Deployment of BIP147 (NULLDUMMY)
     DEPLOYMENT_ISAUTOLOCKS, // Deployment of automatic IS locks for simple transactions

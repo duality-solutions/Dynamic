@@ -2498,8 +2498,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
     }
     /** ASSET END */
 
-    if (view.HaveCoin(out))
-        fClean = false; // overwriting transaction output
+    if (view.HaveCoin(out)) fClean = false; // overwriting transaction output
 
     if (undo.nHeight == 0) {
         // Missing undo metadata (height and coinbase). Older versions included this
@@ -2513,7 +2512,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
             return DISCONNECT_FAILED; // adding output for transaction without known metadata
         }
     }
-    view.AddCoin(out, std::move(undo), undo.fCoinBase);
+    view.AddCoin(out, std::move(undo), !fClean);
 
     /** ASSET START */
     if (AreAssetsDeployed()) {
@@ -2529,7 +2528,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
 
 /** Undo the effects of this block (with given index) on the UTXO set represented by coins.
  *  When UNCLEAN or FAILED is returned, view is left in an indeterminate state. */
-static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, int nCheckLevel)
+static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, int nCheckLevel, CAssetsCache* assetsCache = nullptr, bool ignoreAddressIndex = false, bool databaseMessaging = true)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
     bool fClean = true;
@@ -2550,6 +2549,12 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         return DISCONNECT_FAILED;
     }
 
+    std::vector<std::pair<std::string, CBlockAssetUndo> > vUndoData;
+    if (!passetsdb->ReadBlockUndoAssetData(block.GetHash(), vUndoData)) {
+        error("DisconnectBlock(): block asset undo data inconsistent");
+        return DISCONNECT_FAILED;
+    }
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
@@ -2560,6 +2565,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         const CTransaction& tx = *block.vtx[i];
         uint256 hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
+
         bool fIsBDAP = tx.nVersion == BDAP_TX_VERSION;
         if (fIsBDAP && !fReindex && nCheckLevel >= 4) {
             LogPrintf("%s -- BDAP tx found. Hash %s\n", __func__, hash.ToString());
@@ -2940,7 +2946,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
 
         // restore inputs
         if (i > 0) { // not coinbases
-            CTxUndo& txundo = blockUndo.vtxundo[i - 1];
+            CTxUndo &txundo = blockUndo.vtxundo[i-1];
             if (txundo.vprevout.size() != tx.vin.size()) {
                 error("DisconnectBlock(): transaction and undo data inconsistent");
                 return DISCONNECT_FAILED;
@@ -2948,6 +2954,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
             for (unsigned int j = tx.vin.size(); j-- > 0;) {
                 const COutPoint& out = tx.vin[j].prevout;
                 int undoHeight = txundo.vprevout[j].nHeight;
+                Coin &undo = txundo.vprevout[j];
                 int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache); /** RVN START */ /* Pass assetsCache into ApplyTxInUndo function */ /** RVN END */
                 if (res == DISCONNECT_FAILED)
                     return DISCONNECT_FAILED;
@@ -3192,7 +3199,7 @@ static int64_t nTimeTotal = 0;
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins.
  *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
  *  can fail if those validity checks fail (among other reasons). */
-static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck = false, bool ignoreAddressIndex = false)
+static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, const CChainParams& chainparams, CAssetsCache* assetsCache = nullptr, bool fJustCheck = false, bool ignoreAddressIndex = false)
 {
     AssertLockHeld(cs_main);
 
@@ -3304,6 +3311,12 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
+
+/* ASSET START */
+    std::set<CMessage> setMessages;
+    std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
+/* ASSET END */
+
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
         const uint256 txhash = tx.GetHash();
@@ -3358,16 +3371,31 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     const CTxOut& prevout = coin.out;
                     uint160 hashBytes;
                     int addressType;
+                    bool isAsset = false;
+                    std::string assetName;
+                    CAmount assetAmount;
 
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
-                        hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin() + 2, prevout.scriptPubKey.begin() + 22));
+                        hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22));
                         addressType = 2;
                     } else if (prevout.scriptPubKey.IsPayToPublicKeyHash()) {
-                        hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin() + 3, prevout.scriptPubKey.begin() + 23));
+                        hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                        addressType = 1;
+                    } else if (prevout.scriptPubKey.IsPayToPublicKey()) {
+                        hashBytes = Hash160(prevout.scriptPubKey.begin() + 1, prevout.scriptPubKey.end() - 1);
                         addressType = 1;
                     } else {
-                        hashBytes.SetNull();
-                        addressType = 0;
+                        /* ASSET START */
+                        if (AreAssetsDeployed()) {
+                            hashBytes.SetNull();
+                            addressType = 0;
+
+                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
+                                addressType = 1;
+                                isAsset = true;
+                            }
+                        }
+                        /* ASSET END */
                     }
 
                     if (fAddressIndex && addressType > 0) {
@@ -3500,7 +3528,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         std::pair<std::string, CBlockAssetUndo> undoPair = std::make_pair("", CBlockAssetUndo());
         std::pair<std::string, CBlockAssetUndo>* undoAssetData = &undoPair;
         /** ASSET END */
-        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight);
+        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight, block.GetHash(), assetsCache, undoAssetData);
 
         /** ASSET START */
         if (!undoAssetData->first.empty()) {
@@ -4076,15 +4104,74 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
 static int64_t nTimeReadFromDisk = 0;
 static int64_t nTimeConnectTotal = 0;
 static int64_t nTimeFlush = 0;
+static int64_t nTimeAssetFlush = 0;
+static int64_t nTimeAssetTasks = 0;
 static int64_t nTimeChainState = 0;
 static int64_t nTimePostConnect = 0;
 
+struct PerBlockConnectTrace {
+    CBlockIndex* pindex = nullptr;
+    std::shared_ptr<const CBlock> pblock;
+    std::shared_ptr<std::vector<CTransactionRef>> conflictedTxs;
+    PerBlockConnectTrace() : conflictedTxs(std::make_shared<std::vector<CTransactionRef>>()) {}
+};
 /**
  * Used to track blocks whose transactions were applied to the UTXO state as a
  * part of a single ActivateBestChainStep call.
+ *
+ * This class also tracks transactions that are removed from the mempool as
+ * conflicts (per block) and can be used to pass all those transactions
+ * through SyncTransaction.
+ *
+ * This class assumes (and asserts) that the conflicted transactions for a given
+ * block are added via mempool callbacks prior to the BlockConnected() associated
+ * with those transactions. If any transactions are marked conflicted, it is
+ * assumed that an associated block will always be added.
+ *
+ * This class is single-use, once you call GetBlocksConnected() you have to throw
+ * it away and make a new one.
  */
-struct ConnectTrace {
-    std::vector<std::pair<CBlockIndex*, std::shared_ptr<const CBlock> > > blocksConnected;
+class ConnectTrace {
+private:
+    std::vector<PerBlockConnectTrace> blocksConnected;
+    CTxMemPool &pool;
+
+public:
+    explicit ConnectTrace(CTxMemPool &_pool) : blocksConnected(1), pool(_pool) {
+        pool.NotifyEntryRemoved.connect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+    }
+
+    ~ConnectTrace() {
+        pool.NotifyEntryRemoved.disconnect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+    }
+
+    void BlockConnected(CBlockIndex* pindex, std::shared_ptr<const CBlock> pblock) {
+        assert(!blocksConnected.back().pindex);
+        assert(pindex);
+        assert(pblock);
+        blocksConnected.back().pindex = pindex;
+        blocksConnected.back().pblock = std::move(pblock);
+        blocksConnected.emplace_back();
+    }
+
+    std::vector<PerBlockConnectTrace>& GetBlocksConnected() {
+        // We always keep one extra block at the end of our list because
+        // blocks are added after all the conflicted transactions have
+        // been filled in. Thus, the last entry should always be an empty
+        // one waiting for the transactions from the next block. We pop
+        // the last entry here to make sure the list we return is sane.
+        assert(!blocksConnected.back().pindex);
+        assert(blocksConnected.back().conflictedTxs->empty());
+        blocksConnected.pop_back();
+        return blocksConnected;
+    }
+
+    void NotifyEntryRemoved(CTransactionRef txRemoved, MemPoolRemovalReason reason) {
+        assert(!blocksConnected.back().pindex);
+        if (reason == MemPoolRemovalReason::CONFLICT) {
+            blocksConnected.back().conflictedTxs->emplace_back(std::move(txRemoved));
+        }
+    }
 };
 
 /**
@@ -5978,7 +6065,7 @@ bool InitBlockIndex(const CChainParams& chainparams)
     pblocktree->WriteFlag("addressindex", fAddressIndex);
 
     // Use the provided setting for -assetindex in the new database
-    fAssetIndex = gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
+    fAssetIndex = GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
     pblocktree->WriteFlag("assetindex", fAssetIndex);
     LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
 

@@ -36,11 +36,14 @@ private:
     unsigned int chRejectCode;
     bool corruptionPossible;
     std::string strDebugMessage;
+    uint256 failedTransaction;
 
 public:
     CValidationState() : mode(MODE_VALID), nDoS(0), chRejectCode(0), corruptionPossible(false) {}
-    bool DoS(int level, bool ret = false, unsigned int chRejectCodeIn = 0, const std::string& strRejectReasonIn = "", bool corruptionIn = false, const std::string& strDebugMessageIn = "")
-    {
+    bool DoS(int level, bool ret = false,
+             unsigned int chRejectCodeIn=0, const std::string &strRejectReasonIn="",
+             bool corruptionIn=false,
+             const std::string &strDebugMessageIn="", uint256 tx=uint256()) {
         chRejectCode = chRejectCodeIn;
         strRejectReason = strRejectReasonIn;
         corruptionPossible = corruptionIn;
@@ -52,42 +55,46 @@ public:
         return ret;
     }
     bool Invalid(bool ret = false,
-        unsigned int _chRejectCode = 0,
-        const std::string& _strRejectReason = "",
-        const std::string& _strDebugMessage = "")
-    {
+                 unsigned int _chRejectCode=0, const std::string &_strRejectReason="",
+                 const std::string &_strDebugMessage="") {
         return DoS(0, ret, _chRejectCode, _strRejectReason, false, _strDebugMessage);
     }
-    bool Error(const std::string& strRejectReasonIn)
-    {
+    bool Error(const std::string& strRejectReasonIn) {
         if (mode == MODE_VALID)
             strRejectReason = strRejectReasonIn;
         mode = MODE_ERROR;
         return false;
     }
-    bool IsValid() const
-    {
+    bool IsValid() const {
         return mode == MODE_VALID;
     }
-    bool IsInvalid() const
-    {
+    bool IsInvalid() const {
         return mode == MODE_INVALID;
     }
-    bool IsError() const
-    {
+    bool IsError() const {
         return mode == MODE_ERROR;
     }
-    bool IsInvalid(int& nDoSOut) const
-    {
+    bool IsInvalid(int &nDoSOut) const {
         if (IsInvalid()) {
             nDoSOut = nDoS;
             return true;
         }
         return false;
     }
-    bool CorruptionPossible() const
-    {
+    bool CorruptionPossible() const {
         return corruptionPossible;
+    }
+    void SetCorruptionPossible() {
+        corruptionPossible = true;
+    }
+    void SetFailedTransaction(const uint256& txhash) {
+        failedTransaction = txhash;
+    }
+    uint256 GetFailedTransaction() {
+        return failedTransaction;
+    }
+    bool IsTransactionError() const  {
+        return failedTransaction != uint256();
     }
     unsigned int GetRejectCode() const { return chRejectCode; }
     std::string GetRejectReason() const { return strRejectReason; }
