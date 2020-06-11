@@ -1683,12 +1683,12 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
     return AcceptToMemoryPoolWithTime(pool, state, tx, fLimitFree, pfMissingInputs, GetTime(), plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, fDryRun);
 }
 
-bool GetTimestampIndex(const unsigned int& high, const unsigned int& low, std::vector<uint256>& hashes)
+bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &hashes)
 {
     if (!fTimestampIndex)
         return error("Timestamp index not enabled");
 
-    if (!pblocktree->ReadTimestampIndex(high, low, hashes))
+    if (!pblocktree->ReadTimestampIndex(high, low, fActiveOnly, hashes))
         return error("Unable to get hashes for timestamps");
 
     return true;
