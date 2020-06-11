@@ -111,6 +111,13 @@ public:
         vOutpoints.assign(setSelected.begin(), setSelected.end());
     }
 
+/* ASSET START */
+    void ListSelectedAssets(std::vector<COutPoint>& vOutpoints) const
+    {
+        vOutpoints.assign(setAssetsSelected.begin(), setAssetsSelected.end());
+    }
+/* ASSET END */
+    
 private:
     std::set<COutPoint> setSelected;
 /* ASSET START */
