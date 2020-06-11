@@ -19,6 +19,8 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
+#include "compat/sanity.h"
+#include "consensus/validation.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/linkmanager.h"
@@ -53,8 +55,6 @@
 #ifdef ENABLE_WALLET
 #include "privatesend-client.h"
 #endif // ENABLE_WALLET
-#include "compat/sanity.h"
-#include "consensus/validation.h"
 #include "pos/staker.h"
 #include "privatesend-server.h"
 #include "psnotificationinterface.h"
