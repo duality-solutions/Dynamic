@@ -80,6 +80,13 @@ struct CMainSignals {
      * included in connected blocks such as transactions removed from mempool,
      * accepted to mempool or appearing in disconnected blocks.*/
     static const int SYNC_TRANSACTION_NOT_IN_BLOCK = -1;
+    /** Notifies listeners of updated transaction data (transaction, and
+     * optionally the block it is found in). Called with block data when
+     * transaction is included in a connected block, and without block data when
+     * transaction was accepted to mempool, removed from mempool (only when
+     * removal was due to conflict from connected block), or appeared in a
+     * disconnected block.*/
+    boost::signals2::signal<void(const CTransaction&, const CBlockIndex* pindex, int posInBlock)> SyncTransaction;
     boost::signals2::signal<void (const CTransactionRef &)> TransactionAddedToMempool;
     boost::signals2::signal<void (const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef>&)> BlockConnected;
     boost::signals2::signal<void (const std::shared_ptr<const CBlock> &)> BlockDisconnected;
