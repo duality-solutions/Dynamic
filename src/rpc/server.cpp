@@ -15,6 +15,7 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "validation.h"
 
 #include <univalue.h>
 
