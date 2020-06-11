@@ -212,6 +212,10 @@ extern std::string HelpExampleRpc(const std::string& methodname, const std::stri
 extern void EnsureWalletIsUnlocked();
 extern void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds);
 
+/* ASSET START */
+void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime);
+/* ASSET END */
+
 bool StartRPC();
 void InterruptRPC();
 void StopRPC();
