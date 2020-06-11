@@ -926,10 +926,21 @@ void CTxMemPool::removeConflicts(const CTransaction& tx)
     }
 }
 
+/* ASSET START */
 /**
  * Called when a block is connected. Removes from mempool and updates the miner fee estimator.
  */
 void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight)
+{
+    ConnectedBlockAssetData connectedBlockAssetData;
+    removeForBlock(vtx, nBlockHeight, connectedBlockAssetData);
+}
+/* ASSET END *./
+
+/**
+ * Called when a block is connected. Removes from mempool and updates the miner fee estimator.
+ */
+void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, ConnectedBlockAssetData& connectedBlockData)
 {
     LOCK(cs);
     std::vector<const CTxMemPoolEntry*> entries;
