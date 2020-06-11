@@ -616,7 +616,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
         }
     }
 
-    if fCheckDuplicateInputs {
+    if (fCheckDuplicateInputs) {
         // Check for duplicate inputs
         std::set<COutPoint> vInOutPoints;
         for (const auto& txin : tx.vin)
