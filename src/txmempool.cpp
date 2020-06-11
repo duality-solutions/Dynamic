@@ -1145,7 +1145,7 @@ void CTxMemPool::clear()
 static void CheckInputsAndUpdateCoins(const CTransaction& tx, CCoinsViewCache& mempoolDuplicate, const int64_t nSpendHeight) {
     CValidationState state;
     CAmount txfee = 0;
-    bool fCheckResult = tx.IsCoinBase() || Consensus::CheckTxInputs(tx, state, mempoolDuplicate, nSpendHeight, txfee);
+    bool fCheckResult = tx.IsCoinBase() || Consensus::CheckTxInputs(tx, state, mempoolDuplicate, nSpendHeight);
 
     if (AreAssetsDeployed()) {
         std::vector<std::pair<std::string, uint256>> vReissueAssets;
