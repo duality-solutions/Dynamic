@@ -33,6 +33,7 @@
 
 class CAutoFile;
 class CBlockIndex;
+struct ConnectedBlockAssetData;
 
 inline double AllowFreeThreshold()
 {
@@ -812,5 +813,16 @@ struct TxCoinAgePriorityCompare {
         return a.first < b.first;
     }
 };
+
+/* ASSET START */
+struct ConnectedBlockAssetData
+{
+    std::set<CAssetCacheNewAsset> newAssetsToAdd;
+    std::set<CAssetCacheRestrictedVerifiers> newVerifiersToAdd;
+    std::set<CAssetCacheRestrictedAddress> newAddressRestrictionsToAdd;
+    std::set<CAssetCacheRestrictedGlobal> newGlobalRestrictionsToAdd;
+    std::set<CAssetCacheQualifierAddress> newQualifiersToAdd;
+};
+/* ASSET END */
 
 #endif // DYNAMIC_TXMEMPOOL_H
