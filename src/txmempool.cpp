@@ -1234,17 +1234,7 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
         if (fDependsWait)
             waitingOnDependants.push_back(&(*it));
         else {
-            CValidationState state;
-            bool fCheckResult = entry->GetTx().IsCoinBase() || Consensus::CheckTxInputs(entry->GetTx(), state, mempoolDuplicate, nSpendHeight);
-            /** ASSET START */
-            if (AreAssetsDeployed()) {
-                std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate, passets, false, vReissueAssets);
-                assert(fCheckResult && fCheckAssets);
-            } else
-            assert(fCheckResult);
-            /** ASSET END */
-            UpdateCoins(tx, mempoolDuplicate, 1000000);
+            CheckInputsAndUpdateCoins(tx, mempoolDuplicate, spendheight);
         }
     }
     unsigned int stepsSinceLastRemove = 0;
