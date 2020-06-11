@@ -484,18 +484,18 @@ UniValue viewmyrestrictedaddresses(const JSONRPCRequest& request) {
 #endif
 
 static const CRPCCommand commands[] =
-    {           //  category    name                          actor (function)             argNames
-                //  ----------- ------------------------      -----------------------      ----------
-            { "messages",       "viewallmessages",            &viewallmessages,            {}},
-            { "messages",       "viewallmessagechannels",     &viewallmessagechannels,     {}},
-            { "messages",       "subscribetochannel",         &subscribetochannel,         {"channel_name"}},
-            { "messages",       "unsubscribefromchannel",     &unsubscribefromchannel,     {"channel_name"}},
+    {           //  category    name                          actor (function)             okSafe   argNames
+                //  ----------- ------------------------      -----------------------      ------   ----------
+            { "messages",       "viewallmessages",            &viewallmessages,            true,    {}},
+            { "messages",       "viewallmessagechannels",     &viewallmessagechannels,     true,    {}},
+            { "messages",       "subscribetochannel",         &subscribetochannel,         true,    {"channel_name"}},
+            { "messages",       "unsubscribefromchannel",     &unsubscribefromchannel,     true,    {"channel_name"}},
 #ifdef ENABLE_WALLET
-            { "messages",       "sendmessage",                &sendmessage,                {"channel", "ipfs_hash", "expire_time"}},
-            {"restricted",        "viewmytaggedaddresses",      &viewmytaggedaddresses,       {}},
-            {"restricted",        "viewmyrestrictedaddresses",  &viewmyrestrictedaddresses,   {}},
+            { "messages",       "sendmessage",                &sendmessage,                true,    {"channel", "ipfs_hash", "expire_time"}},
+            {"restricted",        "viewmytaggedaddresses",      &viewmytaggedaddresses,       true,    {}},
+            {"restricted",        "viewmyrestrictedaddresses",  &viewmyrestrictedaddresses,   true,    {}},
 #endif
-            { "messages",       "clearmessages",              &clearmessages,              {}},
+            { "messages",       "clearmessages",              &clearmessages,              true,    {}},
     };
 
 void RegisterMessageRPCCommands(CRPCTable &t)
