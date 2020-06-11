@@ -35,45 +35,70 @@ struct CMempoolAddressDelta {
     }
 };
 
-struct CMempoolAddressDeltaKey {
+struct CMempoolAddressDeltaKey
+{
     int type;
     uint160 addressBytes;
+    std::string asset;
     uint256 txhash;
     unsigned int index;
     int spending;
 
-    CMempoolAddressDeltaKey(int addressType, uint160 addressHash, uint256 hash, unsigned int i, int s)
-    {
+    CMempoolAddressDeltaKey(int addressType, uint160 addressHash, std::string assetName,
+                            uint256 hash, unsigned int i, int s) {
         type = addressType;
         addressBytes = addressHash;
+        asset = assetName;
         txhash = hash;
         index = i;
         spending = s;
     }
 
-    CMempoolAddressDeltaKey(int addressType, uint160 addressHash)
-    {
+    CMempoolAddressDeltaKey(int addressType, uint160 addressHash, uint256 hash, unsigned int i, int s) {
         type = addressType;
         addressBytes = addressHash;
+        asset = "";
+        txhash = hash;
+        index = i;
+        spending = s;
+    }
+
+    CMempoolAddressDeltaKey(int addressType, uint160 addressHash, std::string assetName) {
+        type = addressType;
+        addressBytes = addressHash;
+        asset = assetName;
+        txhash.SetNull();
+        index = 0;
+        spending = 0;
+    }
+
+    CMempoolAddressDeltaKey(int addressType, uint160 addressHash) {
+        type = addressType;
+        addressBytes = addressHash;
+        asset = "";
         txhash.SetNull();
         index = 0;
         spending = 0;
     }
 };
 
-struct CMempoolAddressDeltaKeyCompare {
-    bool operator()(const CMempoolAddressDeltaKey& a, const CMempoolAddressDeltaKey& b) const
-    {
+struct CMempoolAddressDeltaKeyCompare
+{
+    bool operator()(const CMempoolAddressDeltaKey& a, const CMempoolAddressDeltaKey& b) const {
         if (a.type == b.type) {
             if (a.addressBytes == b.addressBytes) {
-                if (a.txhash == b.txhash) {
-                    if (a.index == b.index) {
-                        return a.spending < b.spending;
+                if (a.asset == b.asset) {
+                    if (a.txhash == b.txhash) {
+                        if (a.index == b.index) {
+                            return a.spending < b.spending;
+                        } else {
+                            return a.index < b.index;
+                        }
                     } else {
-                        return a.index < b.index;
+                        return a.txhash < b.txhash;
                     }
                 } else {
-                    return a.txhash < b.txhash;
+                    return a.asset < b.asset;
                 }
             } else {
                 return a.addressBytes < b.addressBytes;
