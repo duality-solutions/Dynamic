@@ -24,7 +24,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CAssetTransfer asset("DYNAMICTEST", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CCoinsView view;
@@ -72,7 +72,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CAssetTransfer asset("DYNAMICTEST", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CCoinsView view;
@@ -100,7 +100,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // Create CTxOut that will only send 100 of the asset
         // This should fail because 900 DYNAMIC doesn't have a destination
         CAssetTransfer assetTransfer("DYNAMICTEST", 100);
-        CScript scriptLess = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptLess = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         assetTransfer.ConstructTransaction(scriptLess);
 
         CTxOut txOut2;
@@ -129,7 +129,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CAssetTransfer asset("DYNAMICTEST", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CCoinsView view;
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         for (int i = 0; i < 10; i++)
         {
             CAssetTransfer asset2("DYNAMICTEST", 100);
-            CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
 
             CTxOut txOut2;
@@ -190,7 +190,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CAssetTransfer asset("DYNAMICTEST", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CCoinsView view;
@@ -219,7 +219,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         for (int i = 0; i < 12; i++)
         {
             CAssetTransfer asset2("DYNAMICTEST", 100);
-            CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
 
             CTxOut txOut2;
@@ -251,15 +251,15 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKeys
         CAssetTransfer asset("DYNAMICTEST", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CAssetTransfer asset2("DYNAMICTESTTEST", 1000);
-        CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset2.ConstructTransaction(scriptPubKey2);
 
         CAssetTransfer asset3("DYNAMICTESTTESTTEST", 1000);
-        CScript scriptPubKey3 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        CScript scriptPubKey3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset3.ConstructTransaction(scriptPubKey3);
 
         CCoinsView view;
@@ -316,7 +316,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         {
             // Add the first asset
             CAssetTransfer outAsset("DYNAMICTEST", 100);
-            CScript outScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset.ConstructTransaction(outScript);
 
             CTxOut txOutNew;
@@ -327,7 +327,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
             // Add the second asset
             CAssetTransfer outAsset2("DYNAMICTESTTEST", 100);
-            CScript outScript2 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset2.ConstructTransaction(outScript2);
 
             CTxOut txOutNew2;
@@ -338,7 +338,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
             // Add the third asset
             CAssetTransfer outAsset3("DYNAMICTESTTESTTEST", 100);
-            CScript outScript3 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset3.ConstructTransaction(outScript3);
 
             CTxOut txOutNew3;
@@ -371,7 +371,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         {
             // Add the first asset
             CAssetTransfer outAsset("DYNAMICTEST", 100);
-            CScript outScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset.ConstructTransaction(outScript);
 
             CTxOut txOutNew;
@@ -382,7 +382,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
             // Add the second asset
             CAssetTransfer outAsset2("DYNAMICTESTTEST", 100);
-            CScript outScript2 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset2.ConstructTransaction(outScript2);
 
             CTxOut txOutNew2;
@@ -393,7 +393,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
             // Add the third asset
             CAssetTransfer outAsset3("DYNAMICTESTTESTTEST", 100);
-            CScript outScript3 = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+            CScript outScript3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset3.ConstructTransaction(outScript3);
 
             CTxOut txOutNew3;

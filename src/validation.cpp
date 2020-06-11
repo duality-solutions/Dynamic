@@ -6454,7 +6454,7 @@ bool AreAssetsDeployed() {
     if (fAssetsIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
         fAssetsIsActive = true;
 
@@ -6466,7 +6466,7 @@ bool IsMsgRestAssetIsActive()
     if (fMsgRestAssetIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MSG_REST_ASSETS);
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_MSG_REST_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
         fMsgRestAssetIsActive = true;
 
@@ -6483,7 +6483,7 @@ bool AreTransferScriptsSizeDeployed() {
     if (fTransferScriptIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE);
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE);
     if (thresholdState == THRESHOLD_ACTIVE)
         fTransferScriptIsActive = true;
 
@@ -6496,8 +6496,8 @@ bool AreRestrictedAssetsDeployed() {
 }
 
 bool IsMessagingActive(unsigned int nBlockNumber) {
-    if (GetParams().MessagingActivationBlock()) {
-        return nBlockNumber > GetParams().MessagingActivationBlock();
+    if (Params().MessagingActivationBlock()) {
+        return nBlockNumber > Params().MessagingActivationBlock();
     } else {
         return AreMessagesDeployed();
     }
@@ -6505,8 +6505,8 @@ bool IsMessagingActive(unsigned int nBlockNumber) {
 
 bool IsRestrictedActive(unsigned int nBlockNumber)
 {
-    if (GetParams().RestrictedActivationBlock()) {
-        return nBlockNumber > GetParams().RestrictedActivationBlock();
+    if (Params().RestrictedActivationBlock()) {
+        return nBlockNumber > Params().RestrictedActivationBlock();
     } else {
         return AreRestrictedAssetsDeployed();
     }
