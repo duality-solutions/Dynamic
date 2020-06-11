@@ -572,7 +572,7 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
-bool CheckTransaction(const CTransaction& tx, CValidationState& state)
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs)
 {
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -616,13 +616,16 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         }
     }
 
-    // Check for duplicate inputs
-    std::set<COutPoint> vInOutPoints;
-    for (const auto& txin : tx.vin)
-    {
-        if (!vInOutPoints.insert(txin.prevout).second)
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
+    if fCheckDuplicateInputs {
+        // Check for duplicate inputs
+        std::set<COutPoint> vInOutPoints;
+        for (const auto& txin : tx.vin)
+        {
+            if (!vInOutPoints.insert(txin.prevout).second)
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
+        }   
     }
+
     CAmount nStandardIn = 0;
     CAmount nCreditsIn = 0;
     std::vector<Coin> vBdapCoins;

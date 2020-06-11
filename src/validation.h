@@ -415,7 +415,7 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 /** Transaction validation functions */
 
 /** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state);
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true);
 /** 
  * Validate the usage of BDAP credits to makes sure they are not recirculated
  * with standard DYN (trapped as fuel credit) and used to fund the appropriate BDAP operation.
