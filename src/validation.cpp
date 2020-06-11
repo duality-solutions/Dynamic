@@ -2282,9 +2282,9 @@ bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoins
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction", false, "", tx.GetHash());
                     }
                 } else {
-                    if (out.scriptPubKey.Find(OP_RVN_ASSET)) {
+                    if (out.scriptPubKey.Find(OP_DYN_ASSET)) {
                         if (AreRestrictedAssetsDeployed()) {
-                            if (out.scriptPubKey[0] != OP_RVN_ASSET) {
+                            if (out.scriptPubKey[0] != OP_DYN_ASSET) {
                                 return state.DoS(100, false, REJECT_INVALID,
                                                  "bad-txns-op-rvn-asset-not-in-right-script-location", false, "", tx.GetHash());
                             }
