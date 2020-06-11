@@ -943,6 +943,8 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
 void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, ConnectedBlockAssetData& connectedBlockData)
 {
     LOCK(cs);
+    std::set<uint256> setAlreadyRemoving;
+
     std::vector<const CTxMemPoolEntry*> entries;
     for (const auto& tx : vtx) {
         uint256 hash = tx->GetHash();
