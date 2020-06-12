@@ -154,9 +154,7 @@ public:
     CInit()
     {
         // Init OpenSSL library multithreading support
-        ppmutexOpenSSL = (CCriticalSection**)OPENSSL_malloc(CRYPTO_num_locks() * sizeof(CCriticalSection*));
-        for (int i = 0; i < CRYPTO_num_locks(); i++)
-            ppmutexOpenSSL[i] = new CCriticalSection();
+        ppmutexOpenSSL.reset(new CCriticalSection[CRYPTO_num_locks()]);
         CRYPTO_set_locking_callback(locking_callback);
 
         // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
@@ -179,10 +177,9 @@ public:
         // Securely erase the memory used by the PRNG
         RAND_cleanup();
         // Shutdown OpenSSL library multithreading support
-        CRYPTO_set_locking_callback(NULL);
-        for (int i = 0; i < CRYPTO_num_locks(); i++)
-            delete ppmutexOpenSSL[i];
-        OPENSSL_free(ppmutexOpenSSL);
+        CRYPTO_set_locking_callback(nullptr);
+        // Clear the set of locks now to maintain symmetry with the constructor.
+        ppmutexOpenSSL.reset();
     }
 } instance_of_cinit;
 
@@ -408,7 +405,7 @@ static void InterpretNegativeSetting(std::string& strKey, std::string& strValue)
     }
 }
 
-void ParseParameters(int argc, const char* const argv[])
+void ArgsManager::ParseParameters(int argc, const char* const argv[])
 {
     LOCK(cs_args);
     mapArgs.clear();
@@ -442,46 +439,53 @@ void ParseParameters(int argc, const char* const argv[])
     }
 }
 
-bool IsArgSet(const std::string& strArg)
+std::vector<std::string> ArgsManager::GetArgs(const std::string &strArg) const
+{
+    LOCK(cs_args);
+    auto it = mapMultiArgs.find(strArg);
+    if (it != mapMultiArgs.end()) return it->second;
+    return {};
+}
+
+bool ArgsManager::IsArgSet(const std::string &strArg) const
 {
     LOCK(cs_args);
     return mapArgs.count(strArg);
 }
 
-std::string GetArg(const std::string& strArg, const std::string& strDefault)
+std::string ArgsManager::GetArg(const std::string &strArg, const std::string &strDefault) const
 {
     LOCK(cs_args);
-    if (mapArgs.count(strArg))
-        return mapArgs[strArg];
+    auto it = mapArgs.find(strArg);
+    if (it != mapArgs.end()) return it->second;
     return strDefault;
 }
 
-int64_t GetArg(const std::string& strArg, int64_t nDefault)
+int64_t ArgsManager::GetArg(const std::string &strArg, int64_t nDefault) const
 {
     LOCK(cs_args);
-    if (mapArgs.count(strArg))
-        return atoi64(mapArgs[strArg]);
+    auto it = mapArgs.find(strArg);
+    if (it != mapArgs.end()) return atoi64(it->second);
     return nDefault;
 }
 
-bool GetBoolArg(const std::string& strArg, bool fDefault)
+bool ArgsManager::GetBoolArg(const std::string &strArg, bool fDefault) const
 {
     LOCK(cs_args);
-    if (mapArgs.count(strArg))
-        return InterpretBool(mapArgs[strArg]);
+    auto it = mapArgs.find(strArg);
+    if (it != mapArgs.end()) return InterpretBool(it->second);
     return fDefault;
 }
 
-bool SoftSetArg(const std::string& strArg, const std::string& strValue)
+bool ArgsManager::SoftSetArg(const std::string &strArg, const std::string &strValue)
 {
     LOCK(cs_args);
-    if (mapArgs.count(strArg))
-        return false;
-    mapArgs[strArg] = strValue;
+    if (IsArgSet(strArg)) return false;
+    ForceSetArg(strArg, strValue);
     return true;
 }
 
-bool SoftSetBoolArg(const std::string& strArg, bool fValue)
+bool ArgsManager::SoftSetBoolArg(const std::string &strArg, bool fValue)
 {
     if (fValue)
         return SoftSetArg(strArg, std::string("1"));
@@ -489,25 +493,27 @@ bool SoftSetBoolArg(const std::string& strArg, bool fValue)
         return SoftSetArg(strArg, std::string("0"));
 }
 
-void ForceSetArg(const std::string& strArg, const std::string& strValue)
+void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strValue)
 {
     LOCK(cs_args);
     mapArgs[strArg] = strValue;
+    mapMultiArgs[strArg] = {strValue};
 }
 
-void ForceSetArg(const std::string& strArg, const int64_t& nValue)
+void ArgsManager::ForceSetArg(const std::string &strArg, const int64_t &nValue)
 {
     LOCK(cs_args);
-    mapArgs[strArg] = i64tostr(nValue);
+    mapArgs[strArg] = std::to_string(nValue);
+    mapMultiArgs[strArg] = {std::to_string(nValue)};
 }
 
-void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
+void ArgsManager::ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
 {
     LOCK(cs_args);
     _mapMultiArgs[strArg] = values;
 }
 
-void ForceRemoveArg(const std::string& strArg)
+void ArgsManager::ForceRemoveArg(const std::string& strArg)
 {
     LOCK(cs_args);
     mapArgs.erase(strArg);

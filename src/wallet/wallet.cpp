@@ -8093,7 +8093,7 @@ void CWallet::AutoCombineDust()
             continue;
 
         CValidationState state;
-        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
+        if (!CommitTransaction(wtx, keyChange, g_connman->get(), state)) {
             LogPrintf("AutoCombineDust transaction commit failed\n");
             continue;
         }
@@ -8194,7 +8194,7 @@ bool CWallet::MultiSend()
             return false;
         }
         CValidationState state;
-        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
+        if (!CommitTransaction(wtx, keyChange, g_connman->get(), state)) {
             LogPrintf("MultiSend transaction commit failed\n");
             return false;
         } else

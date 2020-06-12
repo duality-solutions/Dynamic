@@ -186,13 +186,12 @@ public:
 
     CConnman(uint64_t seed0, uint64_t seed1);
     ~CConnman();
-    bool Start(CScheduler& scheduler, std::string& strNodeError, Options options);
+    bool Start(CScheduler& scheduler, const Options& options);
     void Stop();
     void Interrupt();
-    bool BindListenPort(const CService& bindAddr, std::string& strError, bool fWhitelisted = false);
     bool GetNetworkActive() const { return fNetworkActive; };
     void SetNetworkActive(bool active);
-    bool OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant* grantOutbound = NULL, const char* strDest = NULL, bool fOneShot = false, bool fFeeler = false, bool fAddnode = false, bool fConnectToDynode = false);
+    bool OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant* grantOutbound = NULL, const char* strDest = NULL, bool fOneShot = false, bool fFeeler = false, bool manual_connection = false, bool fConnectToDynode = false);
     bool OpenDynodeConnection(const CAddress& addrConnect);
     bool CheckIncomingNonce(uint64_t nonce);
 
@@ -382,6 +381,19 @@ public:
     void GetBanned(banmap_t& banmap);
     void SetBanned(const banmap_t& banmap);
 
+    // This allows temporarily exceeding nMaxOutbound, with the goal of finding
+    // a peer that is better than all our current peers.
+    void SetTryNewOutboundPeer(bool flag);
+    bool GetTryNewOutboundPeer();
+
+    // Return the number of outbound peers we have in excess of our target (eg,
+    // if we previously called SetTryNewOutboundPeer(true), and have since set
+    // to false, we may have extra peers that we wish to disconnect). This may
+    // return a value less than (num_outbound_connections - num_outbound_slots)
+    // in cases where some outbound connections are not yet fully connected, or
+    // not yet fully disconnected.
+    int GetExtraOutboundCount();
+
     void AddOneShot(const std::string& strDest);
 
     bool AddNode(const std::string& node);
@@ -442,6 +454,9 @@ private:
         ListenSocket(SOCKET socket_, bool whitelisted_) : socket(socket_), whitelisted(whitelisted_) {}
     };
 
+    bool BindListenPort(const CService& bindAddr, std::string& strError, bool fWhitelisted = false);
+    bool Bind(const CService &addr, unsigned int flags);
+    bool InitBinds(const std::vector<CService>& binds, const std::vector<CService>& whiteBinds);
     void ThreadOpenAddedConnections();
     void ProcessOneShot();
     void ThreadOpenConnections();
@@ -559,6 +574,11 @@ private:
     std::thread threadOpenConnections;
     std::thread threadOpenDynodeConnections;
     std::thread threadMessageHandler;
+
+    /** flag for deciding to connect to an extra outbound peer,
+     *  in excess of nMaxOutbound
+     *  This takes the place of a feeler connection */
+    std::atomic_bool m_try_another_outbound_peer;
 };
 extern std::unique_ptr<CConnman> g_connman;
 void Discover(boost::thread_group& threadGroup);
@@ -581,17 +601,6 @@ struct CombinerAll {
         return true;
     }
 };
-
-// Signals for message handling
-struct CNodeSignals {
-    boost::signals2::signal<bool(CNode*, CConnman&, std::atomic<bool>&), CombinerAll> ProcessMessages;
-    boost::signals2::signal<bool(CNode*, CConnman&, std::atomic<bool>&), CombinerAll> SendMessages;
-    boost::signals2::signal<void(CNode*, CConnman&)> InitializeNode;
-    boost::signals2::signal<void(NodeId, bool&)> FinalizeNode;
-};
-
-
-CNodeSignals& GetNodeSignals();
 
 /**
  * Interface for message handling
@@ -672,7 +681,7 @@ public:
     int nVersion;
     std::string cleanSubVer;
     bool fInbound;
-    bool fAddnode;
+    bool m_manual_connection;
     int nStartingHeight;
     uint64_t nSendBytes;
     mapMsgCmdSize mapSendBytesPerMsgCmd;
@@ -782,7 +791,7 @@ public:
     bool fWhitelisted;          // This peer can bypass DoS banning.
     bool fFeeler;               // If true this node is being used as a short lived feeler.
     bool fOneShot;
-    bool fAddnode;
+    bool m_manual_connection;
     bool fClient;
     const bool fInbound;
     std::atomic_bool fSuccessfullyConnected;

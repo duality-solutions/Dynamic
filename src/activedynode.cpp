@@ -21,13 +21,13 @@ extern CWallet* pwalletMain;
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
 
-void CActiveDynode::DoMaintenance(CConnman &connman)
+void CActiveDynode::DoMaintenance(CConnman* connman)
 {
     if (ShutdownRequested()) return;
      ManageState(connman);
 }
 
-void CActiveDynode::ManageState(CConnman& connman)
+void CActiveDynode::ManageState(CConnman* connman)
 {
     LogPrint("dynode", "CActiveDynode::ManageState -- Start\n");
     if (!fDynodeMode) {
@@ -108,7 +108,7 @@ std::string CActiveDynode::GetTypeString() const
     return strType;
 }
 
-bool CActiveDynode::SendDynodePing(CConnman& connman)
+bool CActiveDynode::SendDynodePing(CConnman* connman)
 {
     if (!fPingerEnabled) {
         LogPrint("dynode", "CActiveDynode::SendDynodePing -- %s: Dynode ping service is disabled, skipping...\n", GetStateString());
@@ -153,7 +153,7 @@ bool CActiveDynode::UpdateSentinelPing(int version)
     return true;
 }
 
-void CActiveDynode::ManageStateInitial(CConnman& connman)
+void CActiveDynode::ManageStateInitial(CConnman* connman)
 {
     LogPrint("dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
@@ -170,7 +170,7 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     if (!fFoundLocal) {
         bool empty = true;
         // If we have some peers, let's try to find our local address from one of them
-        connman.ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
+        connman->ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
             empty = false;
             if (pnode->addr.IsIPv4())
                 fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);

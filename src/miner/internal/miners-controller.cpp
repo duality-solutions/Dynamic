@@ -11,7 +11,7 @@
 #include "validationinterface.h"
 
 
-MinersController::MinersController(const CChainParams& chainparams, CConnman& connman)
+MinersController::MinersController(const CChainParams& chainparams, CConnman* connman)
     : MinersController(std::make_shared<MinerContext>(chainparams, connman)){};
 
 MinersController::MinersController(MinerContextRef ctx)

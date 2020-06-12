@@ -295,20 +295,20 @@ bool CVGPMessage::IsInEffect() const
     return (unsignedMessage.nTimeStamp + 60 >= GetAdjustedTime());
 }
 
-bool CVGPMessage::RelayMessage(CConnman& connman) const
+bool CVGPMessage::RelayMessage(CConnman* connman) const
 {
     CUnsignedVGPMessage unsignedMessage(vchMsg);
     if (!IsInEffect())
         return false;
 
-    connman.ForEachNode([&connman, this, unsignedMessage](CNode* pnode) {
+    connman->ForEachNode([&connman, this, unsignedMessage](CNode* pnode) {
         if (pnode->nVersion != 0 && pnode->nVersion >= MIN_VGP_MESSAGE_PEER_PROTO_VERSION)
         {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
             // returns true if wasn't already contained in the set
             if (pnode->setKnown.insert(GetHash()).second) {
                 if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
-                    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
+                    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
                 }
             }
         }
@@ -406,7 +406,7 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
     return 0; // All checks okay, relay message to peers.
 }
 
-bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
+bool CVGPMessage::RelayTo(CNode* pnode, CConnman* connman) const
 {
     if (pnode->nVersion != 0 && pnode->nVersion >= MIN_VGP_MESSAGE_PEER_PROTO_VERSION)
     {
@@ -414,7 +414,7 @@ bool CVGPMessage::RelayTo(CNode* pnode, CConnman& connman) const
         CUnsignedVGPMessage unsignedMessage(vchMsg);
         if (pnode->setKnown.insert(GetHash()).second) {
             if (GetAdjustedTime() < unsignedMessage.nRelayUntil) {
-                connman.PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
+                connman->PushMessage(pnode, msgMaker.Make(NetMsgType::VGPMESSAGE, (*this)));
             }
             else {
                 return false;

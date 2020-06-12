@@ -31,7 +31,7 @@ void ConnectMinerSignals(MinersController*);
 class MinersController
 {
 public:
-    MinersController(const CChainParams& chainparams, CConnman& connman);
+    MinersController(const CChainParams& chainparams, CConnman* connman);
     MinersController(MinerContextRef ctx);
     virtual ~MinersController() = default;
 

@@ -30,7 +30,7 @@ If you screw up something, send another alert with nCancel set to cancel
 the bad alert.
 */
 
-void ThreadSendAlert(CConnman& connman)
+void ThreadSendAlert(CConnman* connman)
 {
     if (!IsArgSet("-sendalert") && !IsArgSet("-printalert"))
         return;
@@ -96,7 +96,7 @@ void ThreadSendAlert(CConnman& connman)
     // Confirm
     if (!IsArgSet("-sendalert"))
         return;
-    while (connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !ShutdownRequested())
+    while (connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !ShutdownRequested())
         MilliSleep(500);
     if (ShutdownRequested())
         return;
@@ -105,7 +105,7 @@ void ThreadSendAlert(CConnman& connman)
     printf("ThreadSendAlert() : Sending alert\n");
     int nSent = 0;
     {
-        connman.ForEachNode([&alert2, &connman, &nSent](CNode* pnode) {
+        connman->ForEachNode([&alert2, &connman, &nSent](CNode* pnode) {
             if (alert2.RelayTo(pnode, connman)) {
                 printf("ThreadSendAlert() : Sent alert to %s\n", pnode->addr.ToString().c_str());
                 nSent++;

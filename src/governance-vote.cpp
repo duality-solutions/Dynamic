@@ -118,7 +118,7 @@ std::string CGovernanceVote::ToString() const
     return ostr.str();
 }
 
-void CGovernanceVote::Relay(CConnman& connman) const
+void CGovernanceVote::Relay(CConnman* connman) const
 {
     // Do not relay until fully synced
     if (!dynodeSync.IsSynced()) {
@@ -127,7 +127,7 @@ void CGovernanceVote::Relay(CConnman& connman) const
     }
 
     CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, GetHash());
-    connman.RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
+    connman->RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
 }
 
 void CGovernanceVote::UpdateHash() const

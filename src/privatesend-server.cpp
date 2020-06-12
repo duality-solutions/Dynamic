@@ -19,7 +19,7 @@
 
 CPrivateSendServer privateSendServer;
 
-void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
+void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -31,7 +31,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
     if (strCommand == NetMsgType::PSACCEPT) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSACCEPT -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION, connman);
             return;
         }
@@ -96,7 +96,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
 
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSQUEUE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -152,7 +152,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
     } else if (strCommand == NetMsgType::PSVIN) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSVIN -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION, connman);
             return;
         }
@@ -250,7 +250,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
     } else if (strCommand == NetMsgType::PSSIGNFINALTX) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSSIGNFINALTX -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -288,7 +288,7 @@ void CPrivateSendServer::SetNull()
 //
 // Check the mixing progress and send client updates if a Dynode
 //
-void CPrivateSendServer::CheckPool(CConnman& connman)
+void CPrivateSendServer::CheckPool(CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -310,7 +310,7 @@ void CPrivateSendServer::CheckPool(CConnman& connman)
     }
 }
 
-void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
+void CPrivateSendServer::CreateFinalTransaction(CConnman* connman)
 {
     LogPrint("privatesend", "CPrivateSendServer::CreateFinalTransaction -- FINALIZE TRANSACTIONS\n");
 
@@ -336,7 +336,7 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
     SetState(POOL_STATE_SIGNING);
 }
 
-void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
+void CPrivateSendServer::CommitFinalTransaction(CConnman* connman)
 {
     if (!fDynodeMode)
         return; // check and relay final tx only on dynode
@@ -372,7 +372,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
     LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING PSTX\n");
 
     CInv inv(MSG_PSTX, hashTx);
-    connman.RelayInv(inv);
+    connman->RelayInv(inv);
 
     // Tell the clients it was successful
     RelayCompletedTransaction(MSG_SUCCESS, connman);
@@ -397,7 +397,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
 // transaction for the client to be able to enter the pool. This transaction is kept by the Dynode
 // until the transaction is either complete or fails.
 //
-void CPrivateSendServer::ChargeFees(CConnman& connman)
+void CPrivateSendServer::ChargeFees(CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -461,7 +461,7 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            connman.RelayTransaction(*vecOffendersCollaterals[0]);
+            connman->RelayTransaction(*vecOffendersCollaterals[0]);
         }
     }
 }
@@ -478,7 +478,7 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
     stop these kinds of attacks 1 in 10 successful transactions are charged. This
     adds up to a cost of 0.001DRK per transaction on average.
 */
-void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
+void CPrivateSendServer::ChargeRandomFees(CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -495,7 +495,7 @@ void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeRandomFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            connman.RelayTransaction(*txCollateral);
+            connman->RelayTransaction(*txCollateral);
         }
     }
 }
@@ -503,7 +503,7 @@ void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
 //
 // Check for various timeouts (queue objects, mixing, etc)
 //
-void CPrivateSendServer::CheckTimeout(CConnman& connman)
+void CPrivateSendServer::CheckTimeout(CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -526,7 +526,7 @@ void CPrivateSendServer::CheckTimeout(CConnman& connman)
     After receiving multiple psa messages, the queue will switch to "accepting entries"
     which is the active state right before merging the transaction
 */
-void CPrivateSendServer::CheckForCompleteQueue(CConnman& connman)
+void CPrivateSendServer::CheckForCompleteQueue(CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -722,7 +722,7 @@ bool CPrivateSendServer::IsAcceptablePSA(const CPrivateSendAccept& psa, PoolMess
     return true;
 }
 
-bool CPrivateSendServer::CreateNewSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet, CConnman& connman)
+bool CPrivateSendServer::CreateNewSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet, CConnman* connman)
 {
     if (!fDynodeMode || nSessionID != 0)
         return false;
@@ -797,16 +797,16 @@ bool CPrivateSendServer::AddUserToExistingSession(const CPrivateSendAccept& psa,
     return true;
 }
 
-void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal, CConnman& connman)
+void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal, CConnman* connman)
 {
     LogPrint("privatesend", "CPrivateSendServer::%s -- nSessionID: %d  nSessionDenom: %d (%s)\n",
         __func__, nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto entry : vecEntries) {
-        bool fOk = connman.ForNode(entry.addr, [&txFinal, &connman, this](CNode* pnode) {
+        bool fOk = connman->ForNode(entry.addr, [&txFinal, &connman, this](CNode* pnode) {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
-            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSFINALTX, nSessionID, txFinal));
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSFINALTX, nSessionID, txFinal));
             return true;
         });
         if (!fOk) {
@@ -817,21 +817,21 @@ void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal, CCon
     }
 }
 
-void CPrivateSendServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, CConnman& connman)
+void CPrivateSendServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, CConnman* connman)
 {
     if (!pnode)
         return;
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID));
 }
 
-void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman& connman, PoolMessage nMessageID)
+void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* connman, PoolMessage nMessageID)
 {
     unsigned int nDisconnected{};
     // status updates should be relayed to mixing participants only
     for (const auto entry : vecEntries) {
         // make sure everyone is still connected
-        bool fOk = connman.ForNode(entry.addr, [&nStatusUpdate, &nMessageID, &connman, this](CNode* pnode) {
+        bool fOk = connman->ForNode(entry.addr, [&nStatusUpdate, &nMessageID, &connman, this](CNode* pnode) {
             PushStatus(pnode, nStatusUpdate, nMessageID, connman);
             return true;
         });
@@ -849,7 +849,7 @@ void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman& c
 
     // notify everyone else that this session should be terminated
     for (const auto& entry : vecEntries) {
-        connman.ForNode(entry.addr, [&connman, this](CNode* pnode) {
+        connman->ForNode(entry.addr, [&connman, this](CNode* pnode) {
             PushStatus(pnode, STATUS_REJECTED, MSG_NOERR, connman);
             return true;
         });
@@ -862,16 +862,16 @@ void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman& c
     }
 }
 
-void CPrivateSendServer::RelayCompletedTransaction(PoolMessage nMessageID, CConnman& connman)
+void CPrivateSendServer::RelayCompletedTransaction(PoolMessage nMessageID, CConnman* connman)
 {
     LogPrint("privatesend", "CPrivateSendServer::%s -- nSessionID: %d  nSessionDenom: %d (%s)\n",
         __func__, nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto& entry : vecEntries) {
-        bool fOk = connman.ForNode(entry.addr, [&nMessageID, &connman, this](CNode* pnode) {
+        bool fOk = connman->ForNode(entry.addr, [&nMessageID, &connman, this](CNode* pnode) {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
-            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID));
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID));
             return true;
         });
         if (!fOk) {
@@ -896,7 +896,7 @@ void CPrivateSendServer::SetState(PoolState nStateNew)
     nState = nStateNew;
 }
 
-void CPrivateSendServer::DoMaintenance(CConnman& connman)
+void CPrivateSendServer::DoMaintenance(CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality

@@ -89,10 +89,6 @@ boost::array<int, 10> vnThreadsRunning;
 
 limitedmap<uint256, int64_t> mapAlreadyAskedFor(MAX_INV_SZ);
 
-// Signals for message handling
-static CNodeSignals g_signals;
-CNodeSignals& GetNodeSignals() { return g_signals; }
-
 void CConnman::AddOneShot(const std::string& strDest)
 {
     LOCK(cs_vOneShots);
@@ -640,7 +636,7 @@ void CNode::copyStats(CNodeStats& stats)
         X(cleanSubVer);
     }
     X(fInbound);
-    X(fAddnode);
+    X(m_manual_connection);
     X(nStartingHeight);
     {
         LOCK(cs_vSend);
@@ -1516,7 +1512,7 @@ void CConnman::ThreadDNSAddressSeed()
         LOCK(cs_vNodes);
         int nRelevant = 0;
         for (auto pnode : vNodes) {
-            nRelevant += pnode->fSuccessfullyConnected && ((pnode->nServices & nRelevantServices) == nRelevantServices);
+            nRelevant += pnode->fSuccessfullyConnected && !pnode->fFeeler && !pnode->fOneShot && !pnode->m_manual_connection && !pnode->fInbound;
         }
         if (nRelevant >= 7) {
             LogPrintf("P2P peers available. Skipped DNS seeding.\n");
@@ -1602,6 +1598,37 @@ void CConnman::ProcessOneShot()
     }
 }
 
+bool CConnman::GetTryNewOutboundPeer()
+{
+    return m_try_another_outbound_peer;
+}
+
+void CConnman::SetTryNewOutboundPeer(bool flag)
+{
+    m_try_another_outbound_peer = flag;
+    LogPrint("net", "net: setting try another outbound peer=%s\n", flag ? "true" : "false");
+}
+
+// Return the number of peers we have over our outbound connection limit
+// Exclude peers that are marked for disconnect, or are going to be
+// disconnected soon (eg one-shots and feelers)
+// Also exclude peers that haven't finished initial connection handshake yet
+// (so that we don't decide we're over our desired connection limit, and then
+// evict some peer that has finished the handshake)
+int CConnman::GetExtraOutboundCount()
+{
+    int nOutbound = 0;
+    {
+        LOCK(cs_vNodes);
+        for (CNode* pnode : vNodes) {
+            if (!pnode->fInbound && !pnode->m_manual_connection && !pnode->fFeeler && !pnode->fDisconnect && !pnode->fOneShot && pnode->fSuccessfullyConnected) {
+                ++nOutbound;
+            }
+        }
+    }
+    return std::max(nOutbound - nMaxOutbound, 0);
+}
+
 void CConnman::ThreadOpenConnections()
 {
     // Connect to specific addresses
@@ -1662,7 +1689,7 @@ void CConnman::ThreadOpenConnections()
         if (!Params().AllowMultipleAddressesFromGroup()) {
             LOCK(cs_vNodes);
             BOOST_FOREACH (CNode* pnode, vNodes) {
-                if (!pnode->fInbound && !pnode->fAddnode && !pnode->fDynode) {
+                if (!pnode->fInbound && !pnode->m_manual_connection && !pnode->fDynode) {
                     // Count the peers that have all relevant services
                     if (pnode->fSuccessfullyConnected && !pnode->fFeeler && ((pnode->nServices & nRelevantServices) == nRelevantServices)) {
                         nOutboundRelevant++;
@@ -1691,7 +1718,7 @@ void CConnman::ThreadOpenConnections()
         //  * Only make a feeler connection once every few minutes.
         //
         bool fFeeler = false;
-        if (nOutbound >= nMaxOutbound) {
+        if (nOutbound >= nMaxOutbound && !GetTryNewOutboundPeer()) {
             int64_t nTime = GetTimeMicros(); // The current time right now (in microseconds).
             if (nTime > nNextFeeler) {
                 nNextFeeler = PoissonNextSend(nTime, FEELER_INTERVAL);
@@ -1901,7 +1928,7 @@ void CConnman::ThreadOpenDynodeConnections()
 }
 
 // if successful, this moves the passed grant to the constructed node
-bool CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant* grantOutbound, const char* pszDest, bool fOneShot, bool fFeeler, bool fAddnode, bool fConnectToDynode)
+bool CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant* grantOutbound, const char* pszDest, bool fOneShot, bool fFeeler, bool manual_connection, bool fConnectToDynode)
 {
     //
     // Initiate outbound network connection
@@ -1937,8 +1964,8 @@ bool CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFai
         pnode->fOneShot = true;
     if (fFeeler)
         pnode->fFeeler = true;
-    if (fAddnode)
-        pnode->fAddnode = true;
+    if (manual_connection)
+        pnode->m_manual_connection = true;
     if (fConnectToDynode)
         pnode->fDynode = true;
 
@@ -2170,6 +2197,10 @@ CConnman::CConnman(uint64_t nSeed0In, uint64_t nSeed1In) : addrman(Params().Allo
     nBestHeight = 0;
     clientInterface = NULL;
     flagInterruptMsgProc = false;
+    SetTryNewOutboundPeer(false);
+
+    Options connOptions;
+    Init(connOptions);
 }
 
 NodeId CConnman::GetNewNodeId()
@@ -2177,31 +2208,74 @@ NodeId CConnman::GetNewNodeId()
     return nLastNodeId.fetch_add(1, std::memory_order_relaxed);
 }
 
-bool CConnman::Start(CScheduler& scheduler, std::string& strNodeError, Options connOptions)
+bool CConnman::Bind(const CService &addr, unsigned int flags) {
+    if (!(flags & BF_EXPLICIT) && IsLimited(addr))
+        return false;
+    std::string strError;
+    if (!BindListenPort(addr, strError, (flags & BF_WHITELIST) != 0)) {
+        if ((flags & BF_REPORT_ERROR) && clientInterface) {
+            clientInterface->ThreadSafeMessageBox(strError, "", CClientUIInterface::MSG_ERROR);
+        }
+        return false;
+    }
+    return true;
+}
+
+bool CConnman::InitBinds(const std::vector<CService>& binds, const std::vector<CService>& whiteBinds) {
+    bool fBound = false;
+    for (const auto& addrBind : binds) {
+        fBound |= Bind(addrBind, (BF_EXPLICIT | BF_REPORT_ERROR));
+    }
+    for (const auto& addrBind : whiteBinds) {
+        fBound |= Bind(addrBind, (BF_EXPLICIT | BF_REPORT_ERROR | BF_WHITELIST));
+    }
+    if (binds.empty() && whiteBinds.empty()) {
+        struct in_addr inaddr_any;
+        inaddr_any.s_addr = INADDR_ANY;
+        fBound |= Bind(CService((in6_addr)IN6ADDR_ANY_INIT, GetListenPort()), BF_NONE);
+        fBound |= Bind(CService(inaddr_any, GetListenPort()), !fBound ? BF_REPORT_ERROR : BF_NONE);
+    }
+    return fBound;
+}
+
+bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
 {
+    Init(connOptions);
+
     nTotalBytesRecv = 0;
     nTotalBytesSent = 0;
     nMaxOutboundTotalBytesSentInCycle = 0;
     nMaxOutboundCycleStartTime = 0;
 
-    nRelevantServices = connOptions.nRelevantServices;
-    nLocalServices = connOptions.nLocalServices;
-    nMaxConnections = connOptions.nMaxConnections;
-    nMaxOutbound = std::min((connOptions.nMaxOutbound), nMaxConnections);
-    nMaxAddnode = connOptions.nMaxAddnode;
-    nMaxFeeler = connOptions.nMaxFeeler;
+    Init(connOptions);
 
-    nSendBufferMaxSize = connOptions.nSendBufferMaxSize;
-    nReceiveFloodSize = connOptions.nReceiveFloodSize;
+    nTotalBytesRecv = 0;
+    nTotalBytesSent = 0;
+    nMaxOutboundTotalBytesSentInCycle = 0;
+    nMaxOutboundCycleStartTime = 0;
 
-    nMaxOutboundLimit = connOptions.nMaxOutboundLimit;
-    nMaxOutboundTimeframe = connOptions.nMaxOutboundTimeframe;
+    LogPrintf("Connection Manager: Start");
 
-    SetBestHeight(connOptions.nBestHeight);
+    if (fListen && !InitBinds(connOptions.vBinds, connOptions.vWhiteBinds)) {
+        if (clientInterface) {
+            clientInterface->ThreadSafeMessageBox(
+                _("Failed to listen on any port. Use -listen=0 if you want this."),
+                "", CClientUIInterface::MSG_ERROR);
+        }
+        return false;
+    }
 
-    clientInterface = connOptions.uiInterface;
-    if (clientInterface)
-        clientInterface->InitMessage(_("Loading addresses..."));
+    LogPrintf("Connection Manager: Adding Seed Nodes\n");
+
+    for (const auto& strDest : connOptions.vSeedNodes) {
+        LogPrintf("Connection Manager: Adding Seed Node: %s\n", strDest);
+
+        AddOneShot(strDest);
+    }
+
+    if (clientInterface) {
+        clientInterface->InitMessage(_("Loading P2P addresses..."));
+    }
     // Load addresses from peers.dat
     int64_t nStart = GetTimeMillis();
     {
@@ -2221,11 +2295,11 @@ bool CConnman::Start(CScheduler& scheduler, std::string& strNodeError, Options c
     CBanDB bandb;
     banmap_t banmap;
     if (bandb.Read(banmap)) {
-        SetBanned(banmap);        // thread save setter
+        SetBanned(banmap); // thread save setter
         SetBannedSetDirty(false); // no need to write down, just read data
-        SweepBanned();            // sweep out unused entries
+        SweepBanned(); // sweep out unused entries
 
-        LogPrint("net", "Loaded %d banned node ips/subnets from banlist.dat  %dms\n",
+        LogPrint(BCLog::NET, "Loaded %d banned node ips/subnets from banlist.dat  %dms\n",
             banmap.size(), GetTimeMillis() - nStart);
     } else {
         LogPrintf("Invalid or missing banlist.dat; recreating\n");
@@ -2286,7 +2360,7 @@ bool CConnman::Start(CScheduler& scheduler, std::string& strNodeError, Options c
     threadMessageHandler = std::thread(&TraceThread<std::function<void()> >, "msghand", std::function<void()>(std::bind(&CConnman::ThreadMessageHandler, this)));
 
     // Dump network addresses
-    scheduler.scheduleEvery(boost::bind(&CConnman::DumpData, this), DUMP_ADDRESSES_INTERVAL);
+    scheduler.scheduleEvery(std::bind(&CConnman::DumpData, this), DUMP_ADDRESSES_INTERVAL * 1000);
 
     return true;
 }
@@ -2703,6 +2777,7 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     strSubVer = "";
     fWhitelisted = false;
     fOneShot = false;
+    m_manual_connection = false;
     fClient = false; // set by version message
     fFeeler = false;
     fSuccessfullyConnected = false;

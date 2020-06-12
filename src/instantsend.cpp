@@ -55,7 +55,7 @@ const std::string CInstantSend::SERIALIZATION_VERSION_STRING = "CInstantSend-Ver
 // CInstantSend
 //
 
-void CInstantSend::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
+void CInstantSend::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
@@ -68,7 +68,7 @@ void CInstantSend::ProcessMessage(CNode* pfrom, const std::string& strCommand, C
     {
         if (pfrom->nVersion < MIN_INSTANTSEND_PROTO_VERSION) {
             LogPrint("instantsend", "TXLOCKVOTE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_INSTANTSEND_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_INSTANTSEND_PROTO_VERSION)));
             return;
         }
 
@@ -97,7 +97,7 @@ void CInstantSend::ProcessMessage(CNode* pfrom, const std::string& strCommand, C
     }
 }
 
-bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman& connman)
+bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman* connman)
 {
     LOCK(cs_main);
 #ifdef ENABLE_WALLET
@@ -203,7 +203,7 @@ void CInstantSend::CreateEmptyTxLockCandidate(const uint256& txHash)
     mapTxLockCandidates.insert(std::make_pair(txHash, CTxLockCandidate(txLockRequest)));
 }
 
-void CInstantSend::Vote(const uint256& txHash, CConnman& connman)
+void CInstantSend::Vote(const uint256& txHash, CConnman* connman)
 {
     AssertLockHeld(cs_main);
 #ifdef ENABLE_WALLET
@@ -226,7 +226,7 @@ void CInstantSend::Vote(const uint256& txHash, CConnman& connman)
     TryToFinalizeLockCandidate(txLockCandidate);
 }
 
-void CInstantSend::Vote(CTxLockCandidate& txLockCandidate, CConnman& connman)
+void CInstantSend::Vote(CTxLockCandidate& txLockCandidate, CConnman* connman)
 {
     if (!fDynodeMode)
         return;
@@ -325,7 +325,7 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate, CConnman& connman)
     }
 }
 
-bool CInstantSend::ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, CConnman& connman)
+bool CInstantSend::ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, CConnman* connman)
 {
     uint256 txHash = vote.GetTxHash();
     uint256 nVoteHash = vote.GetHash();
@@ -879,7 +879,7 @@ bool CInstantSend::IsTxLockCandidateTimedOut(const uint256& txHash)
     return false;
 }
 
-void CInstantSend::Relay(const uint256& txHash, CConnman& connman)
+void CInstantSend::Relay(const uint256& txHash, CConnman* connman)
 {
     LOCK(cs_instantsend);
 
@@ -1046,7 +1046,7 @@ bool CTxLockRequest::IsSimple() const
 // CTxLockVote
 //
 
-bool CTxLockVote::IsValid(CNode* pnode, CConnman& connman) const
+bool CTxLockVote::IsValid(CNode* pnode, CConnman* connman) const
 {
     if (!dnodeman.Has(outpointDynode)) {
         LogPrint("instantsend", "CTxLockVote::IsValid -- Unknown dynode %s\n", outpointDynode.ToStringShort());
@@ -1163,14 +1163,14 @@ bool CTxLockVote::Sign()
     return true;
 }
 
-void CTxLockVote::Relay(CConnman& connman) const
+void CTxLockVote::Relay(CConnman* connman) const
 {
     CInv inv(MSG_TXLOCK_VOTE, GetHash());
     CTxLockRequest request;
     if (instantsend.GetTxLockRequest(txHash, request))
-        connman.RelayInvFiltered(inv, *request.tx);
+        connman->RelayInvFiltered(inv, *request.tx);
     else
-        connman.RelayInv(inv);
+        connman->RelayInv(inv);
 }
 
 bool CTxLockVote::IsExpired(int nHeight) const
@@ -1212,7 +1212,7 @@ bool COutPointLock::HasDynodeVoted(const COutPoint& outpointDynodeIn) const
     return mapDynodeVotes.count(outpointDynodeIn);
 }
 
-void COutPointLock::Relay(CConnman& connman) const
+void COutPointLock::Relay(CConnman* connman) const
 {
     for (const auto& pair : mapDynodeVotes) {
         pair.second.Relay(connman);
@@ -1282,9 +1282,9 @@ bool CTxLockCandidate::IsTimedOut() const
     return GetTime() - nTimeCreated > INSTANTSEND_LOCK_TIMEOUT_SECONDS;
 }
 
-void CTxLockCandidate::Relay(CConnman& connman) const
+void CTxLockCandidate::Relay(CConnman* connman) const
 {
-    connman.RelayTransaction(*txLockRequest.tx);
+    connman->RelayTransaction(*txLockRequest.tx);
     for (const auto& pair : mapOutPointLocks) {
         pair.second.Relay(connman);
     }
