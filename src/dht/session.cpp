@@ -385,7 +385,7 @@ void static StartDHTNetwork(const CChainParams& chainparams, CConnman* connman)
     try {
         // Busy-wait for the network to come online so we get a full list of Dynodes
         do {
-            bool fvNodesEmpty = connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
+            bool fvNodesEmpty = g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
             if (!fvNodesEmpty && !IsInitialBlockDownload() && dynodeSync.IsSynced() && 
                 dynodeSync.IsBlockchainSynced() && sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
                     break;

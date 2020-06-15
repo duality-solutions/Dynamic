@@ -122,10 +122,10 @@ std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
 
 #if ENABLE_ZMQ
-static CZMQNotificationInterface* pzmqNotificationInterface = NULL;
+static CZMQNotificationInterface* pzmqNotificationInterface = nullptr;
 #endif
 
-static CPSNotificationInterface* ppsNotificationInterface = NULL;
+static CPSNotificationInterface* ppsNotificationInterface = nullptr;
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -135,14 +135,6 @@ static CPSNotificationInterface* ppsNotificationInterface = NULL;
 #else
 #define MIN_CORE_FILEDESCRIPTORS 150
 #endif
-
-/** Used to pass flags to the Bind() function */
-enum BindFlags {
-    BF_NONE = 0,
-    BF_EXPLICIT = (1U << 0),
-    BF_REPORT_ERROR = (1U << 1),
-    BF_WHITELIST = (1U << 2),
-};
 
 static const char* FEE_ESTIMATES_FILENAME = "fee_estimates.dat";
 
@@ -230,7 +222,7 @@ public:
     // Writes do not need similar protection, as failure to write is handled by the caller.
 };
 
-static CCoinsViewErrorCatcher* pcoinscatcher = NULL;
+static CCoinsViewErrorCatcher* pcoinscatcher = nullptr;
 static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 void Interrupt(boost::thread_group& threadGroup)
@@ -315,6 +307,7 @@ void PrepareShutdown()
     ShutdownMiners();
     MapPort(false);
     UnregisterValidationInterface(peerLogic.get());
+    if(g_connman) g_connman->Stop();
     peerLogic.reset();
     g_connman.reset();
 
@@ -358,40 +351,40 @@ void PrepareShutdown()
 
     {
         LOCK(cs_main);
-        if (pcoinsTip != NULL) {
+        if (pcoinsTip != nullptr) {
             FlushStateToDisk();
         }
         delete pcoinsTip;
-        pcoinsTip = NULL;
+        pcoinsTip = nullptr;
         delete pcoinscatcher;
-        pcoinscatcher = NULL;
+        pcoinscatcher = nullptr;
         delete pcoinsdbview;
-        pcoinsdbview = NULL;
+        pcoinsdbview = nullptr;
         delete pblocktree;
-        pblocktree = NULL;
+        pblocktree = nullptr;
         // Fluid transaction DB's
         delete pFluidDynodeDB;
-        pFluidDynodeDB = NULL;
+        pFluidDynodeDB = nullptr;
         delete pFluidMiningDB;
-        pFluidMiningDB = NULL;
+        pFluidMiningDB = nullptr;
         delete pFluidStakingDB;
-        pFluidStakingDB = NULL;
+        pFluidStakingDB = nullptr;
         delete pFluidMintDB;
-        pFluidMintDB = NULL;
+        pFluidMintDB = nullptr;
         delete pFluidSovereignDB;
-        pFluidSovereignDB = NULL;
+        pFluidSovereignDB = nullptr;
         delete pBanAccountDB;
-        pBanAccountDB = NULL;
+        pBanAccountDB = nullptr;
         // BDAP Services DB's
         delete pDomainEntryDB;
-        pDomainEntryDB = NULL;
+        pDomainEntryDB = nullptr;
         delete pLinkDB;
-        pLinkDB = NULL;
+        pLinkDB = nullptr;
         delete pLinkManager;
-        pLinkManager = NULL;
+        pLinkManager = nullptr;
         // LibTorrent DHT Netowrk Services
         delete pMutableDataDB;
-        pMutableDataDB = NULL;
+        pMutableDataDB = nullptr;
 /** ASSET START */
         delete passets;
         passets = nullptr;
@@ -458,14 +451,14 @@ void PrepareShutdown()
     if (pzmqNotificationInterface) {
         UnregisterValidationInterface(pzmqNotificationInterface);
         delete pzmqNotificationInterface;
-        pzmqNotificationInterface = NULL;
+        pzmqNotificationInterface = nullptr;
     }
 #endif
 
     if (ppsNotificationInterface) {
         UnregisterValidationInterface(ppsNotificationInterface);
         delete ppsNotificationInterface;
-        ppsNotificationInterface = NULL;
+        ppsNotificationInterface = nullptr;
     }
 
 #ifndef WIN32
@@ -497,7 +490,7 @@ void Shutdown()
     StopTorControl();
 #ifdef ENABLE_WALLET
     delete pwalletMain;
-    pwalletMain = NULL;
+    pwalletMain = nullptr;
 #endif
     globalVerifyHandle.reset();
     ECC_Stop();
@@ -1718,7 +1711,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     nTotalCache = std::max(nTotalCache, nMinDbCache << 20); // total cache cannot be less than nMinDbCache
     nTotalCache = std::min(nTotalCache, nMaxDbCache << 20); // total cache cannot be greated than nMaxDbcache
     int64_t nBlockTreeDBCache = nTotalCache / 8;
-    nBlockTreeDBCache = std::min(nBlockTreeDBCache, (GetBoolArg("-txindex", DEFAULT_TXINDEX) ? nMaxBlockDBAndTxIndexCache : nMaxBlockDBCache) << 20);
+    nBlockTreeDBCache = std::min(nBlockTreeDBCache, (gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX) ? nMaxBlockDBAndTxIndexCache : nMaxBlockDBCache) << 20);
     nTotalCache -= nBlockTreeDBCache;
     int64_t nCoinDBCache = std::min(nTotalCache / 2, (nTotalCache / 4) + (1 << 23)); // use 25%-50% of the remainder for disk cache
     nCoinDBCache = std::min(nCoinDBCache, nMaxCoinsDBCache << 20);                   // cap total coins db cache
@@ -1852,7 +1845,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                               passetsCache->Size());
 
                     // Check for changed -disablemessaging state
-                    if (GetBoolArg("-disablemessaging", false)) {
+                    if (gArgs.GetBoolArg("-disablemessaging", false)) {
                         LogPrintf("Messaging is disabled\n");
                         fMessaging = false;
                     } else {
@@ -1893,7 +1886,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 }
 
                 // Check for changed -txindex state
-                if (fTxIndex != GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
+                if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
                     strLoadError = _("You need to rebuild the database using -reindex-chainstate to change -txindex");
                     break;
                 }
@@ -1988,7 +1981,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (fPruneMode) {
         LogPrintf("Unsetting NODE_NETWORK on prune mode\n");
         nLocalServices = ServiceFlags(nLocalServices & ~NODE_NETWORK);
-        if (!fReindex && chainActive.Tip() != NULL) {
+        if (!fReindex && chainActive.Tip() != nullptr) {
             uiInterface.InitMessage(_("Pruning blockstore..."));
             PruneAndFlush();
         }
@@ -2001,7 +1994,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Either install a handler to notify us when genesis activates, or set fHaveGenesis directly.
     // No locking, as this happens before any background thread is started.
-    if (chainActive.Tip() == NULL) {
+    if (chainActive.Tip() == nullptr) {
         uiInterface.NotifyBlockTip.connect(BlockNotifyGenesisWait);
     } else {
         fHaveGenesis = true;
@@ -2030,11 +2023,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // ********************************************************* Step 11a: setup PrivateSend
-    fDynodeMode = GetBoolArg("-dynode", false);
+    fDynodeMode = gArgs.GetBoolArg("-dynode", false);
     // TODO: dynode should have no wallet
 
     //lite mode disables all Dynamic-specific functionality
-    fLiteMode = GetBoolArg("-litemode", false);
+    fLiteMode = gArgs.GetBoolArg("-litemode", false);
 
     if (fLiteMode) {
         InitWarning(_("You are starting in lite mode, all Dynamic-specific functionality is disabled."));
@@ -2065,7 +2058,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 #ifdef ENABLE_WALLET
     LogPrintf("Using Dynode config file %s\n", GetDynodeConfigFile().string());
 
-    if (GetBoolArg("-dnconflock", true) && pwalletMain && (dynodeConfig.getCount() > 0)) {
+    if (gArgs.GetBoolArg("-dnconflock", true) && pwalletMain && (dynodeConfig.getCount() > 0)) {
         LOCK(pwalletMain->cs_wallet);
         LogPrintf("Locking Dynodes:\n");
         uint256 dnTxHash;
@@ -2093,14 +2086,14 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         nMaxRounds = std::numeric_limits<int>::max();
     }
 
-    privateSendClient.fEnablePrivateSend = GetBoolArg("-enableprivatesend", false);
-    privateSendClient.fPrivateSendMultiSession = GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
+    privateSendClient.fEnablePrivateSend = gArgs.GetBoolArg("-enableprivatesend", false);
+    privateSendClient.fPrivateSendMultiSession = gArgs.GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
     privateSendClient.nPrivateSendSessions = std::min(std::max((int)gArgs.GetArg("-privatesendsessions", DEFAULT_PRIVATESEND_SESSIONS), MIN_PRIVATESEND_SESSIONS), MAX_PRIVATESEND_SESSIONS);
     privateSendClient.nPrivateSendRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), MIN_PRIVATESEND_ROUNDS), nMaxRounds);
     privateSendClient.nPrivateSendAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), MIN_PRIVATESEND_AMOUNT), MAX_PRIVATESEND_AMOUNT);
 #endif // ENABLE_WALLET
 
-    fEnableInstantSend = GetBoolArg("-enableinstantsend", 1);
+    fEnableInstantSend = gArgs.GetBoolArg("-enableinstantsend", 1);
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
 #ifdef ENABLE_WALLET
@@ -2200,13 +2193,13 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     //// debug print
     LogPrintf("mapBlockIndex.size() = %u\n", mapBlockIndex.size());
     LogPrintf("chainActive.Height() = %d\n", chainActive.Height());
-    if (GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
+    if (gArgs.GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
         StartTorControl(threadGroup, scheduler);
 
     Discover(threadGroup);
 
     // Map ports with UPnP
-    MapPort(GetBoolArg("-upnp", DEFAULT_UPNP));
+    MapPort(gArgs.GetBoolArg("-upnp", DEFAULT_UPNP));
 
     std::string strNodeError;
     CConnman::Options connOptions;

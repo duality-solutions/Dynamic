@@ -96,7 +96,7 @@ void ThreadSendAlert(CConnman* connman)
     // Confirm
     if (!IsArgSet("-sendalert"))
         return;
-    while (connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !ShutdownRequested())
+    while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !ShutdownRequested())
         MilliSleep(500);
     if (ShutdownRequested())
         return;

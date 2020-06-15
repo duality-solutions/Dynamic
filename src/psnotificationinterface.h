@@ -10,6 +10,8 @@
 
 class CPSNotificationInterface : public CValidationInterface
 {
+private:
+    CConnman* connman;
 public:
     CPSNotificationInterface(CConnman* connmanIn) : connman(connmanIn) {}
     virtual ~CPSNotificationInterface() = default;
@@ -22,8 +24,6 @@ protected:
     void AcceptedBlockHeader(const CBlockIndex* pindexNew) override;
     void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload) override;
     void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload) override;
-private:
-    CConnman* connman;
 };
 
 #endif // DYNAMIC_PSNOTIFICATIONINTERFACE_H
