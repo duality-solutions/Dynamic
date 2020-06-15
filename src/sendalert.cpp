@@ -32,12 +32,12 @@ the bad alert.
 
 void ThreadSendAlert(CConnman* connman)
 {
-    if (!IsArgSet("-sendalert") && !IsArgSet("-printalert"))
+    if (!gArgs.IsArgSet("-sendalert") && !gArgs.IsArgSet("-printalert"))
         return;
 
     // Wait one minute so we get well connected. If we only need to print
     // but not to broadcast - do this right away.
-    if (IsArgSet("-sendalert"))
+    if (gArgs.IsArgSet("-sendalert"))
         MilliSleep(60 * 1000);
 
     //
@@ -94,7 +94,7 @@ void ThreadSendAlert(CConnman* connman)
     printf("vchSig=%s\n", HexStr(alert2.vchSig).c_str());
 
     // Confirm
-    if (!IsArgSet("-sendalert"))
+    if (!gArgs.IsArgSet("-sendalert"))
         return;
     while (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !ShutdownRequested())
         MilliSleep(500);

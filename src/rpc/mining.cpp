@@ -170,7 +170,7 @@ UniValue getgenerate(const JSONRPCRequest& request)
             HelpExampleCli("getgenerate", "") + HelpExampleRpc("getgenerate", ""));
 
     LOCK(cs_main);
-    return GetBoolArg("-gen", DEFAULT_GENERATE);
+    return gArgs.GetBoolArg("-gen", DEFAULT_GENERATE);
 }
 
 UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
@@ -320,20 +320,20 @@ UniValue setgenerate(const JSONRPCRequest& request)
     if (request.params.size() > 0)
         fGenerate = request.params[0].get_bool();
 
-    int nGenProcLimitCPU = GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU);
+    int nGenProcLimitCPU = gArgs.GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU);
     if (request.params.size() > 1)
         nGenProcLimitCPU = request.params[1].get_int();
 
-    int nGenProcLimitGPU = GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
+    int nGenProcLimitGPU = gArgs.GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
     if (request.params.size() > 2)
         nGenProcLimitGPU = request.params[2].get_int();
 
     if (nGenProcLimitCPU == 0 && nGenProcLimitGPU == 0)
         fGenerate = false;
 
-    ForceSetArg("-gen", fGenerate ? "1" : "0");
-    ForceSetArg("-genproclimit-cpu", nGenProcLimitCPU);
-    ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
+    gArgs.ForceSetArg("-gen", fGenerate ? "1" : "0");
+    gArgs.ForceSetArg("-genproclimit-cpu", nGenProcLimitCPU);
+    gArgs.ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
 
     if (fGenerate) {
         #ifdef ENABLE_WALLET
@@ -433,8 +433,8 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.push_back(Pair("currentblocktx", (uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty", (double)GetDifficulty()));
     obj.push_back(Pair("errors", GetWarnings("statusbar")));
-    obj.push_back(Pair("genproclimit-cpu", (int)GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU)));
-    obj.push_back(Pair("genproclimit-gpu", (int)GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU)));
+    obj.push_back(Pair("genproclimit-cpu", (int)gArgs.GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU)));
+    obj.push_back(Pair("genproclimit-gpu", (int)gArgs.GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU)));
     obj.push_back(Pair("networkhashps", getnetworkhashps(request)));
     obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
     obj.push_back(Pair("chain", Params().NetworkIDString()));

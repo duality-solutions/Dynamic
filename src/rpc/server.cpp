@@ -526,7 +526,7 @@ std::string HelpExampleRpc(const std::string& methodname, const std::string& arg
            "\"method\": \"" +
            methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;'"
                                                      " http://127.0.0.1:" +
-           strprintf("%d", GetArg("-rpcport", BaseParams().RPCPort())) + "/\n";
+           strprintf("%d", gArgs.GetArg("-rpcport", BaseParams().RPCPort())) + "/\n";
 }
 
 void RPCSetTimerInterfaceIfUnset(RPCTimerInterface* iface)

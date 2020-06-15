@@ -136,10 +136,10 @@ UniValue debug(const JSONRPCRequest& request)
 
     std::vector<std::string> newMultiArgs;
     boost::split(newMultiArgs, strMode, boost::is_any_of("+"));
-    ForceSetMultiArgs("-debug", newMultiArgs);
-    ForceSetArg("-debug", newMultiArgs[newMultiArgs.size() - 1]);
+    gArgs.ForceSetMultiArgs("-debug", newMultiArgs);
+    gArgs.ForceSetArg("-debug", newMultiArgs[newMultiArgs.size() - 1]);
 
-    fDebug = GetArg("-debug", "") != "0";
+    fDebug = gArgs.GetArg("-debug", "") != "0";
 
     return "Debug mode: " + (fDebug ? strMode : "off");
 }
