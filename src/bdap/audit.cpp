@@ -116,6 +116,15 @@ bool CAudit::ValidateValues(std::string& strErrorMessage) const
     if (auditData.vAuditData.size() == 0)
         return false;
 
+    //Check for duplicates
+    if (auditData.vAuditData.size() >> 1) {
+        auto it = std::unique(auditData.vAuditData.begin(), auditData.vAuditData.end());
+        if (!(it == auditData.vAuditData.end())) {
+            strErrorMessage = "Invalid Audit data. Can not have duplicates.";
+            return false;
+        }
+    }
+
     if (vchOwnerFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) {
         strErrorMessage = "Invalid BDAP audit owner FQDN length. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
