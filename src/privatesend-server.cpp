@@ -896,7 +896,7 @@ void CPrivateSendServer::SetState(PoolState nStateNew)
     nState = nStateNew;
 }
 
-void CPrivateSendServer::DoMaintenance(std::unique_ptr<CConnman> connman)
+void CPrivateSendServer::DoMaintenance(CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
