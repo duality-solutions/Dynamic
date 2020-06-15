@@ -2167,20 +2167,20 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if (!fLiteMode) {
         scheduler.scheduleEvery(boost::bind(&CNetFulfilledRequestManager::DoMaintenance, boost::ref(netfulfilledman)), 60);
-        scheduler.scheduleEvery(boost::bind(&CDynodeSync::DoMaintenance, boost::ref(dynodeSync), boost::ref(g_connman)), DYNODE_SYNC_TICK_SECONDS);
-        scheduler.scheduleEvery(boost::bind(&CDynodeMan::DoMaintenance, boost::ref(dnodeman), boost::ref(g_connman)), 1);
-        scheduler.scheduleEvery(boost::bind(&CActiveDynode::DoMaintenance, boost::ref(activeDynode), boost::ref(g_connman)), DYNODE_MIN_DNP_SECONDS);
+        scheduler.scheduleEvery(boost::bind(&CDynodeSync::DoMaintenance, boost::ref(dynodeSync), g_connman.get()), DYNODE_SYNC_TICK_SECONDS);
+        scheduler.scheduleEvery(boost::bind(&CDynodeMan::DoMaintenance, boost::ref(dnodeman), g_connman.get()), 1);
+        scheduler.scheduleEvery(boost::bind(&CActiveDynode::DoMaintenance, boost::ref(activeDynode), g_connman.get()), DYNODE_MIN_DNP_SECONDS);
 
         scheduler.scheduleEvery(boost::bind(&CDynodePayments::DoMaintenance, boost::ref(dnpayments)), 60);
-        scheduler.scheduleEvery(boost::bind(&CGovernanceManager::DoMaintenance, boost::ref(governance), boost::ref(g_connman)), 60 * 5);
+        scheduler.scheduleEvery(boost::bind(&CGovernanceManager::DoMaintenance, boost::ref(governance), g_connman.get()), 60 * 5);
 
         scheduler.scheduleEvery(boost::bind(&CInstantSend::DoMaintenance, boost::ref(instantsend)), 60);
 
         if (fDynodeMode)
-            scheduler.scheduleEvery(boost::bind(&CPrivateSendServer::DoMaintenance, boost::ref(privateSendServer), boost::ref(g_connman)), 1);
+            scheduler.scheduleEvery(boost::bind(&CPrivateSendServer::DoMaintenance, boost::ref(privateSendServer), g_connman.get()), 1);
 #ifdef ENABLE_WALLET
         else
-            scheduler.scheduleEvery(boost::bind(&CPrivateSendClientManager::DoMaintenance, boost::ref(privateSendClient), boost::ref(g_connman)), 1);
+            scheduler.scheduleEvery(boost::bind(&CPrivateSendClientManager::DoMaintenance, boost::ref(privateSendClient), g_connman.get()), 1);
 #endif // ENABLE_WALLET
     }
 

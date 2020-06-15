@@ -1810,7 +1810,7 @@ void CDynodeMan::NotifyDynodeUpdates(CConnman* connman)
     fDynodesRemoved = false;
 }
 
-void CDynodeMan::DoMaintenance(std::unique_ptr<CConnman> connman)
+void CDynodeMan::DoMaintenance(CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
@@ -1825,16 +1825,16 @@ void CDynodeMan::DoMaintenance(std::unique_ptr<CConnman> connman)
     // make sure to check all dynodes first
     dnodeman.Check();
 
-    dnodeman.ProcessPendingDnbRequests(connman.get());
-    dnodeman.ProcessPendingDnvRequests(connman.get());
+    dnodeman.ProcessPendingDnbRequests(connman);
+    dnodeman.ProcessPendingDnvRequests(connman);
 
     if (nTick % 60 == 0) {
-        dnodeman.ProcessDynodeConnections(connman.get());
-        dnodeman.CheckAndRemove(connman.get());
+        dnodeman.ProcessDynodeConnections(connman);
+        dnodeman.CheckAndRemove(connman);
         dnodeman.WarnDynodeDaemonUpdates();
     }
 
     if (fDynodeMode && (nTick % (60 * 5) == 0)) {
-        dnodeman.DoFullVerificationStep(connman.get());
+        dnodeman.DoFullVerificationStep(connman);
     }
 }

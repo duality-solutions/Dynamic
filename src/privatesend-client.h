@@ -248,7 +248,7 @@ public:
 
     void UpdatedBlockTip(const CBlockIndex* pindex);
 
-    void DoMaintenance(std::unique_ptr<CConnman> connman);
+    void DoMaintenance(CConnman* connman);
 };
 
 #endif
