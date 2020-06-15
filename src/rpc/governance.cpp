@@ -194,7 +194,7 @@ UniValue gobject(const JSONRPCRequest& request)
         CReserveKey reservekey(pwalletMain);
         // -- send the tx to the network
         CValidationState state;
-        if (!pwalletMain->CommitTransaction(wtx, reservekey, g_connman->get(), state, NetMsgType::TX)) {
+        if (!pwalletMain->CommitTransaction(wtx, reservekey, g_connman.get(), state, NetMsgType::TX)) {
             throw JSONRPCError(RPC_INTERNAL_ERROR, "CommitTransaction failed! Reason given: " + state.GetRejectReason());
         }
 
@@ -306,9 +306,9 @@ UniValue gobject(const JSONRPCRequest& request)
 
         if (fMissingConfirmations) {
             governance.AddPostponedObject(govobj);
-            govobj.Relay(*g_connman);
+            govobj.Relay(g_connman.get());
         } else {
-            governance.AddGovernanceObject(govobj, *g_connman);
+            governance.AddGovernanceObject(govobj, g_connman.get());
         }
 
         return govobj.GetHash().ToString();
@@ -373,7 +373,7 @@ UniValue gobject(const JSONRPCRequest& request)
         }
 
         CGovernanceException exception;
-        if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+        if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
             nSuccessful++;
             statusObj.push_back(Pair("result", "success"));
         } else {
@@ -470,7 +470,7 @@ UniValue gobject(const JSONRPCRequest& request)
             }
 
             CGovernanceException exception;
-            if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+            if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             } else {
@@ -590,7 +590,7 @@ UniValue gobject(const JSONRPCRequest& request)
             // UPDATE LOCAL DATABASE WITH NEW OBJECT SETTINGS
 
             CGovernanceException exception;
-            if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+            if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             } else {
@@ -902,7 +902,7 @@ UniValue voteraw(const JSONRPCRequest& request)
     }
 
     CGovernanceException exception;
-    if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+    if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
         return "Voted successfully";
     } else {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Error voting : " + exception.GetMessage());

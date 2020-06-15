@@ -168,13 +168,13 @@ UniValue dnsync(const JSONRPCRequest& request)
     }
 
     if (strMode == "next") {
-        dynodeSync.SwitchToNextAsset(*g_connman);
+        dynodeSync.SwitchToNextAsset(g_connman.get());
         return "sync updated to " + dynodeSync.GetAssetName();
     }
 
     if (strMode == "reset") {
         dynodeSync.Reset();
-        dynodeSync.SwitchToNextAsset(*g_connman);
+        dynodeSync.SwitchToNextAsset(g_connman.get());
         return "success";
     }
     return "failure";
@@ -289,7 +289,7 @@ UniValue spork(const JSONRPCRequest& request)
         int64_t nValue = request.params[1].get_int64();
 
         //broadcast new spork
-        if (sporkManager.UpdateSpork(nSporkID, nValue, *g_connman)) {
+        if (sporkManager.UpdateSpork(nSporkID, nValue, g_connman.get())) {
             sporkManager.ExecuteSpork(nSporkID, nValue);
             return "success";
         } else {

@@ -342,7 +342,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
                 throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
         #endif //ENABLE_WALLET
 
-        InitMiners(Params(), *g_connman);
+        InitMiners(Params(), g_connman.get());
         SetCPUMinerThreads(nGenProcLimitCPU);
         SetGPUMinerThreads(nGenProcLimitGPU);
         StartMiners();
