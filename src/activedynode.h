@@ -83,7 +83,7 @@ public:
 
     bool UpdateSentinelPing(int version);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(std::unique_ptr<CConnman> connman);
 
 private:
     void ManageStateInitial(CConnman* connman);

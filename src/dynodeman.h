@@ -245,7 +245,7 @@ public:
      */
     void NotifyDynodeUpdates(CConnman* connman);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(std::unique_ptr<CConnman> connman);
 
     bool EnoughActiveForInstandSend() { return (CountEnabled() >= INSTANTSEND_MIN_ACTIVE_DYNODE_COUNT); }
 

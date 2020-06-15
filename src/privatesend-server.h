@@ -74,7 +74,7 @@ public:
     void CheckTimeout(CConnman* connman);
     void CheckForCompleteQueue(CConnman* connman);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(std::unique_ptr<CConnman> connman);
 };
 
 #endif

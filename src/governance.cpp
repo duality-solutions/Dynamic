@@ -572,7 +572,7 @@ struct sortProposalsByVotes {
     }
 };
 
-void CGovernanceManager::DoMaintenance(CConnman* connman)
+void CGovernanceManager::DoMaintenance(std::unique_ptr<CConnman> connman)
 {
     if (fLiteMode || !dynodeSync.IsSynced() || ShutdownRequested()) 
         return;
@@ -581,7 +581,7 @@ void CGovernanceManager::DoMaintenance(CConnman* connman)
 
     CleanOrphanObjects();
 
-    RequestOrphanObjects(connman);
+    RequestOrphanObjects(connman.get());
 
     // CHECK AND REMOVE - REPROCESS GOVERNANCE OBJECTS
 

@@ -21,10 +21,10 @@ extern CWallet* pwalletMain;
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
 
-void CActiveDynode::DoMaintenance(CConnman* connman)
+void CActiveDynode::DoMaintenance(std::unique_ptr<CConnman> connman)
 {
     if (ShutdownRequested()) return;
-     ManageState(connman);
+        ManageState(connman.get());
 }
 
 void CActiveDynode::ManageState(CConnman* connman)

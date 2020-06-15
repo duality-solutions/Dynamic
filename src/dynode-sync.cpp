@@ -527,8 +527,8 @@ void CDynodeSync::UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDow
     }
 }
 
-void CDynodeSync::DoMaintenance(CConnman* connman)
+void CDynodeSync::DoMaintenance(std::unique_ptr<CConnman> connman)
 {
     if (ShutdownRequested()) return;
-     ProcessTick(connman);
+     ProcessTick(connman.get());
 }

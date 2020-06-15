@@ -81,7 +81,7 @@ public:
     void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman* connman);
     void UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman* connman);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(std::unique_ptr<CConnman> connman);
     double SyncProgress();
 
 };

@@ -1649,7 +1649,7 @@ void CPrivateSendClientManager::UpdatedBlockTip(const CBlockIndex* pindex)
     LogPrint("privatesend", "CPrivateSendClientSession::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 }
 
-void CPrivateSendClientManager::DoMaintenance(CConnman* connman)
+void CPrivateSendClientManager::DoMaintenance(std::unique_ptr<CConnman> connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
