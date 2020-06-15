@@ -5,6 +5,7 @@
 
 #include "script/standard.h"
 
+#include "assets/assets.h"
 #include "bdap/stealth.h"
 #include "pubkey.h"
 #include "script/script.h"
