@@ -60,8 +60,7 @@ bool ProcessStakeBlockFound(const std::shared_ptr<const CBlock> pblock, CWallet&
     if (!ProcessNewBlock(Params(), pblock, true, &fNewBlock))
         return error("Dynamic Staker: ProcessStakeBlockFound, block not accepted");
 
-    CConnman& connman = *g_connman;
-    connman->ForEachNode([pblock](CNode* pnode) {
+    g_connman->ForEachNode([pblock](CNode* pnode) {
         if (pnode->nVersion != 0)
         {
         	pnode->PushInventory(CInv(MSG_BLOCK, pblock->GetHash()));
@@ -84,7 +83,6 @@ void DynamicStakeMinter(CWallet* pwallet)
     CReserveKey reservekey(pwallet);
     unsigned int nExtraNonce = 0;
     bool fLastLoopOrphan = false;
-    CConnman& connman = *g_connman;
     while (fProofOfStake) {
         //control the amount of times the client will check for mintable coins
         if ((GetTime() - nMintableLastCheck > 5 * 60)) // 5 minute check time
