@@ -40,6 +40,10 @@ struct BIP9Deployment {
     int64_t nWindowSize;
     /** A number of blocks, in the range of 1..nWindowSize, which must signal for a fork in order to lock it in. */
     int64_t nThreshold;
+    /** Use to override the confirmation window on a specific BIP */
+    uint32_t nOverrideMinerConfirmationWindow;
+    /** Use to override the the activation threshold on a specific BIP */
+    uint32_t nOverrideRuleChangeActivationThreshold;
 };
 
 /**
