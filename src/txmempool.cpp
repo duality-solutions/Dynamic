@@ -1145,7 +1145,6 @@ void CTxMemPool::clear()
 /** ASSET START */
 static void CheckInputsAndUpdateCoins(const CTransaction& tx, CCoinsViewCache& mempoolDuplicate, const int64_t nSpendHeight) {
     CValidationState state;
-    CAmount txfee = 0;
     bool fCheckResult = tx.IsCoinBase() || Consensus::CheckTxInputs(tx, state, mempoolDuplicate, nSpendHeight);
 
     if (AreAssetsDeployed()) {
@@ -1520,7 +1519,7 @@ double CTxMemPool::UsedMemoryShare() const
     // this param is calculated in such way in other places (see AppInit
     // function in src/init.cpp or mempoolInfoToJSON function in
     // src/rpc/blockchain.cpp)
-    size_t maxmempool = GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
+    size_t maxmempool = gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
     return double(DynamicMemoryUsage()) / maxmempool;
 }
 
