@@ -319,8 +319,6 @@ public:
         nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
         nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
 
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** ASSET END **/
     }
 };
@@ -540,8 +538,6 @@ public:
         nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
         nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
 
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** ASSET END **/
     }
 };
@@ -751,9 +747,6 @@ public:
         nAssetActivationHeight = 10000000; // Asset activated block height // TODO
         nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
         nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
-
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** ASSET END **/
 };
 static CRegTestParams regTestParams;
@@ -958,8 +951,6 @@ public:
         nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
         nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
 
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** ASSET END **/
     }
 };

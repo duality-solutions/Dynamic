@@ -10,10 +10,15 @@
 #include "consensus/consensus.h"
 #include "memusage.h"
 #include "random.h"
+#include "util.h"
 #include "validation.h" //fMessaging
+#include "tinyformat.h"
+#include "base58.h"
 
 #include <assert.h>
 #include <assets/assets.h>
+#include <wallet/wallet.h>
+
 
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }

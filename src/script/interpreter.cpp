@@ -1270,7 +1270,7 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKeyIn, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
+bool VerifyScript(const CScript &scriptSig, const CScript &scriptPubKey, unsigned int flags, const BaseSignatureChecker &checker, ScriptError *serror)
 {
     // Remove BDAP portion of the script
     CScript scriptPubKey;
@@ -1288,12 +1288,12 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKeyIn, unsig
     }
 
     std::vector<std::vector<unsigned char> > stack, stackCopy;
-    if (!EvalScript(stack, scriptSig, flags, checker, serror))
+    if (!EvalScript(stack, scriptSig, flags, checker, SIGVERSION_BASE, serror))
         // serror is set
         return false;
     if (flags & SCRIPT_VERIFY_P2SH)
         stackCopy = stack;
-    if (!EvalScript(stack, scriptPubKey, flags, checker, serror))
+    if (!EvalScript(stack, scriptPubKey, flags, checker, SIGVERSION_BASE, serror))
         // serror is set
         return false;
     if (stack.empty())
@@ -1319,7 +1319,7 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKeyIn, unsig
         CScript pubKey2(pubKeySerialized.begin(), pubKeySerialized.end());
         popstack(stack);
 
-        if (!EvalScript(stack, pubKey2, flags, checker, serror))
+        if (!EvalScript(stack, pubKey2, flags, checker, SIGVERSION_BASE, serror))
             // serror is set
             return false;
         if (stack.empty())
