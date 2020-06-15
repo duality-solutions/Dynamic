@@ -10,6 +10,7 @@
 #include "consensus/consensus.h"
 #include "memusage.h"
 #include "random.h"
+#include "validation.h" //fMessaging
 
 #include <assert.h>
 #include <assets/assets.h>
