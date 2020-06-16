@@ -805,6 +805,9 @@ bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBd
     return true;
 }
 
+// Returns the script flags which should be checked for a given block
+static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
+
 void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age)
 {
     int expired = pool.Expire(GetTime() - age);
@@ -1671,23 +1674,59 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         if (fDryRun)
             return true;
 
+        unsigned int scriptVerifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
+        if (!chainparams.RequireStandard()) {
+            scriptVerifyFlags = gArgs.GetArg("-promiscuousmempoolflags", scriptVerifyFlags);
+        }
+
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
-        if (!CheckInputs(tx, state, view, true, STANDARD_SCRIPT_VERIFY_FLAGS, true))
+        PrecomputedTransactionData txdata(tx);
+        if (!CheckInputs(tx, state, view, true, scriptVerifyFlags, true, false, txdata)) {
+            // SCRIPT_VERIFY_CLEANSTACK requires SCRIPT_VERIFY_WITNESS, so we
+            // need to turn both off, and compare against just turning off CLEANSTACK
+            // to see if the failure is specifically due to witness validation.
+            CValidationState stateDummy; // Want reported failures to be from first CheckInputs
+            if (CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~(SCRIPT_VERIFY_CLEANSTACK), true, false, txdata) &&
+                !CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~SCRIPT_VERIFY_CLEANSTACK, true, false, txdata)) {
+                // Only the witness is missing, so the transaction itself may be fine.
+                state.SetCorruptionPossible();
+            }
             return false; // state filled in by CheckInputs
+        }
 
-        // Check again against just the consensus-critical mandatory script
-        // verification flags, in case of bugs in the standard flags that cause
+        // Check again against the current block tip's script verification
+        // flags to cache our script execution flags. This is, of course,
+        // useless if the next block has different script flags from the
+        // previous one, but because the cache tracks script flags for us it
+        // will auto-invalidate and we'll just have a few blocks of extra
+        // misses on soft-fork activation.
+        //
+        // This is also useful in case of bugs in the standard flags that cause
         // transactions to pass as valid when they're actually invalid. For
         // instance the STRICTENC flag was incorrectly allowing certain
         // CHECKSIG NOT scripts to pass, even though they were invalid.
         //
         // There is a similar check in CreateNewBlock() to prevent creating
-        // invalid blocks, however allowing such transactions into the mempool
-        // can be exploited as a DoS attack.
-        if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true)) {
-            return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s, %s",
-                __func__, hash.ToString(), FormatStateMessage(state));
+        // invalid blocks (using TestBlockValidity), however allowing such
+        // transactions into the mempool can be exploited as a DoS attack.
+        unsigned int currentBlockScriptVerifyFlags = GetBlockScriptFlags(chainActive.Tip(), Params().GetConsensus());
+        if (!CheckInputsFromMempoolAndCache(tx, state, view, pool, currentBlockScriptVerifyFlags, true, txdata))
+        {
+            // If we're using promiscuousmempoolflags, we may hit this normally
+            // Check if current block has some flags that scriptVerifyFlags
+            // does not before printing an ominous warning
+            if (!(~scriptVerifyFlags & currentBlockScriptVerifyFlags)) {
+                return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against latest-block but not STANDARD flags %s, %s",
+                    __func__, hash.ToString(), FormatStateMessage(state));
+            } else {
+                if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true, false, txdata)) {
+                    return error("%s: ConnectInputs failed against MANDATORY but not STANDARD flags due to promiscuous mempool %s, %s",
+                        __func__, hash.ToString(), FormatStateMessage(state));
+                } else {
+                    LogPrintf("Warning: -promiscuousmempool flags set to not include currently enforced soft forks, this may break mining or otherwise cause instability!\n");
+                }
+            }
         }
 
         if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
@@ -1711,7 +1750,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // BIP 125 replacement transaction (may not be widely supported), the
         // node is not behind, and the transaction is not dependent on any other
         // transactions in the mempool.
-        bool validForFeeEstimation = !fReplacementTransaction && IsCurrentForFeeEstimation() && pool.HasNoInputsOf(tx);
+        bool validForFeeEstimation = !fReplacementTransaction && !fOverrideMempoolLimit && IsCurrentForFeeEstimation() && pool.HasNoInputsOf(tx);
 
         // Store transaction in memory
         pool.addUnchecked(hash, entry, setAncestors, validForFeeEstimation);
@@ -1732,10 +1771,111 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (!pool.exists(hash))
                 return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool full");
         }
+
+        for (auto out : vReissueAssets) {
+            mapReissuedAssets.insert(out);
+            mapReissuedTx.insert(std::make_pair(out.second, out.first));
+        }
+
+        if (AreAssetsDeployed()) {
+            for (auto out : tx.vout) {
+                if (out.scriptPubKey.IsAssetScript()) {
+                    CAssetOutputEntry data;
+                    if (!GetAssetData(out.scriptPubKey, data))
+                        continue;
+                    if (data.type == TX_NEW_ASSET && !IsAssetNameAnOwner(data.assetName)) {
+                        pool.mapAssetToHash[data.assetName] = hash;
+                        pool.mapHashToAsset[hash] = data.assetName;
+                    }
+
+                    // Keep track of all restricted assets tx that can become invalid if qualifier or verifiers are changed
+                    if (AreRestrictedAssetsDeployed()) {
+                        if (IsAssetNameAnRestricted(data.assetName)) {
+                            std::string address = EncodeDestination(data.destination);
+                            pool.mapAddressesQualifiersChanged[address].insert(hash);
+                            pool.mapHashQualifiersChanged[hash].insert(address);
+
+                            pool.mapAssetVerifierChanged[data.assetName].insert(hash);
+                            pool.mapHashVerifierChanged[hash].insert(data.assetName);
+                        }
+                    }
+                } else if (out.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                    CNullAssetTxData globalNullData;
+                    if (GlobalAssetNullDataFromScript(out.scriptPubKey, globalNullData)) {
+                        if (globalNullData.flag == 1) {
+                            if (pool.mapGlobalFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-freeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        } else if (globalNullData.flag == 0) {
+                            if (pool.mapGlobalUnFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-unfreeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalUnFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalUnFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        }
+                    }
+                } else if (out.scriptPubKey.IsNullAssetTxDataScript()) {
+                    // We need to track all tags that are being adding to address, that live in the mempool
+                    // This will allow us to keep the mempool clean, and only allow one tag per address at a time into the mempool
+                    CNullAssetTxData addressNullData;
+                    std::string address;
+                    if (AssetNullDataFromScript(out.scriptPubKey, addressNullData, address)) {
+                        if (IsAssetNameAQualifier(addressNullData.asset_name)) {
+                            if (addressNullData.flag == (int) QualifierType::ADD_QUALIFIER) {
+                                if (pool.mapAddressAddedTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                    return state.DoS(0, false, REJECT_INVALID,
+                                                     "bad-txns-adding-tag-already-in-mempool");
+                                }
+                                // Adding a qualifier to an address
+                                pool.mapAddressAddedTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressAddedTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            } else {
+                                    if (pool.mapAddressRemoveTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                        return state.DoS(0, false, REJECT_INVALID,
+                                                         "bad-txns-remove-tag-already-in-mempool");
+                                    }
+
+                                pool.mapAddressRemoveTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressRemoveTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Keep track of all restricted assets tx that can become invalid if address or assets are marked as frozen
+        if (AreRestrictedAssetsDeployed()) {
+            for (auto in : tx.vin) {
+                const Coin coin = pcoinsTip->AccessCoin(in.prevout);
+
+                if (!coin.IsAsset())
+                    continue;
+
+                CAssetOutputEntry data;
+                if (GetAssetData(coin.out.scriptPubKey, data)) {
+
+                    if (IsAssetNameAnRestricted(data.assetName)) {
+                        pool.mapAssetMarkedGlobalFrozen[data.assetName].insert(hash);
+                        pool.mapHashMarkedGlobalFrozen[hash].insert(data.assetName);
+
+                        auto pair = std::make_pair(EncodeDestination(data.destination), data.assetName);
+                        pool.mapAddressesMarkedFrozen[pair].insert(hash);
+                        pool.mapHashToAddressMarkedFrozen[hash].insert(pair);
+                    }
+                }
+            }
+        }
     }
 
     if (!fDryRun)
         GetMainSignals().SyncTransaction(tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+
+    GetMainSignals().TransactionAddedToMempool(ptx);
 
     return true;
 }
@@ -3281,6 +3421,29 @@ public:
 // Protected by cs_main
 static ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS];
 
+static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& consensusparams) {
+    AssertLockHeld(cs_main);
+
+    const CChainParams& chainparams = Params();
+    
+    // BIP16 didn't become active until Apr 1 2012
+    int64_t nBIP16SwitchTime = 1333238400;
+    bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
+    int nLockTimeFlags = 0;
+
+    unsigned int flags = fStrictPayToScriptHash ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE;
+    flags |= SCRIPT_VERIFY_DERSIG;
+    flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+    flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
+    nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
+
+    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
+        flags |= SCRIPT_VERIFY_NULLDUMMY;
+    }
+
+    return flags;
+}
+
 static int64_t nTimeCheck = 0;
 static int64_t nTimeForks = 0;
 static int64_t nTimeVerify = 0;
@@ -3370,22 +3533,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         return state.DoS(100, error("ConnectBlock(): invalid superblock start"),
             REJECT_INVALID, "bad-sb-start");
 
-    // BIP16 didn't become active until Apr 1 2012
-    int64_t nBIP16SwitchTime = 1333238400;
-    bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
+    // Get the script flags for this block
+    unsigned int flags = GetBlockScriptFlags(pindex, chainparams.GetConsensus());
 
-    int nLockTimeFlags = 0;
-
-    unsigned int flags = fStrictPayToScriptHash ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE;
-    flags |= SCRIPT_VERIFY_DERSIG;
-    flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
-    flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
-    nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
-
-    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
-        flags |= SCRIPT_VERIFY_NULLDUMMY;
-    }
-    
     int64_t nTime2 = GetTimeMicros();
     nTimeForks += nTime2 - nTime1;
     LogPrint("bench", "    - Fork checks: %.2fms [%.2fs]\n", MILLI * (nTime2 - nTime1), nTimeForks * MICRO, nTimeForks * MILLI / nBlocksTotal);
@@ -3456,6 +3606,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 prevheights[j] = view.AccessCoin(tx.vin[j].prevout).nHeight;
             }
 
+            int nLockTimeFlags = 0;
+
             if (!SequenceLocks(tx, nLockTimeFlags, &prevheights, *pindex)) {
                 return state.DoS(100, error("%s: contains a non-BIP68-final transaction", __func__),
                     REJECT_INVALID, "bad-txns-nonfinal");
@@ -3522,6 +3674,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     }
                 }
             }
+
+            int64_t nBIP16SwitchTime = 1333238400;
+            bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
 
             if (fStrictPayToScriptHash) {
                 // Add in sigops done by pay-to-script-hash inputs;
