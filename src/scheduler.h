@@ -8,7 +8,11 @@
 #ifndef DYNAMIC_SCHEDULER_H
 #define DYNAMIC_SCHEDULER_H
 
+#include <boost/chrono/chrono.hpp>
+#include <boost/thread.hpp>
 #include <map>
+
+#include "sync.h"
 
 //
 // NOTE:
