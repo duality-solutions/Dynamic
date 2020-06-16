@@ -99,7 +99,7 @@ private:
     //int SaveSessionState();
     //std::string GetSessionStatePath();
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-    bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
+    bool FindDHTGetEvent(const std::string& infoHash, const int64_t& min_seq, CMutableGetEvent& event);
     bool CheckRecordMap(const CMutableGetEvent& event);
 };
 

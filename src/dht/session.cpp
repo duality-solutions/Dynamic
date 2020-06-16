@@ -601,7 +601,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
-        if (FindDHTGetEvent(infoHash, data) && data.SequenceNumber() >= nMinSequence) {
+        if (FindDHTGetEvent(infoHash, nMinSequence, data)) {
             std::string strData = data.Value();
             // TODO (DHT): check the last position for the single quote character
             if (strData.substr(0, 1) == "'") {
@@ -631,7 +631,7 @@ bool CHashTableSession::SubmitGetAuthoritative(const std::array<char, 32>& publi
     int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
-        if (FindDHTGetEvent(infoHash, data) && data.Authoritative()) {
+        if (FindDHTGetEvent(infoHash, lastSequence, data) && data.Authoritative()) {
             std::string strData = data.Value();
             // TODO (DHT): check the last position for the single quote character
             if (strData.substr(0, 1) == "'") {
@@ -718,7 +718,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
 bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event)
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
-    if (FindDHTGetEvent(infoHash, event)) {
+    if (FindDHTGetEvent(infoHash, 0, event)) {
         LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
         return true;
     }
@@ -950,11 +950,11 @@ void CHashTableSession::GetEvents(const int64_t& startTime, std::vector<CEvent>&
     LogPrintf("%s -- events.size() = %u\n", __func__, events.size());
 }
 
-bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
+bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, const int64_t& min_seq, CMutableGetEvent& event)
 {
     //LOCK(cs_DHTGetEventMap);
     std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
-    if (iMutableEvent != m_DHTGetEventMap.end()) {
+    if (iMutableEvent != m_DHTGetEventMap.end() && iMutableEvent->second.SequenceNumber() >= min_seq) {
         // event found.
         event = iMutableEvent->second;
         return true;
