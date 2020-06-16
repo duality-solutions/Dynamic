@@ -17,12 +17,11 @@
 #include "core_io.h"
 #include "httpserver.h"
 #include "validation.h"
+#include "miner/miner-util.h"
 #include "net.h"
-#include "policy/feerate.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
 #include "policy/rbf.h"
-#include "rpc/mining.h"
 #include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "script/sign.h"
@@ -35,6 +34,8 @@
 #include "wallet/walletdb.h"
 #include "assets/snapshotrequestdb.h"
 #include "assets/assetsnapshotdb.h"
+
+extern bool EnsureWalletIsAvailable(bool avoidException);
 
 #ifdef ENABLE_WALLET
 
@@ -175,7 +176,7 @@ UniValue getsnapshotrequest(const JSONRPCRequest& request) {
         return obj;
     }
     else {
-       LogPrint(BCLog::REWARDS, "Failed to retrieve specified snapshot request for asset '%s' at height %d!\n",
+       LogPrint("rewards", "Failed to retrieve specified snapshot request for asset '%s' at height %d!\n",
             asset_name.c_str(), block_height);
     }
 
@@ -231,7 +232,7 @@ UniValue listsnapshotrequests(const JSONRPCRequest& request) {
         return result;
     }
     else {
-        LogPrint(BCLog::REWARDS, "Failed to cancel specified snapshot request for asset '%s' at height %d!\n",
+        LogPrint("rewards", "Failed to cancel specified snapshot request for asset '%s' at height %d!\n",
                  asset_name.c_str(), block_height);
     }
 
@@ -278,7 +279,7 @@ UniValue cancelsnapshotrequest(const JSONRPCRequest& request) {
         return obj;
     }
     else {
-        LogPrint(BCLog::REWARDS, "Failed to cancel specified snapshot request for asset '%s' at height %d!\n",
+        LogPrint("rewards", "Failed to cancel specified snapshot request for asset '%s' at height %d!\n",
             asset_name.c_str(), block_height);
     }
 
@@ -330,16 +331,16 @@ UniValue distributereward(const JSONRPCRequest& request) {
 
     //  Figure out which wallet to use
     CWallet * const walletPtr = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(walletPtr, request.fHelp)) {
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         UniValue ret(UniValue::VSTR);
         ret.push_back("Rewards system requires a wallet.");
         return ret;
     }
 
     ObserveSafeMode();
-    LOCK2(cs_main, walletPtr->cs_wallet);
+    LOCK(cs_main);
 
-    EnsureWalletIsUnlocked(walletPtr);
+    EnsureWalletIsUnlocked();
 
     //  Extract parameters
     std::string asset_name(request.params[0].get_str());
@@ -487,12 +488,12 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
             {   "rewards",      "requestsnapshot",            &requestsnapshot,            {"asset_name", "block_height"}},
             {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,         {"asset_name", "block_height"}},
-            {   "rewards",      "listsnapshotrequests",         &listsnapshotrequests,         {"asset_name", "block_height"}},
+            {   "rewards",      "listsnapshotrequests",       &listsnapshotrequests,       {"asset_name", "block_height"}},
             {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,      {"asset_name", "block_height"}},
             {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address"}},
-            {   "rewards",      "getdistributestatus",        &getdistributestatus,            {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}}
-    #endif
-    };
+            {   "rewards",      "getdistributestatus",        &getdistributestatus,        {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}},
+#endif
+};
 
 void RegisterRewardsRPCCommands(CRPCTable &t)
 {
