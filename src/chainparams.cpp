@@ -699,12 +699,7 @@ public:
         base58Prefixes[STEALTH_ADDRESS] = {0x13};
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
-    }
-    void UpdateBIP9Parameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
-    {
-        consensus.vDeployments[d].nStartTime = nStartTime;
-        consensus.vDeployments[d].nTimeout = nTimeout;
-    }
+
         /** ASSET START **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN; // TODO
@@ -739,6 +734,13 @@ public:
         nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
         nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
         /** ASSET END **/
+    }
+    void UpdateBIP9Parameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
+    {
+        consensus.vDeployments[d].nStartTime = nStartTime;
+        consensus.vDeployments[d].nTimeout = nTimeout;
+    }
+
 };
 static CRegTestParams regTestParams;
 
