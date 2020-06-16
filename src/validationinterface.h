@@ -48,9 +48,9 @@ protected:
      * Notifies listeners of a block being connected.
      * Provides a vector of transactions evicted from the mempool as a result.
      */
-    virtual void BlockConnected(const std::shared_ptr<const CBlock> &block, const CBlockIndex *pindex, const std::vector<CTransactionRef> &txnConflicted) {}
+    virtual void BlockConnected(const std::shared_ptr<const CBlock> &pblock, const CBlockIndex *pindex, const std::vector<CTransactionRef>& vtxConflicted) {}
     /** Notifies listeners of a block being disconnected */
-    virtual void BlockDisconnected(const std::shared_ptr<const CBlock> &block) {}    virtual void NotifyTransactionLock(const CTransaction& tx) {}
+    virtual void BlockDisconnected(const std::shared_ptr<const CBlock> &pblock) {}    virtual void NotifyTransactionLock(const CTransaction& tx) {}
     virtual void NotifyGovernanceVote(const CGovernanceVote& vote) {}
     virtual void NotifyGovernanceObject(const CGovernanceObject& object) {}
     virtual void NotifyInstantSendDoubleSpendAttempt(const CTransaction& currentTx, const CTransaction& previousTx) {}
