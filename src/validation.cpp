@@ -3641,7 +3641,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     const Coin& coin = view.AccessCoin(tx.vin[j].prevout);
                     const CTxOut& prevout = coin.out;
                     uint160 hashBytes;
-                    int addressType;
+                    int addressType = 0;
                     bool isAsset = false;
                     std::string assetName;
                     CAmount assetAmount;
@@ -4154,12 +4154,12 @@ bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode, int n
         }
 
         int64_t nMempoolSizeMax = gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
-        int64_t cacheSize = pcoinsTip->DynamicMemoryUsage() * DB_PEAK_USAGE_FACTOR;
+        int64_t cacheSize = pcoinsTip->DynamicMemoryUsage() + assetDynamicSize + assetDirtyCacheSize + messageCacheSize;
         int64_t nTotalSpace = nCoinCacheUsage + std::max<int64_t>(nMempoolSizeMax - nMempoolUsage, 0);
         // The cache is large and we're within 10% and 10 MiB of the limit, but we have time now (not in the middle of a block processing).
         bool fCacheLarge = mode == FLUSH_STATE_PERIODIC && cacheSize > std::max((9 * nTotalSpace) / 10, nTotalSpace - MAX_BLOCK_COINSDB_USAGE * 1024 * 1024);
         // The cache is over the limit, we have to write now.
-        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && cacheSize > nTotalSpace;
+        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && (cacheSize > nTotalSpace || assetMapAmountSize > 1000000);
         // It's been a while since we wrote the block index to disk. Do this frequently, so we don't need to redownload after a crash.
         bool fPeriodicWrite = mode == FLUSH_STATE_PERIODIC && nNow > nLastWrite + (int64_t)DATABASE_WRITE_INTERVAL * 1000000;
         // It's been very long since we flushed the cache. Do this infrequently, to optimize cache usage.

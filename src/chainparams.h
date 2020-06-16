@@ -13,6 +13,7 @@
 #include "primitives/block.h"
 #include "protocol.h"
 
+#include <memory>
 #include <vector>
 
 struct CDNSSeedData {
