@@ -7,12 +7,17 @@
 
 #include "core_io.h"
 
+#include "assets/assets.h"
 #include "base58.h"
-#include "primitives/transaction.h"
+#include "consensus/consensus.h"
+#include "consensus/validation.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "serialize.h"
 #include "streams.h"
+#include <univalue.h>
+#include <iomanip>
+#include <wallet/wallet.h>
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
@@ -21,6 +26,32 @@
 
 #include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
+
+std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
+{
+    bool sign = amount < 0;
+    int64_t n_abs = (sign ? -amount : amount);
+    int64_t quotient = n_abs / COIN;
+    int64_t remainder = n_abs % COIN;
+    remainder = remainder / pow(10, 8 - units);
+
+    if (units == 0 && remainder == 0) {
+        return strprintf("%s%d", sign ? "-" : "", quotient);
+    }
+    else {
+        return strprintf("%s%d.%0" + std::to_string(units) + "d", sign ? "-" : "", quotient, remainder);
+    }
+}
+
+UniValue ValueFromAmount(const CAmount& amount, const int8_t units)
+{
+    return UniValue(UniValue::VNUM, ValueFromAmountString(amount, units));
+}
+
+UniValue ValueFromAmount(const CAmount& amount)
+{
+    return ValueFromAmount(amount, 8);
+}
 
 std::string FormatScript(const CScript& script)
 {
@@ -157,8 +188,6 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
                 case TX_SCRIPTHASH:
                 case TX_MULTISIG:
                 case TX_NULL_DATA:
-                case TX_WITNESS_V0_SCRIPTHASH:
-                case TX_WITNESS_V0_KEYHASH:
                 case TX_RESTRICTED_ASSET_DATA:
                 default:
                     break;
