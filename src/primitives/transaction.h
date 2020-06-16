@@ -347,7 +347,7 @@ public:
     /** ASSET END */
 
     /**
-     * Get the total transaction size in bytes, including witness data.
+     * Get the total transaction size in bytes.
      * "Total Size" defined in BIP141 and BIP144.
      * @return Total transaction size in bytes
      */

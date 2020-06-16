@@ -18,13 +18,17 @@
 #include "uint256.h"
 #include "version.h"
 
+#include <crypto/ethash/helpers.hpp>
+
 #include <vector>
+
+class CBlockHeader;
 
 typedef uint256 ChainCode;
 
 static const size_t INPUT_BYTES = 80;              // Lenth of a block header in bytes. Input Length = Salt Length (salt = input)
 static const size_t OUTPUT_BYTES = 32;             // Length of output needed for a 256-bit hash
-static const unsigned int DEFAULT_ARGON2_FLAG = 2; //Same as ARGON2_DEFAULT_FLAGS
+static const unsigned int DEFAULT_ARGON2_FLAG = 2; // Same as ARGON2_DEFAULT_FLAGS
 /* ----------- Bitcoin Hash ------------------------------------------------- */
 /** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
 class CHash256
@@ -408,4 +412,8 @@ inline uint256 HashBlake2b(const T1 pbegin, const T1 pend)
     blake2b_final( S, (unsigned char*)&hash1, OUTPUT_BYTES );
     return hash1;
 }
+
+uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash);
+uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader);
+
 #endif // DYNAMIC_HASH_H

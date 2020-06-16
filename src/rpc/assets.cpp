@@ -3034,8 +3034,8 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               true, {"asset_name"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       true, {"asset_name", "onlytotal", "count", "start"}},
 #ifdef ENABLE_WALLET
-    { "assets",   "transferfromaddress",        &transferfromaddress,        true, {"asset_name", "from_address", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
-    { "assets",   "transferfromaddresses",      &transferfromaddresses,      true, {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
+    { "assets",   "transferfromaddress",        &transferfromaddress,        true, {"asset_name", "from_address", "qty", "to_address", "message", "expire_time", "dyn_change_address", "asset_change_address"}},
+    { "assets",   "transferfromaddresses",      &transferfromaddresses,      true, {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "dyn_change_address", "asset_change_address"}},
     { "assets",   "transfer",                   &transfer,                   true, {"asset_name", "qty", "to_address", "message", "expire_time", "change_address", "asset_change_address"}},
     { "assets",   "reissue",                    &reissue,                    true, {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_units", "new_ipfs"}},
 #endif

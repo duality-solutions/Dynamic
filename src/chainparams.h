@@ -230,6 +230,8 @@ protected:
     int nMinReorganizationAge;
 
     int nAssetActivationHeight;
+
+    uint32_t nKAAAWWWPOWActivationTime;
     /** ASSET End **/
 };
 

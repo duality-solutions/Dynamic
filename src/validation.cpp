@@ -2538,7 +2538,7 @@ bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoins
                         if (AreRestrictedAssetsDeployed()) {
                             if (out.scriptPubKey[0] != OP_DYN_ASSET) {
                                 return state.DoS(100, false, REJECT_INVALID,
-                                                 "bad-txns-op-rvn-asset-not-in-right-script-location", false, "", tx.GetHash());
+                                                 "bad-txns-op-dyn-asset-not-in-right-script-location", false, "", tx.GetHash());
                             }
                         } else {
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script", false, "", tx.GetHash());
@@ -3208,7 +3208,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                 const COutPoint& out = tx.vin[j].prevout;
                 int undoHeight = txundo.vprevout[j].nHeight;
                 Coin &undo = txundo.vprevout[j];
-                int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache); /** RVN START */ /* Pass assetsCache into ApplyTxInUndo function */ /** RVN END */
+                int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache); /* ASSET START */ /* Pass assetsCache into ApplyTxInUndo function */ /* ASSET END */
                 if (res == DISCONNECT_FAILED)
                     return DISCONNECT_FAILED;
                 fClean = fClean && res != DISCONNECT_UNCLEAN;

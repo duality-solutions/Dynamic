@@ -173,7 +173,6 @@ bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPu
     bool solved = SignStep(creator, script, result, whichType, SIGVERSION_BASE);
     bool P2SH = false;
     CScript subscript;
-    sigdata.scriptWitness.stack.clear();
 
     txnouttype whichType;
     if (!SignStep(creator, fromPubKey, scriptSig, whichType))
@@ -287,7 +286,6 @@ namespace
 struct Stacks
 {
     std::vector<valtype> script;
-    std::vector<valtype> witness;
 
     Stacks() {}
     explicit Stacks(const std::vector<valtype>& scriptSigStack_) {}

@@ -488,12 +488,12 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
             {   "rewards",      "requestsnapshot",            &requestsnapshot,            {"asset_name", "block_height"}},
             {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,         {"asset_name", "block_height"}},
-            {   "rewards",      "listsnapshotrequests",       &listsnapshotrequests,       {"asset_name", "block_height"}},
+            {   "rewards",      "listsnapshotrequests",         &listsnapshotrequests,         {"asset_name", "block_height"}},
             {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,      {"asset_name", "block_height"}},
             {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address"}},
-            {   "rewards",      "getdistributestatus",        &getdistributestatus,        {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}},
-#endif
-};
+            {   "rewards",      "getdistributestatus",        &getdistributestatus,            {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}}
+    #endif
+    };
 
 void RegisterRewardsRPCCommands(CRPCTable &t)
 {

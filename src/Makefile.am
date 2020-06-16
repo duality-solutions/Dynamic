@@ -451,6 +451,30 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/chacha20.cpp \
   crypto/chacha20.h \
   crypto/common.h \
+  crypto/ethash/include/ethash/ethash.h \
+  crypto/ethash/include/ethash/ethash.hpp \
+  crypto/ethash/include/ethash/hash_types.h \
+  crypto/ethash/include/ethash/hash_types.hpp \
+  crypto/ethash/include/ethash/keccak.h \
+  crypto/ethash/include/ethash/keccak.hpp \
+  crypto/ethash/include/ethash/progpow.hpp \
+  crypto/ethash/include/ethash/version.h \
+  crypto/ethash/lib/ethash/bit_manipulation.h \
+  crypto/ethash/lib/ethash/builtins.h \
+  crypto/ethash/lib/ethash/endianness.hpp \
+  crypto/ethash/lib/ethash/ethash.cpp \
+  crypto/ethash/lib/ethash/ethash-internal.hpp \
+  crypto/ethash/lib/ethash/kiss99.hpp \
+  crypto/ethash/lib/ethash/managed.cpp \
+  crypto/ethash/lib/ethash/primes.c \
+  crypto/ethash/lib/ethash/primes.h \
+  crypto/ethash/lib/ethash/progpow.cpp \
+  crypto/ethash/lib/keccak/keccak.c \
+  crypto/ethash/lib/keccak/keccakf1600.c \
+  crypto/ethash/lib/keccak/keccakf800.c \
+  crypto/ethash/lib/support/attributes.h \
+  crypto/ethash/helpers.hpp \
+  crypto/ethash/progpow_test_vectors.hpp \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
   crypto/hmac_sha512.cpp \

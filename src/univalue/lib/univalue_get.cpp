@@ -111,6 +111,16 @@ int UniValue::get_int() const
     return retval;
 }
 
+uint32_t UniValue::get_uint() const
+{
+    if (typ != VNUM)
+        throw std::runtime_error("JSON value is not an integer as expected");
+    uint32_t retval;
+    if (!ParseUInt32(getValStr(), &retval))
+        throw std::runtime_error("JSON integer out of range");
+    return retval;
+}
+
 int64_t UniValue::get_int64() const
 {
     if (typ != VNUM)
@@ -120,6 +130,15 @@ int64_t UniValue::get_int64() const
         throw std::runtime_error("JSON integer out of range");
     return retval;
 }
+
+uint64_t UniValue::get_uint64() const
+{
+    if (typ != VNUM)
+        throw std::runtime_error("JSON value is not an integer as expected");
+    uint64_t retval;
+    if (!ParseUInt64(getValStr(), &retval))
+        throw std::runtime_error("JSON integer out of range");
+    r
 
 double UniValue::get_real() const
 {

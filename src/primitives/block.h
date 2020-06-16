@@ -19,6 +19,9 @@
  * in the block is a special one that creates a new coin owned by the creator
  * of the block.
  */
+
+extern uint32_t nKAWPOWActivationTime;
+
 class CBlockHeader
 {
 public:
@@ -31,6 +34,11 @@ public:
     uint32_t nNonce;
     // Proof-of-Stake: copy from CBlockIndex.nFlags from other clients. We need this information because we are using headers-first syncronization.
     int32_t nFlags;
+
+    //KAAAWWWPOW data
+    uint32_t nHeight;
+    uint64_t nNonce64;
+    uint256 mix_hash;
 
     CBlockHeader()
     {
@@ -47,7 +55,13 @@ public:
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
         READWRITE(nBits);
-        READWRITE(nNonce);
+        if (nTime < nKAWPOWActivationTime) {
+            READWRITE(nNonce);
+        } else {
+            READWRITE(nHeight);
+            READWRITE(nNonce64);
+            READWRITE(mix_hash);
+        }
         if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
             READWRITE(nFlags);
     }
@@ -61,6 +75,10 @@ public:
         nBits = 0;
         nNonce = 0;
         nFlags = 0;
+
+        nNonce64 = 0;
+        nHeight = 0;
+        mix_hash.SetNull();
     }
 
     bool IsNull() const
@@ -69,6 +87,8 @@ public:
     }
 
     uint256 GetHash() const;
+    uint256 GetHashFull() const;
+    uint256 GetKAWPOWHeaderHash() const;
 
     int64_t GetBlockTime() const
     {
@@ -144,6 +164,12 @@ public:
         block.nBits = nBits;
         block.nNonce = nNonce;
         block.nFlags = nFlags;
+        return block;
+
+        // KAWPOW
+        block.nHeight        = nHeight;
+        block.nNonce64       = nNonce64;
+        block.mix_hash       = mix_hash;
         return block;
     }
 
