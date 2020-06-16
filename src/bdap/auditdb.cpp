@@ -287,6 +287,20 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
             return error(errorMessage.c_str());
         }
         // check signature and pubkey belongs to bdap account.
+        CPubKey pubkey(vvchOpParameters[2]);
+
+        CDynamicAddress addressCompare(pubkey.GetID());
+
+        if (!(address == addressCompare)) {
+            errorMessage = "CheckNewAuditTxInputs: - Wallet address does not match. ";
+            return error(errorMessage.c_str());
+        }
+
+        if (!audit.CheckSignature(pubkey.Raw())) {
+            errorMessage = "CheckNewAuditTxInputs: - Could not validate signature. ";
+            return error(errorMessage.c_str());
+        }
+
     }
 
     CAudit getAudit;
@@ -338,6 +352,9 @@ bool CheckAuditTx(const CTransactionRef& tx, const CScript& scriptOp, const int&
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (strOperationType == "bdap_new_audit") {
+        if (!audit.ValidateValues(errorMessage))
+            return false;
+
         if (vvchArgs.size() > 3) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
