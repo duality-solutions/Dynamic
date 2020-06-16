@@ -107,11 +107,6 @@ void CScheduler::schedule(CScheduler::Function f, boost::chrono::system_clock::t
     newTaskScheduled.notify_one();
 }
 
-void CScheduler::scheduleFromNow(CScheduler::Function f, int64_t deltaSeconds)
-{
-    schedule(f, boost::chrono::system_clock::now() + boost::chrono::seconds(deltaSeconds));
-}
-
 void CScheduler::scheduleFromNow(CScheduler::Function f, int64_t deltaMilliSeconds)
 {
     schedule(f, boost::chrono::system_clock::now() + boost::chrono::milliseconds(deltaMilliSeconds));
