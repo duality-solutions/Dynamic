@@ -178,6 +178,11 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
     } else {
         vchUnHexValue = vchChunks;
     }
+    if (dataHeader.nFormat == DHT::DataFormat::Null) {
+        fIsNull = true;
+        LogPrintf("CDataRecord::%s -- Null value found", __func__);
+    }
+
     if (vchUnHexValue.size() != dataHeader.nDataSize)
     {
         LogPrintf("CDataRecord::%s --Warning, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
@@ -186,10 +191,8 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
         vchData = vchChunks;
     }
     else if (dataHeader.nVersion == 1) {
-
-        if (!Decrypt(privateKey, vchUnHexValue, vchData, strErrorMessage)) {
+        if (!Decrypt(privateKey, vchUnHexValue, vchData, strErrorMessage))
             return false;
-        }
     }
     else {
         strErrorMessage = "Unsupported version.";

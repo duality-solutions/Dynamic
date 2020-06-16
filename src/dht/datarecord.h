@@ -33,9 +33,10 @@ private:
     std::string strErrorMessage;
     std::vector<std::vector<unsigned char>> vPubKeys;
     bool fValid = false;
+    bool fIsNull = false;
 
 public:
-    CDataRecord() {}
+    CDataRecord() { fIsNull = true; }
 
     CDataRecord(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
                  const uint16_t version, const uint32_t expire, const DHT::DataFormat format);
@@ -58,6 +59,8 @@ public:
     std::string HeaderHex;
     bool HasError() const { return strErrorMessage.size() > 0; }
     bool Valid() const { return (fValid); }
+    bool IsNull() const { return fIsNull; }
+
 private:
     bool InitPut();
     bool InitClear();
