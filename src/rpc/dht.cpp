@@ -300,7 +300,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
             "  \"put_pubkey\"          (string)      BDAP account DHT public key\n"
             "  \"put_operation\"       (string)      Mutable data put operation or salt\n"
             "  \"put_seq\"             (string)      Mutable data sequence number\n"
-            "  \"put_value\"           (string)      Mutable data entry value\n"
+            "  \"put_data_size\"       (int)         Put data entry value size\n"
+            "  \"timestamp\"           (int)         Put data entry timestamp\n"
             "  }\n"
             "\nExamples\n" +
             HelpExampleCli("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0") +
@@ -382,6 +383,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
+
     return result;
 }
 
@@ -905,6 +908,8 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
             "  \"put_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"put_seq\"             (string)      Mutable data sequence number\n"
             "  \"put_value\"           (string)      Mutable data entry value\n"
+            "  \"put_data_size\"       (int)         Put data entry value size\n"
+            "  \"timestamp\"           (int)         Put epoch timestamp\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht putlinkrecord", "duality bob auth \"save this auth data\"") +
@@ -1010,6 +1015,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
