@@ -11,7 +11,7 @@
 #include "uint256.h"
 #include "utiltime.h"
 
-CRecordHeader::CRecordHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size, const uint32_t timestamp) :
+CRecordHeader::CRecordHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size, const int64_t timestamp) :
                                nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation), nDataSize(size), nTimeStamp(timestamp)
 {
     nUnlockTime = GetTime() + 30; // unlocks in 30 seconds by default

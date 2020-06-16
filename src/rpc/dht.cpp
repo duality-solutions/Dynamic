@@ -580,7 +580,7 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
             "  \"success_count\"      (string)      Put entry success count\n"
             "  \"message\"            (string)      Put entry message\n"
             "  \"what\"               (string)      Type of DHT alert event\n"
-            "  \"timestamp\"          (string)      Put entry timestamp\n"
+            "  \"timestamp\"          (string)      Put entry epoch timestamp\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dhtputmessages", "") +
@@ -634,7 +634,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
             "  \"authoritative\"      (string)      Get entry value is authoritative\n"
             "  \"message\"            (string)      Get entry message\n"
             "  \"what\"               (string)      Type of DHT alert event\n"
-            "  \"timestamp\"          (string)      Get entry timestamp\n"
+            "  \"timestamp\"          (string)      Get entry epoch timestamp\n"
             "  \"value\"              (string)      Get entry value\n"
             "  }\n"
             "\nExamples\n" +
@@ -1030,7 +1030,9 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
             "  \"link_acceptor\"       (string)      BDAP account that accepted the link\n"
             "  \"put_pubkey\"          (string)      BDAP account DHT public key for account1\n"
             "  \"put_operation\"       (string)      Mutable data operation code or salt\n"
-            "  \"put_seq\"             (string)      Mutable data sequence number\n"
+            "  \"put_seq\"             (string)      Put data sequence number\n"
+            "  \"put_data_size\"       (int)         Put data size\n"
+            "  \"timestamp\"           (int)         Epoch timestamp when record was cleared\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht clearlinkrecord", "duality bob auth") +
@@ -1126,6 +1128,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
