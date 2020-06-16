@@ -993,8 +993,8 @@ void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool f
         // ignore validation errors in resurrected transactions
         CValidationState stateDummy;
         if (!fAddToMempool || (*it)->IsCoinBase() ||
-            !AcceptToMemoryPool(mempool, stateDummy, *it, nullptr /* pfMissingInputs */,
-                                nullptr /* plTxnReplaced */, true /* bypass_limits */, 0 /* nAbsurdFee */)) {
+            !AcceptToMemoryPool(mempool, stateDummy, *it, false /* fLimitFree */, nullptr /* pfMissingInputs */,
+                                nullptr /* plTxnReplaced */, true /* fOverrideMempoolLimit */, 0 /* nAbsurdFee */)) {
             // If the transaction doesn't make it in to the mempool, remove any
             // transactions that depend on it (which would now be orphans).
             mempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
@@ -3576,7 +3576,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
     std::vector<PrecomputedTransactionData> txdata;
     txdata.reserve(block.vtx.size()); // Required so that pointers to individual PrecomputedTransactionData don't get invalidated
-    
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;

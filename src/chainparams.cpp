@@ -308,9 +308,6 @@ public:
         //Global Burn Address
         strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
 
-        // DGW Activation
-        nDGWActivationBlock = 10000000; // TODO
-
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
@@ -527,9 +524,6 @@ public:
         //Global Burn Address
         strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
 
-        // DGW Activation
-        nDGWActivationBlock = 10000000; // TODO
-
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
@@ -737,9 +731,6 @@ public:
         //Global Burn Address
         strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
 
-        // DGW Activation
-        nDGWActivationBlock = 10000000; // TODO
-
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
@@ -939,9 +930,6 @@ public:
 
         //Global Burn Address
         strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
-
-        // DGW Activation
-        nDGWActivationBlock = 10000000; // TODO
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO

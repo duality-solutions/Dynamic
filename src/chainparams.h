@@ -152,7 +152,6 @@ public:
         return false;
     }
 
-    unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
     unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
@@ -222,7 +221,6 @@ protected:
     // Global Burn Address
     std::string strGlobalBurnAddress;
 
-    unsigned int nDGWActivationBlock;
     unsigned int nMessagingActivationBlock;
     unsigned int nRestrictedActivationBlock;
 
@@ -231,8 +229,6 @@ protected:
     int nMinReorganizationAge;
 
     int nAssetActivationHeight;
-
-    uint32_t nKAAAWWWPOWActivationTime;
     /** ASSET End **/
 };
 
