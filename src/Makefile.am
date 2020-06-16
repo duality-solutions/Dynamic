@@ -377,6 +377,7 @@ libdynamic_server_a_SOURCES = \
   rpc/net.cpp \
   rpc/rawbdap.cpp \
   rpc/rawtransaction.cpp \
+  rpc/rewards.cpp \
   rpc/safemode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \
