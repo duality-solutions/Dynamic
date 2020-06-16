@@ -494,7 +494,14 @@ static UniValue GetRecord(const JSONRPCRequest& request)
             "  \"get_pubkey\"          (string)      BDAP account DHT public key\n"
             "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"data_encrypted\"      (bool)        Returns if the record is encrypted\n"
+            "  \"data_version\"        (int)         Record data version number\n"
+            "  \"data_chunks\"         (int)         Number of data chunks according to header\n"
             "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  \"get_value_size\"      (int)         Mutable data entry value size\n"
+            "  \"get_milliseconds\"    (string)      Number of milliseconds to get record\n"
+            "  \"null_record\"         (bool)        Record is null according to header\n"
+            "  \"timestamp\"           (int)         Epoch timestamp for the record creation date/time\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht getrecord", "Duality avatar") +
@@ -552,6 +559,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
 
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+    result.push_back(Pair("null_record", record.GetHeader().IsNull() ? "true" : "false"));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
@@ -683,7 +692,14 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
             "  \"get_pubkey\"          (string)      BDAP account DHT public key for account1\n"
             "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"data_encrypted\"      (bool)        Returns if the record is encrypted\n"
+            "  \"data_version\"        (int)         Record data version number\n"
+            "  \"data_chunks\"         (int)         Number of data chunks according to header\n"
             "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  \"get_value_size\"      (int)         Mutable data entry value size\n"
+            "  \"get_milliseconds\"    (string)      Number of milliseconds to get record\n"
+            "  \"null_record\"         (bool)        Record is null according to header\n"
+            "  \"timestamp\"           (int)         Epoch timestamp for the record creation date/time\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht getlinkrecord", "duality bob auth") +
@@ -776,9 +792,10 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
     result.push_back(Pair("get_value", record.Value()));
     result.push_back(Pair("get_value_size", (int)record.Value().size()));
-
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+    result.push_back(Pair("null_record", record.GetHeader().IsNull() ? "true" : "false"));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
