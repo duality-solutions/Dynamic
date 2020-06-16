@@ -58,6 +58,7 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
         InitPut();
     }
     else {
+        fIsNull = true;
         InitClear();
     }
     dataHeader.SetHex();
