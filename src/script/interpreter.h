@@ -101,7 +101,7 @@ enum SigVersion
     SIGVERSION_BASE = 0
 };
 
-uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType, SigVersion sigversion, const PrecomputedTransactionData *cache = nullptr);
+uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo, unsigned int nIn, int nHashType, const CAmount &amount, SigVersion sigversion, const PrecomputedTransactionData *cache = nullptr);
 
 class BaseSignatureChecker
 {
