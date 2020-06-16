@@ -687,6 +687,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
     // if header matches previous entry, only get missing chunks.
     if (strHeaderHex == "")
         return false; // Header failed, so don't try to get the rest of the record.
+
     nHeaderSeq = iSequence;
     header.LoadHex(strHeaderHex);
     if (!header.IsNull() && header.nChunks > 0) {
@@ -710,6 +711,12 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         nGetPieces += header.nChunks + 1;
         nGetBytes += header.nDataSize;
         record = getRecord;
+        return true;
+    } else if (header.IsNull()) {
+        std::vector<CDataChunk> vChunks;
+        CDataRecord getRecord(strOperationType, 0, header, vChunks, Array32ToVector(private_seed));
+        record = getRecord;
+        nGetBytes += header.nDataSize;
         return true;
     }
     return false;

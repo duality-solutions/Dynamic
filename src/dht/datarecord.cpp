@@ -135,19 +135,12 @@ bool CDataRecord::InitPut()
 
 bool CDataRecord::InitClear()
 {
-    std::string strNullValue = "null";
-    uint16_t nPlacement = 1;
-    std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
-    CDataChunk chunk(0, nPlacement, strSalt, strNullValue);
-    vChunks.push_back(chunk);
-
     dataHeader.nVersion = 0; // unencrypted
-    dataHeader.nTimeStamp = 0;
     dataHeader.nExpireTime = 0;
-    dataHeader.nChunks = 1;
-    dataHeader.nChunkSize = 4;
-    dataHeader.nDataSize = 4;
-    dataHeader.nFormat = DHT::DataFormat::String;
+    dataHeader.nChunks = 0;
+    dataHeader.nChunkSize = 0;
+    dataHeader.nDataSize = 0;
+    dataHeader.nFormat = DHT::DataFormat::Null;
     dataHeader.nIndexLocation = 0;
     dataHeader.nTimeStamp = GetTime();
     return true;
