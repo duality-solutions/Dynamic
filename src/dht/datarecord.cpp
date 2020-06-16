@@ -8,6 +8,7 @@
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "util.h"
 #include "utilstrencodings.h"
+#include "utiltime.h"
 
 #include <string>
 #include <vector>
@@ -115,6 +116,7 @@ bool CDataRecord::InitPut()
         dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
         dataHeader.nDataSize = size;
+        dataHeader.nTimeStamp = GetTime();
     }
     else
     {
@@ -125,6 +127,7 @@ bool CDataRecord::InitPut()
         dataHeader.nChunkSize = vchRaw.size();
         dataHeader.nIndexLocation = 0;
         dataHeader.nDataSize = vchRaw.size();
+        dataHeader.nTimeStamp = GetTime();
     }
     return true;
 }
@@ -145,7 +148,7 @@ bool CDataRecord::InitClear()
     dataHeader.nDataSize = 4;
     dataHeader.nFormat = DHT::DataFormat::String;
     dataHeader.nIndexLocation = 0;
-
+    dataHeader.nTimeStamp = GetTime();
     return true;
 }
 

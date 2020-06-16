@@ -58,7 +58,7 @@ public:
     uint16_t nIndexLocation;
     uint32_t nUnlockTime;
     uint32_t nDataSize;
-    uint32_t nTimeStamp;
+    int64_t nTimeStamp;
     std::string Salt;
 
     CRecordHeader() {
@@ -66,7 +66,7 @@ public:
     }
 
     CRecordHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, 
-                        const uint32_t format, const uint16_t indexLocation, const uint32_t size, const uint32_t timestamp);
+                        const uint32_t format, const uint16_t indexLocation, const uint32_t size, const int64_t timestamp);
 
     CRecordHeader(const std::string& hex);
 
