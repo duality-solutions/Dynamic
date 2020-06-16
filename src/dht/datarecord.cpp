@@ -183,10 +183,11 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
         LogPrintf("CDataRecord::%s -- Null value found", __func__);
     }
 
-    if (vchUnHexValue.size() != dataHeader.nDataSize)
-    {
-        LogPrintf("CDataRecord::%s --Warning, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
+    if (vchUnHexValue.size() != dataHeader.nDataSize) {
+        LogPrintf("CDataRecord::%s -- Error, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
+        return false;
     }
+
     if (dataHeader.nVersion == 0) {
         vchData = vchChunks;
     }
