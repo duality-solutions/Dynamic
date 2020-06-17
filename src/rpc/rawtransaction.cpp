@@ -5,6 +5,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "assets/assets.h"
 #include "base58.h"
 #include "chain.h"
 #include "coins.h"
@@ -439,6 +440,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
         rawTx.vin.push_back(in);
     }
 
+    auto currentActiveAssetCache = GetCurrentAssetCache();
+
     std::set<CTxDestination> setDestAddress;
     std::vector<std::string> addrList = sendTo.getKeys();
     for (const std::string& name_ : addrList) {
@@ -476,8 +479,10 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 scriptPubKey = GetScriptForDestination(dest);
             }
             CAmount nAmount = AmountFromValue(sendTo[name_]);
+            CScript ownerPubKey = GetScriptForDestination(dest);
 
             CTxOut out(nAmount, scriptPubKey);
+
             rawTx.vout.push_back(out);
             if (fStealthAddress) {
                 CScript scriptData;
@@ -485,6 +490,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 CTxOut txOutData(0, scriptData);
                 rawTx.vout.push_back(txOutData);
             }
+
             /* ASSET START */
             else if (sendTo[name_].type() == UniValue::VOBJ) {
                 auto asset_ = sendTo[name_].get_obj();
@@ -600,7 +606,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     // Create the scripts for the change of the ownership token
-                    CScript scriptTransferOwnerAsset = GetScriptForDestination(destination);
+                    CScript scriptTransferOwnerAsset = GetScriptForDestination(dest);
                     CAssetTransfer assetTransfer(root_name.get_str() + OWNER_TAG, OWNER_ASSET_AMOUNT);
                     assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
 
@@ -628,7 +634,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                             throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
                         // Construct the asset transaction
-                        scriptPubKey = GetScriptForDestination(destination);
+                        scriptPubKey = GetScriptForDestination(dest);
                         asset.ConstructTransaction(scriptPubKey);
 
                         // Push the scriptPubKey into the vouts.
@@ -707,13 +713,13 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     if (fHasOwnerChange)
                         owner_asset_transfer_script = GetScriptForDestination(DecodeDestination(owner_change_address.get_str()));
                     else
-                        owner_asset_transfer_script = GetScriptForDestination(destination);
+                        owner_asset_transfer_script = GetScriptForDestination(dest);
 
                     CAssetTransfer transfer_owner(asset_name.get_str() + OWNER_TAG, OWNER_ASSET_AMOUNT);
                     transfer_owner.ConstructTransaction(owner_asset_transfer_script);
 
                     // Create the scripts for the reissued assets
-                    CScript scriptReissueAsset = GetScriptForDestination(destination);
+                    CScript scriptReissueAsset = GetScriptForDestination(dest);
                     reissueObj.ConstructTransaction(scriptReissueAsset);
 
                     // Create the CTxOut for the owner token
@@ -754,7 +760,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         }
 
                         // Construct transaction
-                        CScript scriptPubKey = GetScriptForDestination(destination);
+                        CScript scriptPubKey = GetScriptForDestination(dest);
                         transfer.ConstructTransaction(scriptPubKey);
 
                         // Push into vouts
@@ -808,7 +814,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         }
 
                         // Construct transaction
-                        CScript scriptPubKey = GetScriptForDestination(destination);
+                        CScript scriptPubKey = GetScriptForDestination(dest);
                         transfer.ConstructTransaction(scriptPubKey);
 
                         // Push into vouts
@@ -878,7 +884,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     // Check the restricted asset destination address, and make sure it validates with the verifier string
                     std::string strError = "";
-                    if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString, EncodeDestination(destination), strError))
+                    if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString, EncodeDestination(dest), strError))
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parmeter, verifier string is not. Please check the syntax. Error Msg - " + strError));
 
 
@@ -891,7 +897,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     // Construct the restricted issuance script
-                    CScript restricted_issuance_script = GetScriptForDestination(destination);
+                    CScript restricted_issuance_script = GetScriptForDestination(dest);
                     asset.ConstructTransaction(restricted_issuance_script);
 
                     // Construct the owner change script
@@ -899,7 +905,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     if (fHasOwnerChange)
                         owner_asset_transfer_script = GetScriptForDestination(DecodeDestination(owner_change_address.get_str()));
                     else
-                        owner_asset_transfer_script = GetScriptForDestination(destination);
+                        owner_asset_transfer_script = GetScriptForDestination(dest);
 
                     CAssetTransfer transfer_owner(strAssetName.substr(1, strAssetName.size()) + OWNER_TAG, OWNER_ASSET_AMOUNT);
                     transfer_owner.ConstructTransaction(owner_asset_transfer_script);
@@ -999,7 +1005,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         // Check the restricted asset destination address, and make sure it validates with the verifier string
                         std::string strError = "";
                         if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString,
-                                                           EncodeDestination(destination), strError))
+                                                           EncodeDestination(dest), strError))
                             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
                                     "Invalid parmeter, verifier string is not. Please check the syntax. Error Msg - " +
                                     strError));
@@ -1020,13 +1026,13 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         owner_asset_transfer_script = GetScriptForDestination(
                                 DecodeDestination(owner_change_address.get_str()));
                     else
-                        owner_asset_transfer_script = GetScriptForDestination(destination);
+                        owner_asset_transfer_script = GetScriptForDestination(dest);
 
                     CAssetTransfer transfer_owner(RestrictedNameToOwnerName(asset_name.get_str()), OWNER_ASSET_AMOUNT);
                     transfer_owner.ConstructTransaction(owner_asset_transfer_script);
 
                     // Create the scripts for the reissued assets
-                    CScript scriptReissueAsset = GetScriptForDestination(destination);
+                    CScript scriptReissueAsset = GetScriptForDestination(dest);
                     reissueObj.ConstructTransaction(scriptReissueAsset);
 
                     // Construct the verifier string script
@@ -1121,7 +1127,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     // Construct the issuance script
-                    CScript issuance_script = GetScriptForDestination(destination);
+                    CScript issuance_script = GetScriptForDestination(dest);
                     asset.ConstructTransaction(issuance_script);
 
                     // Construct the root change script if issuing subqualifier
@@ -1131,7 +1137,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                             root_asset_transfer_script = GetScriptForDestination(
                                     DecodeDestination(root_change_address.get_str()));
                         else
-                            root_asset_transfer_script = GetScriptForDestination(destination);
+                            root_asset_transfer_script = GetScriptForDestination(dest);
 
                         CAssetTransfer transfer_root(GetParentName(strAssetName), changeQty);
                         transfer_root.ConstructTransaction(root_asset_transfer_script);
@@ -1179,7 +1185,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     // change
-                    CScript change_script = GetScriptForDestination(destination);
+                    CScript change_script = GetScriptForDestination(dest);
                     CAssetTransfer transfer_change(strQualifier, changeQty);
                     transfer_change.ConstructTransaction(change_script);
                     CTxOut out_change(0, change_script);
@@ -1216,7 +1222,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     // owner change
-                    CScript change_script = GetScriptForDestination(destination);
+                    CScript change_script = GetScriptForDestination(dest);
                     CAssetTransfer transfer_change(RestrictedNameToOwnerName(strAssetName), OWNER_ASSET_AMOUNT);
                     transfer_change.ConstructTransaction(change_script);
                     CTxOut out_change(0, change_script);
@@ -1245,7 +1251,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, a valid restricted asset name must be provided, e.g. $MY_ASSET");
 
                     // owner change
-                    CScript change_script = GetScriptForDestination(destination);
+                    CScript change_script = GetScriptForDestination(dest);
                     CAssetTransfer transfer_change(RestrictedNameToOwnerName(strAssetName), OWNER_ASSET_AMOUNT);
                     transfer_change.ConstructTransaction(change_script);
                     CTxOut out_change(0, change_script);
