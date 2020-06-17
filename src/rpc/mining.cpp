@@ -993,8 +993,8 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
     uint32_t nHeight = request.params[3].get_uint();
 
     uint64_t nNonce;
-    if (!ParseUInt64(hex_nonce, &nNonce, 16))
-        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid nonce hex string");
+//    if (!ParseUInt64(hex_nonce, &nNonce, 16))
+//       throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid nonce hex string");
 
     if (nHeight > (uint32_t)chainActive.Height() + 10)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
@@ -1068,8 +1068,8 @@ static UniValue pprpcsb(const JSONRPCRequest& request) {
     std::string str_nonce = request.params[2].get_str();
 
     uint64_t nonce;
-    if (!ParseUInt64(str_nonce, &nonce, 16))
-        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid hex nonce");
+//    if (!ParseUInt64(str_nonce, &nonce, 16))
+//        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid hex nonce");
 
     if (!mapDYNKAWBlockTemplates.count(header_hash))
         throw JSONRPCError(RPC_INVALID_PARAMS, "Block header hash not found in block data");
@@ -1084,8 +1084,7 @@ static UniValue pprpcsb(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
     }
 
-    uint256 retMixHash;
-    if (!CheckProofOfWork(blockptr->GetHashFull(retMixHash), blockptr->nBits, Params().GetConsensus()))
+    if (!CheckProofOfWork(blockptr->GetHashFull(), blockptr->nBits, Params().GetConsensus()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not solve the boundary");
 
 
