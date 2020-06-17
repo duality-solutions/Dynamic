@@ -233,7 +233,9 @@ bool SignSignature(const CKeyStore &keystore, const CTransaction& txFrom, CMutab
     return SignSignature(keystore, txout.scriptPubKey, txTo, nIn, txout.nValue, nHashType);
 }
 
-static CScript CombineMultisig(const CScript& scriptPubKey, const BaseSignatureChecker& checker, const std::vector<valtype>& vSolutions, const std::vector<valtype>& sigs1, const std::vector<valtype>& sigs2, SigVersion sigversion)
+static std::vector<valtype> CombineMultisig(const CScript& scriptPubKey, const BaseSignatureChecker& checker,
+                               const std::vector<valtype>& vSolutions,
+                               const std::vector<valtype>& sigs1, const std::vector<valtype>& sigs2, SigVersion sigversion)
 {
     // Combine all the signatures we've got:
     std::set<valtype> allsigs;
@@ -265,17 +267,17 @@ static CScript CombineMultisig(const CScript& scriptPubKey, const BaseSignatureC
     }
     // Now build a merged CScript:
     unsigned int nSigsHave = 0;
-    CScript result;
-    result << OP_0; // pop-one-too-many workaround
+    std::vector<valtype> result; result.push_back(valtype()); // pop-one-too-many workaround
     for (unsigned int i = 0; i < nPubKeys && nSigsHave < nSigsRequired; i++) {
-        if (sigs.count(vSolutions[i + 1])) {
-            result << sigs[vSolutions[i + 1]];
+        if (sigs.count(vSolutions[i + 1])) 
+        {
+            result.push_back(sigs[vSolutions[i+1]]);
             ++nSigsHave;
         }
     }
     // Fill any missing with OP_0:
     for (unsigned int i = nSigsHave; i < nSigsRequired; i++)
-        result << OP_0;
+        result.push_back(valtype());
 
     return result;
 }
