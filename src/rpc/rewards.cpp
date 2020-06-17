@@ -483,15 +483,15 @@ UniValue getdistributestatus(const JSONRPCRequest& request) {
 
 
 static const CRPCCommand commands[] =
-    {           //  category    name                          actor (function)             argNames
-                //  ----------- ------------------------      -----------------------      ----------
+    {           //  category    name                          actor (function)              okSafe  argNames
+                //  ----------- ------------------------      -----------------------       ------  ----
 #ifdef ENABLE_WALLET
-            {   "rewards",      "requestsnapshot",            &requestsnapshot,            {"asset_name", "block_height"}},
-            {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,         {"asset_name", "block_height"}},
-            {   "rewards",      "listsnapshotrequests",         &listsnapshotrequests,         {"asset_name", "block_height"}},
-            {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,      {"asset_name", "block_height"}},
-            {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address"}},
-            {   "rewards",      "getdistributestatus",        &getdistributestatus,            {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}}
+            {   "rewards",      "requestsnapshot",            &requestsnapshot,             true,   {"asset_name", "block_height"}},
+            {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,          true,   {"asset_name", "block_height"}},
+            {   "rewards",      "listsnapshotrequests",       &listsnapshotrequests,        true,   {"asset_name", "block_height"}},
+            {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,       true,   {"asset_name", "block_height"}},
+            {   "rewards",      "distributereward",           &distributereward,            true,   {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address"}},
+            {   "rewards",      "getdistributestatus",        &getdistributestatus,         true,   {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}},
     #endif
     };
 
