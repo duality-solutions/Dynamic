@@ -16,7 +16,7 @@
 
 typedef std::vector<unsigned char> valtype;
 
-TransactionSignatureCreator::TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn) : BaseSignatureCreator(keystoreIn), txTo(txToIn), nIn(nInIn), nHashType(nHashTypeIn), amount(amountIn), checker(txTo, nIn) {}
+TransactionSignatureCreator::TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn) : BaseSignatureCreator(keystoreIn), txTo(txToIn), nIn(nInIn), nHashType(nHashTypeIn), amount(amountIn), checker(txTo, nIn, amountIn) {}
 
 bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& address, const CScript& scriptCode, SigVersion sigversion) const
 {
@@ -114,15 +114,15 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
     /** ASSET END */
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
-        return Sign1(keyID, creator, scriptPubKey, scriptSigRet);
+        return Sign1(keyID, creator, scriptPubKey, ret, sigversion);
     case TX_PUBKEYHASH:
         keyID = CKeyID(uint160(vSolutions[0]));
-        if (!Sign1(keyID, creator, scriptPubKey, scriptSigRet))
+        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
             return false;
         else {
             CPubKey vch;
             creator.KeyStore().GetPubKey(keyID, vch);
-            scriptSigRet << ToByteVector(vch);
+            ret.push_back(ToByteVector(vch));
         }
         return true;
     case TX_SCRIPTHASH:
@@ -156,12 +156,12 @@ static CScript PushAll(const std::vector<valtype>& values)
     return result;
 }
 
-bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKey, SignatureData& sigdata)
+bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKeyIn, SignatureData& sigdata)
 {
     // Remove BDAP portion of the script
     CScript fromPubKey;
     CScript scriptPubKeyOut;
-    if (RemoveBDAPScript(fromPubKeyIn, scriptPubKeyOut)) {
+    if (RemoveBDAPScript(fromPubKey, scriptPubKeyOut)) {
         fromPubKey = scriptPubKeyOut;
     } else {
         fromPubKey = fromPubKeyIn;
@@ -174,8 +174,7 @@ bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPu
     bool P2SH = false;
     CScript subscript;
 
-    txnouttype whichType;
-    if (!SignStep(creator, fromPubKey, scriptSig, whichType))
+    if (!SignStep(creator, fromPubKey, result, whichType, SIGVERSION_BASE))
         return false;
 
     if (solved && whichType == TX_SCRIPTHASH)
@@ -234,7 +233,7 @@ bool SignSignature(const CKeyStore &keystore, const CTransaction& txFrom, CMutab
     return SignSignature(keystore, txout.scriptPubKey, txTo, nIn, txout.nValue, nHashType);
 }
 
-static CScript CombineMultisig(const CScript& scriptPubKey, const BaseSignatureChecker& checker, const std::vector<valtype>& vSolutions, const std::vector<valtype>& sigs1, const std::vector<valtype>& sigs2)
+static CScript CombineMultisig(const CScript& scriptPubKey, const BaseSignatureChecker& checker, const std::vector<valtype>& vSolutions, const std::vector<valtype>& sigs1, const std::vector<valtype>& sigs2, SigVersion sigversion)
 {
     // Combine all the signatures we've got:
     std::set<valtype> allsigs;
@@ -258,7 +257,7 @@ static CScript CombineMultisig(const CScript& scriptPubKey, const BaseSignatureC
             if (sigs.count(pubkey))
                 continue; // Already got a sig for this pubkey
 
-            if (checker.CheckSig(sig, pubkey, scriptPubKey)) {
+            if (checker.CheckSig(sig, pubkey, scriptPubKey, sigversion)) {
                 sigs[pubkey] = sig;
                 break;
             }
@@ -288,7 +287,7 @@ struct Stacks
     std::vector<valtype> script;
 
     Stacks() {}
-    explicit Stacks(const std::vector<valtype>& scriptSigStack_) {}
+    explicit Stacks(const std::vector<valtype>& scriptSigStack_) : script(scriptSigStack_) {}
     explicit Stacks(const SignatureData& data) {
         EvalScript(script, data.scriptSig, SCRIPT_VERIFY_STRICTENC, BaseSignatureChecker(), SIGVERSION_BASE);
     }
