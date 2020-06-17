@@ -809,7 +809,7 @@ void RPCConsole::message(int category, const QString& message, bool html)
     if (html)
         out += message;
     else
-        out += GUIUtil::HtmlEscape(message, true);
+        out += GUIUtil::HtmlEscape(message, false);
     out += "</td></tr></table>";
     ui->messagesWidget->append(out);
 }
