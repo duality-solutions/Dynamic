@@ -43,23 +43,31 @@ static UniValue AddAudit(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
     // audit add "0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026,cc01a8d4e3d7271c4c2d6af1f5247a87cb324a5e59c5018e9251d81681877ce7" "username@public.bfap.io" 
-    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 3))
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 5))
         throw std::runtime_error(
-            "audit add \"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\"\n"
+            "audit add \"hash_array\" ( \"account\" ) ( \"description\" ) ( \"algorithm\" )\n"
             "\nAdds an audit record to the blockchain.\n"
+            "\nArguments:\n"
+            "1. \"hash_array\"       (string, required)  Audit hashes\n"
+            "2. \"account\"          (string, optional)  BDAP account that created audit\n"
+            "3. \"description\"      (string, optional)  Description of audit\n"
+            "4. \"algorithm\"        (string, optional)  Algorithm used to create hash\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"audit hashes\"      (string)            Audit hashes\n"
             "  \"account\"           (string, optional)  BDAP account that created audit\n"
+            "  \"description\"       (string, optional)  Description of audit\n"
+            "  \"algorithm\"         (string, optional)  Algorithm used to create hash\n"
             "  \"txid\"              (string)            Audit record transaction id\n"
             "}\n"
             "\nExamples\n" +
-           HelpExampleCli("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\"") +
+           HelpExampleCli("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\" \"testdescription\" \"sha256\"") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\""));
+           HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\"  \"testdescription\" \"sha256\""));
 
     EnsureWalletIsUnlocked();
 
+    //handle HASH array [REQUIRED]
     std::string strAudits = request.params[1].get_str();
     CharString vchOwnerFQDN;
     CAuditData auditData;
@@ -74,38 +82,60 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     CPubKey pubWalletKey;
     CAudit txAudit(auditData);
     bool signedAudit = false;
-    if (request.params.size() == 3) {
-        // TODO: add ability to use specified wallet address
-        std::string strOwnerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
-        ToLowerCase(strOwnerFQDN);
-        vchOwnerFQDN = vchFromString(strOwnerFQDN);
-        // Check if name exists
-        CDomainEntry domainEntry;
-        if (!GetDomainEntry(vchOwnerFQDN, domainEntry))
-            throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strOwnerFQDN));
 
-        txAudit.vchOwnerFullObjectPath = domainEntry.vchFullObjectPath();
+    //handle OWNER [OPTIONAL]
+    if (request.params.size() > 2) {
 
-        CDynamicAddress address = domainEntry.GetWalletAddress();
-        CKeyID keyID;
-        if (!address.GetKeyID(keyID))
-            throw JSONRPCError(RPC_TYPE_ERROR, "BDAP account wallet address does not refer to a key");
+        if (request.params[2].get_str().size() > 0) {
+            // TODO: add ability to use specified wallet address
+            std::string strOwnerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+            ToLowerCase(strOwnerFQDN);
+            vchOwnerFQDN = vchFromString(strOwnerFQDN);
+            // Check if name exists
+            CDomainEntry domainEntry;
+            if (!GetDomainEntry(vchOwnerFQDN, domainEntry))
+                throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strOwnerFQDN));
 
-        CKey walletKey;
-        if (!pwalletMain->GetKey(keyID, walletKey))
-            throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Private key for address " + address.ToString() + " is not known");
+            txAudit.vchOwnerFullObjectPath = domainEntry.vchFullObjectPath();
 
-        if (!txAudit.Sign(walletKey))
-            throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Signing audit data failed.");
+            CDynamicAddress address = domainEntry.GetWalletAddress();
+            CKeyID keyID;
+            if (!address.GetKeyID(keyID))
+                throw JSONRPCError(RPC_TYPE_ERROR, "BDAP account wallet address does not refer to a key");
 
-        signedAudit = true;
-        pubWalletKey = walletKey.GetPubKey();
-        //LogPrintf("%s: txAudit CheckSignature %s\n", __func__, txAudit.CheckSignature(pubWalletKey.Raw()) ? "Valid" : "Invalid");
+            CKey walletKey;
+            if (!pwalletMain->GetKey(keyID, walletKey))
+                throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Private key for address " + address.ToString() + " is not known");
 
-    } else {
-        CharString vchEd25519PubKey;
-        if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchEd25519PubKey, false))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+            if (!txAudit.Sign(walletKey))
+                throw JSONRPCError(RPC_WALLET_PRIV_KEY_NOT_FOUND, "Signing audit data failed.");
+
+            signedAudit = true;
+            pubWalletKey = walletKey.GetPubKey();
+            //LogPrintf("%s: txAudit CheckSignature %s\n", __func__, txAudit.CheckSignature(pubWalletKey.Raw()) ? "Valid" : "Invalid");
+
+        } else {
+            CharString vchEd25519PubKey;
+            if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchEd25519PubKey, false))
+                throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        }
+
+    }
+
+    //handle description [OPTIONAL]
+    if (request.params.size() > 3) {
+            std::string auditDescription = request.params[3].get_str();
+            if (auditDescription.size() > 0) {
+                txAudit.vchDescription = vchFromString(auditDescription);
+            }
+    }
+
+    //handle algorithm [OPTIONAL]
+    if (request.params.size() > 4) {
+            std::string auditAlgorithm = request.params[4].get_str();
+            if (auditAlgorithm.size() > 0) {
+                txAudit.vchAlgorithmType = vchFromString(auditAlgorithm);
+            }
     }
 
     // Create BDAP operation script
@@ -181,9 +211,9 @@ UniValue audit_rpc(const JSONRPCRequest& request)
             "  add                - Add new audit or list of audits\n"
             "  get                - Get audit by hash or BDAP account\n"
             "\nExamples:\n"
-            + HelpExampleCli("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser@public.bdap.io\"") +
+            + HelpExampleCli("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\" \"testdescription\" \"sha256\"") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser@public.bdap.io\""));
+            + HelpExampleRpc("audit add", "\"0ac6a1e929c006cc63b9220bcb40e0af1e4776c4223e6f41e0da5d16f6ea2026\" \"testuser\" \"testdescription\" \"sha256\""));
     }
     if (strCommand == "add" || strCommand == "get") {
         if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
