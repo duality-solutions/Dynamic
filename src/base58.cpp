@@ -75,18 +75,6 @@ static CTxDestination DecodeDestination(const std::string& str, const CChainPara
     return CNoDestination();
 }
 
-/* ASSET START*/
-bool IsValidDestinationString(const std::string& str, const CChainParams& params)
-{
-    return CDynamicAddress(str).IsValid(params);
-}
-
-bool IsValidDestinationString(const std::string& str)
-{
-    return CDynamicAddress(str).IsValid();
-}
-/* ASSET END */
-
 } // namespace
 
 CTxDestination DecodeDestination(const std::string& str)
@@ -98,6 +86,18 @@ std::string EncodeDestination(const CTxDestination& dest)
 {
     return boost::apply_visitor(DestinationEncoder(Params()), dest);
 }
+
+/* ASSET START*/
+bool IsValidDestinationString(const std::string& str, const CChainParams& params)
+{
+    return CDynamicAddress(str).IsValid(params);
+}
+
+bool IsValidDestinationString(const std::string& str)
+{
+    return CDynamicAddress(str).IsValid();
+}
+/* ASSET END */
 
 bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
 {

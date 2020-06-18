@@ -5,8 +5,12 @@
 
 #include "script.h"
 
+#include "assets/assets.h"
+#include "standard.h"
+#include "streams.h"
 #include "tinyformat.h"
 #include "utilstrencodings.h"
+#include "version.h"
 
 const char* GetOpName(opcodetype opcode)
 {
@@ -507,7 +511,7 @@ bool CScript::IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) con
                     nType = TX_NEW_ASSET;
                     fIsOwner = true;
                     return true;
-                } else if ((*this)[index] == DYN_R) {
+                } else if ((*this)[index] == DYN_D) {
                     nType = TX_REISSUE_ASSET;
                     return true;
                 }
@@ -645,6 +649,12 @@ bool CScript::HasValidOps() const
         }
     }
     return true;
+}
+
+bool CScript::IsUnspendable() const
+{
+    CAmount nAmount;
+    return (size() > 0 && *begin() == OP_RETURN) || (size() > 0 && *begin() == OP_DYN_ASSET) || (size() > MAX_SCRIPT_SIZE) || (GetAssetAmountFromScript(*this, nAmount) && nAmount == 0);
 }
 
 /* ASSET START */

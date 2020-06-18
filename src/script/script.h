@@ -8,9 +8,11 @@
 #ifndef DYNAMIC_SCRIPT_SCRIPT_H
 #define DYNAMIC_SCRIPT_SCRIPT_H
 
+#include "amount.h"
 #include "crypto/common.h"
 #include "prevector.h"
 #include "pubkey.h"
+#include "serialize.h"
 
 #include <assert.h>
 #include <climits>
@@ -223,6 +225,9 @@ enum opcodetype {
     // invalid operation code
     OP_INVALIDOPCODE = 0xff,
 };
+
+// Maximum value that an opcode can be
+static const unsigned int MAX_OPCODE = OP_NOP10;
 
 const char* GetOpName(opcodetype opcode);
 
@@ -695,10 +700,8 @@ public:
      * regardless of the initial stack. This allows outputs to be pruned
      * instantly when entering the UTXO set.
      */
-    bool IsUnspendable() const
-    {
-        return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
-    }
+    bool IsUnspendable() const;
+
 
     bool IsProtocolInstruction(const ProtocolCodes& code) const
     {
@@ -794,6 +797,17 @@ public:
     CReserveScript() {}
     virtual ~CReserveScript() {}
 };
+
+//! These are needed because script.h and script.cpp do not have access to asset.h and asset.cpp functions. This is
+//! because the make file compiles them at different times. This is becauses script files are compiled with other
+//! consensus files, and asset files are compiled with core files
+bool GetAssetAmountFromScript(const CScript& script, CAmount& nAmount);
+bool AmountFromNewAssetScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool AmountFromTransferScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
 // TODO: Use a seperate code file for these BDAP functions
 bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);

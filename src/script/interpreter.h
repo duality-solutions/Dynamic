@@ -106,7 +106,7 @@ uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo, unsig
 class BaseSignatureChecker
 {
 public:
-    virtual bool CheckSig(const std::vector<unsigned char>& scriptSig, const std::vector<unsigned char>& vchPubKey, const CScript& scriptCode, SigVersion sigversion) const
+    virtual bool CheckSig(const std::vector<unsigned char> &scriptSig, const std::vector<unsigned char> &vchPubKey, const CScript &scriptCode, SigVersion sigversion) const
     {
         return false;
     }
@@ -153,6 +153,6 @@ public:
 };
 
 bool EvalScript(std::vector<std::vector<unsigned char> > &stack, const CScript &script, unsigned int flags, const BaseSignatureChecker &checker, SigVersion sigversion, ScriptError *error = nullptr);
-bool VerifyScript(const CScript &scriptSig, const CScript &scriptPubKey, unsigned int flags, const BaseSignatureChecker &checker, ScriptError *serror = nullptr);
+bool VerifyScript(const CScript &scriptSig, const CScript &scriptPubKeyIn, unsigned int flags, const BaseSignatureChecker &checker, ScriptError *serror = nullptr);
 
 #endif // DYNAMIC_SCRIPT_INTERPRETER_H
