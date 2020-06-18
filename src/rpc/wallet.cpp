@@ -13,6 +13,7 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "core_io.h"
+#include "httpserver.h" // urlDecode
 #include "init.h"
 #include "instantsend.h"
 #include "keepass.h"
