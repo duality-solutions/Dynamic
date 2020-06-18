@@ -893,7 +893,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 LogPrint("bdap", "%s -- BDAP move asset operation. vvchBDAPArgs.size() = %d\n", __func__, vvchBDAPArgs.size());
                 return true;
             }
-            else if (strOpType == "bdap_add_audit") {
+            else if (strOpType == "bdap_new_audit") {
                 bValid = CheckAuditTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: " + errorMessage;
