@@ -1,6 +1,34 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.4.2**
+
+* [DHT] Fix total slots for RPC hash table commands
+* [DHT] Change empty record initialization
+* [DHT] Share get event map and do not add old sequence numbers
+* [DHT] Create a record map so old sequence chunks are not added to rec… …
+* [DHT] Increase get timeout to 60 seconds
+* [DHT] Make sure header return is authoritative when getting a record
+* [DHT] Only put record with authoritative header
+* [DHT] Prevent crash when using the same account to get data
+* [DHT] Make sure old sequence numbers are not returned with get
+* [DHT] Add IsNull to data record class
+* [DHT] Return invalid get when record header size mismatch
+* [DHT] Return get record and get link record timestamp and is null
+* [DHT] Save Epoch timestamp in record header for put commands
+* [DHT] Set record is null in constructor
+* [DHT] Return timestamp and fix help for put record RPC
+* [DHT] Change clear record to use zero chunks and correct null format … …
+* [Qt] Remove double line break in RPC console UI results
+* [Wallet] Fix rescanning progress debug log
+* Change print DHT settings to debug only
+* Change print Dynode mananger events to debug mode only
+* Change print Dynode simple check to debug mode only
+* Fix build warning for unsigned int less than zero
+* Change print Dynode broadcast events to debug mode only
+* Bump client version to v2.4.4.2 and year to 2020
+
+
 **Dynamic v2.4.4.1**
 
 * Use std::function and std::bind in scheduler instead of boost/std mix
