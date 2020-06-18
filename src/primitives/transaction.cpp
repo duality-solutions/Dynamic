@@ -12,6 +12,8 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
+#include <streams.h>
+
 std::string COutPoint::ToString() const
 {
     return strprintf("COutPoint(%s, %u)", hash.ToString() /*.substr(0,10)*/, n);

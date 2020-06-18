@@ -926,7 +926,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         result.push_back(Pair("superblocks_enabled", sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)));
     }
 
-    if (pblock->nTime >= nKAWPOWActivationTime) {
+/*    if (pblock->nTime >= nKAWPOWActivationTime) {
         std::string address = gArgs.GetArg("-miningaddress", "");
         if (IsValidDestinationString(address)) {
             static std::string lastheader = "";
@@ -945,7 +945,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             lastheader = pblock->GetKAWPOWHeaderHash().GetHex();
         }
     }
-
+*/
     return result;
 }
 

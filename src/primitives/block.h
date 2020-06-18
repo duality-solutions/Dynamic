@@ -88,7 +88,6 @@ public:
 
     uint256 GetHash() const;
     uint256 GetHashFull() const;
-    uint256 GetKAWPOWHeaderHash() const;
 
     int64_t GetBlockTime() const
     {

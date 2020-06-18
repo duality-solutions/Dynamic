@@ -413,7 +413,4 @@ inline uint256 HashBlake2b(const T1 pbegin, const T1 pend)
     return hash1;
 }
 
-uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash);
-uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader);
-
 #endif // DYNAMIC_HASH_H
