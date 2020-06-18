@@ -244,7 +244,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     if (GetBDAPOpScript(wtx.tx, scriptOp, vvchBDAPArgs, op1, op2)) {
                         std::string errorMessage;
                         std::string strOpType = GetBDAPOpTypeString(op1, op2);
-                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account" || strOpType == "bdap_new_audit") {
                             std::vector<unsigned char> vchData;
                             std::vector<unsigned char> vchHash;
                             CDomainEntry entry;
@@ -252,6 +252,8 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                             entry.UnserializeFromData(vchData, vchHash);
                             if (strOpType == "bdap_new_account" && entry.ObjectTypeString() == "User Entry") {
                                 sub.type = TransactionRecord::NewDomainUser;
+                            } else if (strOpType == "bdap_new_audit" && entry.ObjectTypeString() == "Audit Entry") {
+                                sub.type = TransactionRecord::NewAudit;
                             } else if (strOpType == "bdap_update_account" && entry.ObjectTypeString() == "User Entry") {
                                 sub.type = TransactionRecord::UpdateDomainUser;
                             } else if (strOpType == "bdap_delete_account" && entry.ObjectTypeString() == "User Entry") {
