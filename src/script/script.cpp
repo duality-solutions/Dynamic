@@ -634,6 +634,19 @@ bool CScript::IsPushOnly() const
     return this->IsPushOnly(begin());
 }
 
+bool CScript::HasValidOps() const
+{
+    CScript::const_iterator it = begin();
+    while (it < end()) {
+        opcodetype opcode;
+        std::vector<unsigned char> item;
+        if (!GetOp(it, opcode, item) || opcode > MAX_OPCODE || item.size() > MAX_SCRIPT_ELEMENT_SIZE) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /* ASSET START */
 //!--------------------------------------------------------------------------------------------------------------------------!//
 //! These are needed because script.h and script.cpp do not have access to asset.h and asset.cpp functions. This is
