@@ -10,18 +10,19 @@
 
 static std::multimap<std::string, CZMQAbstractPublishNotifier*> mapPublishNotifiers;
 
-static const char *MSG_HASHBLOCK  = "hashblock";
-static const char *MSG_HASHTX     = "hashtx";
-static const char *MSG_HASHTXLOCK = "hashtxlock";
-static const char *MSG_HASHGVOTE  = "hashgovernancevote";
-static const char *MSG_HASHGOBJ   = "hashgovernanceobject";
-static const char *MSG_HASHISCON  = "hashinstantsenddoublespend";
-static const char *MSG_RAWBLOCK   = "rawblock";
-static const char *MSG_RAWTX      = "rawtx";
-static const char *MSG_RAWTXLOCK  = "rawtxlock";
-static const char *MSG_RAWGVOTE   = "rawgovernancevote";
-static const char *MSG_RAWGOBJ    = "rawgovernanceobject";
-static const char *MSG_RAWISCON   = "rawinstantsenddoublespend";
+static const char *MSG_HASHBLOCK    = "hashblock";
+static const char *MSG_HASHTX       = "hashtx";
+static const char *MSG_HASHTXLOCK   = "hashtxlock";
+static const char *MSG_HASHGVOTE    = "hashgovernancevote";
+static const char *MSG_HASHGOBJ     = "hashgovernanceobject";
+static const char *MSG_HASHISCON    = "hashinstantsenddoublespend";
+static const char *MSG_RAWBLOCK     = "rawblock";
+static const char *MSG_RAWTX        = "rawtx";
+static const char *MSG_RAWTXLOCK    = "rawtxlock";
+static const char *MSG_RAWGVOTE     = "rawgovernancevote";
+static const char *MSG_RAWGOBJ      = "rawgovernanceobject";
+static const char *MSG_RAWISCON     = "rawinstantsenddoublespend";
+static const char *MSG_RAWASSETMSG  = "rawmessage";
 
 // Internal function to send multipart message
 static int zmq_send_multipart(void *sock, const void* data, size_t size, ...)
@@ -279,3 +280,11 @@ bool CZMQPublishRawInstantSendDoubleSpendNotifier::NotifyInstantSendDoubleSpendA
         && SendMessage(MSG_RAWISCON, &(*ssPrevious.begin()), ssPrevious.size());
 }
 
+bool CZMQPublishNewAssetMessageNotifier::NotifyMessage(const CMessage &message)
+{
+    LogPrint("zmq", "zmq: Publish message %s\n", message.ToString());
+
+    CZMQMessage zmqmessage(message);
+    std::string str = zmqmessage.createJsonString();
+    return SendMessage(MSG_RAWASSETMSG, &(*str.begin()), str.size());
+}
