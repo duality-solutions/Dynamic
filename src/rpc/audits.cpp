@@ -167,7 +167,6 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_AUDIT, bdapType, auditData.vAuditData.size(), monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    //LogPrintf("%s -- monthlyFee %d, oneTimeFee %d, depositFee %d\n", __func__, monthlyFee, oneTimeFee, depositFee);
     // check BDAP values
     std::string strMessage;
     if (!txAudit.ValidateValues(strMessage))
@@ -177,11 +176,10 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    //LogPrintf("%s --txAudit %s\n", __func__, txAudit.ToString());
     bool fUseInstantSend = false;
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
     txAudit.txHash = wtx.GetHash();
     UniValue oAuditTransaction(UniValue::VOBJ);
     BuildAuditJson(txAudit, oAuditTransaction);
