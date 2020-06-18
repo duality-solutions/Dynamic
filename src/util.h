@@ -192,7 +192,7 @@ public:
     void ParseParameters(int argc, const char *const argv[]);
 
     void ReadConfigFile(const std::string &confPath);
-
+    void WriteConfigFile(FILE* configFile);
     /**
      * Return a vector of strings of the given argument
      *

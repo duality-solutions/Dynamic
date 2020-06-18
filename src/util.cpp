@@ -181,7 +181,8 @@ public:
         // Clear the set of locks now to maintain symmetry with the constructor.
         ppmutexOpenSSL.reset();
     }
-} instance_of_cinit;
+}
+        instance_of_cinit;
 
 /**
  * LogPrintf() has been broken a couple of times now
@@ -618,17 +619,6 @@ unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
     return nMin + rand() % (nMax - nMin) + 1;
 }
 
-static void WriteConfigFile(FILE* configFile)
-{
-    fputs("#Do not use special characters with username/password\n", configFile);
-    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
-    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
-    fputs(sUserID.c_str(), configFile);
-    fputs(sRPCpassword.c_str(), configFile);
-    fclose(configFile);
-    ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
-}
-
 const boost::filesystem::path& GetDataDir(bool fNetSpecific)
 {
     namespace fs = boost::filesystem;
@@ -642,8 +632,8 @@ const boost::filesystem::path& GetDataDir(bool fNetSpecific)
     if (!path.empty())
         return path;
 
-    if (IsArgSet("-datadir")) {
-        path = fs::system_complete(GetArg("-datadir", ""));
+    if (gArgs.IsArgSet("-datadir")) {
+        path = fs::system_complete(gArgs.GetArg("-datadir", ""));
         if (!fs::is_directory(path)) {
             path = "";
             return path;
@@ -663,10 +653,10 @@ boost::filesystem::path GetBackupsDir()
 {
     namespace fs = boost::filesystem;
 
-    if (!IsArgSet("-walletbackupsdir"))
+    if (!gArgs.IsArgSet("-walletbackupsdir"))
         return GetDataDir() / "backups";
 
-    return fs::absolute(GetArg("-walletbackupsdir", ""));
+    return fs::absolute(gArgs.GetArg("-walletbackupsdir", ""));
 }
 
 void ClearDatadirCache()
@@ -686,11 +676,13 @@ boost::filesystem::path GetConfigFile(const std::string& confPath)
 
 boost::filesystem::path GetDynodeConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-dnconf", "dynode.conf"));
+    boost::filesystem::path pathConfigFile(gArgs.GetArg("-dnconf", "dynode.conf"));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir() / pathConfigFile;
     return pathConfigFile;
 }
+
+extern void WriteConfigFile(FILE* configFile);
 
 void ReadConfigFile(const std::string& confPath)
 {
@@ -724,10 +716,21 @@ void ReadConfigFile(const std::string& confPath)
     ClearDatadirCache();
 }
 
+void WriteConfigFile(FILE* configFile)
+{
+    fputs("#Do not use special characters with username/password\n", configFile);
+    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
+    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
+    fputs(sUserID.c_str(), configFile);
+    fputs(sRPCpassword.c_str(), configFile);
+    fclose(configFile);
+    ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
+}
+
 #ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", DYNAMIC_PID_FILENAME));
+    boost::filesystem::path pathPidFile(gArgs.GetArg("-pid", DYNAMIC_PID_FILENAME));
     if (!pathPidFile.is_complete())
         pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
