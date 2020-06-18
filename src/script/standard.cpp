@@ -37,6 +37,8 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_NULL_DATA:
         return "nulldata";
     /** ASSET START */
+    case TX_RESTRICTED_ASSET_DATA: 
+        return "nullassetdata";
     case TX_NEW_ASSET: 
         return ASSET_NEW_STRING;
     case TX_TRANSFER_ASSET: 
@@ -45,7 +47,7 @@ const char* GetTxnOutputType(txnouttype t)
         return ASSET_REISSUE_STRING;
     /** ASSET END */
     }
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -104,6 +106,20 @@ bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std:
     // script.
     if (scriptPubKey.size() >= 1 && scriptPubKey[0] == OP_RETURN && scriptPubKey.IsPushOnly(scriptPubKey.begin() + 1)) {
         typeRet = TX_NULL_DATA;
+        return true;
+    }
+
+    // Provably prunable, asset data-carrying output
+    //
+    // So long as script passes the IsUnspendable() test and all but the first three
+    // byte passes the IsPushOnly()
+    if (scriptPubKey.size() >= 1 && scriptPubKey[0] == OP_DYN_ASSET && scriptPubKey.IsPushOnly(scriptPubKey.begin()+1)) {
+        typeRet = TX_RESTRICTED_ASSET_DATA;
+
+        if (scriptPubKey.size() >= 23 && scriptPubKey[1] != OP_RESERVED) {
+            std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
+            vSolutionsRet.push_back(hashBytes);
+        }
         return true;
     }
 
@@ -307,15 +323,23 @@ namespace
 
         bool operator()(const CKeyID &keyID) const {
             script->clear();
-            *script << OP_RVN_ASSET << ToByteVector(keyID);
+            *script << OP_DYN_ASSET << ToByteVector(keyID);
             return true;
         }
 
         bool operator()(const CScriptID &scriptID) const {
             script->clear();
-            *script << OP_RVN_ASSET << ToByteVector(scriptID);
+            *script << OP_DYN_ASSET << ToByteVector(scriptID);
             return true;
         }
+        
+        bool operator()(const CStealthAddress& sxAddr) const {
+        script->clear();
+        // TODO (BDAP): Create the correct stealth address script visitor
+        //*script << OP_DUP << OP_HASH160 << ToByteVector(sxAddr.GetSpendKeyID()) << OP_EQUALVERIFY << OP_CHECKSIG;
+        LogPrintf("CScriptVisitor(CStealthAddress) TODO\n");
+        return false;
+    }
     };
 } // namespace
 
