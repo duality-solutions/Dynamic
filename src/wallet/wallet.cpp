@@ -4007,7 +4007,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_account") {
+                if (strOpType == "bdap_new_account" || "bdap_new_audit" ) {
                     // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
