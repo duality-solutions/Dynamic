@@ -663,9 +663,8 @@ bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTr
                 }
 
                 const CKeyStore& keystore = *pwalletMain;
-
                 LogPrint("privatesend", "CPrivateSendClientSession::SignFinalTransaction -- Signing my input %i\n", nMyInputIndex);
-                if (!SignSignature(keystore, prevPubKey, finalMutableTransaction, nMyInputIndex, int(SIGHASH_ALL | SIGHASH_ANYONECANPAY))) { // changes scriptSig
+                if (!SignSignature(keystore, prevPubKey, finalMutableTransaction, nMyInputIndex, nValue2, int(SIGHASH_ALL | SIGHASH_ANYONECANPAY))) { // changes scriptSig
                     LogPrint("privatesend", "CPrivateSendClientSession::SignFinalTransaction -- Unable to sign my own transaction!\n");
                     // not sure what to do here, it will timeout...?
                 }
@@ -1458,7 +1457,7 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& ta
 
     // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     CValidationState state;
-    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
+    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, connman, state)) {
         LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
@@ -1612,7 +1611,7 @@ bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyI
     keyHolderStorageDenom.KeepAll();
 
     CValidationState state;
-    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
+    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, connman, state)) {
         LogPrintf("CPrivateSendClientSession::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
