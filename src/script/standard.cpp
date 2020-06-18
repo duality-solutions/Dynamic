@@ -291,6 +291,34 @@ public:
 };
 } // namespace
 
+namespace
+{
+    class CNullAssetScriptVisitor : public boost::static_visitor<bool>
+    {
+    private:
+        CScript *script;
+    public:
+        explicit CNullAssetScriptVisitor(CScript *scriptin) { script = scriptin; }
+
+        bool operator()(const CNoDestination &dest) const {
+            script->clear();
+            return false;
+        }
+
+        bool operator()(const CKeyID &keyID) const {
+            script->clear();
+            *script << OP_RVN_ASSET << ToByteVector(keyID);
+            return true;
+        }
+
+        bool operator()(const CScriptID &scriptID) const {
+            script->clear();
+            *script << OP_RVN_ASSET << ToByteVector(scriptID);
+            return true;
+        }
+    };
+} // namespace
+
 CScript GetScriptForDestination(const CTxDestination& dest)
 {
     CScript script;
