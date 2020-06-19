@@ -49,6 +49,7 @@
 #include "utilmoneystr.h"
 #include "validation.h" // For CheckTransaction
 #include "wallet/coincontrol.h"
+#include "wallet/fees.h"
 
 #include <assert.h>
 
@@ -5720,36 +5721,6 @@ bool CWallet::AddAccountingEntry(const CAccountingEntry& acentry, CWalletDB* pwa
     wtxOrdered.insert(make_pair(entry.nOrderPos, TxPair((CWalletTx*)0, &entry)));
 
     return true;
-}
-
-CAmount CWallet::GetRequiredFee(unsigned int nTxBytes)
-{
-    return std::max(minTxFee.GetFee(nTxBytes), ::minRelayTxFee.GetFee(nTxBytes));
-}
-
-CAmount CWallet::GetMinimumFee(unsigned int nTxBytes, unsigned int nConfirmTarget, const CTxMemPool& pool)
-{
-    // payTxFee is the user-set global for desired feerate
-    return GetMinimumFee(nTxBytes, nConfirmTarget, pool, payTxFee.GetFee(nTxBytes));
-}
-
-CAmount CWallet::GetMinimumFee(unsigned int nTxBytes, unsigned int nConfirmTarget, const CTxMemPool& pool, CAmount targetFee)
-{
-    CAmount nFeeNeeded = targetFee;
-    // User didn't set: use -txconfirmtarget to estimate...
-    if (nFeeNeeded == 0) {
-        int estimateFoundTarget = nConfirmTarget;
-        nFeeNeeded = pool.estimateSmartFee(nConfirmTarget, &estimateFoundTarget).GetFee(nTxBytes);
-        // ... unless we don't have enough mempool data for estimatefee, then use fallbackFee
-        if (nFeeNeeded == 0)
-            nFeeNeeded = fallbackFee.GetFee(nTxBytes);
-    }
-    // prevent user from paying a fee below minRelayTxFee or minTxFee
-    nFeeNeeded = std::max(nFeeNeeded, GetRequiredFee(nTxBytes));
-    // But always obey the maximum
-    if (nFeeNeeded > maxTxFee)
-        nFeeNeeded = maxTxFee;
-    return nFeeNeeded;
 }
 
 DBErrors CWallet::LoadWallet(bool& fFirstRunRet, const bool fImportMnemonic)

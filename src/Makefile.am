@@ -187,6 +187,7 @@ DYNAMIC_CORE_H = \
   netmessagemaker.h \
   noui.h \
   ntp.h \
+  policy/feerate.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -242,6 +243,7 @@ DYNAMIC_CORE_H = \
   wallet/crypter.h \
   wallet/db.h \
   wallet/feebumper.h \
+  wallet/fees.h \
   wallet/init.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
@@ -352,6 +354,7 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
+  policy/feerate.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pos/kernel.cpp \
@@ -424,6 +427,7 @@ libdynamic_wallet_a_SOURCES = \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/feebumper.cpp \
+  wallet/fees.cpp \
   wallet/init.cpp \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
@@ -496,7 +500,6 @@ crypto_libdynamic_crypto_a_SOURCES = \
 libdynamic_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_consensus_a_SOURCES = \
-  amount.cpp \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \

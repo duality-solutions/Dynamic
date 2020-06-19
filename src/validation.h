@@ -17,6 +17,7 @@
 #include "chain.h"
 #include "coins.h"
 #include "fs.h"
+#include "policy/feerate.h"
 #include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "spentindex.h"
@@ -47,6 +48,7 @@
 
 class CBloomFilter;
 class CBlockIndex;
+class CBlockPolicyEstimator;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
@@ -195,6 +197,7 @@ struct BlockHasher {
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
+extern CBlockPolicyEstimator feeEstimator;
 extern CTxMemPool mempool;
 typedef std::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap mapBlockIndex;
@@ -241,9 +244,6 @@ extern uint256 hashAssumeValid;
 
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex* pindexBestHeader;
-
-/** BDAP, only check when fully loaded **/
-extern bool fLoaded;
 
 /** Proof-of-Stake maps **/
 extern std::map<uint256, int64_t> mapRejectedBlocks;

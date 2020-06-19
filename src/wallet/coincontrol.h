@@ -8,7 +8,10 @@
 #ifndef DYNAMIC_COINCONTROL_H
 #define DYNAMIC_COINCONTROL_H
 
+#include "policy/feerate.h"
+#include "policy/fees.h"
 #include "primitives/transaction.h"
+#include "wallet/wallet.h"
 
 /** Coin Control Features. */
 class CCoinControl

@@ -121,7 +121,6 @@ uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
-bool fLoaded = false;
 bool fStealthTx = false;
 int64_t nReserveBalance = 0;
 
@@ -130,7 +129,9 @@ uint256 hashAssumeValid;
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
-CTxMemPool mempool(::minRelayTxFee);
+CBlockPolicyEstimator feeEstimator;
+CTxMemPool mempool(&feeEstimator);
+
 std::map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
 
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);

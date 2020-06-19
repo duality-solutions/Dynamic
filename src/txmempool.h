@@ -19,6 +19,7 @@
 #include "amount.h"
 #include "coins.h"
 #include "indirectmap.h"
+#include "policy/feerate.h"
 #include "primitives/transaction.h"
 #include "random.h"
 #include "spentindex.h"
@@ -122,11 +123,6 @@ public:
 
     const CTransaction& GetTx() const { return *this->tx; }
     CTransactionRef GetSharedTx() const { return this->tx; }
-    /**
-     * Fast calculation of lower bound of current priority as update
-     * from entry priority. Only inputs that were originally in-chain will age.
-     */
-    double GetPriority(unsigned int currentHeight) const;
     const CAmount& GetFee() const { return nFee; }
     size_t GetTxSize() const { return nTxSize; }
     int64_t GetTime() const { return nTime; }
@@ -135,6 +131,7 @@ public:
     int64_t GetModifiedFee() const { return nFee + feeDelta; }
     size_t DynamicMemoryUsage() const { return nUsageSize; }
     const LockPoints& GetLockPoints() const { return lockPoints; }
+    double GetPriority(unsigned int currentHeight) const;
 
     // Adjusts the descendant state, if this entry is not dirty.
     void UpdateDescendantState(int64_t modifySize, CAmount modifyFee, int64_t modifyCount);
@@ -585,8 +582,7 @@ public:
 
     /** Create a new CTxMemPool.
      */
-    CTxMemPool(const CFeeRate& _minReasonableRelayFee);
-    ~CTxMemPool();
+    explicit CTxMemPool(CBlockPolicyEstimator* estimator = nullptr);
 
     /**
      * If sanity-checking is turned on, check makes sure the pool is
@@ -682,13 +678,21 @@ public:
       *  would otherwise be half of this, it is set to 0 instead.
       */
     CFeeRate GetMinFee(size_t sizelimit) const;
-    void UpdateMinFee(const CFeeRate& _minReasonableRelayFee);
+
+    /** Estimate priority needed to get into the next nBlocks
+     *  If no answer can be given at nBlocks, return an estimate
+     *  at the lowest number of blocks where one can be given
+     */
+    double estimateSmartPriority(int nBlocks, int* answerFoundAtBlocks = nullptr) const;
+
+    /** Estimate priority needed to get into the next nBlocks */
+    double estimatePriority(int nBlocks) const;
 
     /** Remove transactions from the mempool until its dynamic size is <= sizelimit.
       *  pvNoSpendsRemaining, if set, will be populated with the list of outpoints
       *  which are not in mempool which no longer have any spends in this mempool.
       */
-    void TrimToSize(size_t sizelimit, std::vector<COutPoint>* pvNoSpendsRemaining = NULL);
+    void TrimToSize(size_t sizelimit, std::vector<COutPoint>* pvNoSpendsRemaining = nullptr);
 
     /** Expire all transaction (and their dependencies) in the mempool older than time. Return the number of removed transactions. */
     int Expire(int64_t time);
@@ -724,28 +728,6 @@ public:
     CTransactionRef get(const uint256& hash) const;
     TxMempoolInfo info(const uint256& hash) const;
     std::vector<TxMempoolInfo> infoAll() const;
-
-    /** Estimate fee rate needed to get into the next nBlocks
-     *  If no answer can be given at nBlocks, return an estimate
-     *  at the lowest number of blocks where one can be given
-     */
-    CFeeRate estimateSmartFee(int nBlocks, int* answerFoundAtBlocks = NULL) const;
-
-    /** Estimate fee rate needed to get into the next nBlocks */
-    CFeeRate estimateFee(int nBlocks) const;
-
-    /** Estimate priority needed to get into the next nBlocks
-     *  If no answer can be given at nBlocks, return an estimate
-     *  at the lowest number of blocks where one can be given
-     */
-    double estimateSmartPriority(int nBlocks, int* answerFoundAtBlocks = NULL) const;
-
-    /** Estimate priority needed to get into the next nBlocks */
-    double estimatePriority(int nBlocks) const;
-
-    /** Write/Read estimates to disk */
-    bool WriteFeeEstimates(CAutoFile& fileout) const;
-    bool ReadFeeEstimates(CAutoFile& filein);
 
     size_t DynamicMemoryUsage() const;
     // returns share of the used memory to maximum allowed memory

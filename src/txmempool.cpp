@@ -50,8 +50,7 @@ CTxMemPoolEntry::CTxMemPoolEntry(const CTxMemPoolEntry& other)
     *this = other;
 }
 
-double
-CTxMemPoolEntry::GetPriority(unsigned int currentHeight) const
+double CTxMemPoolEntry::GetPriority(unsigned int currentHeight) const
 {
     double deltaPriority = ((double)(currentHeight - entryHeight) * inChainInputValue) / nModSize;
     double dResult = entryPriority + deltaPriority;
@@ -344,7 +343,8 @@ void CTxMemPoolEntry::UpdateAncestorState(int64_t modifySize, CAmount modifyFee,
     assert(int(nSigOpCountWithAncestors) >= 0);
 }
 
-CTxMemPool::CTxMemPool(const CFeeRate& _minReasonableRelayFee) : nTransactionsUpdated(0)
+CTxMemPool::CTxMemPool(CBlockPolicyEstimator* estimator) :
+    nTransactionsUpdated(0), minerPolicyEstimator(estimator)
 {
     _clear(); //lock free clear
 
@@ -352,13 +352,6 @@ CTxMemPool::CTxMemPool(const CFeeRate& _minReasonableRelayFee) : nTransactionsUp
     // accepting transactions becomes O(N^2) where N is the number
     // of transactions in the pool
     nCheckFrequency = 0;
-
-    minerPolicyEstimator = new CBlockPolicyEstimator(_minReasonableRelayFee);
-}
-
-CTxMemPool::~CTxMemPool()
-{
-    delete minerPolicyEstimator;
 }
 
 bool CTxMemPool::isSpent(const COutPoint& outpoint)
@@ -723,7 +716,7 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason)
     mapLinks.erase(it);
     mapTx.erase(it);
     nTransactionsUpdated++;
-    minerPolicyEstimator->removeTx(hash);
+    minerPolicyEstimator->removeTx(hash, false);
     removeAddressIndex(hash);
     removeSpentIndex(hash);
 
@@ -1380,16 +1373,6 @@ TxMempoolInfo CTxMemPool::info(const uint256& hash) const
     return GetInfo(i);
 }
 
-CFeeRate CTxMemPool::estimateFee(int nBlocks) const
-{
-    LOCK(cs);
-    return minerPolicyEstimator->estimateFee(nBlocks);
-}
-CFeeRate CTxMemPool::estimateSmartFee(int nBlocks, int* answerFoundAtBlocks) const
-{
-    LOCK(cs);
-    return minerPolicyEstimator->estimateSmartFee(nBlocks, answerFoundAtBlocks, *this);
-}
 double CTxMemPool::estimatePriority(int nBlocks) const
 {
     LOCK(cs);
@@ -1399,37 +1382,6 @@ double CTxMemPool::estimateSmartPriority(int nBlocks, int* answerFoundAtBlocks) 
 {
     LOCK(cs);
     return minerPolicyEstimator->estimateSmartPriority(nBlocks, answerFoundAtBlocks, *this);
-}
-
-bool CTxMemPool::WriteFeeEstimates(CAutoFile& fileout) const
-{
-    try {
-        LOCK(cs);
-        fileout << 2040000;        // version required to read: 2.4.0.0 or later
-        fileout << CLIENT_VERSION; // version that wrote the file
-        minerPolicyEstimator->Write(fileout);
-    } catch (const std::exception&) {
-        LogPrintf("CTxMemPool::WriteFeeEstimates(): unable to write policy estimator data (non-fatal)\n");
-        return false;
-    }
-    return true;
-}
-
-bool CTxMemPool::ReadFeeEstimates(CAutoFile& filein)
-{
-    try {
-        int nVersionRequired, nVersionThatWrote;
-        filein >> nVersionRequired >> nVersionThatWrote;
-        if (nVersionRequired > CLIENT_VERSION)
-            return error("CTxMemPool::ReadFeeEstimates(): up-version (%d) fee estimate file", nVersionRequired);
-
-        LOCK(cs);
-        minerPolicyEstimator->Read(filein, nVersionThatWrote);
-    } catch (const std::exception&) {
-        LogPrintf("CTxMemPool::ReadFeeEstimates(): unable to read policy estimator data (non-fatal)\n");
-        return false;
-    }
-    return true;
 }
 
 void CTxMemPool::PrioritiseTransaction(const uint256 hash, const std::string strHash, double dPriorityDelta, const CAmount& nFeeDelta)
@@ -1604,7 +1556,7 @@ CFeeRate CTxMemPool::GetMinFee(size_t sizelimit) const
 {
     LOCK(cs);
     if (!blockSinceLastRollingFeeBump || rollingMinimumFeeRate == 0)
-        return CFeeRate(rollingMinimumFeeRate);
+        return CFeeRate(llround(rollingMinimumFeeRate));
 
     int64_t time = GetTime();
     if (time > lastRollingFeeUpdate + 10) {
@@ -1622,14 +1574,7 @@ CFeeRate CTxMemPool::GetMinFee(size_t sizelimit) const
             return CFeeRate(0);
         }
     }
-    return std::max(CFeeRate(rollingMinimumFeeRate), incrementalRelayFee);
-}
-
-void CTxMemPool::UpdateMinFee(const CFeeRate& _minReasonableRelayFee)
-{
-    LOCK(cs);
-    delete minerPolicyEstimator;
-    minerPolicyEstimator = new CBlockPolicyEstimator(_minReasonableRelayFee);
+    return std::max(CFeeRate(llround(rollingMinimumFeeRate)), incrementalRelayFee);
 }
 
 void CTxMemPool::trackPackageRemoved(const CFeeRate& rate)

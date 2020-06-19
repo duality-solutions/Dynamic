@@ -14,6 +14,7 @@
 #include "assets/assettypes.h"
 #include "base58.h"
 #include "bdap/linkstorage.h"
+#include "policy/feerate.h"
 #include "rpc/wallet.h"
 #include "streams.h"
 #include "tinyformat.h"
@@ -1337,21 +1338,6 @@ public:
 
     static CFeeRate minTxFee;
     static CFeeRate fallbackFee;
-    /**
-     * Estimate the minimum fee considering user set parameters
-     * and the required fee
-     */
-    static CAmount GetMinimumFee(unsigned int nTxBytes, unsigned int nConfirmTarget, const CTxMemPool& pool);
-    /**
-     * Estimate the minimum fee considering required fee and targetFee or if 0
-     * then fee estimation for nConfirmTarget
-     */
-    static CAmount GetMinimumFee(unsigned int nTxBytes, unsigned int nConfirmTarget, const CTxMemPool& pool, CAmount targetFee);
-    /**
-     * Return the minimum required fee taking into account the
-     * floating relay fee and user set minimum transaction fee
-     */
-    static CAmount GetRequiredFee(unsigned int nTxBytes);
 
     bool NewKeyPool();
     bool NewEdKeyPool();

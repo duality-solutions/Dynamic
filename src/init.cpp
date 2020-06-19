@@ -50,6 +50,8 @@
 #include "net.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
+#include "policy/feerate.h"
+#include "policy/fees.h"
 #include "policy/policy.h"
 #include "validation.h"
 #ifdef ENABLE_WALLET
@@ -339,11 +341,13 @@ void PrepareShutdown()
     if (fDumpMempoolLater)
         DumpMempool();
 
-    if (fFeeEstimatesInitialized) {
-        boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
-        CAutoFile est_fileout(fopen(est_path.string().c_str(), "wb"), SER_DISK, CLIENT_VERSION);
+    if (fFeeEstimatesInitialized)
+    {
+        ::feeEstimator.FlushUnconfirmed(::mempool);
+        fs::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
+        CAutoFile est_fileout(fsbridge::fopen(est_path, "wb"), SER_DISK, CLIENT_VERSION);
         if (!est_fileout.IsNull())
-            mempool.WriteFeeEstimates(est_fileout);
+            ::feeEstimator.Write(est_fileout);
         else
             LogPrintf("%s: Failed to write fee estimates to %s\n", __func__, est_path.string());
         fFeeEstimatesInitialized = false;
@@ -1546,6 +1550,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("Unable to start HTTP server. See debug log for details."));
     }
 
+    int64_t nStart;
+    
     // ********************************************************* Step 5: Backup wallet and verify wallet database integrity
 #ifdef ENABLE_WALLET
     if (!CWallet::InitAutoBackup())
@@ -1723,7 +1729,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("* Using %.1fMiB for chain state database\n", nCoinDBCache * (1.0 / 1024 / 1024));
     LogPrintf("* Using %.1fMiB for in-memory UTXO set (plus up to %.1fMiB of unused mempool space)\n", nCoinCacheUsage * (1.0 / 1024 / 1024), nMempoolSizeMax * (1.0 / 1024 / 1024));
 
-    int64_t nStart = GetTimeMillis();
+    bool fLoaded = false;
     while (!fLoaded && !fRequestShutdown) {
         bool fReset = fReindex;
         std::string strLoadError;
@@ -1953,17 +1959,20 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // As LoadBlockIndex can take several minutes, it's possible the user
     // requested to kill the GUI during the last operation. If so, exit.
     // As the program has not fully started yet, Shutdown() is possibly overkill.
-    if (fRequestShutdown) {
+    if (fRequestShutdown)
+    {
         LogPrintf("Shutdown requested. Exiting.\n");
         return false;
     }
-    LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+    if (fLoaded) {
+        LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+    }
 
-    boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
-    CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
+    fs::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
+    CAutoFile est_filein(fsbridge::fopen(est_path, "rb"), SER_DISK, CLIENT_VERSION);
     // Allowed to fail as this file IS missing on first startup.
     if (!est_filein.IsNull())
-        mempool.ReadFeeEstimates(est_filein);
+        ::feeEstimator.Read(est_filein);
     fFeeEstimatesInitialized = true;
 
     // ********************************************************* Step 8: load wallet

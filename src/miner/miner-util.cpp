@@ -6,6 +6,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "miner/miner-util.h"
+
+#include "amount.h"
 #include "consensus/consensus.h"
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
@@ -14,6 +16,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "governance.h"
+#include "policy/feerate.h"
 #include "policy/policy.h"
 #include "pow.h"
 #include "primitives/transaction.h"

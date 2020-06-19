@@ -7,6 +7,7 @@
 #define DYNAMIC_CONSENSUS_VALIDATION_H
 
 #include <string>
+#include "primitives/block.h"
 
 /** "reject" message codes */
 static const unsigned char REJECT_MALFORMED = 0x01;

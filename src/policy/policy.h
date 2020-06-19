@@ -7,12 +7,14 @@
 #define DYNAMIC_POLICY_POLICY_H
 
 #include "consensus/consensus.h"
+#include "feerate.h"
 #include "script/interpreter.h"
 #include "script/standard.h"
 
 #include <string>
 
 class CCoinsViewCache;
+class CTxOut;
 
 /** Default for -blockmaxsize and -blockminsize, which control the range of sizes the mining code will create **/
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 3145728; // 3MB (75% of MAX_BLOCK_SIZE (4MB))
@@ -61,6 +63,10 @@ static const unsigned int STANDARD_LOCKTIME_VERIFY_FLAGS = LOCKTIME_VERIFY_SEQUE
                                                            LOCKTIME_MEDIAN_TIME_PAST;
 /** Used for BDAP transactions. */
 static const int BDAP_TX_VERSION = 0x3500;
+
+CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& minRelayTxFee);
+
+bool IsDust(const CTxOut& txout, const CFeeRate& minRelayTxFee);
 
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
 /**
