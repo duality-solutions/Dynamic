@@ -156,6 +156,9 @@ BOOST_AUTO_TEST_CASE(audit_test2)
         key.MakeNewKey(true);
         audit.Sign(key);
 
+        //Validate after signed
+        BOOST_CHECK(audit.ValidateValues(strErrorMsg) == true);
+
         CPubKey pubKey;
         pubKey = key.GetPubKey();
 

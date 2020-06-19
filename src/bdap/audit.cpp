@@ -8,6 +8,7 @@
 #include "bdap/utils.h"
 #include "key.h"
 #include "hash.h"
+#include "messagesigner.h"
 #include "pubkey.h"
 #include "serialize.h"
 #include "streams.h"
@@ -80,11 +81,17 @@ uint256 CAudit::GetHash() const
     return Hash(dsAudit.begin(), dsAudit.end());
 }
 
+uint256 CAudit::GetAuditHash() const
+{
+    CDataStream dsAudit(SER_NETWORK, PROTOCOL_VERSION);
+    dsAudit << vchAuditData << vchOwnerFullObjectPath << vchAlgorithmType << vchDescription;
+    return Hash(dsAudit.begin(), dsAudit.end());
+}
+
 bool CAudit::Sign(const CKey& key)
 {
-    if (!key.Sign(Hash(vchAuditData.begin(), vchAuditData.end()), vchSignature)) {
-        LogPrintf("CAudit::%s -- Failed to sign audit data.\n", __func__);
-        return false;
+    if (!CHashSigner::SignHash(GetAuditHash(), key, vchSignature)) {
+        return error("CAudit::%s() -- Failed to sign audit data.\n", __func__);
     }
 
     return true;
@@ -92,9 +99,11 @@ bool CAudit::Sign(const CKey& key)
 
 bool CAudit::CheckSignature(const std::vector<unsigned char>& vchPubKey) const
 {
-    CPubKey key(vchPubKey);
-    if (!key.Verify(Hash(vchAuditData.begin(), vchAuditData.end()), vchSignature))
-        return error("CAudit::%s(): verify signature failed", __func__);
+    std::string strError = "";
+    CPubKey pubkey(vchPubKey);
+    if (!CHashSigner::VerifyHash(GetAuditHash(), pubkey, vchSignature, strError)) {
+        return error("CAudit::%s() -- Failed to verify signature - %s\n", __func__, strError);
+    }
 
     return true;
 }

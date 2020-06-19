@@ -156,6 +156,7 @@ public:
     }
 
     uint256 GetHash() const;
+    uint256 GetAuditHash() const;
     bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     int Version() const;
