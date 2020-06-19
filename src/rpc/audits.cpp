@@ -112,7 +112,9 @@ static UniValue AddAudit(const JSONRPCRequest& request)
 
             signedAudit = true;
             pubWalletKey = walletKey.GetPubKey();
-            //LogPrintf("%s: txAudit CheckSignature %s\n", __func__, txAudit.CheckSignature(pubWalletKey.Raw()) ? "Valid" : "Invalid");
+
+            if (!txAudit.CheckSignature(pubWalletKey.Raw()))
+                throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Check Signature failed.");
 
         } else {
             CharString vchEd25519PubKey;
