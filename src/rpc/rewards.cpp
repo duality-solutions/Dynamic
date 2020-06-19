@@ -349,7 +349,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
     if (request.params.size() > 4) {
         exception_addresses = request.params[4].get_str();
 
-        //LogPrint(BCLog::REWARDS, "Excluding \"%s\"\n", exception_addresses.c_str());
+        //LogPrint("rewards", "Excluding \"%s\"\n", exception_addresses.c_str());
     }
 
     std::string change_address = "";
@@ -452,7 +452,7 @@ UniValue getdistributestatus(const JSONRPCRequest& request) {
     if (request.params.size() > 4) {
         exception_addresses = request.params[4].get_str();
 
-        //LogPrint(BCLog::REWARDS, "Excluding \"%s\"\n", exception_addresses.c_str());
+        //LogPrint("rewards", "Excluding \"%s\"\n", exception_addresses.c_str());
     }
 
     if (!pDistributeSnapshotDb)

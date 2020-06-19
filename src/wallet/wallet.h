@@ -67,6 +67,8 @@ static const int DEFAULT_RESCAN_THRESHOLD = 150;
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -fallbackfee default
 static const CAmount DEFAULT_FALLBACK_FEE = 1000;
+//! -m_discard_rate default
+static const CAmount DEFAULT_DISCARD_FEE = 25000;
 //! -mintxfee default
 static const CAmount DEFAULT_TRANSACTION_MINFEE = 1000;
 //! minimum recommended increment for BIP 125 replacement txs
@@ -87,6 +89,7 @@ static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS = false;
 static const unsigned int DEFAULT_TX_CONFIRM_TARGET = 10;
 //! Largest (in bytes) free transaction we're willing to create
 static const unsigned int MAX_FREE_TRANSACTION_CREATE_SIZE = 1000;
+static const bool DEFAULT_WALLET_RBF = false;
 static const bool DEFAULT_WALLETBROADCAST = true;
 static const bool DEFAULT_DISABLE_WALLET = false;
 
@@ -103,6 +106,7 @@ class CBlockIndex;
 class CCoinControl;
 class COutput;
 class CReserveKey;
+class CScheduler;
 class CScript;
 class CStakeInput;
 class CTxMemPool;
@@ -1196,7 +1200,8 @@ public:
     //! loads a HDPubKey into the wallets memory
     bool LoadHDPubKey(const CHDPubKey& hdPubKey);
     //! Adds a key to the store, and saves it to disk.
-    bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
+    bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
+    bool AddKeyPubKeyWithDB(CWalletDB &walletdb,const CKey& key, const CPubKey &pubkey);
     //! Adds an ed25519 keypair and saves it to disk.
     bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) override;
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
@@ -1343,6 +1348,7 @@ public:
 
     static CFeeRate minTxFee;
     static CFeeRate fallbackFee;
+    static CFeeRate m_discard_rate;
 
     bool NewKeyPool();
     bool NewEdKeyPool();
@@ -1494,7 +1500,7 @@ public:
      * Wallet post-init setup
      * Gives the wallet a chance to register repetitive tasks and complete post-init tasks
      */
-    void postInitProcess(boost::thread_group& threadGroup);
+    void postInitProcess(CScheduler& scheduler);
 
     /* Wallets parameter interaction */
     static bool ParameterInteraction();
