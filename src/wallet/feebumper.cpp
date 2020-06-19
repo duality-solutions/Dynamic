@@ -266,7 +266,7 @@ bool CFeeBumper::commit(CWallet *pWallet)
     wtxBumped.fTimeReceivedIsTxTime = true;
     wtxBumped.fFromMe = true;
     CValidationState state;
-    if (!pWallet->CommitTransaction(wtxBumped, reservekey, g_connman->get(), state)) {
+    if (!pWallet->CommitTransaction(wtxBumped, reservekey, g_connman.get(), state)) {
         // NOTE: CommitTransaction never returns false, so this should never happen.
         vErrors.push_back(strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason()));
         return false;
