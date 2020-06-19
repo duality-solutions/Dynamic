@@ -1289,6 +1289,7 @@ public:
      * Insert additional inputs into the transaction by
      * calling CreateTransaction();
      */
+    bool SignTransaction(CMutableTransaction& tx);
     bool FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool overrideEstimatedFeeRate, const CFeeRate& specificFeeRate, int& nChangePosInOut, std::string& strFailReason, bool includeWatching, bool lockUnspents, const std::set<int>& setSubtractFeeFromOutputs, bool keepReserveKey = true, const CTxDestination& destChange = CNoDestination());
 
 
