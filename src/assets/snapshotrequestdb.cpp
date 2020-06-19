@@ -38,7 +38,7 @@ bool CSnapshotRequestDB::ScheduleSnapshot(
     const std::string & p_assetName, int p_heightForSnapshot
 )
 {
-    LogPrint("%s : Requesting snapshot: assetName='%s', height=%d\n",
+    LogPrint("rewards", "%s : Requesting snapshot: assetName='%s', height=%d\n",
         __func__,
         p_assetName.c_str(), p_heightForSnapshot);
 
@@ -47,7 +47,7 @@ bool CSnapshotRequestDB::ScheduleSnapshot(
     //  Add the entry to the database
     bool succeeded = Write(std::make_pair(SNAPSHOTREQUEST_FLAG, snapshotRequest.heightAndName), snapshotRequest);
 
-    LogPrint("%s : Snapshot request for '%s' at height %d %s!\n",
+    LogPrint("rewards", "%s : Snapshot request for '%s' at height %d %s!\n",
         __func__,
         p_assetName.c_str(), p_heightForSnapshot,
         succeeded ? "succeeded" : "failed");
@@ -63,12 +63,12 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequest(
     //  Load up the snapshot entries at this height
     std::string heightAndName = std::to_string(p_heightForSnapshot) + p_assetName;
 
-    LogPrint("%s : Looking for snapshot request '%s'\n",
+    LogPrint("rewards", "%s : Looking for snapshot request '%s'\n",
         __func__, heightAndName.c_str());
 
     bool succeeded = Read(std::make_pair(SNAPSHOTREQUEST_FLAG, heightAndName), p_snapshotRequest);
 
-    LogPrint("%s : Retrieval of snapshot request for '%s' %s!\n",
+    LogPrint("rewards", "%s : Retrieval of snapshot request for '%s' %s!\n",
         __func__,
         heightAndName.c_str(),
         succeeded ? "succeeded" : "failed");
@@ -91,14 +91,14 @@ bool CSnapshotRequestDB::RemoveSnapshotRequest(
     //  Load up the snapshot entries at this height
     std::string heightAndName = std::to_string(p_heightForSnapshot) + p_assetName;
 
-    LogPrint("%s : Attempting to remove snapshot request '%s'\n",
+    LogPrint("rewards", "%s : Attempting to remove snapshot request '%s'\n",
         __func__,
         heightAndName.c_str());
 
     //  Otherwise, erase the entire entry since none are left.
     bool succeeded = Erase(std::make_pair(SNAPSHOTREQUEST_FLAG, heightAndName), true);
 
-    LogPrint("%s : Removal of snapshot request for '%s' %s!\n",
+    LogPrint("rewards", "%s : Removal of snapshot request for '%s' %s!\n",
         __func__,
         heightAndName.c_str(),
         succeeded ? "succeeded" : "failed");
@@ -112,12 +112,12 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
 {
     bool assetNameProvided = p_assetName.length() > 0;
     if (assetNameProvided) {
-        LogPrint("%s : Looking for snapshot requests for asset '%s' at height %d!\n",
+        LogPrint("rewards", "%s : Looking for snapshot requests for asset '%s' at height %d!\n",
             __func__,
             p_assetName.c_str(), p_blockHeight);
     }
     else {
-        LogPrint("%s : Looking for all snapshot requests at height %d!\n",
+        LogPrint("rewards", "%s : Looking for all snapshot requests at height %d!\n",
             __func__,
             p_blockHeight);
     }
@@ -146,7 +146,7 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
                     }
                 }
             } else {
-                LogPrint("%s: Failed to read snapshot request\n", __func__);
+                LogPrint("rewards", "%s: Failed to read snapshot request\n", __func__);
             }
         }
 
@@ -217,7 +217,7 @@ void CDistributeSnapshotRequestDB::LoadAllDistributeSnapshot(std::map<uint256, C
             if (pcursor->GetValue(distributeDbEntry)) {
                 mapRewardSnapshots[key.second] = distributeDbEntry;
             } else {
-                LogPrint("%s: Failed to read snapshot distribution for key: %s\n", __func__, key.second.GetHex());
+                LogPrint("rewards", "%s: Failed to read snapshot distribution for key: %s\n", __func__, key.second.GetHex());
             }
         }
 
@@ -225,7 +225,7 @@ void CDistributeSnapshotRequestDB::LoadAllDistributeSnapshot(std::map<uint256, C
     }
 
     for (auto const & item : mapRewardSnapshots) {
-        LogPrint("%s : Found snapshot distribution request for Owner: %s,  Distribution: %s, Exception: %s, Height: %d, Status: %d\n",
+        LogPrint("rewards", "%s : Found snapshot distribution request for Owner: %s,  Distribution: %s, Exception: %s, Height: %d, Status: %d\n",
                  __func__,
                  item.second.strOwnershipAsset,
                  item.second.strDistributionAsset,

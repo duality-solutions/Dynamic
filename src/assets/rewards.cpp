@@ -46,15 +46,15 @@ bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vect
     vecDistributionList.clear();
 
     if (passets == nullptr) {
-        LogPrint("%s: Invalid assets cache!\n", __func__);
+        LogPrint("rewards", "%s: Invalid assets cache!\n", __func__);
         return false;
     }
     if (pSnapshotRequestDb == nullptr) {
-        LogPrint("%s: Invalid Snapshot Request cache!\n", __func__);
+        LogPrint("rewards", "%s: Invalid Snapshot Request cache!\n", __func__);
         return false;
     }
     if (pAssetSnapshotDb == nullptr) {
-        LogPrint("%s: Invalid asset snapshot cache!\n", __func__);
+        LogPrint("rewards", "%s: Invalid asset snapshot cache!\n", __func__);
         return false;
     }
 
@@ -78,7 +78,7 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 
     if (p_rewardSnapshot.strDistributionAsset != "DYN") {
         if (!passets->GetAssetMetaDataIfExists(p_rewardSnapshot.strDistributionAsset, distributionAsset)) {
-            LogPrint("%s: Failed to retrieve asset details for '%s'\n", __func__, p_rewardSnapshot.strDistributionAsset.c_str());
+            LogPrint("rewards", "%s: Failed to retrieve asset details for '%s'\n", __func__, p_rewardSnapshot.strDistributionAsset.c_str());
             return false;
         }
 
@@ -92,28 +92,28 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
         CAmount srcDivisor = pow(10, COIN_DIGITS_PAST_DECIMAL - distributionAsset.units);
         modifiedPaymentInAssetUnits /= srcDivisor;
 
-        LogPrint("%s: Distribution asset '%s' has units %d and divisor %d\n", __func__,
+        LogPrint("rewards", "%s: Distribution asset '%s' has units %d and divisor %d\n", __func__,
                  p_rewardSnapshot.strDistributionAsset.c_str(), distributionAsset.units, srcUnitDivisor);
     }
     else {
-        LogPrint("%s: Distribution is DYN with divisor %d\n", __func__, srcUnitDivisor);
+        LogPrint("rewards", "%s: Distribution is DYN with divisor %d\n", __func__, srcUnitDivisor);
     }
 
-    LogPrint("%s: Scaled payment amount in %s is %d\n", __func__,
+    LogPrint("rewards", "%s: Scaled payment amount in %s is %d\n", __func__,
              p_rewardSnapshot.strDistributionAsset.c_str(), modifiedPaymentInAssetUnits);
 
     //  Get details on the ownership asset
     CNewAsset ownershipAsset;
     CAmount tgtUnitDivisor = 0;
     if (!passets->GetAssetMetaDataIfExists(p_rewardSnapshot.strOwnershipAsset, ownershipAsset)) {
-        LogPrint("%s: Failed to retrieve asset details for '%s'\n", __func__, p_rewardSnapshot.strOwnershipAsset.c_str());
+        LogPrint("rewards", "%s: Failed to retrieve asset details for '%s'\n", __func__, p_rewardSnapshot.strOwnershipAsset.c_str());
         return false;
     }
 
     //  Save the ownership asset's divisor
     tgtUnitDivisor = static_cast<CAmount>(pow(10, COIN_DIGITS_PAST_DECIMAL - ownershipAsset.units));
 
-    LogPrint("%s: Ownership asset '%s' has units %d and divisor %d\n", __func__,
+    LogPrint("rewards", "%s: Ownership asset '%s' has units %d and divisor %d\n", __func__,
              p_rewardSnapshot.strOwnershipAsset.c_str(), ownershipAsset.units, tgtUnitDivisor);
 
     //  Remove exception addresses & amounts from the list
@@ -125,7 +125,7 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 
     CAssetSnapshotDBEntry snapshotEntry;
     if (!pAssetSnapshotDb->RetrieveOwnershipSnapshot(p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.nHeight, snapshotEntry)) {
-        LogPrint("%s: Failed to retrieve ownership snapshot list!\n", __func__);
+        LogPrint("rewards", "%s: Failed to retrieve ownership snapshot list!\n", __func__);
         return false;
     }
 
@@ -143,15 +143,15 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 
     //  Make sure we have some addresses to pay to
     if (nonExceptionOwnerships.size() == 0) {
-        LogPrint("%s: Ownership of '%s' includes only exception/burn addresses.\n", __func__,
+        LogPrint("rewards", "%s: Ownership of '%s' includes only exception/burn addresses.\n", __func__,
                  p_rewardSnapshot.strOwnershipAsset.c_str());
         return false;
     }
 
-    LogPrint("%s: Total amount owned %d\n", __func__,
+    LogPrint("rewards", "%s: Total amount owned %d\n", __func__,
              totalAmtOwned);
 
-    LogPrint("%s: Total payout amount %d\n", __func__,
+    LogPrint("rewards", "%s: Total payout amount %d\n", __func__,
              modifiedPaymentInAssetUnits);
 
     CAmount totalSentAsRewards = 0;
@@ -168,7 +168,7 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 
         totalSentAsRewards += rewardAmt;
 
-        LogPrint("%s: Found ownership address for '%s': '%s' owns %d => reward %d\n", __func__,
+        LogPrint("rewards", "%s: Found ownership address for '%s': '%s' owns %d => reward %d\n", __func__,
                  p_rewardSnapshot.strOwnershipAsset.c_str(), ownership.address.c_str(),
                  ownership.amount, rewardAmt);
 
@@ -179,7 +179,7 @@ UNUSED_VAR static bool fTransferScriptIsActive = false;
 
     CAmount change = totalAmtOwned - totalSentAsRewards;
     if (change > 0) {
-        LogPrint("%s: Found change amount of %u\n", __func__, change);
+        LogPrint("rewards", "%s: Found change amount of %u\n", __func__, change);
     }
 
     return true;
@@ -330,7 +330,7 @@ bool BuildTransaction(
                 pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
             }
 
-            LogPrint("%s\n", strError.c_str());
+            LogPrint("rewards", "%s\n", strError.c_str());
             return false;
         }
 
@@ -373,7 +373,7 @@ bool BuildTransaction(
         if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vDestinations, "", error, *txnPtr.get(), *reserveKeyPtr.get(), nFeeRequired)) {
             mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::FAILED_CREATE_TRANSACTION;
             pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint("Failed to create transfer asset transaction: %s\n", error.second.c_str());
+            LogPrint("rewards", "Failed to create transfer asset transaction: %s\n", error.second.c_str());
             return false;
         }
 
