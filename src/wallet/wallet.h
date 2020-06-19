@@ -1335,6 +1335,8 @@ public:
     void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& entries);
     bool AddAccountingEntry(const CAccountingEntry&);
     bool AddAccountingEntry(const CAccountingEntry&, CWalletDB* pwalletdb);
+    template <typename ContainerType>
+    bool DummySignTx(CMutableTransaction &txNew, const ContainerType &coins) const;
 
     static CFeeRate minTxFee;
     static CFeeRate fallbackFee;
@@ -1591,6 +1593,42 @@ public:
         READWRITE(vchPubKey);
     }
 };
+
+// Helper for producing a bunch of max-sized low-S signatures (eg 72 bytes)
+// ContainerType is meant to hold pair<CWalletTx *, int>, and be iterable
+// so that each entry corresponds to each vIn, in order.
+// Returns true if all inputs could be signed normally, false if any were padded out for sizing purposes.
+template <typename ContainerType>
+bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins) const
+{
+    bool allSigned = true;
+
+    // pad past max expected sig length (256)
+    const std::string zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    const unsigned char* cstrZeros = (unsigned char*)zeros.c_str();
+
+    // Fill in dummy signatures for fee calculation.
+    int nIn = 0;
+    for (const auto& coin : coins)
+    {
+        const CScript& scriptPubKey = coin.txout.scriptPubKey;
+        SignatureData sigdata;
+
+        if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata))
+        {
+            // just add dummy 256 bytes as sigdata if this fails (can't necessarily sign for all inputs)
+            CScript dummyScript = CScript(cstrZeros, cstrZeros + 256);
+            SignatureData dummyData = SignatureData(dummyScript);
+            UpdateTransaction(txNew, nIn, dummyData);
+            allSigned = false;
+        } else {
+            UpdateTransaction(txNew, nIn, sigdata);
+        }
+
+        nIn++;
+    }
+    return allSigned;
+}
 
 bool RunProcessStealthQueue();
 
