@@ -57,6 +57,7 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
 extern bool fWalletUnlockMixStakeOnly;
+extern bool fWalletRbf;
 
 //Set the following 2 constants together
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
@@ -1481,7 +1482,7 @@ public:
 
     /** Mark a transaction as replaced by another transaction (e.g., BIP 125). */
     bool MarkReplaced(const uint256& originalHash, const uint256& newHash);
-    
+
     /* Returns the wallets help message */
     static std::string GetWalletHelpString(bool showDebug);
 

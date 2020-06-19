@@ -39,6 +39,8 @@ public:
     CFeeRate nFeeRate;
     //! Override the default confirmation target, 0 = use default
     int nConfirmTarget;
+    //! Signal BIP-125 replace by fee.
+    bool signalRbf;
 
     /** ASSET START */
     //! Name of the asset that is selected, used when sending assets with coincontrol
@@ -62,6 +64,7 @@ public:
         nFeeRate = CFeeRate(0);
         fOverrideFeeRate = false;
         nConfirmTarget = 0;
+        signalRbf = fWalletRbf;
 /* ASSET START */
         strAssetSelected = "";
         setAssetsSelected.clear();
