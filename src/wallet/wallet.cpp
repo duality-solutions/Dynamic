@@ -6435,12 +6435,18 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
             // TODO (BDAP): Do not count BDAP OP_RETURN account.
             bool fIsData = IsDataScript(txData.scriptPubKey);
             if (fIsData) {
-                txOutData = txData;
-                fDataFound = true;
-                LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
-                break;
+                std::vector<uint8_t> vData;
+                if (GetDataFromScript(txData.scriptPubKey, vData)) {
+                    if (vData.size() < 65) {
+                        txOutData = txData;
+                        fDataFound = true;
+                        LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
+                        break;
+                    }
+                }
             }
         }
+
         if (fDataFound) {
             int32_t nOutputId = 0;
             for (const CTxOut& txOut : tx.vout) {
