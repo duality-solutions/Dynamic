@@ -35,7 +35,7 @@ static const bool DEFAULT_PRINTPRIORITY = false;
 struct CBlockTemplate {
     CBlock block;
     std::vector<CAmount> vTxFees;
-    std::vector<int64_t> vTxSigOps;
+    std::vector<int64_t> vTxSigOpsCost;
     CTxOut txoutDynode;                 // dynode payment
     std::vector<CTxOut> voutSuperblock; // dynode payment
 };

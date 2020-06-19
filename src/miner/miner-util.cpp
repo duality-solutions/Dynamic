@@ -186,7 +186,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         const int64_t nMedianTimePast = indexPrev->GetMedianTimePast();
 
         pblocktemplate->vTxFees.push_back(-1);   // updated at end
-        pblocktemplate->vTxSigOps.push_back(-1); // updated at end
+        pblocktemplate->vTxSigOpsCost.push_back(-1); // updated at end
         block.nVersion = ComputeBlockVersion(indexPrev, chainparams.GetConsensus());
         // -regtest only: allow overriding block.nVersion with
         // -blockversion=N to test forking scenarios
@@ -269,7 +269,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             if (!IsFinalTx(tx, nHeight, nLockTimeCutoff))
                 continue;
 
-            unsigned int nTxSigOps = iter->GetSigOpCount();
+            unsigned int nTxSigOps = iter->GetSigOpCost();
             if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS) {
                 if (nBlockSigOps > MAX_BLOCK_SIGOPS - 2) {
                     break;
@@ -280,10 +280,10 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             block.vtx.emplace_back(iter->GetSharedTx());
 
             pblocktemplate->vTxFees.push_back(iter->GetFee());
-            pblocktemplate->vTxSigOps.push_back(iter->GetSigOpCount());
+            pblocktemplate->vTxSigOpsCost.push_back(iter->GetSigOpCost());
             nBlockSize += iter->GetTxSize();
             ++nBlockTx;
-            nBlockSigOps += iter->GetSigOpCount();
+            nBlockSigOps += iter->GetSigOpCost();
             nFees += iter->GetFee();
 
             if (fPrintPriority) {
@@ -389,7 +389,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
         block.nBits = GetNextWorkRequired(indexPrev, block, fProofOfStake, chainparams.GetConsensus());
         block.nNonce = 0;
-        pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(*block.vtx[0]);
+        pblocktemplate->vTxSigOpsCost[0] = GetLegacySigOpCount(*block.vtx[0]);
 
         CValidationState state;
         if (!TestBlockValidity(state, chainparams, block, indexPrev, false, false)) {

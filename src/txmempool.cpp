@@ -23,16 +23,16 @@
 #include "validation.h"
 #include "version.h"
 
-CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee, int64_t _nTime, double _entryPriority, unsigned int _entryHeight, CAmount _inChainInputValue, bool _spendsCoinbase, unsigned int _sigOps, LockPoints lp) : tx(_tx), nFee(_nFee), nTime(_nTime), entryPriority(_entryPriority), entryHeight(_entryHeight),
+CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee, int64_t _nTime, double _entryPriority, unsigned int _entryHeight, CAmount _inChainInputValue, bool _spendsCoinbase, int64_t _sigOpsCost, LockPoints lp) : tx(_tx), nFee(_nFee), nTime(_nTime), entryPriority(_entryPriority), entryHeight(_entryHeight),
                                                                                                                                                                                                                                               inChainInputValue(_inChainInputValue),
-                                                                                                                                                                                                                                              spendsCoinbase(_spendsCoinbase), sigOpCount(_sigOps), lockPoints(lp)
+                                                                                                                                                                                                                                              spendsCoinbase(_spendsCoinbase), sigOpCost(_sigOpsCost), lockPoints(lp)
 {
     nTxWeight = GetTransactionWeight(*tx);
-    nModSize = _tx->CalculateModifiedSize(nTxSize);
+    nModSize = _tx->CalculateModifiedSize(GetTxSize());
     nUsageSize = RecursiveDynamicUsage(*tx) + memusage::DynamicUsage(tx);
 
     nCountWithDescendants = 1;
-    nSizeWithDescendants = nTxSize;
+    nSizeWithDescendants = GetTxSize();
     nModFeesWithDescendants = nFee;
     CAmount nValueIn = tx->GetValueOut() + nFee;
     assert(inChainInputValue <= nValueIn);
@@ -40,14 +40,9 @@ CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFe
     feeDelta = 0;
 
     nCountWithAncestors = 1;
-    nSizeWithAncestors = nTxSize;
+    nSizeWithAncestors = GetTxSize();
     nModFeesWithAncestors = nFee;
-    nSigOpCountWithAncestors = sigOpCount;
-}
-
-CTxMemPoolEntry::CTxMemPoolEntry(const CTxMemPoolEntry& other)
-{
-    *this = other;
+    nSigOpCostWithAncestors = sigOpCost;
 }
 
 double CTxMemPoolEntry::GetPriority(unsigned int currentHeight) const
@@ -115,7 +110,7 @@ void CTxMemPool::UpdateForDescendants(txiter updateIt, cacheMap& cachedDescendan
             modifyCount++;
             cachedDescendants[updateIt].insert(cit);
             // Update ancestor state for each descendant
-            mapTx.modify(cit, update_ancestor_state(updateIt->GetTxSize(), updateIt->GetModifiedFee(), 1, updateIt->GetSigOpCount()));
+            mapTx.modify(cit, update_ancestor_state(updateIt->GetTxSize(), updateIt->GetModifiedFee(), 1, updateIt->GetSigOpCost()));
         }
     }
     mapTx.modify(updateIt, update_descendant_state(modifySize, modifyFee, modifyCount));
@@ -257,7 +252,7 @@ void CTxMemPool::UpdateEntryForAncestors(txiter it, const setEntries& setAncesto
     BOOST_FOREACH (txiter ancestorIt, setAncestors) {
         updateSize += ancestorIt->GetTxSize();
         updateFee += ancestorIt->GetModifiedFee();
-        updateSigOps += ancestorIt->GetSigOpCount();
+        updateSigOps += ancestorIt->GetSigOpCost();
     }
     mapTx.modify(it, update_ancestor_state(updateSize, updateFee, updateCount, updateSigOps));
 }
@@ -288,7 +283,7 @@ void CTxMemPool::UpdateForRemoveFromMempool(const setEntries& entriesToRemove, b
             setDescendants.erase(removeIt); // don't update state for self
             int64_t modifySize = -((int64_t)removeIt->GetTxSize());
             CAmount modifyFee = -removeIt->GetModifiedFee();
-            int modifySigOps = -removeIt->GetSigOpCount();
+            int modifySigOps = -removeIt->GetSigOpCost();
             BOOST_FOREACH (txiter dit, setDescendants) {
                 mapTx.modify(dit, update_ancestor_state(modifySize, modifyFee, -1, modifySigOps));
             }
@@ -344,8 +339,8 @@ void CTxMemPoolEntry::UpdateAncestorState(int64_t modifySize, CAmount modifyFee,
     nModFeesWithAncestors += modifyFee;
     nCountWithAncestors += modifyCount;
     assert(int64_t(nCountWithAncestors) > 0);
-    nSigOpCountWithAncestors += modifySigOps;
-    assert(int(nSigOpCountWithAncestors) >= 0);
+    nSigOpCostWithAncestors += modifySigOps;
+    assert(int(nSigOpCostWithAncestors) >= 0);
 }
 
 CTxMemPool::CTxMemPool(CBlockPolicyEstimator* estimator) :
@@ -1195,7 +1190,7 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
                 fDependsWait = true;
                 if (setParentCheck.insert(it2).second) {
                     parentSizes += it2->GetTxSize();
-                    parentSigOpCount += it2->GetSigOpCount();
+                    parentSigOpCount += it2->GetSigOpCost();
                 }
             } else {
                 assert(pcoins->HaveCoin(txin.prevout));
@@ -1216,17 +1211,17 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
         uint64_t nCountCheck = setAncestors.size() + 1;
         uint64_t nSizeCheck = it->GetTxSize();
         CAmount nFeesCheck = it->GetModifiedFee();
-        unsigned int nSigOpCheck = it->GetSigOpCount();
+        unsigned int nSigOpCheck = it->GetSigOpCost();
 
         BOOST_FOREACH (txiter ancestorIt, setAncestors) {
             nSizeCheck += ancestorIt->GetTxSize();
             nFeesCheck += ancestorIt->GetModifiedFee();
-            nSigOpCheck += ancestorIt->GetSigOpCount();
+            nSigOpCheck += ancestorIt->GetSigOpCost();
         }
 
         assert(it->GetCountWithAncestors() == nCountCheck);
         assert(it->GetSizeWithAncestors() == nSizeCheck);
-        assert(it->GetSigOpCountWithAncestors() == nSigOpCheck);
+        assert(it->GetSigOpCostWithAncestors() == nSigOpCheck);
         assert(it->GetModFeesWithAncestors() == nFeesCheck);
 
         // Check children against mapNextTx

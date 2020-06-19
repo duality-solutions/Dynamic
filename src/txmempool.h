@@ -97,7 +97,7 @@ private:
     unsigned int entryHeight;  //!< Chain height when entering the mempool
     CAmount inChainInputValue; //!< Sum of all txin values that are already in blockchain
     bool spendsCoinbase;       //!< keep track of transactions that spend a coinbase
-    unsigned int sigOpCount;   //!< Legacy sig ops plus P2SH sig op count
+    int64_t sigOpCost;         //!< Total sigop cost
     int64_t feeDelta;          //!< Used for determining the priority of the transaction for mining in a block
     LockPoints lockPoints;     //!< Track the height and time at which tx was final
 
@@ -114,12 +114,10 @@ private:
     uint64_t nCountWithAncestors;
     uint64_t nSizeWithAncestors;
     CAmount nModFeesWithAncestors;
-    unsigned int nSigOpCountWithAncestors;
+    int64_t nSigOpCostWithAncestors;
 
 public:
-    CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee, int64_t _nTime, double _entryPriority, unsigned int _entryHeight, CAmount _inChainInputValue, bool spendsCoinbase, unsigned int nSigOps, LockPoints lp);
-
-    CTxMemPoolEntry(const CTxMemPoolEntry& other);
+    CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee, int64_t _nTime, double _entryPriority, unsigned int _entryHeight, CAmount _inChainInputValue, bool spendsCoinbase, int64_t nSigOpsCost, LockPoints lp);
 
     const CTransaction& GetTx() const { return *this->tx; }
     CTransactionRef GetSharedTx() const { return this->tx; }
@@ -128,7 +126,7 @@ public:
     size_t GetTxWeight() const { return nTxWeight; }
     int64_t GetTime() const { return nTime; }
     unsigned int GetHeight() const { return entryHeight; }
-    unsigned int GetSigOpCount() const { return sigOpCount; }
+    int64_t GetSigOpCost() const { return sigOpCost; }
     int64_t GetModifiedFee() const { return nFee + feeDelta; }
     size_t DynamicMemoryUsage() const { return nUsageSize; }
     const LockPoints& GetLockPoints() const { return lockPoints; }
@@ -153,7 +151,7 @@ public:
     uint64_t GetCountWithAncestors() const { return nCountWithAncestors; }
     uint64_t GetSizeWithAncestors() const { return nSizeWithAncestors; }
     CAmount GetModFeesWithAncestors() const { return nModFeesWithAncestors; }
-    unsigned int GetSigOpCountWithAncestors() const { return nSigOpCountWithAncestors; }
+    int64_t GetSigOpCostWithAncestors() const { return nSigOpCostWithAncestors; }
 
     mutable size_t vTxHashesIdx; //!< Index in mempool's vTxHashes
 };
