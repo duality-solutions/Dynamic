@@ -39,6 +39,24 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
+std::string trim(std::string s)
+{
+    if (s.empty()) return s;
+
+    int start = 0;
+    int end = int(s.size());
+    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
+    {
+        ++start;
+    }
+
+    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
+    {
+        --end;
+    }
+    return s.substr(start, end - start);
+}
+
 static UniValue AddAudit(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
@@ -74,7 +92,7 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     if (strAudits.find(",") > 0) {
         std::vector<std::string> vAudits = split(strAudits, ',');
         for(const std::string& strAuditHash : vAudits)
-            auditData.vAuditData.push_back(vchFromString(strAuditHash));
+            auditData.vAuditData.push_back(vchFromString(trim(strAuditHash)));
     } else {
         auditData.vAuditData.push_back(vchFromValue(strAudits));
     }
