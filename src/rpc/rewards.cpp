@@ -329,8 +329,6 @@ UniValue distributereward(const JSONRPCRequest& request) {
         return "_This rpc call is not functional unless -assetindex is enabled. To enable, please run the wallet with -assetindex, this will require a reindex to occur";
     }
 
-    //  Figure out which wallet to use
-    CWallet * const walletPtr = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(request.fHelp)) {
         UniValue ret(UniValue::VSTR);
         ret.push_back("Rewards system requires a wallet.");
@@ -414,7 +412,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_INVALID_REQUEST, std::string("Distribution of reward has already be created. You must remove the distribution before creating another one"));
 
     // Trigger the distribution
-    DistributeRewardSnapshot(walletPtr, distribRewardSnapshotData);
+    DistributeRewardSnapshot(pwalletMain, distribRewardSnapshotData);
 
     return "Created reward distribution";
 }

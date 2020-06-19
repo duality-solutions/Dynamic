@@ -13,14 +13,6 @@ class CRPCTable;
 class CWallet;
 class JSONRPCRequest;
 
-/**
- * Figures out what wallet, if any, to use for a JSONRPCRequest.
- *
- * @param[in] request JSONRPCRequest that wishes to access a wallet
- * @return nullptr if no wallet should be used, or a pointer to the CWallet
- */
-CWallet *GetWalletForJSONRPCRequest(const JSONRPCRequest& request);
-
 void RegisterWalletRPCCommands(CRPCTable& t);
 
 #endif //DYNAMIC_WALLET_RPCWALLET_H
