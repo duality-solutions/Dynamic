@@ -1403,7 +1403,7 @@ public:
     bool ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared);
     int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
     bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
-    bool ScanForOwnedOutputs(const CTransaction& tx);
+    bool ScanForStealthOwnedOutputs(const CTransaction& tx);
     bool AddStealthAddress(const CStealthAddress& sxAddr);
     bool AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress);
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);

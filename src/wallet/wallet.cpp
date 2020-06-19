@@ -1388,7 +1388,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         bool fIsMyStealth = false;
         if (fStealthTx || dynodeSync.IsBlockchainSynced()) {
             // Check if stealth address belongs to this wallet
-            fIsMyStealth = ScanForOwnedOutputs(tx);
+            fIsMyStealth = ScanForStealthOwnedOutputs(tx);
         }
 
         if (fExisted || IsMine(tx) || IsRelevantToMe(tx) || fIsMyStealth) {
@@ -6422,7 +6422,7 @@ bool CWallet::HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript)
     return false;
 }
 
-bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
+bool CWallet::ScanForStealthOwnedOutputs(const CTransaction& tx)
 {
     bool fIsMine = false;
     CScript bdapOpScript;
