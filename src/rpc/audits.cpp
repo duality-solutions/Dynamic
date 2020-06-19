@@ -101,6 +101,22 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     CAudit txAudit(auditData);
     bool signedAudit = false;
 
+    //handle description [OPTIONAL]
+    if (request.params.size() > 3) {
+            std::string auditDescription = request.params[3].get_str();
+            if (auditDescription.size() > 0) {
+                txAudit.vchDescription = vchFromString(auditDescription);
+            }
+    }
+
+    //handle algorithm [OPTIONAL]
+    if (request.params.size() > 4) {
+            std::string auditAlgorithm = request.params[4].get_str();
+            if (auditAlgorithm.size() > 0) {
+                txAudit.vchAlgorithmType = vchFromString(auditAlgorithm);
+            }
+    }
+
     //handle OWNER [OPTIONAL]
     if (request.params.size() > 2) {
 
@@ -142,21 +158,10 @@ static UniValue AddAudit(const JSONRPCRequest& request)
 
     }
 
-    //handle description [OPTIONAL]
-    if (request.params.size() > 3) {
-            std::string auditDescription = request.params[3].get_str();
-            if (auditDescription.size() > 0) {
-                txAudit.vchDescription = vchFromString(auditDescription);
-            }
-    }
-
-    //handle algorithm [OPTIONAL]
-    if (request.params.size() > 4) {
-            std::string auditAlgorithm = request.params[4].get_str();
-            if (auditAlgorithm.size() > 0) {
-                txAudit.vchAlgorithmType = vchFromString(auditAlgorithm);
-            }
-    }
+    // check BDAP values
+    std::string strMessage;
+    if (!txAudit.ValidateValues(strMessage))
+        throw JSONRPCError(RPC_BDAP_AUDIT_INVALID, strprintf("Invalid audit transaction. %s", strMessage));
 
     // Create BDAP operation script
     CScript scriptPubKey;
@@ -187,10 +192,6 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_AUDIT, bdapType, auditData.vAuditData.size(), monthlyFee, oneTimeFee, depositFee))
         throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
-    // check BDAP values
-    std::string strMessage;
-    if (!txAudit.ValidateValues(strMessage))
-        throw JSONRPCError(RPC_BDAP_AUDIT_INVALID, strprintf("Invalid audit transaction. %s", strMessage));
 
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
