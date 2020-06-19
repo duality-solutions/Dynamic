@@ -16,6 +16,7 @@
 #include "bdap/linkstorage.h"
 #include "policy/feerate.h"
 #include "rpc/wallet.h"
+#include "script/sign.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "ui_interface.h"
