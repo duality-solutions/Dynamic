@@ -536,10 +536,10 @@ public:
     CAmount GetDenominatedCredit(bool unconfirmed, bool fUseCache = true) const;
 
     void GetAmounts(std::list<COutputEntry>& listReceived,
-        std::list<COutputEntry>& listSent,
-        CAmount& nFee,
-        std::string& strSentAccount,
-        const isminefilter& filter) const;
+                    std::list<COutputEntry>& listSent, CAmount& nFee, std::string& strSentAccount, const isminefilter& filter) const;
+
+    void GetAmounts(std::list<COutputEntry>& listReceived,
+                    std::list<COutputEntry>& listSent, CAmount& nFee, std::string& strSentAccount, const isminefilter& filter, std::list<CAssetOutputEntry>& assetsReceived, std::list<CAssetOutputEntry>& assetsSent) const;
 
     void GetAccountAmounts(const std::string& strAccount, CAmount& nReceived, CAmount& nSent, CAmount& nFee, const isminefilter& filter) const;
 

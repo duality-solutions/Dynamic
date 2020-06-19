@@ -1716,7 +1716,7 @@ static void MaybePushAddress(UniValue& entry, const CTxDestination& dest)
         entry.push_back(Pair("address", addr.ToString()));
 }
 
-void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, const isminefilter& filter)
+void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, UniValue& retAssets, const isminefilter& filter)
 {
     CAmount nFee;
     std::string strSentAccount;
@@ -1855,6 +1855,13 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
     /** ASSET END */
 }
 
+void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, const isminefilter& filter)
+{
+    UniValue assetDetails(UniValue::VARR);
+
+    ListTransactions(wtx, strAccount, nMinDepth, fLong, ret, assetDetails, filter);
+}
+
 void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccount, UniValue& ret)
 {
     bool fAllAccounts = (strAccount == std::string("*"));
@@ -1873,8 +1880,9 @@ void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccoun
 
 UniValue listtransactions(const JSONRPCRequest& request)
 {
-    if (!EnsureWalletIsAvailable(request.fHelp))
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
+    }
 
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(

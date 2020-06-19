@@ -2087,10 +2087,15 @@ int CWalletTx::GetRequestCount() const
 }
 
 void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
-    std::list<COutputEntry>& listSent,
-    CAmount& nFee,
-    std::string& strSentAccount,
-    const isminefilter& filter) const
+                           std::list<COutputEntry>& listSent, CAmount& nFee, std::string& strSentAccount, const isminefilter& filter) const {
+
+    std::list<CAssetOutputEntry> assetsReceived;
+    std::list<CAssetOutputEntry> assetsSent;
+    GetAmounts(listReceived, listSent, nFee, strSentAccount, filter, assetsReceived, assetsSent);
+}
+
+void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
+                           std::list<COutputEntry>& listSent, CAmount& nFee, std::string& strSentAccount, const isminefilter& filter, std::list<CAssetOutputEntry>& assetsReceived, std::list<CAssetOutputEntry>& assetsSent) const
 {
     nFee = 0;
     listReceived.clear();

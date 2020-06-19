@@ -7,11 +7,11 @@
 #include "wallet/init.h"
 
 #include "net.h"
+#include "rpc/wallet.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "wallet/wallet.h"
-#include "wallet/rpcwallet.h"
 
 std::string GetWalletHelpString(bool showDebug)
 {
