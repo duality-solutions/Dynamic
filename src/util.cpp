@@ -685,7 +685,7 @@ boost::filesystem::path GetDynodeConfigFile()
 
 extern void WriteConfigFile(FILE* configFile);
 
-void ReadConfigFile(const std::string& confPath)
+void ArgsManager::ReadConfigFile(const std::string& confPath)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good()) {
@@ -725,7 +725,7 @@ void WriteConfigFile(FILE* configFile)
     fputs(sUserID.c_str(), configFile);
     fputs(sRPCpassword.c_str(), configFile);
     fclose(configFile);
-    ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
+    gArgs.ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
 }
 
 #ifndef WIN32
