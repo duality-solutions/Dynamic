@@ -33,14 +33,18 @@ public:
     bool fAllowWatchOnly;
     //! Minimum absolute fee (not per kilobyte)
     CAmount nMinimumTotalFee;
-    //! Override estimated feerate
+    //! Override automatic min/max checks on fee, m_feerate must be set if true
     bool fOverrideFeeRate;
+    //! Override the default payTxFee if set
+    boost::optional<CFeeRate> m_feerate;
     //! Feerate to use if overrideFeeRate is true
     CFeeRate nFeeRate;
-    //! Override the default confirmation target, 0 = use default
-    int nConfirmTarget;
+    //! Override the default confirmation target if set
+    boost::optional<unsigned int> m_confirm_target;
     //! Signal BIP-125 replace by fee.
     bool signalRbf;
+    //! Fee estimation mode to control arguments to estimateSmartFee
+    FeeEstimateMode m_fee_mode;
 
     /** ASSET START */
     //! Name of the asset that is selected, used when sending assets with coincontrol
@@ -63,8 +67,10 @@ public:
         nMinimumTotalFee = 0;
         nFeeRate = CFeeRate(0);
         fOverrideFeeRate = false;
-        nConfirmTarget = 0;
+        m_feerate.reset();
+        m_confirm_target.reset();
         signalRbf = fWalletRbf;
+        m_fee_mode = FeeEstimateMode::UNSET;
 /* ASSET START */
         strAssetSelected = "";
         setAssetsSelected.clear();

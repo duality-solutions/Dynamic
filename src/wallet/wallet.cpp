@@ -32,6 +32,7 @@
 #include "key.h"
 #include "keystore.h"
 #include "net.h"
+#include "policy/fees.h"
 #include "policy/policy.h"
 #include "pos/kernel.h"
 #include "pos/stakeinput.h"
@@ -81,6 +82,8 @@ CFeeRate CWallet::minTxFee = CFeeRate(DEFAULT_TRANSACTION_MINFEE);
  * Override with -fallbackfee
  */
 CFeeRate CWallet::fallbackFee = CFeeRate(DEFAULT_FALLBACK_FEE);
+
+CFeeRate CWallet::m_discard_rate = CFeeRate(DEFAULT_DISCARD_FEE);
 
 const uint256 CMerkleTx::ABANDON_HASH(uint256S("0000000000000000000000000000000000000000000000000000000000000001"));
 

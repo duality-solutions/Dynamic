@@ -205,6 +205,7 @@ DYNAMIC_CORE_H = \
   reverselock.h \
   reverse_iterator.h \
   rpc/client.h \
+  rpc/mining.h \
   rpc/protocol.h \
   rpc/register.h \
   rpc/safemode.h \

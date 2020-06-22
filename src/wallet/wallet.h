@@ -1343,6 +1343,7 @@ public:
 
     static CFeeRate minTxFee;
     static CFeeRate fallbackFee;
+    static CFeeRate m_discard_rate;
 
     bool NewKeyPool();
     bool NewEdKeyPool();
