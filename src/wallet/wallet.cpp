@@ -3079,7 +3079,7 @@ void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScri
                     CDynamicAddress address = GetScriptAddress(pcoin->tx->vout[i].scriptPubKey);
                     //LogPrintf("GetBDAPCoins address =  %s\n", address.ToString());
                     if (prevAddress == address) {
-                        vCoins.push_back(COutput(pcoin, i, nDepth, true, true, (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO));
+                        vCoins.push_back(COutput(pcoin, i, nDepth, true, true, (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO)); // todo: unsure if 5th arg should be true
                     }
                 }
             }
