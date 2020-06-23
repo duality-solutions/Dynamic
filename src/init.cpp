@@ -2266,16 +2266,28 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         return false;
     }
 
+    // Generate coins in the background
+    if (gArgs.GetBoolArg("-gen", DEFAULT_GENERATE)) {
+        InitMiners(chainparams, &connman);
+        SetCPUMinerThreads(gArgs.GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
+        SetGPUMinerThreads(gArgs.GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
+        StartMiners();
+    }
 
-
-
-
+    // Start the DHT Torrent networks in the background
+    const bool fMultiSessions = gArgs.GetArg("-multidhtsessions", true);
+    StartTorrentDHTNetwork(fMultiSessions, chainparams, &connman);
 
     SetRPCWarmupFinished();
 
 #ifdef ENABLE_WALLET
-    StartWallets(scheduler);
+    if (pwalletMain)
+        pwalletMain->postInitProcess(threadGroup);
 
+    if (gArgs.GetBoolArg("-staking", false)) {
+        // ppcoin:mint proof-of-stake blocks in the background
+        threadGroup.create_thread(boost::bind(&ThreadStakeMinter));
+    }
 
     // ********************************************************* Step 12: Init Msg Channel list
     if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
@@ -2291,6 +2303,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         }
     }
 #endif
+
+    threadGroup.create_thread(boost::bind(&ThreadSendAlert, &connman));
 
     // ********************************************************* Step 13: finished
     uiInterface.InitMessage(_("Done Loading"));
