@@ -611,6 +611,13 @@ public:
     bool fSpendable;
     bool fSolvable;
 
+    /**
+     * Whether this output is considered safe to spend. Unconfirmed transactions
+     * from outside keys and unconfirmed replacement transactions are considered
+     * unsafe and will not be used to fund new spending transactions.
+     */
+    bool fSafe;
+
     COutput(const CWalletTx* txIn, int iIn, int nDepthIn, bool fSpendableIn, bool fSolvableIn)
     {
         tx = txIn;

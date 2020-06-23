@@ -3349,7 +3349,7 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
 
                     // Add the COutput to the map of available Asset Coins
                     mapAssetCoins.at(output_data.assetName).push_back(
-                            COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+                            COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn));
 
                     // Initialize the map of current asset totals
                     if (!mapAssetTotals.count(output_data.assetName))
@@ -3378,7 +3378,7 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                     if (isAssetScript)
                         continue;
 
-                    vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+                    vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn));
 
                     // Checks the sum amount of all UTXO's.
                     if (nMinimumSumAmount != MAX_MONEY) {
