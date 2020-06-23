@@ -6,6 +6,7 @@
 
 #include "wallet/init.h"
 
+#include "keepass.h"
 #include "net.h"
 #include "rpc/wallet.h"
 #include "util.h"
