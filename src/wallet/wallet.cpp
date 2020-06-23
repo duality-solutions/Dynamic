@@ -1255,7 +1255,7 @@ bool CWallet::MarkReplaced(const uint256& originalHash, const uint256& newHash)
 
     wtx.mapValue["replaced_by_txid"] = newHash.ToString();
 
-    CWalletDB walletdb(*dbw, "r+");
+    CWalletDB walletdb(strWalletFile, "r+");
 
     bool success = true;
     if (!walletdb.WriteTx(wtx)) {
@@ -1684,7 +1684,8 @@ void CWallet::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex,
 
 void CWallet::TransactionAddedToMempool(const CTransactionRef& ptx) {
     LOCK2(cs_main, cs_wallet);
-    SyncTransaction(ptx);
+    const CTransaction& tx = *ptx;
+    SyncTransaction(tx);
 }
 
 void CWallet::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex *pindex, const std::vector<CTransactionRef>& vtxConflicted) {
@@ -1698,10 +1699,12 @@ void CWallet::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const 
     // the notification that the conflicted transaction was evicted.
 
     for (const CTransactionRef& ptx : vtxConflicted) {
-        SyncTransaction(ptx);
+        const CTransaction& tx = *ptx;
+        SyncTransaction(tx);
     }
     for (size_t i = 0; i < pblock->vtx.size(); i++) {
-        SyncTransaction(pblock->vtx[i], pindex, i);
+        const CTransaction& tx = *pblock->vtx[i];
+        SyncTransaction(tx, pindex, i);
     }
 }
 
@@ -1709,7 +1712,8 @@ void CWallet::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock) {
     LOCK2(cs_main, cs_wallet);
 
     for (const CTransactionRef& ptx : pblock->vtx) {
-        SyncTransaction(ptx);
+        const CTransaction& tx = *ptx;
+        SyncTransaction(tx);
     }
 }
 
