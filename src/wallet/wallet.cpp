@@ -4600,8 +4600,8 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
         // create dummy data output only and pay everything as a fee
         txCollateral.vout.push_back(CTxOut(0, CScript() << OP_RETURN));
     }
-
-    if (!SignSignature(*this, txpsinCollateral.prevPubKey, txCollateral, 0)) {
+    unsigned int nIn = 0; //TODO: Assets properly set nIn
+    if (!SignSignature(*this, txpsinCollateral.prevPubKey, txCollateral, nIn, nValue, 0)) {
         strReason = "Unable to sign collateral transaction!";
         return false;
     }
@@ -7893,7 +7893,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBi
         return false;
 
     // Sign Proof-of-Stake
-    int nIn = 0;
+    unsigned int nIn = 0;
     for (CTxIn txIn : txNew.vin) {
         const CWalletTx *wtx = GetWalletTx(txIn.prevout.hash);
         if (!SignSignature(*this, *wtx, txNew, nIn++))
