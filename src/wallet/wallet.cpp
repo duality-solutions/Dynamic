@@ -2214,33 +2214,37 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
 
         COutputEntry output = {address, txout.nValue, (int)i};
 
-        // If we are debited by the transaction, add the output as a "sent" entry
-        if (fFromMe)
-            listSent.push_back(output);
+        /** ASSET START */
+        // In either case, we need to get the destination address
+        if (!txout.scriptPubKey.IsAssetScript()) {
+            COutputEntry output = {address, txout.nValue, (int) i};
 
-        // If we are receiving the output, add it as a "received" entry
-        if (fIsMine & filter) {
-            nCredit += txout.nValue;
-            listReceived.push_back(output);
+            // If we are debited by the transaction, add the output as a "sent" entry
+            if (fFromMe)
+                listSent.push_back(output);
+
+            // If we are receiving the output, add it as a "received" entry
+            if (fIsMine & filter) {
+                nCredit += txout.nValue;
+                listReceived.push_back(output);
+            }
         }
-    }
+        if (AreAssetsDeployed()) {
+            if (txout.scriptPubKey.IsAssetScript()) {
+                CAssetOutputEntry assetoutput;
+                assetoutput.vout = i;
+                GetAssetData(txout.scriptPubKey, assetoutput);
 
-    /** ASSET START */
-    if (AreAssetsDeployed()) {
-        if (txout.scriptPubKey.IsAssetScript()) {
-            CAssetOutputEntry assetoutput;
-            assetoutput.vout = i;
-            GetAssetData(txout.scriptPubKey, assetoutput);
+                // The only asset type we send is transfer_asset. We need to skip all other types for the sent category
+                if (nDebit > 0 && assetoutput.type == TX_TRANSFER_ASSET)
+                    assetsSent.emplace_back(assetoutput);
 
-            // The only asset type we send is transfer_asset. We need to skip all other types for the sent category
-            if (nDebit > 0 && assetoutput.type == TX_TRANSFER_ASSET)
-                assetsSent.emplace_back(assetoutput);
-
-            if (fIsMine & filter)
-                assetsReceived.emplace_back(assetoutput);
+                if (fIsMine & filter)
+                    assetsReceived.emplace_back(assetoutput);
+            }
         }
+        /** ASSET END */
     }
-    /** ASSET END */
 
     if (!fFromMe && nDebit > 0) {
         if (nCredit == nDebit) {
@@ -2392,7 +2396,7 @@ bool CWalletTx::RelayWalletTransaction(CConnman* connman, const std::string& str
 
             if ((strCommand == NetMsgType::TXLOCKREQUEST) ||
                 ((CTxLockRequest(*this).IsSimple()) && CInstantSend::CanAutoLock())) {
-                if (instantsend.ProcessTxLockRequest((CTxLockRequest) * this, *connman)) {
+                if (instantsend.ProcessTxLockRequest((CTxLockRequest) * this, connman)) {
                     instantsend.AcceptLockRequest((CTxLockRequest) * this);
                 } else {
                     instantsend.RejectLockRequest((CTxLockRequest) * this);
@@ -3983,7 +3987,7 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
                 nValueRet += vValue[i].second;
             }
 
-        if (LogAcceptCategory(BCLog::SELECTCOINS)) {
+        if (LogAcceptCategory("SelectCoins")) {
             LogPrint("SelectCoins", "SelectAssets() best subset: ");
             for (unsigned int i = 0; i < vValue.size(); i++) {
                 if (vfBest[i]) {
@@ -4951,7 +4955,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
 
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
-
+                // TODO: remove for assets?
                 if (nBytes > MAX_STANDARD_TX_SIZE) {
                     // Do not create oversized transactions (bad-txns-oversize).
                     strFailReason = _("Transaction too large");
@@ -8090,6 +8094,7 @@ void CWallet::AutoCombineDust()
 
             // Around 180 bytes per input. We use 190 to be certain
             txSizeEstimate += 190;
+            // TODO: remove for assets?
             if (txSizeEstimate >= MAX_STANDARD_TX_SIZE - 200) {
                 maxSize = true;
                 break;
@@ -8136,7 +8141,7 @@ void CWallet::AutoCombineDust()
             continue;
 
         CValidationState state;
-        if (!CommitTransaction(wtx, keyChange, g_connman->get(), state)) {
+        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
             LogPrintf("AutoCombineDust transaction commit failed\n");
             continue;
         }
@@ -8237,7 +8242,7 @@ bool CWallet::MultiSend()
             return false;
         }
         CValidationState state;
-        if (!CommitTransaction(wtx, keyChange, g_connman->get(), state)) {
+        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
             LogPrintf("MultiSend transaction commit failed\n");
             return false;
         } else

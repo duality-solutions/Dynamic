@@ -51,6 +51,9 @@ public:
     std::string strAssetSelected;
     /** ASSET END */
 
+    //! Override the default confirmation target, 0 = use default
+    int nConfirmTarget;
+
     CCoinControl()
     {
         SetNull();
@@ -75,6 +78,7 @@ public:
         strAssetSelected = "";
         setAssetsSelected.clear();
 /* ASSET END */
+        nConfirmTarget = 0;
     }
 
     bool HasSelected() const
@@ -111,6 +115,17 @@ public:
         if (!setSelected.size())
             strAssetSelected = "";
     }
+
+    bool HasAssetSelected() const
+    {
+        return (setAssetsSelected.size() > 0);
+    }
+
+    bool IsAssetSelected(const COutPoint& output) const
+    {
+        return (setAssetsSelected.count(output) > 0);
+    }
+
 /* ASSET END */
 
     void UnSelectAll()
