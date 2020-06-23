@@ -618,13 +618,14 @@ public:
      */
     bool fSafe;
 
-    COutput(const CWalletTx* txIn, int iIn, int nDepthIn, bool fSpendableIn, bool fSolvableIn)
+    COutput(const CWalletTx* txIn, int iIn, int nDepthIn, bool fSpendableIn, bool fSolvableIn, bool fSafeIn)
     {
         tx = txIn;
         i = iIn;
         nDepth = nDepthIn;
         fSpendable = fSpendableIn;
         fSolvable = fSolvableIn;
+        fSafe = fSafeIn;
     }
 
     //Used with PrivateSend. Will return largest nondenom, then denominations, then very small inputs
@@ -1141,9 +1142,20 @@ public:
 
 /** ASSET START */
     /**
+     * Return list of available coins and locked coins grouped by non-change output address.
+     */
+    std::map<CTxDestination, std::vector<COutput>> ListCoins() const;
+
+    /**
      * Return list of available assets and locked assets grouped by non-change output address.
      */
     std::map<CTxDestination, std::vector<COutput>> ListAssets() const;
+
+
+    /**
+     * Find non-change parent output.
+     */
+    const CTxOut& FindNonChangeParentOutput(const CTransaction& tx, int output) const;
 /** ASSET END */
 
     /**
@@ -1186,7 +1198,7 @@ public:
     void LockCoin(const COutPoint& output);
     void UnlockCoin(const COutPoint& output);
     void UnlockAllCoins();
-    void ListLockedCoins(std::vector<COutPoint>& vOutpts);
+    void ListLockedCoins(std::vector<COutPoint>& vOutpts) const;
 
     /**
      * keystore implementation
@@ -1481,6 +1493,13 @@ public:
      */
     boost::signals2::signal<void(CWallet* wallet, const uint256& hashTx, ChangeType status)> NotifyTransactionChanged;
 
+    /**
+     * Wallets Restricted Asset Address data added or updated.
+     * @note called with lock cs_wallet held.
+     */
+    boost::signals2::signal<void (CWallet *wallet, std::string& address, std::string& asset_name,
+                                  int type, uint32_t date)> NotifyMyRestrictedAssetsChanged;
+    
     /** Show progress e.g. for rescan */
     boost::signals2::signal<void(const std::string& title, int nProgress)> ShowProgress;
 
