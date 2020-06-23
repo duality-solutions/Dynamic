@@ -3079,7 +3079,8 @@ void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScri
                     CDynamicAddress address = GetScriptAddress(pcoin->tx->vout[i].scriptPubKey);
                     //LogPrintf("GetBDAPCoins address =  %s\n", address.ToString());
                     if (prevAddress == address) {
-                        vCoins.push_back(COutput(pcoin, i, nDepth, true, true, (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO)); // todo: unsure if 5th arg should be true
+                        bool safeTx = pcoin->IsTrusted();
+                        vCoins.push_back(COutput(pcoin, i, nDepth, true, (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO, safeTx));
                     }
                 }
             }
@@ -3181,6 +3182,7 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if (!fUseBDAP && fIsBDAP)
                     continue;
 
+                
                 isminetype mine = IsMine(pcoin->tx->vout[i]);
                 if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO &&
                     (!IsLockedCoin((*it).first, i) || nCoinType == ONLY_1000) &&
@@ -3189,7 +3191,7 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                     vCoins.push_back(COutput(pcoin, i, nDepth,
                         ((mine & ISMINE_SPENDABLE) != ISMINE_NO) ||
                             (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO),
-                        (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO));
+                        (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO, pcoin->IsTrusted()));
             }
         }
     }
@@ -4178,8 +4180,8 @@ bool CWallet::SignTransaction(CMutableTransaction &tx)
         if(mi == mapWallet.end() || input.prevout.n >= mi->second.tx->vout.size()) {
             return false;
         }
-        const CScript& scriptPubKey = mi->second.tx->vout[input.prevout.n].scriptPubKey;
-        const CAmount& amount = mi->second.tx->vout[input.prevout.n].nValue;
+        const CScript scriptPubKey = mi->second.tx->vout[input.prevout.n].scriptPubKey;
+        const CAmount amount = mi->second.tx->vout[input.prevout.n].nValue;
         SignatureData sigdata;
         if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, amount, SIGHASH_ALL), scriptPubKey, sigdata)) {
             return false;
@@ -4536,7 +4538,7 @@ int CWallet::CountInputsWithAmount(CAmount nInputAmount)
                 int nDepth = pcoin->GetDepthInMainChain();
 
                 for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-                    COutput out = COutput(pcoin, i, nDepth, true, true);
+                    COutput out = COutput(pcoin, i, nDepth, true, true, pcoin->IsTrusted());
                     COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
 
                     if (out.tx->tx->vout[out.i].nValue != nInputAmount)
@@ -5053,9 +5055,10 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 // Fill in dummy signatures for fee calculation.
                 int nIn = 0;
                 for (const auto& txpsin : vecTxPSInTmp) {
-                    const CScript& scriptPubKey = txpsin.prevPubKey;
-                    CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
-                    if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, scriptSigRes)) {
+                    const CScript scriptPubKey = txpsin.prevPubKey;
+                    const CScript scriptSigRes = txNew.vin[nIn].scriptSig;
+                    SignatureData sigdata(scriptSigRes);
+                    if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata)) {
                         strFailReason = _("Signing transaction failed");
                         return false;
                     }
@@ -5169,10 +5172,10 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
             CTransaction txNewConst(txNew);
             int nIn = 0;
             for (const auto& txpsin : vecTxPSInTmp) {
-                const CScript& scriptPubKey = txpsin.prevPubKey;
-                CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
-
-                if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, scriptSigRes)) {
+                const CScript scriptPubKey = txpsin.prevPubKey;
+                const CScript scriptSigRes = txNew.vin[nIn].scriptSig;
+                SignatureData sigdata(scriptSigRes);
+                if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, sigdata)) {
                     strFailReason = _("Signing transaction failed");
                     return false;
                 }
@@ -5758,9 +5761,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             int nIn = 0;
             for (const auto& coin : setCoins)
             {
-                const CScript& scriptPubKey = coin.txout.scriptPubKey;
+                const CScript scriptPubKey = coin.txout.scriptPubKey;
                 SignatureData sigdata;
-
                 if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, coin.txout.nValue, SIGHASH_ALL), scriptPubKey, sigdata))
                 {
                     strFailReason = _("Signing transaction failed");
@@ -5774,7 +5776,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             /** ASSET START */
             if (AreAssetsDeployed()) {
                 for (const auto &asset : setAssets) {
-                    const CScript &scriptPubKey = asset.txout.scriptPubKey;
+                    const CScript scriptPubKey = asset.txout.scriptPubKey;
                     SignatureData sigdata;
 
                     if (!ProduceSignature(
