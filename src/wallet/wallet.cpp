@@ -5111,7 +5111,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     //                        break;
                 }
                 // Standard fee not needed for BDAP
-                CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, currentConfirmationTarget, mempool)) : 0;
+                CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, *coinControl, mempool, ::feeEstimator, nullptr)) : 0;
                 if (coinControl && nFeeNeeded > 0 && coinControl->nMinimumTotalFee > nFeeNeeded) {
                     nFeeNeeded = coinControl->nMinimumTotalFee;
                 }
