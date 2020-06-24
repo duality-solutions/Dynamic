@@ -127,6 +127,22 @@ bool CAuditDB::EraseAuditTxId(const std::vector<unsigned char>& vchTxId)
         for(const std::vector<unsigned char>& vchAudit : audit.GetAudits())
             CDBWrapper::Erase(make_pair(std::string("audit"), vchAudit));
     }
+    if (audit.vchOwnerFullObjectPath.size() > 0) {
+        std::vector<std::vector<unsigned char>> vvTxId;
+        CDBWrapper::Read(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+        if (vvTxId.size() == 1 && vvTxId[0] == vchTxId) {
+            CDBWrapper::Erase(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath));
+        }
+        else {
+            std::vector<std::vector<unsigned char>> vvTxIdNew;
+            for (const std::vector<unsigned char>& txid : vvTxId) {
+                if (txid != vchTxId) {
+                    vvTxIdNew.push_back(txid);
+                }
+            }
+            Write(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxIdNew);
+        }
+    }
     return CDBWrapper::Erase(make_pair(std::string("txid"), vchTxId));
 }
 
@@ -335,6 +351,7 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
     int op = OP_BDAP_NEW;
     if (!pAuditDB->AddAudit(audit, op)) {
         errorMessage = "CheckNewAuditTxInputs failed! Error adding new audit record to LevelDB.";
+        pAuditDB->EraseAuditTxId(vchFromString(audit.txHash.ToString()));
         return error(errorMessage.c_str());
     }
 
