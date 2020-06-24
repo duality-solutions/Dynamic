@@ -197,6 +197,7 @@ bool CAudit::UnserializeFromTx(const CTransactionRef& tx)
     if(!UnserializeFromData(vchData, vchHash)) {
         return false;
     }
+    txHash = tx->GetHash();
     return true;
 }
 
