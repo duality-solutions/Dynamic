@@ -64,20 +64,34 @@ bool UndoAddAudit(const CAudit& audit)
 bool CAuditDB::AddAudit(const CAudit& audit, const int op) 
 { 
     bool writeState = false;
+    bool writeStateDN = false;
     bool auditHashWriteState = true;
     {
         LOCK(cs_bdap_audit);
         CAuditData auditData = audit.GetAuditData();
         for(const std::vector<unsigned char>& vchAuditHash : auditData.vAuditData) {
+            std::vector<std::vector<unsigned char>> vvTxHash;
+            CDBWrapper::Read(make_pair(std::string("audit"), vchAuditHash), vvTxHash);
+            vvTxHash.push_back(vchFromString(audit.txHash.ToString()));
             // each hash points to a txid. The txid record stores the audit record.
-            if (!Write(make_pair(std::string("audit"), vchAuditHash), vchFromString(audit.txHash.ToString()))) {
+            if (!Write(make_pair(std::string("audit"), vchAuditHash), vvTxHash)) {
                 auditHashWriteState = false;
             }
+        }
+        if (audit.vchOwnerFullObjectPath.size() > 0) {
+            std::vector<std::vector<unsigned char>> vvTxId;
+            CDBWrapper::Read(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+            vvTxId.push_back(vchFromString(audit.txHash.ToString()));
+
+            writeStateDN = Write(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+        }
+        else {
+            writeStateDN = true;
         }
         writeState = Write(make_pair(std::string("txid"), vchFromString(audit.txHash.ToString())), audit);
     }
 
-    return writeState && auditHashWriteState;
+    return writeState && auditHashWriteState && writeStateDN;
 }
 
 bool CAuditDB::ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit) 
