@@ -574,19 +574,23 @@ public:
 /* ASSET START */
 class CInputCoin {
 public:
-    CInputCoin(const CWalletTx* walletTx, unsigned int i)
+    CInputCoin() {}
+    CInputCoin(const CWalletTx* wtx, unsigned int nOutIndex)
     {
         if (!walletTx)
             throw std::invalid_argument("walletTx should not be null");
-        if (i >= walletTx->tx->vout.size())
+        if (nOutIndex >= walletTx->tx->vout.size())
             throw std::out_of_range("The output index is out of range");
-
-        outpoint = COutPoint(walletTx->GetHash(), i);
-        txout = walletTx->tx->vout[i];
+        walletTx = wtx;
+        outpoint = COutPoint(walletTx->GetHash(), nOutIndex);
+        txout = walletTx->tx->vout[nOutIndex];
+        nOut = nOutIndex;
     }
 
+    const CWalletTx* walletTx;
     COutPoint outpoint;
     CTxOut txout;
+    unsigned int nOut;
 
     bool operator<(const CInputCoin& rhs) const {
         return outpoint < rhs.outpoint;
@@ -818,8 +822,7 @@ private:
      * all coins from coinControl are selected; Never select unconfirmed coins
      * if they are not ours
      */
-    bool SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl *coinControl = NULL, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = true) const;
-
+    bool SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CCoinControl *coinControl = NULL, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = true) const;
 /** ASSET START */
     bool SelectAssets(const std::map<std::string, std::vector<COutput> >& mapAvailableAssets, const std::map<std::string, CAmount>& mapAssetTargetValue, std::set<CInputCoin>& setCoinsRet, std::map<std::string, CAmount>& nValueRet) const;
 /** ASSET END */
@@ -1164,7 +1167,7 @@ public:
      * completion the coin set and corresponding actual target value is
      * assembled
      */
-    bool SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, uint64_t nMaxAncestors, std::vector<COutput> vCoins, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = false) const;
+    bool SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, uint64_t nMaxAncestors, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend = false) const;
 
 /** ASSET START */
     bool SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMine, const int nConfTheirs, const uint64_t nMaxAncestors, const std::string& strAssetName, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
@@ -1347,7 +1350,7 @@ public:
                               int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const std::vector<CNewAsset> assets, const CTxDestination destination, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign);
 
     bool CreateNewChangeAddress(CReserveKey& reservekey, CKeyID& keyID, std::string& strFailReason);
-    
+
     /* ASSET END */
 
 

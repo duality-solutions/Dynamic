@@ -92,9 +92,9 @@ const uint256 CMerkleTx::ABANDON_HASH(uint256S("00000000000000000000000000000000
  * @{
  */
 
-struct CompareValueOnly {
-    bool operator()(const std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> >& t1,
-        const std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> >& t2) const
+struct CompareValueOnly
+{
+    bool operator()(const std::pair<CAmount, CInputCoin>& t1, const std::pair<CAmount, CInputCoin>& t2) const
     {
         return t1.first < t2.first;
     }
@@ -3622,7 +3622,7 @@ static void ApproximateBestAssetSubset(const std::vector<std::pair<CInputCoin, C
     }
 }
 /** ASSET END */
-static void ApproximateBestSubset(std::vector<std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> > > vValue, const CAmount& nTotalLower, const CAmount& nTargetValue, std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
+static void ApproximateBestSubset(std::vector<std::pair<CAmount, CInputCoin> > vValue, const CAmount& nTotalLower, const CAmount& nTargetValue, std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
 {
     std::vector<char> vfIncluded;
 
@@ -3691,18 +3691,18 @@ bool less_then_denom(const COutput& out1, const COutput& out2)
 }
 
 bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMine, const int nConfTheirs, const uint64_t nMaxAncestors, std::vector<COutput> vCoins,
-                                 std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, AvailableCoinsType nCoinType, bool fUseInstantSend) const
+                                 std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
     setCoinsRet.clear();
     nValueRet = 0;
 
     // List of values less than target
-    std::pair<CAmount, std::pair<const CWalletTx*,unsigned int> > coinLowestLarger;
+    std::pair<CAmount, CInputCoin> coinLowestLarger;
     coinLowestLarger.first = fUseInstantSend
                                         ? sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN
                                         : std::numeric_limits<CAmount>::max();
-    coinLowestLarger.second.first = NULL;
-    std::vector<std::pair<CAmount, std::pair<const CWalletTx*,unsigned int> > > vValue;
+    coinLowestLarger.second.walletTx = nullptr;
+    std::vector<std::pair<CAmount, CInputCoin> > vValue;
     CAmount nTotalLower = 0;
 
     random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
@@ -3762,7 +3762,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
                 if (nRounds < privateSendClient.nPrivateSendRounds) continue;
             }
 
-            std::pair<CAmount, std::pair<const CWalletTx*,unsigned int> > coin = std::make_pair(n, std::make_pair(pcoin, i));
+            std::pair<CAmount, CInputCoin> coin = std::make_pair(n, CInputCoin(pcoin, i));
 
             if (n == nTargetValue)
             {
@@ -3793,7 +3793,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 
         if (nTotalLower < nTargetValue)
         {
-            if (coinLowestLarger.second.first == NULL) // there is no input larger than nTargetValue
+            if (coinLowestLarger.second.walletTx == nullptr) // there is no input larger than nTargetValue
             {
                 if (tryDenom == 0)
                     // we didn't look at denom yet, let's do it
@@ -3826,7 +3826,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 
     // If we have a bigger coin and (either the stochastic approximation didn't find a good solution,
     //                                   or the next bigger coin is closer), return the bigger coin
-    if (coinLowestLarger.second.first &&
+    if (coinLowestLarger.second.walletTx &&
         ((nBest != nTargetValue && nBest < nTargetValue + nMinChange) || coinLowestLarger.first <= nBest))
     {
         setCoinsRet.insert(coinLowestLarger.second);
@@ -3851,7 +3851,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     return nCoinType == ONLY_DENOMINATED ? (nValueRet - nTargetValue <= maxTxFee) : true;
 }
 
-bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl, AvailableCoinsType nCoinType, bool fUseInstantSend) const
+bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
     // Note: this function should never be used for "always free" tx types like pstx
 
@@ -3860,7 +3860,7 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
     // coin control -> return all selected outputs (we want all selected to go into the transaction for sure)
     if (coinControl && coinControl->HasSelected() && !coinControl->fAllowOtherInputs)
     {
-        BOOST_FOREACH(const COutput& out, vCoins)
+        for(const COutput& out : vCoins)
         {
             if(!out.fSpendable)
                 continue;
@@ -3872,20 +3872,20 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
                 if(nRounds < privateSendClient.nPrivateSendRounds) continue;
             }
             nValueRet += out.tx->tx->vout[out.i].nValue;
-            setCoinsRet.insert(std::make_pair(out.tx, out.i));
+            setCoinsRet.insert(CInputCoin(out.tx, out.i));
         }
 
         return (nValueRet >= nTargetValue);
     }
 
     // calculate value from preset inputs and store them
-    std::set<std::pair<const CWalletTx*, uint32_t> > setPresetCoins;
+    std::set<CInputCoin> setPresetCoins;
     CAmount nValueFromPresetInputs = 0;
 
     std::vector<COutPoint> vPresetInputs;
     if (coinControl)
         coinControl->ListSelected(vPresetInputs);
-    BOOST_FOREACH(const COutPoint& outpoint, vPresetInputs)
+    for(const COutPoint& outpoint : vPresetInputs)
     {
         std::map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash);
         if (it != mapWallet.end())
@@ -3901,7 +3901,7 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
                 if (nRounds < privateSendClient.nPrivateSendRounds) continue;
             }
             nValueFromPresetInputs += pcoin->tx->vout[outpoint.n].nValue;
-            setPresetCoins.insert(std::make_pair(pcoin, outpoint.n));
+            setPresetCoins.insert(CInputCoin(pcoin, outpoint.n));
         } else
             return false; // TODO: Allow non-wallet inputs
     }
@@ -3909,7 +3909,7 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
     // remove preset inputs from vCoins
     for (std::vector<COutput>::iterator it = vCoins.begin(); it != vCoins.end() && coinControl && coinControl->HasSelected();)
     {
-        if (setPresetCoins.count(std::make_pair(it->tx, it->i)))
+        if (setPresetCoins.count(CInputCoin(it->tx, it->i)))
             it = vCoins.erase(it);
         else
             ++it;
@@ -4726,7 +4726,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
     
     {
-        std::set<std::pair<const CWalletTx*, unsigned int> > setCoins;
+        std::set<CInputCoin> setCoins;
         std::vector<CTxPSIn> vecTxPSInTmp;
         LOCK2(cs_main, cs_wallet);
         {
@@ -4916,21 +4916,21 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 bool fUsingBDAPCredits = false;
                 CScript scriptBdapChange;
                 for (const auto& pcoin : setCoins) {
-                    CAmount nCredit = pcoin.first->tx->vout[pcoin.second].nValue;
+                    CAmount nCredit = pcoin.txout.nValue;
                     //The coin age after the next block (depth+1) is used instead of the current,
                     //reflecting an assumption the user would accept a bit more delay for
                     //a chance at a free transaction.
                     //But mempool inputs might still be in the mempool, so their age stays 0
-                    int age = pcoin.first->GetDepthInMainChain();
+                    int age = pcoin.walletTx->GetDepthInMainChain();
                     assert(age >= 0);
                     if (age != 0)
                         age += 1;
                     dPriority += (double)nCredit * age;
                     int opCode1 = -1; int opCode2 = -1;
-                    pcoin.first->tx->vout[pcoin.second].GetBDAPOpCodes(opCode1, opCode2);
+                    pcoin.txout.GetBDAPOpCodes(opCode1, opCode2);
                     std::string strOpType = GetBDAPOpTypeString(opCode1, opCode2);
                     if (strOpType == "bdap_move_asset") {
-                        GetBDAPCreditScript(pcoin.first->tx, scriptBdapChange);
+                        GetBDAPCreditScript(pcoin.walletTx->tx, scriptBdapChange);
                         CDynamicAddress address = GetScriptAddress(scriptBdapChange);
                         LogPrintf("%s -- address %s, scriptBdapChange %s\n", __func__, address.ToString(), ScriptToAsmStr(scriptBdapChange));
                         fUsingBDAPCredits = true;
@@ -5030,9 +5030,9 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 // nLockTime set above actually works.
                 vecTxPSInTmp.clear();
                 for (const auto& coin : setCoins) {
-                    CTxIn txin = CTxIn(coin.first->GetHash(), coin.second, CScript(),
+                    CTxIn txin = CTxIn(coin.walletTx->GetHash(), coin.nOut, CScript(),
                         std::numeric_limits<unsigned int>::max() - 1);
-                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.first->tx->vout[coin.second].scriptPubKey));
+                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.txout.scriptPubKey));
                     txNew.vin.push_back(txin);
                 }
 
@@ -5808,7 +5808,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     if (gArgs.GetBoolArg("-walletrejectlongchains", DEFAULT_WALLET_REJECT_LONG_CHAINS)) {
         // Lastly, ensure this tx will pass the mempool's chain limits
         LockPoints lp;
-        CTxMemPoolEntry entry(wtxNew.tx, 0, 0, 0, false, 0, lp);
+        CTxMemPoolEntry entry(wtxNew.tx, 0, 0, 0, 0, 0, false, 0, lp);
         CTxMemPool::setEntries setAncestors;
         size_t nLimitAncestors = gArgs.GetArg("-limitancestorcount", DEFAULT_ANCESTOR_LIMIT);
         size_t nLimitAncestorSize = gArgs.GetArg("-limitancestorsize", DEFAULT_ANCESTOR_SIZE_LIMIT)*1000;
@@ -7772,6 +7772,8 @@ bool CWallet::SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInp
     }
     return true;
 }
+
+extern bool ShutdownRequested();
 
 // ppcoin: create coin stake transaction
 bool CWallet::CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime)
