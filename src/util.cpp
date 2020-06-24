@@ -121,6 +121,8 @@ int nWalletBackups = 10;
 const char* const DYNAMIC_CONF_FILENAME = "dynamic.conf";
 const char* const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
+ArgsManager gArgs;
+
 CCriticalSection cs_args;
 std::map<std::string, std::string> mapArgs;
 static std::map<std::string, std::vector<std::string> > _mapMultiArgs;
