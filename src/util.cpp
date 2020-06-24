@@ -683,8 +683,6 @@ boost::filesystem::path GetDynodeConfigFile()
     return pathConfigFile;
 }
 
-extern void WriteConfigFile(FILE* configFile);
-
 void ArgsManager::ReadConfigFile(const std::string& confPath)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile(confPath));
@@ -717,7 +715,7 @@ void ArgsManager::ReadConfigFile(const std::string& confPath)
     ClearDatadirCache();
 }
 
-void WriteConfigFile(FILE* configFile)
+void ArgsManager::WriteConfigFile(FILE* configFile)
 {
     fputs("#Do not use special characters with username/password\n", configFile);
     std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
