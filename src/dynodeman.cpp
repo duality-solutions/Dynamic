@@ -897,7 +897,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDa
         if (nDos > 0) {
             // if anything significant failed, mark that node
             Misbehaving(pfrom->GetId(), nDos);
-        } else if (pdn != NULL) {
+        } else if (pdn != nullptr) {
             // nothing significant failed, dn is a known one too
             return;
         }

@@ -282,7 +282,7 @@ UniValue gettxoutproof(const JSONRPCRequest& request)
 
     LOCK(cs_main);
 
-    CBlockIndex* pblockindex = NULL;
+    CBlockIndex* pblockindex = nullptr;
 
     uint256 hashBlock;
     if (request.params.size() > 1) {
@@ -297,7 +297,7 @@ UniValue gettxoutproof(const JSONRPCRequest& request)
         }
     }
 
-    if (pblockindex == NULL) {
+    if (pblockindex == nullptr) {
         CTransactionRef tx;
         if (!GetTransaction(oneTxid, tx, Params().GetConsensus(), hashBlock, false) || hashBlock.IsNull())
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Transaction not yet in block");
@@ -1535,7 +1535,7 @@ UniValue signrawtransaction(const JSONRPCRequest& request)
             HelpExampleCli("signrawtransaction", "\"myhex\"") + HelpExampleRpc("signrawtransaction", "\"myhex\""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
     LOCK(cs_main);
 #endif
@@ -1785,7 +1785,7 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
         }
         CValidationState state;
         bool fMissingInputs;
-        if (!AcceptToMemoryPool(mempool, state, std::move(tx), !fBypassLimits, &fMissingInputs, NULL, false, nMaxRawTxFee)) {
+        if (!AcceptToMemoryPool(mempool, state, std::move(tx), !fBypassLimits, &fMissingInputs, nullptr, false, nMaxRawTxFee)) {
             if (state.IsInvalid()) {
                 throw JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
             } else {

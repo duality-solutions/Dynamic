@@ -212,7 +212,7 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
         //moved to get count AFTER space
         std::string teststring = "";
         teststring = ssCurrentWord.c_str();
-        int characterSize = mbstowcs(NULL,teststring.c_str(), teststring.size());
+        int characterSize = mbstowcs(nullptr,teststring.c_str(), teststring.size());
         if (characterSize >= 25) { //was 9
             return false;
         }

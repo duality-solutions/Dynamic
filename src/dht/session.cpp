@@ -452,7 +452,7 @@ void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainpa
     fMultiThreads = multithreads;
     fRun = true;
     fStarted = false;
-    if (pDHTTorrentThread != NULL)
+    if (pDHTTorrentThread != nullptr)
          StopTorrentDHTNetwork();
 
     pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&StartDHTNetwork, std::cref(chainparams), std::ref(connman)));
@@ -511,7 +511,7 @@ void StopTorrentDHTNetwork()
         pReannounceThread->interrupt();
         pReannounceThread->join();
     }
-    pDHTTorrentThread = NULL;
+    pDHTTorrentThread = nullptr;
     LogPrintf("%s --Finished stopping all DHT session threads.\n", __func__);
 }
 

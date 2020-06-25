@@ -79,7 +79,7 @@ UniValue getinfo(const JSONRPCRequest& request)
             HelpExampleCli("getinfo", "") + HelpExampleRpc("getinfo", ""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
     LOCK(cs_main);
 #endif
@@ -335,7 +335,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
             HelpExampleCli("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"") + HelpExampleRpc("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
     LOCK(cs_main);
 #endif
@@ -1129,7 +1129,7 @@ UniValue getstakingstatus(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_PROOF_OF_STAKE_INACTIVE, strprintf("Proof of Stake is not yet activated."));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
     LOCK(cs_main);
 #endif

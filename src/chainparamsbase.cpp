@@ -128,5 +128,5 @@ std::string ChainNameFromCommandLine()
 
 bool AreBaseParamsConfigured()
 {
-    return pCurrentBaseParams != NULL;
+    return pCurrentBaseParams != nullptr;
 }

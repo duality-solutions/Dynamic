@@ -24,7 +24,7 @@ MinerBase::MinerBase(MinerContextRef ctx, std::size_t device_index)
     GetMainSignals().ScriptForMining(_coinbase_script);
     // Throw an error if no script was provided.  This can happen
     // due to some internal error but also if the keypool is empty.
-    // In the latter case, already the pointer is NULL.
+    // In the latter case, already the pointer is nullptr.
     if (!_coinbase_script || _coinbase_script->reserveScript.empty()) {
         throw std::runtime_error("No coinbase script available (mining requires a wallet)");
     }

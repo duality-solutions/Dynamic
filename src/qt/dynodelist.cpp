@@ -120,7 +120,7 @@ void DynodeList::StartAlias(std::string strAlias)
             bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
             int nDoS;
-            if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+            if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, *g_connman)) {
                 strError = "Failed to verify DNB";
                 fSuccess = false;
             }
@@ -166,7 +166,7 @@ void DynodeList::StartAll(std::string strCommand)
         bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
         int nDoS;
-        if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+        if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, *g_connman)) {
             strError = "Failed to verify DNB";
             fSuccess = false;
         }

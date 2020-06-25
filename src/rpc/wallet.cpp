@@ -466,7 +466,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
         vecSend.push_back(sendData);
     }
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
+            strError, nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -517,7 +517,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -569,7 +569,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     vecSend.push_back(recOPScript);
     // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -654,7 +654,7 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
     vecSend.push_back(recipient);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, NULL, true, ALL_COINS, false)) {
+            strError, nullptr, true, ALL_COINS, false)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -676,7 +676,7 @@ static bool GetCoinControl(const CScript& sendAddressScript, CCoinControl* ccCoi
     unsigned int nCount = 0;
     ccCoins->SetNull();
     std::vector<COutput> vecOutputs;
-    pwalletMain->AvailableCoins(vecOutputs, true, NULL, false, ALL_COINS, false);
+    pwalletMain->AvailableCoins(vecOutputs, true, nullptr, false, ALL_COINS, false);
     for (const COutput& out : vecOutputs) {
         CTxDestination outputAddress;
         const CScript& scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
@@ -1478,7 +1478,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     }
 
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-        NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
+        nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
@@ -2167,7 +2167,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    const CBlockIndex* pindex = NULL;
+    const CBlockIndex* pindex = nullptr;
     int target_confirms = 1;
     isminefilter filter = ISMINE_SPENDABLE;
 
@@ -3434,9 +3434,9 @@ UniValue listunspent(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VARR);
     std::vector<COutput> vecOutputs;
-    assert(pwalletMain != NULL);
+    assert(pwalletMain != nullptr);
     LOCK2(cs_main, pwalletMain->cs_wallet);
-    pwalletMain->AvailableCoins(vecOutputs, !include_unsafe, NULL, true);
+    pwalletMain->AvailableCoins(vecOutputs, !include_unsafe, nullptr, true);
     BOOST_FOREACH (const COutput& out, vecOutputs) {
         if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
             continue;

@@ -115,7 +115,7 @@ bool LogAcceptCategory(const char* category);
 /** Send a string to the log output */
 int LogPrintStr(const std::string& str);
 
-#define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
+#define LogPrintf(...) LogPrint(nullptr, __VA_ARGS__)
 
 template <typename... Args>
 static inline int LogPrint(const char* category, const char* fmt, const Args&... args)
@@ -312,7 +312,7 @@ void TraceThread(const char* name, Callable func)
         PrintExceptionContinue(&e, name);
         throw;
     } catch (...) {
-        PrintExceptionContinue(NULL, name);
+        PrintExceptionContinue(nullptr, name);
         throw;
     }
 }

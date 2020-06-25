@@ -62,7 +62,7 @@ struct LockPoints {
     // values are still valid even after a reorg.
     CBlockIndex* maxInputBlock;
 
-    LockPoints() : height(0), time(0), maxInputBlock(NULL) {}
+    LockPoints() : height(0), time(0), maxInputBlock(nullptr) {}
 };
 
 class CTxMemPool;

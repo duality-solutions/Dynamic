@@ -1012,7 +1012,7 @@ UniValue makecredits(const JSONRPCRequest& request)
     scriptColorCoins += scriptDestination;
 
     CWalletTx wtx;
-    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, NULL, false, false);
+    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, nullptr, false, false);
 
     return wtx.GetHash().GetHex();
 }

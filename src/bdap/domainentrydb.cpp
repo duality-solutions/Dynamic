@@ -19,7 +19,7 @@
 #include <boost/thread.hpp>
 
 
-CDomainEntryDB *pDomainEntryDB = NULL;
+CDomainEntryDB *pDomainEntryDB = nullptr;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
 {
@@ -361,7 +361,7 @@ bool FlushLevelDB()
 {
     {
         LOCK(cs_bdap_entry);
-        if (pDomainEntryDB != NULL)
+        if (pDomainEntryDB != nullptr)
         {
             if (!pDomainEntryDB->Flush()) {
                 LogPrintf("Failed to write to BDAP database!");
@@ -374,7 +374,7 @@ bool FlushLevelDB()
 
 void CleanupLevelDB(int& nRemoved)
 {
-    if(pDomainEntryDB != NULL)
+    if(pDomainEntryDB != nullptr)
         pDomainEntryDB->CleanupLevelDB(nRemoved);
     FlushLevelDB();
 }

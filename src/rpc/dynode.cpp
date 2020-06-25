@@ -236,7 +236,7 @@ UniValue dynode(const JSONRPCRequest& request)
         int nCount;
         int nHeight;
         dynode_info_t dnInfo;
-        CBlockIndex* pindex = NULL;
+        CBlockIndex* pindex = nullptr;
         {
             LOCK(cs_main);
             pindex = chainActive.Tip();
@@ -288,7 +288,7 @@ UniValue dynode(const JSONRPCRequest& request)
                 bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
                 int nDoS;
-                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, g_connman.get())) {
+                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
                     strError = "Failed to verify DNB";
                     fResult = false;
                 }
@@ -344,7 +344,7 @@ UniValue dynode(const JSONRPCRequest& request)
             bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
             int nDoS;
-            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, g_connman.get())) {
+            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
                 strError = "Failed to verify DNB";
                 fResult = false;
             }
@@ -408,7 +408,7 @@ UniValue dynode(const JSONRPCRequest& request)
 
         // Find possible candidates
         std::vector<COutput> vPossibleCoins;
-        pwalletMain->AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
+        pwalletMain->AvailableCoins(vPossibleCoins, true, nullptr, false, ONLY_1000);
 
         UniValue obj(UniValue::VOBJ);
         for (const auto& out : vPossibleCoins) {
@@ -522,7 +522,7 @@ UniValue dynodelist(const JSONRPCRequest& request)
     }
 
     if (strMode == "full" || strMode == "json" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-        CBlockIndex* pindex = NULL;
+        CBlockIndex* pindex = nullptr;
         {
             LOCK(cs_main);
             pindex = chainActive.Tip();
@@ -862,7 +862,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
             int nDos = 0;
             bool fResult;
             if (dnb.CheckSignature(nDos)) {
-                fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, g_connman.get());
+                fResult = dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDos, g_connman.get());
                 dnodeman.NotifyDynodeUpdates(g_connman.get());
             } else
                 fResult = false;

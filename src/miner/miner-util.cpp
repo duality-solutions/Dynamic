@@ -49,7 +49,7 @@ bool ProcessBlockFound(const CBlock& block, const CChainParams& chainparams)
     // Process this block the same as if we had received it from another node
     CValidationState state;
     auto shared_pblock = std::make_shared<const CBlock>(block);
-    if (!ProcessNewBlock(chainparams, shared_pblock, true, NULL)) {
+    if (!ProcessNewBlock(chainparams, shared_pblock, true, nullptr)) {
         return error("ProcessBlockFound -- ProcessNewBlock() failed, block not accepted");
     }
 

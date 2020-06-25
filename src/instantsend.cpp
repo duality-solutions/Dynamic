@@ -101,7 +101,7 @@ bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CCo
 {
     LOCK(cs_main);
 #ifdef ENABLE_WALLET
-    LOCK(pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK(pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #endif
     LOCK2(mempool.cs, cs_instantsend);
 
@@ -207,7 +207,7 @@ void CInstantSend::Vote(const uint256& txHash, CConnman* connman)
 {
     AssertLockHeld(cs_main);
 #ifdef ENABLE_WALLET
-    LOCK(pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK(pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #endif
 
     CTxLockRequest dummyRequest;
@@ -341,7 +341,7 @@ bool CInstantSend::ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, C
 
     LOCK(cs_main);
 #ifdef ENABLE_WALLET
-    LOCK(pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK(pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #endif
     LOCK2(mempool.cs, cs_instantsend);
 
