@@ -51,7 +51,7 @@ static const int ASSETDATA_VERSION = 71300;
 //! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
 static const int ASSETDATA_VERSION_UPDATED = 71300;
 
-//! In this version, 'rip5 (messaging and restricted assets)' was introduced
+//! In this version, 'IsMsgRestAssetIsActive (messaging and restricted assets)' was introduced
 static const int MESSAGING_RESTRICTED_ASSETS_VERSION = 71300;
 
 #endif // DYNAMIC_VERSION_H

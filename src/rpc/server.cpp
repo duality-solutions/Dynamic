@@ -535,7 +535,7 @@ void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
     size_t msglen = message.length();
     if (msglen == 46 || msglen == 64) {
         if (msglen == 64 && !AreMessagesDeployed()) {
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until RIP5 is activated"));
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until IsMsgRestAssetIsActive is activated"));
         }
     } else {
         if (msglen)

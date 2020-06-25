@@ -15,7 +15,7 @@
 #include "random.h"
 #include "tinyformat.h"
 #include "util.h"
-#include "validation.h" //fMessaging
+#include "validation.h"
 #include "wallet/wallet.h"
 
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
