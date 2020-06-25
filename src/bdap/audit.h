@@ -163,7 +163,7 @@ public:
     bool ValidateValues(std::string& strErrorMessage) const;
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
-    bool UnserializeFromTx(const CTransactionRef& tx);
+    bool UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height=0);
     std::string ToString() const;
 };
 

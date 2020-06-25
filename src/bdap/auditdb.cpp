@@ -336,8 +336,7 @@ bool CheckAuditTx(const CTransactionRef& tx, const CScript& scriptOp, const int&
     std::vector<unsigned char> vchHash;
     int nDataOut;
     bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
-    audit.nHeight = nHeight;
-    if(bData && !audit.UnserializeFromTx(tx))
+    if(bData && !audit.UnserializeFromTx(tx, nHeight))
     {
         errorMessage = ("UnserializeFromData data in tx failed!");
         LogPrintf("%s -- %s \n", __func__, errorMessage);

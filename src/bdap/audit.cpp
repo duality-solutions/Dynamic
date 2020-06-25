@@ -185,7 +185,7 @@ bool CAudit::UnserializeFromData(const std::vector<unsigned char>& vchData, cons
     return true;
 }
 
-bool CAudit::UnserializeFromTx(const CTransactionRef& tx) 
+bool CAudit::UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -198,6 +198,7 @@ bool CAudit::UnserializeFromTx(const CTransactionRef& tx)
         return false;
     }
     txHash = tx->GetHash();
+    nHeight = height;
     return true;
 }
 
