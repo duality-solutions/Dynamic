@@ -152,37 +152,6 @@ bool CAuditDB::EraseAudit(const std::vector<unsigned char>& vchAudit)
     return CDBWrapper::Erase(make_pair(std::string("audit"), vchAudit));
 }
 
-// Removes expired records from databases.
-bool CAuditDB::RemoveExpired(int& entriesRemoved, int& auditsRemoved)
-{
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    CAudit audit;
-    std::pair<std::string, std::vector<unsigned char> > key;
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "txid") {
-                std::vector<unsigned char> value;
-                CAudit audit;
-                pcursor->GetValue(value);
-                if (GetAudit(value, audit) && audit.nExpireTime > 0 && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= audit.nExpireTime) {
-                    for(const std::vector<unsigned char>& vchAuditHash : audit.GetAudits()) {
-                        EraseAudit(vchAuditHash);
-                        auditsRemoved++;
-                    }
-                    EraseAuditTxId(key.second);
-                    entriesRemoved++;
-                }
-            }
-            pcursor->Next();
-        } catch (std::exception& e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
 bool CAuditDB::GetAuditInfo(const std::vector<unsigned char>& vchAudit, UniValue& oAuditInfo)
 {
     CAudit audit;
@@ -224,13 +193,6 @@ bool FlushAuditLevelDB()
         }
     }
     return true;
-}
-
-void RemoveExpired(int& entriesRemoved, int& auditsRemoved)
-{
-    if(pAuditDB != NULL)
-        pAuditDB->RemoveExpired(entriesRemoved, auditsRemoved);
-    FlushAuditLevelDB();
 }
 
 static bool CommonDataCheck(const CAudit& audit, const vchCharString& vvchOpParameters, std::string& errorMessage)
