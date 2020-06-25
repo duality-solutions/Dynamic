@@ -14,6 +14,13 @@
 
 #include "addressindex.h"
 #include "amount.h"
+#include "assets/assets.h"
+#include "assets/assetdb.h"
+#include "assets/messages.h"
+#include "assets/myassetsdb.h"
+#include "assets/restricteddb.h"
+#include "assets/assetsnapshotdb.h"
+#include "assets/snapshotrequestdb.h"
 #include "chain.h"
 #include "coins.h"
 #include "fs.h"
@@ -26,6 +33,7 @@
 #include "versionbits.h"
 
 #include <algorithm>
+#include <atomic>
 #include <exception>
 #include <map>
 #include <set>
@@ -35,17 +43,12 @@
 #include <utility>
 #include <vector>
 
-#include <atomic>
-#include <assets/assets.h>
-#include <assets/assetdb.h>
-#include <assets/messages.h>
-#include <assets/myassetsdb.h>
-#include <assets/restricteddb.h>
-#include <assets/assetsnapshotdb.h>
-#include <assets/snapshotrequestdb.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/unordered_map.hpp>
 
+class CAssets;
+class CAssetsCache;
+class CAssetsDB;
 class CBloomFilter;
 class CBlockIndex;
 class CBlockPolicyEstimator;
@@ -55,22 +58,18 @@ class CCoinsViewDB;
 class CConnman;
 class CInv;
 class CKeyStore;
+class CMessage;
+class CNullAssetTxData;
 class CScriptCheck;
+class CSnapshotRequestDB;
 class CTxMemPool;
 class CTxUndo;
 class CValidationInterface;
 class CValidationState;
+
 struct ChainTxData;
-
-class CAssets;
-class CAssetsCache;
-class CAssetsDB;
-class CMessage;
-class CNullAssetTxData;
-class CSnapshotRequestDB;
-
-struct LockPoints;
 struct CNodeStateStats;
+struct LockPoints;
 
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;
@@ -215,7 +214,6 @@ extern bool fAssetIndex;
 extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fStealthTx;
-extern unsigned int nBytesPerSigOp;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
 extern size_t nCoinCacheUsage;

@@ -7,18 +7,16 @@
 
 #include "coins.h"
 
+#include "assets/assetdb.h"
+#include "assets/assets.h"
+#include "base58.h"
 #include "consensus/consensus.h"
 #include "memusage.h"
 #include "random.h"
+#include "tinyformat.h"
 #include "util.h"
 #include "validation.h" //fMessaging
-#include "tinyformat.h"
-#include "base58.h"
-
-#include <assert.h>
-#include <assets/assets.h>
-#include <wallet/wallet.h>
-
+#include "wallet/wallet.h"
 
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }
@@ -540,7 +538,7 @@ double CCoinsViewCache::GetPriority(const CTransaction& tx, int nHeight, CAmount
     if (tx.IsCoinBase() || tx.IsCoinStake())
         return 0.0;
     double dResult = 0.0;
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
         const Coin& coin = AccessCoin(txin.prevout);
         if (coin.IsSpent())
             continue;

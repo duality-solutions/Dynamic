@@ -2,13 +2,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
-#include <consensus/params.h>
-#include <wallet/wallet_ismine.h>
-#include <tinyformat.h>
-#include "assetdb.h"
-#include "assets.h"
+#include "assets/assetdb.h"
+
+#include "assets/assets.h"
+#include "consensus/params.h"
+#include "tinyformat.h"
+#include "util.h"
 #include "validation.h"
+#include "wallet/wallet_ismine.h"
 
 #include <boost/thread.hpp>
 

@@ -7,6 +7,7 @@
 
 #include "activedynode.h"
 #include "consensus/validation.h"
+#include "core_io.h"
 #include "dynode-sync.h"
 #include "dynode.h"
 #include "dynodeconfig.h"

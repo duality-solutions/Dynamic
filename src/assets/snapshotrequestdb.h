@@ -2,17 +2,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SNAPSHOTREQUESTDB_H
-#define SNAPSHOTREQUESTDB_H
-
-#include <dbwrapper.h>
-
-#include <string>
-#include <vector>
-#include <set>
+#ifndef DYNAMIC_SNAPSHOTREQUESTDB_H
+#define DYNAMIC_SNAPSHOTREQUESTDB_H
 
 #include "amount.h"
 #include "assets/rewards.h"
+#include "dbwrapper.h"
+
+#include <set>
+#include <string>
+#include <vector>
 
 class CSnapshotRequestDBEntry
 {
@@ -112,6 +111,4 @@ public:
 
 };
 
-
-
-#endif //SNAPSHOTREQUESTDB_H
+#endif // DYNAMIC_SNAPSHOTREQUESTDB_H

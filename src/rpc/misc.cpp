@@ -7,6 +7,7 @@
 
 #include "base58.h"
 #include "clientversion.h"
+#include "core_io.h"
 #include "dynode-sync.h"
 #include "init.h"
 #include "net.h"

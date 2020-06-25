@@ -2,7 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "restricteddb.h"
+#include "assets/restricteddb.h"
+
 #include "validation.h"
 
 #include <boost/thread.hpp>
@@ -13,8 +14,6 @@ static const char ADDRESS_QULAIFIER_FLAG = 'T';
 static const char QULAIFIER_ADDRESS_FLAG = 'Q';
 static const char RESTRICTED_ADDRESS_FLAG = 'R';
 static const char GLOBAL_RESTRICTION_FLAG = 'G';
-
-
 
 CRestrictedDB::CRestrictedDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "restricted", nCacheSize, fMemory, fWipe) {
 }

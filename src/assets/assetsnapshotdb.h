@@ -2,13 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef ASSETSNAPSHOTDB_H
-#define ASSETSNAPSHOTDB_H
+#ifndef DYNAMIC_ASSETSNAPSHOTDB_H
+#define DYNAMIC_ASSETSNAPSHOTDB_H
+
+#include "amount.h"
+#include "dbwrapper.h"
 
 #include <set>
-
-#include <dbwrapper.h>
-#include "amount.h"
 
 class CAssetSnapshotDBEntry
 {
@@ -74,5 +74,4 @@ public:
         const std::string & p_assetName, int p_height);
 };
 
-
-#endif //ASSETSNAPSHOTDB_H
+#endif // DYNAMIC_ASSETSNAPSHOTDB_H

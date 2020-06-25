@@ -2,15 +2,15 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <validation.h>
-#include <chainparams.h>
-#include <wallet/wallet.h>
-#include <wallet/wallet_ismine.h>
-#include <base58.h>
-#include "messages.h"
-#include "myassetsdb.h"
-#include <primitives/block.h>
+#include "assets/messages.h"
 
+#include "assets/myassetsdb.h"
+#include "base58.h"
+#include "chainparams.h"
+#include "primitives/block.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+#include "wallet/wallet_ismine.h"
 
 std::set<COutPoint> setDirtyMessagesRemove;
 std::map<COutPoint, CMessage> mapDirtyMessagesAdd;
@@ -24,7 +24,6 @@ std::set<std::string> setDirtySeenAddressAdd;
 std::set<std::string> setAddressAskedForFalse;
 
 CCriticalSection cs_messaging;
-
 
 int8_t IntFromMessageStatus(MessageStatus status)
 {
@@ -330,7 +329,6 @@ size_t GetMessageDirtyCacheSize()
 
     return size;
 }
-
 
 std::string CZMQMessage::createJsonString()
 {

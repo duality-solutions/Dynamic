@@ -2,11 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
 #ifndef DYNAMIC_RESTRICTEDDB_H
 #define DYNAMIC_RESTRICTEDDB_H
 
-#include <dbwrapper.h>
+#include "dbwrapper.h"
 
 class CRestrictedDB  : public CDBWrapper {
 
@@ -54,6 +53,5 @@ public:
 
     bool Flush();
 };
-
 
 #endif //DYNAMIC_RESTRICTEDDB_H

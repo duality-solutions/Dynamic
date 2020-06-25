@@ -11,6 +11,7 @@
 #include "checkpoints.h"
 #include "coins.h"
 #include "consensus/validation.h"
+#include "core_io.h"
 #include "dynode-sync.h"
 #include "hash.h"
 #include "instantsend.h"

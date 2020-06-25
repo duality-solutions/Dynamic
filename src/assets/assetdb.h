@@ -5,19 +5,19 @@
 #ifndef DYNAMIC_ASSETDB_H
 #define DYNAMIC_ASSETDB_H
 
+#include "dbwrapper.h"
 #include "fs.h"
 #include "serialize.h"
 
-#include <string>
 #include <map>
-#include <dbwrapper.h>
+#include <string>
 
 const int8_t ASSET_UNDO_INCLUDES_VERIFIER_STRING = -1;
 
-class CNewAsset;
-class uint256;
-class COutPoint;
 class CDatabasedAssetData;
+class CNewAsset;
+class COutPoint;
+class uint256;
 
 struct CBlockAssetUndo
 {

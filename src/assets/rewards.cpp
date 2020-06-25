@@ -2,22 +2,25 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <utilstrencodings.h>
-#include <hash.h>
-#include <validation.h>
+#include "assets/rewards.h"
+
+#include "assets/assetsnapshotdb.h"
+#include "base58.h"
+#include "chainparams.h"
+#include "consensus/validation.h"
+#include "core_io.h"
+#include "hash.h"
+#include "net.h"
+#include "utilmoneystr.h"
+#include "utilstrencodings.h"
+#include "validation.h"
+#include "wallet/coincontrol.h"
+#include "wallet/wallet.h"
+
+#include <univalue/include/univalue.h>
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <chainparams.h>
-#include <univalue/include/univalue.h>
-#include <core_io.h>
-#include <net.h>
-#include <base58.h>
-#include <consensus/validation.h>
-#include <wallet/coincontrol.h>
-#include <utilmoneystr.h>
-#include "assets/rewards.h"
-#include "assetsnapshotdb.h"
-#include "wallet/wallet.h"
 
 std::map<uint256, CRewardSnapshot> mapRewardSnapshots;
 

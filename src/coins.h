@@ -8,19 +8,20 @@
 #ifndef DYNAMIC_COINS_H
 #define DYNAMIC_COINS_H
 
+#include "assets/assets.h"
+#include "assets/assetdb.h"
 #include "compressor.h"
 #include "core_memusage.h"
 #include "hash.h"
 #include "memusage.h"
+#include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "wallet/wallet.h"
 
 #include <assert.h>
 #include <stdint.h>
 
-#include <assets/assets.h>
-#include <assets/assetdb.h>
-#include <boost/foreach.hpp>
 #include <unordered_map>
 
 /**

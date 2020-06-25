@@ -2,19 +2,18 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
 #ifndef DYNAMIC_ASSET_PROTOCOL_H
 #define DYNAMIC_ASSET_PROTOCOL_H
 
 #include "amount.h"
+#include "assets/assettypes.h"
 #include "tinyformat.h"
-#include "assettypes.h"
 
-#include <string>
-#include <set>
-#include <map>
-#include <unordered_map>
 #include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
 
 #define DYN_D 114
 #define DYN_Y 118
@@ -50,18 +49,19 @@
 
 #define MINIMUM_REWARDS_PAYOUT_HEIGHT 60
 
-class CScript;
+class Coin;
+class CCoinControl;
 class CDataStream;
+class COutput;
+class CReserveKey;
+class CScript;
 class CTransaction;
 class CTxOut;
-class Coin;
 class CWallet;
-class CReserveKey;
 class CWalletTx;
+
 struct CAssetOutputEntry;
-class CCoinControl;
 struct CBlockAssetUndo;
-class COutput;
 
 // 2500 * 82 Bytes == 205 KB (kilobytes) of memory
 #define MAX_CACHE_ASSETS_SIZE 2500

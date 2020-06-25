@@ -15,13 +15,12 @@
 #include "script/standard.h"
 #include "serialize.h"
 #include "streams.h"
-#include <univalue.h>
-#include <iomanip>
-#include <wallet/wallet.h>
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "wallet/wallet.h"
 
+#include <iomanip>
 #include <univalue.h>
 
 #include <boost/assign/list_of.hpp>

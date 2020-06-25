@@ -9,6 +9,7 @@
 
 #include "wallet/wallet.h"
 
+#include "assets/assets.h"
 #include "base58.h"
 #include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"

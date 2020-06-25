@@ -514,7 +514,8 @@ private:
     // Whitelisted ranges. Any node connecting from these is automatically
     // whitelisted (as well as those connecting to whitelisted binds).
     std::vector<CSubNet> vWhitelistedRange;
-
+    CCriticalSection cs_vWhitelistedRange;
+    
     unsigned int nSendBufferMaxSize;
     unsigned int nReceiveFloodSize;
 

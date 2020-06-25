@@ -5,13 +5,14 @@
 #ifndef DYNAMIC_NEWASSET_H
 #define DYNAMIC_NEWASSET_H
 
-#include <string>
-#include <sstream>
-#include <list>
-#include <unordered_map>
 #include "amount.h"
 #include "script/standard.h"
 #include "primitives/transaction.h"
+
+#include <list>
+#include <string>
+#include <sstream>
+#include <unordered_map>
 
 #define MAX_UNIT 8
 #define MIN_UNIT 0

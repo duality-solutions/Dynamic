@@ -6,19 +6,17 @@
 #define DYNAMIC_REWARDS_H
 
 #include "amount.h"
+#include "assets/assettypes.h"
 #include "tinyformat.h"
-#include "assettypes.h"
 
-#include <string>
-#include <set>
-#include <map>
-#include <unordered_map>
 #include <list>
-
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
 
 class CRewardSnapshot;
 class CWallet;
-class CRewardSnapshot;
 
 extern std::map<uint256, CRewardSnapshot> mapRewardSnapshots;
 

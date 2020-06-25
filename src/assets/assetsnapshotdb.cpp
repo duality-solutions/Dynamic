@@ -2,9 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "assetsnapshotdb.h"
-#include "validation.h"
+#include "assets/assetsnapshotdb.h"
+
 #include "base58.h"
+#include "validation.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>

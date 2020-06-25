@@ -2,17 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-//#include <amount.h>
-//#include <base58.h>
 #include "assets/assets.h"
-#include "assets/assetdb.h"
-#include <map>
-#include "tinyformat.h"
-//#include <rpc/server.h>
-//#include <script/standard.h>
-//#include <utilstrencodings.h>
 
 #include "amount.h"
+#include "assets/assetdb.h"
 #include "base58.h"
 #include "chain.h"
 #include "consensus/validation.h"
@@ -27,12 +20,15 @@
 #include "rpc/server.h"
 #include "script/sign.h"
 #include "timedata.h"
+#include "tinyformat.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "wallet/coincontrol.h"
 #include "wallet/feebumper.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
+
+#include <map>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
 

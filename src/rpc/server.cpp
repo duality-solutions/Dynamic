@@ -133,34 +133,6 @@ CAmount AmountFromValue(const UniValue& value, bool p_isDYN)
     return amount;
 }
 
-/* ASSET START */
-std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
-{
-    bool sign = amount < 0;
-    int64_t n_abs = (sign ? -amount : amount);
-    int64_t quotient = n_abs / COIN;
-    int64_t remainder = n_abs % COIN;
-    remainder = remainder / pow(10, 8 - units);
-
-    if (units == 0 && remainder == 0) {
-        return strprintf("%s%d", sign ? "-" : "", quotient);
-    }
-    else {
-        return strprintf("%s%d.%0" + std::to_string(units) + "d", sign ? "-" : "", quotient, remainder);
-    }
-}
-
-UniValue ValueFromAmount(const CAmount& amount, const int8_t units)
-{
-    return UniValue(UniValue::VNUM, ValueFromAmountString(amount, units));
-}
-
-UniValue ValueFromAmount(const CAmount& amount)
-{
-    return ValueFromAmount(amount, 8);
-}
-/* ASSET END */
-
 uint256 ParseHashV(const UniValue& v, std::string strName)
 {
     std::string strHex;

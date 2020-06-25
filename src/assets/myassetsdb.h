@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_MYASSETSDB_H
 #define DYNAMIC_MYASSETSDB_H
 
-#include <dbwrapper.h>
+#include "dbwrapper.h"
 
 class CMessage;
 class COutPoint;
@@ -77,6 +77,5 @@ public:
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
 };
-
 
 #endif //DYNAMIC_MYASSETSDB_H

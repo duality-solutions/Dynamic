@@ -34,10 +34,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "assets/assets.h"
 
 #include <map>
-#include <string>
-#include <vector>
-#include <utility>
 #include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 class LibBoolEE {
 public:

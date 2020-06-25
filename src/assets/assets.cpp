@@ -2,40 +2,41 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <regex>
-#include <script/script.h>
-#include <version.h>
-#include <streams.h>
-#include <primitives/transaction.h>
-#include <iostream>
-#include <script/standard.h>
-#include <util.h>
-#include <chainparams.h>
-#include <base58.h>
-#include <validation.h>
-#include <txmempool.h>
-#include <tinyformat.h>
-#include <wallet/wallet.h>
-#include <boost/algorithm/string.hpp>
-#include <consensus/validation.h>
-#include <rpc/protocol.h>
-#include <net.h>
-#include "assets.h"
-#include "assetdb.h"
-#include "assettypes.h"
-#include "protocol.h"
-#include "wallet/coincontrol.h"
-#include "utilmoneystr.h"
+#include "assets/assets.h"
+
+#include "assets/assetdb.h"
+#include "assets/assettypes.h"
+#include "base58.h"
+#include "chainparams.h"
 #include "coins.h"
-#include "wallet/wallet.h"
+#include "consensus/validation.h"
 #include "LibBoolEE.h"
+#include "net.h"
+#include "primitives/transaction.h"
+#include "protocol.h"
+#include "rpc/protocol.h"
+#include "script/script.h"
+#include "script/standard.h"
+#include "streams.h"
+#include "tinyformat.h"
+#include "txmempool.h"
+#include "util.h"
+#include "utilmoneystr.h"
+#include "validation.h"
+#include "version.h"
+#include "wallet/coincontrol.h"
+#include "wallet/wallet.h"
+
+#include <iostream>
+#include <regex>
+
+#include <boost/algorithm/string.hpp>
 
 #define SIX_MONTHS 15780000 // Six months worth of seconds
 
 #define OFFSET_THREE 3
 #define OFFSET_FOUR 4
 #define OFFSET_TWENTY_THREE 23
-
 
 std::map<uint256, std::string> mapReissuedTx;
 std::map<std::string, uint256> mapReissuedAssets;

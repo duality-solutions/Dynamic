@@ -1,10 +1,11 @@
 // Copyright (c) 2018-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#include "assets/myassetsdb.h"
+
+#include "assets/messages.h"
 #include "validation.h"
-#include "myassetsdb.h"
-#include "messages.h"
-#include <boost/thread.hpp>
 
 #include <boost/thread.hpp>
 

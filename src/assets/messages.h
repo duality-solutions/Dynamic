@@ -2,17 +2,17 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
 #ifndef DYNAMIC_MESSAGES_H
 #define DYNAMIC_MESSAGES_H
 
+#include "assets/assets.h"
+#include "primitives/transaction.h"
+#include "serialize.h"
 #include "sync.h"
-
-#include <uint256.h>
-#include <serialize.h>
+#include "tinyformat.h"
+#include "uint256.h"
 
 class CMessage;
-class COutPoint;
 
 // Message Database caches
 extern std::set<COutPoint> setDirtyMessagesRemove;

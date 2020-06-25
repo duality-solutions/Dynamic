@@ -2,10 +2,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <set>
-#include <boost/thread.hpp>
+#include "assets/snapshotrequestdb.h"
 
-#include "snapshotrequestdb.h"
+#include <set>
+
+#include <boost/thread.hpp>
 
 static const char SNAPSHOTREQUEST_FLAG = 'S';
 

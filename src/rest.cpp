@@ -7,6 +7,7 @@
 
 #include "chain.h"
 #include "chainparams.h"
+#include "core_io.h"
 #include "httpserver.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"

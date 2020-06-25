@@ -106,6 +106,7 @@ class CBlockIndex;
 class CCoinControl;
 class COutput;
 class CReserveKey;
+class CScheduler;
 class CScript;
 class CStakeInput;
 class CTxMemPool;
@@ -1520,9 +1521,6 @@ public:
     /** Mark a transaction as replaced by another transaction (e.g., BIP 125). */
     bool MarkReplaced(const uint256& originalHash, const uint256& newHash);
 
-    /* Returns the wallets help message */
-    static std::string GetWalletHelpString(bool showDebug);
-
     /* Initializes the wallet, returns a new CWallet instance or a null pointer in case of an error */
     static CWallet* CreateWalletFromFile(const std::string walletFile, const bool fImportMnemonic = false);
     static bool InitLoadWallet();
@@ -1532,9 +1530,6 @@ public:
      * Gives the wallet a chance to register repetitive tasks and complete post-init tasks
      */
     void postInitProcess(boost::thread_group& threadGroup);
-
-    /* Wallets parameter interaction */
-    static bool ParameterInteraction();
 
     /* Initialize AutoBackup functionality */
     static bool InitAutoBackup();
