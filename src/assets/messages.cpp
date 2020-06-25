@@ -12,6 +12,9 @@
 #include "wallet/wallet.h"
 #include "wallet/wallet_ismine.h"
 
+#ifdef ENABLE_WALLET
+extern CWallet* pwalletMain;
+#endif // ENABLE_WALLET
 
 std::set<COutPoint> setDirtyMessagesRemove;
 std::map<COutPoint, CMessage> mapDirtyMessagesAdd;
