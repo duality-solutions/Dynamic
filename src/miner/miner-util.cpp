@@ -270,8 +270,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 continue;
 
             unsigned int nTxSigOps = iter->GetSigOpCost();
-            if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS) {
-                if (nBlockSigOps > MAX_BLOCK_SIGOPS - 2) {
+            if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS_COST) {
+                if (nBlockSigOps > MAX_BLOCK_SIGOPS_COST - 2) {
                     break;
                 }
                 continue;
