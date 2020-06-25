@@ -143,10 +143,10 @@ std::string CMutableTransaction::ToString() const
         vin.size(),
         vout.size(),
         nLockTime);
-    for (unsigned int i = 0; i < vin.size(); i++)
-        str += "    " + vin[i].ToString() + "\n";
-    for (unsigned int i = 0; i < vout.size(); i++)
-        str += "    " + vout[i].ToString() + "\n";
+    for (const auto& tx_in : vin)
+        str += "    " + tx_in.ToString() + "\n";
+    for (const auto& tx_out : vout)
+        str += "    " + tx_out.ToString() + "\n";
     return str;
 }
 
@@ -172,9 +172,16 @@ CTransaction& CTransaction::operator=(const CTransaction &tx) {
 CAmount CTransaction::GetValueOut() const
 {
     CAmount nValueOut = 0;
-    for (std::vector<CTxOut>::const_iterator it(vout.begin()); it != vout.end(); ++it) {
-        nValueOut += it->nValue;
-        if (!MoneyRange(it->nValue) || !MoneyRange(nValueOut))
+    for (const auto& tx_out : vout) {
+        
+        // Because we don't want to deal with assets messing up this calculation
+        // If this is an asset tx, we should move onto the next output in the transaction
+        // This will also help with processing speed of transaction that contain a large amounts of asset outputs in a transaction
+        if (tx_out.scriptPubKey.IsAssetScript())
+            continue;
+        
+        nValueOut += tx_out.nValue;
+        if (!MoneyRange(tx_out.nValue) || !MoneyRange(nValueOut))
             throw std::runtime_error(std::string(__func__) + ": value out of range");
     }
     return nValueOut;
@@ -232,9 +239,9 @@ std::string CTransaction::ToString() const
         vin.size(),
         vout.size(),
         nLockTime);
-    for (unsigned int i = 0; i < vin.size(); i++)
-        str += "    " + vin[i].ToString() + "\n";
-    for (unsigned int i = 0; i < vout.size(); i++)
-        str += "    " + vout[i].ToString() + "\n";
+    for (const auto& tx_in : vin)
+        str += "    " + tx_in.ToString() + "\n";
+    for (const auto& tx_out : vout)
+        str += "    " + tx_out.ToString() + "\n";
     return str;
 }
