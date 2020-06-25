@@ -44,11 +44,6 @@
 
 extern CWallet* pwalletMain;
 
-/* ASSET START */
-typedef CWallet* CWalletRef;
-extern std::vector<CWalletRef> vpwallets;
-/* ASSET END */
-
 /**
  * Settings
  */

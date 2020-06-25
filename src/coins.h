@@ -17,7 +17,6 @@
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
-#include "wallet/wallet.h"
 
 #include <assert.h>
 #include <stdint.h>

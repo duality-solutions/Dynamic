@@ -4378,8 +4378,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
 
 
-            if (vpwallets.size())
-                vpwallets[0]->UpdateMyRestrictedAssets(item.first, item.second.asset_name, item.second.flag, block.nTime);
+            if (pwalletMain)
+                pwalletMain->UpdateMyRestrictedAssets(item.first, item.second.asset_name, item.second.flag, block.nTime);
 
         }
     }
@@ -4919,8 +4919,8 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     }
 
 #ifdef ENABLE_WALLET
-    if (vpwallets.size()) {
-        CheckRewardDistributions(vpwallets[0]);
+    if (pwalletMain) {
+        CheckRewardDistributions(pwalletMain);
     }
 #endif
     /** ASSET END */

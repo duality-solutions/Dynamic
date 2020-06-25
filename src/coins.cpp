@@ -18,6 +18,10 @@
 #include "validation.h"
 #include "wallet/wallet.h"
 
+#ifdef ENABLE_WALLET
+extern CWallet* pwalletMain;
+#endif // ENABLE_WALLET
+
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }
 bool CCoinsView::BatchWrite(CCoinsMap& mapCoins, const uint256& hashBlock) { return false; }
@@ -284,7 +288,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
 #ifdef ENABLE_WALLET
                         if (fMessaging && pMessageSubscribedChannelsCache) {
                             LOCK(cs_messaging);
-                            if (vpwallets.size() && vpwallets[0]->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                            if (pwalletMain && pwalletMain->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
                                 AssetType aType;
                                 IsAssetNameValid(assetTransfer.strName, aType);
 
@@ -307,10 +311,10 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
 #ifdef ENABLE_WALLET
                         if (fMessaging && pMessageSubscribedChannelsCache) {
                             LOCK(cs_messaging);
-                            if (vpwallets.size()) {
+                            if (pwalletMain) {
                                 AssetType aType;
                                 IsAssetNameValid(assetData.assetName, aType);
-                                if (vpwallets[0]->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                                if (pwalletMain->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
                                     if (aType == AssetType::ROOT || aType == AssetType::SUB) {
                                         AddChannel(assetData.assetName + OWNER_TAG);
                                         AddAddressSeen(EncodeDestination(assetData.destination));

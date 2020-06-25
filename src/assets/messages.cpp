@@ -12,6 +12,7 @@
 #include "wallet/wallet.h"
 #include "wallet/wallet_ismine.h"
 
+
 std::set<COutPoint> setDirtyMessagesRemove;
 std::map<COutPoint, CMessage> mapDirtyMessagesAdd;
 std::map<COutPoint, CMessage> mapDirtyMessagesOrphaned;
@@ -192,7 +193,7 @@ bool ScanForMessageChannels(std::string& strError)
 
     LogPrintf("%s : Start Scanning For Message Channels\n", __func__);
 
-    if (vpwallets.size() == 0) {
+    if (!pwalletMain) {
         strError = "Wallet isn't active on this client. Can't scan for MsgChannels";
         return false;
     }
@@ -217,7 +218,7 @@ bool ScanForMessageChannels(std::string& strError)
             for (auto out : ptx->vout) {
                 int nType = -1;
                 bool fOwner = false;
-                if (vpwallets[0]->IsMine(out) == ISMINE_SPENDABLE) { // Is the out mine
+                if (pwalletMain->IsMine(out) == ISMINE_SPENDABLE) { // Is the out mine
                     if (out.scriptPubKey.IsAssetScript(nType, fOwner)) {
                         CAssetOutputEntry assetData;
                         // Get the asset data from the script
