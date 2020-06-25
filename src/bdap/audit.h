@@ -168,5 +168,6 @@ public:
 };
 
 bool BuildAuditJson(const CAudit& audit, UniValue& oAudit);
+bool BuildVerifyAuditJson(const CAudit& audit, UniValue& oAudit);
 
 #endif // DYNAMIC_BDAP_AUDITDATA_H
