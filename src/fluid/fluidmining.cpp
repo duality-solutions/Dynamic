@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidMiningDB* pFluidMiningDB = NULL;
+CFluidMiningDB* pFluidMiningDB = nullptr;
 
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
 {

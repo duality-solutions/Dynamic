@@ -321,12 +321,12 @@ inline int Argon2d_Phase1_Hash(const void* in, const size_t size, const void* ou
     context.pwdlen = (uint32_t)size;
     context.salt = (uint8_t*)in; //salt = input
     context.saltlen = (uint32_t)size;
-    context.secret = NULL;
+    context.secret = nullptr;
     context.secretlen = 0;
-    context.ad = NULL;
+    context.ad = nullptr;
     context.adlen = 0;
-    context.allocate_cbk = NULL;
-    context.free_cbk = NULL;
+    context.allocate_cbk = nullptr;
+    context.free_cbk = nullptr;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
     context.m_cost = 500; // Memory in KiB (512KB)
@@ -361,12 +361,12 @@ inline int Argon2d_Phase2_Hash(const void* in, const size_t size, const void* ou
     context.pwdlen = (uint32_t)size;
     context.salt = (uint8_t*)in; //salt = input
     context.saltlen = (uint32_t)size;
-    context.secret = NULL;
+    context.secret = nullptr;
     context.secretlen = 0;
-    context.ad = NULL;
+    context.ad = nullptr;
     context.adlen = 0;
-    context.allocate_cbk = NULL;
-    context.free_cbk = NULL;
+    context.allocate_cbk = nullptr;
+    context.free_cbk = nullptr;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
     context.m_cost = 8000; // Memory in KiB (~8192KB)

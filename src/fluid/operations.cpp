@@ -93,7 +93,7 @@ std::string GetRidOfScriptStatement(const std::string& input, const int& positio
 bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
 {
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
     CDynamicAddress address(dynamicAddress);
 
     if (address.IsValid()) {

@@ -155,14 +155,14 @@ static void initTranslations(QTranslator& qtTranslatorBase, QTranslator& qtTrans
 #if QT_VERSION < 0x050000
 void DebugMessageHandler(QtMsgType type, const char* msg)
 {
-    const char* category = (type == QtDebugMsg) ? "qt" : NULL;
+    const char* category = (type == QtDebugMsg) ? "qt" : nullptr;
     LogPrint(category, "GUI: %s\n", msg);
 }
 #else
 void DebugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
     Q_UNUSED(context);
-    const char* category = (type == QtDebugMsg) ? "qt" : NULL;
+    const char* category = (type == QtDebugMsg) ? "qt" : nullptr;
     LogPrint(category, "GUI: %s\n", msg.toStdString());
 }
 #endif
@@ -289,7 +289,7 @@ void DynamicCore::initialize()
     } catch (const std::exception& e) {
         handleRunawayException(&e);
     } catch (...) {
-        handleRunawayException(NULL);
+        handleRunawayException(nullptr);
     }
 }
 
@@ -314,7 +314,7 @@ void DynamicCore::restart(QStringList args)
         } catch (const std::exception& e) {
             handleRunawayException(&e);
         } catch (...) {
-            handleRunawayException(NULL);
+            handleRunawayException(nullptr);
         }
     }
 }
@@ -331,7 +331,7 @@ void DynamicCore::shutdown()
     } catch (const std::exception& e) {
         handleRunawayException(&e);
     } catch (...) {
-        handleRunawayException(NULL);
+        handleRunawayException(nullptr);
     }
 }
 
@@ -396,7 +396,7 @@ void DynamicApplication::createPaymentServer()
 
 void DynamicApplication::createOptionsModel(bool resetSettings)
 {
-    optionsModel = new OptionsModel(NULL, resetSettings);
+    optionsModel = new OptionsModel(nullptr, resetSettings);
 }
 
 void DynamicApplication::createWindow(const NetworkStyle* networkStyle)
@@ -607,7 +607,7 @@ int main(int argc, char* argv[])
     // Show help message immediately after parsing command-line options (for "-lang") and setting locale,
     // but before showing splash screen.
     if (gArgs.IsArgSet("-?") || gArgs.IsArgSet("-h") || gArgs.IsArgSet("-help") || gArgs.IsArgSet("-version")) {
-        HelpMessageDialog help(NULL, gArgs.IsArgSet("-version") ? HelpMessageDialog::about : HelpMessageDialog::cmdline);
+        HelpMessageDialog help(nullptr, gArgs.IsArgSet("-version") ? HelpMessageDialog::about : HelpMessageDialog::cmdline);
         help.showOrPrint();
         return EXIT_SUCCESS;
     }
@@ -718,7 +718,7 @@ int main(int argc, char* argv[])
         PrintExceptionContinue(&e, "Runaway exception");
         app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
     } catch (...) {
-        PrintExceptionContinue(NULL, "Runaway exception");
+        PrintExceptionContinue(nullptr, "Runaway exception");
         app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
     }
     return app.getReturnValue();
