@@ -20,7 +20,9 @@ public:
     }
     bool AddAudit(const CAudit& audit, const int op);
     bool ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit);
-    bool ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit) ;
+    bool ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit);
+    bool ReadAuditDN(const std::vector<unsigned char>& vchOwnerFullObjectPath, std::vector<CAudit>& vAudits);
+    bool ReadAuditHash(const std::vector<unsigned char>& vchAudit, std::vector<CAudit>& vAudits);
     bool EraseAuditTxId(const std::vector<unsigned char>& vchTxId);
     bool EraseAudit(const std::vector<unsigned char>& vchAudit);
     bool AuditExists(const std::vector<unsigned char>& vchAudit);

@@ -100,6 +100,45 @@ bool CAuditDB::ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& 
     return CDBWrapper::Read(make_pair(std::string("txid"), vchTxId), audit);
 }
 
+bool CAuditDB::ReadAuditDN(const std::vector<unsigned char>& vchOwnerFullObjectPath, std::vector<CAudit>& vAudits) 
+{
+    LOCK(cs_bdap_audit);
+    std::vector<std::vector<unsigned char>> vvTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("dn"), vchOwnerFullObjectPath), vvTxId);
+
+    if (readState) {
+        for (const std::vector<unsigned char>& vchTxId : vvTxId) {
+            CAudit audit;
+            if (ReadAuditTxId(vchTxId, audit)) {
+                vAudits.push_back(audit);
+            }
+        }
+    }
+
+    return (vAudits.size() > 0);
+}
+
+bool CAuditDB::ReadAuditHash(const std::vector<unsigned char>& vchAudit, std::vector<CAudit>& vAudits) 
+{
+    LOCK(cs_bdap_audit);
+    std::vector<std::vector<unsigned char>> vvTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("audit"), vchAudit), vvTxId);
+
+    if (readState) {
+        for (const std::vector<unsigned char>& vchTxId : vvTxId) {
+            CAudit audit;
+            if (ReadAuditTxId(vchTxId, audit)) {
+                vAudits.push_back(audit);
+            }
+        }
+    }
+
+    return (vAudits.size() > 0);
+}
+
+
 bool CAuditDB::ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit) 
 {
     std::vector<unsigned char> vchTxId;
