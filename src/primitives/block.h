@@ -20,8 +20,6 @@
  * of the block.
  */
 
-extern uint32_t nKAWPOWActivationTime;
-
 class CBlockHeader
 {
 public:
@@ -55,15 +53,10 @@ public:
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
         READWRITE(nBits);
-        if (nTime < nKAWPOWActivationTime) {
-            READWRITE(nNonce);
-        } else {
-            READWRITE(nHeight);
-            READWRITE(nNonce64);
-            READWRITE(mix_hash);
-        }
-        if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
-            READWRITE(nFlags);
+        READWRITE(nNonce);
+
+    if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
+        READWRITE(nFlags);
     }
 
     void SetNull()
@@ -75,10 +68,6 @@ public:
         nBits = 0;
         nNonce = 0;
         nFlags = 0;
-
-        nNonce64 = 0;
-        nHeight = 0;
-        mix_hash.SetNull();
     }
 
     bool IsNull() const
@@ -163,12 +152,6 @@ public:
         block.nBits = nBits;
         block.nNonce = nNonce;
         block.nFlags = nFlags;
-        return block;
-
-        // KAWPOW
-        block.nHeight        = nHeight;
-        block.nNonce64       = nNonce64;
-        block.mix_hash       = mix_hash;
         return block;
     }
 

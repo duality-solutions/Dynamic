@@ -691,10 +691,6 @@ bool IsMsgRestAssetIsActive();
 
 bool AreTransferScriptsSizeDeployed();
 
-bool IsDGWActive(unsigned int nBlockNumber);
-bool IsMessagingActive(unsigned int nBlockNumber);
-bool IsRestrictedActive(unsigned int nBlockNumber);
-
 CAssetsCache* GetCurrentAssetCache();
 
 //! Utility function to add all of a transaction's outputs to a cache.

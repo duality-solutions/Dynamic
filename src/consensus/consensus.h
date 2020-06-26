@@ -15,13 +15,7 @@ static const unsigned int MAX_BLOCK_SIGOPS_COST = MAX_BLOCK_SIZE / 50;
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 10;
 
-/** ASSET START */
 #define UNUSED_VAR     __attribute__ ((unused))
-//! This variable needs to in this class because undo.h uses it. However because it is in this class
-//! it causes unused variable warnings when compiling. This UNUSED_VAR removes the unused warnings
-UNUSED_VAR static bool fAssetsIsActive = false;
-UNUSED_VAR static bool fMsgRestAssetIsActive = false;
-UNUSED_VAR static bool fTransferScriptIsActive = false;
 
 unsigned int GetMaxBlockSerializedSize();
 /** ASSET END */

@@ -7205,65 +7205,27 @@ void DumpMempool(void)
 /** ASSET START */
 bool AreAssetsDeployed() {
 
-    if (fAssetsIsActive)
-        return true;
-
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fAssetsIsActive = true;
-
-    return fAssetsIsActive;
+    return sporkManager.IsSporkActive(SPORK_32_BDAP_V2);
 }
 
 bool IsMsgRestAssetIsActive()
 {
-    if (fMsgRestAssetIsActive)
-        return true;
-
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_MSG_REST_ASSETS);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fMsgRestAssetIsActive = true;
-
-    return fMsgRestAssetIsActive;
+    return AreAssetsDeployed();
 }
 
 bool AreMessagesDeployed() {
 
-    return IsMsgRestAssetIsActive();
+    return AreAssetsDeployed();
 }
 
 bool AreTransferScriptsSizeDeployed() {
 
-    if (fTransferScriptIsActive)
-        return true;
-
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fTransferScriptIsActive = true;
-
-    return fTransferScriptIsActive;
+    return AreAssetsDeployed();
 }
 
 bool AreRestrictedAssetsDeployed() {
 
-    return IsMsgRestAssetIsActive();
-}
-
-bool IsMessagingActive(unsigned int nBlockNumber) {
-    if (Params().MessagingActivationBlock()) {
-        return nBlockNumber > Params().MessagingActivationBlock();
-    } else {
-        return AreMessagesDeployed();
-    }
-}
-
-bool IsRestrictedActive(unsigned int nBlockNumber)
-{
-    if (Params().RestrictedActivationBlock()) {
-        return nBlockNumber > Params().RestrictedActivationBlock();
-    } else {
-        return AreRestrictedAssetsDeployed();
-    }
+    return AreAssetsDeployed();
 }
 
 CAssetsCache* GetCurrentAssetCache()

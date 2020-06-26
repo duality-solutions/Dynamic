@@ -183,29 +183,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 4032;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 3226; // 80% of 4032
 
-/** ASSET START **/
-        // Deployment of Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
-
-        // Deployment of MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
-
-        // Deployment of DEPLOYMENT_TRANSFER_SCRIPT_SIZE
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].bit = 8;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 2016; // TODO
-/** ASSET END **/
-
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 215493;
 
@@ -311,14 +288,6 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
-
-        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
-        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
-        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
-
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO 
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** ASSET END **/
     }
 };
 static CMainParams mainParams;
@@ -402,29 +371,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 1564012800; // Jul 25th, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 100;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
-
-/** ASSET START **/
-        // Deployment of Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
-
-        // Deployment of MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
-
-        // Deployment of DEPLOYMENT_TRANSFER_SCRIPT_SIZE
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].bit = 8;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 2016; // TODO
-/** ASSET END **/
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 210; // 210
@@ -529,14 +475,6 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
-
-        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
-        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
-        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
-
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO 
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** ASSET END **/
     }
 };
 static CTestNetParams testNetParams;
@@ -612,29 +550,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 999999999999ULL;
-
-/** ASSET START **/
-        // Deployment of Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
-
-        // Deployment of MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
-
-        // Deployment of DEPLOYMENT_TRANSFER_SCRIPT_SIZE
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].bit = 8;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 2016; // TODO
-/** ASSET END **/
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 0;
@@ -733,14 +648,6 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
-
-        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
-        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
-        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
-
-        nKAAAWWWPOWActivationTime = 3572480000; // TODO 
-        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** ASSET END **/
     }
     void UpdateBIP9Parameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
     {
@@ -817,30 +724,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
-
-
-/** ASSET START **/
-        // Deployment of Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016; // TODO
-
-        // Deployment of MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // MSG REST Assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = // TODO
-
-        // Deployment of DEPLOYMENT_TRANSFER_SCRIPT_SIZE
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].bit = 8;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nStartTime = 3540944000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nTimeout = 3572480000; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 1714; // TODO
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 2016; // TODO
-/** ASSET END **/
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 210; // 210
@@ -943,12 +826,6 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
         nMinReorganizationPeers = 4; // TODO
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
-
-        nAssetActivationHeight = 10000000; // Asset activated block height // TODO
-        nMessagingActivationBlock = 10000000; // Messaging activated block height // TODO
-        nRestrictedActivationBlock = 10000000; // Restricted activated block height // TODO
-
-        /** ASSET END **/
     }
 };
 static CPrivateNetParams privateNetParams;

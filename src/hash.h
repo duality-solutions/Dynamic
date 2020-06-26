@@ -18,8 +18,6 @@
 #include "uint256.h"
 #include "version.h"
 
-#include <crypto/ethash/helpers.hpp>
-
 #include <vector>
 
 class CBlockHeader;

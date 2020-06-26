@@ -61,14 +61,7 @@ bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vect
         return false;
     }
 
-  /** ASSET START */
-#define UNUSED_VAR     __attribute__ ((unused))
-//! This variable needs to in this class because undo.h uses it. However because it is in this class
-//! it causes unused variable warnings when compiling. This UNUSED_VAR removes the unused warnings
-UNUSED_VAR static bool fAssetsIsActive = false;
-UNUSED_VAR static bool fMsgRestAssetIsActive = false;
-UNUSED_VAR static bool fTransferScriptIsActive = false;
-/** ASSET END */
+#define UNUSED_VAR     __attribute__ ((unused)) // used for srcIsIndivisible
 
     //  Get details on the specified source asset
     CNewAsset distributionAsset;

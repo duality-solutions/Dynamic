@@ -684,7 +684,7 @@ bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetT
     std::vector<unsigned char> vchTransferAsset;
 
     if (AreTransferScriptsSizeDeployed()) {
-        // Before kawpow activation we used the hardcoded 31 to find the data
+        // Before SPORK_32_BDAP_V2 activation we used the hardcoded 31 to find the data
         // This created a bug where large transfers scripts would fail to serialize.
         // This fixes that issue (https://github.com/RavenProject/Ravencoin/issues/752)
         // TODO, after the kawpow fork goes active, we should be able to remove this if/else statement and just use this line.
