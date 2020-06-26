@@ -5,6 +5,8 @@
 #include "fs.h"
 #include "key.h"
 #include "pubkey.h"
+#include "random.h"
+#include "scheduler.h"
 #include "txdb.h"
 #include "txmempool.h"
 
@@ -45,13 +47,19 @@ struct BasicTestingSetup {
  * and wallet (if enabled) setup.
  */
 class CConnman;
-struct TestingSetup: public BasicTestingSetup {
-    CCoinsViewDB *pcoinsdbview;
-    boost::filesystem::path pathTemp;
-    boost::thread_group threadGroup;
-    CConnman* connman;
+class PeerLogicValidation;
 
-    TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+struct TestingSetup : public BasicTestingSetup
+{
+    CCoinsViewDB *pcoinsdbview;
+    fs::path pathTemp;
+    boost::thread_group threadGroup;
+    CConnman *connman;
+    CScheduler scheduler;
+    std::unique_ptr<PeerLogicValidation> peerLogic;
+
+    explicit TestingSetup(const std::string &chainName = CBaseChainParams::MAIN);
+
     ~TestingSetup();
 };
 

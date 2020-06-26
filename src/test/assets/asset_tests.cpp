@@ -518,7 +518,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         /// Generic Amount Tests ///
         {
             CNewAsset invalid_amount_less_zero("INVALID", -1);
-            CNewAsset invalid_amount_over_max("INVALID", MAX_MONEY + 1);
+            CNewAsset invalid_amount_over_max("INVALID", MAX_MONEY); // equal to max or we encounter an integer overflow
 
             BOOST_CHECK_MESSAGE(!CheckNewAsset(invalid_amount_less_zero, error), "CheckNewAsset: Invalid Amount Test 1 should fail");
             BOOST_CHECK_MESSAGE(!CheckNewAsset(invalid_amount_over_max, error), "CheckNewAsset: Invalid Amount Test 2 should fail");

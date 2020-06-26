@@ -13,8 +13,8 @@
 #include <script/standard.h>
 #include <base58.h>
 #include <consensus/validation.h>
-#include <consensus/tx_verify.h>
 #include <validation.h>
+
 BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
 
 
