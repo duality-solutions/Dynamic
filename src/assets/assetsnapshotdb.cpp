@@ -33,7 +33,7 @@ CAssetSnapshotDBEntry::CAssetSnapshotDBEntry(
     heightAndName = std::to_string(height) + assetName;
 }
 
-CAssetSnapshotDB::CAssetSnapshotDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewards" / "assetsnapshot", nCacheSize, fMemory, fWipe) {
+CAssetSnapshotDB::CAssetSnapshotDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "rewards" / "assetsnapshot", nCacheSize, fMemory, fWipe) {
 }
 
 bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(

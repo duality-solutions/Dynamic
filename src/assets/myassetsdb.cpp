@@ -17,7 +17,7 @@ static const char DB_FLAG = 'D'; // Database Flags
 static const char MY_TAGGED_ADDRESSES = 'T'; // Addresses that have been tagged
 static const char MY_RESTRICTED_ADDRESSES = 'R'; // Addresses that have been restricted
 
-CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "messages", nCacheSize, fMemory, fWipe) {
+CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "messages", nCacheSize, fMemory, fWipe) {
 }
 
 bool CMessageDB::WriteMessage(const CMessage &message)
@@ -125,7 +125,7 @@ bool CMessageDB::Flush() {
     return true;
 }
 
-CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "channels", nCacheSize, fMemory, fWipe) {
+CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "messages" / "channels", nCacheSize, fMemory, fWipe) {
 }
 
 bool CMessageChannelDB::WriteMyMessageChannel(const std::string& channelname)
@@ -241,7 +241,7 @@ bool CMessageChannelDB::Flush() {
 }
 
 
-CMyRestrictedDB::CMyRestrictedDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "myrestricted", nCacheSize, fMemory, fWipe) {
+CMyRestrictedDB::CMyRestrictedDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "myrestricted", nCacheSize, fMemory, fWipe) {
 }
 
 bool CMyRestrictedDB::WriteTaggedAddress(const std::string& address, const std::string& tag_name, const bool fAdd, const uint32_t& nHeight)
