@@ -391,7 +391,7 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
 
     case RF_JSON: {
         UniValue objTx(UniValue::VOBJ);
-        TxToJSON(*tx, hashBlock, objTx);
+        TxToUnivWithAssets(*tx, hashBlock, objTx);
         std::string strJSON = objTx.write() + "\n";
         req->WriteHeader("Content-Type", "application/json");
         req->WriteReply(HTTP_OK, strJSON);
@@ -565,7 +565,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
 
             // include the script in a json output
             UniValue o(UniValue::VOBJ);
-            ScriptPubKeyToJSON(coin.out.scriptPubKey, o, true);
+            ScriptPubKeyToUnivWithAssets(coin.out.scriptPubKey, o, true);
             utxo.push_back(Pair("scriptPubKey", o));
             utxos.push_back(utxo);
         }

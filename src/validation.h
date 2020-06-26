@@ -696,6 +696,26 @@ bool IsMessagingActive(unsigned int nBlockNumber);
 bool IsRestrictedActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
+
+//! Utility function to add all of a transaction's outputs to a cache.
+// When check is false, this assumes that overwrites are only possible for coinbase transactions.
+// When check is true, the underlying view may be queried to determine whether an addition is
+// an overwrite.
+// TODO: pass in a boolean to limit these possible overwrites to known
+// (pre-BIP34) cases.
+void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction& tx, int nHeight, uint256 blockHash, bool check = false, CAssetsCache* assetsCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
+
+/**
+ * Spend a coin. Pass moveto in order to get the deleted data.
+ * If no unspent output exists for the passed outpoint, this call
+ * has no effect.
+*/
+bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin* moveto = nullptr, CAssetsCache* assetsCache = nullptr);
+//! Utility function to find any unspent output with a given txid.
+// This function can be quite expensive because in the event of a transaction
+// which is not found in the cache, it can cause up to MAX_OUTPUTS_PER_BLOCK
+// lookups to database, so it should be used with care.
+const Coin& AccessByTxid(const CCoinsViewCache& cache, const uint256& txid);
 /** ASSET END */
 
 class CServiceCredit {

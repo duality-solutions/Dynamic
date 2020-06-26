@@ -6,6 +6,7 @@
 
 #include "assets/assetdb.h"
 #include "assets/assettypes.h"
+#include "core_io.h" 
 #include "base58.h"
 #include "chainparams.h"
 #include "coins.h"
@@ -33,6 +34,8 @@ extern CWallet* pwalletMain;
 
 #include <iostream>
 #include <regex>
+
+#include <univalue.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -5633,5 +5636,168 @@ std::string GetUserErrorString(const ErrorReport& report)
         case ErrorReport::ErrorType::VariableNotFound: return _("Variable is not allow in the expression: '") + report.vecUserData[0] + "'";;
         default:
             return _("Error not set");
+    }
+}
+
+void ScriptPubKeyToUnivWithAssets(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex)
+{
+    txnouttype type;
+    std::vector<CTxDestination> addresses;
+    int nRequired;
+
+    out.pushKV("asm", ScriptToAsmStr(scriptPubKey));
+    if (fIncludeHex)
+        out.pushKV("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end()));
+
+    if (!ExtractDestinations(scriptPubKey, type, addresses, nRequired)) {
+        out.pushKV("type", GetTxnOutputType(type));
+        return;
+    }
+
+    /** ASSET START */
+    if (type == TX_NEW_ASSET || type == TX_TRANSFER_ASSET || type == TX_REISSUE_ASSET) {
+        UniValue assetInfo(UniValue::VOBJ);
+
+        std::string _assetAddress;
+
+        CAssetOutputEntry data;
+        if (GetAssetData(scriptPubKey, data)) {
+            assetInfo.pushKV("name", data.assetName);
+            assetInfo.pushKV("amount", ValueFromAmount(data.nAmount));
+            if (!data.message.empty())
+                assetInfo.pushKV("message", EncodeAssetData(data.message));
+            if(data.expireTime)
+                assetInfo.pushKV("expire_time", data.expireTime);
+
+            switch (type) {
+                case TX_NONSTANDARD:
+                case TX_PUBKEY:
+                case TX_PUBKEYHASH:
+                case TX_SCRIPTHASH:
+                case TX_MULTISIG:
+                case TX_NULL_DATA:
+                case TX_RESTRICTED_ASSET_DATA:
+                default:
+                    break;
+                case TX_NEW_ASSET:
+                    if (IsAssetNameAnOwner(data.assetName)) {
+                        // pwnd n00b
+                    } else {
+                        CNewAsset asset;
+                        if (AssetFromScript(scriptPubKey, asset, _assetAddress)) {
+                            assetInfo.pushKV("units", asset.units);
+                            assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
+                            if (asset.nHasIPFS > 0) {
+                                assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
+                            }
+                        }
+                    }
+                    break;
+                case TX_TRANSFER_ASSET:
+                    break;
+                case TX_REISSUE_ASSET:
+                    CReissueAsset asset;
+                    if (ReissueAssetFromScript(scriptPubKey, asset, _assetAddress)) {
+                        if (asset.nUnits >= 0) {
+                            assetInfo.pushKV("units", asset.nUnits);
+                        }
+                        assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
+                        if (!asset.strIPFSHash.empty()) {
+                            assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
+                        }
+                    }
+                    break;
+            }
+        }
+
+        out.pushKV("asset", assetInfo);
+    }
+
+    if (type == TX_RESTRICTED_ASSET_DATA) {
+        UniValue assetInfo(UniValue::VOBJ);
+        CNullAssetTxData data;
+        CNullAssetTxVerifierString verifierData;
+        std::string address;
+        if (AssetNullDataFromScript(scriptPubKey, data, address)) {
+            AssetType type;
+            IsAssetNameValid(data.asset_name, type);
+            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                assetInfo.pushKV("asset_name", data.asset_name);
+                assetInfo.pushKV("qualifier_type", data.flag ? "adding qualifier" : "removing qualifier");
+                assetInfo.pushKV("address", address);
+            } else if (type == AssetType::RESTRICTED) {
+                assetInfo.pushKV("asset_name", data.asset_name);
+                assetInfo.pushKV("restricted_type", data.flag ? "freezing address" : "unfreezing address");
+                assetInfo.pushKV("address", address);
+            }
+        } else if (GlobalAssetNullDataFromScript(scriptPubKey, data)) {
+            assetInfo.pushKV("restricted_name", data.asset_name);
+            assetInfo.pushKV("restricted_type", data.flag ? "freezing" : "unfreezing");
+            assetInfo.pushKV("address", "all addresses");
+        } else if (AssetNullVerifierDataFromScript(scriptPubKey, verifierData)) {
+            assetInfo.pushKV("verifier_string", verifierData.verifier_string);
+        }
+
+        out.pushKV("asset_data", assetInfo);
+    }
+    /** ASSET END */
+
+    out.pushKV("reqSigs", nRequired);
+    out.pushKV("type", GetTxnOutputType(type));
+
+    UniValue a(UniValue::VARR);
+    BOOST_FOREACH (const CTxDestination& addr, addresses)
+        a.push_back(CDynamicAddress(addr).ToString());
+    out.pushKV("addresses", a);
+}
+
+void TxToUnivWithAssets(const CTransaction& tx, const uint256& hashBlock, UniValue& entry, bool include_hex, int serialize_flags)
+{
+    entry.pushKV("txid", tx.GetHash().GetHex());
+    entry.pushKV("version", tx.nVersion);
+    entry.pushKV("size", (int)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION));
+    entry.pushKV("vsize", (GetTransactionWeight(tx)));
+    entry.pushKV("locktime", (int64_t)tx.nLockTime);
+
+    UniValue vin(UniValue::VARR);
+    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        UniValue in(UniValue::VOBJ);
+        if (tx.IsCoinBase())
+            in.pushKV("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end()));
+        else {
+            in.pushKV("txid", txin.prevout.hash.GetHex());
+            in.pushKV("vout", (int64_t)txin.prevout.n);
+            UniValue o(UniValue::VOBJ);
+            o.pushKV("asm", ScriptToAsmStr(txin.scriptSig, true));
+            o.pushKV("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end()));
+            in.pushKV("scriptSig", o);
+        }
+        in.pushKV("sequence", (int64_t)txin.nSequence);
+        vin.push_back(in);
+    }
+    entry.pushKV("vin", vin);
+
+    UniValue vout(UniValue::VARR);
+    for (unsigned int i = 0; i < tx.vout.size(); i++) {
+        const CTxOut& txout = tx.vout[i];
+
+        UniValue out(UniValue::VOBJ);
+
+        UniValue outValue(UniValue::VNUM, FormatMoney(txout.nValue));
+        out.pushKV("value", outValue);
+        out.pushKV("n", (int64_t)i);
+
+        UniValue o(UniValue::VOBJ);
+        ScriptPubKeyToUniv(txout.scriptPubKey, o, true);
+        out.pushKV("scriptPubKey", o);
+        vout.push_back(out);
+    }
+    entry.pushKV("vout", vout);
+
+    if (!hashBlock.IsNull())
+        entry.pushKV("blockhash", hashBlock.GetHex());
+
+    if (include_hex) {
+        entry.pushKV("hex", EncodeHexTx(tx, serialize_flags)); // the hex-encoded transaction. used the name "hex" to be consistent with the verbose output of "getrawtransaction".
     }
 }

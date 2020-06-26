@@ -148,10 +148,8 @@ std::string EncodeHexTx(const CTransaction& tx, const int serializeFlags)
     return HexStr(ssTx.begin(), ssTx.end());
 }
 
-void ScriptPubKeyToUniv(const CScript& scriptPubKey,
-    UniValue& out,
-    bool fIncludeHex)
-{
+ void ScriptPubKeyToUniv(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex)
+ {
     txnouttype type;
     std::vector<CTxDestination> addresses;
     int nRequired;
@@ -165,113 +163,23 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
         return;
     }
 
-    /** ASSET START */
-    if (type == TX_NEW_ASSET || type == TX_TRANSFER_ASSET || type == TX_REISSUE_ASSET) {
-        UniValue assetInfo(UniValue::VOBJ);
-
-        std::string _assetAddress;
-
-        CAssetOutputEntry data;
-        if (GetAssetData(scriptPubKey, data)) {
-            assetInfo.pushKV("name", data.assetName);
-            assetInfo.pushKV("amount", ValueFromAmount(data.nAmount));
-            if (!data.message.empty())
-                assetInfo.pushKV("message", EncodeAssetData(data.message));
-            if(data.expireTime)
-                assetInfo.pushKV("expire_time", data.expireTime);
-
-            switch (type) {
-                case TX_NONSTANDARD:
-                case TX_PUBKEY:
-                case TX_PUBKEYHASH:
-                case TX_SCRIPTHASH:
-                case TX_MULTISIG:
-                case TX_NULL_DATA:
-                case TX_RESTRICTED_ASSET_DATA:
-                default:
-                    break;
-                case TX_NEW_ASSET:
-                    if (IsAssetNameAnOwner(data.assetName)) {
-                        // pwnd n00b
-                    } else {
-                        CNewAsset asset;
-                        if (AssetFromScript(scriptPubKey, asset, _assetAddress)) {
-                            assetInfo.pushKV("units", asset.units);
-                            assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
-                            if (asset.nHasIPFS > 0) {
-                                assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
-                            }
-                        }
-                    }
-                    break;
-                case TX_TRANSFER_ASSET:
-                    break;
-                case TX_REISSUE_ASSET:
-                    CReissueAsset asset;
-                    if (ReissueAssetFromScript(scriptPubKey, asset, _assetAddress)) {
-                        if (asset.nUnits >= 0) {
-                            assetInfo.pushKV("units", asset.nUnits);
-                        }
-                        assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
-                        if (!asset.strIPFSHash.empty()) {
-                            assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
-                        }
-                    }
-                    break;
-            }
-        }
-
-        out.pushKV("asset", assetInfo);
-    }
-
-    if (type == TX_RESTRICTED_ASSET_DATA) {
-        UniValue assetInfo(UniValue::VOBJ);
-        CNullAssetTxData data;
-        CNullAssetTxVerifierString verifierData;
-        std::string address;
-        if (AssetNullDataFromScript(scriptPubKey, data, address)) {
-            AssetType type;
-            IsAssetNameValid(data.asset_name, type);
-            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
-                assetInfo.pushKV("asset_name", data.asset_name);
-                assetInfo.pushKV("qualifier_type", data.flag ? "adding qualifier" : "removing qualifier");
-                assetInfo.pushKV("address", address);
-            } else if (type == AssetType::RESTRICTED) {
-                assetInfo.pushKV("asset_name", data.asset_name);
-                assetInfo.pushKV("restricted_type", data.flag ? "freezing address" : "unfreezing address");
-                assetInfo.pushKV("address", address);
-            }
-        } else if (GlobalAssetNullDataFromScript(scriptPubKey, data)) {
-            assetInfo.pushKV("restricted_name", data.asset_name);
-            assetInfo.pushKV("restricted_type", data.flag ? "freezing" : "unfreezing");
-            assetInfo.pushKV("address", "all addresses");
-        } else if (AssetNullVerifierDataFromScript(scriptPubKey, verifierData)) {
-            assetInfo.pushKV("verifier_string", verifierData.verifier_string);
-        }
-
-        out.pushKV("asset_data", assetInfo);
-    }
-    /** ASSET END */
-
     out.pushKV("reqSigs", nRequired);
     out.pushKV("type", GetTxnOutputType(type));
 
     UniValue a(UniValue::VARR);
-    BOOST_FOREACH (const CTxDestination& addr, addresses)
-        a.push_back(CDynamicAddress(addr).ToString());
+    for (const CTxDestination& addr : addresses) 
+         a.push_back(CDynamicAddress(addr).ToString()); 
     out.pushKV("addresses", a);
 }
 
-void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry, bool include_hex, int serialize_flags)
-{
+ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry) 
+ {
     entry.pushKV("txid", tx.GetHash().GetHex());
     entry.pushKV("version", tx.nVersion);
-    entry.pushKV("size", (int)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION));
-    entry.pushKV("vsize", (GetTransactionWeight(tx)));
     entry.pushKV("locktime", (int64_t)tx.nLockTime);
 
     UniValue vin(UniValue::VARR);
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) { 
         UniValue in(UniValue::VOBJ);
         if (tx.IsCoinBase())
             in.pushKV("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end()));
@@ -308,7 +216,5 @@ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry,
     if (!hashBlock.IsNull())
         entry.pushKV("blockhash", hashBlock.GetHex());
 
-    if (include_hex) {
-        entry.pushKV("hex", EncodeHexTx(tx, serialize_flags)); // the hex-encoded transaction. used the name "hex" to be consistent with the verbose output of "getrawtransaction".
-    }
+    entry.pushKV("hex", EncodeHexTx(tx)); // the hex-encoded transaction. used the name "hex" to be consistent with the verbose output of "getrawtransaction".
 }
