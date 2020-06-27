@@ -628,8 +628,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
             nStandardOut += txout.nValue;
         }
 
-        /** RVN START */
-        // Find and handle all new OP_RVN_ASSET null data transactions
+        /** ASSET START */
+        // Find and handle all new OP_DYN_ASSET null data transactions
         if (txout.scriptPubKey.IsNullAsset()) {
             CNullAssetTxData data;
             std::string address;
@@ -683,9 +683,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
                 fContainsNullAssetVerifierTx = true;
             }
         }
-        /** RVN END */
+        /** ASSET END */
 
-        /** RVN START */
+        /** ASSET START */
         bool isAsset = false;
         int nType;
         bool fIsOwner;
@@ -774,7 +774,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
         }
     }
 
-    /** RVN END */
+    /** ASSET END */
 
     if (fCheckDuplicateInputs) {
         // Check for duplicate inputs
@@ -819,7 +819,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
     if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins, nStandardIn, nCreditsIn, nStandardOut, nCreditsOut, nDataBurned))
         return state.DoS(100, false, REJECT_INVALID, "bad-bdap-credit-use");
 
-    /** RVN START */
+    /** ASSET START */
     if (tx.IsNewAsset()) {
         /** Verify the reissue assets data */
         std::string strError = "";
@@ -949,7 +949,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
     }
     else {
         // Fail if transaction contains any non-transfer asset scripts and hasn't conformed to one of the
-        // above transaction types.  Also fail if it contains OP_RVN_ASSET opcode but wasn't a valid script.
+        // above transaction types.  Also fail if it contains OP_DYN_ASSET opcode but wasn't a valid script.
         for (auto out : tx.vout) {
             int nType;
             bool _isOwner;
@@ -961,7 +961,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
                 if (out.scriptPubKey.Find(OP_DYN_ASSET)) {
                     if (out.scriptPubKey[0] != OP_DYN_ASSET) {
                         return state.DoS(100, false, REJECT_INVALID,
-                                         "bad-txns-op-rvn-asset-not-in-right-script-location");
+                                         "bad-txns-op-dyn-asset-not-in-right-script-location");
                     }
                 }
             }
@@ -978,7 +978,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
     }
 
     // we allow restricted asset reissuance without having a verifier string transaction, we don't force it to be update
-    /** RVN END */
+    /** ASSET END */
 
     return true;
 }
@@ -7241,9 +7241,9 @@ bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin
 
     cache.cachedCoinsUsage -= it->second.coin.DynamicMemoryUsage();
 
-    /** RVN START */
+    /** ASSET START */
     Coin tempCoin = it->second.coin;
-    /** RVN END */
+    /** ASSET END */
 
     if (moveout) {
         *moveout = std::move(it->second.coin);
@@ -7255,7 +7255,7 @@ bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin
         it->second.coin.Clear();
     }
 
-    /** RVN START */
+    /** ASSET START */
     if (AreAssetsDeployed()) {
         if (assetsCache) {
             if (!assetsCache->TrySpendCoin(outpoint, tempCoin.out)) {
@@ -7263,7 +7263,7 @@ bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin
             }
         }
     }
-    /** RVN END */
+    /** ASSET END */
 
     return true;
 }
@@ -7272,7 +7272,7 @@ void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHei
     bool fCoinbase = tx.IsCoinBase();
     const uint256& txid = tx.GetHash();
 
-    /** RVN START */
+    /** ASSET START */
     if (AreAssetsDeployed()) {
         if (assetsCache) {
             if (tx.IsNewAsset()) { // This works are all new root assets, sub asset, and restricted assets
@@ -7425,7 +7425,7 @@ void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHei
             }
         }
     }
-    /** RVN END */
+    /** ASSET END */
 
     for (size_t i = 0; i < tx.vout.size(); ++i) {
         bool overwrite = check ? cache.HaveCoin(COutPoint(txid, i)) : fCoinbase;
@@ -7433,7 +7433,7 @@ void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHei
         // deal with the pre-BIP30 occurrences of duplicate coinbase transactions.
         cache.AddCoin(COutPoint(txid, i), Coin(tx.vout[i], nHeight, fCoinbase), overwrite);
 
-        /** RVN START */
+        /** ASSET START */
         if (AreAssetsDeployed()) {
             if (assetsCache) {
                 CAssetOutputEntry assetData;
@@ -7525,7 +7525,7 @@ void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHei
                 }
             }
         }
-        /** RVN END */
+        /** ASSET END */
     }
 }
 
