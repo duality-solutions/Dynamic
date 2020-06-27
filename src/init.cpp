@@ -1505,6 +1505,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     std::ostringstream strErrors;
 
     InitSignatureCache();
+    InitScriptExecutionCache();
 
     LogPrintf("Using %u threads for script verification\n", nScriptCheckThreads);
     if (nScriptCheckThreads) {

@@ -49,6 +49,8 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
         ECC_Start_Stealth();
         SetupEnvironment();
         SetupNetworking();
+        InitSignatureCache();
+        InitScriptExecutionCache();
         fPrintToDebugLog = false; // don't want to write to debug.log file
         fCheckBlockIndex = true;
         SelectParams(chainName);
