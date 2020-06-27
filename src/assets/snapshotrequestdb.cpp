@@ -32,7 +32,7 @@ CSnapshotRequestDBEntry::CSnapshotRequestDBEntry(
 
 CSnapshotRequestDB::CSnapshotRequestDB(
     size_t nCacheSize, bool fMemory, bool fWipe)
-    : CDBWrapper(GetDataDir() / "assets" / "rewards" / "snapshotrequest", nCacheSize, fMemory, fWipe) {
+    : CDBWrapper(GetDataDir() / "assets" / "snapshotrequest", nCacheSize, fMemory, fWipe) {
 }
 
 bool CSnapshotRequestDB::ScheduleSnapshot(
@@ -159,7 +159,7 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
 
 CDistributeSnapshotRequestDB::CDistributeSnapshotRequestDB(
         size_t nCacheSize, bool fMemory, bool fWipe)
-        : CDBWrapper(GetDataDir() / "assets" / "rewards" / "distributerequests", nCacheSize, fMemory, fWipe) {
+        : CDBWrapper(GetDataDir() / "assets" / "distributerequests", nCacheSize, fMemory, fWipe) {
 }
 
 // Schedule a distribution to occur

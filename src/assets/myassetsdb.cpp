@@ -125,7 +125,7 @@ bool CMessageDB::Flush() {
     return true;
 }
 
-CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "messages" / "channels", nCacheSize, fMemory, fWipe) {
+CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets" / "channels", nCacheSize, fMemory, fWipe) {
 }
 
 bool CMessageChannelDB::WriteMyMessageChannel(const std::string& channelname)
