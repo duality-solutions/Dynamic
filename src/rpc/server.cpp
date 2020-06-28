@@ -7,6 +7,7 @@
 
 #include "rpc/server.h"
 
+#include "assets/assets.h"
 #include "base58.h"
 #include "fs.h"
 #include "init.h"
