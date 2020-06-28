@@ -431,7 +431,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
 
         CReserveKey* keyChange = transaction.getPossibleKeyChange();
         CValidationState state;
-        if (!wallet->CommitTransaction(*newTx, *keyChange, g_connman->get(), state, recipients[0].fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
+        if (!wallet->CommitTransaction(*newTx, *keyChange, g_connman.get(), state, recipients[0].fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
             return SendCoinsReturn(TransactionCommitFailed, QString::fromStdString(state.GetRejectReason()));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -467,6 +467,56 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
     return SendCoinsReturn(OK);
 }
 
+WalletModel::SendCoinsReturn WalletModel::sendAssets(CWalletTx& tx, QList<SendAssetsRecipient>& recipients, CReserveKey& reservekey)
+{
+    QByteArray transaction_array; /* store serialized transaction */
+
+    {
+        LOCK2(cs_main, wallet->cs_wallet);
+
+        std::pair<int, std::string> error;
+        std::string txid;
+        if (!SendAssetTransaction(this->wallet, tx, reservekey, error, txid))
+            return SendCoinsReturn(TransactionCommitFailed, QString::fromStdString(error.second));
+
+        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+        ssTx << tx.tx;
+        transaction_array.append(&(ssTx[0]), ssTx.size());
+    }
+
+    // Add addresses / update labels that we've sent to the address book,
+    // and emit coinsSent signal for each recipient
+    for (const SendAssetsRecipient &rcp : recipients)
+    {
+        // Don't touch the address book when we have a payment request
+        if (!rcp.paymentRequest.IsInitialized())
+        {
+            std::string strAddress = rcp.address.toStdString();
+            CTxDestination dest = DecodeDestination(strAddress);
+            std::string strLabel = rcp.label.toStdString();
+            {
+                LOCK(wallet->cs_wallet);
+
+                std::map<CTxDestination, CAddressBookData>::iterator mi = wallet->mapAddressBook.find(dest);
+
+                // Check if we have a new address or an updated label
+                if (mi == wallet->mapAddressBook.end())
+                {
+                    wallet->SetAddressBook(dest, strLabel, "send");
+                }
+                else if (mi->second.name != strLabel)
+                {
+                    wallet->SetAddressBook(dest, strLabel, ""); // "" means don't change purpose
+                }
+            }
+        }
+        Q_EMIT assetsSent(wallet, rcp, transaction_array);
+    }
+    checkBalanceChanged(); // update balance immediately, otherwise there could be a short noticeable delay until pollBalanceChanged hits
+
+    return SendCoinsReturn(OK);
+}
+
 OptionsModel* WalletModel::getOptionsModel()
 {
     return optionsModel;
@@ -480,6 +530,16 @@ AddressTableModel* WalletModel::getAddressTableModel()
 TransactionTableModel* WalletModel::getTransactionTableModel()
 {
     return transactionTableModel;
+}
+
+AssetTableModel *WalletModel::getAssetTableModel()
+{
+    return assetTableModel;
+}
+
+MyRestrictedAssetsTableModel *WalletModel::getMyRestrictedAssetsTableModel()
+{
+    return myRestrictedAssetsTableModel;
 }
 
 RecentRequestsTableModel* WalletModel::getRecentRequestsTableModel()
@@ -672,6 +732,11 @@ bool WalletModel::getPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const
     return wallet->GetPubKey(address, vchPubKeyOut);
 }
 
+bool WalletModel::IsSpendable(const CTxDestination& dest) const
+{
+    return IsMine(*wallet, dest) & ISMINE_SPENDABLE;
+}
+
 bool WalletModel::havePrivKey(const CKeyID& address) const
 {
     return wallet->HaveKey(address);
@@ -686,13 +751,13 @@ bool WalletModel::getPrivKey(const CKeyID& address, CKey& vchPrivKeyOut) const
 void WalletModel::getOutputs(const std::vector<COutPoint>& vOutpoints, std::vector<COutput>& vOutputs)
 {
     LOCK2(cs_main, wallet->cs_wallet);
-    BOOST_FOREACH (const COutPoint& outpoint, vOutpoints) {
-        if (!wallet->mapWallet.count(outpoint.hash))
-            continue;
-        int nDepth = wallet->mapWallet[outpoint.hash].GetDepthInMainChain();
-        if (nDepth < 0)
-            continue;
-        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true, true);
+    for (const COutPoint& outpoint : vOutpoints)
+    {
+        auto it = wallet->mapWallet.find(outpoint.hash);
+        if (it == wallet->mapWallet.end()) continue;
+        int nDepth = it->second.GetDepthInMainChain();
+        if (nDepth < 0) continue;
+        COutput out(&it->second, outpoint.n, nDepth, true /* spendable */, true /* solvable */, true /* safe */);
         vOutputs.push_back(out);
     }
 }
@@ -706,40 +771,41 @@ bool WalletModel::isSpent(const COutPoint& outpoint) const
 // AvailableCoins + LockedCoins grouped by wallet address (put change in one group with wallet address)
 void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins) const
 {
-    std::vector<COutput> vCoins;
-    wallet->AvailableCoins(vCoins);
-
-    LOCK2(cs_main, wallet->cs_wallet); // ListLockedCoins, mapWallet
-    std::vector<COutPoint> vLockedCoins;
-    wallet->ListLockedCoins(vLockedCoins);
-
-    // add locked coins
-    BOOST_FOREACH (const COutPoint& outpoint, vLockedCoins) {
-        if (!wallet->mapWallet.count(outpoint.hash))
-            continue;
-        int nDepth = wallet->mapWallet[outpoint.hash].GetDepthInMainChain();
-        if (nDepth < 0)
-            continue;
-        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true, true);
-        if (outpoint.n < out.tx->tx->vout.size() && wallet->IsMine(out.tx->tx->vout[outpoint.n]) == ISMINE_SPENDABLE)
-            vCoins.push_back(out);
-    }
-
-    BOOST_FOREACH (const COutput& out, vCoins) {
-        COutput cout = out;
-
-        while (wallet->IsChange(cout.tx->tx->vout[cout.i]) && cout.tx->tx->vin.size() > 0 && wallet->IsMine(cout.tx->tx->vin[0])) {
-            if (!wallet->mapWallet.count(cout.tx->tx->vin[0].prevout.hash))
-                break;
-            cout = COutput(&wallet->mapWallet[cout.tx->tx->vin[0].prevout.hash], cout.tx->tx->vin[0].prevout.n, 0, true, true);
+    for (auto& group : wallet->ListCoins()) {
+        auto& resultGroup = mapCoins[QString::fromStdString(EncodeDestination(group.first))];
+        for (auto& coin : group.second) {
+            resultGroup.emplace_back(std::move(coin));
         }
-
-        CTxDestination address;
-        if (!out.fSpendable || !ExtractDestination(cout.tx->tx->vout[cout.i].scriptPubKey, address))
-            continue;
-        mapCoins[QString::fromStdString(CDynamicAddress(address).ToString())].push_back(out);
     }
 }
+
+/** ASSET START */
+// AvailableCoins + LockedCoins grouped by wallet address (put change in one group with wallet address)
+void WalletModel::listAssets(std::map<QString, std::map<QString, std::vector<COutput> > >& mapCoins) const
+{
+    std::map<QString, std::map<QString, std::vector<COutput> > > mapSortedByAssetName;
+    auto list = wallet->ListAssets();
+
+    for (auto& group : list) {
+        auto address = QString::fromStdString(EncodeDestination(group.first));
+
+        for (auto& coin : group.second) {
+            auto out = coin.tx->tx->vout[coin.i];
+            std::string strAssetName;
+            CAmount nAmount;
+            if (!GetAssetInfoFromScript(out.scriptPubKey, strAssetName, nAmount))
+                continue;
+
+            if (nAmount == 0)
+                continue;
+
+            QString assetName = QString::fromStdString(strAssetName);
+            auto& assetMap = mapCoins[assetName];
+            assetMap[address].emplace_back(coin);
+        }
+    }
+}
+/** ASSET END */
 
 bool WalletModel::isLockedCoin(uint256 hash, unsigned int n) const
 {
@@ -806,7 +872,7 @@ bool WalletModel::abandonTransaction(uint256 hash) const
 
 bool WalletModel::isWalletEnabled()
 {
-    return !GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
+    return !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
 }
 
 bool WalletModel::hdEnabled() const

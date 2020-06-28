@@ -23,7 +23,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #ifdef ENABLE_GPU
     int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
 #endif
-    std::string PrivAddress = GetArg("-miningprivkey", "");
+    std::string PrivAddress = gArgs.GetArg("-miningprivkey", "");
     if (!PrivAddress.empty()) {
         CDynamicSecret Secret;
         Secret.SetString(PrivAddress);
@@ -275,8 +275,8 @@ void MiningPage::changeNumberOfCPUThreads(int i, bool shutdown)
 {
     if (!shutdown)
         ui->labelNCPUCores->setText(QString("%1").arg(i));
-    ForceSetArg("-gen", isMinerOn() ? "1" : "0");
-    ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
+    gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
+    gArgs.ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
     InitMiners(Params(), *g_connman);
     SetCPUMinerThreads(i);
     if (fCPUMinerOn)
@@ -288,8 +288,8 @@ void MiningPage::changeNumberOfGPUThreads(int i, bool shutdown)
 {
     if (!shutdown)
         ui->labelNGPUCores->setText(QString("%1").arg(i));
-    ForceSetArg("-gen", isMinerOn() ? "1" : "0");
-    ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
+    gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
+    gArgs.ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
     InitMiners(Params(), *g_connman);
     SetGPUMinerThreads(i);
     if (fGPUMinerOn)

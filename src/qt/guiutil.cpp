@@ -10,10 +10,13 @@
 #include "arith_uint256.h"
 #include "dynamicaddressvalidator.h"
 #include "dynamicunits.h"
+#include "guiconstants.h"
+#include "platformstyle.h"
 #include "qvalidatedlineedit.h"
 #include "walletmodel.h"
 
 #include "init.h"
+#include "fs.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "protocol.h"
@@ -61,6 +64,7 @@
 #include <QFont>
 #include <QLineEdit>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QSettings>
 #include <QTextDocument> // for Qt::mightBeRichText
 #include <QThread>
@@ -73,6 +77,10 @@
 
 #if QT_VERSION >= 0x50200
 #include <QFontDatabase>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
 #endif
 
 #if BOOST_FILESYSTEM_VERSION >= 3
@@ -91,6 +99,66 @@ extern double NSAppKitVersionNumber;
 
 namespace GUIUtil
 {
+QFont getSubLabelFont()
+{
+    QFont labelSubFont;
+#if !defined(Q_OS_MAC)
+    labelSubFont.setFamily("Open Sans");
+#endif
+    labelSubFont.setWeight(QFont::Weight::ExtraLight);
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    return labelSubFont;
+}
+
+QFont getSubLabelFontBolded()
+{
+    QFont labelSubFont;
+#if !defined(Q_OS_MAC)
+    labelSubFont.setFamily("Open Sans");
+#endif
+    labelSubFont.setWeight(QFont::Weight::Bold);
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    return labelSubFont;
+}
+
+QFont getTopLabelFontBolded()
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(QFont::Weight::Bold);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(18);
+    return labelTopFont;
+}
+
+QFont getTopLabelFont(int weight, int pxsize)
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(weight);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(pxsize);
+    return labelTopFont;
+}
+
+QFont getTopLabelFont()
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(QFont::Weight::Light);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(18);
+    return labelTopFont;
+}
+
 QString dateTimeStr(const QDateTime& date)
 {
     return date.date().toString(Qt::SystemLocaleShortDate) + QString(" ") + date.toString("hh:mm");
@@ -420,7 +488,7 @@ void openDebugLogfile()
 
 void openConfigfile()
 {
-    boost::filesystem::path pathConfig = GetConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
+    boost::filesystem::path pathConfig = GetConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
 
     /* Open dynamic.conf with the associated application */
     if (boost::filesystem::exists(pathConfig))
@@ -477,6 +545,25 @@ void SubstituteFonts(const QString& language)
     }
 #endif
 #endif
+}
+
+SyncWarningMessage::SyncWarningMessage(QWidget *parent) :
+    QDialog(parent)
+{
+
+}
+
+bool SyncWarningMessage::showTransactionSyncWarningMessage()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this, tr("Warning: transaction while syncing wallet!"), tr("You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?\n\nRecommended action: Fully sync your wallet before sending a transaction.\n"),
+                                  QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int _size_threshold, QObject* parent) : QObject(parent),
@@ -764,7 +851,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
             optionFile << "Name=Dynamic\n";
         else
             optionFile << strprintf("Name=Dynamic (%s)\n", chain);
-        optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", GetBoolArg("-testnet", false), GetBoolArg("-regtest", false));
+        optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", gArgs.GetBoolArg("-testnet", false), gArgs.GetBoolArg("-regtest", false));
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";
         optionFile.close();
@@ -1053,7 +1140,7 @@ int CPUMaxThreads()
 {
     int nThreads = boost::thread::hardware_concurrency();
 
-    int nUseThreads = GetArg("-genproclimit-cpu", -1);
+    int nUseThreads = gArgs.GetArg("-genproclimit-cpu", -1);
     if (nUseThreads < 0) {
         nUseThreads = nThreads;
     }
@@ -1191,5 +1278,42 @@ QString HashRateUnits(int64_t hashRate)
         prefix = " kMGTPEZY"[i];
 
     return QString("%1H/s").arg(prefix);
+}
+
+void concatenate(QPainter* painter, QString& catString, int static_width, int left_side, int right_size)
+{
+    // Starting length of the name
+    int start_name_length = catString.size();
+
+    // Get the length of the dots
+    #ifndef QTversionPreFiveEleven
+        int dots_width = painter->fontMetrics().horizontalAdvance("...");
+    #else
+        int dots_width = painter->fontMetrics().width("...");
+    #endif
+
+    // Add the dots width to the amount width
+    static_width += dots_width;
+
+    // Start concatenation loop, end loop if name is at three characters
+    while (catString.size() > 3)
+    {
+        // Get the text width of the current name
+        #ifndef QTversionPreFiveEleven
+            int text_width = painter->fontMetrics().horizontalAdvance(catString);
+        #else
+            int text_width = painter->fontMetrics().width(catString);
+        #endif
+        // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
+        if (left_side + text_width < right_size - static_width)
+            break;
+
+        // substring the name minus the last character of it and continue the loop
+        catString = catString.left(catString.size() - 1);
+    }
+
+    // Add the ... if the name was concatenated
+    if (catString.size() != start_name_length)
+        catString.append("...");
 }
 } // namespace GUIUtil

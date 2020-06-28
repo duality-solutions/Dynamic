@@ -127,6 +127,31 @@ QIcon PlatformStyle::TextColorIcon(const QIcon& icon) const
     return ColorizeIcon(icon, TextColor());
 }
 
+QColor PlatformStyle::MainBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::TopWidgetBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::WidgetBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::SendEntriesBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::AssetTxColor() const
+{
+    return QColor(11,129,158);
+}
+
 const PlatformStyle* PlatformStyle::instantiate(const QString& platformId)
 {
     for (unsigned x = 0; x < platform_styles_count; ++x) {

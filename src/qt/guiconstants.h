@@ -20,7 +20,8 @@ static const int STATUSBAR_ICONSIZE = 16;
 static const bool DEFAULT_SPLASHSCREEN = true;
 
 /* Invalid field background style */
-#define STYLE_INVALID "background:#FF8080"
+#define STYLE_INVALID "background:#FF8080; border: 1px solid lightgray; padding: 0px;"
+#define STYLE_VALID "border: 1px solid lightgray; padding: 0px;"
 
 /* Transaction list -- unconfirmed transaction */
 #define COLOR_UNCONFIRMED QColor(128, 128, 128)
@@ -48,6 +49,10 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_STAKE QColor(102, 128, 14)
 /* Transaction list -- TX status decoration - orphan (Light Gray) */
 #define COLOR_ORPHAN QColor(211, 211, 211)
+
+/* Ravencoin label color as a string */
+#define STRING_LABEL_COLOR "color: #4960ad"
+#define STRING_LABEL_COLOR_WARNING "color: #FF8080"
 
 /* Tooltips longer than this (in characters) are converted into rich text,
    so that they can be word-wrapped.

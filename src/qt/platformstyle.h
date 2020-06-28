@@ -42,6 +42,14 @@ public:
     /** Colorize an icon (given object) with the text color */
     QIcon TextColorIcon(const QIcon& icon) const;
 
+/* ASSET START */
+    QColor MainBackGroundColor() const;
+    QColor TopWidgetBackGroundColor() const;
+    QColor WidgetBackGroundColor() const;
+    QColor SendEntriesBackGroundColor() const;
+    QColor AssetTxColor() const;
+/* ASSET END */
+
 private:
     PlatformStyle(const QString& name, bool imagesOnButtons, bool colorizeIcons, bool useExtraSpacing);
 

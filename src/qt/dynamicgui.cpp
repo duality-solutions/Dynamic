@@ -47,8 +47,10 @@
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
+#include <QFontDatabase>
 #include <QIcon>
 #include <QListWidget>
 #include <QMenuBar>
@@ -70,6 +72,10 @@
 #include <QUrl>
 #else
 #include <QUrlQuery>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
 #endif
 
 const std::string DynamicGUI::DEFAULT_UIPLATFORM =
@@ -152,7 +158,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
     } else {
         windowTitle += tr("Node");
     }
-    QString userWindowTitle = QString::fromStdString(GetArg("-windowtitle", ""));
+    QString userWindowTitle = QString::fromStdString(gArgs.GetArg("-windowtitle", ""));
     if (!userWindowTitle.isEmpty())
         windowTitle += " - " + userWindowTitle;
     windowTitle += " " + networkStyle->getTitleAddText();
@@ -1556,8 +1562,13 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle* pl
     QList<DynamicUnits::Unit> units = DynamicUnits::availableUnits();
     int max_width = 0;
     const QFontMetrics fm(font());
-    Q_FOREACH (const DynamicUnits::Unit unit, units) {
-        max_width = qMax(max_width, fm.width(DynamicUnits::name(unit)));
+    for (const DynamicUnits::Unit unit : units)
+    {
+        #ifndef QTversionPreFiveEleven
+            max_width = qMax(max_width, fm.horizontalAdvance(DynamicUnits::name(unit)));
+        #else
+            max_width = qMax(max_width, fm.width(DynamicUnits::name(unit)));
+        #endif
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);

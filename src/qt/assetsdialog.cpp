@@ -36,7 +36,6 @@
 #include "wallet/fees.h"
 
 #include <QFontMetrics>
-#include <QGraphicsDropShadowEffect>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -124,11 +123,11 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
     ui->checkBoxMinimumFee->setChecked(settings.value("fPayOnlyMinFee").toBool());
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
-    /** RVN START */
+    /** ASSET START */
     setupAssetControlFrame(platformStyle);
     setupScrollView(platformStyle);
     setupFeeControl(platformStyle);
-    /** RVN END */
+    /** ASSET END */
 }
 
 void AssetsDialog::setClientModel(ClientModel *_clientModel)
@@ -176,7 +175,7 @@ void AssetsDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int &n : confTargets) {
-            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * GetParams().GetConsensus().nPowTargetSpacing)).arg(n));
+            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * Params().GetConsensus().nPowTargetSpacing)).arg(n));
         }
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(updateSmartFeeLabel()));
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(assetControlUpdateLabels()));
@@ -228,11 +227,8 @@ AssetsDialog::~AssetsDialog()
 void AssetsDialog::setupAssetControlFrame(const PlatformStyle *platformStyle)
 {
     /** Update the assetcontrol frame */
-    ui->frameAssetControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    ui->widgetAssetControl->setStyleSheet(".QWidget {background-color: transparent;}");
-    /** Create the shadow effects on the frames */
-
-    ui->frameAssetControl->setGraphicsEffect(GUIUtil::getShadowEffect());
+    ui->frameAssetControl->setStyleSheet(GUIUtil::loadStyleSheet());
+    ui->widgetAssetControl->setStyleSheet(GUIUtil::loadStyleSheet());
 
     ui->labelAssetControlFeatures->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelAssetControlFeatures->setFont(GUIUtil::getTopLabelFont());
@@ -282,7 +278,6 @@ void AssetsDialog::setupScrollView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
     ui->scrollArea->setStyleSheet(QString(".QScrollArea{background-color: %1; border: none}").arg(platformStyle->WidgetBackGroundColor().name()));
-    ui->scrollArea->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     // Add some spacing so we can see the whole card
     ui->entries->setContentsMargins(10,10,20,0);
@@ -293,9 +288,6 @@ void AssetsDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
     ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    /** Create the shadow effects on the frames */
-
-    ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->labelFeeHeadline->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
@@ -999,7 +991,7 @@ void AssetsDialog::assetControlUpdateLabels()
     }
 }
 
-/** RVN START */
+/** ASSET START */
 void AssetsDialog::assetControlUpdateSendCoinsDialog()
 {
     for(int i = 0; i < ui->entries->count(); ++i)
@@ -1064,4 +1056,4 @@ void AssetsDialog::handleFirstSelection()
         entry->refreshAssetList();
     }
 }
-/** RVN END */
+/** ASSET END */
