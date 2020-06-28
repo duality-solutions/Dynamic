@@ -9,8 +9,6 @@
 
 #include "primitives/transaction.h" // CTransaction(Ref)
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals2/signal.hpp>
 #include <memory>
 
 class CBlock;
@@ -21,6 +19,7 @@ class CGovernanceVote;
 class CGovernanceObject;
 class CMessage;
 class CReserveScript;
+class CScheduler;
 class CTransaction;
 class CValidationInterface;
 class CValidationState;
@@ -38,10 +37,17 @@ void UnregisterAllValidationInterfaces();
 class CValidationInterface
 {
 protected:
+    /**
+    * Protected destructor so that instances can only be deleted by derived
+    * classes. If that restriction is no longer desired, this should be made
+    * public and virtual.
+    */
     ~CValidationInterface() = default;
     virtual void AcceptedBlockHeader(const CBlockIndex* pindexNew) {}
     virtual void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload) {}
+    /** Notifies listeners of updated blockchain tip */
     virtual void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload) {}
+    virtual void SyncTransaction(const CTransaction&, const CBlockIndex* pindex, int posInBlock) {}
     /** Notifies listeners of a transaction having been added to mempool. */
     virtual void TransactionAddedToMempool(const CTransactionRef &ptxn) {}
     /**
@@ -59,69 +65,52 @@ protected:
     virtual void Inventory(const uint256& hash) {}
     virtual void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) {}
     virtual void BlockChecked(const CBlock&, const CValidationState&) {}
-    virtual void GetScriptForMining(std::shared_ptr<CReserveScript>&){};
-    virtual void ResetRequestCount(const uint256& hash){};
+    virtual void GetScriptForMining(std::shared_ptr<CReserveScript>&){}
+    virtual void ResetRequestCount(const uint256& hash){}
     virtual void NewPoWValidBlock(const CBlockIndex* pindex, const std::shared_ptr<const CBlock>& block) {}
     virtual void NotifyBDAPUpdate(const char* value, const char* action) {}
-    virtual void NewAssetMessage(const CMessage &message) {};
+    virtual void NewAssetMessage(const CMessage &message) {}
+
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterAllValidationInterfaces();
 };
 
-struct CMainSignals {
-    /** Notifies listeners of accepted block header */
-    boost::signals2::signal<void(const CBlockIndex*)> AcceptedBlockHeader;
-    /** Notifies listeners of updated block header tip */
-    boost::signals2::signal<void(const CBlockIndex*, bool fInitialDownload)> NotifyHeaderTip;
-    /** Notifies listeners of updated block chain tip */
-    boost::signals2::signal<void(const CBlockIndex*, const CBlockIndex*, bool fInitialDownload)> UpdatedBlockTip;
-    /** A posInBlock value for SyncTransaction calls for tranactions not
-     * included in connected blocks such as transactions removed from mempool,
-     * accepted to mempool or appearing in disconnected blocks.*/
-    static const int SYNC_TRANSACTION_NOT_IN_BLOCK = -1;
-    /** Notifies listeners of updated transaction data (transaction, and
-     * optionally the block it is found in). Called with block data when
-     * transaction is included in a connected block, and without block data when
-     * transaction was accepted to mempool, removed from mempool (only when
-     * removal was due to conflict from connected block), or appeared in a
-     * disconnected block.*/
-    boost::signals2::signal<void(const CTransaction&, const CBlockIndex* pindex, int posInBlock)> SyncTransaction;
-    boost::signals2::signal<void (const CTransactionRef &)> TransactionAddedToMempool;
-    boost::signals2::signal<void (const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef>&)> BlockConnected;
-    boost::signals2::signal<void (const std::shared_ptr<const CBlock> &)> BlockDisconnected;
-    /** Notifies listeners of an updated transaction lock without new data. */
-    boost::signals2::signal<void(const CTransaction&)> NotifyTransactionLock;
-    /** Notifies listeners of a new governance vote. */
-    boost::signals2::signal<void(const CGovernanceVote&)> NotifyGovernanceVote;
-    /** Notifies listeners of a new governance object. */
-    boost::signals2::signal<void(const CGovernanceObject&)> NotifyGovernanceObject;
-    /** Notifies listeners of a attempted InstantSend double spend*/
-    boost::signals2::signal<void(const CTransaction& currentTx, const CTransaction& previousTx)> NotifyInstantSendDoubleSpendAttempt;
-    /** Notifies listeners of an updated transaction without new data (for now: a coinbase potentially becoming visible). */
-    boost::signals2::signal<bool(const uint256&)> UpdatedTransaction;
-    /** Notifies listeners of a new active block chain. */
-    boost::signals2::signal<void(const CBlockLocator&)> SetBestChain;
-    /** Notifies listeners about an inventory item being seen on the network. */
-    boost::signals2::signal<void(const uint256&)> Inventory;
-    /** Tells listeners to broadcast their data. */
-    boost::signals2::signal<void(int64_t nBestBlockTime, CConnman* connman)> Broadcast;
-    /** Notifies listeners of a block validation result */
-    boost::signals2::signal<void(const CBlock&, const CValidationState&)> BlockChecked;
-    /** Notifies listeners that a key for mining is required (coinbase) */
-    boost::signals2::signal<void(std::shared_ptr<CReserveScript>&)> ScriptForMining;
-    /** Notifies listeners that a block has been successfully mined */
-    boost::signals2::signal<void(const uint256&)> BlockFound;
-    /**
-     * Notifies listeners that a block which builds directly on our current tip
-     * has been received and connected to the headers tree, though not validated yet */
-    boost::signals2::signal<void(const CBlockIndex*, const std::shared_ptr<const CBlock>&)> NewPoWValidBlock;
-    /** Notifies listeners of an updated BDAP action */
-    boost::signals2::signal<void(const char* value, const char* action)> NotifyBDAPUpdate;
-/* ASSET START */
-    boost::signals2::signal<void (const CMessage &)> NewAssetMessage;
-    boost::signals2::signal<void (const std::string &)> AssetInventory;
-/* ASSET END  */
+struct MainSignalsInstance;
+
+class CMainSignals {
+private:
+    std::unique_ptr<MainSignalsInstance> m_internals;
+
+    friend void ::RegisterValidationInterface(CValidationInterface*);
+    friend void ::UnregisterValidationInterface(CValidationInterface*);
+    friend void ::UnregisterAllValidationInterfaces();
+
+public:
+    /** Register a CScheduler to give callbacks which should run in the background (may only be called once) */
+    void RegisterBackgroundSignalScheduler(CScheduler& scheduler);
+    /** Unregister a CScheduler to give callbacks which should run in the background - these callbacks will now be dropped! */
+    void UnregisterBackgroundSignalScheduler();
+    /** Call any remaining callbacks on the calling thread */
+    void FlushBackgroundCallbacks();
+
+    void UpdatedBlockTip(const CBlockIndex *, const CBlockIndex *, bool fInitialDownload);
+    void SyncTransaction(const CTransaction &, const CBlockIndex *, int posInBlock);
+    void TransactionAddedToMempool(const CTransactionRef &);
+    void BlockConnected(const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef> &);
+    void NotifyTransactionLock(const CTransaction &);
+    void BlockDisconnected(const std::shared_ptr<const CBlock> &);
+    void NotifyGovernanceVote(const CGovernanceVote &);
+    void NotifyGovernanceObject(const CGovernanceObject &);
+    void NotifyInstantSendDoubleSpendAttempt(const CTransaction &, const CTransaction &);
+    void SetBestChain(const CBlockLocator &);
+    void Inventory(const uint256 &);
+    void Broadcast(int64_t nBestBlockTime, CConnman* connman);
+    void BlockChecked(const CBlock&, const CValidationState&);
+    void ScriptForMining(std::shared_ptr<CReserveScript> &);
+    void NewPoWValidBlock(const CBlockIndex *, const std::shared_ptr<const CBlock>&);
+    void NotifyBDAPUpdate(const char*, const char*);
+    void NewAssetMessage(const CMessage&);
 };
 
 CMainSignals& GetMainSignals();

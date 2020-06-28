@@ -338,8 +338,9 @@ void PrepareShutdown()
     peerLogic.reset();
     g_connman.reset();
 
-    if (fDumpMempoolLater)
+    if (fDumpMempoolLater && gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
         DumpMempool();
+    }
 
     if (fFeeEstimatesInitialized)
     {
@@ -352,6 +353,21 @@ void PrepareShutdown()
             LogPrintf("%s: Failed to write fee estimates to %s\n", __func__, est_path.string());
         fFeeEstimatesInitialized = false;
     }
+
+    // FlushStateToDisk generates a SetBestChain callback, which we should avoid missing
+    if (pcoinsTip != nullptr) {
+        FlushStateToDisk();
+    }
+
+    // After there are no more peers/RPC left to give us new data which may generate
+    // CValidationInterface callbacks, flush them...
+    GetMainSignals().FlushBackgroundCallbacks();
+
+    // Any future callbacks will be dropped. This should absolutely be safe - if
+    // missing a callback results in an unrecoverable situation, unclean shutdown
+    // would too. The only reason to do the above flushes is to let the wallet catch
+    // up with our current chain to avoid any strange pruning edge cases and make
+    // next startup faster by avoiding rescan.
 
     {
         LOCK(cs_main);
@@ -578,6 +594,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-maxorphantx=<n>", strprintf(_("Keep at most <n> unconnectable transactions in memory (default: %u)"), DEFAULT_MAX_ORPHAN_TRANSACTIONS));
     strUsage += HelpMessageOpt("-maxmempool=<n>", strprintf(_("Keep the transaction memory pool below <n> megabytes (default: %u)"), DEFAULT_MAX_MEMPOOL_SIZE));
     strUsage += HelpMessageOpt("-mempoolexpiry=<n>", strprintf(_("Do not keep transactions in the mempool longer than <n> hours (default: %u)"), DEFAULT_MEMPOOL_EXPIRY));
+    strUsage += HelpMessageOpt("-persistmempool", strprintf(_("Whether to save the mempool on shutdown and load on restart (default: %u)"), DEFAULT_PERSIST_MEMPOOL));
     strUsage += HelpMessageOpt("-par=<n>", strprintf(_("Set the number of script verification threads (%u to %d, 0 = auto, <0 = leave that many cores free, default: %d)"),
                                                -GetNumCores(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS));
 #ifndef WIN32
@@ -938,8 +955,12 @@ void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
         if (gArgs.GetBoolArg("-stopafterblockimport", DEFAULT_STOPAFTERBLOCKIMPORT)) {
             LogPrintf("Stopping after block import\n");
             StartShutdown();
+        } // End scope of CImportingNow
+        if (gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
+            LoadMempool();
+            fDumpMempoolLater = !fRequestShutdown;
         }
-    } // End scope of CImportingNow
+    }
 
     // force UpdatedBlockTip to initialize nCachedBlockHeight for PS, DN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
