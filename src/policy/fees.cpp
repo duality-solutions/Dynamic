@@ -413,7 +413,7 @@ void TxConfirmStats::Read(CAutoFile& filein, int nFileVersion, size_t numBuckets
     size_t maxConfirms, maxPeriods;
 
     // The current version will store the decay with each individual TxConfirmStats and also keep a scale factor
-    if (nFileVersion >= 149900) {
+    if (nFileVersion >= 2050000) {
         filein >> decay;
         if (decay <= 0 || decay >= 1) {
             throw std::runtime_error("Corrupt estimates file. Decay must be between 0 and 1 (non-inclusive)");
@@ -445,7 +445,7 @@ void TxConfirmStats::Read(CAutoFile& filein, int nFileVersion, size_t numBuckets
         }
     }
 
-    if (nFileVersion >= 149900) {
+    if (nFileVersion >= 2050000) {
         filein >> failAvg;
         if (maxPeriods != failAvg.size()) {
             throw std::runtime_error("Corrupt estimates file. Mismatch in confirms tracked for failures");
@@ -929,7 +929,7 @@ bool CBlockPolicyEstimator::Write(CAutoFile& fileout) const
 {
     try {
         LOCK(cs_feeEstimator);
-        fileout << 149900; // version required to read: 0.14.99 or later
+        fileout << 2050000;        // version required to read: 2.5.0.0 or later
         fileout << CLIENT_VERSION; // version that wrote the file
         fileout << nBestSeenHeight;
         if (BlockSpan() > HistoricalBlockSpan()/2) {
@@ -964,7 +964,7 @@ bool CBlockPolicyEstimator::Read(CAutoFile& filein)
         unsigned int nFileBestSeenHeight;
         filein >> nFileBestSeenHeight;
 
-        if (nVersionThatWrote < 149900) {
+        if (nVersionThatWrote < 2050000) {
             // Read the old fee estimates file for temporary use, but then discard.  Will start collecting data from scratch.
             // decay is stored before buckets in old versions, so pre-read decay and pass into TxConfirmStats constructor
             double tempDecay;
@@ -989,7 +989,7 @@ bool CBlockPolicyEstimator::Read(CAutoFile& filein)
                 tempMap[tempBuckets[i]] = i;
             }
         }
-        else { // nVersionThatWrote >= 149900
+        else { // nVersionThatWrote >= 2050000
             unsigned int nFileHistoricalFirst, nFileHistoricalBest;
             filein >> nFileHistoricalFirst >> nFileHistoricalBest;
             if (nFileHistoricalFirst > nFileHistoricalBest || nFileHistoricalBest > nFileBestSeenHeight) {
