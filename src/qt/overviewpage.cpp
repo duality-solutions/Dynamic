@@ -9,7 +9,6 @@
 #include "ui_overviewpage.h"
 
 #include "clientmodel.h"
-#include "dynamicgui.h"
 #include "dynamicunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
@@ -34,7 +33,6 @@
 
 #include <QAbstractItemDelegate>
 #include <QDebug>
-#include <QFontDatabase>
 #include <QPainter>
 #include <QScrollBar>
 #include <QSettings>
@@ -55,7 +53,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
 public:
-    explicit TxViewDelegate(const PlatformStyle* _platformStyle, QObject *parent=nullptr):
+    explicit TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
         QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
         platformStyle(_platformStyle)
     {
@@ -272,23 +270,27 @@ public:
 
 };
 
-OverviewPage::OverviewPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
-                                                                                  timer(nullptr),
-                                                                                  ui(new Ui::OverviewPage),
-                                                                                  clientModel(0),
-                                                                                  walletModel(0),
-                                                                                  currentBalance(-1),
-                                                                                  currentTotal(-1),
-                                                                                  currentStake(-1),
-                                                                                  currentUnconfirmedBalance(-1),
-                                                                                  currentImmatureBalance(-1),
-                                                                                  currentWatchOnlyBalance(-1),
-                                                                                  currentWatchUnconfBalance(-1),
-                                                                                  currentWatchImmatureBalance(-1),
-                                                                                  currentWatchOnlyStake(-1),
-                                                                                  txdelegate(new TxViewDelegate(platformStyle, this)),
-                                                                                  assetdelegate(new AssetViewDelegate(platformStyle, this))
+#include "overviewpage.moc"
+#include "dynamicgui.h"
+#include <QFontDatabase>
 
+OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) :
+    QWidget(parent),
+    timer(nullptr),
+    ui(new Ui::OverviewPage),
+    clientModel(0),
+    walletModel(0),
+    currentBalance(-1),
+    currentTotal(-1),
+    currentStake(-1),
+    currentUnconfirmedBalance(-1),
+    currentImmatureBalance(-1),
+    currentWatchOnlyBalance(-1),
+    currentWatchUnconfBalance(-1),
+    currentWatchImmatureBalance(-1),
+    currentWatchOnlyStake(-1),
+    txdelegate(new TxViewDelegate(platformStyle, this)),
+    assetdelegate(new AssetViewDelegate(platformStyle, this))
 {
     ui->setupUi(this);
     QString theme = GUIUtil::getThemeName();
