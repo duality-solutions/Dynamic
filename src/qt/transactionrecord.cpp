@@ -443,7 +443,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
             }
         }
     }
-    /** RVN END */
+    /** ASSET END */
 
     return parts;
 }

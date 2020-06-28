@@ -110,6 +110,14 @@ QIcon PlatformStyle::SingleColorIcon(const QString& filename) const
     return ColorizeIcon(filename, SingleColor());
 }
 
+QIcon PlatformStyle::SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const
+{
+    QIcon icon;
+    icon.addPixmap(QPixmap(filenameOn), QIcon::Normal, QIcon::On);
+    icon.addPixmap(QPixmap(filenameOff), QIcon::Normal, QIcon::Off);
+    return icon;
+}
+
 QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
 {
     if (!colorizeIcons)

@@ -773,7 +773,7 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
     case AssetNameRole:
         {
             QString assetName;
-            if (rec->assetName != "RVN")
+            if (rec->assetName != "DYN")
                assetName.append(QString::fromStdString(rec->assetName));
             else
                assetName.append(QString(DynamicUnits::name(walletModel->getOptionsModel()->getDisplayUnit())));

@@ -35,7 +35,6 @@
 #include <QDebug>
 #include <QClipboard>
 #include <QCompleter>
-#include <QGraphicsDropShadowEffect>
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QSettings>
@@ -119,9 +118,7 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
     formatGreen = "%1%2 <font color=green><b>%3</b></font>";
-    formatBlack = "%1%2 <font color=black><b>%3</b></font>";
-    if (darkModeEnabled)
-        formatBlack = "%1%2 <font color=white><b>%3</b></font>";
+    formatBlack = "%1%2 <font color=white><b>%3</b></font>";
 
     setupCoinControlFrame(platformStyle);
     setupAssetDataView(platformStyle);
@@ -185,7 +182,7 @@ void ReissueAssetDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int &n : confTargets) {
-            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * GetParams().GetConsensus().nPowTargetSpacing)).arg(n));
+            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * Params().GetConsensus().nPowTargetSpacing)).arg(n));
         }
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(updateSmartFeeLabel()));
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(coinControlUpdateLabels()));
@@ -291,9 +288,6 @@ void ReissueAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyl
     /** Update the assetcontrol frame */
     ui->frameCoinControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
-    /** Create the shadow effects on the frames */
-
-    ui->frameCoinControl->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->labelCoinControlFeatures->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlFeatures->setFont(GUIUtil::getTopLabelFont());
@@ -343,7 +337,6 @@ void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
     ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->assetNameLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->assetNameLabel->setFont(GUIUtil::getSubLabelFont());
@@ -362,10 +355,8 @@ void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
     ui->ipfsBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
 
     ui->frame_3->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    ui->frame_3->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    ui->frame_2->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->currentDataLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->currentDataLabel->setFont(GUIUtil::getTopLabelFont());
@@ -382,9 +373,6 @@ void ReissueAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
     ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-    /** Create the shadow effects on the frames */
-
-    ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->labelFeeHeadline->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
@@ -932,10 +920,10 @@ void ReissueAssetDialog::onReissueAssetClicked()
     QStringList formatted;
 
     // generate bold amount string
-    QString amount = "<b>" + QString::fromStdString(ValueFromAmountString(GetReissueAssetBurnAmount(), 8)) + " RVN";
+    QString amount = "<b>" + QString::fromStdString(ValueFromAmountString(GetReissueAssetBurnAmount(), 8)) + " DYN";
     amount.append("</b>");
     // generate monospace address string
-    QString addressburn = "<span style='font-family: monospace;'>" + QString::fromStdString(GetParams().ReissueAssetBurnAddress());
+    QString addressburn = "<span style='font-family: monospace;'>" + QString::fromStdString(Params().ReissueAssetBurnAddress());
     addressburn.append("</span>");
 
     QString recipientElement1;
@@ -961,7 +949,7 @@ void ReissueAssetDialog::onReissueAssetClicked()
     {
         // append fee string if a fee is required
         questionString.append("<hr /><span style='color:#aa0000;'>");
-        questionString.append(DynamicnUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nFeeRequired));
+        questionString.append(DynamicUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nFeeRequired));
         questionString.append("</span> ");
         questionString.append(tr("added as transaction fee"));
 

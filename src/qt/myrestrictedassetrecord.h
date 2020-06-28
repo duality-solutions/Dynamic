@@ -33,12 +33,12 @@ public:
     static const int RecommendedNumConfirmations = 6;
 
     MyRestrictedAssetRecord():
-            hash(), time(0), type(Other), address(""), assetName("RVN"), idx(0)
+            hash(), time(0), type(Other), address(""), assetName("DYN"), idx(0)
     {
     }
 
     MyRestrictedAssetRecord(uint256 _hash, qint64 _time):
-            hash(_hash), time(_time), type(Other), address(""), assetName("RVN"), idx(0)
+            hash(_hash), time(_time), type(Other), address(""), assetName("DYN"), idx(0)
     {
     }
 
@@ -46,7 +46,7 @@ public:
                       Type _type, const std::string &_address,
                       const CAmount& _debit, const CAmount& _credit):
             hash(_hash), time(_time), type(_type), address(_address),
-            assetName("RVN"), idx(0)
+            assetName("DYN"), idx(0)
     {
     }
 

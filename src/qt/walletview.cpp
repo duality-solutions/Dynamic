@@ -9,11 +9,8 @@
 
 #include "addressbookpage.h"
 #include "askpassphrasedialog.h"
-#include "assetsdialog.h"
-#include "assettablemodel.h"
 #include "bdappage.h"
 #include "clientmodel.h"
-#include "createassetdialog.h"
 #include "dynamicgui.h"
 #include "guiutil.h"
 #include "miningpage.h"
@@ -22,8 +19,6 @@
 #include "overviewpage.h"
 #include "platformstyle.h"
 #include "receivecoinsdialog.h"
-#include "reissueassetdialog.h"
-#include "restrictedassetsdialog.h"
 #include "sendcoinsdialog.h"
 #include "signverifymessagedialog.h"
 #include "transactionrecord.h"
@@ -34,6 +29,12 @@
 
 #include "dynodeconfig.h"
 #include "ui_interface.h"
+
+#include "assettablemodel.h"
+#include "assetsdialog.h"
+#include "createassetdialog.h"
+#include "reissueassetdialog.h"
+#include "restrictedassetsdialog.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -61,14 +62,6 @@ WalletView::WalletView(const PlatformStyle* _platformStyle, QWidget* parent) : Q
     miningPage = new MiningPage(platformStyle);
     bdapPage = new BdapPage(platformStyle);
 
-    assetsPage = new AssetsDialog(platformStyle);
-    createAssetsPage = new CreateAssetDialog(platformStyle);
-    manageAssetsPage = new ReissueAssetDialog(platformStyle);
-    restrictedAssetsPage = new RestrictedAssetsDialog(platformStyle);
-
-    usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
-    usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
-
     transactionsPage = new QWidget(this);
     QVBoxLayout* vbox = new QVBoxLayout();
     QHBoxLayout* hbox_buttons = new QHBoxLayout();
@@ -81,6 +74,14 @@ WalletView::WalletView(const PlatformStyle* _platformStyle, QWidget* parent) : Q
         exportButton->setIcon(QIcon(":/icons/" + theme + "/export"));
     }
     hbox_buttons->addStretch();
+
+    assetsPage = new AssetsDialog(platformStyle);
+    createAssetsPage = new CreateAssetDialog(platformStyle);
+    manageAssetsPage = new ReissueAssetDialog(platformStyle);
+    restrictedAssetsPage = new RestrictedAssetsDialog(platformStyle);
+
+    usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
+    usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
 
     // Sum of selected transactions
     QLabel* transactionSumLabel = new QLabel();                // Label
@@ -273,7 +274,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
             return;
     }
 
-    /** RVN START */
+    /** ASSET START */
     // With the addition of asset transactions, there can be multiple transaction that need notifications
     // so we need to loop through all new transaction that were added to the transaction table and display
     // notifications for each individual transaction
@@ -297,6 +298,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
     assetsPage->processNewTransaction();
     createAssetsPage->updateAssetList();
     manageAssetsPage->updateAssetsList();
+    /** ASSET END */
 
 }
 

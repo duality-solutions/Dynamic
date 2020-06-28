@@ -38,7 +38,6 @@
 
 #include <QDebug>
 #include <QFontMetrics>
-#include <QGraphicsDropShadowEffect>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -135,11 +134,6 @@ void RestrictedAssetsDialog::setupStyling(const PlatformStyle *platformStyle)
     ui->frameAddressList->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
 
     ui->tabFrame->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
-
-    /** Create the shadow effects on the frames */
-    ui->frameAssetBalance->setGraphicsEffect(GUIUtil::getShadowEffect());
-    ui->frameAddressList->setGraphicsEffect(GUIUtil::getShadowEffect());
-    ui->tabFrame->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     /** Add label color and font */
     ui->labelAssetBalance->setStyleSheet(STRING_LABEL_COLOR);

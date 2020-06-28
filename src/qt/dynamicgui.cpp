@@ -133,6 +133,11 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
                                                                                                                  multiSendAction(0),
+                                                                                                                 transferAssetAction(0),
+                                                                                                                 createAssetAction(0),
+                                                                                                                 manageAssetAction(0),
+                                                                                                                 messagingAction(0),
+                                                                                                                 restrictedAssetAction(0),
                                                                                                                  trayIcon(0),
                                                                                                                  trayIconMenu(0),
                                                                                                                  dockIconMenu(0),
@@ -395,6 +400,52 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(bdapAction);    
 
+/** ASSET START */
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
+    transferAssetAction->setStatusTip(tr("Transfer assets to DYN addresses"));
+    transferAssetAction->setToolTip(transferAssetAction->statusTip());
+    transferAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    transferAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_8));
+#else
+    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+#endif
+    tabGroup->addAction(transferAssetAction);
+
+    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
+    createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
+    createAssetAction->setToolTip(createAssetAction->statusTip());
+    createAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    createAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_9));
+#else
+    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+#endif
+    tabGroup->addAction(createAssetAction);
+
+    manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
+    manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
+    manageAssetAction->setToolTip(manageAssetAction->statusTip());
+    manageAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    manageAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0));
+#else
+    manageAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_0));
+#endif
+    tabGroup->addAction(manageAssetAction);
+
+    messagingAction = new QAction(platformStyle->SingleColorIcon(":/icons/editcopy"), tr("&Messaging"), this);
+    messagingAction->setStatusTip(tr("Coming Soon"));
+    messagingAction->setToolTip(messagingAction->statusTip());
+    messagingAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    messagingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+#else
+    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Q));
+#endif
+    tabGroup->addAction(messagingAction);
+/** ASSET END */
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -415,6 +466,14 @@ void DynamicGUI::createActions()
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(gotoBdapPage()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(gotoAssetsPage()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(gotoCreateAssetsPage()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(gotoManageAssetsPage()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(gotoRestrictedAssetsPage()));
 
 #endif // ENABLE_WALLET
 
@@ -616,6 +675,12 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(dynodeAction);
         toolbar->addAction(miningAction);
         toolbar->addAction(bdapAction);
+        toolbar->addAction(createAssetAction);
+        toolbar->addAction(transferAssetAction);
+        toolbar->addAction(manageAssetAction);
+//        toolbar->addAction(messagingAction);
+//        toolbar->addAction(votingAction);
+        toolbar->addAction(restrictedAssetAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -768,6 +833,14 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
     mnemonicAction->setEnabled(enabled);
+    /** ASSET START */
+    transferAssetAction->setEnabled(false);
+    createAssetAction->setEnabled(false);
+    manageAssetAction->setEnabled(false);
+    messagingAction->setEnabled(false);
+    votingAction->setEnabled(false);
+    restrictedAssetAction->setEnabled(false);
+    /** ASSET END */
 }
 
 void DynamicGUI::createTrayIcon(const NetworkStyle* networkStyle)
@@ -994,6 +1067,32 @@ void DynamicGUI::gotoMultiSendDialog()
     if (walletFrame)
         walletFrame->gotoMultiSendDialog();
 }
+
+/** ASSET START */
+void DynamicGUI::gotoAssetsPage()
+{
+    transferAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoAssetsPage();
+};
+
+void DynamicGUI::gotoCreateAssetsPage()
+{
+    createAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoCreateAssetsPage();
+};
+
+void DynamicGUI::gotoManageAssetsPage()
+{
+    manageAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoManageAssetsPage();
+};
+
+void DynamicGUI::gotoRestrictedAssetsPage()
+{
+    restrictedAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoRestrictedAssetsPage();
+};
+/** ASSET END */
 #endif // ENABLE_WALLET
 
 void DynamicGUI::setNumConnections(int count)
@@ -1308,19 +1407,48 @@ void DynamicGUI::showEvent(QShowEvent* event)
 void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName)
 {
     // On new transaction, make an info balloon
+    QString msg = tr("Date: %1\n").arg(date);
+    if (assetName == "DYN")
+        msg += tr("Amount: %1\n").arg(DynamicUnits::formatWithUnit(unit, amount, true));
+    else
+        msg += tr("Amount: %1\n").arg(DynamicUnits::formatWithCustomName(assetName, amount, MAX_ASSET_UNITS, true));
+
+    msg += tr("Type: %1\n").arg(type);
+
+    if (!label.isEmpty())
+        msg += tr("Label: %1\n").arg(label);
+    else if (!address.isEmpty())
+        msg += tr("Address: %1\n").arg(address);
     message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
-        tr("Date: %1\n"
-           "Amount: %2\n"
-           "Type: %3\n"
-           "Address: %4\n")
-            .arg(date)
-            .arg(DynamicUnits::formatWithUnit(unit, amount, true))
-            .arg(type)
-            .arg(address),
-        CClientUIInterface::MSG_INFORMATION);
+             msg, CClientUIInterface::MSG_INFORMATION);
+}
 
-    pwalletMain->fMultiSendNotify = false;
+void DynamicGUI::checkAssets()
+{
+    // Check that status of RIP2 and activate the assets icon if it is active
+    if(AreAssetsDeployed()) {
+        transferAssetAction->setDisabled(false);
+        transferAssetAction->setToolTip(tr("Transfer assets to DYN addresses"));
+        createAssetAction->setDisabled(false);
+        createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
+        manageAssetAction->setDisabled(false);
+        }
+    else {
+        transferAssetAction->setDisabled(true);
+        transferAssetAction->setToolTip(tr("Assets not yet active"));
+        createAssetAction->setDisabled(true);
+        createAssetAction->setToolTip(tr("Assets not yet active"));
+        manageAssetAction->setDisabled(true);
+        }
 
+    if (AreRestrictedAssetsDeployed()) {
+        restrictedAssetAction->setDisabled(false);
+        restrictedAssetAction->setToolTip(tr("Manage restricted assets"));
+
+    } else {
+        restrictedAssetAction->setDisabled(true);
+        restrictedAssetAction->setToolTip(tr("Restricted Assets not yet active"));
+    }
 }
 #endif // ENABLE_WALLET
 

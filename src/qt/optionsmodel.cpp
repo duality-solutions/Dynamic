@@ -93,6 +93,10 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fCoinControlFeatures", true);
     fCoinControlFeatures = settings.value("fCoinControlFeatures", true).toBool();
 
+    if (!settings.contains("fCustomFeeFeatures"))
+        settings.setValue("fCustomFeeFeatures", false);
+    fCustomFeeFeatures = settings.value("fCustomFeeFeatures", false).toBool();
+
     if (!settings.contains("digits"))
         settings.setValue("digits", "2");
 
@@ -321,6 +325,8 @@ QVariant OptionsModel::data(const QModelIndex& index, int role) const
             return settings.value("nThreadsScriptVerif");
         case Listen:
             return settings.value("fListen");
+        case CustomFeeFeatures:
+            return fCustomFeeFeatures;
         default:
             return QVariant();
         }
@@ -525,6 +531,11 @@ bool OptionsModel::setData(const QModelIndex& index, const QVariant& value, int 
                 setRestartRequired(true);
             }
             break;
+        case CustomFeeFeatures:
+                fCustomFeeFeatures = value.toBool();
+                settings.setValue("fCustomFeeFeatures", fCustomFeeFeatures);
+                Q_EMIT customFeeFeaturesChanged(fCustomFeeFeatures);
+                break;
         default:
             break;
         }

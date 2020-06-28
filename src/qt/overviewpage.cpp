@@ -8,8 +8,6 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
-#include "assetfilterproxy.h"
-#include "assettablemodel.h"
 #include "clientmodel.h"
 #include "dynamicgui.h"
 #include "dynamicunits.h"
@@ -27,6 +25,12 @@
 #include "init.h"
 #include "instantsend.h"
 #include "privatesend-client.h"
+#include "utiltime.h"
+#include "validation.h"
+
+#include "assetfilterproxy.h"
+#include "assetrecord.h"
+#include "assettablemodel.h"
 
 #include <QAbstractItemDelegate>
 #include <QDebug>
@@ -50,9 +54,12 @@ class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    explicit TxViewDelegate(const PlatformStyle* _platformStyle, QObject* parent = nullptr) : QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
-                                                                                     platformStyle(_platformStyle)
+public:
+    explicit TxViewDelegate(const PlatformStyle* _platformStyle, QObject *parent=nullptr):
+        QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
+        platformStyle(_platformStyle)
     {
+
     }
 
     inline void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -629,7 +636,7 @@ void OverviewPage::showAssets()
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
 
-        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        // This keeps the DYN balance grid from expanding and looking terrible when asset balance is hidden
         ui->assetVerticalSpaceWidget->show();
         ui->assetVerticalSpaceWidget2->show();
     }

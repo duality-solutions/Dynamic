@@ -60,7 +60,7 @@ public:
                 TxPlainTextRole,
         /** Unprocessed icon */
                 RawDecorationRole,
-        /** RVN or name of an asset */
+        /** DYN or name of an asset */
                 AssetNameRole,
     };
 

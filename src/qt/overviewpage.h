@@ -16,13 +16,14 @@
 #include <QSortFilterProxyModel>
 #include <QWidget>
 
-class AssetFilterProxy;
-class AssetViewDelegate;
 class ClientModel;
 class PlatformStyle;
 class TransactionFilterProxy;
 class TxViewDelegate;
 class WalletModel;
+
+class AssetFilterProxy;
+class AssetViewDelegate;
 
 namespace Ui
 {
@@ -83,12 +84,12 @@ private:
     std::unique_ptr<TransactionFilterProxy> filter;
     std::unique_ptr<AssetFilterProxy> assetFilter;
 
-    AssetViewDelegate *assetdelegate;
-    QMenu *contextMenu;
-    QAction *sendAction;
-    QAction *issueSub;
-    QAction *issueUnique;
-    QAction *reissue;
+    AssetViewDelegate* assetdelegate;
+    QMenu* contextMenu;
+    QAction* sendAction;
+    QAction* issueSub;
+    QAction* issueUnique;
+    QAction* reissue;
 
     void SetupTransactionList(int nNumItems);
     void DisablePrivateSendCompletely();

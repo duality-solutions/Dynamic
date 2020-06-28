@@ -15,21 +15,22 @@
 #include <QStackedWidget>
 
 class AddressBookPage;
-class AssetsDialog;
 class BdapPage;
 class ClientModel;
-class CreateAssetDialog;
 class DynamicGUI;
 class MiningPage;
 class OverviewPage;
 class PlatformStyle;
 class ReceiveCoinsDialog;
-class ReissueAssetDialog;
-class RestrictedAssetsDialog;
 class SendCoinsDialog;
 class SendCoinsRecipient;
 class TransactionView;
 class WalletModel;
+
+class AssetsDialog;
+class CreateAssetDialog;
+class ReissueAssetDialog;
+class RestrictedAssetsDialog;
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -86,10 +87,10 @@ private:
     const PlatformStyle* platformStyle;
 
     /** ASSET START */
-    AssetsDialog *assetsPage;
-    CreateAssetDialog *createAssetsPage;
-    ReissueAssetDialog *manageAssetsPage;
-    RestrictedAssetsDialog *restrictedAssetsPage;
+    AssetsDialog* assetsPage;
+    CreateAssetDialog* createAssetsPage;
+    ReissueAssetDialog* manageAssetsPage;
+    RestrictedAssetsDialog* restrictedAssetsPage;
     /** ASSET END */
 
 public Q_SLOTS:
