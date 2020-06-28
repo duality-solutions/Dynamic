@@ -1452,6 +1452,18 @@ static bool LockDataDirectory(bool probeOnly)
     return true;
 }
 
+bool AppInitLockDataDirectory()
+{
+    // After daemonization get the data directory lock again and hold on to it until exit
+    // This creates a slight window for a race condition to happen, however this condition is harmless: it
+    // will at most make us exit without printing a message to console.
+    if (!LockDataDirectory(false)) {
+        // Detailed error printed inside LockDataDirectory
+        return false;
+    }
+    return true;
+}
+
 bool AppInitSanityChecks()
 {
     // ********************************************************* Step 4: sanity checks
@@ -1474,13 +1486,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 {
     const CChainParams& chainparams = Params();
     // ********************************************************* Step 4a: application initialization
-    // After daemonization get the data directory lock again and hold on to it until exit
-    // This creates a slight window for a race condition to happen, however this condition is harmless: it
-    // will at most make us exit without printing a message to console.
-    if (!LockDataDirectory(false)) {
-        // Detailed error printed inside LockDataDirectory
-        return false;
-    }
 #ifndef WIN32
     CreatePidFile(GetPidFile(), getpid());
 #endif
