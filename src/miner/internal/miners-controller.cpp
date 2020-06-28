@@ -62,8 +62,8 @@ int64_t MinersController::GetHashRate() const
 MinerSignals::MinerSignals(MinersController* ctr)
     : _ctr(ctr),
       _node(_ctr->ctx()->connman()->ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, _1))),
-      _block(GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinerSignals::NotifyBlock, this, _1, _2, _3))),
-      _txn(GetMainSignals().SyncTransaction.connect(boost::bind(&MinerSignals::NotifyTransaction, this, _1, _2, _3))){};
+      _block(GetMainSignals().UpdatedBlockTip(pindexNewTip, pindexFork, fInitialDownload).connect(boost::bind(&MinerSignals::NotifyBlock, this, _1, _2, _3))),
+      _txn(GetMainSignals().SyncTransaction(tx).connect(boost::bind(&MinerSignals::NotifyTransaction, this, _1, _2, _3))){};
 
 void MinerSignals::NotifyNode(const CNode* node)
 {

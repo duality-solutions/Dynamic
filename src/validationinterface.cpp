@@ -28,7 +28,7 @@ struct MainSignalsInstance {
     /** A posInBlock value for SyncTransaction calls for transactions not
      * included in connected blocks such as transactions removed from mempool,
      * accepted to mempool or appearing in disconnected blocks.*/
-    static const int SYNC_TRANSACTION_NOT_IN_BLOCK = -1;
+    boost::signals2::signal<void(int NotInBlock)> SyncTransactionNotInBlock;
     /** Notifies listeners of updated transaction data (transaction, and
      * optionally the block it is found in). Called with block data when
      * transaction is included in a connected block, and without block data when
@@ -173,6 +173,10 @@ void UnregisterAllValidationInterfaces()
 
 void CMainSignals::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {
     m_internals->UpdatedBlockTip(pindexNew, pindexFork, fInitialDownload);
+}
+
+void CMainSignals::SyncTransactionNotInBlock(int NotInBlock) {
+    m_internals->SyncTransactionNotInBlock(NotInBlock)
 }
 
 void CMainSignals::SyncTransaction(const CTransaction &tx, const CBlockIndex* pindex, int posInBlock) {

@@ -1654,6 +1654,11 @@ void CWallet::MarkConflicted(const uint256& hashBlock, const uint256& hashTx)
     fAnonymizableTallyCachedNonDenom = false;
 }
 
+void CWallet::SyncTransactionNotInBlock (int NotInBlock) 
+{
+    int NotInBlock = -1;
+}
+
 void CWallet::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock)
 {
     LOCK2(cs_main, cs_wallet);

@@ -47,6 +47,7 @@ protected:
     virtual void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload) {}
     /** Notifies listeners of updated blockchain tip */
     virtual void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload) {}
+    virtual void SyncTransactionNotInBlock(int NotInBlock) {}
     virtual void SyncTransaction(const CTransaction&, const CBlockIndex* pindex, int posInBlock) {}
     /** Notifies listeners of a transaction having been added to mempool. */
     virtual void TransactionAddedToMempool(const CTransactionRef &ptxn) {}
@@ -95,6 +96,7 @@ public:
     void FlushBackgroundCallbacks();
 
     void UpdatedBlockTip(const CBlockIndex *, const CBlockIndex *, bool fInitialDownload);
+    void SyncTransactionNotInBlock(int NotInBlock);
     void SyncTransaction(const CTransaction &, const CBlockIndex *, int posInBlock);
     void TransactionAddedToMempool(const CTransactionRef &);
     void BlockConnected(const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef> &);

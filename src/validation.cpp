@@ -243,7 +243,7 @@ public:
     {
         pool.NotifyEntryRemoved.disconnect(boost::bind(&MemPoolConflictRemovalTracker::NotifyEntryRemoved, this, _1, _2));
         for (const auto& tx : conflictedTxs) {
-            GetMainSignals().SyncTransaction(*tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+            GetMainSignals().SyncTransaction(*tx, nullptr, GetMainSignals().SyncTransactionNotInBlock(NotInBlock));
         }
         conflictedTxs.clear();
     }
@@ -2186,7 +2186,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     }
 
     if (!fDryRun)
-        GetMainSignals().SyncTransaction(tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+        GetMainSignals().SyncTransaction(tx, nullptr, GetMainSignals().SyncTransactionNotInBlock(NotInBlock));
 
     GetMainSignals().TransactionAddedToMempool(ptx);
 

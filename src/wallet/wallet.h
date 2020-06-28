@@ -861,6 +861,8 @@ private:
 
     void SyncMetaData(std::pair<TxSpends::iterator, TxSpends::iterator>);
 
+    void SyncTransactionNotInBlock (int NotInBlock);
+
     /* Used by TransactionAddedToMemorypool/BlockConnected/Disconnected.
      * Should be called with pindexBlock and posInBlock if this is for a transaction that is included in a block. */
     void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex = nullptr, int posInBlock = 0);
