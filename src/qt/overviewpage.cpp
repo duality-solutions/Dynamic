@@ -593,7 +593,7 @@ void OverviewPage::privateSendStatus()
 
 void OverviewPage::privateSendAuto()
 {
-    privateSendClient.DoAutomaticDenominating(*g_connman);
+    privateSendClient.DoAutomaticDenominating(g_connman.get());
 }
 
 void OverviewPage::privateSendReset()

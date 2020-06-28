@@ -228,7 +228,7 @@ void MiningPage::StartCPUMiner()
 {
     LogPrintf("StartCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = true;
-    InitMiners(Params(), *g_connman);
+    InitMiners(Params(), g_connman.get());
     changeNumberOfCPUThreads(ui->sliderCPUCores->value());
     updateUI();
 }
@@ -277,7 +277,7 @@ void MiningPage::changeNumberOfCPUThreads(int i, bool shutdown)
         ui->labelNCPUCores->setText(QString("%1").arg(i));
     gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
     gArgs.ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
-    InitMiners(Params(), *g_connman);
+    InitMiners(Params(), g_connman.get());
     SetCPUMinerThreads(i);
     if (fCPUMinerOn)
         StartMiners();
@@ -290,7 +290,7 @@ void MiningPage::changeNumberOfGPUThreads(int i, bool shutdown)
         ui->labelNGPUCores->setText(QString("%1").arg(i));
     gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
     gArgs.ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
-    InitMiners(Params(), *g_connman);
+    InitMiners(Params(), g_connman.get());
     SetGPUMinerThreads(i);
     if (fGPUMinerOn)
         StartMiners();
