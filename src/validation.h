@@ -70,6 +70,7 @@ class CValidationState;
 struct ChainTxData;
 struct CNodeStateStats;
 struct LockPoints;
+struct PrecomputedTransactionData;
 
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;
