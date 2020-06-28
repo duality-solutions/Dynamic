@@ -80,6 +80,8 @@ public:
         StatusRole,
         /** Unprocessed icon */
         RawDecorationRole,
+        /** DYN or name of an asset */
+        AssetNameRole,
     };
 
     int rowCount(const QModelIndex& parent) const;

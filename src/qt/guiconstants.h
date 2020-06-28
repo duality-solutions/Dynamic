@@ -37,6 +37,16 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TX_STATUS_DANGER QColor(200, 100, 100)
 /* Transaction list -- TX status decoration - default color */
 #define COLOR_BLACK QColor(0, 0, 0)
+/* dark orange */
+#define COLOR_DARK_ORANGE QColor("#f05339")
+/* light orange */
+#define COLOR_LIGHT_ORANGE QColor("#f79433")
+/* dark blue */
+#define COLOR_DARK_BLUE QColor("#475eaa")
+/* light blue */
+#define COLOR_LIGHT_BLUE QColor("#5874cf")
+/* white */
+#define COLOR_WHITE QColor(255, 255, 255)
 /* Transaction list -- TX status decoration - Locked by InstantSend (Dark Blue) */
 #define COLOR_TX_STATUS_LOCKED QColor(13, 81, 140)
 /* Transaction list -- TX status decoration - Fluid Transaction (Light Blue) */
@@ -49,8 +59,16 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_STAKE QColor(102, 128, 14)
 /* Transaction list -- TX status decoration - orphan (Light Gray) */
 #define COLOR_ORPHAN QColor(211, 211, 211)
+/* administrator background color */
+#define COLOR_ADMIN_CARD_DARK COLOR_BLACK
+/* regular asset background color */
+#define COLOR_REGULAR_CARD_DARK_BLUE QColor("#06132a")
+/* regular asset background color */
+#define COLOR_REGULAR_CARD_LIGHT_BLUE QColor("#0e1b3b")
+/* Color of labels */
+#define COLOR_LABELS QColor("#4960ad")
 
-/* Ravencoin label color as a string */
+/* Dynamic label color as a string */
 #define STRING_LABEL_COLOR "color: #4960ad"
 #define STRING_LABEL_COLOR_WARNING "color: #FF8080"
 

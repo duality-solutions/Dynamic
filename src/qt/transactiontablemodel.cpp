@@ -770,6 +770,15 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
     case FormattedAmountRole:
         // Used for copy/export, so don't include separators
         return formatTxAmount(rec, false, DynamicUnits::separatorNever);
+    case AssetNameRole:
+        {
+            QString assetName;
+            if (rec->assetName != "RVN")
+               assetName.append(QString::fromStdString(rec->assetName));
+            else
+               assetName.append(QString(DynamicUnits::name(walletModel->getOptionsModel()->getDisplayUnit())));
+            return assetName;
+        }
     case StatusRole:
         return rec->status.status;
     }

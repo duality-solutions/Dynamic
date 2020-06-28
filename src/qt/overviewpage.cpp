@@ -8,7 +8,10 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
+#include "assetfilterproxy.h"
+#include "assettablemodel.h"
 #include "clientmodel.h"
+#include "dynamicgui.h"
 #include "dynamicunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
@@ -26,20 +29,28 @@
 #include "privatesend-client.h"
 
 #include <QAbstractItemDelegate>
+#include <QDebug>
+#include <QFontDatabase>
 #include <QPainter>
+#include <QScrollBar>
 #include <QSettings>
 #include <QTimer>
+
 
 #define ICON_OFFSET 16
 #define DECORATION_SIZE 54
 #define NUM_ITEMS 7
 #define NUM_ITEMS_ADV 7
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
+
 class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(const PlatformStyle* _platformStyle, QObject* parent = nullptr) : QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
+    explicit TxViewDelegate(const PlatformStyle* _platformStyle, QObject* parent = nullptr) : QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
                                                                                      platformStyle(_platformStyle)
     {
     }
@@ -95,6 +106,16 @@ public:
         }
         painter->drawText(amountRect, Qt::AlignRight | Qt::AlignVCenter, amountText);
 
+        QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
+
+        // Concatenate the strings if needed before painting
+        #ifndef QTversionPreFiveEleven
+            GUIUtil::concatenate(painter, assetName, painter->fontMetrics().horizontalAdvance(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+        #else
+            GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+        #endif
+        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
+
         painter->setPen(option.palette.color(QPalette::Text));
         painter->drawText(amountRect, Qt::AlignLeft | Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
 
@@ -109,7 +130,140 @@ public:
     int unit;
     const PlatformStyle* platformStyle;
 };
-#include "overviewpage.moc"
+
+class AssetViewDelegate : public QAbstractItemDelegate
+{
+Q_OBJECT
+public:
+    explicit AssetViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
+            QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
+            platformStyle(_platformStyle)
+    {
+
+    }
+
+    inline void paint(QPainter *painter, const QStyleOptionViewItem &option,
+                      const QModelIndex &index ) const
+    {
+        painter->save();
+
+        /** Get the icon for the administrator of the asset */
+        QPixmap pixmap = qvariant_cast<QPixmap>(index.data(Qt::DecorationRole));
+
+        bool admin = index.data(AssetTableModel::AdministratorRole).toBool();
+
+        /** Need to know the heigh to the pixmap. If it is 0 we don't we dont own this asset so dont have room for the icon */
+        int nIconSize = admin ? pixmap.height() : 0;
+        int extraNameSpacing = 12;
+        if (nIconSize)
+            extraNameSpacing = 0;
+
+        /** Get basic padding and half height */
+        QRect mainRect = option.rect;
+        int xspace = nIconSize + 32;
+        int ypad = 2;
+
+        // Create the gradient rect to draw the gradient over
+        QRect gradientRect = mainRect;
+        gradientRect.setTop(gradientRect.top() + 2);
+        gradientRect.setBottom(gradientRect.bottom() - 2);
+        gradientRect.setRight(gradientRect.right() - 20);
+
+        int halfheight = (gradientRect.height() - 2*ypad)/2;
+
+        /** Create the three main rectangles  (Icon, Name, Amount) */
+        QRect assetAdministratorRect(QPoint(20, gradientRect.top() + halfheight/2 - 3*ypad), QSize(nIconSize, nIconSize));
+        QRect assetNameRect(gradientRect.left() + xspace - extraNameSpacing, gradientRect.top()+ypad+(halfheight/2), gradientRect.width() - xspace, halfheight + ypad);
+        QRect amountRect(gradientRect.left() + xspace, gradientRect.top()+ypad+(halfheight/2), gradientRect.width() - xspace - 16, halfheight);
+
+        // Create the gradient for the asset items
+        QLinearGradient gradient(mainRect.topLeft(), mainRect.bottomRight());
+
+        // Select the color of the gradient
+        if (admin) {
+            gradient.setColorAt(0, COLOR_ADMIN_CARD_DARK);
+            gradient.setColorAt(1, COLOR_ADMIN_CARD_DARK);
+        }
+        else 
+        {
+            gradient.setColorAt(0, COLOR_REGULAR_CARD_LIGHT_BLUE);
+            gradient.setColorAt(1, COLOR_REGULAR_CARD_DARK_BLUE);
+        }
+
+        // Using 4 are the radius because the pixels are solid
+        QPainterPath path;
+        path.addRoundedRect(gradientRect, 4, 4);
+
+        // Paint the gradient
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->fillPath(path, gradient);
+
+        /** Draw asset administrator icon */
+        if (nIconSize)
+            painter->drawPixmap(assetAdministratorRect, pixmap);
+
+        /** Create the font that is used for painting the asset name */
+        QFont nameFont;
+#if !defined(Q_OS_MAC)
+        nameFont.setFamily("Open Sans");
+#endif
+        nameFont.setPixelSize(18);
+        nameFont.setWeight(QFont::Weight::Normal);
+        nameFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.4);
+
+        /** Create the font that is used for painting the asset amount */
+        QFont amountFont;
+#if !defined(Q_OS_MAC)
+        amountFont.setFamily("Open Sans");
+#endif
+        amountFont.setPixelSize(14);
+        amountFont.setWeight(QFont::Weight::Normal);
+        amountFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.3);
+
+        /** Get the name and formatted amount from the data */
+        QString name = index.data(AssetTableModel::AssetNameRole).toString();
+        QString amountText = index.data(AssetTableModel::FormattedAmountRole).toString();
+
+        // Setup the pens
+        QColor textColor = COLOR_WHITE;
+
+        QPen penName(textColor);
+
+        /** Start Concatenation of Asset Name */
+        // Get the width in pixels that the amount takes up (because they are different font,
+        // we need to do this before we call the concatenate function
+        painter->setFont(amountFont);
+        #ifndef QTversionPreFiveEleven
+            int amount_width = painter->fontMetrics().horizontalAdvance(amountText);
+        #else
+            int amount_width = painter->fontMetrics().width(amountText);
+        #endif
+        // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
+        painter->setFont(nameFont);
+
+        GUIUtil::concatenate(painter, name, amount_width, assetNameRect.left(), amountRect.right());
+
+        /** Paint the asset name */
+        painter->setPen(penName);
+        painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
+
+
+        /** Paint the amount */
+        painter->setFont(amountFont);
+        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
+
+        painter->restore();
+    }
+
+    inline QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        return QSize(42, 42);
+    }
+
+    int unit;
+    const PlatformStyle *platformStyle;
+
+};
 
 OverviewPage::OverviewPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
                                                                                   timer(nullptr),
@@ -125,10 +279,18 @@ OverviewPage::OverviewPage(const PlatformStyle* platformStyle, QWidget* parent) 
                                                                                   currentWatchUnconfBalance(-1),
                                                                                   currentWatchImmatureBalance(-1),
                                                                                   currentWatchOnlyStake(-1),
-                                                                                  txdelegate(new TxViewDelegate(platformStyle, this))
+                                                                                  txdelegate(new TxViewDelegate(platformStyle, this)),
+                                                                                  assetdelegate(new AssetViewDelegate(platformStyle, this))
+
 {
     ui->setupUi(this);
     QString theme = GUIUtil::getThemeName();
+
+    // init "out of sync" warning labels
+    ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelPrivateSendSyncStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelAssetStatus->setText("(" + tr("out of sync") + ")");
 
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
@@ -136,12 +298,64 @@ OverviewPage::OverviewPage(const PlatformStyle* platformStyle, QWidget* parent) 
     // Note: minimum height of listTransactions will be set later in updateAdvancedPSUI() to reflect actual settings
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
+    /** Create the list of assets */
+    ui->listAssets->setItemDelegate(assetdelegate);
+    ui->listAssets->setIconSize(QSize(42, 42));
+    ui->listAssets->setMinimumHeight(5 * (42 + 2));
+    ui->listAssets->viewport()->setAutoFillBackground(false);
 
-    // init "out of sync" warning labels
-    ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
-    ui->labelPrivateSendSyncStatus->setText("(" + tr("out of sync") + ")");
-    ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
+    // Delay before filtering assetes in ms
+    static const int input_filter_delay = 200;
+
+    QTimer *asset_typing_delay;
+    asset_typing_delay = new QTimer(this);
+    asset_typing_delay->setSingleShot(true);
+    asset_typing_delay->setInterval(input_filter_delay);
+    connect(ui->assetSearch, SIGNAL(textChanged(QString)), asset_typing_delay, SLOT(start()));
+    connect(asset_typing_delay, SIGNAL(timeout()), this, SLOT(assetSearchChanged()));
+
+    connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
+    connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
+
+    /** Create the search bar for assets */
+    ui->assetSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    ui->assetSearch->setStyleSheet(QString(".QLineEdit {border: 1px solid %1; border-radius: 5px;}").arg(COLOR_LABELS.name()));
+    ui->assetSearch->setAlignment(Qt::AlignVCenter);
+    QFont font = ui->assetSearch->font();
+    font.setPointSize(12);
+    ui->assetSearch->setFont(font);
+
+    QFontMetrics fm = QFontMetrics(ui->assetSearch->font());
+    ui->assetSearch->setFixedHeight(fm.height()+ 5);
+
+    // Trigger the call to show the assets table if assets are active
+    showAssets();
+
+    // context menu actions
+    sendAction = new QAction(tr("Send Asset"), this);
+    QAction *copyAmountAction = new QAction(tr("Copy Amount"), this);
+    QAction *copyNameAction = new QAction(tr("Copy Name"), this);
+    issueSub = new QAction(tr("Issue Sub Asset"), this);
+    issueUnique = new QAction(tr("Issue Unique Asset"), this);
+    reissue = new QAction(tr("Reissue Asset"), this);
+
+    sendAction->setObjectName("Send");
+    issueSub->setObjectName("Sub");
+    issueUnique->setObjectName("Unique");
+    reissue->setObjectName("Reissue");
+    copyNameAction->setObjectName("Copy Name");
+    copyAmountAction->setObjectName("Copy Amount");
+
+    // context menu
+    contextMenu = new QMenu(this);
+    contextMenu->addAction(sendAction);
+    contextMenu->addAction(issueSub);
+    contextMenu->addAction(issueUnique);
+    contextMenu->addAction(reissue);
+    contextMenu->addSeparator();
+    contextMenu->addAction(copyNameAction);
+    contextMenu->addAction(copyAmountAction);
+    // context menu signals
 
     // hide PS frame (helps to preserve saved size)
     // we'll setup and make it visible in updateAdvancedPSUI() later if we are not in litemode
@@ -180,6 +394,53 @@ void OverviewPage::handleTransactionClicked(const QModelIndex& index)
 {
     if (filter)
         Q_EMIT transactionClicked(filter->mapToSource(index));
+}
+
+void OverviewPage::handleAssetClicked(const QModelIndex &index)
+{
+    if(assetFilter) {
+        QString name = index.data(AssetTableModel::AssetNameRole).toString();
+        if (IsAssetNameAnOwner(name.toStdString())) {
+            name = name.left(name.size() - 1);
+            sendAction->setDisabled(true);
+        } else {
+            sendAction->setDisabled(false);
+        }
+
+        if (!index.data(AssetTableModel::AdministratorRole).toBool()) {
+            issueSub->setDisabled(true);
+            issueUnique->setDisabled(true);
+            reissue->setDisabled(true);
+        } else {
+            issueSub->setDisabled(false);
+            issueUnique->setDisabled(false);
+            reissue->setDisabled(true);
+            CNewAsset asset;
+            auto currentActiveAssetCache = GetCurrentAssetCache();
+            if (currentActiveAssetCache && currentActiveAssetCache->GetAssetMetaDataIfExists(name.toStdString(), asset))
+                if (asset.nReissuable)
+                    reissue->setDisabled(false);
+
+        }
+
+        QAction* action = contextMenu->exec(QCursor::pos());
+
+        if (action) {
+            if (action->objectName() == "Send")
+                    Q_EMIT assetSendClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Sub")
+                    Q_EMIT assetIssueSubClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Unique")
+                    Q_EMIT assetIssueUniqueClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Reissue")
+                    Q_EMIT assetReissueClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Copy Name")
+                GUIUtil::setClipboard(index.data(AssetTableModel::AssetNameRole).toString());
+            else if (action->objectName() == "Copy Amount")
+                GUIUtil::setClipboard(index.data(AssetTableModel::FormattedAmountRole).toString());
+        }
+    }
+
 }
 
 void OverviewPage::handleOutOfSyncWarningClicks()
@@ -276,6 +537,28 @@ void OverviewPage::setWalletModel(WalletModel* model)
 {
     this->walletModel = model;
     if (model && model->getOptionsModel()) {
+
+        // Set up transaction list
+        filter.reset(new TransactionFilterProxy());
+        filter->setSourceModel(model->getTransactionTableModel());
+        filter->setLimit(NUM_ITEMS);
+        filter->setDynamicSortFilter(true);
+        filter->setSortRole(Qt::EditRole);
+        filter->setShowInactive(false);
+        filter->sort(TransactionTableModel::Date, Qt::DescendingOrder);
+
+        ui->listTransactions->setModel(filter.get());
+        ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
+
+        assetFilter.reset(new AssetFilterProxy());
+        assetFilter->setSourceModel(model->getAssetTableModel());
+        assetFilter->sort(AssetTableModel::AssetNameRole, Qt::DescendingOrder);
+        ui->listAssets->setModel(assetFilter.get());
+        ui->listAssets->setAutoFillBackground(false);
+
+        ui->assetVerticalSpaceWidget->setStyleSheet("background-color: transparent");
+        ui->assetVerticalSpaceWidget2->setStyleSheet("background-color: transparent");
+
         // update the display unit, to not use the default ("DYN")
         updateDisplayUnit();
         // Keep up to date with wallet
@@ -329,6 +612,34 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelPrivateSendSyncStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+}
+
+void OverviewPage::showAssets()
+{
+    if (AreAssetsDeployed()) {
+        ui->assetFrame->show();
+        ui->assetBalanceLabel->show();
+        ui->labelAssetStatus->show();
+
+        // Disable the vertical space so that listAssets goes to the bottom of the screen
+        ui->assetVerticalSpaceWidget->hide();
+        ui->assetVerticalSpaceWidget2->hide();
+    } else {
+        ui->assetFrame->hide();
+        ui->assetBalanceLabel->hide();
+        ui->labelAssetStatus->hide();
+
+        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        ui->assetVerticalSpaceWidget->show();
+        ui->assetVerticalSpaceWidget2->show();
+    }
+}
+
+void OverviewPage::assetSearchChanged()
+{
+    if (!assetFilter)
+        return;
+    assetFilter->setAssetNamePrefix(ui->assetSearch->text());
 }
 
 void OverviewPage::hideOrphans(bool fHide)

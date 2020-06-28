@@ -10,9 +10,14 @@
 
 #include "amount.h"
 
-#include <QWidget>
 #include <memory>
 
+#include <QMenu>
+#include <QSortFilterProxyModel>
+#include <QWidget>
+
+class AssetFilterProxy;
+class AssetViewDelegate;
 class ClientModel;
 class PlatformStyle;
 class TransactionFilterProxy;
@@ -40,6 +45,7 @@ public:
     void setClientModel(ClientModel* clientModel);
     void setWalletModel(WalletModel* walletModel);
     void showOutOfSyncWarning(bool fShow);
+    void showAssets();
 
 public Q_SLOTS:
     void privateSendStatus();
@@ -48,6 +54,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void transactionClicked(const QModelIndex& index);
+    void assetSendClicked(const QModelIndex &index);
+    void assetIssueSubClicked(const QModelIndex &index);
+    void assetIssueUniqueClicked(const QModelIndex &index);
+    void assetReissueClicked(const QModelIndex &index);
     void outOfSyncWarningClicked();
 
 private:
@@ -71,6 +81,14 @@ private:
 
     TxViewDelegate* txdelegate;
     std::unique_ptr<TransactionFilterProxy> filter;
+    std::unique_ptr<AssetFilterProxy> assetFilter;
+
+    AssetViewDelegate *assetdelegate;
+    QMenu *contextMenu;
+    QAction *sendAction;
+    QAction *issueSub;
+    QAction *issueUnique;
+    QAction *reissue;
 
     void SetupTransactionList(int nNumItems);
     void DisablePrivateSendCompletely();
@@ -84,9 +102,11 @@ private Q_SLOTS:
     void updatePrivateSendProgress();
     void updateAdvancedPSUI(bool fShowAdvancedPSUI);
     void handleTransactionClicked(const QModelIndex& index);
+    void handleAssetClicked(const QModelIndex &index);
     void updateAlerts(const QString& warnings);
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
+    void assetSearchChanged();
 };
 
 #endif // DYNAMIC_QT_OVERVIEWPAGE_H
