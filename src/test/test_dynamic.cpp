@@ -18,6 +18,7 @@
 #include "random.h"
 #include "rpc/server.h"
 #include "rpc/register.h"
+#include "script/sigcache.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "ui_interface.h"
