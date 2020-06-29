@@ -54,4 +54,7 @@ static const int ASSETDATA_VERSION_UPDATED = 71300;
 //! In this version, 'IsMsgRestAssetIsActive (messaging and restricted assets)' was introduced
 static const int MESSAGING_RESTRICTED_ASSETS_VERSION = 71300;
 
+//! "feefilter" tells peers to filter invs to you by fee starts with this version
+static const int FEEFILTER_VERSION = 71300;
+
 #endif // DYNAMIC_VERSION_H

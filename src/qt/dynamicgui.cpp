@@ -137,6 +137,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  createAssetAction(0),
                                                                                                                  manageAssetAction(0),
                                                                                                                  messagingAction(0),
+                                                                                                                 votingAction(0),
                                                                                                                  restrictedAssetAction(0),
                                                                                                                  trayIcon(0),
                                                                                                                  trayIconMenu(0),
@@ -298,7 +299,7 @@ DynamicGUI::~DynamicGUI()
     // Unsubscribe from notifications from core
     unsubscribeFromCoreSignals();
 
-    GUIUtil::saveWindowGeometry("nWindow", this);
+    GUIUtil::saveWindowGeometry("MainWindowGeometry", this);
     if (trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
         trayIcon->hide();
 #ifdef Q_OS_MAC
@@ -439,11 +440,26 @@ void DynamicGUI::createActions()
     messagingAction->setToolTip(messagingAction->statusTip());
     messagingAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    messagingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+    messagingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_));
 #else
     messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Q));
 #endif
     tabGroup->addAction(messagingAction);
+
+    votingAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Voting"), this);
+    votingAction->setStatusTip(tr("Coming Soon"));
+    votingAction->setToolTip(votingAction->statusTip());
+    votingAction->setCheckable(true);
+//    votingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_));
+//    votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_W));
+    tabGroup->addAction(votingAction);
+
+    restrictedAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Restricted Assets"), this);
+    restrictedAssetAction->setStatusTip(tr("Manage restricted assets"));
+    restrictedAssetAction->setToolTip(restrictedAssetAction->statusTip());
+    restrictedAssetAction->setCheckable(true);
+//    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    tabGroup->addAction(restrictedAssetAction);
 /** ASSET END */
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
