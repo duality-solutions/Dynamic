@@ -239,11 +239,11 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
     connect(watchOnlyWidget, SIGNAL(activated(int)), this, SLOT(chooseWatchonly(int)));
     connect(instantsendWidget, SIGNAL(activated(int)), this, SLOT(chooseInstantSend(int)));
     connect(amountWidget, SIGNAL(textChanged(QString)), amount_typing_delay, SLOT(start()));
-    connect(amount_typing_delay, SIGNAL(timeout()), this, SLOT(changedAmount()));
+    connect(amount_typing_delay, SIGNAL(timeout()), this, SLOT(changedAmount(QString)));
     connect(assetNameWidget, SIGNAL(textChanged(QString)), asset_typing_delay, SLOT(start()));
     connect(asset_typing_delay, SIGNAL(timeout()), this, SLOT(changedAssetName()));
     connect(addressWidget, SIGNAL(textChanged(QString)), prefix_typing_delay, SLOT(start()));
-    connect(prefix_typing_delay, SIGNAL(timeout()), this, SLOT(changedPrefix()));
+    connect(prefix_typing_delay, SIGNAL(timeout()), this, SLOT(changedPrefix(QString)));
 
     connect(view, SIGNAL(doubleClicked(QModelIndex)), this, SIGNAL(doubleClicked(QModelIndex)));
     connect(view, SIGNAL(clicked(QModelIndex)), this, SLOT(computeSum()));
