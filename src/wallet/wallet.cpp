@@ -1732,16 +1732,29 @@ isminetype CWallet::IsMine(const CTxIn& txin) const
     return ISMINE_NO;
 }
 
-CAmount CWallet::GetDebit(const CTxIn& txin, const isminefilter& filter) const
+CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter) const {
+    CAssetOutputEntry assetData;
+    return GetDebit(txin, filter, assetData);
+}
+
+// Note that this function doesn't distinguish between a 0-valued input,
+// and a not-"is mine" (according to the filter) input.
+CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter, CAssetOutputEntry& assetData) const
 {
     {
         LOCK(cs_wallet);
         std::map<uint256, CWalletTx>::const_iterator mi = mapWallet.find(txin.prevout.hash);
-        if (mi != mapWallet.end()) {
+        if (mi != mapWallet.end())
+        {
             const CWalletTx& prev = (*mi).second;
             if (txin.prevout.n < prev.tx->vout.size())
-                if (IsMine(prev.tx->vout[txin.prevout.n]) & filter)
+                if (IsMine(prev.tx->vout[txin.prevout.n]) & filter) {
+                    // if asset get that assets data from the scriptPubKey
+                    if (prev.tx->vout[txin.prevout.n].scriptPubKey.IsAssetScript())
+                        GetAssetData(prev.tx->vout[txin.prevout.n].scriptPubKey, assetData);
+
                     return prev.tx->vout[txin.prevout.n].nValue;
+                }
         }
     }
     return 0;

@@ -23,6 +23,7 @@ TransactionFilterProxy::TransactionFilterProxy(QObject* parent) : QSortFilterPro
                                                                   dateFrom(MIN_DATE),
                                                                   dateTo(MAX_DATE),
                                                                   addrPrefix(),
+                                                                  assetNamePrefix(),
                                                                   typeFilter(COMMON_TYPES),
                                                                   watchOnlyFilter(WatchOnlyFilter_All),
                                                                   instantsendFilter(InstantSendFilter_All),

@@ -305,6 +305,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
 void WalletView::gotoOverviewPage()
 {
     setCurrentWidget(overviewPage);
+    Q_EMIT checkAssets();
 }
 
 void WalletView::gotoSendCoinsPage(QString addr)
