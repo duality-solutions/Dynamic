@@ -8,6 +8,7 @@
 #include "bdap/utils.h"
 #include "key.h"
 #include "hash.h"
+#include "messagesigner.h"
 #include "pubkey.h"
 #include "serialize.h"
 #include "streams.h"
@@ -80,11 +81,17 @@ uint256 CAudit::GetHash() const
     return Hash(dsAudit.begin(), dsAudit.end());
 }
 
+uint256 CAudit::GetAuditHash() const
+{
+    CDataStream dsAudit(SER_NETWORK, PROTOCOL_VERSION);
+    dsAudit << vchAuditData << vchOwnerFullObjectPath << vchAlgorithmType << vchDescription;
+    return Hash(dsAudit.begin(), dsAudit.end());
+}
+
 bool CAudit::Sign(const CKey& key)
 {
-    if (!key.Sign(Hash(vchAuditData.begin(), vchAuditData.end()), vchSignature)) {
-        LogPrintf("CAudit::%s -- Failed to sign audit data.\n", __func__);
-        return false;
+    if (!CHashSigner::SignHash(GetAuditHash(), key, vchSignature)) {
+        return error("CAudit::%s() -- Failed to sign audit data.\n", __func__);
     }
 
     return true;
@@ -92,9 +99,11 @@ bool CAudit::Sign(const CKey& key)
 
 bool CAudit::CheckSignature(const std::vector<unsigned char>& vchPubKey) const
 {
-    CPubKey key(vchPubKey);
-    if (!key.Verify(Hash(vchAuditData.begin(), vchAuditData.end()), vchSignature))
-        return error("CAudit::%s(): verify signature failed", __func__);
+    std::string strError = "";
+    CPubKey pubkey(vchPubKey);
+    if (!CHashSigner::VerifyHash(GetAuditHash(), pubkey, vchSignature, strError)) {
+        return error("CAudit::%s() -- Failed to verify signature - %s\n", __func__, strError);
+    }
 
     return true;
 }
@@ -109,11 +118,39 @@ int CAudit::Version() const
 
 bool CAudit::ValidateValues(std::string& strErrorMessage) const
 {
-    if (vchAuditData.size() == 0)
+    CAuditData auditData(vchAuditData);
+    if (!auditData.ValidateValues(strErrorMessage))
         return false;
 
+    if (auditData.vAuditData.size() == 0)
+        return false;
+
+    //Check for duplicates
+    if (auditData.vAuditData.size() >> 1) {
+        auto it = std::unique(auditData.vAuditData.begin(), auditData.vAuditData.end());
+        if (!(it == auditData.vAuditData.end())) {
+            strErrorMessage = "Invalid Audit data. Can not have duplicates.";
+            return false;
+        }
+    }
+
     if (vchOwnerFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) {
-        strErrorMessage = "Invalid BDAP audit owner FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
+        strErrorMessage = "Invalid BDAP audit owner FQDN length. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchSignature.size() > MAX_SIGNATURE_LENGTH) {
+        strErrorMessage = "Invalid BDAP audit signature length. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchAlgorithmType.size() > MAX_ALGORITHM_TYPE_LENGTH) {
+        strErrorMessage = "Invalid Algorithm Type length. Can not have more than " + std::to_string(MAX_ALGORITHM_TYPE_LENGTH) + " characters.";
+        return false;
+    }
+
+    if (vchDescription.size() > MAX_DATA_DESCRIPTION_LENGTH) {
+        strErrorMessage = "Invalid Data Description length. Can not have more than " + std::to_string(MAX_DATA_DESCRIPTION_LENGTH) + " characters.";
         return false;
     }
 
@@ -148,7 +185,7 @@ bool CAudit::UnserializeFromData(const std::vector<unsigned char>& vchData, cons
     return true;
 }
 
-bool CAudit::UnserializeFromTx(const CTransactionRef& tx) 
+bool CAudit::UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -160,6 +197,8 @@ bool CAudit::UnserializeFromTx(const CTransactionRef& tx)
     if(!UnserializeFromData(vchData, vchHash)) {
         return false;
     }
+    txHash = tx->GetHash();
+    nHeight = height;
     return true;
 }
 
@@ -175,6 +214,8 @@ std::string CAudit::ToString() const
         "    nVersion             = %d\n"
         "    Audit Count          = %d\n"
         "    Audit Data           = %s\n"
+        "    Algorithm Type       = %s\n"
+        "    Description          = %s\n"
         "    nTimeStamp           = %d\n"
         "    Owner                = %s\n"
         "    Signed               = %s\n"
@@ -182,6 +223,8 @@ std::string CAudit::ToString() const
         auditData.nVersion,
         auditData.vAuditData.size(),
         strAuditData,
+        stringFromVch(vchAlgorithmType),
+        stringFromVch(vchDescription),
         auditData.nTimeStamp,
         stringFromVch(vchOwnerFullObjectPath),
         IsSigned() ? "True" : "False"
@@ -190,30 +233,56 @@ std::string CAudit::ToString() const
 
 bool BuildAuditJson(const CAudit& audit, UniValue& oAudit)
 {
-    bool expired = false;
-    int64_t expired_time = 0;
     int64_t nTime = 0;
     CAuditData auditData = audit.GetAuditData();
+
+    UniValue oAuditHashes(UniValue::VOBJ);
+    int counter = 0;
+    for(const std::vector<unsigned char>& vchAudit : auditData.vAuditData) {
+        counter++;
+        oAuditHashes.push_back(Pair("audit_hash" + std::to_string(counter), stringFromVch(vchAudit)));
+    }
     oAudit.push_back(Pair("version", std::to_string(audit.Version())));
-    oAudit.push_back(Pair("audit count", auditData.vAuditData.size()));
+    oAudit.push_back(Pair("audit_count", auditData.vAuditData.size()));
+    oAudit.push_back(Pair("audit_hashes", oAuditHashes));
     oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
     oAudit.push_back(Pair("owner", stringFromVch(audit.vchOwnerFullObjectPath)));
     oAudit.push_back(Pair("signed", audit.IsSigned() ? "True" : "False"));
+    oAudit.push_back(Pair("algorithm_type", stringFromVch(audit.vchAlgorithmType)));
+    oAudit.push_back(Pair("description", stringFromVch(audit.vchDescription)));
     oAudit.push_back(Pair("txid", audit.txHash.GetHex()));
-    if ((unsigned int)chainActive.Height() >= audit.nHeight-1) {
-        CBlockIndex *pindex = chainActive[audit.nHeight-1];
+    if ((unsigned int)chainActive.Height() >= audit.nHeight) {
+        CBlockIndex *pindex = chainActive[audit.nHeight];
         if (pindex) {
-            nTime = pindex->GetMedianTimePast();
+            nTime = pindex->GetBlockTime();
         }
     }
-    oAudit.push_back(Pair("time", nTime));
-    oAudit.push_back(Pair("height", std::to_string(audit.nHeight)));
-    expired_time = audit.nExpireTime;
-    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
-    {
-        expired = true;
-    }
-    oAudit.push_back(Pair("expires_on", std::to_string(expired_time)));
-    oAudit.push_back(Pair("expired", expired));
+    oAudit.push_back(Pair("block_time", nTime));
+    oAudit.push_back(Pair("block_height", std::to_string(audit.nHeight)));
     return true;
 }
+
+bool BuildVerifyAuditJson(const CAudit& audit, UniValue& oAudit)
+{
+    int64_t nTime = 0;
+    CAuditData auditData = audit.GetAuditData();
+
+    oAudit.push_back(Pair("version", std::to_string(audit.Version())));
+    oAudit.push_back(Pair("audit_count", auditData.vAuditData.size()));
+    oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
+    oAudit.push_back(Pair("owner", stringFromVch(audit.vchOwnerFullObjectPath)));
+    oAudit.push_back(Pair("signed", audit.IsSigned() ? "True" : "False"));
+    oAudit.push_back(Pair("algorithm_type", stringFromVch(audit.vchAlgorithmType)));
+    oAudit.push_back(Pair("description", stringFromVch(audit.vchDescription)));
+    oAudit.push_back(Pair("txid", audit.txHash.GetHex()));
+    if ((unsigned int)chainActive.Height() >= audit.nHeight) {
+        CBlockIndex *pindex = chainActive[audit.nHeight];
+        if (pindex) {
+            nTime = pindex->GetBlockTime();
+        }
+    }
+    oAudit.push_back(Pair("block_time", nTime));
+    oAudit.push_back(Pair("block_height", std::to_string(audit.nHeight)));
+    return true;
+}
+

@@ -491,6 +491,10 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     if (nOpAmount <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
 
+    //NOTE: nDataAmount cannot be 0
+    if (nDataAmount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
+
     if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 

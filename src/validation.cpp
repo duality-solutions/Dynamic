@@ -1242,7 +1242,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 LogPrint("bdap", "%s -- BDAP move asset operation. vvchBDAPArgs.size() = %d\n", __func__, vvchBDAPArgs.size());
                 return true;
             }
-            else if (strOpType == "bdap_add_audit") {
+            else if (strOpType == "bdap_new_audit") {
                 bValid = CheckAuditTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: " + errorMessage;
@@ -1563,12 +1563,12 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 CPubKey pubkey(vvch[2]);
                 CDynamicAddress address(pubkey.GetID());
                 if (findDomainEntry.GetWalletAddress().ToString() != address.ToString()) {
-                    strErrorMessage = "AcceptToMemoryPoolWorker -- Public key does not match BDAP account wallet address.  Rejected by the tx memory pool!";
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
-                }
-                if (!audit.CheckSignature(vvch[2])) {
+                        strErrorMessage = "AcceptToMemoryPoolWorker -- Public key does not match BDAP account wallet address.  Rejected by the tx memory pool!";
+                        return state.Invalid(false, REJECT_INVALID, "bdap-audit-wallet-address-mismatch " + strErrorMessage);
+                    }
+                if (!audit.CheckSignature(pubkey.Raw())) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
-                    return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
+                    return state.Invalid(false, REJECT_INVALID, "bdap-audit-check-signature-failed " + strErrorMessage);
                 }
             }
             CAudit audit;

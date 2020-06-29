@@ -1,5 +1,5 @@
 ---
-name: "dynamic-2.5.1.0"
+name: "dynamic-2.5.2.0"
 enable_cache: true
 suites:
 - "trusty"

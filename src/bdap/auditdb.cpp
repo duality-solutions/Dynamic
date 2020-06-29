@@ -64,20 +64,34 @@ bool UndoAddAudit(const CAudit& audit)
 bool CAuditDB::AddAudit(const CAudit& audit, const int op) 
 { 
     bool writeState = false;
+    bool writeStateDN = false;
     bool auditHashWriteState = true;
     {
         LOCK(cs_bdap_audit);
         CAuditData auditData = audit.GetAuditData();
         for(const std::vector<unsigned char>& vchAuditHash : auditData.vAuditData) {
+            std::vector<std::vector<unsigned char>> vvTxHash;
+            CDBWrapper::Read(make_pair(std::string("audit"), vchAuditHash), vvTxHash);
+            vvTxHash.push_back(vchFromString(audit.txHash.ToString()));
             // each hash points to a txid. The txid record stores the audit record.
-            if (!Write(make_pair(std::string("audit"), vchAuditHash), vchFromString(audit.txHash.ToString()))) {
+            if (!Write(make_pair(std::string("audit"), vchAuditHash), vvTxHash)) {
                 auditHashWriteState = false;
             }
+        }
+        if (audit.vchOwnerFullObjectPath.size() > 0) {
+            std::vector<std::vector<unsigned char>> vvTxId;
+            CDBWrapper::Read(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+            vvTxId.push_back(vchFromString(audit.txHash.ToString()));
+
+            writeStateDN = Write(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+        }
+        else {
+            writeStateDN = true;
         }
         writeState = Write(make_pair(std::string("txid"), vchFromString(audit.txHash.ToString())), audit);
     }
 
-    return writeState && auditHashWriteState;
+    return writeState && auditHashWriteState && writeStateDN;
 }
 
 bool CAuditDB::ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit) 
@@ -85,6 +99,45 @@ bool CAuditDB::ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& 
     LOCK(cs_bdap_audit);
     return CDBWrapper::Read(make_pair(std::string("txid"), vchTxId), audit);
 }
+
+bool CAuditDB::ReadAuditDN(const std::vector<unsigned char>& vchOwnerFullObjectPath, std::vector<CAudit>& vAudits) 
+{
+    LOCK(cs_bdap_audit);
+    std::vector<std::vector<unsigned char>> vvTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("dn"), vchOwnerFullObjectPath), vvTxId);
+
+    if (readState) {
+        for (const std::vector<unsigned char>& vchTxId : vvTxId) {
+            CAudit audit;
+            if (ReadAuditTxId(vchTxId, audit)) {
+                vAudits.push_back(audit);
+            }
+        }
+    }
+
+    return (vAudits.size() > 0);
+}
+
+bool CAuditDB::ReadAuditHash(const std::vector<unsigned char>& vchAudit, std::vector<CAudit>& vAudits) 
+{
+    LOCK(cs_bdap_audit);
+    std::vector<std::vector<unsigned char>> vvTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("audit"), vchAudit), vvTxId);
+
+    if (readState) {
+        for (const std::vector<unsigned char>& vchTxId : vvTxId) {
+            CAudit audit;
+            if (ReadAuditTxId(vchTxId, audit)) {
+                vAudits.push_back(audit);
+            }
+        }
+    }
+
+    return (vAudits.size() > 0);
+}
+
 
 bool CAuditDB::ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit) 
 {
@@ -113,6 +166,22 @@ bool CAuditDB::EraseAuditTxId(const std::vector<unsigned char>& vchTxId)
         for(const std::vector<unsigned char>& vchAudit : audit.GetAudits())
             CDBWrapper::Erase(make_pair(std::string("audit"), vchAudit));
     }
+    if (audit.vchOwnerFullObjectPath.size() > 0) {
+        std::vector<std::vector<unsigned char>> vvTxId;
+        CDBWrapper::Read(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxId);
+        if (vvTxId.size() == 1 && vvTxId[0] == vchTxId) {
+            CDBWrapper::Erase(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath));
+        }
+        else {
+            std::vector<std::vector<unsigned char>> vvTxIdNew;
+            for (const std::vector<unsigned char>& txid : vvTxId) {
+                if (txid != vchTxId) {
+                    vvTxIdNew.push_back(txid);
+                }
+            }
+            Write(make_pair(std::string("dn"), audit.vchOwnerFullObjectPath), vvTxIdNew);
+        }
+    }
     return CDBWrapper::Erase(make_pair(std::string("txid"), vchTxId));
 }
 
@@ -120,37 +189,6 @@ bool CAuditDB::EraseAudit(const std::vector<unsigned char>& vchAudit)
 {
     LOCK(cs_bdap_audit);
     return CDBWrapper::Erase(make_pair(std::string("audit"), vchAudit));
-}
-
-// Removes expired records from databases.
-bool CAuditDB::RemoveExpired(int& entriesRemoved, int& auditsRemoved)
-{
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    CAudit audit;
-    std::pair<std::string, std::vector<unsigned char> > key;
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "txid") {
-                std::vector<unsigned char> value;
-                CAudit audit;
-                pcursor->GetValue(value);
-                if (GetAudit(value, audit) && audit.nExpireTime > 0 && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= audit.nExpireTime) {
-                    for(const std::vector<unsigned char>& vchAuditHash : audit.GetAudits()) {
-                        EraseAudit(vchAuditHash);
-                        auditsRemoved++;
-                    }
-                    EraseAuditTxId(key.second);
-                    entriesRemoved++;
-                }
-            }
-            pcursor->Next();
-        } catch (std::exception& e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
 }
 
 bool CAuditDB::GetAuditInfo(const std::vector<unsigned char>& vchAudit, UniValue& oAuditInfo)
@@ -194,13 +232,6 @@ bool FlushAuditLevelDB()
         }
     }
     return true;
-}
-
-void RemoveExpired(int& entriesRemoved, int& auditsRemoved)
-{
-    if(pAuditDB != nullptr)
-        pAuditDB->RemoveExpired(entriesRemoved, auditsRemoved);
-    FlushAuditLevelDB();
 }
 
 static bool CommonDataCheck(const CAudit& audit, const vchCharString& vvchOpParameters, std::string& errorMessage)
@@ -287,6 +318,20 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
             return error(errorMessage.c_str());
         }
         // check signature and pubkey belongs to bdap account.
+        CPubKey pubkey(vvchOpParameters[2]);
+
+        CDynamicAddress addressCompare(pubkey.GetID());
+
+        if (!(address == addressCompare)) {
+            errorMessage = "CheckNewAuditTxInputs: - Wallet address does not match. ";
+            return error(errorMessage.c_str());
+        }
+
+        if (!audit.CheckSignature(pubkey.Raw())) {
+            errorMessage = "CheckNewAuditTxInputs: - Could not validate signature. ";
+            return error(errorMessage.c_str());
+        }
+
     }
 
     CAudit getAudit;
@@ -307,6 +352,7 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
     int op = OP_BDAP_NEW;
     if (!pAuditDB->AddAudit(audit, op)) {
         errorMessage = "CheckNewAuditTxInputs failed! Error adding new audit record to LevelDB.";
+        pAuditDB->EraseAuditTxId(vchFromString(audit.txHash.ToString()));
         return error(errorMessage.c_str());
     }
 
@@ -329,7 +375,7 @@ bool CheckAuditTx(const CTransactionRef& tx, const CScript& scriptOp, const int&
     std::vector<unsigned char> vchHash;
     int nDataOut;
     bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
-    if(bData && !audit.UnserializeFromData(vchData, vchHash))
+    if(bData && !audit.UnserializeFromTx(tx, nHeight))
     {
         errorMessage = ("UnserializeFromData data in tx failed!");
         LogPrintf("%s -- %s \n", __func__, errorMessage);
@@ -338,6 +384,9 @@ bool CheckAuditTx(const CTransactionRef& tx, const CScript& scriptOp, const int&
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (strOperationType == "bdap_new_audit") {
+        if (!audit.ValidateValues(errorMessage))
+            return false;
+
         if (vvchArgs.size() > 3) {
             errorMessage = "Failed to get fees to add a new BDAP account";
             return false;
