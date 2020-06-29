@@ -38,7 +38,8 @@ static int column_alignments[] = {
     Qt::AlignLeft | Qt::AlignVCenter, /* date */
     Qt::AlignLeft | Qt::AlignVCenter, /* type */
     Qt::AlignLeft | Qt::AlignVCenter, /* address */
-    Qt::AlignLeft | Qt::AlignVCenter  /* amount */
+    Qt::AlignLeft | Qt::AlignVCenter,  /* amount */
+    Qt::AlignLeft|Qt::AlignVCenter /* assetName */
 };
 
 // Comparison operator for sort/binary search of model tx list
@@ -229,7 +230,7 @@ TransactionTableModel::TransactionTableModel(const PlatformStyle* _platformStyle
                                                                                                                            fProcessingQueuedTransactions(false),
                                                                                                                            platformStyle(_platformStyle)
 {
-    columns << QString() << QString() << QString() << tr("Date") << tr("Type") << tr("Address / Label") << DynamicUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
+    columns << QString() << QString() << QString() << tr("Date") << tr("Type") << tr("Address / Label") << DynamicUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit()) << tr("Asset");
     priv->refreshWallet();
 
     connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
@@ -395,7 +396,14 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("PrivateSend Create Denominations");
     case TransactionRecord::PrivateSend:
         return tr("PrivateSend");
-
+    case TransactionRecord::Issue:
+        return tr("Asset Issued");
+    case TransactionRecord::Reissue:
+        return tr("Asset Reissued");
+    case TransactionRecord::TransferFrom:
+        return tr("Assets Received");
+    case TransactionRecord::TransferTo:
+        return tr("Assets Sent");
     default:
         return QString();
     }
@@ -442,6 +450,12 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::LinkRequest:
     case TransactionRecord::LinkAccept:
         return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::Issue:
+    case TransactionRecord::Reissue:
+    case TransactionRecord::TransferFrom:
+        return QIcon(":/icons/tx_asset_input");
+    case TransactionRecord::TransferTo:
+        return QIcon(":/icons/tx_asset_output");
     default:
         return QIcon(":/icons/" + theme + "/tx_inout");
     }
@@ -640,6 +654,8 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
             return txInstantSendDecoration(rec);
         case ToAddress:
             return txAddressDecoration(rec);
+        case AssetName:
+            return QString::fromStdString(rec->assetName);
         }
         break;
     case Qt::DecorationRole: {
@@ -655,6 +671,11 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
             return formatTxToAddress(rec, false);
         case Amount:
             return formatTxAmount(rec, true, DynamicUnits::separatorAlways);
+        case AssetName:
+            if (rec->assetName != "DYN")
+               return QString::fromStdString(rec->assetName);
+            else
+               return QString(DynamicUnits::name(walletModel->getOptionsModel()->getDisplayUnit()));
         }
         break;
     case Qt::EditRole:
@@ -674,6 +695,8 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
             return formatTxToAddress(rec, true);
         case Amount:
             return qint64(rec->credit + rec->debit);
+        case AssetName:
+            return QString::fromStdString(rec->assetName);
         }
         break;
     case Qt::ToolTipRole:
@@ -716,6 +739,11 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         }
         if (index.column() == ToAddress) {
             return addressColor(rec);
+        }
+        if(index.column() == AssetName)
+        {
+            if (rec->assetName != "DYN")
+               return platformStyle->AssetTxColor();
         }
         // To avoid overriding above conditional formats a default text color for this QTableView is not defined in stylesheet,
         // so we must always return a color here
@@ -777,6 +805,15 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
     case FormattedAmountRole:
         // Used for copy/export, so don't include separators
         return formatTxAmount(rec, false, DynamicUnits::separatorNever);
+    case AssetNameRole:
+        {
+            QString assetName;
+            if (rec->assetName != "DYN")
+               assetName.append(QString::fromStdString(rec->assetName));
+            else
+               assetName.append(QString(DynamicUnits::name(walletModel->getOptionsModel()->getDisplayUnit())));
+            return assetName;
+        }
     case StatusRole:
         return rec->status.status;
     }
@@ -806,6 +843,8 @@ QVariant TransactionTableModel::headerData(int section, Qt::Orientation orientat
                 return tr("User-defined intent/purpose of the transaction.");
             case Amount:
                 return tr("Amount removed from or added to balance.");
+            case AssetName:
+                return tr("The asset (or DYN) removed or added to balance.");
             }
         }
     }

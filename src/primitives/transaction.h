@@ -10,9 +10,14 @@
 #define DYNAMIC_PRIMITIVES_TRANSACTION_H
 
 #include "amount.h"
+#include "policy/feerate.h"
 #include "script/script.h"
 #include "serialize.h"
 #include "uint256.h"
+
+/** ASSET START */
+class CNullAssetTxVerifierString;
+/** ASSET END */
 
 enum DataOutputTypes
 {
@@ -30,12 +35,8 @@ public:
     uint256 hash;
     uint32_t n;
 
-    COutPoint() { SetNull(); }
-    COutPoint(uint256 hashIn, uint32_t nIn)
-    {
-        hash = hashIn;
-        n = nIn;
-    }
+    COutPoint(): n((uint32_t) -1) { }
+    COutPoint(const uint256& hashIn, uint32_t nIn): hash(hashIn), n(nIn) { }
 
     ADD_SERIALIZE_METHODS;
 
@@ -71,6 +72,7 @@ public:
 
     std::string ToString() const;
     std::string ToStringShort() const;
+    std::string ToSerializedString() const;
     bool IsDynodeReward(const CTransaction* tx) const;
 
 };
@@ -320,8 +322,29 @@ public:
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize = 0) const;
 
+    /** ASSET START */
+    bool IsNewAsset() const;
+    bool VerifyNewAsset(std::string& strError) const;
+    bool IsNewUniqueAsset() const;
+    bool VerifyNewUniqueAsset(std::string& strError) const;
+    bool IsReissueAsset() const;
+    bool VerifyReissueAsset(std::string& strError) const;
+    bool IsNewMsgChannelAsset() const;
+    bool VerifyNewMsgChannelAsset(std::string& strError) const;
+    bool IsNewQualifierAsset() const;
+    bool VerifyNewQualfierAsset(std::string &strError) const;
+    bool IsNewRestrictedAsset() const;
+    bool VerifyNewRestrictedAsset(std::string& strError) const;
+
+    bool CheckAddingTagBurnFee(const int& count) const;
+
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const;
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
+
+    /** ASSET END */
+
     /**
-     * Get the total transaction size in bytes, including witness data.
+     * Get the total transaction size in bytes.
      * "Total Size" defined in BIP141 and BIP144.
      * @return Total transaction size in bytes
      */

@@ -29,7 +29,7 @@ Serialize(const CScript& s)
 }
 
 static bool
-Verify(const CScript& scriptSig, const CScript& scriptPubKey, bool fStrict, ScriptError& err)
+Verify(const CScript &scriptSig, const CScript &scriptPubKey, bool fStrict, ScriptError &err)
 {
     // Create dummy to/from transactions:
     CMutableTransaction txFrom;
@@ -44,7 +44,7 @@ Verify(const CScript& scriptSig, const CScript& scriptPubKey, bool fStrict, Scri
     txTo.vin[0].scriptSig = scriptSig;
     txTo.vout[0].nValue = 1;
 
-    return VerifyScript(scriptSig, scriptPubKey, fStrict ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE, MutableTransactionSignatureChecker(&txTo, 0), &err);
+    return VerifyScript(scriptSig, scriptPubKey, fStrict ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE, MutableTransactionSignatureChecker(&txTo, 0, txFrom.vout[0].nValue), &err);
 }
 
 
@@ -100,29 +100,29 @@ BOOST_AUTO_TEST_CASE(sign)
         txTo[i].vin[0].prevout.n = i;
         txTo[i].vin[0].prevout.hash = txFrom.GetHash();
         txTo[i].vout[0].nValue = 1;
-#ifdef ENABLE_WALLET
         BOOST_CHECK_MESSAGE(IsMine(keystore, txFrom.vout[i].scriptPubKey), strprintf("IsMine %d", i));
-#endif
     }
     for (int i = 0; i < 8; i++)
     {
-        BOOST_CHECK_MESSAGE(SignSignature(keystore, txFrom, txTo[i], 0), strprintf("SignSignature %d", i));
+        BOOST_CHECK_MESSAGE(SignSignature(keystore, txFrom, txTo[i], 0, SIGHASH_ALL), strprintf("SignSignature %d", i));
     }
     // All of the above should be OK, and the txTos have valid signatures
     // Check to make sure signature verification fails if we use the wrong ScriptSig:
     for (int i = 0; i < 8; i++)
+    {
+        PrecomputedTransactionData txdata(txTo[i]);
         for (int j = 0; j < 8; j++)
         {
             CScript sigSave = txTo[i].vin[0].scriptSig;
             txTo[i].vin[0].scriptSig = txTo[j].vin[0].scriptSig;
-            const CTxOut& output = txFrom.vout[txTo[i].vin[0].prevout.n];
-            bool sigOK = CScriptCheck(output.scriptPubKey, output.nValue, txTo[i], 0, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, false)();
+            bool sigOK = CScriptCheck(txFrom.vout[txTo[i].vin[0].prevout.n], txTo[i], 0, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, false, &txdata)();
             if (i == j)
                 BOOST_CHECK_MESSAGE(sigOK, strprintf("VerifySignature %d %d", i, j));
             else
                 BOOST_CHECK_MESSAGE(!sigOK, strprintf("VerifySignature %d %d", i, j));
             txTo[i].vin[0].scriptSig = sigSave;
         }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(norecurse)

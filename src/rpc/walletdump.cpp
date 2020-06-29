@@ -932,11 +932,11 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     boost::filesystem::path backupFile = GetDataDir() / ("wallet.dat.before-mnemonic-import" + dateTimeStr);
     pwalletMain->BackupWallet(backupFile.string());
 
-    ForceSetArg("-mnemonic", strMnemonic);
-    ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
-    ForceSetArg("-mnemoniclanguage", compareLanguage);
-    SoftSetBoolArg("-importmnemonic", true);
-    SoftSetBoolArg("-skipmnemoniccheck", true);
+    gArgs.ForceSetArg("-mnemonic", strMnemonic);
+    gArgs.ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
+    gArgs.ForceSetArg("-mnemoniclanguage", compareLanguage);
+    gArgs.SoftSetBoolArg("-importmnemonic", true);
+    gArgs.SoftSetBoolArg("-skipmnemoniccheck", true);
 
     CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
     pwalletMain = pwallet;
@@ -945,10 +945,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     entry.push_back(Pair("Done", "Stopping daemon... Please restart dynamic..."));
 
     //cleanup
-    ForceRemoveArg("-mnemonic");
-    ForceRemoveArg("-importmnemonic");
-    ForceRemoveArg("-mnemoniclanguage");
-    ForceRemoveArg("-skipmnemoniccheck");
+    gArgs.ForceRemoveArg("-mnemonic");
+    gArgs.ForceRemoveArg("-importmnemonic");
+    gArgs.ForceRemoveArg("-mnemoniclanguage");
+    gArgs.ForceRemoveArg("-skipmnemoniccheck");
 
     return entry;
 

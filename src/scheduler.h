@@ -8,7 +8,11 @@
 #ifndef DYNAMIC_SCHEDULER_H
 #define DYNAMIC_SCHEDULER_H
 
+#include <boost/chrono/chrono.hpp>
+#include <boost/thread.hpp>
 #include <map>
+
+#include "sync.h"
 
 //
 // NOTE:
@@ -38,6 +42,7 @@
 // delete s; // Must be done after thread is interrupted/joined.
 //
 
+
 class CScheduler
 {
 public:
@@ -47,17 +52,17 @@ public:
     typedef boost::function<void(void)> Function;
 
     // Call func at/after time t
-    void schedule(Function f, boost::chrono::system_clock::time_point t);
+    void schedule(Function f, boost::chrono::system_clock::time_point t=boost::chrono::system_clock::now());
 
     // Convenience method: call f once deltaSeconds from now
-    void scheduleFromNow(Function f, int64_t deltaSeconds);
+    void scheduleFromNow(Function f, int64_t deltaMilliSeconds);
 
     // Another convenience method: call f approximately
     // every deltaSeconds forever, starting deltaSeconds from now.
     // To be more precise: every time f is finished, it
     // is rescheduled to run deltaSeconds later. If you
     // need more accurate scheduling, don't use this method.
-    void scheduleEvery(Function f, int64_t deltaSeconds);
+    void scheduleEvery(Function f, int64_t deltaMilliSeconds);
 
     // To keep things as simple as possible, there is no unschedule.
 
@@ -75,6 +80,9 @@ public:
     size_t getQueueInfo(boost::chrono::system_clock::time_point& first,
         boost::chrono::system_clock::time_point& last) const;
 
+    // Returns true if there are threads actively running in serviceQueue()
+    bool AreThreadsServicingQueue() const;
+
 private:
     std::multimap<boost::chrono::system_clock::time_point, Function> taskQueue;
     boost::condition_variable newTaskScheduled;
@@ -83,6 +91,32 @@ private:
     bool stopRequested;
     bool stopWhenEmpty;
     bool shouldStop() { return stopRequested || (stopWhenEmpty && taskQueue.empty()); }
+};
+
+/**
+ * Class used by CScheduler clients which may schedule multiple jobs
+ * which are required to be run serially. Does not require such jobs
+ * to be executed on the same thread, but no two jobs will be executed
+ * at the same time.
+ */
+class SingleThreadedSchedulerClient {
+private:
+    CScheduler *m_pscheduler;
+
+    CCriticalSection m_cs_callbacks_pending;
+    std::list<std::function<void (void)>> m_callbacks_pending;
+    bool m_are_callbacks_running = false;
+
+    void MaybeScheduleProcessQueue();
+    void ProcessQueue();
+
+public:
+    explicit SingleThreadedSchedulerClient(CScheduler *pschedulerIn) : m_pscheduler(pschedulerIn) {}
+    void AddToProcessQueue(std::function<void (void)> func);
+
+    // Processes all remaining queue members on the calling thread, blocking until queue is empty
+    // Must be called after the CScheduler has no remaining processing threads!
+    void EmptyQueue();
 };
 
 #endif // DYNAMIC_SCHEDULER_H

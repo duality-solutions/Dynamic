@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "amount.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
@@ -1011,7 +1012,7 @@ UniValue makecredits(const JSONRPCRequest& request)
     scriptColorCoins += scriptDestination;
 
     CWalletTx wtx;
-    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, NULL, false, false);
+    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, nullptr, false, false);
 
     return wtx.GetHash().GetHex();
 }

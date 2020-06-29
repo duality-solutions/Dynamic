@@ -7,11 +7,20 @@
 
 #include "coins.h"
 
+#include "assets/assetdb.h"
+#include "assets/assets.h"
+#include "base58.h"
 #include "consensus/consensus.h"
 #include "memusage.h"
 #include "random.h"
+#include "tinyformat.h"
+#include "util.h"
+#include "validation.h"
+#include "wallet/wallet.h"
 
-#include <assert.h>
+#ifdef ENABLE_WALLET
+extern CWallet* pwalletMain;
+#endif // ENABLE_WALLET
 
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }
@@ -93,10 +102,11 @@ void CCoinsViewCache::AddCoin(const COutPoint& outpoint, Coin&& coin, bool possi
     cachedCoinsUsage += it->second.coin.DynamicMemoryUsage();
 }
 
-void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight)
-{
+ void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight) 
+ {
     bool fCoinbase = tx.IsCoinBase();
     const uint256& txid = tx.GetHash();
+
     for (size_t i = 0; i < tx.vout.size(); ++i) {
         // Pass fCoinbase as the possible_overwrite flag to AddCoin, in order to correctly
         // deal with the pre-BIP30 occurrances of duplicate coinbase transactions.
@@ -104,12 +114,13 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight)
     }
 }
 
-bool CCoinsViewCache::SpendCoin(const COutPoint& outpoint, Coin* moveout)
+bool CCoinsViewCache::SpendCoin(const COutPoint& outpoint, Coin* moveout) 
 {
     CCoinsMap::iterator it = FetchCoin(outpoint);
     if (it == cacheCoins.end())
         return false;
     cachedCoinsUsage -= it->second.coin.DynamicMemoryUsage();
+
     if (moveout) {
         *moveout = std::move(it->second.coin);
     }
@@ -267,7 +278,7 @@ double CCoinsViewCache::GetPriority(const CTransaction& tx, int nHeight, CAmount
     if (tx.IsCoinBase() || tx.IsCoinStake())
         return 0.0;
     double dResult = 0.0;
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
         const Coin& coin = AccessCoin(txin.prevout);
         if (coin.IsSpent())
             continue;
@@ -277,18 +288,4 @@ double CCoinsViewCache::GetPriority(const CTransaction& tx, int nHeight, CAmount
         }
     }
     return tx.ComputePriority(dResult);
-}
-
-static const size_t MAX_OUTPUTS_PER_BLOCK = MAX_BLOCK_SIZE / ::GetSerializeSize(CTxOut(), SER_NETWORK, PROTOCOL_VERSION); // TODO: merge with similar definition in undo.h.
-
-const Coin& AccessByTxid(const CCoinsViewCache& view, const uint256& txid)
-{
-    COutPoint iter(txid, 0);
-    while (iter.n < MAX_OUTPUTS_PER_BLOCK) {
-        const Coin& alternate = view.AccessCoin(iter);
-        if (!alternate.IsSpent())
-            return alternate;
-        ++iter.n;
-    }
-    return coinEmpty;
 }

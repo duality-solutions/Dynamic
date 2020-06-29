@@ -1111,7 +1111,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("signature_size", (int)vpgMessage.vchSig.size()));
     if (vpgMessage.CheckSignature(vchWalletPubKey)) {
         oLink.push_back(Pair("check_signature", "valid"));
-        vpgMessage.RelayMessage(*g_connman);
+        vpgMessage.RelayMessage(g_connman.get());
     }
     else {
         oLink.push_back(Pair("check_signature", "invalid"));

@@ -110,12 +110,12 @@ bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode) const
     return true;
 }
 
-bool CPrivateSendQueue::Relay(CConnman& connman)
+bool CPrivateSendQueue::Relay(CConnman* connman)
 {
-    connman.ForEachNode([&connman, this](CNode* pnode) {
+    connman->ForEachNode([&connman, this](CNode* pnode) {
         CNetMsgMaker msgMaker(pnode->GetSendVersion());
         if (pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSQUEUE, (*this)));
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSQUEUE, (*this)));
     });
     return true;
 }
@@ -331,7 +331,7 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     {
         LOCK(cs_main);
         CValidationState validationState;
-        if (!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), false, NULL, NULL, false, maxTxFee, true)) {
+        if (!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), false, nullptr, nullptr, false, maxTxFee, true)) {
             LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool()\n");
             return false;
         }

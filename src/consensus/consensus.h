@@ -11,9 +11,14 @@ static const unsigned int MAX_TX_SIZE = 1000000; // 1 MB to match the default ma
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 4194304; //4MB
 /** The maximum allowed number of signature check operations in a block (network rule) */
-static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE / 50;
+static const unsigned int MAX_BLOCK_SIGOPS_COST = MAX_BLOCK_SIZE / 50;
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 10;
+
+#define UNUSED_VAR     __attribute__ ((unused))
+
+unsigned int GetMaxBlockSerializedSize();
+/** ASSET END */
 
 /** Flags for nSequence and nLockTime locks */
 enum {

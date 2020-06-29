@@ -126,7 +126,7 @@ bool CAlert::AppliesToMe() const
     return AppliesTo(PROTOCOL_VERSION, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<std::string>()));
 }
 
-bool CAlert::RelayTo(CNode* pnode, CConnman& connman) const
+bool CAlert::RelayTo(CNode* pnode, CConnman* connman) const
 {
     if (!IsInEffect())
         return false;
@@ -138,7 +138,7 @@ bool CAlert::RelayTo(CNode* pnode, CConnman& connman) const
         if (AppliesTo(pnode->nVersion, pnode->strSubVer) ||
             AppliesToMe() ||
             GetAdjustedTime() < nRelayUntil) {
-            connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::ALERT, *this));
+            connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::ALERT, *this));
             return true;
         }
     }
@@ -151,7 +151,7 @@ bool CAlert::Sign()
     sMsg << *(CUnsignedAlert*)this;
     vchMsg = std::vector<unsigned char>(sMsg.begin(), sMsg.end());
     CDynamicSecret vchSecret;
-    if (!vchSecret.SetString(GetArg("-alertkey", ""))) {
+    if (!vchSecret.SetString(gArgs.GetArg("-alertkey", ""))) {
         printf("CAlert::SignAlert() : vchSecret.SetString failed\n");
         return false;
     }
@@ -256,7 +256,7 @@ bool CAlert::ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThre
 
 void CAlert::Notify(const std::string& strMessage, bool fThread)
 {
-    std::string strCmd = GetArg("-alertnotify", "");
+    std::string strCmd = gArgs.GetArg("-alertnotify", "");
     if (strCmd.empty())
         return;
 

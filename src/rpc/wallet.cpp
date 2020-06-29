@@ -13,6 +13,7 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "core_io.h"
+#include "httpserver.h" // urlDecode
 #include "init.h"
 #include "instantsend.h"
 #include "keepass.h"
@@ -20,6 +21,7 @@
 #include "netbase.h"
 #include "policy/rbf.h"
 #include "privatesend-client.h"
+#include "rpc/mining.h"
 #include "rpc/server.h"
 #include "timedata.h"
 #include "util.h"
@@ -464,7 +466,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
         vecSend.push_back(sendData);
     }
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
+            strError, nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -519,7 +521,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -571,7 +573,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     vecSend.push_back(recOPScript);
     // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -656,7 +658,7 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
     vecSend.push_back(recipient);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, NULL, true, ALL_COINS, false)) {
+            strError, nullptr, true, ALL_COINS, false)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -678,7 +680,7 @@ static bool GetCoinControl(const CScript& sendAddressScript, CCoinControl* ccCoi
     unsigned int nCount = 0;
     ccCoins->SetNull();
     std::vector<COutput> vecOutputs;
-    pwalletMain->AvailableCoins(vecOutputs, true, NULL, false, ALL_COINS, false);
+    pwalletMain->AvailableCoins(vecOutputs, true, nullptr, false, ALL_COINS, false);
     for (const COutput& out : vecOutputs) {
         CTxDestination outputAddress;
         const CScript& scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
@@ -749,7 +751,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 7)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 9)
         throw std::runtime_error(
             "sendtoaddress \"dynamicaddress\" amount ( \"comment\" \"comment-to\" subtractfeefromamount use_is use_ps )\n"
             "\nSend an amount to a given address.\n" +
@@ -767,8 +769,13 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
                             "                             The recipient will receive less Dynamic than you enter in the amount field.\n"
                             "6. \"use_is\"      (bool, optional) Send this transaction as InstantSend (default: false)\n"
                             "7. \"use_ps\"      (bool, optional) Use anonymized funds only (default: false)\n"
+                            "8. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+                            "9. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+                            "       \"UNSET\"\n"
+                            "       \"ECONOMICAL\"\n"
+                            "       \"CONSERVATIVE\"\n"
                             "\nResult:\n"
-                            "\"transactionid\"  (string) The transaction id.\n"
+                            "\"txid\"                  (string) The transaction id.\n"
                             "\nExamples:\n" +
             HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1") + HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1 \"donation\" \"seans outpost\"") + HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1 \"\" \"\" true") + HelpExampleRpc("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", 0.1, \"donation\", \"seans outpost\""));
 
@@ -800,6 +807,18 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
         fUseInstantSend = request.params[5].get_bool();
     if (request.params.size() > 6)
         fUsePrivateSend = request.params[6].get_bool();
+
+    CCoinControl coin_control;
+
+    if (!request.params[7].isNull()) {
+        coin_control.m_confirm_target = ParseConfirmTarget(request.params[8]);
+    }
+
+    if (!request.params[8].isNull()) {
+        if (!FeeModeFromString(request.params[9].get_str(), coin_control.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
 
     EnsureWalletIsUnlocked();
 
@@ -1315,7 +1334,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 9)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 11)
         throw std::runtime_error(
             "sendmany \"fromaccount\" {\"address\":amount,...} ( minconf addlocked \"comment\" [\"address\",...] subtractfeefromamount use_is use_ps )\n"
             "\nSend multiple times. Amounts are double-precision floating point numbers." +
@@ -1341,8 +1360,13 @@ UniValue sendmany(const JSONRPCRequest& request)
                             "    ]\n"
                             "7. \"use_is\"                (bool, optional) Send this transaction as InstantSend (default: false)\n"
                             "8. \"use_ps\"                (bool, optional) Use anonymized funds only (default: false)\n"
-                            "\nResult:\n"
-                            "\"transactionid\"            (string) The transaction id for the send. Only 1 transaction is created regardless of \n"
+                            "9. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+                            "10. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+                            "       \"UNSET\"\n"
+                            "       \"ECONOMICAL\"\n"
+                            "       \"CONSERVATIVE\"\n"
+                             "\nResult:\n"
+                            "\"txid\"                   (string) The transaction id for the send. Only 1 transaction is created regardless of \n"
                             "                                    the number of addresses.\n"
                             "\nExamples:\n"
                             "\nSend two amounts to two different addresses:\n" +
@@ -1445,8 +1469,20 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (request.params.size() > 7)
         fUsePrivateSend = request.params[7].get_bool();
 
+    CCoinControl coin_control;
+    
+    if (!request.params[8].isNull()) {
+        coin_control.m_confirm_target = ParseConfirmTarget(request.params[9]);
+    }
+
+    if (!request.params[9].isNull()) {
+        if (!FeeModeFromString(request.params[10].get_str(), coin_control.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
+
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-        NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
+        nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
@@ -1719,14 +1755,17 @@ static void MaybePushAddress(UniValue& entry, const CTxDestination& dest)
         entry.push_back(Pair("address", addr.ToString()));
 }
 
-void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, const isminefilter& filter)
+void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, UniValue& retAssets, const isminefilter& filter)
 {
     CAmount nFee;
     std::string strSentAccount;
     std::list<COutputEntry> listReceived;
     std::list<COutputEntry> listSent;
 
-    wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount, filter);
+    std::list<CAssetOutputEntry> listAssetsReceived;
+    std::list<CAssetOutputEntry> listAssetsSent;
+    
+    wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount, filter, listAssetsReceived, listAssetsSent);
 
     bool fAllAccounts = (strAccount == std::string("*"));
     bool involvesWatchonly = wtx.IsRelevantToMe(ISMINE_WATCH_ONLY);
@@ -1802,6 +1841,64 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
             }
         }
     }
+    /** ASSET START */
+    if (AreAssetsDeployed()) {
+        if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
+            for (const CAssetOutputEntry &data : listAssetsReceived){
+                UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwalletMain, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
+
+                entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
+                entry.push_back(Pair("asset_name", data.assetName));
+                entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
+                entry.push_back(Pair("destination", EncodeDestination(data.destination)));
+                entry.push_back(Pair("vout", data.vout));
+                entry.push_back(Pair("category", "receive"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
+                retAssets.push_back(entry);
+            }
+        }
+
+        if ((!listAssetsSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount)) {
+            for (const CAssetOutputEntry &data : listAssetsSent) {
+                UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwalletMain, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
+
+                entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
+                entry.push_back(Pair("asset_name", data.assetName));
+                entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
+                entry.push_back(Pair("destination", EncodeDestination(data.destination)));
+                entry.push_back(Pair("vout", data.vout));
+                entry.push_back(Pair("category", "send"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
+                retAssets.push_back(entry);
+            }
+        }
+    }
+    /** ASSET END */
+}
+
+void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, const isminefilter& filter)
+{
+    UniValue assetDetails(UniValue::VARR);
+
+    ListTransactions(wtx, strAccount, nMinDepth, fLong, ret, assetDetails, filter);
 }
 
 void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccount, UniValue& ret)
@@ -1822,8 +1919,9 @@ void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccoun
 
 UniValue listtransactions(const JSONRPCRequest& request)
 {
-    if (!EnsureWalletIsAvailable(request.fHelp))
+    if (!EnsureWalletIsAvailable(request.fHelp)) {
         return NullUniValue;
+    }
 
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
@@ -2073,7 +2171,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    const CBlockIndex* pindex = NULL;
+    const CBlockIndex* pindex = nullptr;
     int target_confirms = 1;
     isminefilter filter = ISMINE_SPENDABLE;
 
@@ -3340,9 +3438,9 @@ UniValue listunspent(const JSONRPCRequest& request)
 
     UniValue results(UniValue::VARR);
     std::vector<COutput> vecOutputs;
-    assert(pwalletMain != NULL);
+    assert(pwalletMain != nullptr);
     LOCK2(cs_main, pwalletMain->cs_wallet);
-    pwalletMain->AvailableCoins(vecOutputs, !include_unsafe, NULL, true);
+    pwalletMain->AvailableCoins(vecOutputs, !include_unsafe, nullptr, true);
     BOOST_FOREACH (const COutput& out, vecOutputs) {
         if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
             continue;
@@ -3406,38 +3504,47 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
             "1. \"hexstring\"           (string, required) The hex string of the raw transaction\n"
             "2. options                 (object, optional)\n"
             "   {\n"
-            "     \"changeAddress\"          (string, optional, default pool address) The dynamic address to receive the change\n"
+            "     \"changeAddress\"          (string, optional, default pool address) The Dynamic address to receive the change\n"
             "     \"changePosition\"         (numeric, optional, default random) The index of the change output\n"
             "     \"includeWatching\"        (boolean, optional, default false) Also select inputs which are watch only\n"
             "     \"lockUnspents\"           (boolean, optional, default false) Lock selected unspent outputs\n"
-            "     \"reserveChangeKey\"       (boolean, optional, default true) Reserves the change output key from the keypool\n"
-            "     \"feeRate\"                (numeric, optional, default not set: makes wallet determine the fee) Set a specific feerate (" +
-            CURRENCY_UNIT + " per KB)\n"
-                            "     \"subtractFeeFromOutputs\" (array, optional) A json array of integers.\n"
-                            "                              The fee will be equally deducted from the amount of each specified output.\n"
-                            "                              The outputs are specified by their zero-based index, before any change output is added.\n"
-                            "                              Those recipients will receive less dynamic than you enter in their corresponding amount field.\n"
-                            "                              If no outputs are specified here, the sender pays the fee.\n"
-                            "                                  [vout_index,...]\n"
-                            "   }\n"
-                            "                         for backward compatibility: passing in a true instead of an object will result in {\"includeWatching\":true}\n"
-                            "\nResult:\n"
-                            "{\n"
-                            "  \"hex\":       \"value\", (string)  The resulting raw transaction (hex-encoded string)\n"
-                            "  \"fee\":       n,         (numeric) Fee in " +
-            CURRENCY_UNIT + " the resulting transaction pays\n"
-                            "  \"changepos\": n          (numeric) The position of the added change output, or -1\n"
-                            "}\n"
-                            "\nExamples:\n"
-                            "\nCreate a transaction with no inputs\n" +
-            HelpExampleCli("createrawtransaction", "\"[]\" \"{\\\"myaddress\\\":0.01}\"") +
-            "\nAdd sufficient unsigned inputs to meet the output value\n" + HelpExampleCli("fundrawtransaction", "\"rawtransactionhex\"") +
-            "\nSign the transaction\n" + HelpExampleCli("signrawtransaction", "\"fundedtransactionhex\"") +
-            "\nSend the transaction\n" + HelpExampleCli("sendrawtransaction", "\"signedtransactionhex\""));
+            "     \"feeRate\"                (numeric, optional, default not set: makes wallet determine the fee) Set a specific fee rate in " + CURRENCY_UNIT + "/kB\n"
+            "     \"subtractFeeFromOutputs\" (array, optional) A json array of integers.\n"
+            "                              The fee will be equally deducted from the amount of each specified output.\n"
+            "                              The outputs are specified by their zero-based index, before any change output is added.\n"
+            "                              Those recipients will receive less DYN than you enter in their corresponding amount field.\n"
+            "                              If no outputs are specified here, the sender pays the fee.\n"
+            "                                  [vout_index,...]\n"
+//                            "     \"replaceable\"            (boolean, optional) Marks this transaction as BIP125 replaceable.\n"
+            "                              Allows this transaction to be replaced by a transaction with higher fees\n"
+            "     \"conf_target\"            (numeric, optional) Confirmation target (in blocks)\n"
+            "     \"estimate_mode\"          (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+            "         \"UNSET\"\n"
+            "         \"ECONOMICAL\"\n"
+            "         \"CONSERVATIVE\"\n"
+            "   }\n"
+            "                         for backward compatibility: passing in a true instead of an object will result in {\"includeWatching\":true}\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"hex\":       \"value\", (string)  The resulting raw transaction (hex-encoded string)\n"
+            "  \"fee\":       n,         (numeric) Fee in " + CURRENCY_UNIT + " the resulting transaction pays\n"
+            "  \"changepos\": n          (numeric) The position of the added change output, or -1\n"
+            "}\n"
+            "\nExamples:\n"
+            "\nCreate a transaction with no inputs\n"
+            + HelpExampleCli("createrawtransaction", "\"[]\" \"{\\\"myaddress\\\":0.01}\"") +
+            "\nAdd sufficient unsigned inputs to meet the output value\n"
+            + HelpExampleCli("fundrawtransaction", "\"rawtransactionhex\"") +
+            "\nSign the transaction\n"
+            + HelpExampleCli("signrawtransaction", "\"fundedtransactionhex\"") +
+            "\nSend the transaction\n"
+            + HelpExampleCli("sendrawtransaction", "\"signedtransactionhex\"")
+    );
 
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR));
 
     CTxDestination changeAddress = CNoDestination();
+    CCoinControl coinControl;
     int changePosition = -1;
     bool includeWatching = false;
     bool lockUnspents = false;
@@ -3465,6 +3572,8 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
                     {"reserveChangeKey", UniValueType(UniValue::VBOOL)},
                     {"feeRate", UniValueType()}, // will be checked below
                     {"subtractFeeFromOutputs", UniValueType(UniValue::VARR)},
+                    {"conf_target", UniValueType(UniValue::VNUM)},
+                    {"estimate_mode", UniValueType(UniValue::VSTR)},
                 },
                 true, true);
 
@@ -3489,13 +3598,29 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
             if (options.exists("reserveChangeKey"))
                 reserveChangeKey = options["reserveChangeKey"].get_bool();
 
-            if (options.exists("feeRate")) {
-                feeRate = CFeeRate(AmountFromValue(options["feeRate"]));
-                overrideEstimatedFeerate = true;
-            }
+            if (options.exists("feeRate"))
+                {
+                    coinControl.m_feerate = CFeeRate(AmountFromValue(options["feeRate"]));
+                    coinControl.fOverrideFeeRate = true;
+                }
 
             if (options.exists("subtractFeeFromOutputs"))
                 subtractFeeFromOutputs = options["subtractFeeFromOutputs"].get_array();
+        
+            if (options.exists("conf_target")) {
+                if (options.exists("feeRate")) {
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot specify both conf_target and feeRate");
+                }
+                coinControl.m_confirm_target = ParseConfirmTarget(options["conf_target"]);
+            }
+            if (options.exists("estimate_mode")) {
+                if (options.exists("feeRate")) {
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot specify both estimate_mode and feeRate");
+                }
+                if (!FeeModeFromString(options["estimate_mode"].get_str(), coinControl.m_fee_mode)) {
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+                }
+            }
         }
     }
 
@@ -3627,7 +3752,7 @@ static const CRPCCommand commands[] =
 
 void RegisterWalletRPCCommands(CRPCTable& t)
 {
-    if (GetBoolArg("-disablewallet", false))
+    if (gArgs.GetBoolArg("-disablewallet", false))
         return;
 
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)

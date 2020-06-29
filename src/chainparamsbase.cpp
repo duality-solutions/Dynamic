@@ -111,9 +111,9 @@ void SelectBaseParams(const std::string& chain)
 
 std::string ChainNameFromCommandLine()
 {
-    bool fRegTest = GetBoolArg("-regtest", false);
-    bool fTestNet = GetBoolArg("-testnet", false);
-    bool fPrivateNet = GetBoolArg("-privatenet", false);
+    bool fRegTest = gArgs.GetBoolArg("-regtest", false);
+    bool fTestNet = gArgs.GetBoolArg("-testnet", false);
+    bool fPrivateNet = gArgs.GetBoolArg("-privatenet", false);
 
     if (fTestNet && fRegTest)
         throw std::runtime_error("Invalid combination of -regtest and -testnet.");
@@ -128,5 +128,5 @@ std::string ChainNameFromCommandLine()
 
 bool AreBaseParamsConfigured()
 {
-    return pCurrentBaseParams != NULL;
+    return pCurrentBaseParams != nullptr;
 }

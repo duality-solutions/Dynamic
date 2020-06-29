@@ -17,7 +17,7 @@
 #include <QPixmap>
 
 static const struct {
-    const char* platformId;
+    const char *platformId;
     /** Show images on push buttons */
     const bool imagesOnButtons;
     /** Colorize single-color icons */
@@ -25,11 +25,12 @@ static const struct {
     /** Extra padding/spacing in transactionview */
     const bool useExtraSpacing;
 } platform_styles[] = {
-    {"macosx", false, false, true},
-    {"windows", true, false, false},
+    {"macosx", false, true, true},
+    {"windows", true, true, false},
     /* Other: linux, unix, ... */
-    {"other", true, false, false}};
-static const unsigned platform_styles_count = sizeof(platform_styles) / sizeof(*platform_styles);
+    {"other", true, true, false}
+};
+static const unsigned platform_styles_count = sizeof(platform_styles)/sizeof(*platform_styles);
 
 namespace
 {
@@ -38,8 +39,10 @@ namespace
 void MakeSingleColorImage(QImage& img, const QColor& colorbase)
 {
     img = img.convertToFormat(QImage::Format_ARGB32);
-    for (int x = img.width(); x--;) {
-        for (int y = img.height(); y--;) {
+    for (int x = img.width(); x--; )
+    {
+        for (int y = img.height(); y--; )
+        {
             const QRgb rgb = img.pixel(x, y);
             img.setPixel(x, y, qRgba(colorbase.red(), colorbase.green(), colorbase.blue(), qAlpha(rgb)));
         }
@@ -49,8 +52,8 @@ void MakeSingleColorImage(QImage& img, const QColor& colorbase)
 QIcon ColorizeIcon(const QIcon& ico, const QColor& colorbase)
 {
     QIcon new_ico;
-    QSize sz;
-    Q_FOREACH (sz, ico.availableSizes()) {
+    for (const QSize sz : ico.availableSizes())
+    {
         QImage img(ico.pixmap(sz).toImage());
         MakeSingleColorImage(img, colorbase);
         new_ico.addPixmap(QPixmap::fromImage(img));
@@ -110,11 +113,41 @@ QIcon PlatformStyle::SingleColorIcon(const QString& filename) const
     return ColorizeIcon(filename, SingleColor());
 }
 
+QIcon PlatformStyle::SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const
+{
+    QIcon icon;
+    icon.addPixmap(QPixmap(filenameOn), QIcon::Normal, QIcon::On);
+    icon.addPixmap(QPixmap(filenameOff), QIcon::Normal, QIcon::Off);
+    return icon;
+}
+
 QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
 {
     if (!colorizeIcons)
         return icon;
     return ColorizeIcon(icon, SingleColor());
+}
+
+QIcon PlatformStyle::SingleColorIcon(const QIcon& icon, const QColor& color) const
+{
+    if (!colorizeIcons)
+        return icon;
+    return ColorizeIcon(icon, color);
+}
+
+
+QIcon PlatformStyle::OrangeColorIcon(const QString& filename) const
+{
+    if (!colorizeIcons)
+        return QIcon(filename);
+    return ColorizeIcon(filename, DarkOrangeColor());
+}
+
+QIcon PlatformStyle::OrangeColorIcon(const QIcon& icon) const
+{
+    if (!colorizeIcons)
+        return icon;
+    return ColorizeIcon(icon, DarkOrangeColor());
 }
 
 QIcon PlatformStyle::TextColorIcon(const QString& filename) const
@@ -125,6 +158,61 @@ QIcon PlatformStyle::TextColorIcon(const QString& filename) const
 QIcon PlatformStyle::TextColorIcon(const QIcon& icon) const
 {
     return ColorizeIcon(icon, TextColor());
+}
+
+QColor PlatformStyle::TextColor() const
+{
+    return QColor(255,255,255);
+}
+
+QColor PlatformStyle::MainBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::TopWidgetBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::WidgetBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::SendEntriesBackGroundColor() const
+{
+    return QColor(0,0,0);
+}
+
+QColor PlatformStyle::LightBlueColor() const
+{
+    return COLOR_LIGHT_BLUE;
+}
+
+QColor PlatformStyle::DarkBlueColor() const
+{
+    return COLOR_DARK_BLUE;
+}
+
+QColor PlatformStyle::LightOrangeColor() const
+{
+        return COLOR_LIGHT_ORANGE;
+}
+
+QColor PlatformStyle::DarkOrangeColor() const
+{
+    return COLOR_DARK_ORANGE;
+}
+
+QColor PlatformStyle::SingleColor() const
+{
+    return singleColor;
+}
+
+QColor PlatformStyle::AssetTxColor() const
+{
+    return QColor(11,129,158);
 }
 
 const PlatformStyle* PlatformStyle::instantiate(const QString& platformId)

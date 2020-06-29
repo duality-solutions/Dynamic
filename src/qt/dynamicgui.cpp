@@ -47,8 +47,10 @@
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
+#include <QFontDatabase>
 #include <QIcon>
 #include <QListWidget>
 #include <QMenuBar>
@@ -70,6 +72,10 @@
 #include <QUrl>
 #else
 #include <QUrlQuery>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
 #endif
 
 const std::string DynamicGUI::DEFAULT_UIPLATFORM =
@@ -127,6 +133,12 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
                                                                                                                  multiSendAction(0),
+                                                                                                                 transferAssetAction(0),
+                                                                                                                 createAssetAction(0),
+                                                                                                                 manageAssetAction(0),
+                                                                                                                 messagingAction(0),
+                                                                                                                 votingAction(0),
+                                                                                                                 restrictedAssetAction(0),
                                                                                                                  trayIcon(0),
                                                                                                                  trayIconMenu(0),
                                                                                                                  dockIconMenu(0),
@@ -152,7 +164,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
     } else {
         windowTitle += tr("Node");
     }
-    QString userWindowTitle = QString::fromStdString(GetArg("-windowtitle", ""));
+    QString userWindowTitle = QString::fromStdString(gArgs.GetArg("-windowtitle", ""));
     if (!userWindowTitle.isEmpty())
         windowTitle += " - " + userWindowTitle;
     windowTitle += " " + networkStyle->getTitleAddText();
@@ -287,7 +299,7 @@ DynamicGUI::~DynamicGUI()
     // Unsubscribe from notifications from core
     unsubscribeFromCoreSignals();
 
-    GUIUtil::saveWindowGeometry("nWindow", this);
+    GUIUtil::saveWindowGeometry("MainWindowGeometry", this);
     if (trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
         trayIcon->hide();
 #ifdef Q_OS_MAC
@@ -389,6 +401,67 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(bdapAction);    
 
+/** ASSET START */
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
+    transferAssetAction->setStatusTip(tr("Transfer assets to DYN addresses"));
+    transferAssetAction->setToolTip(transferAssetAction->statusTip());
+    transferAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    transferAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_8));
+#else
+    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+#endif
+    tabGroup->addAction(transferAssetAction);
+
+    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
+    createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
+    createAssetAction->setToolTip(createAssetAction->statusTip());
+    createAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    createAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_9));
+#else
+    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+#endif
+    tabGroup->addAction(createAssetAction);
+
+    manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
+    manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
+    manageAssetAction->setToolTip(manageAssetAction->statusTip());
+    manageAssetAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    manageAssetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0));
+#else
+    manageAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_0));
+#endif
+    tabGroup->addAction(manageAssetAction);
+
+    messagingAction = new QAction(platformStyle->SingleColorIcon(":/icons/editcopy"), tr("&Messaging"), this);
+    messagingAction->setStatusTip(tr("Coming Soon"));
+    messagingAction->setToolTip(messagingAction->statusTip());
+    messagingAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    messagingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_));
+#else
+    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Q));
+#endif
+    tabGroup->addAction(messagingAction);
+
+    votingAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Voting"), this);
+    votingAction->setStatusTip(tr("Coming Soon"));
+    votingAction->setToolTip(votingAction->statusTip());
+    votingAction->setCheckable(true);
+//    votingAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_));
+//    votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_W));
+    tabGroup->addAction(votingAction);
+
+    restrictedAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Restricted Assets"), this);
+    restrictedAssetAction->setStatusTip(tr("Manage restricted assets"));
+    restrictedAssetAction->setToolTip(restrictedAssetAction->statusTip());
+    restrictedAssetAction->setCheckable(true);
+//    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    tabGroup->addAction(restrictedAssetAction);
+/** ASSET END */
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -409,6 +482,14 @@ void DynamicGUI::createActions()
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(gotoBdapPage()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(gotoAssetsPage()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(gotoCreateAssetsPage()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(gotoManageAssetsPage()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(gotoRestrictedAssetsPage()));
 
 #endif // ENABLE_WALLET
 
@@ -610,6 +691,12 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(dynodeAction);
         toolbar->addAction(miningAction);
         toolbar->addAction(bdapAction);
+        toolbar->addAction(createAssetAction);
+        toolbar->addAction(transferAssetAction);
+        toolbar->addAction(manageAssetAction);
+//        toolbar->addAction(messagingAction);
+//        toolbar->addAction(votingAction);
+        toolbar->addAction(restrictedAssetAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -659,7 +746,7 @@ void DynamicGUI::setClientModel(ClientModel* _clientModel)
         connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
         modalOverlay->setKnownBestHeight(clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(clientModel->getHeaderTipTime()));
-        setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(NULL), false);
+        setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(nullptr), false);
         connect(_clientModel, SIGNAL(numBlocksChanged(int, QDateTime, double, bool)), this, SLOT(setNumBlocks(int, QDateTime, double, bool)));
 
         connect(_clientModel, SIGNAL(additionalDataSyncProgressChanged(double)), this, SLOT(setAdditionalDataSyncProgress(double)));
@@ -762,6 +849,14 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
     mnemonicAction->setEnabled(enabled);
+    /** ASSET START */
+    transferAssetAction->setEnabled(false);
+    createAssetAction->setEnabled(false);
+    manageAssetAction->setEnabled(false);
+    messagingAction->setEnabled(false);
+    votingAction->setEnabled(false);
+    restrictedAssetAction->setEnabled(false);
+    /** ASSET END */
 }
 
 void DynamicGUI::createTrayIcon(const NetworkStyle* networkStyle)
@@ -988,6 +1083,32 @@ void DynamicGUI::gotoMultiSendDialog()
     if (walletFrame)
         walletFrame->gotoMultiSendDialog();
 }
+
+/** ASSET START */
+void DynamicGUI::gotoAssetsPage()
+{
+    transferAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoAssetsPage();
+};
+
+void DynamicGUI::gotoCreateAssetsPage()
+{
+    createAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoCreateAssetsPage();
+};
+
+void DynamicGUI::gotoManageAssetsPage()
+{
+    manageAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoManageAssetsPage();
+};
+
+void DynamicGUI::gotoRestrictedAssetsPage()
+{
+    restrictedAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoRestrictedAssetsPage();
+};
+/** ASSET END */
 #endif // ENABLE_WALLET
 
 void DynamicGUI::setNumConnections(int count)
@@ -1246,7 +1367,7 @@ void DynamicGUI::message(const QString& title, const QString& message, unsigned 
         showNormalIfMinimized();
         QMessageBox mBox((QMessageBox::Icon)nMBoxIcon, strTitle, message, buttons, this);
         int r = mBox.exec();
-        if (ret != NULL)
+        if (ret != nullptr)
             *ret = r == QMessageBox::Ok;
     } else
         notificator->notify((Notificator::Class)nNotifyIcon, strTitle, message);
@@ -1299,22 +1420,51 @@ void DynamicGUI::showEvent(QShowEvent* event)
 }
 
 #ifdef ENABLE_WALLET
-void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label)
+void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName)
 {
     // On new transaction, make an info balloon
+    QString msg = tr("Date: %1\n").arg(date);
+    if (assetName == "DYN")
+        msg += tr("Amount: %1\n").arg(DynamicUnits::formatWithUnit(unit, amount, true));
+    else
+        msg += tr("Amount: %1\n").arg(DynamicUnits::formatWithCustomName(assetName, amount, MAX_ASSET_UNITS, true));
+
+    msg += tr("Type: %1\n").arg(type);
+
+    if (!label.isEmpty())
+        msg += tr("Label: %1\n").arg(label);
+    else if (!address.isEmpty())
+        msg += tr("Address: %1\n").arg(address);
     message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
-        tr("Date: %1\n"
-           "Amount: %2\n"
-           "Type: %3\n"
-           "Address: %4\n")
-            .arg(date)
-            .arg(DynamicUnits::formatWithUnit(unit, amount, true))
-            .arg(type)
-            .arg(address),
-        CClientUIInterface::MSG_INFORMATION);
+             msg, CClientUIInterface::MSG_INFORMATION);
+}
 
-    pwalletMain->fMultiSendNotify = false;
+void DynamicGUI::checkAssets()
+{
+    // Check that status of RIP2 and activate the assets icon if it is active
+    if(AreAssetsDeployed()) {
+        transferAssetAction->setDisabled(false);
+        transferAssetAction->setToolTip(tr("Transfer assets to DYN addresses"));
+        createAssetAction->setDisabled(false);
+        createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
+        manageAssetAction->setDisabled(false);
+        }
+    else {
+        transferAssetAction->setDisabled(true);
+        transferAssetAction->setToolTip(tr("Assets not yet active"));
+        createAssetAction->setDisabled(true);
+        createAssetAction->setToolTip(tr("Assets not yet active"));
+        manageAssetAction->setDisabled(true);
+        }
 
+    if (AreRestrictedAssetsDeployed()) {
+        restrictedAssetAction->setDisabled(false);
+        restrictedAssetAction->setToolTip(tr("Manage restricted assets"));
+
+    } else {
+        restrictedAssetAction->setDisabled(true);
+        restrictedAssetAction->setToolTip(tr("Restricted Assets not yet active"));
+    }
 }
 #endif // ENABLE_WALLET
 
@@ -1556,8 +1706,13 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle* pl
     QList<DynamicUnits::Unit> units = DynamicUnits::availableUnits();
     int max_width = 0;
     const QFontMetrics fm(font());
-    Q_FOREACH (const DynamicUnits::Unit unit, units) {
-        max_width = qMax(max_width, fm.width(DynamicUnits::name(unit)));
+    for (const DynamicUnits::Unit unit : units)
+    {
+        #ifndef QTversionPreFiveEleven
+            max_width = qMax(max_width, fm.horizontalAdvance(DynamicUnits::name(unit)));
+        #else
+            max_width = qMax(max_width, fm.width(DynamicUnits::name(unit)));
+        #endif
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -1599,7 +1754,7 @@ void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel* _optionsModel)
 /** When Display Units are changed on OptionsModel it will refresh the display text of the control on the status bar */
 void UnitDisplayStatusBarControl::updateDisplayUnit(int newUnits)
 {
-    setPixmap(QIcon(":/icons/drk/unit_" + DynamicUnits::id(newUnits)).pixmap(33, STATUSBAR_ICONSIZE));
+    setText(DynamicUnits::name(newUnits));
 }
 
 /** Shows context menu with Display Unit options by the mouse coordinates */

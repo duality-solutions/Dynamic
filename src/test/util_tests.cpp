@@ -118,19 +118,19 @@ BOOST_AUTO_TEST_CASE(util_ParseParameters)
 {
     const char *argv_test[] = {"-ignored", "-a", "-b", "-ccc=argument", "-ccc=multiple", "f", "-d=e"};
 
-    ParseParameters(0, (char**)argv_test);
+    gArgs.ParseParameters(0, (char**)argv_test);
     BOOST_CHECK(mapArgs.empty() && mapMultiArgs.empty());
 
-    ParseParameters(1, (char**)argv_test);
+    gArgs.ParseParameters(1, (char**)argv_test);
     BOOST_CHECK(mapArgs.empty() && mapMultiArgs.empty());
 
-    ParseParameters(5, (char**)argv_test);
+    gArgs.ParseParameters(5, (char**)argv_test);
     // expectation: -ignored is ignored (program name argument),
     // -a, -b and -ccc end up in map, -d ignored because it is after
     // a non-option argument (non-GNU option parsing)
     BOOST_CHECK(mapArgs.size() == 3 && mapMultiArgs.size() == 3);
-    BOOST_CHECK(IsArgSet("-a") && IsArgSet("-b") && IsArgSet("-ccc")
-                && !IsArgSet("f") && !IsArgSet("-d"));
+    BOOST_CHECK(gArgs.IsArgSet("-a") && gArgs.IsArgSet("-b") && gArgs.IsArgSet("-ccc")
+                && !gArgs.IsArgSet("f") && !gArgs.IsArgSet("-d"));
     BOOST_CHECK(mapMultiArgs.count("-a") && mapMultiArgs.count("-b") && mapMultiArgs.count("-ccc")
                 && !mapMultiArgs.count("f") && !mapMultiArgs.count("-d"));
 
@@ -151,15 +151,15 @@ BOOST_AUTO_TEST_CASE(util_GetArg)
     mapArgs["booltest3"] = "0";
     mapArgs["booltest4"] = "1";
 
-    BOOST_CHECK_EQUAL(GetArg("strtest1", "default"), "string...");
-    BOOST_CHECK_EQUAL(GetArg("strtest2", "default"), "default");
-    BOOST_CHECK_EQUAL(GetArg("inttest1", -1), 12345);
-    BOOST_CHECK_EQUAL(GetArg("inttest2", -1), 81985529216486895LL);
-    BOOST_CHECK_EQUAL(GetArg("inttest3", -1), -1);
-    BOOST_CHECK_EQUAL(GetBoolArg("booltest1", false), true);
-    BOOST_CHECK_EQUAL(GetBoolArg("booltest2", false), false);
-    BOOST_CHECK_EQUAL(GetBoolArg("booltest3", false), false);
-    BOOST_CHECK_EQUAL(GetBoolArg("booltest4", false), true);
+    BOOST_CHECK_EQUAL(gArgs.GetArg("strtest1", "default"), "string...");
+    BOOST_CHECK_EQUAL(gArgs.GetArg("strtest2", "default"), "default");
+    BOOST_CHECK_EQUAL(gArgs.GetArg("inttest1", -1), 12345);
+    BOOST_CHECK_EQUAL(gArgs.GetArg("inttest2", -1), 81985529216486895LL);
+    BOOST_CHECK_EQUAL(gArgs.GetArg("inttest3", -1), -1);
+    BOOST_CHECK_EQUAL(gArgs.GetBoolArg("booltest1", false), true);
+    BOOST_CHECK_EQUAL(gArgs.GetBoolArg("booltest2", false), false);
+    BOOST_CHECK_EQUAL(gArgs.GetBoolArg("booltest3", false), false);
+    BOOST_CHECK_EQUAL(gArgs.GetBoolArg("booltest4", false), true);
 }
 
 BOOST_AUTO_TEST_CASE(util_FormatMoney)
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_ParseInt32)
 {
     int32_t n;
     // Valid values
-    BOOST_CHECK(ParseInt32("1234", NULL));
+    BOOST_CHECK(ParseInt32("1234", nullptr));
     BOOST_CHECK(ParseInt32("0", &n) && n == 0);
     BOOST_CHECK(ParseInt32("1234", &n) && n == 1234);
     BOOST_CHECK(ParseInt32("01234", &n) && n == 1234); // no octal
@@ -349,17 +349,17 @@ BOOST_AUTO_TEST_CASE(test_ParseInt32)
     std::string teststr(test_bytes, sizeof(test_bytes));
     BOOST_CHECK(!ParseInt32(teststr, &n)); // no embedded NULs
     // Overflow and underflow
-    BOOST_CHECK(!ParseInt32("-2147483649", NULL));
-    BOOST_CHECK(!ParseInt32("2147483648", NULL));
-    BOOST_CHECK(!ParseInt32("-32482348723847471234", NULL));
-    BOOST_CHECK(!ParseInt32("32482348723847471234", NULL));
+    BOOST_CHECK(!ParseInt32("-2147483649", nullptr));
+    BOOST_CHECK(!ParseInt32("2147483648", nullptr));
+    BOOST_CHECK(!ParseInt32("-32482348723847471234", nullptr));
+    BOOST_CHECK(!ParseInt32("32482348723847471234", nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(test_ParseInt64)
 {
     int64_t n;
     // Valid values
-    BOOST_CHECK(ParseInt64("1234", NULL));
+    BOOST_CHECK(ParseInt64("1234", nullptr));
     BOOST_CHECK(ParseInt64("0", &n) && n == 0LL);
     BOOST_CHECK(ParseInt64("1234", &n) && n == 1234LL);
     BOOST_CHECK(ParseInt64("01234", &n) && n == 1234LL); // no octal
@@ -379,17 +379,17 @@ BOOST_AUTO_TEST_CASE(test_ParseInt64)
     std::string teststr(test_bytes, sizeof(test_bytes));
     BOOST_CHECK(!ParseInt64(teststr, &n)); // no embedded NULs
     // Overflow and underflow
-    BOOST_CHECK(!ParseInt64("-9223372036854775809", NULL));
-    BOOST_CHECK(!ParseInt64("9223372036854775808", NULL));
-    BOOST_CHECK(!ParseInt64("-32482348723847471234", NULL));
-    BOOST_CHECK(!ParseInt64("32482348723847471234", NULL));
+    BOOST_CHECK(!ParseInt64("-9223372036854775809", nullptr));
+    BOOST_CHECK(!ParseInt64("9223372036854775808", nullptr));
+    BOOST_CHECK(!ParseInt64("-32482348723847471234", nullptr));
+    BOOST_CHECK(!ParseInt64("32482348723847471234", nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(test_ParseUInt32)
 {
     uint32_t n;
     // Valid values
-    BOOST_CHECK(ParseUInt32("1234", NULL));
+    BOOST_CHECK(ParseUInt32("1234", nullptr));
     BOOST_CHECK(ParseUInt32("0", &n) && n == 0);
     BOOST_CHECK(ParseUInt32("1234", &n) && n == 1234);
     BOOST_CHECK(ParseUInt32("01234", &n) && n == 1234); // no octal
@@ -412,15 +412,15 @@ BOOST_AUTO_TEST_CASE(test_ParseUInt32)
     BOOST_CHECK(!ParseUInt32("-2147483648", &n));
     BOOST_CHECK(!ParseUInt32("4294967296", &n));
     BOOST_CHECK(!ParseUInt32("-1234", &n));
-    BOOST_CHECK(!ParseUInt32("-32482348723847471234", NULL));
-    BOOST_CHECK(!ParseUInt32("32482348723847471234", NULL));
+    BOOST_CHECK(!ParseUInt32("-32482348723847471234", nullptr));
+    BOOST_CHECK(!ParseUInt32("32482348723847471234", nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(test_ParseUInt64)
 {
     uint64_t n;
     // Valid values
-    BOOST_CHECK(ParseUInt64("1234", NULL));
+    BOOST_CHECK(ParseUInt64("1234", nullptr));
     BOOST_CHECK(ParseUInt64("0", &n) && n == 0LL);
     BOOST_CHECK(ParseUInt64("1234", &n) && n == 1234LL);
     BOOST_CHECK(ParseUInt64("01234", &n) && n == 1234LL); // no octal
@@ -440,9 +440,9 @@ BOOST_AUTO_TEST_CASE(test_ParseUInt64)
     std::string teststr(test_bytes, sizeof(test_bytes));
     BOOST_CHECK(!ParseUInt64(teststr, &n)); // no embedded NULs
     // Overflow and underflow
-    BOOST_CHECK(!ParseUInt64("-9223372036854775809", NULL));
-    BOOST_CHECK(!ParseUInt64("18446744073709551616", NULL));
-    BOOST_CHECK(!ParseUInt64("-32482348723847471234", NULL));
+    BOOST_CHECK(!ParseUInt64("-9223372036854775809", nullptr));
+    BOOST_CHECK(!ParseUInt64("18446744073709551616", nullptr));
+    BOOST_CHECK(!ParseUInt64("-32482348723847471234", nullptr));
     BOOST_CHECK(!ParseUInt64("-2147483648", &n));
     BOOST_CHECK(!ParseUInt64("-9223372036854775808", &n));
     BOOST_CHECK(!ParseUInt64("-1234", &n));
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(test_ParseDouble)
 {
     double n;
     // Valid values
-    BOOST_CHECK(ParseDouble("1234", NULL));
+    BOOST_CHECK(ParseDouble("1234", nullptr));
     BOOST_CHECK(ParseDouble("0", &n) && n == 0.0);
     BOOST_CHECK(ParseDouble("1234", &n) && n == 1234.0);
     BOOST_CHECK(ParseDouble("01234", &n) && n == 1234.0); // no octal
@@ -472,8 +472,8 @@ BOOST_AUTO_TEST_CASE(test_ParseDouble)
     std::string teststr(test_bytes, sizeof(test_bytes));
     BOOST_CHECK(!ParseDouble(teststr, &n)); // no embedded NULs
     // Overflow and underflow
-    BOOST_CHECK(!ParseDouble("-1e10000", NULL));
-    BOOST_CHECK(!ParseDouble("1e10000", NULL));
+    BOOST_CHECK(!ParseDouble("-1e10000", nullptr));
+    BOOST_CHECK(!ParseDouble("1e10000", nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(test_FormatParagraph)

@@ -11,7 +11,7 @@
 
 #include <boost/thread.hpp>
 
-CBanAccountDB* pBanAccountDB = NULL;
+CBanAccountDB* pBanAccountDB = nullptr;
 
 bool CheckBanAccountDB()
 {

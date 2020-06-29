@@ -18,6 +18,7 @@
 #include "random.h"
 #include "rpc/server.h"
 #include "rpc/register.h"
+#include "script/sigcache.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "ui_interface.h"
@@ -49,6 +50,8 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
         ECC_Start_Stealth();
         SetupEnvironment();
         SetupNetworking();
+        InitSignatureCache();
+        InitScriptExecutionCache();
         fPrintToDebugLog = false; // don't want to write to debug.log file
         fCheckBlockIndex = true;
         SelectParams(chainName);
@@ -59,7 +62,6 @@ BasicTestingSetup::~BasicTestingSetup()
 {
         ECC_Stop();
         ECC_Stop_Stealth();
-        g_connman.reset();
 }
 
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
@@ -75,7 +77,7 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
         ClearDatadirCache();
         pathTemp = GetTempPath() / strprintf("test_dynamic_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
         boost::filesystem::create_directories(pathTemp);
-        ForceSetArg("-datadir", pathTemp.string());
+        gArgs.ForceSetArg("-datadir", pathTemp.string());
         mempool.setSanityCheck(1.0);
         pblocktree = new CBlockTreeDB(1 << 20, true);
         pcoinsdbview = new CCoinsViewDB(1 << 23, true);
@@ -97,18 +99,19 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
             threadGroup.create_thread(&ThreadScriptCheck);
         g_connman = std::unique_ptr<CConnman>(new CConnman(0x1337, 0x1337)); // Deterministic randomness for tests.
         connman = g_connman.get();
-        RegisterNodeSignals(GetNodeSignals());
+        peerLogic.reset(new PeerLogicValidation(connman, scheduler));
 }
 
 TestingSetup::~TestingSetup()
 {
-        UnregisterNodeSignals(GetNodeSignals());
         threadGroup.interrupt_all();
         threadGroup.join_all();
+        g_connman.reset();
+        peerLogic.reset();
 #ifdef ENABLE_WALLET
         UnregisterValidationInterface(pwalletMain);
         delete pwalletMain;
-        pwalletMain = NULL;
+        pwalletMain = nullptr;
 #endif
         UnloadBlockIndex();
         delete pcoinsTip;
@@ -156,7 +159,7 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>&
     while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
 
     std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
-    ProcessNewBlock(chainparams, shared_pblock, true, NULL);
+    ProcessNewBlock(chainparams, shared_pblock, true, nullptr);
     
     CBlock result = block;
     return result;

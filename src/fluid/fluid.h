@@ -54,7 +54,7 @@ public:
     bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage);
     bool CheckIfQuorumExists(const std::string& consentToken, std::string& message, const bool individual = false);
     bool CheckNonScriptQuorum(const std::string& consentToken, std::string& message, const bool individual = false);
-    bool CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex = NULL);
+    bool CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex = nullptr);
 
     bool GenericConsentMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& howMuch, bool txCheckPurpose = false);

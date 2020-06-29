@@ -101,7 +101,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other) : cs(),
 bool CGovernanceObject::ProcessVote(CNode* pfrom,
     const CGovernanceVote& vote,
     CGovernanceException& exception,
-    CConnman& connman)
+    CConnman* connman)
 {
     LOCK(cs);
 
@@ -685,7 +685,7 @@ bool CGovernanceObject::GetCurrentDNVotes(const COutPoint& dnCollateralOutpoint,
     return true;
 }
 
-void CGovernanceObject::Relay(CConnman& connman)
+void CGovernanceObject::Relay(CConnman* connman)
 {
     // Do not relay until fully synced
     if (!dynodeSync.IsSynced()) {
@@ -694,7 +694,7 @@ void CGovernanceObject::Relay(CConnman& connman)
     }
 
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
-    connman.RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
+    connman->RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
 }
 
 void CGovernanceObject::UpdateSentinelVariables()
@@ -735,7 +735,7 @@ void CGovernanceObject::UpdateSentinelVariables()
         fCachedValid = false;
 }
 
-void CGovernanceObject::CheckOrphanVotes(CConnman& connman)
+void CGovernanceObject::CheckOrphanVotes(CConnman* connman)
 {
     int64_t nNow = GetAdjustedTime();
     const vote_cmm_t::list_t& listVotes = cmmapOrphanVotes.GetItemList();

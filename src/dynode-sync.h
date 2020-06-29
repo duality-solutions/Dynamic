@@ -56,7 +56,7 @@ private:
 public:
     CDynodeSync() { Reset(); }
 
-    void SendGovernanceSyncRequest(CNode* pnode, CConnman& connman);
+    void SendGovernanceSyncRequest(CNode* pnode, CConnman* connman);
 
     bool IsFailed() { return nRequestedDynodeAssets == DYNODE_SYNC_FAILED; }
     bool IsBlockchainSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_WAITING; }
@@ -72,16 +72,16 @@ public:
     std::string GetSyncStatus();
 
     void Reset();
-    void SwitchToNextAsset(CConnman& connman);
+    void SwitchToNextAsset(CConnman* connman);
 
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv);
-    void ProcessTick(CConnman& connman);
+    void ProcessTick(CConnman* connman);
 
     void AcceptedBlockHeader(const CBlockIndex* pindexNew);
-    void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman& connman);
-    void UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman& connman);
+    void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman* connman);
+    void UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDownload, CConnman* connman);
 
-    void DoMaintenance(CConnman& connman);
+    void DoMaintenance(CConnman* connman);
     double SyncProgress();
 
 };
