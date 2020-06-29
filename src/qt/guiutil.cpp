@@ -1152,7 +1152,7 @@ int GPUMaxThreads()
 {
     int nThreads = GPUMiner::TotalDevices();
 
-    int nUseThreads = GetArg("-genproclimit-gpu", -1);
+    int nUseThreads = gArgs.GetArg("-genproclimit-gpu", -1);
     if (nUseThreads < 0) {
         nUseThreads = nThreads;
     }

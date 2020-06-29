@@ -237,7 +237,7 @@ void MiningPage::StartCPUMiner()
 void MiningPage::StartGPUMiner()
 {
     fGPUMinerOn = true;
-    InitMiners(Params(), *g_connman);
+    InitMiners(Params(), g_connman.get());
     changeNumberOfGPUThreads(ui->sliderGPUCores->value());
     updateUI();
 }
