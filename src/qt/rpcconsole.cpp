@@ -281,6 +281,11 @@ bool RPCConsole::RPCExecuteCommandLine(std::string& strResult, const std::string
             switch (ch) {
             case '\'':
                 state = STATE_ARGUMENT;
+                //Handle optional parameters
+                if (curarg.size() == 0) {
+                    stack.back().push_back(curarg);
+                    state = STATE_EATING_SPACES;
+                }
                 break;
             default:
                 curarg += ch;
@@ -290,6 +295,11 @@ bool RPCConsole::RPCExecuteCommandLine(std::string& strResult, const std::string
             switch (ch) {
             case '"':
                 state = STATE_ARGUMENT;
+                //Handle optional parameters
+                if (curarg.size() == 0) {
+                    stack.back().push_back(curarg);
+                    state = STATE_EATING_SPACES;
+                }
                 break;
             case '\\':
                 state = STATE_ESCAPE_DOUBLEQUOTED;

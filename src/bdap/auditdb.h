@@ -20,11 +20,12 @@ public:
     }
     bool AddAudit(const CAudit& audit, const int op);
     bool ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit);
-    bool ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit) ;
+    bool ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit);
+    bool ReadAuditDN(const std::vector<unsigned char>& vchOwnerFullObjectPath, std::vector<CAudit>& vAudits);
+    bool ReadAuditHash(const std::vector<unsigned char>& vchAudit, std::vector<CAudit>& vAudits);
     bool EraseAuditTxId(const std::vector<unsigned char>& vchTxId);
     bool EraseAudit(const std::vector<unsigned char>& vchAudit);
     bool AuditExists(const std::vector<unsigned char>& vchAudit);
-    bool RemoveExpired(int& entriesRemoved, int& auditsRemoved);
     bool GetAuditInfo(const std::vector<unsigned char>& vchAudit, UniValue& oAuditInfo);
     bool GetAuditInfo(const std::vector<unsigned char>& vchAudit, CAudit& audit);
 };
@@ -36,7 +37,6 @@ bool AuditExists(const std::vector<unsigned char>& vchAudit);
 bool UndoAddAudit(const CAudit& audit);
 bool CheckAuditDB();
 bool FlushAuditLevelDB();
-void RemoveExpired(int& entriesRemoved, int& auditsRemoved);
 bool CheckAuditTx(const CTransactionRef& tx, const CScript& scriptOp, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
                                 const bool fJustCheck, const int& nHeight, const uint32_t& nBlockTime, const bool bSanityCheck, std::string& errorMessage);
 

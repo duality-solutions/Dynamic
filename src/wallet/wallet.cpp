@@ -1388,7 +1388,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         bool fIsMyStealth = false;
         if (fStealthTx || dynodeSync.IsBlockchainSynced()) {
             // Check if stealth address belongs to this wallet
-            fIsMyStealth = ScanForOwnedOutputs(tx);
+            fIsMyStealth = ScanForStealthOwnedOutputs(tx);
         }
 
         if (fExisted || IsMine(tx) || IsRelevantToMe(tx) || fIsMyStealth) {
@@ -4007,7 +4007,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_account") {
+                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" ) {
                     // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
@@ -6422,7 +6422,7 @@ bool CWallet::HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript)
     return false;
 }
 
-bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
+bool CWallet::ScanForStealthOwnedOutputs(const CTransaction& tx)
 {
     bool fIsMine = false;
     CScript bdapOpScript;
@@ -6435,12 +6435,18 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
             // TODO (BDAP): Do not count BDAP OP_RETURN account.
             bool fIsData = IsDataScript(txData.scriptPubKey);
             if (fIsData) {
-                txOutData = txData;
-                fDataFound = true;
-                LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
-                break;
+                std::vector<uint8_t> vData;
+                if (GetDataFromScript(txData.scriptPubKey, vData)) {
+                    if (vData.size() < 65) {
+                        txOutData = txData;
+                        fDataFound = true;
+                        LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
+                        break;
+                    }
+                }
             }
         }
+
         if (fDataFound) {
             int32_t nOutputId = 0;
             for (const CTxOut& txOut : tx.vout) {

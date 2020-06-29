@@ -13,11 +13,13 @@
 class CKey;
 class UniValue;
 
+typedef std::vector<unsigned char> AuditData;
+
 class CAuditData {
 public:
     static const int CURRENT_VERSION = 1;
     int nVersion;
-    std::vector<CharString> vAuditData; // vector of hashes that points to the document being audited
+    std::vector<AuditData> vAuditData; // vector of hashes that points to the document being audited
     int64_t nTimeStamp;
 
     CAuditData() {
@@ -70,9 +72,11 @@ public:
 class CAudit
 {
 public:
-    std::vector<unsigned char> vchAuditData;
+    std::vector<unsigned char> vchAuditData; // serialized CAuditData class
     std::vector<unsigned char> vchOwnerFullObjectPath;  // name of the owner's full domain entry path
     std::vector<unsigned char> vchSignature; // signature using the owners wallet public key
+    std::vector<unsigned char> vchAlgorithmType; // Algorithm Type (SHA256, Argon2d) - 32 max length
+    std::vector<unsigned char> vchDescription; // Data Description (FHIR message, JSON document, file, database record, etc...) - 128 max length
     unsigned int nHeight;
     uint64_t nExpireTime;
     uint256 txHash;
@@ -96,6 +100,8 @@ public:
         READWRITE(vchAuditData);
         READWRITE(vchOwnerFullObjectPath);
         READWRITE(vchSignature);
+        READWRITE(vchAlgorithmType);
+        READWRITE(vchDescription);
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
@@ -105,6 +111,8 @@ public:
         vchAuditData = b.vchAuditData;
         vchOwnerFullObjectPath = b.vchOwnerFullObjectPath;
         vchSignature = b.vchSignature;
+        vchAlgorithmType = b.vchAlgorithmType;
+        vchDescription = b.vchDescription;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
         txHash = b.txHash;
@@ -116,6 +124,8 @@ public:
         vchAuditData.clear();
         vchOwnerFullObjectPath.clear();
         vchSignature.clear();
+        vchAlgorithmType.clear();
+        vchDescription.clear();
         nHeight = 0;
         nExpireTime = 0;
         txHash.SetNull();
@@ -146,16 +156,18 @@ public:
     }
 
     uint256 GetHash() const;
+    uint256 GetAuditHash() const;
     bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     int Version() const;
     bool ValidateValues(std::string& strErrorMessage) const;
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
-    bool UnserializeFromTx(const CTransactionRef& tx);
+    bool UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height=0);
     std::string ToString() const;
 };
 
 bool BuildAuditJson(const CAudit& audit, UniValue& oAudit);
+bool BuildVerifyAuditJson(const CAudit& audit, UniValue& oAudit);
 
 #endif // DYNAMIC_BDAP_AUDITDATA_H
