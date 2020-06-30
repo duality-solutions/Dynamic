@@ -1446,7 +1446,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     }
                 }
             } else {
-                TopUpKeyPoolCombo(0, true);
+                TopUpKeyPoolCombo();
                 for (const CTxOut& txout : tx.vout) {
                     CScript scriptPubKey = txout.scriptPubKey;
                     CTxDestination dest;
@@ -1461,6 +1461,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     CPubKey retrievePubKey;
                     if (GetPubKey(keyID, retrievePubKey)) {
                         if (ReserveKeyForTransactions(retrievePubKey)) {
+                            TopUpKeyPoolCombo(0, true);
                             SetAddressBook(dest, "", "");
                             fNeedToRescanTransactions = true;
                         }
@@ -4889,7 +4890,7 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
             }
 
             if (fIncreaseSize) {
-                DynamicKeyPoolSize = DynamicKeyPoolSize + 1;
+                DynamicKeyPoolSize = DynamicKeyPoolSize + 2;
             } //if fIncreaseSize
 
             nTargetSize = DynamicKeyPoolSize; 
@@ -5093,9 +5094,10 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
                 foundPubKey = true;
                 KeepKey(nIndex);
                 EraseIndex = true;
+                fNeedToUpdateKeyPools = true;
                 IndexToErase = nIndex;
                 ReserveKeyCount++;
-                if (ReserveKeyCount <= DEFAULT_RESCAN_THRESHOLD) {
+                if (ReserveKeyCount < DEFAULT_KEYPOOL_SIZE) {
                     SaveRescanIndex = true;
                 }
             }
