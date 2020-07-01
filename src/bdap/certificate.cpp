@@ -39,7 +39,7 @@ bool CCertificate::UnserializeFromData(const std::vector<unsigned char>& vchData
     return true;
 }
 
-bool CCertificate::UnserializeFromTx(const CTransactionRef& tx) 
+bool CCertificate::UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -53,6 +53,8 @@ bool CCertificate::UnserializeFromTx(const CTransactionRef& tx)
     {
         return false;
     }
+    txHash = tx->GetHash();
+    nHeight = height;
     return true;
 }
 
