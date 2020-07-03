@@ -18,11 +18,12 @@
 #include "timedata.h"
 #include "utilmoneystr.h"
 #include "validation.h"
+#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -200,7 +201,8 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     bool fUseInstantSend = false;
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
     txAudit.txHash = wtx.GetHash();
     UniValue oAuditTransaction(UniValue::VOBJ);
     BuildAuditJson(txAudit, oAuditTransaction);
