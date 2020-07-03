@@ -62,7 +62,7 @@ public:
     void updateAssetList(bool fSetOnStart = false);
 
     static QList<CAmount> payAmounts;
-    static CCoinControl *assetControl;
+    static CCoinControl* assetControl;
     static bool fSubtractFeeFromAmount;
     bool fOnStartUp;
 

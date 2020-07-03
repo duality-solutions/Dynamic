@@ -414,7 +414,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
     return ret;
 }
 
-static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, bool fUseInstantSend = false, bool fUsePrivateSend = false)
+static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, const CCoinControl& coinControl, bool fUseInstantSend = false, bool fUsePrivateSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -452,6 +452,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 
     // Create and send the transaction
+
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
     std::string strError;
@@ -466,7 +467,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
         vecSend.push_back(sendData);
     }
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
+            strError, coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -483,7 +484,7 @@ For BDAP transactions,
     - nDataAmount is burned in the OP_RETURN transaction.
     - nOpAmount turns to BDAP credits and can only be used to fund BDAP fees
 */
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
 
@@ -521,7 +522,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, coinControl, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -534,7 +535,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
 }
 
 void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
-                                CWalletTx& wtxNew, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend)
+                                CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
 
@@ -573,7 +574,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     vecSend.push_back(recOPScript);
     // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, coinControl, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -585,7 +586,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     }
 }
 
-void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend)
+void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nColorAmount, const bool fUseInstantSend, const bool fUsePrivateSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -629,7 +630,7 @@ void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealt
     }
 }
 
-void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false)
+void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, const CCoinControl& coinControl, CAmount nValue, bool fUseInstantSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -658,7 +659,7 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
     vecSend.push_back(recipient);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, nullptr, true, ALL_COINS, false)) {
+            strError, coinControl, true, ALL_COINS, false)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -746,6 +747,7 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     delete ccCoins;
 }
 
+
 UniValue sendtoaddress(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))
@@ -808,21 +810,21 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     if (request.params.size() > 6)
         fUsePrivateSend = request.params[6].get_bool();
 
-    CCoinControl coin_control;
+    CCoinControl coinControl;
 
     if (!request.params[7].isNull()) {
-        coin_control.m_confirm_target = ParseConfirmTarget(request.params[8]);
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[8]);
     }
 
     if (!request.params[8].isNull()) {
-        if (!FeeModeFromString(request.params[9].get_str(), coin_control.m_fee_mode)) {
+        if (!FeeModeFromString(request.params[9].get_str(), coinControl.m_fee_mode)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
         }
     }
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -876,7 +878,9 @@ UniValue instantsendtoaddress(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, true);
+    CCoinControl coinControl;
+
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, true);
 
     return wtx.GetHash().GetHex();
 }
@@ -1323,7 +1327,9 @@ UniValue sendfrom(const JSONRPCRequest& request)
     if (nAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
-    SendMoney(address.Get(), nAmount, false, wtx);
+    CCoinControl coinControl;
+
+    SendMoney(address.Get(), nAmount, false, wtx, coinControl);
 
     return wtx.GetHash().GetHex();
 }
@@ -1469,20 +1475,20 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (request.params.size() > 7)
         fUsePrivateSend = request.params[7].get_bool();
 
-    CCoinControl coin_control;
+    CCoinControl coinControl;
     
     if (!request.params[8].isNull()) {
-        coin_control.m_confirm_target = ParseConfirmTarget(request.params[9]);
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[9]);
     }
 
     if (!request.params[9].isNull()) {
-        if (!FeeModeFromString(request.params[10].get_str(), coin_control.m_fee_mode)) {
+        if (!FeeModeFromString(request.params[10].get_str(), coinControl.m_fee_mode)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
         }
     }
 
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-        nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
+        coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
@@ -3548,9 +3554,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     int changePosition = -1;
     bool includeWatching = false;
     bool lockUnspents = false;
-    bool reserveChangeKey = true;
-    CFeeRate feeRate = CFeeRate(0);
-    bool overrideEstimatedFeerate = false;
     UniValue subtractFeeFromOutputs;
     std::set<int> setSubtractFeeFromOutputs;
 
@@ -3594,9 +3597,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
 
             if (options.exists("lockUnspents"))
                 lockUnspents = options["lockUnspents"].get_bool();
-
-            if (options.exists("reserveChangeKey"))
-                reserveChangeKey = options["reserveChangeKey"].get_bool();
 
             if (options.exists("feeRate"))
                 {
@@ -3649,7 +3649,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     CAmount nFeeOut;
     std::string strFailReason;
 
-    if (!pwalletMain->FundTransaction(tx, nFeeOut, overrideEstimatedFeerate, feeRate, changePosition, strFailReason, includeWatching, lockUnspents, setSubtractFeeFromOutputs, reserveChangeKey, changeAddress))
+    if (!pwalletMain->FundTransaction(tx, nFeeOut, changePosition, strFailReason, includeWatching, lockUnspents, setSubtractFeeFromOutputs, coinControl))
         throw JSONRPCError(RPC_INTERNAL_ERROR, strFailReason);
 
     UniValue result(UniValue::VOBJ);
