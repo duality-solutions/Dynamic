@@ -5346,7 +5346,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 // to avoid conflicting with other possible uses of nSequence,
                 // and in the spirit of "smallest possible change from prior
                 // behavior."
-                const uint32_t nSequence = std::numeric_limits<unsigned int>::max() - 1;
+                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1;
                 for (const auto& coin : setCoins)
                     txNew.vin.push_back(CTxIn(coin.outpoint,CScript(),
                                               nSequence));
@@ -7883,7 +7883,8 @@ bool CWallet::MultiSend()
 {
     LOCK2(cs_main, cs_wallet);
     // Stop the old blocks from sending multisends
-    const CBlockIndex* tip = chainActive.Tip();
+    const CBlockIndex* tip = chainActive.Tip();                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1;
+
     int chainTipHeight = tip->nHeight;
     if (tip->nTime < (GetAdjustedTime() - 300) || IsLocked()) {
         return false;
