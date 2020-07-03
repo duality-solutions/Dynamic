@@ -4225,7 +4225,7 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, int& nC
 
     CReserveKey reservekey(this);
     CWalletTx wtx;
-    if (!CreateTransaction(vecSend, wtx, reservekey, nFeeRet, nChangePosInOut, strFailReason, &coinControl, false))
+    if (!CreateTransaction(vecSend, wtx, reservekey, nFeeRet, nChangePosInOut, strFailReason, coinControl, false))
         return false;
 
     if (nChangePosInOut != -1)
@@ -4639,13 +4639,12 @@ bool CWallet::GetBudgetSystemCollateralTX(CWalletTx& tx, uint256 hash, CAmount a
     std::vector<CRecipient> vecSend;
     vecSend.push_back((CRecipient){scriptChange, amount, false});
 
-    CCoinControl* coinControl = nullptr;
+    CCoinControl coinControl;
     bool success = CreateTransaction(vecSend, tx, reservekey, nFeeRet, nChangePosRet, strFail, coinControl, true, ALL_COINS, fUseInstantSend);
     if (!success) {
         LogPrintf("CWallet::GetBudgetSystemCollateralTX -- Error: %s\n", strFail);
         return false;
     }
-
     return true;
 }
 
@@ -4941,11 +4940,14 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
             }
 
-            CFeeRate discard_rate = GetDiscardRate(::feeEstimator);
+            CTxOut change_prototype_txout(0, scriptChange);
+            size_t change_prototype_size = GetSerializeSize(change_prototype_txout, SER_DISK, 0);
 
+            CFeeRate discard_rate = GetDiscardRate(::feeEstimator);
             nFeeRet = 0;
-            if (nFeePay > 0)
-                nFeeRet = nFeePay;
+            bool pick_new_inputs = true;
+            CAmount nValueIn = 0;
+
             // Start with no fee and loop until there is enough fee
             while (true) {
 /** ASSET START */
@@ -5310,6 +5312,17 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         i++;
                     }
                 }
+
+                //
+                // BIP125 defines opt-in RBF as any nSequence < maxint-1, so
+                // we use the highest possible value in that range (maxint-2)
+                // to avoid conflicting with other possible uses of nSequence,
+                // and in the spirit of "smallest possible change from prior
+                // behavior."
+                const uint32_t nSequence = std::numeric_limits<unsigned int>::max() - 1;
+                for (const auto& coin : setCoins)
+                    txNew.vin.push_back(CTxIn(coin.outpoint,CScript(),
+                                              nSequence));
 
 /** ASSET START */
                 if (AreAssetsDeployed()) {

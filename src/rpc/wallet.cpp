@@ -723,11 +723,10 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     int nChangePosRet = -1;
     CRecipient recipient = {burnScript, nValue, false};
     vecSend.push_back(recipient);
-    CCoinControl* ccCoins = new CCoinControl;
+    CCoinControl ccCoins;
     if (!scriptSendFrom.empty()) {
-        if (!GetCoinControl(scriptSendFrom, ccCoins)) {
+        if (!GetCoinControl(scriptSendFrom, &ccCoins)) {
             strError = strprintf("Error: GetCoinControl failed");
-            delete ccCoins;
             throw JSONRPCError(RPC_WALLET_ERROR, strError);
         }
     }
@@ -735,16 +734,13 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strError, ccCoins, true, ALL_COINS, fUseInstantSend)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
-        delete ccCoins;
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     CValidationState state;
     if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX)) {
         strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
-        delete ccCoins;
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    delete ccCoins;
 }
 
 
