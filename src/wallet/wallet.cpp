@@ -4838,7 +4838,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
             int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
             if (!fIsBDAP) {
-                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
+                AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, false);
             } else {
                 std::vector<unsigned char> vchValue;
                 CScript bdapOperationScript;
@@ -4848,7 +4848,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
                 if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" ) {
                     // Use BDAP credits first.
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
+                    AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
                     CDomainEntry prevEntry;
@@ -4882,7 +4882,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         strFailReason = _("Public key already used for a link request.");
                         return false;
                     }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
+                    AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
@@ -4890,7 +4890,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         strFailReason = _("Public key already used for an accepted link.");
                         return false;
                     }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
+                    AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, true);
                 }
                 else if (strOpType == "bdap_delete_link_request") {
                     uint256 prevTxId;
@@ -4923,7 +4923,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
                 else if (strOpType == "bdap_move_asset") {
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, false);
+                    AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, false);
                     fIsBDAP = false; // Treat like a standard transaction so standard fees are applied.
                 }
                 else if (strOpType == "bdap_update_link_accept") {
@@ -4939,6 +4939,33 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     return false;
                 }
             }
+
+            // Create change script that will be used if we need change
+            // TODO: pass in scriptChange instead of reservekey so
+            // change transaction isn't always pay-to-raven-address
+            CScript scriptChange;
+            CScript assetScriptChange;
+
+            // coin control: send change to custom address
+            if (!boost::get<CNoDestination>(&coinControl.destChange)) {
+                scriptChange = GetScriptForDestination(coinControl.destChange);
+            } else {
+
+                // no coin control: send change to newly generated address
+                CKeyID keyID;
+                if (!CreateNewChangeAddress(reservekey, keyID, strFailReason))
+                    return false;
+
+                scriptChange = GetScriptForDestination(keyID);
+            }
+
+            /** ASSET START */
+            if (!boost::get<CNoDestination>(&coinControl.assetDestChange)) {
+                assetScriptChange = GetScriptForDestination(coinControl.assetDestChange);
+            } else {
+                assetScriptChange = scriptChange;
+            }
+            /** ASSET END */
 
             CTxOut change_prototype_txout(0, scriptChange);
             size_t change_prototype_size = GetSerializeSize(change_prototype_txout, SER_DISK, 0);
@@ -5014,7 +5041,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 // Choose coins to use
                 CAmount nValueIn = 0;
                 setCoins.clear();
-                if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueIn, coinControl, nCoinType, fUseInstantSend)) {
+                if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueIn, &coinControl, nCoinType, fUseInstantSend)) {
                     if (nCoinType == ONLY_NONDENOMINATED) {
                         strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction.");
                     } else if (nCoinType == ONLY_DENOMINATED) {
@@ -5176,8 +5203,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         CScript assetScriptChange;
 /** ASSET END */
                         // coin control: send change to custom address
-                        if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange)) {
-                            scriptChange = GetScriptForDestination(coinControl->destChange);
+                        if (boost::get<CNoDestination>(&coinControl.destChange)) {
+                            scriptChange = GetScriptForDestination(coinControl.destChange);
                         } else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
                             // send deposit change back to original account.
                             scriptChange = prevScriptPubKey;
@@ -5380,8 +5407,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                 // Allow to override the default confirmation target over the CoinControl instance
                 int currentConfirmationTarget = nTxConfirmTarget;
-                if (coinControl && coinControl->nConfirmTarget > 0)
-                    currentConfirmationTarget = coinControl->nConfirmTarget;
+                if (coinControl.nConfirmTarget > 0)
+                    currentConfirmationTarget = coinControl.nConfirmTarget;
 
                 // Can we complete this as a free transaction?
                 // Note: InstantSend transaction can't be a free one
@@ -5398,16 +5425,16 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
                 // Standard fee not needed for BDAP
                 CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, coinControl, mempool, ::feeEstimator, nullptr)) : 0;
-                if (coinControl && nFeeNeeded > 0 && coinControl->nMinimumTotalFee > nFeeNeeded) {
-                    nFeeNeeded = coinControl->nMinimumTotalFee;
+                if (nFeeNeeded > 0 && coinControl.nMinimumTotalFee > nFeeNeeded) {
+                    nFeeNeeded = coinControl.nMinimumTotalFee;
                 }
 
                 if (fUseInstantSend) {
                     nFeeNeeded = std::max(nFeeNeeded, CTxLockRequest(txNew).GetMinFee(true));
                 }
 
-                if (coinControl && coinControl->fOverrideFeeRate)
-                    nFeeNeeded = coinControl->nFeeRate.GetFee(nBytes);
+                if (coinControl.fOverrideFeeRate)
+                    nFeeNeeded = coinControl.nFeeRate.GetFee(nBytes);
 
                 // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
                 // because we must be at the maximum allowed fee.
