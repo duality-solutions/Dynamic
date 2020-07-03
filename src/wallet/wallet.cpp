@@ -7960,7 +7960,7 @@ bool CWallet::MultiSend()
         vecSend[vecSend.size() - 1].nAmount = nLastSendAmount - nFeeRet - 500;
 
         // Create the transaction and commit it to the network
-        if (!CreateTransaction(vecSend, wtxdummy, nFeeRet, nChangePosInOut, strErr, coinControl, true, ALL_COINS, false, false)) {
+        if (!CreateTransaction(vecSend, wtxdummy, keyChange, nFeeRet, nChangePosInOut, strErr, coinControl, true, ALL_COINS, false, false)) {
             LogPrintf("MultiSend createtransaction failed\n");
             return false;
         }
