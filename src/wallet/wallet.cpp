@@ -5425,16 +5425,13 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
                 // Standard fee not needed for BDAP
                 CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, coinControl, mempool, ::feeEstimator, nullptr)) : 0;
-                if (nFeeNeeded > 0 && coinControl.nMinimumTotalFee > nFeeNeeded) {
-                    nFeeNeeded = coinControl.nMinimumTotalFee;
-                }
 
                 if (fUseInstantSend) {
                     nFeeNeeded = std::max(nFeeNeeded, CTxLockRequest(txNew).GetMinFee(true));
                 }
 
                 if (coinControl.fOverrideFeeRate)
-                    nFeeNeeded = coinControl.nFeeRate.GetFee(nBytes);
+                    nFeeNeeded = coinControl.m_feerate->GetFee(nBytes);
 
                 // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
                 // because we must be at the maximum allowed fee.
@@ -7801,7 +7798,7 @@ void CWallet::AutoCombineDust()
         unsigned int txSizeEstimate = 90;
 
         //find dynode rewards that need to be combined
-        CCoinControl* coinControl = new CCoinControl();
+        CCoinControl coinControl;
         CAmount nTotalRewardsValue = 0;
         for (const COutput& out : vCoins) {
             if (!out.fSpendable)
@@ -7811,7 +7808,7 @@ void CWallet::AutoCombineDust()
                 continue;
 
             COutPoint outpt(out.tx->GetHash(), out.i);
-            coinControl->Select(outpt);
+            coinControl.Select(outpt);
             vRewardCoins.push_back(out);
             nTotalRewardsValue += out.tx->tx->GetValueOut();
 
@@ -7829,7 +7826,7 @@ void CWallet::AutoCombineDust()
         }
 
         //if no inputs found then return
-        if (!coinControl->HasSelected())
+        if (!coinControl.HasSelected())
             continue;
 
         //we cannot combine one coin with itself
@@ -7847,7 +7844,7 @@ void CWallet::AutoCombineDust()
             LogPrintf("AutoCombineDust: failed to extract destination\n");
             continue;
         }
-        coinControl->destChange = destMyAddress;
+        coinControl.destChange = destMyAddress;
 
         // Create the transaction and commit it to the network
         CWalletTx wtx;
@@ -7875,7 +7872,6 @@ void CWallet::AutoCombineDust()
 
         LogPrintf("AutoCombineDust sent transaction\n");
 
-        delete coinControl;
     }
 }
 
@@ -7883,7 +7879,7 @@ bool CWallet::MultiSend()
 {
     LOCK2(cs_main, cs_wallet);
     // Stop the old blocks from sending multisends
-    const CBlockIndex* tip = chainActive.Tip();                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1;
+    const CBlockIndex* tip = chainActive.Tip();
 
     int chainTipHeight = tip->nHeight;
     if (tip->nTime < (GetAdjustedTime() - 300) || IsLocked()) {
