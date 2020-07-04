@@ -4817,8 +4817,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
     FeeCalculation feeCalc;
-    CAmount nFeeNeeded;
-    unsigned int nBytes;    
+    CAmount nFeeNeeded; // needed for BDAP
     {
         std::set<CInputCoin> setCoins;
 /** ASSET START */
@@ -4973,7 +4972,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             CFeeRate discard_rate = GetDiscardRate(::feeEstimator);
             nFeeRet = 0;
             bool pick_new_inputs = true;
-            CAmount nValueIn = 0;
 
             // Start with no fee and loop until there is enough fee
             while (true) {
