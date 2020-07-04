@@ -256,7 +256,7 @@ void WalletModel::updateAddressBookLabels(const CTxDestination& dest, const std:
     }
 }
 
-WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
+WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl& coinControl)
 {
     if (fWalletUnlockMixStakeOnly)
         return MixStakeOnlyMode;
@@ -349,7 +349,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         return DuplicateAddress;
     }
 
-    CAmount nBalance = getBalance(coinControl);
+    CAmount nBalance = getBalance(&coinControl);
 
     if (total > nBalance) {
         return AmountExceedsBalance;

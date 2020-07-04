@@ -410,7 +410,7 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
             return;
     }
 
-    prepareStatus = model->prepareTransaction(currentTransaction, &ctrl);
+    prepareStatus = model->prepareTransaction(currentTransaction, ctrl);
 
     // process prepareStatus and on error generate message shown to user
     processSendCoinsReturn(prepareStatus,
