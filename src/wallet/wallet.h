@@ -1094,7 +1094,7 @@ public:
 
     std::map<CDynamicAddress, std::vector<COutput> > AvailableCoinsByAddress(bool fConfirmed = true, CAmount maxCoinValue = 0);
 
-/** ASSET START */
+/**ASSETS START */
     /**
      * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
      */
@@ -1103,7 +1103,9 @@ public:
                             bool fOnlySafe = true, const CCoinControl* coinControl = nullptr,
                             const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
                             const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
-                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999, bool fOnlyConfirmed = true,
+                            bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, 
+                            bool fUseInstantSend = false, bool fUseBDAP = false) const;
 
     /**
      * Helper function that calls AvailableCoinsAll, used for transfering assets
@@ -1111,21 +1113,29 @@ public:
     void AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe = true,
                          const CCoinControl* coinControl = nullptr, const CAmount &nMinimumAmount = 1,
                          const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
-                         const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
-
+                         const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999, 
+                         bool fOnlyConfirmed = true, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, 
+                         bool fUseInstantSend = false, bool fUseBDAP = false) const;
     /**
      * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and DYN
      */
     void AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
                                   bool fOnlySafe = true, const CCoinControl* coinControl = nullptr, const CAmount &nMinimumAmount = 1,
                                   const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
-                                  const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
-/** ASSET END */
-
+                                  const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999, 
+                                  bool fOnlyConfirmed = true, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, 
+                                  bool fUseInstantSend = false, bool fUseBDAP = false) const;
     /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed = true, const CCoinControl* coinControl = nullptr, bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false, bool fUseBDAP = false) const;
+    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr,
+                        const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                        const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                        const int& nMinDepth = 0, const int& nMaxDepth = 9999999, bool fOnlyConfirmed = true,
+                        bool fIncludeZeroValue = false, AvailableCoinsType nCoinType = ALL_COINS, 
+                        bool fUseInstantSend = false, bool fUseBDAP = false) const;
+/** ASSETS END */
+
     /**
      * populate vCoins with vector of available BDAP credits.
      */

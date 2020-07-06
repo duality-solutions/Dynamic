@@ -3126,7 +3126,40 @@ CAmount CWallet::GetBDAPDynamicAmount() const
     return nTotalCredits;
 }
 
-void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl* coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
+/** ASSET START */
+
+void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe, const CCoinControl *coinControl, const CAmount &nMinimumAmount, const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount, const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth, bool fOnlyConfirmed, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
+{
+    std::map<std::string, std::vector<COutput> > mapAssetCoins;
+    AvailableCoinsAll(vCoins, mapAssetCoins, true, false, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth, fOnlyConfirmed, fIncludeZeroValue, nCoinType, fUseInstantSend, fUseBDAP);
+}
+
+void CWallet::AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe,
+                              const CCoinControl* coinControl, const CAmount &nMinimumAmount,
+                              const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
+                              const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth,
+                              bool fOnlyConfirmed, bool fIncludeZeroValue, AvailableCoinsType nCoinType, 
+                              bool fUseInstantSend, bool fUseBDAP) const
+{
+    if (!AreAssetsDeployed())
+        return;
+
+    std::vector<COutput> vCoins;
+
+    AvailableCoinsAll(vCoins, mapAssetCoins, false, true, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth, fOnlyConfirmed, fIncludeZeroValue, nCoinType, fUseInstantSend, fUseBDAP);
+}
+
+void CWallet::AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                              bool fOnlySafe, const CCoinControl* coinControl, const CAmount &nMinimumAmount,
+                              const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
+                              const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth,
+                              bool fOnlyConfirmed, bool fIncludeZeroValue, AvailableCoinsType nCoinType, 
+                              bool fUseInstantSend, bool fUseBDAP) const
+{
+    AvailableCoinsAll(vCoins, mapAssetCoins, true, AreAssetsDeployed(), fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth, fOnlyConfirmed, fIncludeZeroValue, nCoinType, fUseInstantSend, fUseBDAP);
+}
+
+void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, bool fGetDYN, bool fGetAssets, bool fOnlySafe, const CCoinControl* coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth, bool fOnlyConfirmed, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fUseBDAP) const
 {
     vCoins.clear();
 
@@ -3134,9 +3167,20 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
         LOCK2(cs_main, cs_wallet);
         int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
+        CAmount nTotal = 0;
+
+        /** ASSET START */
+        bool fDYNLimitHit = false;
+        // A set of the hashes that have already been used
+        std::set<uint256> usedMempoolHashes;
+
+        std::map<std::string, CAmount> mapAssetTotals;
+        std::map<uint256, COutPoint> mapOutPoints;
+        std::set<std::string> setAssetMaxFound;
+        // Turn the OutPoints into a map that is easily interatable.
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-            const uint256& wtxid = it->first;
-            const CWalletTx* pcoin = &(*it).second;
+            const uint256 &wtxid = it->first;
+            const CWalletTx *pcoin = &(*it).second;
 
             if (!CheckFinalTx(*pcoin))
                 continue;
@@ -3148,7 +3192,6 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 continue;
 
             int nDepth = pcoin->GetDepthInMainChain();
-            // do not use IX for inputs that have less then nInstantSendConfirmationsRequired blockchain confirmations
             if (fUseInstantSend && nDepth < nInstantSendConfirmationsRequired)
                 continue;
 
@@ -3208,66 +3251,6 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                             (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO),
                         (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO, pcoin->IsTrusted()));
             }
-        }
-    }
-}
-
-/** ASSET START */
-void CWallet::AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe,
-                              const CCoinControl* coinControl, const CAmount &nMinimumAmount,
-                              const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
-                              const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
-{
-    if (!AreAssetsDeployed())
-        return;
-
-    std::vector<COutput> vCoins;
-
-    AvailableCoinsAll(vCoins, mapAssetCoins, false, true, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
-}
-
-void CWallet::AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
-                              bool fOnlySafe, const CCoinControl* coinControl, const CAmount &nMinimumAmount,
-                              const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
-                              const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
-{
-    AvailableCoinsAll(vCoins, mapAssetCoins, true, AreAssetsDeployed(), fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
-}
-
-void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, bool fGetDYN, bool fGetAssets, bool fOnlySafe, const CCoinControl* coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth) const {
-    vCoins.clear();
-
-    {
-        LOCK2(cs_main, cs_wallet);
-
-        CAmount nTotal = 0;
-
-        bool fDYNLimitHit = false;
-        // A set of the hashes that have already been used
-        std::set<uint256> usedMempoolHashes;
-
-        std::map<std::string, CAmount> mapAssetTotals;
-        std::map<uint256, COutPoint> mapOutPoints;
-        std::set<std::string> setAssetMaxFound;
-        // Turn the OutPoints into a map that is easily interatable.
-        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-            const uint256 &wtxid = it->first;
-            const CWalletTx *pcoin = &(*it).second;
-
-            if (!CheckFinalTx(*pcoin))
-                continue;
-
-            if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
-                continue;
-
-            int nDepth = pcoin->GetDepthInMainChain();
-            if (nDepth < 0)
-                continue;
-
-            // We should not consider coins which aren't at least in our mempool
-            // It's possible for these to be conflicted via ancestors which we may never be able to detect
-            if (nDepth == 0 && !pcoin->InMempool())
-                continue;
 
             bool safeTx = pcoin->IsTrusted();
 
@@ -3414,6 +3397,7 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                 }
             }
         }
+        /** ASSET END */
     }
 }
 
