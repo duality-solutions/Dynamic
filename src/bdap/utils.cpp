@@ -362,6 +362,15 @@ std::string GetOpCodeType(const std::string& strOpCode)
     else if (strOpCode == "bdap_new_audit") {
         return "audit";
     }
+    else if (strOpCode == "bdap_new_certificate") {
+        return "certificate";
+    }
+    else if (strOpCode == "bdap_approve_certificate") {
+        return "certificate";
+    }
+    else if (strOpCode == "bdap_revoke_certificate") {
+        return "certificate";
+    }
     else {
         return "unknown";
     }
@@ -407,6 +416,15 @@ std::string GetBDAPOpTypeString(const int& op1, const int& op2)
     }
     else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_AUDIT) {
         return "bdap_new_audit";
+    }
+    else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_new_certificate";
+    }
+    else if (op1 == OP_BDAP_MODIFY && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_approve_certificate";
+    }
+    else if (op1 == OP_BDAP_EXPIRE && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_revoke_certificate";
     }
     else {
         return "unknown";
