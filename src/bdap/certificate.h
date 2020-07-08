@@ -174,6 +174,10 @@ public:
         return false;
     }
 
+    CKeyID GetCertificateKeyID() const {
+        return CKeyID(Hash160(PublicKey.begin(), PublicKey.end()));
+    }
+
     uint256 GetHash() const;
     uint256 GetSubjectHash() const;
     uint256 GetIssuerHash() const;
