@@ -343,6 +343,7 @@ libdynamic_server_a_SOURCES = \
   rest.cpp \
   rpc/audits.cpp \
   rpc/blockchain.cpp \
+  rpc/certificates.cpp \
   rpc/dht.cpp \
   rpc/domainentry.cpp \
   rpc/dynode.cpp \
