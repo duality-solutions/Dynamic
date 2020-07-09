@@ -10,6 +10,7 @@
 #include "alert.h"
 #include "arith_uint256.h"
 #include "bdap/auditdb.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
 #include "bdap/linking.h"
