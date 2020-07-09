@@ -327,6 +327,7 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
     oCertificate.push_back(Pair("issuer", stringFromVch(certificate.Issuer)));
     oCertificate.push_back(Pair("public_key", stringFromVch(certificate.PublicKey)));
     oCertificate.push_back(Pair("signature_value", EncodeBase64(&issuerSig[0], issuerSig.size())));
+    oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
 
     oCertificate.push_back(Pair("certificate_keyid", certificateKeyId.ToString()));

@@ -24,7 +24,7 @@ public:
     int nVersion;
 
     CharString SignatureAlgorithm; //only support ed25519 and secp256k1 (future)
-    CharString SignatureHashAlgorithm; //sha256
+    CharString SignatureHashAlgorithm; //sha512
     CharString FingerPrint; //hash of the publickey (possible method)
     uint16_t MonthsValid;
     CharString Subject; //owner full path
@@ -161,6 +161,10 @@ public:
         return *this;
     }
  
+    bool IsApproved() const {
+        return (SignatureValue.size() > 0);
+    }
+
     inline bool IsNull() const { return (Subject.empty()); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
