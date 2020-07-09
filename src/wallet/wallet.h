@@ -570,23 +570,19 @@ public:
 /* ASSET START */
 class CInputCoin {
 public:
-    CInputCoin() {}
-    CInputCoin(const CWalletTx* wtx, unsigned int nOutIndex)
+    CInputCoin(const CWalletTx* wtx, unsigned int i)
     {
         if (!walletTx)
             throw std::invalid_argument("walletTx should not be null");
-        if (nOutIndex >= walletTx->tx->vout.size())
+        if (i >= walletTx->tx->vout.size())
             throw std::out_of_range("The output index is out of range");
-        walletTx = wtx;
-        outpoint = COutPoint(walletTx->GetHash(), nOutIndex);
-        txout = walletTx->tx->vout[nOutIndex];
-        nOut = nOutIndex;
-    }
 
-    const CWalletTx* walletTx;
+        outpoint = COutPoint(walletTx->GetHash(), i);
+        txout = walletTx->tx->vout[i];
+    }
+    const CWalletTx* walletTx; // PoS
     COutPoint outpoint;
     CTxOut txout;
-    unsigned int nOut;
 
     bool operator<(const CInputCoin& rhs) const {
         return outpoint < rhs.outpoint;
