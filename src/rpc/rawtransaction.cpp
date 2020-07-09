@@ -18,6 +18,7 @@
 #include "net.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
+#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "script/script.h"
 #include "script/script_error.h"
@@ -1621,7 +1622,7 @@ UniValue decodescript(const JSONRPCRequest& request)
             + HelpExampleCli("decodescript", "\"hexstring\"")
             + HelpExampleRpc("decodescript", "\"hexstring\"")
         );
-    
+
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR));
 
     UniValue r(UniValue::VOBJ);
@@ -1791,6 +1792,7 @@ UniValue signrawtransaction(const JSONRPCRequest& request)
                                           "\nExamples:\n" +
             HelpExampleCli("signrawtransaction", "\"myhex\"") + HelpExampleRpc("signrawtransaction", "\"myhex\""));
 
+    ObserveSafeMode();
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
@@ -2006,6 +2008,7 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
             "\nSend the transaction (signed hex)\n" + HelpExampleCli("sendrawtransaction", "\"signedhex\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("sendrawtransaction", "\"signedhex\""));
 
+    ObserveSafeMode();
     LOCK(cs_main);
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL)(UniValue::VBOOL));
 

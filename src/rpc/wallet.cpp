@@ -22,6 +22,7 @@
 #include "policy/rbf.h"
 #include "privatesend-client.h"
 #include "rpc/mining.h"
+#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "timedata.h"
 #include "util.h"
@@ -777,6 +778,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1") + HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1 \"donation\" \"seans outpost\"") + HelpExampleCli("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.1 \"\" \"\" true") + HelpExampleRpc("sendtoaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", 0.1, \"donation\", \"seans outpost\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
@@ -908,6 +910,7 @@ UniValue listaddressgroupings(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("listaddressgroupings", "") + HelpExampleRpc("listaddressgroupings", ""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     UniValue jsonGroupings(UniValue::VARR);
@@ -1043,6 +1046,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
             "\nThe amount with at least 10 confirmation, very safe\n" + HelpExampleCli("getreceivedbyaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 10") +
             "\nAs a json rpc call\n" + HelpExampleRpc("getreceivedbyaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", 10"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     // Dynamic address
@@ -1099,6 +1103,7 @@ UniValue getreceivedbyaccount(const JSONRPCRequest& request)
             "\nThe amount with at least 10 confirmation, very safe\n" + HelpExampleCli("getreceivedbyaccount", "\"tabby\" 10") +
             "\nAs a json rpc call\n" + HelpExampleRpc("getreceivedbyaccount", "\"tabby\", 10"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     // Minimum confirmations
@@ -1155,6 +1160,7 @@ UniValue getbalance(const JSONRPCRequest& request)
             "\nThe total amount in the wallet at least 5 blocks confirmed\n" + HelpExampleCli("getbalance", "\"*\" 10") +
             "\nAs a json rpc call\n" + HelpExampleRpc("getbalance", "\"*\", 10"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     if (request.params.size() == 0)
@@ -1212,6 +1218,7 @@ UniValue getunconfirmedbalance(const JSONRPCRequest& request)
             "getunconfirmedbalance\n"
             "Returns the server's total unconfirmed balance\n");
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     return ValueFromAmount(pwalletMain->GetUnconfirmedBalance());
@@ -1242,6 +1249,7 @@ UniValue movecmd(const JSONRPCRequest& request)
             "\nMove 0.01 " + CURRENCY_UNIT + " timotei to akiko with a comment and funds have 10 confirmations\n" + HelpExampleCli("move", "\"timotei\" \"akiko\" 0.01 10 \"happy birthday!\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("move", "\"timotei\", \"akiko\", 0.01, 10, \"happy birthday!\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string strFrom = AccountFromValue(request.params[0]);
@@ -1293,6 +1301,7 @@ UniValue sendfrom(const JSONRPCRequest& request)
             "\nSend 0.01 from the tabby account to the given address, funds must have at least 10 confirmations\n" + HelpExampleCli("sendfrom", "\"tabby\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" 0.01 10 false \"donation\" \"seans outpost\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("sendfrom", "\"tabby\", \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", 0.01, 10, false \"donation\", \"seans outpost\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string strAccount = AccountFromValue(request.params[0]);
@@ -1376,6 +1385,7 @@ UniValue sendmany(const JSONRPCRequest& request)
             "\nSend two amounts to two different addresses setting the confirmation and comment:\n" + HelpExampleCli("sendmany", "\"tabby\" \"{\\\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\":0.01,\\\"D1MfcDTf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\":0.02}\" 10 false \"testing\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("sendmany", "\"tabby\", \"{\\\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\":0.01,\\\"D1MfcDTf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\":0.02}\", 10, false \"testing\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     if (pwalletMain->GetBroadcastTransactions() && !g_connman)
@@ -1710,6 +1720,7 @@ UniValue listreceivedbyaddress(const JSONRPCRequest& request)
             "\nExamples:\n" +
             HelpExampleCli("listreceivedbyaddress", "") + HelpExampleCli("listreceivedbyaddress", "6 false true") + HelpExampleRpc("listreceivedbyaddress", "6, false, true, true"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     return ListReceived(request.params, false);
@@ -1745,6 +1756,7 @@ UniValue listreceivedbyaccount(const JSONRPCRequest& request)
             "\nExamples:\n" +
             HelpExampleCli("listreceivedbyaccount", "") + HelpExampleCli("listreceivedbyaccount", "10 false true") + HelpExampleRpc("listreceivedbyaccount", "10, false, true, true"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     return ListReceived(request.params, true);
@@ -1985,6 +1997,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
             "\nList transactions 100 to 120\n" + HelpExampleCli("listtransactions", "\"*\" 20 100") +
             "\nAs a json rpc call\n" + HelpExampleRpc("listtransactions", "\"*\", 20, 100"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string strAccount = "*";
@@ -2075,6 +2088,7 @@ UniValue listaccounts(const JSONRPCRequest& request)
             "\nList account balances for 10 or more confirmations\n" + HelpExampleCli("listaccounts", "10") +
             "\nAs json rpc call\n" + HelpExampleRpc("listaccounts", "10"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     int nMinDepth = 1;
@@ -2171,6 +2185,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("listsinceblock", "") + HelpExampleCli("listsinceblock", "\"000000000000000bacf66f7497b7dc45ef753ee9a7d38571037cdb1a57f663ad\" 6") + HelpExampleRpc("listsinceblock", "\"000000000000000bacf66f7497b7dc45ef753ee9a7d38571037cdb1a57f663ad\", 6"));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     const CBlockIndex* pindex = nullptr;
@@ -2278,6 +2293,7 @@ UniValue gettransaction(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("gettransaction", "\"1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d\"") + HelpExampleCli("gettransaction", "\"1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d\" true") + HelpExampleRpc("gettransaction", "\"1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     uint256 hash;
@@ -2334,6 +2350,7 @@ UniValue abandontransaction(const JSONRPCRequest& request)
             "\nExamples:\n" +
             HelpExampleCli("abandontransaction", "\"1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d\"") + HelpExampleRpc("abandontransaction", "\"1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d\""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     uint256 hash;
@@ -2737,6 +2754,7 @@ UniValue listlockunspent(const JSONRPCRequest& request)
             "\nUnlock the transaction again\n" + HelpExampleCli("lockunspent", "true \"[{\\\"txid\\\":\\\"a08e6907dbbd3d809776dbfc5d82e371b764ed838b5655e72f463568df1aadf0\\\",\\\"vout\\\":1}]\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("listlockunspent", ""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::vector<COutPoint> vOutpts;
@@ -2860,6 +2878,7 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("getwalletinfo", "") + HelpExampleRpc("getwalletinfo", ""));
 
+    ObserveSafeMode();
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     CHDChain hdChainCurrent;
@@ -3405,6 +3424,8 @@ UniValue listunspent(const JSONRPCRequest& request)
                             "\nExamples:\n" +
             HelpExampleCli("listunspent", "") + HelpExampleCli("listunspent", "6 9999999 \"[\\\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\\\",\\\"XuQQkwA4FYkq2XERzMY2CiAZhJTEDAbtcg\\\"]\"") + HelpExampleRpc("listunspent", "6, 9999999 \"[\\\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\\\",\\\"XuQQkwA4FYkq2XERzMY2CiAZhJTEDAbtcg\\\"]\""));
 
+    ObserveSafeMode();
+
     int nMinDepth = 1;
     if (request.params.size() > 0 && !request.params[0].isNull()) {
         RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
@@ -3543,6 +3564,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
             + HelpExampleCli("sendrawtransaction", "\"signedtransactionhex\"")
     );
 
+    ObserveSafeMode();
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR));
 
     CTxDestination changeAddress = CNoDestination();
