@@ -152,68 +152,58 @@ bool CCertificate::CheckIssuerSignature(const std::vector<unsigned char>& vchPub
 bool CCertificate::ValidateValues(std::string& errorMessage)
 {
     // check Signature Algorithm
-    std::string strSignatureAlgorithm = stringFromVch(SignatureAlgorithm);
-    if (strSignatureAlgorithm.length() > MAX_ALGORITHM_TYPE_LENGTH) 
+    if (SignatureAlgorithm.size() > MAX_ALGORITHM_TYPE_LENGTH) 
     {
         errorMessage = "Invalid Signature Algorithm. Can not have more than " + std::to_string(MAX_ALGORITHM_TYPE_LENGTH) + " characters.";
         return false;
     }
 
     // check SignatureHashAlgorithm
-    std::string strSignatureHashAlgorithm = stringFromVch(SignatureHashAlgorithm);
-    if (strSignatureHashAlgorithm.length() > MAX_ALGORITHM_TYPE_LENGTH) 
+    if (SignatureHashAlgorithm.size() > MAX_ALGORITHM_TYPE_LENGTH) 
     {
         errorMessage = "Invalid Signature Hash Algorithm. Can not have more than " + std::to_string(MAX_ALGORITHM_TYPE_LENGTH) + " characters.";
         return false;
     }
 
     // check FingerPrint
-    std::string strFingerPrint = stringFromVch(FingerPrint);
-    if (strFingerPrint.length() > MAX_CERTIFICATE_FINGERPRINT) 
+    if (FingerPrint.size() > MAX_CERTIFICATE_FINGERPRINT) 
     {
         errorMessage = "Invalid Finger Print. Can not have more than " + std::to_string(MAX_CERTIFICATE_FINGERPRINT) + " characters.";
         return false;
     }
 
-    //TODO: ValidFrom and ValidTo checks?
-
     // check subject owner path
-    std::string strSubject = stringFromVch(Subject);
-    if (strSubject.length() > MAX_OBJECT_FULL_PATH_LENGTH) 
+    if (Subject.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid Subject full path name. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
 
     // check SubjectSignature
-    std::string strSubjectSignature = stringFromVch(SubjectSignature);
-    if (strSubjectSignature.length() > MAX_SIGNATURE_LENGTH) 
+    if (SubjectSignature.size() > MAX_SIGNATURE_LENGTH) 
     {
         errorMessage = "Invalid SubjectSignature. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
         return false;
     }
 
     // check issuer owner path
-    std::string strIssuer = stringFromVch(Issuer);
-    if (strIssuer.length() > MAX_OBJECT_FULL_PATH_LENGTH) 
+    if (Issuer.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid Issuer full path name. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
 
     // check PublicKey
-    std::string strPublicKey = stringFromVch(PublicKey);
-    if (strPublicKey.length() > MAX_KEY_LENGTH) 
+    if (PublicKey.size() > MAX_KEY_LENGTH) 
     {
         errorMessage = "Invalid PublicKey. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
         return false;
     }
 
     // check SignatureValue
-    std::string strSignatureValue = stringFromVch(SignatureValue);
-    if (strSignatureValue.length() > MAX_SIGNATURE_LENGTH) 
+    if (SignatureValue.size() > MAX_SIGNATURE_LENGTH) 
     {
-        errorMessage = "Invalid SubjectSiSignatureValuegnature. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
+        errorMessage = "Invalid SignatureValue. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
         return false;
     }
 
@@ -224,8 +214,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& KeyUsageValue : KeyUsage) {
-        std::string strKeyUsageValue = stringFromVch(KeyUsageValue);
-        if (strKeyUsageValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (KeyUsageValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid KeyUsage. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -239,8 +228,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& ExtendedKeyUsageValue : ExtendedKeyUsage) {
-        std::string strExtendedKeyUsageValue = stringFromVch(ExtendedKeyUsageValue);
-        if (strExtendedKeyUsageValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (ExtendedKeyUsageValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid ExtendedKeyUsage. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -254,8 +242,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& AuthorityInformationAccessValue : AuthorityInformationAccess) {
-        std::string strAuthorityInformationAccessValue = stringFromVch(AuthorityInformationAccessValue);
-        if (strAuthorityInformationAccessValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (AuthorityInformationAccessValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid AuthorityInformationAccess. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -269,8 +256,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& SubjectAlternativeNameValue : SubjectAlternativeName) {
-        std::string strSubjectAlternativeNameValue = stringFromVch(SubjectAlternativeNameValue);
-        if (strSubjectAlternativeNameValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (SubjectAlternativeNameValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid SubjectAlternativeName. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -284,8 +270,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& PoliciesValue : Policies) {
-        std::string strPoliciesValue = stringFromVch(PoliciesValue);
-        if (strPoliciesValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (PoliciesValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid Policies. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -299,8 +284,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& CRLDistributionPointsValue : CRLDistributionPoints) {
-        std::string strCRLDistributionPointsValue = stringFromVch(CRLDistributionPointsValue);
-        if (strCRLDistributionPointsValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (CRLDistributionPointsValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid CRLDistributionPoints. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
@@ -314,8 +298,7 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
         return false;
     }
     for (const CharString& SCTListValue : SCTList) {
-        std::string strSCTListValue = stringFromVch(SCTListValue);
-        if (strSCTListValue.length() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
+        if (SCTListValue.size() > MAX_CERTIFICATE_EXTENSION_LENGTH) 
         {
             errorMessage = "Invalid SCTList. Can not have more than " + std::to_string(MAX_CERTIFICATE_EXTENSION_LENGTH) + " characters.";
             return false;
