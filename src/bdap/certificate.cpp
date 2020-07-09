@@ -60,10 +60,25 @@ bool CCertificate::UnserializeFromTx(const CTransactionRef& tx, const unsigned i
     {
         return false;
     }
-    //TODO: Distringuish between Request and Approve
-    //if issuer = subject 
-    txHashRequest = tx->GetHash();
-    nHeightRequest = height;
+
+    //Distinguish between Request and Approve
+    int op1, op2;
+    std::vector<std::vector<unsigned char> > vvchBDAPArgs;
+    CScript scriptOp;
+    if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
+        std::string errorMessage;
+        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+        if (strOpType == "bdap_new_certificate") {
+            txHashRequest = tx->GetHash();
+            nHeightRequest = height;
+        }
+        else if (strOpType == "bdap_approve_certificate") {
+            txHashApprove = tx->GetHash();
+            nHeightApprove = height;
+        }
+        //TODO: bdap_revoke_certificate?
+    }
+
     return true;
 }
 
