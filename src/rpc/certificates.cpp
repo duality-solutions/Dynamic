@@ -16,32 +16,28 @@
 #include "spork.h"
 #include "timedata.h"
 #include "utilmoneystr.h"
+#include "uint256.h"
+#include "utilstrencodings.h"
 #include "validation.h"
 #include "wallet/wallet.h"
 
-
 #include <libtorrent/ed25519.hpp>
-#include "uint256.h"
-
-#include "utilstrencodings.h"
-
 #include <univalue.h>
-
 
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
-    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 5))
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 3))
         throw std::runtime_error(
             "certificate new \"subject\" ( \"issuer\" )\n"
-            "\nAdds an audit record to the blockchain.\n"
+            "\nAdds an X.509 certificate to the blockchain.\n"
             "\nArguments:\n"
             "1. \"subject\"          (string, required)  BDAP account that created certificate\n"
             "2. \"issuer\"           (string, optional)  BDAP account that issued certificate\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"tbd\"               (string)            tbd\n"
-            "  \"txid\"              (string)            Audit record transaction id\n"
+            "  \"txid\"              (string)            Certificate record transaction id\n"
             "}\n"
             "\nExamples\n" +
            HelpExampleCli("certificate new", "\"subject\" (\"issuer\") ") +
@@ -52,6 +48,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     CCertificate txCertificate;
     CharString vchSubjectFQDN;
+    CharString vchIssuerFQDN;
     bool selfSign = false;
     int32_t nMonths = 12; // certificates last a year?
 
@@ -65,14 +62,14 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     ToLowerCase(strSubjectFQDN);
     vchSubjectFQDN = vchFromString(strSubjectFQDN);
     // Check if name exists
-    CDomainEntry domainEntry;
-    if (!GetDomainEntry(vchSubjectFQDN, domainEntry))
+    CDomainEntry subjectDomainEntry;
+    if (!GetDomainEntry(vchSubjectFQDN, subjectDomainEntry))
         throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strSubjectFQDN));
 
-    txCertificate.Subject = domainEntry.vchFullObjectPath();
+    txCertificate.Subject = subjectDomainEntry.vchFullObjectPath();
     
     //Get Subject BDAP user Public Key
-    CharString vchSubjectPubKey = domainEntry.DHTPublicKey;
+    CharString vchSubjectPubKey = subjectDomainEntry.DHTPublicKey;
     CKeyEd25519 privSubjectDHTKey;
     std::vector<unsigned char> SubjectSecretKey;
     std::vector<unsigned char> SubjectPublicKey;
@@ -94,7 +91,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Subject Signature invalid.");
     }
 
-    CKeyEd25519 privIssuerDHTKey;
+    //CKeyEd25519 privIssuerDHTKey;
     std::vector<unsigned char> IssuerSecretKey;
     std::vector<unsigned char> PublicKey;
 
@@ -128,9 +125,23 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Issuer Signature invalid.");
         }
 
-
     } //end Self Sign
 
+    //Issuer detected, so Certificate Request
+    if (request.params.size() == 3) {
+        selfSign = false;
+
+        //Handle ISSUER [optional]
+        std::string strIssuerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+        ToLowerCase(strIssuerFQDN);
+        vchIssuerFQDN = vchFromString(strIssuerFQDN);
+        // Check if name exists
+        CDomainEntry issuerDomainEntry;
+        if (!GetDomainEntry(vchIssuerFQDN, issuerDomainEntry))
+            throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strIssuerFQDN));
+
+        txCertificate.Issuer = issuerDomainEntry.vchFullObjectPath();
+    }
 
     std::string strMessage;
 
@@ -144,24 +155,23 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     std::vector<unsigned char> vchMonths = vchFromString(std::to_string(nMonths));
 
     //TODO: add additional fields
+    //Only send PubKeys of BDAP accounts
     CScript scriptPubKey;
-    if (selfSign) {
+    if (selfSign) { 
         scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
-                 << vchMonths << txCertificate.Issuer << PublicKey << OP_2DROP << OP_2DROP << OP_DROP; 
-    } else {
+                 << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchSubjectFQDN << SubjectPublicKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
+    } else { //NEW CERTIFICATE REQUEST
         scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
-                 << vchMonths << OP_2DROP << OP_DROP; 
+                 << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchIssuerFQDN << OP_2DROP << OP_2DROP << OP_2DROP; 
     }
 
-    CKeyID keyWalletID = privIssuerDHTKey.GetID();
+    //this needs review
+    CKeyID keyWalletID = privSubjectDHTKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
-
-
-
 
     // Create BDAP OP_RETURN script
     CharString data;
@@ -171,7 +181,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     // Get BDAP Fees
     //seems like there's an entry in fees.cpp
-
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_CERTIFICATE;
     CAmount monthlyFee, oneTimeFee, depositFee;
 
@@ -188,15 +197,20 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    bool fUseInstantSend = false;
+    //comment out for now
+    // bool fUseInstantSend = false;
+    // // Send the transaction
+    // CWalletTx wtx;
+    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
 
-
-
-
-
+    // if (selfSign) {
+    //     txCertificate.txHashApprove = wtx.GetHash();
+    // }
+    // else {
+    //     txCertificate.txHashRequest = wtx.GetHash();
+    // }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
-
     BuildCertificateJson(txCertificate, oCertificateTransaction);
 
     return oCertificateTransaction;
@@ -213,7 +227,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     return oCertificateTransaction;
 #else
-    throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Sign certificate transaction is not available when the wallet is disabled."));
+    throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Approve certificate transaction is not available when the wallet is disabled."));
 #endif
 } //ApproveCertificate
 
@@ -269,7 +283,7 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
-    { "bdap",               "certificate",           &certificate_rpc,               true,  {"command", "param1", "param2", "param3", "param4"} },
+    { "bdap",               "certificate",           &certificate_rpc,               true,  {"command", "param1", "param2"} },
 };
 
 void RegisterCertificateRPCCommands(CRPCTable &t)
