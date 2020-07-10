@@ -798,8 +798,9 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
         wtx.mapValue["to"] = request.params[3].get_str();
 
     bool fSubtractFeeFromAmount = false;
-    if (request.params.size() > 4)
+    if (request.params.size() > 4 && !request.params[4].isNull()) {
         fSubtractFeeFromAmount = request.params[4].get_bool();
+    }
 
     bool fUseInstantSend = false;
     bool fUsePrivateSend = false;
@@ -879,6 +880,128 @@ UniValue instantsendtoaddress(const JSONRPCRequest& request)
     CCoinControl coinControl;
 
     SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, true);
+
+    return wtx.GetHash().GetHex();
+}
+
+UniValue sendfromaddress(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 10)
+        throw std::runtime_error(
+            "sendfromaddress \"from_address\" \"to_address\" amount ( \"comment\" \"comment_to\" subtractfeefromamount replaceable conf_target \"estimate_mode\")\n"
+            "\nSend an amount from a specific address to a given address. All rvn change will get sent back to the from_address\n"
+            + HelpRequiringPassphrase() +
+            "\nArguments:\n"
+            "1. \"from_address\"       (string, required) The raven address to send from.\n"
+            "2. \"to_address\"            (string, required) The raven address to send to.\n"
+            "3. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
+            "4. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
+            "                             This is not part of the transaction, just kept in your wallet.\n"
+            "5. \"comment_to\"         (string, optional) A comment to store the name of the person or organization \n"
+            "                             to which you're sending the transaction. This is not part of the \n"
+            "                             transaction, just kept in your wallet.\n"
+            "6. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
+            "                             The recipient will receive less ravens than you enter in the amount field.\n"
+            "7. \"use_is\"      (bool, optional) Send this transaction as InstantSend (default: false)\n"
+            "8. \"use_ps\"      (bool, optional) Use anonymized funds only (default: false)\n"               
+            "9. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+            "10. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+            "       \"UNSET\"\n"
+            "       \"ECONOMICAL\"\n"
+            "       \"CONSERVATIVE\"\n"
+            "\nResult:\n"
+            "\"txid\"                  (string) The transaction id.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"donation\" \"seans outpost\"")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"\" \"\" true")
+            + HelpExampleRpc("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.1, \"donation\", \"seans outpost\"")
+        );
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    CCoinControl coinControl;
+
+    std::string from_address = request.params[0].get_str();
+    CTxDestination from_dest = DecodeDestination(from_address);
+    if (!IsValidDestination(from_dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid from address");
+    }
+    coinControl.destChange = from_dest;
+
+    CTxDestination dest = DecodeDestination(request.params[1].get_str());
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
+
+    // Amount
+    CAmount nAmount = AmountFromValue(request.params[2]);
+    if (nAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
+
+    // Get the coins that belong to the from address
+    std::vector<COutput> coins;
+    pwalletMain->AvailableCoins(coins);
+
+    CAmount nAmountFromCoins = 0;
+    for (auto out : coins) {
+        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
+        CTxDestination coin_dest;
+        CAmount nCoinAmount = out.tx->tx->vout[out.i].nValue;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, coin_dest);
+
+        if (nCoinAmount <= 0)
+            continue;
+
+        if (from_address != EncodeDestination(coin_dest))
+            continue;
+
+        coinControl.Select(COutPoint(out.tx->GetHash(), out.i));
+        nAmountFromCoins += out.tx->tx->vout[out.i].nValue;
+
+        if (nAmountFromCoins >= nAmount)
+            break;
+    }
+
+    if (nAmountFromCoins < nAmount)
+        throw JSONRPCError(RPC_TYPE_ERROR, "From Address doesn't contain enough funds");
+
+    // Wallet comments
+    CWalletTx wtx;
+    if (!request.params[3].isNull() && !request.params[2].get_str().empty())
+        wtx.mapValue["comment"] = request.params[2].get_str();
+    if (!request.params[4].isNull() && !request.params[3].get_str().empty())
+        wtx.mapValue["to"]      = request.params[3].get_str();
+
+    bool fSubtractFeeFromAmount = false;
+    if (!request.params[5].isNull()) {
+        fSubtractFeeFromAmount = request.params[4].get_bool();
+    }
+
+    bool fUseInstantSend = false;
+    bool fUsePrivateSend = false;
+    if (request.params.size() > 6)
+        fUseInstantSend = request.params[6].get_bool();
+    if (request.params.size() > 7)
+        fUsePrivateSend = request.params[7].get_bool();
+
+    if (!request.params[8].isNull()) {
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[6]);
+    }
+
+    if (!request.params[9].isNull()) {
+        if (!FeeModeFromString(request.params[8].get_str(), coinControl.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
+
+    EnsureWalletIsUnlocked();
+
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -3746,6 +3869,7 @@ static const CRPCCommand commands[] =
         {"wallet", "sendfrom", &sendfrom, false, {"fromaccount", "toaddress", "amount", "minconf", "addlocked", "comment", "comment_to"}},
         {"wallet", "sendmany", &sendmany, false, {"fromaccount", "amounts", "minconf", "addlocked", "comment", "subtractfeefrom"}},
         {"wallet", "sendtoaddress", &sendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
+        { "wallet","sendfromaddress", &sendfromaddress, false, {"from_address","address","amount","comment","comment_to","subtractfeefromamount", "conf_target","estimate_mode"} },
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
         {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
         {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},
