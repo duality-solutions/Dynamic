@@ -121,5 +121,6 @@ bool GenerateAuthCookie(std::string* cookie_out);
 bool GetAuthCookie(std::string* cookie_out);
 /** Delete RPC authentication cookie from disk */
 void DeleteAuthCookie();
-
+/** Parse JSON-RPC batch reply into a vector */
+std::vector<UniValue> JSONRPCProcessBatchReply(const UniValue &in, size_t num);
 #endif // DYNAMIC_RPCPROTOCOL_H
