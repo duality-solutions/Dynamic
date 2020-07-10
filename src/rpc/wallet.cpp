@@ -804,18 +804,18 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     bool fUseInstantSend = false;
     bool fUsePrivateSend = false;
-    if (request.params.size() > 5)
+    if (request.params.size() > 5 && !request.params[5].isNull())
         fUseInstantSend = request.params[5].get_bool();
-    if (request.params.size() > 6)
+    if (request.params.size() > 6 && !request.params[6].isNull())
         fUsePrivateSend = request.params[6].get_bool();
 
     CCoinControl coinControl;
 
-    if (!request.params[7].isNull()) {
+    if (request.params.size() > 7 && !request.params[7].isNull()) {
         coinControl.m_confirm_target = ParseConfirmTarget(request.params[8]);
     }
 
-    if (!request.params[8].isNull()) {
+    if (request.params.size() > 8 && !request.params[8].isNull()) {
         if (!FeeModeFromString(request.params[9].get_str(), coinControl.m_fee_mode)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
         }
