@@ -314,6 +314,14 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
 
     std::vector<unsigned char> subjectSig = certificate.SubjectSignature;
     std::vector<unsigned char> issuerSig = certificate.SignatureValue;
+
+    UniValue oKeyUsages(UniValue::VOBJ);
+    int counter = 0;
+    for(const std::vector<unsigned char>& vchKeyUsage : certificate.KeyUsage) {
+        counter++;
+        oKeyUsages.push_back(Pair("key_usage" + std::to_string(counter), stringFromVch(vchKeyUsage)));
+    }
+
     CKeyID certificateKeyId = certificate.GetCertificateKeyID();
 
     oCertificate.push_back(Pair("version", std::to_string(certificate.nVersion)));
@@ -331,6 +339,7 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
 
     oCertificate.push_back(Pair("certificate_keyid", certificateKeyId.ToString()));
+    oCertificate.push_back(Pair("key_usage", oKeyUsages));
 
     oCertificate.push_back(Pair("txid_request", certificate.txHashRequest.GetHex()));
     oCertificate.push_back(Pair("txid_approve", certificate.txHashApprove.GetHex()));
