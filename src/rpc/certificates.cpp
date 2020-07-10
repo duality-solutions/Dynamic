@@ -223,6 +223,160 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 static UniValue ApproveCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 2))
+        throw std::runtime_error(
+            "certificate approve \"txid\" \n"
+            "\nApprove an X.509 certificate request\n"
+            "\nArguments:\n"
+            "1. \"txid\"             (string, required)  Transaction ID of certificate to approve\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"tbd\"               (string)            tbd\n"
+            "  \"txid\"              (string)            Certificate record transaction id\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("certificate approve", "\"txid\" ") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("certificate approve", "\"txid\" "));
+
+    EnsureWalletIsUnlocked();
+
+    CCertificate txCertificate;
+    unsigned int height;
+    int32_t nMonths = 12; // certificates last a year?
+
+    uint256 hash = ParseHashV(request.params[1], "Transaction ID");
+
+    //Retrieve Transaction
+    CTransactionRef tx;
+    uint256 hashBlock;
+    if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
+
+    //Get height - TO REVIEW
+    BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
+    CBlockIndex* pindex = (*mi).second;
+    height = pindex->nHeight;
+
+    //Retrieve certificate from tx
+    if (!txCertificate.UnserializeFromTx(tx, height))
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Unable to retrieve certificate from UnserializeFromTx");
+
+    //Check if certificate already approved
+    if (txCertificate.IsApproved())
+        throw JSONRPCError(RPC_BDAP_ERROR, "Certificate already approved");
+
+
+    //Check if I'm the correct account to approve
+    std::vector<unsigned char> vchIssuer;
+    std::vector<unsigned char> vchSubject;
+    CDomainEntry issuerDomainEntry;
+    CDomainEntry subjectDomainEntry;
+
+    vchIssuer = txCertificate.Issuer;
+    if (!GetDomainEntry(vchIssuer, issuerDomainEntry))
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", stringFromVch(vchIssuer)));
+
+    //need subject BDAP for BDAP operation script
+    vchSubject = txCertificate.Subject;
+    if (!GetDomainEntry(vchSubject, subjectDomainEntry))
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", stringFromVch(vchSubject)));
+    CharString vchSubjectPubKey = subjectDomainEntry.DHTPublicKey;
+
+    //TODO: IS THIS CORRECT ACCOUNT TO APPROVE?
+
+    //Get Issuer BDAP user Public Key
+    CharString vchIssuerPubKey = issuerDomainEntry.DHTPublicKey;
+    CKeyEd25519 privIssuerDHTKey;
+    std::vector<unsigned char> IssuerSecretKey;
+    std::vector<unsigned char> IssuerPublicKey;
+
+    //TO REVISIT: Who owns certificate public key?
+    //generate ed25519 key for certificate
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchCertificatePubKey;
+    CKeyEd25519 privCertificateKey;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchCertificatePubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
+    if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+
+    txCertificate.PublicKey = privCertificateKey.GetPubKey();  //GetPubKeyBytes?
+
+    //Generate Issuer ed25519 key
+    CKeyID vchIssuerPubKeyID = GetIdFromCharVector(vchIssuerPubKey);
+    if (!pwalletMain->GetDHTKey(vchIssuerPubKeyID, privIssuerDHTKey))
+        throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Unable to retrieve DHT Key");
+
+    IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
+    IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
+
+    txCertificate.MonthsValid = nMonths;
+
+    //Issuer Signs
+    if (!txCertificate.SignIssuer(IssuerPublicKey, IssuerSecretKey)) {
+        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer signing.");
+    }
+
+    if (!txCertificate.CheckIssuerSignature(IssuerPublicKey)) {
+        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Issuer Signature invalid.");
+        }
+
+    std::string strMessage;
+
+    //Validate BDAP values
+    if (!txCertificate.ValidateValues(strMessage))
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
+
+
+    // Create BDAP operation script
+    // OP_BDAP_CERTIFICATE
+    // BDAP_CERTIFICATE
+    std::vector<unsigned char> vchMonths = vchFromString(std::to_string(nMonths));
+
+    //TODO: add additional fields
+    //Only send PubKeys of BDAP accounts
+    CScript scriptPubKey;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
+                << vchMonths << vchSubject << vchSubjectPubKey << vchIssuer << vchIssuerPubKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
+
+    //this needs review
+    CKeyID keyWalletID = privIssuerDHTKey.GetID();
+    CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
+
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(walletAddress.Get());
+    scriptPubKey += scriptDestination;
+
+    // Create BDAP OP_RETURN script
+    CharString data;
+    txCertificate.Serialize(data);
+    CScript scriptData;
+    scriptData << OP_RETURN << data;
+
+    // Get BDAP Fees
+    //seems like there's an entry in fees.cpp
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_CERTIFICATE;
+    CAmount monthlyFee, oneTimeFee, depositFee;
+
+    if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_CERTIFICATE, bdapType, nMonths, monthlyFee, oneTimeFee, depositFee))
+        throw JSONRPCError(RPC_BDAP_FEE_UNKNOWN, strprintf("Error calculating BDAP fees."));
+
+    CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
+    if (monthlyFee + oneTimeFee + depositFee > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
+
+    //comment out for now
+    // bool fUseInstantSend = false;
+    // // Send the transaction
+    // CWalletTx wtx;
+    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
+
+    // txCertificate.txHashApprove = wtx.GetHash();
+
+
     UniValue oCertificateTransaction(UniValue::VOBJ);
 
     return oCertificateTransaction;
