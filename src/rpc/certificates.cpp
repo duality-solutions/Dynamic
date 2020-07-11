@@ -24,25 +24,59 @@
 #include <libtorrent/ed25519.hpp>
 #include <univalue.h>
 
+template <typename Out>
+void split1(const std::string &s, char delim, Out result) {
+    std::istringstream iss(s);
+    std::string item;
+    while (std::getline(iss, item, delim)) {
+        *result++ = item;
+    }
+}
+
+std::vector<std::string> split1(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split1(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+std::string trim1(std::string s)
+{
+    if (s.empty()) return s;
+
+    int start = 0;
+    int end = int(s.size());
+    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
+    {
+        ++start;
+    }
+
+    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
+    {
+        --end;
+    }
+    return s.substr(start, end - start);
+}
+
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
-    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 3))
+    if (request.fHelp || (request.params.size() != 4 ))
         throw std::runtime_error(
-            "certificate new \"subject\" ( \"issuer\" )\n"
+            "certificate new \"subject\" ( \"issuer\" ) \"key_usage_array\" \n"
             "\nAdds an X.509 certificate to the blockchain.\n"
             "\nArguments:\n"
             "1. \"subject\"          (string, required)  BDAP account that created certificate\n"
             "2. \"issuer\"           (string, optional)  BDAP account that issued certificate\n"
+            "3. \"key_usage_array\"  (string, required)  Descriptions of how this certificate will be used\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"tbd\"               (string)            tbd\n"
             "  \"txid\"              (string)            Certificate record transaction id\n"
             "}\n"
             "\nExamples\n" +
-           HelpExampleCli("certificate new", "\"subject\" (\"issuer\") ") +
+           HelpExampleCli("certificate new", "\"subject\" (\"issuer\") \"key_usage_array\" ") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("certificate new", "\"subject\" (\"issuer\") "));
+           HelpExampleRpc("certificate new", "\"subject\" (\"issuer\")  \"key_usage_array\" "));
 
     EnsureWalletIsUnlocked();
 
@@ -56,6 +90,29 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     txCertificate.SignatureAlgorithm = vchFromString("ed25519"); 
     txCertificate.SignatureHashAlgorithm = vchFromString("sha512"); 
     txCertificate.SerialNumber = GetTimeMillis();
+
+    std::string strIssuer = request.params[2].get_str();
+    if (strIssuer.size() > 0) {
+        selfSign = false;
+    }
+    else {
+        selfSign = true;
+    }
+
+    //Handle Key Usage array [REQUIRED]
+    std::string strKeyUsages = request.params[3].get_str();
+
+    if (!(strKeyUsages.size() > 0)) {
+        throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Key usage cannot be empty");
+    }
+
+    if (strKeyUsages.find(",") > 0) {
+        std::vector<std::string> vKeyUsages = split1(strKeyUsages, ',');
+        for(const std::string& strKeyUsage : vKeyUsages)
+            txCertificate.KeyUsage.push_back(vchFromString(trim1(strKeyUsage)));
+    } else {
+        txCertificate.KeyUsage.push_back(vchFromValue(strKeyUsages));
+    }
 
     //Handle SUBJECT [required]
     std::string strSubjectFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -95,26 +152,26 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     std::vector<unsigned char> IssuerSecretKey;
     std::vector<unsigned char> PublicKey;
 
-    if (request.params.size() == 2) { //Self Sign
-        selfSign = true;
+    //At minimum, subject owns these keys
+    //generate ed25519 key for certificate
+    CPubKey pubWalletKey; //won't be needing this
+    CharString vchCertificatePubKey;
+    CKeyEd25519 privCertificateKey;
+    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchCertificatePubKey, true))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
+    if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+
+    txCertificate.PublicKey = privCertificateKey.GetPubKey();  //GetPubKeyBytes?
+
+    txCertificate.MonthsValid = nMonths;
+
+    if (selfSign) { //Self Sign
 
         //Issuer = Subject
         txCertificate.Issuer = txCertificate.Subject;
-
-        //generate ed25519 key for certificate
-        CPubKey pubWalletKey; //won't be needing this
-        CharString vchCertificatePubKey;
-        CKeyEd25519 privCertificateKey;
-        if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchCertificatePubKey, true))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-
-        CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
-        if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
-            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
-
-        txCertificate.PublicKey = privCertificateKey.GetPubKey();  //GetPubKeyBytes?
-
-        txCertificate.MonthsValid = nMonths;
 
         //Issuer Signs
         if (!txCertificate.SignIssuer(SubjectPublicKey, SubjectSecretKey)) {
@@ -126,11 +183,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
         }
 
     } //end Self Sign
-
-    //Issuer detected, so Certificate Request
-    if (request.params.size() == 3) {
-        selfSign = false;
-
+    else {
         //Handle ISSUER [optional]
         std::string strIssuerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strIssuerFQDN);
@@ -141,7 +194,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strIssuerFQDN));
 
         txCertificate.Issuer = issuerDomainEntry.vchFullObjectPath();
-    }
+    } //end ISSUER
 
     std::string strMessage;
 
@@ -266,8 +319,6 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     if (txCertificate.IsApproved())
         throw JSONRPCError(RPC_BDAP_ERROR, "Certificate already approved");
 
-
-    //Check if I'm the correct account to approve
     std::vector<unsigned char> vchIssuer;
     std::vector<unsigned char> vchSubject;
     CDomainEntry issuerDomainEntry;
@@ -283,37 +334,25 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", stringFromVch(vchSubject)));
     CharString vchSubjectPubKey = subjectDomainEntry.DHTPublicKey;
 
-    //TODO: IS THIS CORRECT ACCOUNT TO APPROVE?
-
     //Get Issuer BDAP user Public Key
     CharString vchIssuerPubKey = issuerDomainEntry.DHTPublicKey;
     CKeyEd25519 privIssuerDHTKey;
     std::vector<unsigned char> IssuerSecretKey;
     std::vector<unsigned char> IssuerPublicKey;
 
-    //TO REVISIT: Who owns certificate public key?
-    //generate ed25519 key for certificate
-    CPubKey pubWalletKey; //won't be needing this
-    CharString vchCertificatePubKey;
-    CKeyEd25519 privCertificateKey;
-    if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchCertificatePubKey, true))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-
-    CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
-    if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
-
-    txCertificate.PublicKey = privCertificateKey.GetPubKey();  //GetPubKeyBytes?
-
-    //Generate Issuer ed25519 key
     CKeyID vchIssuerPubKeyID = GetIdFromCharVector(vchIssuerPubKey);
+
+    //Check if I'm the correct account to approve
+    //look for issuer public key in the wallet
+    if (!pwalletMain->HaveDHTKey(vchIssuerPubKeyID))
+        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Issuer public key not found in wallet");
+
+    //Get Issuer ed25519 key
     if (!pwalletMain->GetDHTKey(vchIssuerPubKeyID, privIssuerDHTKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Unable to retrieve DHT Key");
+        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve DHT Key");
 
     IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
     IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
-
-    txCertificate.MonthsValid = nMonths;
 
     //Issuer Signs
     if (!txCertificate.SignIssuer(IssuerPublicKey, IssuerSecretKey)) {
@@ -330,7 +369,6 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     if (!txCertificate.ValidateValues(strMessage))
         throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
 
-
     // Create BDAP operation script
     // OP_BDAP_CERTIFICATE
     // BDAP_CERTIFICATE
@@ -342,9 +380,8 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
                 << vchMonths << vchSubject << vchSubjectPubKey << vchIssuer << vchIssuerPubKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
 
-    //this needs review
-    CKeyID keyWalletID = privIssuerDHTKey.GetID();
-    CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
+    CKeyID vchSubjectPubKeyID = GetIdFromCharVector(vchSubjectPubKey);
+    CDynamicAddress walletAddress = CDynamicAddress(vchSubjectPubKeyID);
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -437,7 +474,7 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
-    { "bdap",               "certificate",           &certificate_rpc,               true,  {"command", "param1", "param2"} },
+    { "bdap",               "certificate",           &certificate_rpc,               true,  {"command", "param1", "param2", "param3"} },
 };
 
 void RegisterCertificateRPCCommands(CRPCTable &t)
