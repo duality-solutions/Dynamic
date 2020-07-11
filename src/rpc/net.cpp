@@ -185,14 +185,14 @@ UniValue getpeerinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("whitelisted", stats.fWhitelisted));
 
         UniValue sendPerMsgCmd(UniValue::VOBJ);
-        BOOST_FOREACH (const mapMsgCmdSize::value_type& i, stats.mapSendBytesPerMsgCmd) {
+        for (const mapMsgCmdSize::value_type& i : stats.mapSendBytesPerMsgCmd) {
             if (i.second > 0)
                 sendPerMsgCmd.push_back(Pair(i.first, i.second));
         }
         obj.push_back(Pair("bytessent_per_msg", sendPerMsgCmd));
 
         UniValue recvPerMsgCmd(UniValue::VOBJ);
-        BOOST_FOREACH (const mapMsgCmdSize::value_type& i, stats.mapRecvBytesPerMsgCmd) {
+        for (const mapMsgCmdSize::value_type& i : stats.mapRecvBytesPerMsgCmd) {
             if (i.second > 0)
                 recvPerMsgCmd.push_back(Pair(i.first, i.second));
         }
