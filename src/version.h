@@ -45,4 +45,16 @@ static const int SENDHEADERS_VERSION = 60800;
 //! short-id-based block download starts with this version
 static const int SHORT_IDS_BLOCKS_VERSION = 71000;
 
+//! assetdata network request is allowed for this version
+static const int ASSETDATA_VERSION = 71300;
+
+//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
+static const int ASSETDATA_VERSION_UPDATED = 71300;
+
+//! In this version, 'IsMsgRestAssetIsActive (messaging and restricted assets)' was introduced
+static const int MESSAGING_RESTRICTED_ASSETS_VERSION = 71300;
+
+//! "feefilter" tells peers to filter invs to you by fee starts with this version
+static const int FEEFILTER_VERSION = 71300;
+
 #endif // DYNAMIC_VERSION_H

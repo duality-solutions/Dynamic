@@ -14,7 +14,7 @@
 
 #include <boost/thread.hpp>
 
-CLinkDB *pLinkDB = NULL;
+CLinkDB *pLinkDB = nullptr;
 
 bool UndoLinkData(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey)
 {
@@ -86,7 +86,7 @@ bool FlushLinkDB()
 {
     {
         LOCK(cs_link);
-        if (pLinkDB != NULL)
+        if (pLinkDB != nullptr)
         {
             if (!pLinkDB->Flush()) {
                 LogPrintf("%s -- Failed to flush link leveldb!\n", __func__);

@@ -167,11 +167,11 @@ public:
     bool IsNull() const;
     uint256 GetHash() const;
     bool IsInEffect() const;
-    bool RelayMessage(CConnman& connman) const;
+    bool RelayMessage(CConnman* connman) const;
     bool Sign(const CKey& key);
     bool CheckSignature(const std::vector<unsigned char>& vchPubKey) const;
     int ProcessMessage(std::string& strErrorMessage) const;
-    bool RelayTo(CNode* pnode, CConnman& connman) const;
+    bool RelayTo(CNode* pnode, CConnman* connman) const;
     int Version() const;
     void MineMessage();
 

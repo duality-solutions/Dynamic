@@ -8,17 +8,19 @@
 #ifndef DYNAMIC_COINS_H
 #define DYNAMIC_COINS_H
 
+#include "assets/assets.h"
+#include "assets/assetdb.h"
 #include "compressor.h"
 #include "core_memusage.h"
 #include "hash.h"
 #include "memusage.h"
+#include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
 
 #include <assert.h>
 #include <stdint.h>
 
-#include <boost/foreach.hpp>
 #include <unordered_map>
 
 /**
@@ -102,6 +104,12 @@ public:
         return out.IsNull();
     }
 
+/* ASSET START */
+    bool IsAsset() const {
+        return out.scriptPubKey.IsAssetScript();
+    }
+/* ASSET END */
+    
     size_t DynamicMemoryUsage() const
     {
         return memusage::DynamicUsage(out.scriptPubKey);
@@ -230,12 +238,13 @@ protected:
     mutable uint256 hashBlock;
     mutable CCoinsMap cacheCoins;
 
+public:
     /* Cached dynamic memory usage for the inner Coin objects. */
     mutable size_t cachedCoinsUsage;
 
-public:
     CCoinsViewCache(CCoinsView* baseIn);
 
+    CCoinsMap* CacheCoins() const { return &cacheCoins; } 
     // Standard CCoinsView methods
     bool GetCoin(const COutPoint& outpoint, Coin& coin) const override;
     bool HaveCoin(const COutPoint& outpoint) const override;
@@ -276,7 +285,7 @@ public:
      * If no unspent output exists for the passed outpoint, this call
      * has no effect.
      */
-    bool SpendCoin(const COutPoint& outpoint, Coin* moveto = nullptr);
+    bool SpendCoin(const COutPoint& outpoint, Coin* moveto = nullptr); 
 
     /**
      * Push the modifications applied to this cache to its base.
@@ -317,7 +326,6 @@ public:
      */
     double GetPriority(const CTransaction& tx, int nHeight, CAmount& inChainInputValue) const;
 
-private:
     CCoinsMap::iterator FetchCoin(const COutPoint& outpoint) const;
 
     /**
@@ -330,12 +338,6 @@ private:
 // It assumes that overwrites are only possible for coinbase transactions,
 // TODO: pass in a boolean to limit these possible overwrites to known
 // (pre-BIP34) cases.
-void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight);
-
-//! Utility function to find any unspent output with a given txid.
-// This function can be quite expensive because in the event of a transaction
-// which is not found in the cache, it can cause up to MAX_OUTPUTS_PER_BLOCK
-// lookups to database, so it should be used with care.
-const Coin& AccessByTxid(const CCoinsViewCache& cache, const uint256& txid);
+void AddCoins(CCoinsViewCache& cache, const CTransaction& tx, int nHeight); 
 
 #endif // DYNAMIC_COINS_H

@@ -9,6 +9,7 @@
 #define DYNAMIC_DBWRAPPER_H
 
 #include "clientversion.h"
+#include "fs.h"
 #include "serialize.h"
 #include "streams.h"
 #include "util.h"
@@ -183,7 +184,7 @@ class CDBWrapper
     friend const std::vector<unsigned char>& dbwrapper_private::GetObfuscateKey(const CDBWrapper& w);
 
 private:
-    //! custom environment this database is using (may be NULL in case of default environment)
+    //! custom environment this database is using (may be nullptr in case of default environment)
     leveldb::Env* penv;
 
     //! database options used

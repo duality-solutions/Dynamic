@@ -16,7 +16,7 @@ class MinersController;
 extern std::unique_ptr<MinersController> gMiners;
 
 /** Initializes miners controller */
-void InitMiners(const CChainParams& chainparams, CConnman& connman);
+void InitMiners(const CChainParams& chainparams, CConnman* connman);
 /** Start all miner threads */
 void StartMiners();
 /** Shuts down all miner threads */

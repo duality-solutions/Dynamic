@@ -135,6 +135,23 @@ qint64 DynamicUnits::factor(int unit)
     }
 }
 
+qint64 DynamicUnits::factorAsset(int unit)
+{
+    switch(unit)
+    {
+        case 0:  return 1;
+        case 1: return 10;
+        case 2: return 100;
+        case 3: return 1000;
+        case 4: return 10000;
+        case 5: return 100000;
+        case 6: return 1000000;
+        case 7: return 10000000;
+        case 8: return 100000000;
+        default:   return 100000000;
+    }
+}
+
 int DynamicUnits::decimals(int unit)
 {
     switch (unit) {
@@ -151,15 +168,15 @@ int DynamicUnits::decimals(int unit)
     }
 }
 
-QString DynamicUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators)
+QString DynamicUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators, const int nAssetUnit)
 {
     // Note: not using straight sprintf here because we do NOT want
     // localized number formatting.
-    if (!valid(unit))
+    if((nAssetUnit < 0 || nAssetUnit > 8) && !valid(unit))
         return QString(); // Refuse to format invalid unit
     qint64 n = (qint64)nIn;
-    qint64 coin = factor(unit);
-    int num_decimals = decimals(unit);
+    qint64 coin = nAssetUnit >= 0 ? factorAsset(nAssetUnit) : factor(unit);
+    int num_decimals = nAssetUnit >= 0 ? nAssetUnit : decimals(unit);
     qint64 n_abs = (n > 0 ? n : -n);
     qint64 quotient = n_abs / coin;
     qint64 remainder = n_abs % coin;
@@ -179,7 +196,7 @@ QString DynamicUnits::format(int unit, const CAmount& nIn, bool fPlus, Separator
     else if (fPlus && n > 0)
         quotient_str.insert(0, '+');
 
-    if (num_decimals <= 0)
+    if (nAssetUnit == MIN_ASSET_UNITS)
         return quotient_str;
 
     return quotient_str + QString(".") + remainder_str;
@@ -197,6 +214,11 @@ QString DynamicUnits::format(int unit, const CAmount& nIn, bool fPlus, Separator
 QString DynamicUnits::formatWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     return format(unit, amount, plussign, separators) + QString(" ") + name(unit);
+}
+
+QString DynamicUnits::formatWithCustomName(QString customName, const CAmount& amount, int unit, bool plussign, SeparatorStyle separators)
+{
+    return format(DYN, amount / factorAsset(MAX_ASSET_UNITS - unit), plussign, separators, unit) + QString(" ") + customName;
 }
 
 QString DynamicUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
@@ -254,6 +276,45 @@ bool DynamicUnits::parse(int unit, const QString& value, CAmount* val_out)
     }
     CAmount retvalue(str.toLongLong(&ok));
     if (val_out) {
+        *val_out = retvalue;
+    }
+    return ok;
+}
+
+bool DynamicUnits::assetParse(int assetUnit, const QString &value, CAmount *val_out)
+{
+    if(!(assetUnit >= 0 && assetUnit <= 8) || value.isEmpty())
+        return false; // Refuse to parse invalid unit or empty string
+    int num_decimals = assetUnit;
+
+    // Ignore spaces and thin spaces when parsing
+    QStringList parts = removeSpaces(value).split(".");
+
+    if(parts.size() > 2)
+    {
+        return false; // More than one dot
+    }
+    QString whole = parts[0];
+    QString decimals;
+
+    if(parts.size() > 1)
+    {
+        decimals = parts[1];
+    }
+    if(decimals.size() > num_decimals)
+    {
+        return false; // Exceeds max precision
+    }
+    bool ok = false;
+    QString str = whole + decimals.leftJustified(num_decimals, '0');
+
+    if(str.size() > 18)
+    {
+        return false; // Longer numbers will exceed 63 bits
+    }
+    CAmount retvalue(str.toLongLong(&ok));
+    if(val_out)
+    {
         *val_out = retvalue;
     }
     return ok;

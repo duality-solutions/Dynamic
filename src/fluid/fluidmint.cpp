@@ -11,7 +11,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidMintDB* pFluidMintDB = NULL;
+CFluidMintDB* pFluidMintDB = nullptr;
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
 {

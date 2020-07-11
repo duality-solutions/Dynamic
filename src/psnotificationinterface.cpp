@@ -19,7 +19,7 @@
 void CPSNotificationInterface::InitializeCurrentBlockTip()
 {
     LOCK(cs_main);
-    UpdatedBlockTip(chainActive.Tip(), NULL, IsInitialBlockDownload());
+    UpdatedBlockTip(chainActive.Tip(), nullptr, IsInitialBlockDownload());
 }
 
 void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex* pindexNew)
@@ -57,10 +57,4 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex* pindexNew, con
     instantsend.UpdatedBlockTip(pindexNew);
     dnpayments.UpdatedBlockTip(pindexNew, connman);
     governance.UpdatedBlockTip(pindexNew, connman);
-}
-
-void CPSNotificationInterface::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock)
-{
-    instantsend.SyncTransaction(tx, pindex, posInBlock);
-    CPrivateSend::SyncTransaction(tx, pindex, posInBlock);
 }

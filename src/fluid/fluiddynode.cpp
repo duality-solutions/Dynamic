@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidDynodeDB* pFluidDynodeDB = NULL;
+CFluidDynodeDB* pFluidDynodeDB = nullptr;
 
 bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
 {

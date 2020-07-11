@@ -6,7 +6,7 @@
 #define DYNAMIC_BDAP_SIDECHAIN_H
 
 #include "amount.h"
-#include "bdap.h"
+#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "serialize.h"
 #include "uint256.h"

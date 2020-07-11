@@ -110,7 +110,7 @@ void CSporkManager::CheckAndRemove()
     }
 }
 
-void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
+void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
@@ -179,7 +179,7 @@ void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CD
         LOCK(cs); // make sure to not lock this together with cs_main
         for (const auto& pair : mapSporksActive) {
             for (const auto& signerSporkPair : pair.second) {
-                connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::SPORK, signerSporkPair.second));
+                connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::SPORK, signerSporkPair.second));
             }
         }
     }
@@ -213,7 +213,7 @@ void CSporkManager::ExecuteSpork(int nSporkID, int nValue)
     }
 }
 
-bool CSporkManager::UpdateSpork(int nSporkID, int64_t nValue, CConnman& connman)
+bool CSporkManager::UpdateSpork(int nSporkID, int64_t nValue, CConnman* connman)
 {
     CSporkMessage spork = CSporkMessage(nSporkID, nValue, GetAdjustedTime());
 
@@ -510,8 +510,8 @@ bool CSporkMessage::GetSignerKeyID(CKeyID& retKeyidSporkSigner, bool fSporkSixAc
     return true;
 }
 
-void CSporkMessage::Relay(CConnman& connman)
+void CSporkMessage::Relay(CConnman* connman)
 {
     CInv inv(MSG_SPORK, GetHash());
-    connman.RelayInv(inv);
+    connman->RelayInv(inv);
 }

@@ -99,8 +99,8 @@ public:
     bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
     bool CheckSignature(const CPubKey& pubKeyDynode, int& nDos) const;
     bool SimpleCheck(int& nDos);
-    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
-    void Relay(CConnman& connman);
+    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman* connman);
+    void Relay(CConnman* connman);
 
     std::string GetSentinelString() const;
     std::string GetDaemonString() const;
@@ -241,7 +241,7 @@ public:
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
     arith_uint256 CalculateScore(const uint256& blockHash) const;
 
-    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman);
+    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman* connman);
 
     static CollateralStatus CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey);
     static CollateralStatus CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey, int& nHeightRet);
@@ -404,12 +404,12 @@ public:
     static bool Create(const std::string strService, const std::string strKey, const std::string strTxHash, const std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast& dnbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
-    bool Update(CDynode* pdn, int& nDos, CConnman& connman);
+    bool Update(CDynode* pdn, int& nDos, CConnman* connman);
     bool CheckOutpoint(int& nDos);
 
     bool Sign(const CKey& keyCollateralAddress);
     bool CheckSignature(int& nDos) const;
-    void Relay(CConnman& connman) const;
+    void Relay(CConnman* connman) const;
 };
 
 class CDynodeVerification

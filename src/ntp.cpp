@@ -364,14 +364,14 @@ int64_t DoReq(SOCKET sockfd, socklen_t servlen, struct sockaddr cliaddr)
     FD_ZERO(&fdset);
     FD_SET(sockfd, &fdset);
 
-    retcode = select(sockfd + 1, &fdset, NULL, NULL, &timeout);
+    retcode = select(sockfd + 1, &fdset, nullptr, nullptr, &timeout);
     if (retcode <= 0) {
         LogPrintf("recvfrom() error\n");
         seconds_transmit = -4;
         goto _end;
     }
 
-    recvfrom(sockfd, (char*)msg, len, 0, NULL, NULL);
+    recvfrom(sockfd, (char*)msg, len, 0, nullptr, nullptr);
     ntohl_fp(&msg->xmt, &prt->xmt);
     Ntp2Unix(prt->xmt.Ul_i.Xl_ui, seconds_transmit);
 

@@ -38,6 +38,7 @@ const char* FILTERADD = "filteradd";
 const char* FILTERCLEAR = "filterclear";
 const char* REJECT = "reject";
 const char* SENDHEADERS = "sendheaders";
+const char *FEEFILTER="feefilter";
 const char* SENDCMPCT = "sendcmpct";
 const char* CMPCTBLOCK = "cmpctblock";
 const char* GETBLOCKTXN = "getblocktxn";
@@ -68,6 +69,9 @@ const char* DNGOVERNANCEOBJECT = "govobj";
 const char* DNGOVERNANCEOBJECTVOTE = "govobjvote";
 const char* DNVERIFY = "dnv";
 const char* VGPMESSAGE = "vgpmessage";
+const char *GETASSETDATA="getassetdata";
+const char *ASSETDATA="assetdata";
+const char *ASSETNOTFOUND ="asstnotfound";
 }; // namespace NetMsgType
 
 static const char* ppszTypeName[] =
@@ -119,6 +123,7 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
     NetMsgType::SENDHEADERS,
+    NetMsgType::FEEFILTER,
     NetMsgType::SENDCMPCT,
     NetMsgType::CMPCTBLOCK,
     NetMsgType::GETBLOCKTXN,
@@ -149,6 +154,9 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::DNGOVERNANCEOBJECTVOTE,
     NetMsgType::DNVERIFY,
     NetMsgType::VGPMESSAGE,
+    NetMsgType::GETASSETDATA,
+    NetMsgType::ASSETDATA,
+    NetMsgType::ASSETNOTFOUND
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes + ARRAYLEN(allNetMessageTypes));
 
@@ -274,3 +282,22 @@ const std::vector<std::string>& getAllNetMessageTypes()
 {
     return allNetMessageTypesVec;
 }
+
+/* ASSET START */
+CInvAsset::CInvAsset()
+{
+    name = "";
+}
+
+CInvAsset::CInvAsset(std::string strName) : name(strName){}
+
+bool operator<(const CInvAsset& a, const CInvAsset& b)
+{
+    return a.name < b.name;
+}
+
+std::string CInvAsset::ToString() const
+{
+    return strprintf("%s %s", "CInvAsset for asset: ", name);
+}
+/* ASSET END */
