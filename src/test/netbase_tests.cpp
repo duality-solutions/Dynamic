@@ -5,7 +5,6 @@
 
 #include "netbase.h"
 #include "test/test_dynamic.h"
-#include "utilstrencodings.h"
 
 #include <string>
 

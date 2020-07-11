@@ -18,7 +18,6 @@
 #include "net.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
-#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "script/script.h"
 #include "script/script_error.h"
@@ -1549,32 +1548,26 @@ UniValue decoderawtransaction(const JSONRPCRequest& request)
             "  ],\n"
             "  \"vout\" : [             (array of json objects)\n"
             "     {\n"
-            "       \"value\" : x.xxx,            (numeric) The value in " + CURRENCY_UNIT + "\n"
-            "       \"n\" : n,                    (numeric) index\n"
-            "       \"scriptPubKey\" : {          (json object)\n"
-            "         \"asm\" : \"asm\",          (string) the asm\n"
-            "         \"hex\" : \"hex\",          (string) the hex\n"
-            "         \"reqSigs\" : n,            (numeric) The required sigs\n"
-            "         \"type\" : \"pubkeyhash\",  (string) The type, eg 'pubkeyhash'\n"
-            "         \"asset\" : {               (json object) optional\n"
-            "           \"name\" : \"name\",      (string) the asset name\n"
-            "           \"amount\" : n,           (numeric) the amount of asset that was sent\n"
-            "           \"message\" : \"message\", (string optional) the message if one was sent\n"
-            "           \"expire_time\" : n,      (numeric optional) the message epoch expiration time if one was set\n"
-            "         \"addresses\" : [           (json array of string)\n"
-            "           \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"   (string) Dynamic address\n"
-            "           ,...\n"
-            "         ]\n"
-            "       }\n"
-            "     }\n"
-            "     ,...\n"
-            "  ],\n"
-            "}\n"
+            "       \"value\" : x.xxx,            (numeric) The value in " +
+            CURRENCY_UNIT + "\n"
+                            "       \"n\" : n,                    (numeric) index\n"
+                            "       \"scriptPubKey\" : {          (json object)\n"
+                            "         \"asm\" : \"asm\",          (string) the asm\n"
+                            "         \"hex\" : \"hex\",          (string) the hex\n"
+                            "         \"reqSigs\" : n,            (numeric) The required sigs\n"
+                            "         \"type\" : \"pubkeyhash\",  (string) The type, eg 'pubkeyhash'\n"
+                            "         \"addresses\" : [           (json array of string)\n"
+                            "           \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"   (string) Dynamic address\n"
+                            "           ,...\n"
+                            "         ]\n"
+                            "       }\n"
+                            "     }\n"
+                            "     ,...\n"
+                            "  ],\n"
+                            "}\n"
 
-            "\nExamples:\n"
-            + HelpExampleCli("decoderawtransaction", "\"hexstring\"")
-            + HelpExampleRpc("decoderawtransaction", "\"hexstring\"")
-        );
+                            "\nExamples:\n" +
+            HelpExampleCli("decoderawtransaction", "\"hexstring\"") + HelpExampleRpc("decoderawtransaction", "\"hexstring\""));
 
     LOCK(cs_main);
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR));
@@ -1608,20 +1601,10 @@ UniValue decodescript(const JSONRPCRequest& request)
             "     \"address\"     (string) dynamic address\n"
             "     ,...\n"
             "  ],\n"
-            "  \"p2sh\":\"address\",       (string) address of P2SH script wrapping this redeem script (not returned if the script is already a P2SH).\n"
-            "  \"(The following only appears if the script is an asset script)\n"
-            "  \"asset_name\":\"name\",      (string) Name of the asset.\n"
-            "  \"amount\":\"x.xx\",          (numeric) The amount of assets interacted with.\n"
-            "  \"units\": n,                (numeric) The units of the asset. (Only appears in the type (new_asset))\n"
-            "  \"reissuable\": true|false, (boolean) If this asset is reissuable. (Only appears in type (new_asset|reissue_asset))\n"
-            "  \"hasIPFS\": true|false,    (boolean) If this asset has an IPFS hash. (Only appears in type (new_asset if hasIPFS is true))\n"
-            "  \"ipfs_hash\": \"hash\",      (string) The ipfs hash for the new asset. (Only appears in type (new_asset))\n"
-            "  \"new_ipfs_hash\":\"hash\",    (string) If new ipfs hash (Only appears in type. (reissue_asset))\n"
+            "  \"p2sh\",\"address\" (string) address of P2SH script wrapping this redeem script (not returned if the script is already a P2SH).\n"
             "}\n"
-            "\nExamples:\n"
-            + HelpExampleCli("decodescript", "\"hexstring\"")
-            + HelpExampleRpc("decodescript", "\"hexstring\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("decodescript", "\"hexstring\"") + HelpExampleRpc("decodescript", "\"hexstring\""));
 
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR));
 
@@ -1792,7 +1775,6 @@ UniValue signrawtransaction(const JSONRPCRequest& request)
                                           "\nExamples:\n" +
             HelpExampleCli("signrawtransaction", "\"myhex\"") + HelpExampleRpc("signrawtransaction", "\"myhex\""));
 
-    ObserveSafeMode();
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
@@ -2008,7 +1990,6 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
             "\nSend the transaction (signed hex)\n" + HelpExampleCli("sendrawtransaction", "\"signedhex\"") +
             "\nAs a json rpc call\n" + HelpExampleRpc("sendrawtransaction", "\"signedhex\""));
 
-    ObserveSafeMode();
     LOCK(cs_main);
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL)(UniValue::VBOOL));
 

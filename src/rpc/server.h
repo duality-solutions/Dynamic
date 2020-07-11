@@ -28,6 +28,8 @@ namespace RPCServer
 {
 void OnStarted(boost::function<void()> slot);
 void OnStopped(boost::function<void()> slot);
+void OnPreCommand(boost::function<void(const CRPCCommand&)> slot);
+void OnPostCommand(boost::function<void(const CRPCCommand&)> slot);
 } // namespace RPCServer
 
 class CBlockIndex;
@@ -52,10 +54,14 @@ public:
     std::string URI;
     std::string authUser;
 
-    JSONRPCRequest() : id(NullUniValue), params(NullUniValue), fHelp(false) {}
+    JSONRPCRequest()
+    {
+        id = NullUniValue;
+        params = NullUniValue;
+        fHelp = false;
+    }
     void parse(const UniValue& valRequest);
 };
-
 
 /** Query whether RPC is running */
 bool IsRPCRunning();

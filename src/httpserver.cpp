@@ -12,7 +12,6 @@
 #include "sync.h"
 #include "ui_interface.h"
 #include "util.h"
-#include "utilstrencodings.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,11 +40,10 @@
 static const size_t MAX_HEADERS_SIZE = 8192;
 
 /** HTTP request work item */
-class HTTPWorkItem final : public HTTPClosure
+class HTTPWorkItem : public HTTPClosure
 {
 public:
-    HTTPWorkItem(std::unique_ptr<HTTPRequest> _req, const std::string &_path, const HTTPRequestHandler& _func):
-        req(std::move(_req)), path(_path), func(_func)
+    HTTPWorkItem(std::unique_ptr<HTTPRequest> req, const std::string& path, const HTTPRequestHandler& func) : req(std::move(req)), path(path), func(func)
     {
     }
     void operator()() override
@@ -59,7 +57,6 @@ private:
     std::string path;
     HTTPRequestHandler func;
 };
-
 
 /** Simple work queue for distributing work over multiple threads.
  * Work items are simply callable objects.
@@ -81,7 +78,7 @@ private:
     {
     public:
         WorkQueue& wq;
-        explicit ThreadCounter(WorkQueue &w): wq(w)
+        ThreadCounter(WorkQueue& w) : wq(w)
         {
             std::lock_guard<std::mutex> lock(wq.cs);
             wq.numThreads += 1;
@@ -95,7 +92,7 @@ private:
     };
 
 public:
-    explicit WorkQueue(size_t _maxDepth) : running(true),
+    WorkQueue(size_t maxDepth) : running(true),
                                  maxDepth(maxDepth),
                                  numThreads(0)
     {

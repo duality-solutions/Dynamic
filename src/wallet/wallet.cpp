@@ -4920,7 +4920,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
             // Create change script that will be used if we need change
             // TODO: pass in scriptChange instead of reservekey so
-            // change transaction isn't always pay-to-dynamic-address
+            // change transaction isn't always pay-to-raven-address
             CScript scriptChange;
             CScript assetScriptChange;
 
@@ -4972,7 +4972,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
                     
 /** ASSET START */
-                    // Check to see if you need to make an asset data outpoint OP_DYN_ASSET data
+                    // Check to see if you need to make an asset data outpoint OP_RVN_ASSET data
                     if (recipient.scriptPubKey.IsNullAssetTxDataScript()) {
                         assert(txout.nValue == 0);
                         txNew.vout.push_back(txout);

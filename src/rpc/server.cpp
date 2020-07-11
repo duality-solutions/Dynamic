@@ -21,7 +21,6 @@
 #include <univalue.h>
 
 #include <memory> // for unique_ptr
-#include <mutex>
 #include <unordered_map>
 
 #include <boost/algorithm/string/case_conv.hpp> // for to_upper()
@@ -45,40 +44,11 @@ static RPCTimerInterface* timerInterface = nullptr;
 /* Map of name to timer. */
 static std::map<std::string, std::unique_ptr<RPCTimerBase> > deadlineTimers;
 
-struct RPCCommandExecutionInfo
-{
-    std::string method;
-    int64_t start;
-};
-
-struct RPCServerInfo
-{
-    std::mutex mtx;
-    std::list<RPCCommandExecutionInfo> active_commands GUARDED_BY(mtx);
-};
-
-static RPCServerInfo g_rpc_server_info;
-
-struct RPCCommandExecution
-{
-    std::list<RPCCommandExecutionInfo>::iterator it;
-    explicit RPCCommandExecution(const std::string& method)
-    {
-        g_rpc_server_info.mtx.lock();
-        it = g_rpc_server_info.active_commands.insert(g_rpc_server_info.active_commands.end(), {method, GetTimeMicros()});
-        g_rpc_server_info.mtx.unlock();
-    }
-    ~RPCCommandExecution()
-    {
-        g_rpc_server_info.mtx.lock();
-        g_rpc_server_info.active_commands.erase(it);
-        g_rpc_server_info.mtx.unlock();
-    }
-};
 static struct CRPCSignals {
     boost::signals2::signal<void()> Started;
     boost::signals2::signal<void()> Stopped;
     boost::signals2::signal<void(const CRPCCommand&)> PreCommand;
+    boost::signals2::signal<void(const CRPCCommand&)> PostCommand;
 } g_rpcSignals;
 
 void RPCServer::OnStarted(boost::function<void()> slot)
@@ -91,13 +61,22 @@ void RPCServer::OnStopped(boost::function<void()> slot)
     g_rpcSignals.Stopped.connect(slot);
 }
 
+void RPCServer::OnPreCommand(boost::function<void(const CRPCCommand&)> slot)
+{
+    g_rpcSignals.PreCommand.connect(boost::bind(slot, _1));
+}
+
+void RPCServer::OnPostCommand(boost::function<void(const CRPCCommand&)> slot)
+{
+    g_rpcSignals.PostCommand.connect(boost::bind(slot, _1));
+}
+
 void RPCTypeCheck(const UniValue& params,
     const std::list<UniValue::VType>& typesExpected,
     bool fAllowNull)
 {
     unsigned int i = 0;
-    for (UniValue::VType t : typesExpected)
-    {
+    BOOST_FOREACH (UniValue::VType t, typesExpected) {
         if (params.size() <= i)
             break;
 
@@ -273,59 +252,6 @@ UniValue stop(const JSONRPCRequest& jsonRequest)
     return "Dynamic server stopping";
 }
 
-UniValue uptime(const JSONRPCRequest& jsonRequest)
-{
-    if (jsonRequest.fHelp || jsonRequest.params.size() > 1)
-        throw std::runtime_error(
-                "uptime\n"
-                        "\nReturns the total uptime of the server.\n"
-                        "\nResult:\n"
-                        "ttt        (numeric) The number of seconds that the server has been running\n"
-                        "\nExamples:\n"
-                + HelpExampleCli("uptime", "")
-                + HelpExampleRpc("uptime", "")
-        );
-
-    return GetTime() - GetStartupTime();
-}
-
-UniValue getrpcinfo(const JSONRPCRequest& jsonRequest)
-{
-
-    if (jsonRequest.fHelp || jsonRequest.params.size() > 0)
-        throw std::runtime_error(
-                "getrpcinfo\n"
-                "Returns details of the RPC server.\n"
-                "\nResult:\n"
-                "{\n"
-                " \"active_commands\" (array) All active commands\n"
-                "  [\n"
-                "   {               (object) Information about an active command\n"
-                "    \"method\"       (string)  The name of the RPC command \n"
-                "    \"duration\"     (numeric)  The running time in microseconds\n"
-                "   },...\n"
-                "  ],\n"
-                "}\n"
-                + HelpExampleCli("getrpcinfo", "")
-                + HelpExampleRpc("getrpcinfo", "")
-        );
-
-    g_rpc_server_info.mtx.lock();
-    UniValue active_commands(UniValue::VARR);
-    for (const RPCCommandExecutionInfo& info : g_rpc_server_info.active_commands) {
-        UniValue entry(UniValue::VOBJ);
-        entry.pushKV("method", info.method);
-        entry.pushKV("duration", GetTimeMicros() - info.start);
-        active_commands.push_back(entry);
-    }
-
-    UniValue result(UniValue::VOBJ);
-    result.pushKV("active_commands", active_commands);
-    g_rpc_server_info.mtx.unlock();
-
-    return result;
-}
-
 /**
  * Call Table
  */
@@ -336,8 +262,6 @@ static const CRPCCommand vRPCCommands[] =
         /* Overall control/query calls */
         {"control", "help", &help, true, {"command"}},
         {"control", "stop", &stop, true, {}},
-        { "control", "uptime", &uptime, true, {}},
-        { "control", "getrpcinfo", &getrpcinfo, {}},
 };
 
 CRPCTable::CRPCTable()
@@ -540,17 +464,17 @@ UniValue CRPCTable::execute(const JSONRPCRequest& request) const
     g_rpcSignals.PreCommand(*pcmd);
 
     try {
-        RPCCommandExecution execution(request.strMethod);
         // Execute, convert arguments to array if necessary
         if (request.params.isObject()) {
             return pcmd->actor(transformNamedArguments(request, pcmd->argNames));
         } else {
             return pcmd->actor(request);
         }
-    } catch (const std::exception& e) 
-    {
+    } catch (const std::exception& e) {
         throw JSONRPCError(RPC_MISC_ERROR, e.what());
     }
+
+    g_rpcSignals.PostCommand(*pcmd);
 }
 
 std::vector<std::string> CRPCTable::listCommands() const

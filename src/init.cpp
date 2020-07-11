@@ -543,6 +543,15 @@ void OnRPCStopped()
     LogPrint("rpc", "RPC stopped.\n");
 }
 
+void OnRPCPreCommand(const CRPCCommand& cmd)
+{
+    // Observe safe mode
+    std::string strWarning = GetWarnings("rpc");
+    if (strWarning != "" && !gArgs.GetBoolArg("-disablesafemode", DEFAULT_DISABLE_SAFEMODE) &&
+        !cmd.okSafeMode)
+        throw JSONRPCError(RPC_FORBIDDEN_BY_SAFE_MODE, std::string("Safe mode: ") + strWarning);
+}
+
 std::string HelpMessage(HelpMessageMode mode)
 {
     const bool showDebug = gArgs.GetBoolArg("-help-debug", false);
@@ -964,6 +973,7 @@ bool AppInitServers(boost::thread_group& threadGroup)
 {
     RPCServer::OnStarted(&OnRPCStarted);
     RPCServer::OnStopped(&OnRPCStopped);
+    RPCServer::OnPreCommand(&OnRPCPreCommand);
     if (!InitHTTPServer())
         return false;
     if (!StartRPC())
