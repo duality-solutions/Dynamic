@@ -780,7 +780,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         entry.push_back(Pair("hash", txHash.GetHex()));
 
         UniValue deps(UniValue::VARR);
-        BOOST_FOREACH (const CTxIn& in, tx.vin) {
+        for (const CTxIn& in : tx.vin) {
             if (setTxIndex.count(in.prevout.hash))
                 deps.push_back(setTxIndex[in.prevout.hash]);
         }
@@ -894,7 +894,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     UniValue superblockObjArray(UniValue::VARR);
     if (pblocktemplate->voutSuperblock.size()) {
-        BOOST_FOREACH (const CTxOut& txout, pblocktemplate->voutSuperblock) {
+        for (const CTxOut& txout : pblocktemplate->voutSuperblock) {
             UniValue entry(UniValue::VOBJ);
             CTxDestination address1;
             ExtractDestination(txout.scriptPubKey, address1);

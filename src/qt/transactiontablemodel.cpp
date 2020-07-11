@@ -29,8 +29,6 @@
 #include <QIcon>
 #include <QList>
 
-#include <boost/foreach.hpp>
-
 static int column_alignments[] = {
     Qt::AlignLeft | Qt::AlignVCenter, /* status */
     Qt::AlignLeft | Qt::AlignVCenter, /* watchonly */

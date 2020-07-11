@@ -12,8 +12,6 @@
 #include "script/standard.h"
 #include "uint256.h"
 
-#include <boost/foreach.hpp>
-
 typedef std::vector<unsigned char> valtype;
 
 TransactionSignatureCreator::TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn) : BaseSignatureCreator(keystoreIn), txTo(txToIn), nIn(nInIn), nHashType(nHashTypeIn), amount(amountIn), checker(txTo, nIn, amountIn) {}
@@ -239,11 +237,11 @@ static std::vector<valtype> CombineMultisig(const CScript& scriptPubKey, const B
 {
     // Combine all the signatures we've got:
     std::set<valtype> allsigs;
-    BOOST_FOREACH (const valtype& v, sigs1) {
+    for (const valtype& v : sigs1) {
         if (!v.empty())
             allsigs.insert(v);
     }
-    BOOST_FOREACH (const valtype& v, sigs2) {
+    for (const valtype& v : sigs2) {
         if (!v.empty())
             allsigs.insert(v);
     }
@@ -253,7 +251,7 @@ static std::vector<valtype> CombineMultisig(const CScript& scriptPubKey, const B
     unsigned int nSigsRequired = vSolutions.front()[0];
     unsigned int nPubKeys = vSolutions.size() - 2;
     std::map<valtype, valtype> sigs;
-    BOOST_FOREACH (const valtype& sig, allsigs) {
+    for (const valtype& sig : allsigs) {
         for (unsigned int i = 0; i < nPubKeys; i++) {
             const valtype& pubkey = vSolutions[i + 1];
             if (sigs.count(pubkey))

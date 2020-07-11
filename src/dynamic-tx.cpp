@@ -12,6 +12,7 @@
 #include "core_io.h"
 #include "keystore.h"
 #include "policy/policy.h"
+#include "policy/rbf.h"
 #include "primitives/transaction.h"
 #include "script/script.h"
 #include "script/sign.h"
@@ -196,6 +197,26 @@ static void MutateTxLocktime(CMutableTransaction& tx, const std::string& cmdVal)
         throw std::runtime_error("Invalid TX locktime requested");
 
     tx.nLockTime = (unsigned int)newLocktime;
+}
+
+static void MutateTxRBFOptIn(CMutableTransaction& tx, const std::string& strInIdx)
+{
+    // parse requested index
+    int inIdx = atoi(strInIdx);
+    if (inIdx < 0 || inIdx >= (int)tx.vin.size()) {
+        throw std::runtime_error("Invalid TX input index '" + strInIdx + "'");
+    }
+
+    // set the nSequence to MAX_INT - 2 (= RBF opt in flag)
+    int cnt = 0;
+    for (CTxIn& txin : tx.vin) {
+        if (strInIdx == "" || cnt == inIdx) {
+            if (txin.nSequence > MAX_BIP125_RBF_SEQUENCE) {
+                txin.nSequence = MAX_BIP125_RBF_SEQUENCE;
+            }
+        }
+        ++cnt;
+    }
 }
 
 static void MutateTxAddInput(CMutableTransaction& tx, const std::string& strInput)
@@ -645,7 +666,10 @@ static void MutateTx(CMutableTransaction& tx, const std::string& command, const 
         MutateTxVersion(tx, commandVal);
     else if (command == "locktime")
         MutateTxLocktime(tx, commandVal);
-
+    else if (command == "replaceable") {
+        MutateTxRBFOptIn(tx, commandVal);
+    }
+    
     else if (command == "delin")
         MutateTxDelInput(tx, commandVal);
     else if (command == "in")

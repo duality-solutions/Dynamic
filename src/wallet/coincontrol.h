@@ -31,14 +31,10 @@ public:
     bool fAllowOtherInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
     bool fAllowWatchOnly;
-    //! Minimum absolute fee (not per kilobyte)
-    CAmount nMinimumTotalFee;
     //! Override automatic min/max checks on fee, m_feerate must be set if true
     bool fOverrideFeeRate;
     //! Override the default payTxFee if set
     boost::optional<CFeeRate> m_feerate;
-    //! Feerate to use if overrideFeeRate is true
-    CFeeRate nFeeRate;
     //! Override the default confirmation target if set
     boost::optional<unsigned int> m_confirm_target;
     //! Signal BIP-125 replace by fee.
@@ -62,15 +58,16 @@ public:
     void SetNull()
     {
         destChange = CNoDestination();
+/* ASSET START */
+        assetDestChange = CNoDestination();
+/* ASSET END */
         fAllowOtherInputs = false;
         fAllowWatchOnly = false;
         setSelected.clear();
         fUseInstantSend = false;
         fUsePrivateSend = true;
-        nMinimumTotalFee = 0;
-        nFeeRate = CFeeRate(0);
-        fOverrideFeeRate = false;
         m_feerate.reset();
+        fOverrideFeeRate = false;
         m_confirm_target.reset();
         signalRbf = fWalletRbf;
         m_fee_mode = FeeEstimateMode::UNSET;
@@ -96,20 +93,18 @@ public:
         setSelected.insert(output);
     }
 
-/* ASSET START */
-    void SelectAsset(const COutPoint& output)
-    {
-        setAssetsSelected.insert(output);
-    }
-/* ASSET END */
-
     void UnSelect(const COutPoint& output)
     {
         setSelected.erase(output);
     }
 
 /* ASSET START */
-   void UnSelectAsset(const COutPoint& output)
+    void SelectAsset(const COutPoint& output)
+    {
+        setAssetsSelected.insert(output);
+    }
+
+    void UnSelectAsset(const COutPoint& output)
     {
         setAssetsSelected.erase(output);
         if (!setSelected.size())

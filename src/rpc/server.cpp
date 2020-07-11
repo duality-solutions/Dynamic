@@ -26,7 +26,6 @@
 #include <boost/algorithm/string/case_conv.hpp> // for to_upper()
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/shared_ptr.hpp>
@@ -76,7 +75,8 @@ void RPCTypeCheck(const UniValue& params,
     bool fAllowNull)
 {
     unsigned int i = 0;
-    BOOST_FOREACH (UniValue::VType t, typesExpected) {
+    for (UniValue::VType t : typesExpected)
+    {
         if (params.size() <= i)
             break;
 
@@ -181,7 +181,8 @@ std::string CRPCTable::help(const std::string& strCommand) const
         vCommands.push_back(make_pair(mi->second->category + mi->first, mi->second));
     sort(vCommands.begin(), vCommands.end());
 
-    BOOST_FOREACH (const PAIRTYPE(std::string, const CRPCCommand*) & command, vCommands) {
+    for (const std::pair<std::string, const CRPCCommand*>& command : vCommands)
+    {
         const CRPCCommand* pcmd = command.second;
         std::string strMethod = pcmd->name;
         // We already filter duplicates, but these deprecated screw up the sort order
@@ -252,6 +253,22 @@ UniValue stop(const JSONRPCRequest& jsonRequest)
     return "Dynamic server stopping";
 }
 
+UniValue uptime(const JSONRPCRequest& jsonRequest)
+{
+    if (jsonRequest.fHelp || jsonRequest.params.size() > 1)
+        throw std::runtime_error(
+                "uptime\n"
+                        "\nReturns the total uptime of the server.\n"
+                        "\nResult:\n"
+                        "ttt        (numeric) The number of seconds that the server has been running\n"
+                        "\nExamples:\n"
+                + HelpExampleCli("uptime", "")
+                + HelpExampleRpc("uptime", "")
+        );
+
+    return GetTime() - GetStartupTime();
+}
+
 /**
  * Call Table
  */
@@ -262,6 +279,7 @@ static const CRPCCommand vRPCCommands[] =
         /* Overall control/query calls */
         {"control", "help", &help, true, {"command"}},
         {"control", "stop", &stop, true, {}},
+        { "control", "uptime", &uptime, true, {}}, 
 };
 
 CRPCTable::CRPCTable()

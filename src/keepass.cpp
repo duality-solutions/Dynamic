@@ -31,9 +31,6 @@
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 
-#include <boost/foreach.hpp>
-
-
 const char* CKeePassIntegrator::KEEPASS_HTTP_HOST = "localhost";
 
 CKeePassIntegrator keePassInt;
@@ -241,7 +238,7 @@ std::string CKeePassIntegrator::constructHTTPPost(const std::string& strMsg, con
               << "Content-Length: " << strMsg.size() << "\r\n"
               << "Connection: close\r\n"
               << "Accept: application/json\r\n";
-    BOOST_FOREACH (const PAIRTYPE(std::string, std::string) & item, mapRequestHeaders)
+    for (const std::pair<std::string, std::string>& item : mapRequestHeaders)
         streamOut << item.first << ": " << item.second << "\r\n";
     streamOut << "\r\n"
               << strMsg;

@@ -81,7 +81,7 @@ void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
     uint256 hash = wtx.GetHash();
     entry.push_back(Pair("txid", hash.GetHex()));
     UniValue conflicts(UniValue::VARR);
-    BOOST_FOREACH (const uint256& conflict, wtx.GetConflicts())
+    for (const uint256& conflict : wtx.GetConflicts())
         conflicts.push_back(conflict.GetHex());
     entry.push_back(Pair("walletconflicts", conflicts));
     entry.push_back(Pair("time", wtx.GetTxTime()));
@@ -99,7 +99,7 @@ void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
     }
     entry.push_back(Pair("bip125-replaceable", rbfStatus));
 
-    BOOST_FOREACH (const PAIRTYPE(std::string, std::string) & item, wtx.mapValue)
+    for (const std::pair<std::string, std::string>& item : wtx.mapValue)
         entry.push_back(Pair(item.first, item.second));
 }
 
@@ -405,7 +405,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
 
     // Find all addresses that have the given account
     UniValue ret(UniValue::VARR);
-    BOOST_FOREACH (const PAIRTYPE(CDynamicAddress, CAddressBookData) & item, pwalletMain->mapAddressBook) {
+    for (const std::pair<CDynamicAddress, CAddressBookData>& item : pwalletMain->mapAddressBook) {
         const CDynamicAddress& address = item.first;
         const std::string& strName = item.second.name;
         if (strName == strAccount)
@@ -414,7 +414,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
     return ret;
 }
 
-static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, bool fUseInstantSend = false, bool fUsePrivateSend = false)
+static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, const CCoinControl& coinControl, bool fUseInstantSend = false, bool fUsePrivateSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -452,6 +452,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 
     // Create and send the transaction
+
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
     std::string strError;
@@ -466,7 +467,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
         vecSend.push_back(sendData);
     }
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
+            strError, coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -483,7 +484,7 @@ For BDAP transactions,
     - nDataAmount is burned in the OP_RETURN transaction.
     - nOpAmount turns to BDAP credits and can only be used to fund BDAP fees
 */
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
 
@@ -521,7 +522,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, coinControl, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -534,7 +535,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
 }
 
 void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
-                                CWalletTx& wtxNew, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend)
+                                CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance() + pwalletMain->GetBDAPDynamicAmount();
 
@@ -573,7 +574,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     vecSend.push_back(recOPScript);
     // TODO (BDAP) Make sure it uses privatesend funds
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, nullptr, true, ALL_COINS, fUseInstantSend, true)) {
+            strError, coinControl, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -585,7 +586,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     }
 }
 
-void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend)
+void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nColorAmount, const bool fUseInstantSend, const bool fUsePrivateSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -629,7 +630,7 @@ void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealt
     }
 }
 
-void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false)
+void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, const CCoinControl& coinControl, CAmount nValue, bool fUseInstantSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -658,7 +659,7 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
     vecSend.push_back(recipient);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, nullptr, true, ALL_COINS, false)) {
+            strError, coinControl, true, ALL_COINS, false)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -722,11 +723,10 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     int nChangePosRet = -1;
     CRecipient recipient = {burnScript, nValue, false};
     vecSend.push_back(recipient);
-    CCoinControl* ccCoins = new CCoinControl;
+    CCoinControl ccCoins;
     if (!scriptSendFrom.empty()) {
-        if (!GetCoinControl(scriptSendFrom, ccCoins)) {
+        if (!GetCoinControl(scriptSendFrom, &ccCoins)) {
             strError = strprintf("Error: GetCoinControl failed");
-            delete ccCoins;
             throw JSONRPCError(RPC_WALLET_ERROR, strError);
         }
     }
@@ -734,17 +734,15 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strError, ccCoins, true, ALL_COINS, fUseInstantSend)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
-        delete ccCoins;
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     CValidationState state;
     if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX)) {
         strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
-        delete ccCoins;
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    delete ccCoins;
 }
+
 
 UniValue sendtoaddress(const JSONRPCRequest& request)
 {
@@ -808,21 +806,21 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     if (request.params.size() > 6)
         fUsePrivateSend = request.params[6].get_bool();
 
-    CCoinControl coin_control;
+    CCoinControl coinControl;
 
     if (!request.params[7].isNull()) {
-        coin_control.m_confirm_target = ParseConfirmTarget(request.params[8]);
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[8]);
     }
 
     if (!request.params[8].isNull()) {
-        if (!FeeModeFromString(request.params[9].get_str(), coin_control.m_fee_mode)) {
+        if (!FeeModeFromString(request.params[9].get_str(), coinControl.m_fee_mode)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
         }
     }
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -876,7 +874,130 @@ UniValue instantsendtoaddress(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, true);
+    CCoinControl coinControl;
+
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, true);
+
+    return wtx.GetHash().GetHex();
+}
+
+UniValue sendfromaddress(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 10)
+        throw std::runtime_error(
+            "sendfromaddress \"from_address\" \"to_address\" amount ( \"comment\" \"comment_to\" subtractfeefromamount replaceable conf_target \"estimate_mode\")\n"
+            "\nSend an amount from a specific address to a given address. All DYN change will get sent back to the from_address\n"
+            + HelpRequiringPassphrase() +
+            "\nArguments:\n"
+            "1. \"from_address\"       (string, required) The Dynamic address to send from.\n"
+            "2. \"to_address\"            (string, required) The Dynamic address to send to.\n"
+            "3. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
+            "4. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
+            "                             This is not part of the transaction, just kept in your wallet.\n"
+            "5. \"comment_to\"         (string, optional) A comment to store the name of the person or organization \n"
+            "                             to which you're sending the transaction. This is not part of the \n"
+            "                             transaction, just kept in your wallet.\n"
+            "6. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
+            "                             The recipient will receive less DYN than you enter in the amount field.\n"
+            "7. \"use_is\"      (bool, optional) Send this transaction as InstantSend (default: false)\n"
+            "8. \"use_ps\"      (bool, optional) Use anonymized funds only (default: false)\n"               
+            "9. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+            "10. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+            "       \"UNSET\"\n"
+            "       \"ECONOMICAL\"\n"
+            "       \"CONSERVATIVE\"\n"
+            "\nResult:\n"
+            "\"txid\"                  (string) The transaction id.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"donation\" \"seans outpost\"")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"\" \"\" true")
+            + HelpExampleRpc("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.1, \"donation\", \"seans outpost\"")
+        );
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    CCoinControl coinControl;
+
+    std::string from_address = request.params[0].get_str();
+    CTxDestination from_dest = DecodeDestination(from_address);
+    if (!IsValidDestination(from_dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid from address");
+    }
+    coinControl.destChange = from_dest;
+
+    CTxDestination dest = DecodeDestination(request.params[1].get_str());
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
+
+    // Amount
+    CAmount nAmount = AmountFromValue(request.params[2]);
+    if (nAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
+
+    // Get the coins that belong to the from address
+    std::vector<COutput> coins;
+    pwalletMain->AvailableCoins(coins);
+
+    CAmount nAmountFromCoins = 0;
+    for (auto out : coins) {
+        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
+        CTxDestination coin_dest;
+        CAmount nCoinAmount = out.tx->tx->vout[out.i].nValue;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, coin_dest);
+
+        if (nCoinAmount <= 0)
+            continue;
+
+        if (from_address != EncodeDestination(coin_dest))
+            continue;
+
+        coinControl.Select(COutPoint(out.tx->GetHash(), out.i));
+        nAmountFromCoins += out.tx->tx->vout[out.i].nValue;
+
+        if (nAmountFromCoins >= nAmount)
+            break;
+    }
+
+    if (nAmountFromCoins < nAmount)
+        throw JSONRPCError(RPC_TYPE_ERROR, "From Address doesn't contain enough funds");
+
+    // Wallet comments
+    CWalletTx wtx;
+    if (!request.params[3].isNull() && !request.params[2].get_str().empty())
+        wtx.mapValue["comment"] = request.params[2].get_str();
+    if (!request.params[4].isNull() && !request.params[3].get_str().empty())
+        wtx.mapValue["to"]      = request.params[3].get_str();
+
+    bool fSubtractFeeFromAmount = false;
+    if (!request.params[5].isNull()) {
+        fSubtractFeeFromAmount = request.params[4].get_bool();
+    }
+
+    bool fUseInstantSend = false;
+    bool fUsePrivateSend = false;
+    if (request.params.size() > 6)
+        fUseInstantSend = request.params[6].get_bool();
+    if (request.params.size() > 7)
+        fUsePrivateSend = request.params[7].get_bool();
+
+    if (!request.params[8].isNull()) {
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[6]);
+    }
+
+    if (!request.params[9].isNull()) {
+        if (!FeeModeFromString(request.params[8].get_str(), coinControl.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
+
+    EnsureWalletIsUnlocked();
+
+    SendMoney(dest, nAmount, fSubtractFeeFromAmount, wtx, coinControl, fUseInstantSend, fUsePrivateSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -912,9 +1033,9 @@ UniValue listaddressgroupings(const JSONRPCRequest& request)
 
     UniValue jsonGroupings(UniValue::VARR);
     std::map<CTxDestination, CAmount> balances = pwalletMain->GetAddressBalances();
-    BOOST_FOREACH (std::set<CTxDestination> grouping, pwalletMain->GetAddressGroupings()) {
+    for (const std::set<CTxDestination>& grouping : pwalletMain->GetAddressGroupings()) {
         UniValue jsonGrouping(UniValue::VARR);
-        BOOST_FOREACH (CTxDestination address, grouping) {
+        for (CTxDestination address : grouping) {
             UniValue addressInfo(UniValue::VARR);
             addressInfo.push_back(CDynamicAddress(address).ToString());
             addressInfo.push_back(ValueFromAmount(balances[address]));
@@ -1066,7 +1187,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
         if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
             continue;
 
-        BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout)
+        for (const CTxOut& txout : wtx.tx->vout)
             if (txout.scriptPubKey == scriptPubKey)
                 if ((wtx.GetDepthInMainChain() >= nMinDepth) || (fAddLocked && wtx.IsLockedByInstantSend()))
                     nAmount += txout.nValue;
@@ -1118,7 +1239,7 @@ UniValue getreceivedbyaccount(const JSONRPCRequest& request)
         if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
             continue;
 
-        BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
+        for (const CTxOut& txout : wtx.tx->vout) {
             CTxDestination address;
             if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*pwalletMain, address) && setAddress.count(address))
                 if ((wtx.GetDepthInMainChain() >= nMinDepth) || (fAddLocked && wtx.IsLockedByInstantSend()))
@@ -1323,7 +1444,9 @@ UniValue sendfrom(const JSONRPCRequest& request)
     if (nAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
-    SendMoney(address.Get(), nAmount, false, wtx);
+    CCoinControl coinControl;
+
+    SendMoney(address.Get(), nAmount, false, wtx, coinControl);
 
     return wtx.GetHash().GetHex();
 }
@@ -1469,20 +1592,20 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (request.params.size() > 7)
         fUsePrivateSend = request.params[7].get_bool();
 
-    CCoinControl coin_control;
+    CCoinControl coinControl;
     
     if (!request.params[8].isNull()) {
-        coin_control.m_confirm_target = ParseConfirmTarget(request.params[9]);
+        coinControl.m_confirm_target = ParseConfirmTarget(request.params[9]);
     }
 
     if (!request.params[9].isNull()) {
-        if (!FeeModeFromString(request.params[10].get_str(), coin_control.m_fee_mode)) {
+        if (!FeeModeFromString(request.params[10].get_str(), coinControl.m_fee_mode)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
         }
     }
 
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-        nullptr, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
+        coinControl, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
@@ -1586,7 +1709,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
         if ((nDepth < nMinDepth) && !(fAddLocked && wtx.IsLockedByInstantSend()))
             continue;
 
-        BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
+        for (const CTxOut& txout : wtx.tx->vout) {
             CTxDestination address;
             if (!ExtractDestination(txout.scriptPubKey, address))
                 continue;
@@ -1607,7 +1730,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
     // Reply
     UniValue ret(UniValue::VARR);
     std::map<std::string, tallyitem> mapAccountTally;
-    BOOST_FOREACH (const PAIRTYPE(CDynamicAddress, CAddressBookData) & item, pwalletMain->mapAddressBook) {
+    for (const std::pair<CDynamicAddress, CAddressBookData>& item : pwalletMain->mapAddressBook) {
         const CDynamicAddress& address = item.first;
         const std::string& strAccount = item.second.name;
         std::map<CDynamicAddress, tallyitem>::iterator it = mapTally.find(address);
@@ -1644,7 +1767,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
                 obj.push_back(Pair("label", strAccount));
             UniValue transactions(UniValue::VARR);
             if (it != mapTally.end()) {
-                BOOST_FOREACH (const uint256& _item, (*it).second.txids) {
+                for (const uint256& _item : (*it).second.txids) {
                     transactions.push_back(_item.GetHex());
                 }
             }
@@ -2085,7 +2208,7 @@ UniValue listaccounts(const JSONRPCRequest& request)
             includeWatchonly = includeWatchonly | ISMINE_WATCH_ONLY;
 
     std::map<std::string, CAmount> mapAccountBalances;
-    BOOST_FOREACH (const PAIRTYPE(CTxDestination, CAddressBookData) & entry, pwalletMain->mapAddressBook) {
+    for (const std::pair<CTxDestination, CAddressBookData>& entry : pwalletMain->mapAddressBook) {
         if (IsMine(*pwalletMain, entry.first) & includeWatchonly) // This address belongs to me
             mapAccountBalances[entry.second.name] = 0;
     }
@@ -2101,10 +2224,10 @@ UniValue listaccounts(const JSONRPCRequest& request)
             continue;
         wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount, includeWatchonly);
         mapAccountBalances[strSentAccount] -= nFee;
-        BOOST_FOREACH (const COutputEntry& s, listSent)
+        for (const COutputEntry& s : listSent)
             mapAccountBalances[strSentAccount] -= s.amount;
         if ((nDepth >= nMinDepth) || (fAddLocked && wtx.IsLockedByInstantSend())) {
-            BOOST_FOREACH (const COutputEntry& r, listReceived)
+            for (const COutputEntry& r : listReceived)
                 if (pwalletMain->mapAddressBook.count(r.destination))
                     mapAccountBalances[pwalletMain->mapAddressBook[r.destination].name] += r.amount;
                 else
@@ -2113,11 +2236,11 @@ UniValue listaccounts(const JSONRPCRequest& request)
     }
 
     const std::list<CAccountingEntry>& acentries = pwalletMain->laccentries;
-    BOOST_FOREACH (const CAccountingEntry& entry, acentries)
+    for (const CAccountingEntry& entry : acentries)
         mapAccountBalances[entry.strAccount] += entry.nCreditDebit;
 
     UniValue ret(UniValue::VOBJ);
-    BOOST_FOREACH (const PAIRTYPE(std::string, CAmount) & accountBalance, mapAccountBalances) {
+    for (const std::pair<std::string, CAmount>& accountBalance : mapAccountBalances) {
         ret.push_back(Pair(accountBalance.first, ValueFromAmount(accountBalance.second)));
     }
     return ret;
@@ -2742,7 +2865,7 @@ UniValue listlockunspent(const JSONRPCRequest& request)
 
     UniValue ret(UniValue::VARR);
 
-    BOOST_FOREACH (COutPoint& outpt, vOutpts) {
+    for (COutPoint& outpt : vOutpts) {
         UniValue o(UniValue::VOBJ);
 
         o.push_back(Pair("txid", outpt.hash.GetHex()));
@@ -3352,7 +3475,7 @@ UniValue resendwallettransactions(const JSONRPCRequest& request)
 
     std::vector<uint256> txids = pwalletMain->ResendWalletTransactionsBefore(GetTime(), g_connman.get());
     UniValue result(UniValue::VARR);
-    BOOST_FOREACH (const uint256& txid, txids) {
+    for (const uint256& txid : txids) {
         result.push_back(txid.ToString());
     }
     return result;
@@ -3441,7 +3564,7 @@ UniValue listunspent(const JSONRPCRequest& request)
     assert(pwalletMain != nullptr);
     LOCK2(cs_main, pwalletMain->cs_wallet);
     pwalletMain->AvailableCoins(vecOutputs, !include_unsafe, nullptr, true);
-    BOOST_FOREACH (const COutput& out, vecOutputs) {
+    for (const COutput& out : vecOutputs) {
         if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
             continue;
 
@@ -3548,9 +3671,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     int changePosition = -1;
     bool includeWatching = false;
     bool lockUnspents = false;
-    bool reserveChangeKey = true;
-    CFeeRate feeRate = CFeeRate(0);
-    bool overrideEstimatedFeerate = false;
     UniValue subtractFeeFromOutputs;
     std::set<int> setSubtractFeeFromOutputs;
 
@@ -3594,9 +3714,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
 
             if (options.exists("lockUnspents"))
                 lockUnspents = options["lockUnspents"].get_bool();
-
-            if (options.exists("reserveChangeKey"))
-                reserveChangeKey = options["reserveChangeKey"].get_bool();
 
             if (options.exists("feeRate"))
                 {
@@ -3649,7 +3766,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     CAmount nFeeOut;
     std::string strFailReason;
 
-    if (!pwalletMain->FundTransaction(tx, nFeeOut, overrideEstimatedFeerate, feeRate, changePosition, strFailReason, includeWatching, lockUnspents, setSubtractFeeFromOutputs, reserveChangeKey, changeAddress))
+    if (!pwalletMain->FundTransaction(tx, nFeeOut, changePosition, strFailReason, includeWatching, lockUnspents, setSubtractFeeFromOutputs, coinControl))
         throw JSONRPCError(RPC_INTERNAL_ERROR, strFailReason);
 
     UniValue result(UniValue::VOBJ);
@@ -3728,6 +3845,7 @@ static const CRPCCommand commands[] =
         {"wallet", "sendfrom", &sendfrom, false, {"fromaccount", "toaddress", "amount", "minconf", "addlocked", "comment", "comment_to"}},
         {"wallet", "sendmany", &sendmany, false, {"fromaccount", "amounts", "minconf", "addlocked", "comment", "subtractfeefrom"}},
         {"wallet", "sendtoaddress", &sendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
+        {"wallet", "sendfromaddress", &sendfromaddress, false, {"from_address","address","amount","comment","comment_to","subtractfeefromamount", "conf_target","estimate_mode"} },
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
         {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
         {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},

@@ -33,8 +33,6 @@
 
 #include <stdint.h>
 
-#include <boost/foreach.hpp>
-
 #include <QDebug>
 #include <QSet>
 #include <QTimer>
@@ -85,7 +83,7 @@ CAmount WalletModel::getBalance(const CCoinControl* coinControl) const
         CAmount nBalance = 0;
         std::vector<COutput> vCoins;
         wallet->AvailableCoins(vCoins, true, coinControl);
-        BOOST_FOREACH (const COutput& out, vCoins)
+        for (const COutput& out : vCoins)
             if (out.fSpendable)
                 nBalance += out.tx->tx->vout[out.i].nValue;
 
@@ -256,7 +254,7 @@ void WalletModel::updateAddressBookLabels(const CTxDestination& dest, const std:
     }
 }
 
-WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
+WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl& coinControl)
 {
     if (fWalletUnlockMixStakeOnly)
         return MixStakeOnlyMode;
@@ -349,7 +347,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         return DuplicateAddress;
     }
 
-    CAmount nBalance = getBalance(coinControl);
+    CAmount nBalance = getBalance(&coinControl);
 
     if (total > nBalance) {
         return AmountExceedsBalance;
@@ -853,8 +851,8 @@ void WalletModel::listLockedCoins(std::vector<COutPoint>& vOutpts)
 void WalletModel::loadReceiveRequests(std::vector<std::string>& vReceiveRequests)
 {
     LOCK(wallet->cs_wallet);
-    BOOST_FOREACH (const PAIRTYPE(CTxDestination, CAddressBookData) & item, wallet->mapAddressBook)
-        BOOST_FOREACH (const PAIRTYPE(std::string, std::string) & item2, item.second.destdata)
+    for (const std::pair<CTxDestination, CAddressBookData>& item : wallet->mapAddressBook)
+        for (const std::pair<std::string, std::string>& item2 : item.second.destdata)
             if (item2.first.size() > 2 && item2.first.substr(0, 2) == "rr") // receive request
                 vReceiveRequests.push_back(item2.second);
 }
@@ -903,10 +901,10 @@ bool WalletModel::bumpFee(uint256 hash)
     return false;
 //    std::unique_ptr<CFeeBumper> feeBump;
 //    {
-//        CCoinControl coin_control;
-//        coin_control.signalRbf = true;
+//        CCoinControl coinControl;
+//        coinControl.signalRbf = true;
 //        LOCK2(cs_main, wallet->cs_wallet);
-//        feeBump.reset(new CFeeBumper(wallet, hash, coin_control, 0));
+//        feeBump.reset(new CFeeBumper(wallet, hash, coinControl, 0));
 //    }
 //    if (feeBump->getResult() != BumpFeeResult::OK)
 //    {
@@ -924,15 +922,15 @@ bool WalletModel::bumpFee(uint256 hash)
 //    questionString.append("<tr><td>");
 //    questionString.append(tr("Current fee:"));
 //    questionString.append("</td><td>");
-//    questionString.append(RavenUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), oldFee));
+//    questionString.append(DynamicUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), oldFee));
 //    questionString.append("</td></tr><tr><td>");
 //    questionString.append(tr("Increase:"));
 //    questionString.append("</td><td>");
-//    questionString.append(RavenUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), newFee - oldFee));
+//    questionString.append(DynamicUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), newFee - oldFee));
 //    questionString.append("</td></tr><tr><td>");
 //    questionString.append(tr("New fee:"));
 //    questionString.append("</td><td>");
-//    questionString.append(RavenUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), newFee));
+//    questionString.append(DynamicUnits::formatHtmlWithUnit(getOptionsModel()->getDisplayUnit(), newFee));
 //    questionString.append("</td></tr></table>");
 //    SendConfirmationDialog confirmationDialog(tr("Confirm fee bump"), questionString);
 //    confirmationDialog.exec();
