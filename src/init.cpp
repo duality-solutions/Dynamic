@@ -868,7 +868,7 @@ void CleanupBlockRevFiles()
     // keeping a separate counter.  Once we hit a gap (or if 0 doesn't exist)
     // start removing block files.
     int nContigCounter = 0;
-    BOOST_FOREACH (const PAIRTYPE(std::string, boost::filesystem::path) & item, mapBlockFiles) {
+    for (const std::pair<std::string, boost::filesystem::path>& item : mapBlockFiles) {
         if (atoi(item.first) == nContigCounter) {
             nContigCounter++;
             continue;
@@ -921,7 +921,7 @@ void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
         }
 
         // -loadblock=
-        BOOST_FOREACH (const boost::filesystem::path& path, vImportFiles) {
+        for (const boost::filesystem::path& path : vImportFiles) {
             FILE* file = fopen(path.string().c_str(), "rb");
             if (file) {
                 LogPrintf("Importing blocks file %s...\n", path.string());
@@ -1585,7 +1585,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     std::vector<std::string> uacomments;
 
     if (mapMultiArgs.count("-uacomment")) {
-        BOOST_FOREACH (std::string cmt, mapMultiArgs.at("-uacomment")) {
+        for (std::string cmt : mapMultiArgs.at("-uacomment")) {
             if (cmt != SanitizeString(cmt, SAFE_CHARS_UA_COMMENT))
                 return InitError(strprintf(_("User Agent comment (%s) contains unsafe characters."), cmt));
             uacomments.push_back(cmt);
@@ -1600,7 +1600,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if (mapMultiArgs.count("-onlynet")) {
         std::set<enum Network> nets;
-        BOOST_FOREACH (const std::string& snet, mapMultiArgs.at("-onlynet")) {
+        for (const std::string& snet : mapMultiArgs.at("-onlynet")) {
             enum Network net = ParseNetwork(snet);
             if (net == NET_UNROUTABLE)
                 return InitError(strprintf(_("Unknown network specified in -onlynet: '%s'"), snet));
@@ -1614,7 +1614,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     if (mapMultiArgs.count("-whitelist")) {
-        BOOST_FOREACH (const std::string& net, mapMultiArgs.at("-whitelist")) {
+        for (const std::string& net : mapMultiArgs.at("-whitelist")) {
             CSubNet subnet;
             LookupSubNet(net.c_str(), subnet);
             if (!subnet.IsValid())
@@ -2025,7 +2025,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     std::vector<boost::filesystem::path> vImportFiles;
     if (mapMultiArgs.count("-loadblock")) {
-        BOOST_FOREACH (const std::string& strFile, mapMultiArgs.at("-loadblock"))
+        for (const std::string& strFile : mapMultiArgs.at("-loadblock"))
             vImportFiles.push_back(strFile);
     }
     threadGroup.create_thread(boost::bind(&ThreadImport, vImportFiles));

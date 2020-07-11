@@ -25,7 +25,7 @@
 //         vGovernanceKeys = mapMultiArgs["-addgovkey"];
 //     }
 
-//     BOOST_FOREACH(SecureString& strSecure, vGovernanceKeys)
+//     for (SecureString& strSecure : vGovernanceKeys)
 //     {
 //     	std::vector<std::string> vecTokenized = SplitBy(strSubCommand, ":");
 

@@ -5746,7 +5746,7 @@ void ScriptPubKeyToUnivWithAssets(const CScript& scriptPubKey, UniValue& out, bo
     out.pushKV("type", GetTxnOutputType(type));
 
     UniValue a(UniValue::VARR);
-    BOOST_FOREACH (const CTxDestination& addr, addresses)
+    for (const CTxDestination& addr : addresses)
         a.push_back(CDynamicAddress(addr).ToString());
     out.pushKV("addresses", a);
 }
@@ -5760,7 +5760,7 @@ void TxToUnivWithAssets(const CTransaction& tx, const uint256& hashBlock, UniVal
     entry.pushKV("locktime", (int64_t)tx.nLockTime);
 
     UniValue vin(UniValue::VARR);
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
         UniValue in(UniValue::VOBJ);
         if (tx.IsCoinBase())
             in.pushKV("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end()));
