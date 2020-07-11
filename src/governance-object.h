@@ -288,7 +288,7 @@ public:
 
     UniValue GetJSONObject();
 
-    void Relay(CConnman& connman);
+    void Relay(CConnman* connman);
 
     uint256 GetHash() const;
 
@@ -375,12 +375,12 @@ private:
     bool ProcessVote(CNode* pfrom,
         const CGovernanceVote& vote,
         CGovernanceException& exception,
-        CConnman& connman);
+        CConnman* connman);
 
     /// Called when DN's which have voted on this object have been removed
     void ClearDynodeVotes();
 
-    void CheckOrphanVotes(CConnman& connman);
+    void CheckOrphanVotes(CConnman* connman);
 };
 
 

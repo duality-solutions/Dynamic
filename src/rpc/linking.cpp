@@ -22,6 +22,7 @@
 #include "rpc/server.h"
 #include "spork.h"
 #include "primitives/transaction.h"
+#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 #include "uint256.h"
 #include "utilmoneystr.h"
@@ -33,7 +34,7 @@
 #ifdef ENABLE_WALLET
 
 extern void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& stealthScript, 
-                                    CWalletTx& wtxNew, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend);
+                                    CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nOneTimeFee, const CAmount& nDepositFee, const bool fUseInstantSend);
 
 
 static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
@@ -276,7 +277,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, coinControl, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
 
     txLink.txHash = wtx.GetHash();
 
@@ -456,7 +458,8 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendLinkingTransaction(scriptData, scriptPubKey, stealthScript, wtx, coinControl, monthlyFee + oneTimeFee, depositFee, fUseInstantSend);
 
     txLinkAccept.txHash = wtx.GetHash();
 
@@ -842,7 +845,8 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
     CAmount nDataFee = 0; // No OP_RETURN data needed for deleted account transactions
 
     bool fUseInstantSend = false;
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, coinControl, nOperationFee, nDataFee, fUseInstantSend);
 
     return oLink;
 }
@@ -1111,7 +1115,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     oLink.push_back(Pair("signature_size", (int)vpgMessage.vchSig.size()));
     if (vpgMessage.CheckSignature(vchWalletPubKey)) {
         oLink.push_back(Pair("check_signature", "valid"));
-        vpgMessage.RelayMessage(*g_connman);
+        vpgMessage.RelayMessage(g_connman.get());
     }
     else {
         oLink.push_back(Pair("check_signature", "invalid"));

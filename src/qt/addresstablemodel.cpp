@@ -13,8 +13,6 @@
 #include "base58.h"
 #include "wallet/wallet.h"
 
-#include <boost/foreach.hpp>
-
 #include <QDebug>
 #include <QFont>
 
@@ -80,7 +78,7 @@ public:
         cachedAddressTable.clear();
         {
             LOCK(wallet->cs_wallet);
-            BOOST_FOREACH (const PAIRTYPE(CTxDestination, CAddressBookData) & item, wallet->mapAddressBook) {
+            for (const std::pair<CTxDestination, CAddressBookData>& item : wallet->mapAddressBook) {
                 const CDynamicAddress& address = item.first;
                 bool fMine = IsMine(*wallet, address.Get());
                 AddressTableEntry::Type addressType = translateTransactionType(

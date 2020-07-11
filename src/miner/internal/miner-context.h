@@ -29,9 +29,9 @@ using MinerContextRef = std::shared_ptr<MinerContext>;
 struct MinerSharedContext {
 public:
     const CChainParams& chainparams;
-    CConnman& connman;
+    CConnman* connman;
 
-    MinerSharedContext(const CChainParams& chainparams_, CConnman& connman_)
+    MinerSharedContext(const CChainParams& chainparams_, CConnman* connman_)
         : chainparams(chainparams_), connman(connman_){};
 
     // Returns chain tip of current block template
@@ -82,7 +82,7 @@ public:
     HashRateCounterRef counter;
     MinerSharedContextRef shared;
 
-    MinerContext(const CChainParams& chainparams_, CConnman& connman_);
+    MinerContext(const CChainParams& chainparams_, CConnman* connman_);
     MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_);
 
     // Constructs child context
@@ -93,7 +93,7 @@ public:
     MinerContextRef MakeChild() const { return std::make_shared<MinerContext>(this); }
 
     // Connection manager
-    CConnman& connman() const { return shared->connman; }
+    CConnman* connman() const { return shared->connman; }
 
     // Chain parameters
     const CChainParams& chainparams() const { return shared->chainparams; }

@@ -7,6 +7,7 @@
 
 #include "activedynode.h"
 #include "consensus/validation.h"
+#include "core_io.h"
 #include "dynode-sync.h"
 #include "dynode.h"
 #include "dynodeconfig.h"
@@ -306,9 +307,9 @@ UniValue gobject(const JSONRPCRequest& request)
 
         if (fMissingConfirmations) {
             governance.AddPostponedObject(govobj);
-            govobj.Relay(*g_connman);
+            govobj.Relay(g_connman.get());
         } else {
-            governance.AddGovernanceObject(govobj, *g_connman);
+            governance.AddGovernanceObject(govobj, g_connman.get());
         }
 
         return govobj.GetHash().ToString();
@@ -373,7 +374,7 @@ UniValue gobject(const JSONRPCRequest& request)
         }
 
         CGovernanceException exception;
-        if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+        if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
             nSuccessful++;
             statusObj.push_back(Pair("result", "success"));
         } else {
@@ -470,7 +471,7 @@ UniValue gobject(const JSONRPCRequest& request)
             }
 
             CGovernanceException exception;
-            if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+            if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             } else {
@@ -590,7 +591,7 @@ UniValue gobject(const JSONRPCRequest& request)
             // UPDATE LOCAL DATABASE WITH NEW OBJECT SETTINGS
 
             CGovernanceException exception;
-            if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+            if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             } else {
@@ -902,7 +903,7 @@ UniValue voteraw(const JSONRPCRequest& request)
     }
 
     CGovernanceException exception;
-    if (governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
+    if (governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
         return "Voted successfully";
     } else {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Error voting : " + exception.GetMessage());

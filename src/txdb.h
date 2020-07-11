@@ -8,10 +8,12 @@
 #ifndef DYNAMIC_TXDB_H
 #define DYNAMIC_TXDB_H
 
+#include "addressindex.h"
 #include "chain.h"
 #include "coins.h"
 #include "dbwrapper.h"
 #include "spentindex.h"
+#include "timestampindex.h"
 
 #include <map>
 #include <string>
@@ -136,9 +138,16 @@ public:
     bool ReadAddressUnspentIndex(uint160 addressHash, int type, std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> >& vect);
     bool WriteAddressIndex(const std::vector<std::pair<CAddressIndexKey, CAmount> >& vect);
     bool EraseAddressIndex(const std::vector<std::pair<CAddressIndexKey, CAmount> >& vect);
-    bool ReadAddressIndex(uint160 addressHash, int type, std::vector<std::pair<CAddressIndexKey, CAmount> >& addressIndex, int start = 0, int end = 0);
-    bool WriteTimestampIndex(const CTimestampIndexKey& timestampIndex);
-    bool ReadTimestampIndex(const unsigned int& high, const unsigned int& low, std::vector<uint256>& vect);
+    bool ReadAddressIndex(uint160 addressHash, int type, std::string assetName,
+                          std::vector<std::pair<CAddressIndexKey, CAmount> > &addressIndex,
+                          int start = 0, int end = 0);
+    bool ReadAddressIndex(uint160 addressHash, int type,
+                          std::vector<std::pair<CAddressIndexKey, CAmount> > &addressIndex,
+                          int start = 0, int end = 0);
+    bool WriteTimestampIndex(const CTimestampIndexKey &timestampIndex);
+    bool ReadTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &vect);
+    bool WriteTimestampBlockIndex(const CTimestampBlockIndexKey &blockhashIndex, const CTimestampBlockIndexValue &logicalts);
+    bool ReadTimestampBlockIndex(const uint256 &hash, unsigned int &logicalTS);
     bool WriteFlag(const std::string& name, bool fValue);
     bool ReadFlag(const std::string& name, bool& fValue);
     bool LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256&)> insertBlockIndex);

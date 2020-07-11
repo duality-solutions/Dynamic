@@ -290,7 +290,7 @@ int CDynodePayments::GetMinDynodePaymentsProto() const
     return sporkManager.IsSporkActive(SPORK_10_DYNODE_PAY_UPDATED_NODES) ? MIN_DYNODE_PAYMENT_PROTO_VERSION_2 : MIN_DYNODE_PAYMENT_PROTO_VERSION_1;
 }
 
-void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
+void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
@@ -299,7 +299,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand
 
         if (pfrom->nVersion < GetMinDynodePaymentsProto()) {
             LogPrint("dnpayments", "DYNODEPAYMENTSYNC -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", GetMinDynodePaymentsProto())));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", GetMinDynodePaymentsProto())));
             return;
         }
 
@@ -335,7 +335,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand
 
         if (pfrom->nVersion < GetMinDynodePaymentsProto()) {
             LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", GetMinDynodePaymentsProto())));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", GetMinDynodePaymentsProto())));
             return;
         }
 
@@ -695,7 +695,7 @@ void CDynodePayments::CheckAndRemove()
     LogPrint("dnpayments", "CDynodePayments::CheckAndRemove -- %s\n", ToString());
 }
 
-bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::string& strError, CConnman& connman) const
+bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::string& strError, CConnman* connman) const
 {
     dynode_info_t dnInfo;
 
@@ -754,7 +754,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
     return true;
 }
 
-bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
+bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman* connman)
 {
     // DETERMINE IF WE SHOULD BE VOTING FOR THE NEXT PAYEE
 
@@ -892,7 +892,7 @@ void CDynodePayments::CheckBlockVotes(int nBlockHeight)
     LogPrint("dnpayments", "%s", debugStr);
 }
 
-void CDynodePaymentVote::Relay(CConnman& connman) const
+void CDynodePaymentVote::Relay(CConnman* connman) const
 {
     // Do not relay until fully synced
     if (!dynodeSync.IsSynced()) {
@@ -901,7 +901,7 @@ void CDynodePaymentVote::Relay(CConnman& connman) const
     }
 
     CInv inv(MSG_DYNODE_PAYMENT_VOTE, GetHash());
-    connman.RelayInv(inv);
+    connman->RelayInv(inv);
 }
 
 bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValidationHeight, int& nDos) const
@@ -960,7 +960,7 @@ std::string CDynodePaymentVote::ToString() const
 }
 
 // Send all votes up to nCountNeeded blocks (but not more than GetStorageLimit)
-void CDynodePayments::Sync(CNode* pnode, CConnman& connman) const
+void CDynodePayments::Sync(CNode* pnode, CConnman* connman) const
 {
     LOCK(cs_mapDynodeBlocks);
 
@@ -986,10 +986,10 @@ void CDynodePayments::Sync(CNode* pnode, CConnman& connman) const
 
     LogPrintf("CDynodePayments::Sync -- Sent %d votes to peer=%d\n", nInvCount, pnode->id);
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_DNW, nInvCount));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_DNW, nInvCount));
 }
 // Request low data/unknown payment blocks in batches directly from some node instead of/after preliminary Sync.
-void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connman) const
+void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman* connman) const
 {
     if (!dynodeSync.IsDynodeListSynced())
         return;
@@ -1009,7 +1009,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
             // We should not violate GETDATA rules
             if (vToFetch.size() == MAX_INV_SZ) {
                 LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d blocks\n", pnode->id, MAX_INV_SZ);
-                connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
+                connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
                 // Start filling new batch
                 vToFetch.clear();
             }
@@ -1055,7 +1055,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
         // We should not violate GETDATA rules
         if (vToFetch.size() == MAX_INV_SZ) {
             LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, MAX_INV_SZ);
-            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
             // Start filling new batch
             vToFetch.clear();
         }
@@ -1063,7 +1063,7 @@ void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman& connma
     // Ask for the rest of it
     if (!vToFetch.empty()) {
         LogPrint("dnpayments", "CDynodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d payment blocks\n", pnode->id, vToFetch.size());
-        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
+        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
     }
 }
 
@@ -1088,7 +1088,7 @@ int CDynodePayments::GetStorageLimit() const
     return std::max(int(dnodeman.size() * nStorageCoeff), nMinBlocksToStore);
 }
 
-void CDynodePayments::UpdatedBlockTip(const CBlockIndex* pindex, CConnman& connman)
+void CDynodePayments::UpdatedBlockTip(const CBlockIndex* pindex, CConnman* connman)
 {
     if (!pindex)
         return;

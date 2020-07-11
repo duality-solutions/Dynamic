@@ -22,7 +22,7 @@
 
 std::vector<std::unique_ptr<CWalletTx>> wtxn;
 
-typedef std::set<std::pair<const CWalletTx*,unsigned int> > CoinSet;
+typedef std::set<CInputCoin> CoinSet;
 
 BOOST_FIXTURE_TEST_SUITE(wallet_tests, TestingSetup)
 
@@ -49,7 +49,7 @@ static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = fa
         wtx->fFromMeCached = true;
         wtx->fFromMeCachedValue = true;
     }
-    COutput output(wtx.get(), nInput, nAge, true, true);
+    COutput output(wtx.get(), nInput, nAge, true /* spendable */, true /* solvable */, true /* safe */);
     vCoins.push_back(output);
     wtxn.emplace_back(std::move(wtx));
 }

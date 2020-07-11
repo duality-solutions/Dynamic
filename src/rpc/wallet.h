@@ -7,7 +7,11 @@
 #ifndef DYNAMIC_WALLET_RPCWALLET_H
 #define DYNAMIC_WALLET_RPCWALLET_H
 
+#include <string>
+
 class CRPCTable;
+class CWallet;
+class JSONRPCRequest;
 
 void RegisterWalletRPCCommands(CRPCTable& t);
 
