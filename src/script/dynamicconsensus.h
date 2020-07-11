@@ -8,8 +8,6 @@
 #ifndef DYNAMIC_DYNAMICCONSENSUS_H
 #define DYNAMIC_DYNAMICCONSENSUS_H
 
-#include <stdint.h>
-
 #if defined(BUILD_DYNAMIC_INTERNAL) && defined(HAVE_CONFIG_H)
 #include "config/dynamic-config.h"
 #if defined(_WIN32)
@@ -42,7 +40,6 @@ typedef enum dynamicconsensus_error_t {
     dynamicconsensus_ERR_TX_INDEX,
     dynamicconsensus_ERR_TX_SIZE_MISMATCH,
     dynamicconsensus_ERR_TX_DESERIALIZE,
-    dynamicconsensus_ERR_AMOUNT_REQUIRED,
     dynamicconsensus_ERR_INVALID_FLAGS,
 } dynamicconsensus_error;
 
@@ -62,14 +59,8 @@ enum {
 /// Returns 1 if the input nIn of the serialized transaction pointed to by
 /// txTo correctly spends the scriptPubKey pointed to by scriptPubKey under
 /// the additional constraints specified by flags.
-/// If not nullptr, err will contain an error/success code for the operation
-EXPORT_SYMBOL int dynamicconsensus_verify_script(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen,
-                                                 const unsigned char *txTo        , unsigned int txToLen,
-                                                 unsigned int nIn, unsigned int flags, dynamicconsensus_error* err);
-
-EXPORT_SYMBOL int dynamicconsensus_verify_script_with_amount(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
-                                    const unsigned char *txTo        , unsigned int txToLen,
-                                    unsigned int nIn, unsigned int flags, dynamicconsensus_error* err);
+/// If not NULL, err will contain an error/success code for the operation
+EXPORT_SYMBOL int dynamicconsensus_verify_script(const unsigned char* scriptPubKey, unsigned int scriptPubKeyLen, const unsigned char* txTo, unsigned int txToLen, unsigned int nIn, unsigned int flags, dynamicconsensus_error* err);
 
 EXPORT_SYMBOL unsigned int dynamicconsensus_version();
 

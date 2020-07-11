@@ -13,7 +13,7 @@ std::map<std::string, BenchFunction> BenchRunner::benchmarks;
 
 static double gettimedouble(void) {
     struct timeval tv;
-    gettimeofday(&tv, nullptr);
+    gettimeofday(&tv, NULL);
     return tv.tv_usec * 0.000001 + tv.tv_sec;
 }
 

@@ -16,11 +16,6 @@ uint256 CBlockHeader::GetHash() const
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }
 
-uint256 CBlockHeader::GetHashFull() const
-{
-    return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
-}
-
 std::string CBlock::ToString() const
 {
     std::stringstream s;

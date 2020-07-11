@@ -31,7 +31,7 @@ CScript ParseScript(const std::string& s)
     static std::map<std::string, opcodetype> mapOpNames;
 
     if (mapOpNames.empty()) {
-        for (unsigned int op = 0; op <= MAX_OPCODE; op++) {
+        for (int op = 0; op <= OP_NOP10; op++) {
             // Allow OP_RESERVED to get into mapOpNames
             if (op < OP_NOP && op != OP_RESERVED)
                 continue;
@@ -78,40 +78,15 @@ CScript ParseScript(const std::string& s)
     return result;
 }
 
-// Check that all of the input and output scripts of a transaction contains valid opcodes
-bool CheckTxScriptsSanity(const CMutableTransaction& tx)
-{
-    // Check input scripts for non-coinbase txs
-    if (!CTransaction(tx).IsCoinBase()) {
-        for (unsigned int i = 0; i < tx.vin.size(); i++) {
-            if (!tx.vin[i].scriptSig.HasValidOps() || tx.vin[i].scriptSig.size() > MAX_SCRIPT_SIZE) {
-                return false;
-            }
-        }
-    }
-    // Check output scripts
-    for (unsigned int i = 0; i < tx.vout.size(); i++) {
-        if (!tx.vout[i].scriptPubKey.HasValidOps() || tx.vout[i].scriptPubKey.size() > MAX_SCRIPT_SIZE) {
-            return false;
-        }
-    }
-    
-    return true;
-}
-
 bool DecodeHexTx(CMutableTransaction& tx, const std::string& strHexTx)
 {
-    if (!IsHex(strHexTx)) {
+    if (!IsHex(strHexTx))
         return false;
-    }
 
     std::vector<unsigned char> txData(ParseHex(strHexTx));
     CDataStream ssData(txData, SER_NETWORK, PROTOCOL_VERSION);
     try {
         ssData >> tx;
-        if (ssData.eof() && CheckTxScriptsSanity(tx)) {
-            return true;
-        }
     } catch (const std::exception&) {
         return false;
     }

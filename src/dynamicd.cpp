@@ -8,7 +8,6 @@
 #include "chainparams.h"
 #include "clientversion.h"
 #include "compat.h"
-#include "fs.h"
 #include "httprpc.h"
 #include "httpserver.h"
 #include "init.h"
@@ -72,13 +71,13 @@ bool AppInit(int argc, char* argv[])
     // Parameters
     //
     // If Qt is used, parameters/dynamic.conf are parsed in qt/dynamic.cpp's main()
-    gArgs.ParseParameters(argc, argv);
+    ParseParameters(argc, argv);
 
     // Process help and version before taking care about datadir
-    if (gArgs.IsArgSet("-?") || gArgs.IsArgSet("-h") || gArgs.IsArgSet("-help") || gArgs.IsArgSet("-version")) {
+    if (IsArgSet("-?") || IsArgSet("-h") || IsArgSet("-help") || IsArgSet("-version")) {
         std::string strUsage = _("Dynamic Daemon") + " " + _("version") + " " + FormatFullVersion() + "\n";
 
-        if (gArgs.IsArgSet("-version")) {
+        if (IsArgSet("-version")) {
             strUsage += FormatParagraph(LicenseInfo());
         } else {
             strUsage += "\n" + _("Usage:") + "\n" +
@@ -92,19 +91,19 @@ bool AppInit(int argc, char* argv[])
     }
 
     try {
-        bool datadirFromCmdLine = gArgs.IsArgSet("-datadir");
+        bool datadirFromCmdLine = IsArgSet("-datadir");
         if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
-            fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
+            fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", GetArg("-datadir", "").c_str());
             return false;
         }
         try {
-            gArgs.ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
+            ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
         } catch (const std::exception& e) {
             fprintf(stderr, "Error reading configuration file: %s\n", e.what());
             return false;
         }
         if (!datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
-            fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
+            fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", GetArg("-datadir", "").c_str());
             return EXIT_FAILURE;
         }
         // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
@@ -133,7 +132,7 @@ bool AppInit(int argc, char* argv[])
             exit(EXIT_FAILURE);
         }
         // -server defaults to true for bitcoind but not for the GUI so do this here
-        gArgs.SoftSetBoolArg("-server", true);
+        SoftSetBoolArg("-server", true);
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
@@ -149,7 +148,7 @@ bool AppInit(int argc, char* argv[])
             // InitError will have been called with detailed error, which ends up on console
             exit(EXIT_FAILURE);
         }
-        if (gArgs.GetBoolArg("-daemon", false)) {
+        if (GetBoolArg("-daemon", false)) {
 #if HAVE_DECL_DAEMON
 #if defined(MAC_OSX)
 #pragma GCC diagnostic push
@@ -170,22 +169,16 @@ bool AppInit(int argc, char* argv[])
             return false;
 #endif // HAVE_DECL_DAEMON
         }
-        // Lock data directory after daemonization
-        if (!AppInitLockDataDirectory())
-        {
-            // If locking the data directory failed, exit immediately
-            exit(EXIT_FAILURE);
-        }
+
         fRet = AppInitMain(threadGroup, scheduler);
     } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {
-        PrintExceptionContinue(nullptr, "AppInit()");
+        PrintExceptionContinue(NULL, "AppInit()");
     }
 
     if (!fRet) {
         Interrupt(threadGroup);
-        threadGroup.join_all();
         // threadGroup.join_all(); was left out intentionally here, because we didn't re-test all of
         // the startup-failure cases to make sure they don't result in a hang due to some
         // thread-blocking-waiting-for-another-thread-during-startup case

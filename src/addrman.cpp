@@ -79,13 +79,13 @@ CAddrInfo* CAddrMan::Find(const CService& addr, int* pnId)
 
     std::map<CService, int>::iterator it = mapAddr.find(addr2);
     if (it == mapAddr.end())
-        return nullptr;
+        return NULL;
     if (pnId)
         *pnId = (*it).second;
     std::map<int, CAddrInfo>::iterator it2 = mapInfo.find((*it).second);
     if (it2 != mapInfo.end())
         return &(*it2).second;
-    return nullptr;
+    return NULL;
 }
 
 CAddrInfo* CAddrMan::Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId)

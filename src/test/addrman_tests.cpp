@@ -34,12 +34,12 @@ public:
         return (unsigned int)(state % nMax);
     }
 
-    CAddrInfo* Find(const CService& addr, int* pnId = nullptr)
+    CAddrInfo* Find(const CService& addr, int* pnId = NULL)
     {
         return CAddrMan::Find(addr, pnId);
     }
 
-    CAddrInfo* Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId = nullptr)
+    CAddrInfo* Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId = NULL)
     {
         return CAddrMan::Create(addr, addrSource, pnId);
     }
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(addrman_delete)
     addrman.Delete(nId);
     BOOST_CHECK(addrman.size() == 0);
     CAddrInfo* info2 = addrman.Find(addr1);
-    BOOST_CHECK(info2 == nullptr);
+    BOOST_CHECK(info2 == NULL);
 }
 
 BOOST_AUTO_TEST_CASE(addrman_getaddr)

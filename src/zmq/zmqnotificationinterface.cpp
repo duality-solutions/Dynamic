@@ -15,7 +15,7 @@ void zmqError(const char *str)
     LogPrint("zmq", "zmq: Error: %s, errno=%s\n", str, zmq_strerror(errno));
 }
 
-CZMQNotificationInterface::CZMQNotificationInterface() : pcontext(nullptr)
+CZMQNotificationInterface::CZMQNotificationInterface() : pcontext(NULL)
 {
 }
 
@@ -31,7 +31,7 @@ CZMQNotificationInterface::~CZMQNotificationInterface()
 
 CZMQNotificationInterface* CZMQNotificationInterface::Create()
 {
-    CZMQNotificationInterface* notificationInterface = nullptr;
+    CZMQNotificationInterface* notificationInterface = NULL;
     std::map<std::string, CZMQNotifierFactory> factories;
     std::list<CZMQAbstractNotifier*> notifiers;
 
@@ -47,15 +47,14 @@ CZMQNotificationInterface* CZMQNotificationInterface::Create()
     factories["pubrawgovernancevote"] = CZMQAbstractNotifier::Create<CZMQPublishRawGovernanceVoteNotifier>;
     factories["pubrawgovernanceobject"] = CZMQAbstractNotifier::Create<CZMQPublishRawGovernanceObjectNotifier>;
     factories["pubrawinstantsenddoublespend"] = CZMQAbstractNotifier::Create<CZMQPublishRawInstantSendDoubleSpendNotifier>;
-    factories["pubrawmessage"] = CZMQAbstractNotifier::Create<CZMQPublishNewAssetMessageNotifier>;
 
     for (std::map<std::string, CZMQNotifierFactory>::const_iterator i=factories.begin(); i!=factories.end(); ++i)
     {
         std::string arg("-zmq" + i->first);
-        if (gArgs.IsArgSet(arg))
+        if (IsArgSet(arg))
         {
             CZMQNotifierFactory factory = i->second;
-            std::string address = gArgs.GetArg(arg, "");
+            std::string address = GetArg(arg, "");
             CZMQAbstractNotifier *notifier = factory();
             notifier->SetType(i->first);
             notifier->SetAddress(address);
@@ -71,7 +70,7 @@ CZMQNotificationInterface* CZMQNotificationInterface::Create()
         if (!notificationInterface->Initialize())
         {
             delete notificationInterface;
-            notificationInterface = nullptr;
+            notificationInterface = NULL;
         }
     }
 
@@ -153,12 +152,8 @@ void CZMQNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, co
     }
 }
 
-void CZMQNotificationInterface::TransactionAddedToMempool(const CTransactionRef& ptx)
+void CZMQNotificationInterface::SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock)
 {
-    // Used by BlockConnected and BlockDisconnected as well, because they're
-    // all the same external callback.
-    const CTransaction& tx = *ptx;
-
     for (std::list<CZMQAbstractNotifier*>::iterator i = notifiers.begin(); i!=notifiers.end(); )
     {
         CZMQAbstractNotifier *notifier = *i;
@@ -171,22 +166,6 @@ void CZMQNotificationInterface::TransactionAddedToMempool(const CTransactionRef&
             notifier->Shutdown();
             i = notifiers.erase(i);
         }
-    }
-}
-
-void CZMQNotificationInterface::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexConnected, const std::vector<CTransactionRef>& vtxConflicted)
-{
-    for (const CTransactionRef& ptx : pblock->vtx) {
-        // Do a normal notify for each transaction added in the block
-        TransactionAddedToMempool(ptx);
-    }
-}
-
-void CZMQNotificationInterface::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock)
-{
-    for (const CTransactionRef& ptx : pblock->vtx) {
-        // Do a normal notify for each transaction removed in block disconnection
-        TransactionAddedToMempool(ptx);
     }
 }
 
@@ -250,23 +229,6 @@ void CZMQNotificationInterface::NotifyGovernanceObject(const CGovernanceObject &
         } else {
             notifier->Shutdown();
             it = notifiers.erase(it);
-        }
-    }
-}
-
-void CZMQNotificationInterface::NewAssetMessage(const CMessage& message)
-{
-    for (std::list<CZMQAbstractNotifier*>::iterator i = notifiers.begin(); i!=notifiers.end(); )
-    {
-        CZMQAbstractNotifier *notifier = *i;
-        if (notifier->NotifyMessage(message))
-        {
-            i++;
-        }
-        else
-        {
-            notifier->Shutdown();
-            i = notifiers.erase(i);
         }
     }
 }

@@ -24,8 +24,6 @@ class TransactionDesc : public QObject
 
 public:
     static QString toHTML(CWallet* wallet, CWalletTx& wtx, TransactionRecord* rec, int unit);
-    static QString toAssetHTML(CWallet *wallet, CWalletTx &wtx, TransactionRecord *rec, int unit);
-    static void CreateDebugString(QString& strHTML, CWallet *wallet, CWalletTx &wtx, int unit);
 
 private:
     TransactionDesc() {}

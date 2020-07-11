@@ -7,7 +7,6 @@
 
 #include "base58.h"
 #include "clientversion.h"
-#include "core_io.h"
 #include "dynode-sync.h"
 #include "init.h"
 #include "net.h"
@@ -79,7 +78,7 @@ UniValue getinfo(const JSONRPCRequest& request)
             HelpExampleCli("getinfo", "") + HelpExampleRpc("getinfo", ""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
 #endif
@@ -137,10 +136,10 @@ UniValue debug(const JSONRPCRequest& request)
 
     std::vector<std::string> newMultiArgs;
     boost::split(newMultiArgs, strMode, boost::is_any_of("+"));
-    gArgs.ForceSetMultiArgs("-debug", newMultiArgs);
-    gArgs.ForceSetArg("-debug", newMultiArgs[newMultiArgs.size() - 1]);
+    ForceSetMultiArgs("-debug", newMultiArgs);
+    ForceSetArg("-debug", newMultiArgs[newMultiArgs.size() - 1]);
 
-    fDebug = gArgs.GetArg("-debug", "") != "0";
+    fDebug = GetArg("-debug", "") != "0";
 
     return "Debug mode: " + (fDebug ? strMode : "off");
 }
@@ -169,13 +168,13 @@ UniValue dnsync(const JSONRPCRequest& request)
     }
 
     if (strMode == "next") {
-        dynodeSync.SwitchToNextAsset(g_connman.get());
+        dynodeSync.SwitchToNextAsset(*g_connman);
         return "sync updated to " + dynodeSync.GetAssetName();
     }
 
     if (strMode == "reset") {
         dynodeSync.Reset();
-        dynodeSync.SwitchToNextAsset(g_connman.get());
+        dynodeSync.SwitchToNextAsset(*g_connman);
         return "success";
     }
     return "failure";
@@ -212,7 +211,7 @@ public:
             obj.push_back(Pair("script", GetTxnOutputType(whichType)));
             obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
             UniValue a(UniValue::VARR);
-            for (const CTxDestination& addr : addresses)
+            BOOST_FOREACH (const CTxDestination& addr, addresses)
                 a.push_back(CDynamicAddress(addr).ToString());
             obj.push_back(Pair("addresses", a));
             if (whichType == TX_MULTISIG)
@@ -290,7 +289,7 @@ UniValue spork(const JSONRPCRequest& request)
         int64_t nValue = request.params[1].get_int64();
 
         //broadcast new spork
-        if (sporkManager.UpdateSpork(nSporkID, nValue, g_connman.get())) {
+        if (sporkManager.UpdateSpork(nSporkID, nValue, *g_connman)) {
             sporkManager.ExecuteSpork(nSporkID, nValue);
             return "success";
         } else {
@@ -335,7 +334,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
             HelpExampleCli("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"") + HelpExampleRpc("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
 #endif
@@ -1129,7 +1128,7 @@ UniValue getstakingstatus(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_PROOF_OF_STAKE_INACTIVE, strprintf("Proof of Stake is not yet activated."));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
 #endif

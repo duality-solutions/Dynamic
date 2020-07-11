@@ -13,7 +13,7 @@
 #include "pubkey.h"
 #include "wallet/wallet.h"
 
-CLinkManager* pLinkManager = nullptr;
+CLinkManager* pLinkManager = NULL;
 
 //#ifdef ENABLE_WALLET
 

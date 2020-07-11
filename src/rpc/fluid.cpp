@@ -25,7 +25,6 @@
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validation.h"
-#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
@@ -34,7 +33,7 @@
 #include <cmath>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, const CCoinControl& coinControl, CAmount nValue, bool fUseInstantSend = false);
+extern void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
 extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
 
 struct DynodeCompareTimeStamp {
@@ -251,8 +250,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE || opcode == OP_REWARD_STAKE) {
         CWalletTx wtx;
-        CCoinControl coinControl;
-        SendCustomTransaction(finalScript, wtx, coinControl, fluid.FLUID_TRANSACTION_COST, false);
+        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
     } else {
         throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", request.params[0].get_str()));

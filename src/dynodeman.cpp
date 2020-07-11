@@ -89,7 +89,7 @@ bool CDynodeMan::Add(CDynode& dn)
     return true;
 }
 
-void CDynodeMan::AskForDN(CNode* pnode, const COutPoint& outpoint, CConnman* connman)
+void CDynodeMan::AskForDN(CNode* pnode, const COutPoint& outpoint, CConnman& connman)
 {
     if (!pnode)
         return;
@@ -119,9 +119,9 @@ void CDynodeMan::AskForDN(CNode* pnode, const COutPoint& outpoint, CConnman* con
     mWeAskedForDynodeListEntry[outpoint][addrSquashed] = GetTime() + PSEG_UPDATE_SECONDS;
 
     if (pnode->GetSendVersion() == 70900) {
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, CTxIn(outpoint)));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, CTxIn(outpoint)));
     } else {
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, outpoint));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, outpoint));
     }
 }
 
@@ -177,7 +177,7 @@ void CDynodeMan::Check()
 }
 
 
-void CDynodeMan::CheckAndRemove(CConnman* connman)
+void CDynodeMan::CheckAndRemove(CConnman& connman)
 {
     if (!dynodeSync.IsDynodeListSynced())
         return;
@@ -214,7 +214,7 @@ void CDynodeMan::CheckAndRemove(CConnman* connman)
                             dynodeSync.IsSynced() &&
                             it->second.IsNewStartRequired() &&
                             !IsDnbRecoveryRequested(hash) &&
-                            !gArgs.IsArgSet("-connect");
+                            !IsArgSet("-connect");
                 if (fAsk) {
                     // this DN is in a non-recoverable state and we haven't asked other nodes yet
                     std::set<CService> setRequested;
@@ -420,7 +420,7 @@ int CDynodeMan::CountByIP(int nNetworkType)
 }
 */
 
-void CDynodeMan::PsegUpdate(CNode* pnode, CConnman* connman)
+void CDynodeMan::PsegUpdate(CNode* pnode, CConnman& connman)
 {
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
     LOCK(cs);
@@ -437,9 +437,9 @@ void CDynodeMan::PsegUpdate(CNode* pnode, CConnman* connman)
     }
 
     if (pnode->GetSendVersion() == 70900) {
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, CTxIn()));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, CTxIn()));
     } else {
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, COutPoint()));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSEG, COutPoint()));
     }
     int64_t askAgain = GetTime() + PSEG_UPDATE_SECONDS;
     mWeAskedForDynodeList[pnode->addr] = askAgain;
@@ -729,7 +729,7 @@ bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, 
     return true;
 }
 
-void CDynodeMan::ProcessDynodeConnections(CConnman* connman)
+void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
 {
     //we don't care about this for regtest
     if (Params().NetworkIDString() == CBaseChainParams::REGTEST)
@@ -740,7 +740,7 @@ void CDynodeMan::ProcessDynodeConnections(CConnman* connman)
     privateSendClient.GetMixingDynodesInfo(vecDnInfo);
 #endif // ENABLE_WALLET
 
-    connman->ForEachNode(CConnman::AllNodes, [&vecDnInfo](CNode* pnode) {
+    connman.ForEachNode(CConnman::AllNodes, [&vecDnInfo](CNode* pnode) {
         if (pnode->fDynode) {
 #ifdef ENABLE_WALLET
             bool fFound = false;
@@ -787,19 +787,19 @@ std::pair<CService, std::set<uint256> > CDynodeMan::PopScheduledDnbRequestConnec
     return std::make_pair(pairFront.first, setResult);
 }
 
-void CDynodeMan::ProcessPendingDnbRequests(CConnman* connman)
+void CDynodeMan::ProcessPendingDnbRequests(CConnman& connman)
 {
     std::pair<CService, std::set<uint256> > p = PopScheduledDnbRequestConnection();
     if (!(p.first == CService() || p.second.empty())) {
-        if (connman->IsDynodeOrDisconnectRequested(p.first))
+        if (connman.IsDynodeOrDisconnectRequested(p.first))
             return;
         mapPendingDNB.insert(std::make_pair(p.first, std::make_pair(GetTime(), p.second)));
-        connman->AddPendingDynode(p.first);
+        connman.AddPendingDynode(p.first);
     }
 
     std::map<CService, std::pair<int64_t, std::set<uint256> > >::iterator itPendingDNB = mapPendingDNB.begin();
     while (itPendingDNB != mapPendingDNB.end()) {
-        bool fDone = connman->ForNode(itPendingDNB->first, [&](CNode* pnode) {
+        bool fDone = connman.ForNode(itPendingDNB->first, [&](CNode* pnode) {
             // compile request vector
             std::vector<CInv> vToFetch;
             for (auto& nHash : itPendingDNB->second.second) {
@@ -811,7 +811,7 @@ void CDynodeMan::ProcessPendingDnbRequests(CConnman* connman)
 
             // ask for data
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
-            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
+            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
             return true;
         });
 
@@ -827,7 +827,7 @@ void CDynodeMan::ProcessPendingDnbRequests(CConnman* connman)
     }
 }
 
-void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality
@@ -848,7 +848,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDa
 
         if (CheckDnbAndUpdateDynodeList(pfrom, dnb, nDos, connman)) {
             // use announced Dynode as a peer
-            connman->AddNewAddress(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2 * 60 * 60);
+            connman.AddNewAddress(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2 * 60 * 60);
         } else if (nDos > 0) {
             LOCK(cs_main);
             Misbehaving(pfrom->GetId(), nDos);
@@ -897,7 +897,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDa
         if (nDos > 0) {
             // if anything significant failed, mark that node
             Misbehaving(pfrom->GetId(), nDos);
-        } else if (pdn != nullptr) {
+        } else if (pdn != NULL) {
             // nothing significant failed, dn is a known one too
             return;
         }
@@ -957,7 +957,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDa
     }
 }
 
-void CDynodeMan::SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman* connman)
+void CDynodeMan::SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman& connman)
 {
     // do not provide any data until our node is synced
     if (!dynodeSync.IsSynced())
@@ -977,7 +977,7 @@ void CDynodeMan::SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman* c
     }
 }
 
-void CDynodeMan::SyncAll(CNode* pnode, CConnman* connman)
+void CDynodeMan::SyncAll(CNode* pnode, CConnman& connman)
 {
     // do not provide any data until our node is synced
     if (!dynodeSync.IsSynced())
@@ -1014,7 +1014,7 @@ void CDynodeMan::SyncAll(CNode* pnode, CConnman* connman)
         nInvCount++;
     }
 
-    connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_LIST, nInvCount));
+    connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_LIST, nInvCount));
     LogPrintf("CDynodeMan::%s -- Sent %d Dynode invs to peer=%d\n", __func__, nInvCount, pnode->id);
 }
 
@@ -1034,7 +1034,7 @@ void CDynodeMan::PushPsegInvs(CNode* pnode, const CDynode& dn)
 
 // Verification of Dynode via unique direct requests.
 
-void CDynodeMan::DoFullVerificationStep(CConnman* connman)
+void CDynodeMan::DoFullVerificationStep(CConnman& connman)
 {
     if (activeDynode.outpoint == COutPoint())
         return;
@@ -1173,7 +1173,7 @@ void CDynodeMan::CheckSameAddr()
     }
 }
 
-bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<const CDynode*>& vSortedByAddr, CConnman* connman)
+bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<const CDynode*>& vSortedByAddr, CConnman& connman)
 {
     if (netfulfilledman.HasFulfilledRequest(addr, strprintf("%s", NetMsgType::DNVERIFY) + "-request")) {
         // we already asked for verification, not a good idea to do this too often, skip it
@@ -1181,10 +1181,10 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<const
         return false;
     }
 
-    if (connman->IsDynodeOrDisconnectRequested(addr))
+    if (connman.IsDynodeOrDisconnectRequested(addr))
         return false;
 
-    connman->AddPendingDynode(addr);
+    connman.AddPendingDynode(addr);
     // use random nonce, store it and require node to reply with correct one later
     CDynodeVerification dnv(addr, GetRandInt(999999), nCachedBlockHeight - 1);
     LOCK(cs_mapPendingDNV);
@@ -1193,20 +1193,20 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<const
     return true;
 }
 
-void CDynodeMan::ProcessPendingDnvRequests(CConnman* connman)
+void CDynodeMan::ProcessPendingDnvRequests(CConnman& connman)
 {
     LOCK(cs_mapPendingDNV);
 
     std::map<CService, std::pair<int64_t, CDynodeVerification> >::iterator itPendingDNV = mapPendingDNV.begin();
 
     while (itPendingDNV != mapPendingDNV.end()) {
-        bool fDone = connman->ForNode(itPendingDNV->first, [&](CNode* pnode) {
+        bool fDone = connman.ForNode(itPendingDNV->first, [&](CNode* pnode) {
             netfulfilledman.AddFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY) + "-request");
             // use random nonce, store it and require node to reply with correct one later
             mWeAskedForVerification[pnode->addr] = itPendingDNV->second.second;
             LogPrint("dynode", "-- verifying node using nonce %d addr=%s\n", itPendingDNV->second.second.nonce, pnode->addr.ToString());
             CNetMsgMaker msgMaker(pnode->GetSendVersion()); // TODO this gives a warning about version not being set (we should wait for VERSION exchange)
-            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::DNVERIFY, itPendingDNV->second.second));
+            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::DNVERIFY, itPendingDNV->second.second));
             return true;
         });
 
@@ -1222,7 +1222,7 @@ void CDynodeMan::ProcessPendingDnvRequests(CConnman* connman)
     }
 }
 
-void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman* connman)
+void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman& connman)
 {
     AssertLockHeld(cs_main);
 
@@ -1275,7 +1275,7 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
     }
 
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::DNVERIFY, dnv));
+    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::DNVERIFY, dnv));
     netfulfilledman.AddFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY) + "-reply");
 }
 
@@ -1547,7 +1547,7 @@ std::string CDynodeMan::ToString() const
     return info.str();
 }
 
-bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos, CConnman* connman)
+bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos, CConnman& connman)
 {
     // Need to lock cs_main here to ensure consistent locking order because the SimpleCheck call below locks cs_main
     LOCK(cs_main);
@@ -1786,7 +1786,7 @@ void CDynodeMan::WarnDynodeDaemonUpdates()
     fWarned = true;
 }
 
-void CDynodeMan::NotifyDynodeUpdates(CConnman* connman)
+void CDynodeMan::NotifyDynodeUpdates(CConnman& connman)
 {
     // Avoid double locking
     bool fDynodesAddedLocal = false;
@@ -1810,7 +1810,7 @@ void CDynodeMan::NotifyDynodeUpdates(CConnman* connman)
     fDynodesRemoved = false;
 }
 
-void CDynodeMan::DoMaintenance(CConnman* connman)
+void CDynodeMan::DoMaintenance(CConnman& connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality

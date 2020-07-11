@@ -23,6 +23,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
 std::map<uint256, CAlert> mapAlerts;
@@ -49,10 +50,10 @@ void CUnsignedAlert::SetNull()
 std::string CUnsignedAlert::ToString() const
 {
     std::string strSetCancel;
-    for (int n : setCancel)
+    BOOST_FOREACH (int n, setCancel)
         strSetCancel += strprintf("%d ", n);
     std::string strSetSubVer;
-    for (const std::string& str : setSubVer)
+    BOOST_FOREACH (const std::string& str, setSubVer)
         strSetSubVer += "\"" + str + "\" ";
     return strprintf(
         "CAlert(\n"
@@ -125,7 +126,7 @@ bool CAlert::AppliesToMe() const
     return AppliesTo(PROTOCOL_VERSION, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<std::string>()));
 }
 
-bool CAlert::RelayTo(CNode* pnode, CConnman* connman) const
+bool CAlert::RelayTo(CNode* pnode, CConnman& connman) const
 {
     if (!IsInEffect())
         return false;
@@ -137,7 +138,7 @@ bool CAlert::RelayTo(CNode* pnode, CConnman* connman) const
         if (AppliesTo(pnode->nVersion, pnode->strSubVer) ||
             AppliesToMe() ||
             GetAdjustedTime() < nRelayUntil) {
-            connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::ALERT, *this));
+            connman.PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::ALERT, *this));
             return true;
         }
     }
@@ -150,7 +151,7 @@ bool CAlert::Sign()
     sMsg << *(CUnsignedAlert*)this;
     vchMsg = std::vector<unsigned char>(sMsg.begin(), sMsg.end());
     CDynamicSecret vchSecret;
-    if (!vchSecret.SetString(gArgs.GetArg("-alertkey", ""))) {
+    if (!vchSecret.SetString(GetArg("-alertkey", ""))) {
         printf("CAlert::SignAlert() : vchSecret.SetString failed\n");
         return false;
     }
@@ -232,7 +233,7 @@ bool CAlert::ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThre
         }
 
         // Check if this alert has been cancelled
-        for (std::pair<const uint256, CAlert>& item : mapAlerts) {
+        BOOST_FOREACH (PAIRTYPE(const uint256, CAlert) & item, mapAlerts) {
             const CAlert& alert = item.second;
             if (alert.Cancels(*this)) {
                 LogPrint("alert", "alert already cancelled by %d\n", alert.nID);
@@ -255,7 +256,7 @@ bool CAlert::ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThre
 
 void CAlert::Notify(const std::string& strMessage, bool fThread)
 {
-    std::string strCmd = gArgs.GetArg("-alertnotify", "");
+    std::string strCmd = GetArg("-alertnotify", "");
     if (strCmd.empty())
         return;
 

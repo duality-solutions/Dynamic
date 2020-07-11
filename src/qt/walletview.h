@@ -14,23 +14,18 @@
 
 #include <QStackedWidget>
 
-class AddressBookPage;
-class BdapPage;
-class ClientModel;
 class DynamicGUI;
+class ClientModel;
 class MiningPage;
+class BdapPage;
 class OverviewPage;
 class PlatformStyle;
-class ReceiveCoinsDialog;
 class SendCoinsDialog;
 class SendCoinsRecipient;
+class ReceiveCoinsDialog;
+class AddressBookPage;
 class TransactionView;
 class WalletModel;
-
-class AssetsDialog;
-class CreateAssetDialog;
-class ReissueAssetDialog;
-class RestrictedAssetsDialog;
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -86,13 +81,6 @@ private:
     QLabel* transactionSum;
     const PlatformStyle* platformStyle;
 
-    /** ASSET START */
-    AssetsDialog* assetsPage;
-    CreateAssetDialog* createAssetsPage;
-    ReissueAssetDialog* manageAssetsPage;
-    RestrictedAssetsDialog* restrictedAssetsPage;
-    /** ASSET END */
-
 public Q_SLOTS:
     /** Switch to overview (home) page */
     void gotoOverviewPage();
@@ -120,7 +108,7 @@ public Q_SLOTS:
 
         The new items are those between start and end inclusive, under the given parent item.
     */
-    void processNewTransaction(const QModelIndex& parent, int start, int end);
+    void processNewTransaction(const QModelIndex& parent, int start, int /*end*/);
     /** Encrypt the wallet */
     void encryptWallet(bool status);
     /** Backup the wallet */
@@ -152,16 +140,6 @@ public Q_SLOTS:
     /** Update selected DYN amount from transactionview */
     void trxAmount(QString amount);
 
-    /** ASSET START */
-    /** Switch to assets page */
-
-    void gotoAssetsPage();
-    void gotoCreateAssetsPage();
-    void gotoManageAssetsPage();
-    void gotoRestrictedAssetsPage();
-
-    /** ASSET END */
-
 Q_SIGNALS:
     /** Signal that we want to show the main window */
     void showNormalIfMinimized();
@@ -172,11 +150,9 @@ Q_SIGNALS:
     /** HD-Enabled status of wallet changed (only possible during startup) */
     void hdEnabledStatusChanged(int hdEnabled);
     /** Notify that a new transaction appeared */
-    void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName);
+    void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
     /** Notify that the out of sync warning icon has been pressed */
     void outOfSyncWarningClicked();
-    /** Show the assets GUI */
-    void checkAssets();
 };
 
 #endif // DYNAMIC_QT_WALLETVIEW_H

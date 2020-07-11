@@ -15,7 +15,6 @@
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
-#include "fs.h"
 #include "protocol.h"
 #include "serialize.h"
 #include "sync.h"
@@ -27,6 +26,7 @@
 #include <atomic>
 
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
 static uint64_t nAccountingEntryNumber = 0;
@@ -354,7 +354,7 @@ CAmount CWalletDB::GetAccountCreditDebit(const std::string& strAccount)
     ListAccountCreditDebit(strAccount, entries);
 
     CAmount nCreditDebit = 0;
-    for (const CAccountingEntry& entry : entries)
+    BOOST_FOREACH (const CAccountingEntry& entry, entries)
         nCreditDebit += entry.nCreditDebit;
 
     return nCreditDebit;
@@ -443,15 +443,8 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             CWalletTx wtx;
             ssValue >> wtx;
             CValidationState state;
-            if (!(CheckTransaction(wtx, state) && (wtx.GetHash() == hash) && state.IsValid())) {
-                // If a client has a wallet.dat that contains asset transactions, but we are syncing the chain.
-                // we want to make sure that we don't fail to load this wallet transaction just because it is an asset transaction
-                // before asset are active
-                if (state.GetRejectReason() != "bad-txns-is-asset-and-asset-not-active" && state.GetRejectReason() != "bad-txns-transfer-asset-bad-deserialize") {
-                    strErr = state.GetRejectReason();
-                    return false;
-                }
-            }
+            if (!(CheckTransaction(wtx, state) && (wtx.GetHash() == hash) && state.IsValid()))
+                return false;
 
             // Undo serialize changes in 31600
             if (31404 <= wtx.fTimeReceivedIsTxTime && wtx.fTimeReceivedIsTxTime <= 31703) {
@@ -838,7 +831,7 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
                     fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
                     if (strType == "tx")
                         // Rescan if there is a bad transaction record:
-                        gArgs.SoftSetBoolArg("-rescan", true);
+                        SoftSetBoolArg("-rescan", true);
                 }
             }
             if (!strErr.empty())
@@ -872,7 +865,7 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
     if ((wss.nKeys + wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta)
         pwallet->UpdateTimeFirstKey(1);
 
-    for (uint256 hash : wss.vWalletUpgrade)
+    BOOST_FOREACH (uint256 hash, wss.vWalletUpgrade)
         WriteTx(pwallet->mapWallet[hash]);
 
     // Rewrite encrypted wallets of versions 0.4.0 and 0.5.0rc:
@@ -887,7 +880,7 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
 
     pwallet->laccentries.clear();
     ListAccountCreditDebit("*", pwallet->laccentries);
-    for (CAccountingEntry& entry : pwallet->laccentries) {
+    BOOST_FOREACH (CAccountingEntry& entry, pwallet->laccentries) {
         pwallet->wtxOrdered.insert(make_pair(entry.nOrderPos, CWallet::TxPair((CWalletTx*)0, &entry)));
     }
 
@@ -970,7 +963,7 @@ DBErrors CWalletDB::ZapSelectTx(CWallet* pwallet, std::vector<uint256>& vTxHashI
     // erase each matching wallet TX
     bool delerror = false;
     std::vector<uint256>::iterator it = vTxHashIn.begin();
-    for (uint256 hash : vTxHash) {
+    BOOST_FOREACH (uint256 hash, vTxHash) {
         while (it < vTxHashIn.end() && (*it) < hash) {
             it++;
         }
@@ -1001,7 +994,7 @@ DBErrors CWalletDB::ZapWalletTx(CWallet* pwallet, std::vector<CWalletTx>& vWtx)
         return err;
 
     // erase each wallet TX
-    for (uint256& hash : vTxHash) {
+    BOOST_FOREACH (uint256& hash, vTxHash) {
         if (!EraseTx(hash))
             return DB_CORRUPT;
     }
@@ -1018,7 +1011,7 @@ void ThreadFlushWalletDB()
     if (fOneThread)
         return;
     fOneThread = true;
-    if (!gArgs.GetBoolArg("-flushwallet", DEFAULT_FLUSHWALLET))
+    if (!GetBoolArg("-flushwallet", DEFAULT_FLUSHWALLET))
         return;
 
     unsigned int nLastSeen = CWalletDB::GetUpdateCounter();
@@ -1080,7 +1073,7 @@ bool CWalletDB::Recover(CDBEnv& dbenv, const std::string& filename, bool fOnlyKe
     int64_t now = GetTime();
     std::string newFilename = strprintf("wallet.%d.bak", now);
 
-    int result = dbenv.dbenv->dbrename(nullptr, filename.c_str(), nullptr,
+    int result = dbenv.dbenv->dbrename(NULL, filename.c_str(), NULL,
         newFilename.c_str(), DB_AUTO_COMMIT);
     if (result == 0)
         LogPrintf("Renamed %s to %s\n", filename, newFilename);
@@ -1098,7 +1091,7 @@ bool CWalletDB::Recover(CDBEnv& dbenv, const std::string& filename, bool fOnlyKe
     LogPrintf("Salvage(aggressive) found %u records\n", salvagedData.size());
 
     std::unique_ptr<Db> pdbCopy(new Db(dbenv.dbenv.get(), 0));
-    int ret = pdbCopy->open(nullptr, // Txn pointer
+    int ret = pdbCopy->open(NULL, // Txn pointer
         filename.c_str(),         // Filename
         "main",                   // Logical db name
         DB_BTREE,                 // Database type
@@ -1112,7 +1105,7 @@ bool CWalletDB::Recover(CDBEnv& dbenv, const std::string& filename, bool fOnlyKe
     CWalletScanState wss;
 
     DbTxn* ptxn = dbenv.TxnBegin();
-    for (CDBEnv::KeyValPair& row : salvagedData) {
+    BOOST_FOREACH (CDBEnv::KeyValPair& row, salvagedData) {
         if (fOnlyKeys) {
             CDataStream ssKey(row.first, SER_DISK, CLIENT_VERSION);
             CDataStream ssValue(row.second, SER_DISK, CLIENT_VERSION);

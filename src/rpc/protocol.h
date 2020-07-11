@@ -10,8 +10,6 @@
 
 #include <univalue.h>
 
-#include "fs.h"
-
 #include <list>
 #include <map>
 #include <stdint.h>

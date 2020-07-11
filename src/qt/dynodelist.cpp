@@ -120,14 +120,14 @@ void DynodeList::StartAlias(std::string strAlias)
             bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
             int nDoS;
-            if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
+            if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
                 strError = "Failed to verify DNB";
                 fSuccess = false;
             }
 
             if (fSuccess) {
                 strStatusHtml += "<br>Successfully started Dynode.";
-                dnodeman.NotifyDynodeUpdates(g_connman.get());
+                dnodeman.NotifyDynodeUpdates(*g_connman);
             } else {
                 strStatusHtml += "<br>Failed to start Dynode.<br>Error: " + strError;
             }
@@ -166,14 +166,14 @@ void DynodeList::StartAll(std::string strCommand)
         bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
         int nDoS;
-        if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
+        if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
             strError = "Failed to verify DNB";
             fSuccess = false;
         }
 
         if (fSuccess) {
             nCountSuccessful++;
-            dnodeman.NotifyDynodeUpdates(g_connman.get());
+            dnodeman.NotifyDynodeUpdates(*g_connman);
         } else {
             nCountFailed++;
             strFailedHtml += "\nFailed to start " + dne.getAlias() + ". Error: " + strError;

@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_ENTRYCHECKPOINT_H
 #define DYNAMIC_BDAP_ENTRYCHECKPOINT_H
 
-#include "bdap/bdap.h"
+#include "bdap.h"
 #include "bdap/domainentry.h"
 #include "serialize.h"
 #include "uint256.h"

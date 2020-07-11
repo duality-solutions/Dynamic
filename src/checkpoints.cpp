@@ -9,7 +9,6 @@
 
 #include "chain.h"
 #include "chainparams.h"
-#include "reverse_iterator.h"
 #include "uint256.h"
 #include "validation.h"
 
@@ -23,15 +22,14 @@ CBlockIndex* GetLastCheckpoint(const CCheckpointData& data)
 {
     const MapCheckpoints& checkpoints = data.mapCheckpoints;
 
-        for (const MapCheckpoints::value_type& i : reverse_iterate(checkpoints))
-        {
-            const uint256& hash = i.second;
-            BlockMap::const_iterator t = mapBlockIndex.find(hash);
-            if (t != mapBlockIndex.end())
-                return t->second;
-        }
-        return nullptr;
+    BOOST_REVERSE_FOREACH (const MapCheckpoints::value_type& i, checkpoints) {
+        const uint256& hash = i.second;
+        BlockMap::const_iterator t = mapBlockIndex.find(hash);
+        if (t != mapBlockIndex.end())
+            return t->second;
     }
+    return NULL;
+}
 
 bool fEnabled = true;
 

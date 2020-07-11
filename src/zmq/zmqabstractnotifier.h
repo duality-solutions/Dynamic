@@ -10,7 +10,6 @@
 class CBlockIndex;
 class CGovernanceObject;
 class CGovernanceVote;
-class CMessage;
 class CZMQAbstractNotifier;
 
 typedef CZMQAbstractNotifier* (*CZMQNotifierFactory)();
@@ -41,7 +40,6 @@ public:
     virtual bool NotifyGovernanceVote(const CGovernanceVote &vote);
     virtual bool NotifyGovernanceObject(const CGovernanceObject &object);
     virtual bool NotifyInstantSendDoubleSpendAttempt(const CTransaction &currentTx, const CTransaction &previousTx);
-    virtual bool NotifyMessage(const CMessage& message);
 
 
 protected:

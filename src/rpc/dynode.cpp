@@ -59,7 +59,7 @@ UniValue privatesend(const JSONRPCRequest& request)
         }
 
         privateSendClient.fEnablePrivateSend = true;
-        bool result = privateSendClient.DoAutomaticDenominating(g_connman.get());
+        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
         return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatuses() + ", will retry"));
     }
 
@@ -236,7 +236,7 @@ UniValue dynode(const JSONRPCRequest& request)
         int nCount;
         int nHeight;
         dynode_info_t dnInfo;
-        CBlockIndex* pindex = nullptr;
+        CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
             pindex = chainActive.Tip();
@@ -288,7 +288,7 @@ UniValue dynode(const JSONRPCRequest& request)
                 bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
                 int nDoS;
-                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
+                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
                     strError = "Failed to verify DNB";
                     fResult = false;
                 }
@@ -297,7 +297,7 @@ UniValue dynode(const JSONRPCRequest& request)
                 if (!fResult) {
                     statusObj.push_back(Pair("errorMessage", strError));
                 }
-                dnodeman.NotifyDynodeUpdates(g_connman.get());
+                dnodeman.NotifyDynodeUpdates(*g_connman);
                 break;
             }
         }
@@ -344,7 +344,7 @@ UniValue dynode(const JSONRPCRequest& request)
             bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
             int nDoS;
-            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDoS, g_connman.get())) {
+            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
                 strError = "Failed to verify DNB";
                 fResult = false;
             }
@@ -362,7 +362,7 @@ UniValue dynode(const JSONRPCRequest& request)
 
             resultsObj.push_back(Pair("status", statusObj));
         }
-        dnodeman.NotifyDynodeUpdates(g_connman.get());
+        dnodeman.NotifyDynodeUpdates(*g_connman);
 
         UniValue returnObj(UniValue::VOBJ);
         returnObj.push_back(Pair("overall", strprintf("Successfully started %d dynodes, failed to start %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
@@ -408,7 +408,7 @@ UniValue dynode(const JSONRPCRequest& request)
 
         // Find possible candidates
         std::vector<COutput> vPossibleCoins;
-        pwalletMain->AvailableCoins(vPossibleCoins, true, nullptr, false, ONLY_1000);
+        pwalletMain->AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
 
         UniValue obj(UniValue::VOBJ);
         for (const auto& out : vPossibleCoins) {
@@ -522,7 +522,7 @@ UniValue dynodelist(const JSONRPCRequest& request)
     }
 
     if (strMode == "full" || strMode == "json" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-        CBlockIndex* pindex = nullptr;
+        CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
             pindex = chainActive.Tip();
@@ -862,8 +862,8 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
             int nDos = 0;
             bool fResult;
             if (dnb.CheckSignature(nDos)) {
-                fResult = dnodeman.CheckDnbAndUpdateDynodeList(nullptr, dnb, nDos, g_connman.get());
-                dnodeman.NotifyDynodeUpdates(g_connman.get());
+                fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
+                dnodeman.NotifyDynodeUpdates(*g_connman);
             } else
                 fResult = false;
 

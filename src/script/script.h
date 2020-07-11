@@ -8,11 +8,9 @@
 #ifndef DYNAMIC_SCRIPT_SCRIPT_H
 #define DYNAMIC_SCRIPT_SCRIPT_H
 
-#include "amount.h"
 #include "crypto/common.h"
 #include "prevector.h"
 #include "pubkey.h"
-#include "serialize.h"
 
 #include <assert.h>
 #include <climits>
@@ -215,19 +213,12 @@ enum opcodetype {
     OP_BDAP_SIDECHAIN_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
     OP_BDAP_ASSET = 0x0f,                // = BDAP asset
 
-    /** ASSET START */
-    OP_DYN_ASSET = 0xd0,
-    /** ASSET END */
-
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
     // invalid operation code
     OP_INVALIDOPCODE = 0xff,
 };
-
-// Maximum value that an opcode can be
-static const unsigned int MAX_OPCODE = OP_NOP10;
 
 const char* GetOpName(opcodetype opcode);
 
@@ -541,7 +532,7 @@ public:
     bool GetOp(iterator& pc, opcodetype& opcodeRet)
     {
         const_iterator pc2 = pc;
-        bool fRet = GetOp2(pc2, opcodeRet, nullptr);
+        bool fRet = GetOp2(pc2, opcodeRet, NULL);
         pc = begin() + (pc2 - begin());
         return fRet;
     }
@@ -553,7 +544,7 @@ public:
 
     bool GetOp(const_iterator& pc, opcodetype& opcodeRet) const
     {
-        return GetOp2(pc, opcodeRet, nullptr);
+        return GetOp2(pc, opcodeRet, NULL);
     }
 
     bool GetOp2(const_iterator& pc, opcodetype& opcodeRet, std::vector<unsigned char>* pvchRet) const
@@ -669,22 +660,6 @@ public:
 
     bool IsPayToScriptHash() const;
 
-    /** ASSET START */
-    enum class txnouttype;
-    bool IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const;
-    bool IsAssetScript(int& nType, bool& fIsOwner) const;
-    bool IsAssetScript() const;
-    bool IsNewAsset() const;
-    bool IsOwnerAsset() const;
-    bool IsReissueAsset() const;
-    bool IsTransferAsset() const;
-    bool IsAsset() const;
-    bool IsNullAsset() const; // Checks all three of the nullptr Asset Tx types
-    bool IsNullAssetTxDataScript() const;
-    bool IsNullAssetVerifierTxDataScript() const;
-    bool IsNullGlobalRestrictionAssetTxDataScript() const;
-    /** ASSET END */
-    
     /** Used for obsolete pay-to-pubkey addresses indexing. */
     bool IsPayToPublicKey() const;
 
@@ -692,16 +667,15 @@ public:
     bool IsPushOnly(const_iterator pc) const;
     bool IsPushOnly() const;
 
-    /** Check if the script contains valid OP_CODES */
-    bool HasValidOps() const;
-    
     /**
      * Returns whether the script is guaranteed to fail at execution,
      * regardless of the initial stack. This allows outputs to be pruned
      * instantly when entering the UTXO set.
      */
-    bool IsUnspendable() const;
-
+    bool IsUnspendable() const
+    {
+        return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
+    }
 
     bool IsProtocolInstruction(const ProtocolCodes& code) const
     {
@@ -797,17 +771,6 @@ public:
     CReserveScript() {}
     virtual ~CReserveScript() {}
 };
-
-//! These are needed because script.h and script.cpp do not have access to asset.h and asset.cpp functions. This is
-//! because the make file compiles them at different times. This is becauses script files are compiled with other
-//! consensus files, and asset files are compiled with core files
-bool GetAssetAmountFromScript(const CScript& script, CAmount& nAmount);
-bool AmountFromNewAssetScript(const CScript& scriptPubKey, CAmount& nAmount);
-bool AmountFromTransferScript(const CScript& scriptPubKey, CAmount& nAmount);
-bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount);
-bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
-bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
-bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
 // TODO: Use a seperate code file for these BDAP functions
 bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);

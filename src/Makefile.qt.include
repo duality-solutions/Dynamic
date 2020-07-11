@@ -25,8 +25,6 @@ QT_TS = \
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
-  qt/forms/assetcontroldialog.ui \
-  qt/forms/assetsdialog.ui \
   qt/forms/bdapaddlinkdialog.ui \
   qt/forms/bdapadduserdialog.ui \
   qt/forms/bdaplinkdetaildialog.ui \
@@ -34,7 +32,6 @@ QT_FORMS_UI = \
   qt/forms/bdapupdateaccountdialog.ui \
   qt/forms/bdapuserdetaildialog.ui \
   qt/forms/coincontroldialog.ui \
-  qt/forms/createassetdialog.ui \
   qt/forms/dynodelist.ui \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
@@ -49,12 +46,7 @@ QT_FORMS_UI = \
   qt/forms/privatesendconfig.ui \
   qt/forms/receivecoinsdialog.ui \
   qt/forms/receiverequestdialog.ui \
-  qt/forms/reissueassetdialog.ui \
-  qt/forms/restrictedassetsdialog.ui \
-  qt/forms/restrictedassignqualifier.ui \
-  qt/forms/restrictedfreezeaddress.ui \
   qt/forms/rpcconsole.ui \
-  qt/forms/sendassetsentry.ui \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
@@ -64,11 +56,6 @@ QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
   qt/moc_addresstablemodel.cpp \
   qt/moc_askpassphrasedialog.cpp \
-  qt/moc_assetcontroldialog.cpp \
-  qt/moc_assetcontroltreewidget.cpp \
-  qt/moc_assetsdialog.cpp \
-  qt/moc_assetfilterproxy.cpp \
-  qt/moc_assettablemodel.cpp \
   qt/moc_bantablemodel.cpp \
   qt/moc_bdapaccounttablemodel.cpp \
   qt/moc_bdapaddlinkdialog.cpp \
@@ -82,7 +69,6 @@ QT_MOC_CPP = \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
-  qt/moc_createassetdialog.cpp \
   qt/moc_csvmodelwriter.cpp \
   qt/moc_dynamicaddressvalidator.cpp \
   qt/moc_dynamicamountfield.cpp \
@@ -99,7 +85,6 @@ QT_MOC_CPP = \
   qt/moc_mnemonicdialog.cpp \
   qt/moc_modaloverlay.cpp \
   qt/moc_multisenddialog.cpp \
-  qt/moc_myrestrictedassettablemodel.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
   qt/moc_optionsdialog.cpp \
@@ -113,12 +98,7 @@ QT_MOC_CPP = \
   qt/moc_receivecoinsdialog.cpp \
   qt/moc_receiverequestdialog.cpp \
   qt/moc_recentrequeststablemodel.cpp \
-  qt/moc_reissueassetdialog.cpp \
-  qt/moc_restrictedassetsdialog.cpp \
-  qt/moc_restrictedassignqualifier.cpp \
-  qt/moc_restrictedfreezeaddress.cpp \
   qt/moc_rpcconsole.cpp \
-  qt/moc_sendassetsentry.cpp \
   qt/moc_sendcoinsdialog.cpp \
   qt/moc_sendcoinsentry.cpp \
   qt/moc_signverifymessagedialog.cpp \
@@ -158,12 +138,6 @@ DYNAMIC_QT_H = \
   qt/addressbookpage.h \
   qt/addresstablemodel.h \
   qt/askpassphrasedialog.h \
-  qt/assetcontroldialog.h \
-  qt/assetcontroltreewidget.h \
-  qt/assetsdialog.h \
-  qt/assetfilterproxy.h \
-  qt/assetrecord.h \
-  qt/assettablemodel.h \
   qt/bantablemodel.h \
   qt/bdapaccounttablemodel.h \
   qt/bdapaddlinkdialog.h \
@@ -177,7 +151,6 @@ DYNAMIC_QT_H = \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
-  qt/createassetdialog.h \
   qt/csvmodelwriter.h \
   qt/dynamicaddressvalidator.h \
   qt/dynamicamountfield.h \
@@ -195,8 +168,6 @@ DYNAMIC_QT_H = \
   qt/mnemonicdialog.h \
   qt/modaloverlay.h \
   qt/multisenddialog.h \
-  qt/myrestrictedassettablemodel.h \
-  qt/myrestrictedassetrecord.h \
   qt/networkstyle.h \
   qt/notificator.h \
   qt/openuridialog.h \
@@ -213,12 +184,7 @@ DYNAMIC_QT_H = \
   qt/receivecoinsdialog.h \
   qt/receiverequestdialog.h \
   qt/recentrequeststablemodel.h \
-  qt/reissueassetdialog.h \
-  qt/restrictedassetsdialog.h \
-  qt/restrictedassignqualifier.h \
-  qt/restrictedfreezeaddress.h \
   qt/rpcconsole.h \
-  qt/sendassetsentry.h \
   qt/sendcoinsdialog.h \
   qt/sendcoinsentry.h \
   qt/signverifymessagedialog.h \
@@ -246,14 +212,6 @@ RES_ICONS = \
   qt/res/icons/drk/about_qt.png \
   qt/res/icons/drk/add.png \
   qt/res/icons/drk/address-book.png \
-  qt/res/icons/drk/asset_administrator.png \
-  qt/res/icons/drk/asset_administrator_dark.png \
-  qt/res/icons/drk/asset_create.png \
-  qt/res/icons/drk/asset_create_selected.png \
-  qt/res/icons/drk/asset_manage.png \
-  qt/res/icons/drk/asset_manage_selected.png \
-  qt/res/icons/drk/asset_transfer.png \
-  qt/res/icons/drk/asset_transfer_selected.png \
   qt/res/icons/drk/bdap.png \
   qt/res/icons/drk/browse.png \
   qt/res/icons/drk/chevron.png \
@@ -306,8 +264,6 @@ RES_ICONS = \
   qt/res/icons/drk/transaction_conflicted.png \
   qt/res/icons/drk/transaction0.png \
   qt/res/icons/drk/transaction2.png \
-  qt/res/icons/drk/tx_asset_input.png \
-  qt/res/icons/drk/tx_asset_output.png \
   qt/res/icons/drk/tx_inout.png \
   qt/res/icons/drk/tx_input.png \
   qt/res/icons/drk/tx_mined.png \
@@ -338,7 +294,6 @@ DYNAMIC_QT_CPP = \
   qt/notificator.cpp \
   qt/optionsdialog.cpp \
   qt/optionsmodel.cpp \
-  qt/assettablemodel.cpp \
   qt/peertablemodel.cpp \
   qt/platformstyle.cpp \
   qt/qvalidatedlineedit.cpp \
@@ -358,10 +313,6 @@ DYNAMIC_QT_CPP += \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \
-  qt/assetcontroldialog.cpp \
-  qt/assetcontroltreewidget.cpp \
-  qt/assetsdialog.cpp \
-  qt/assetfilterproxy.cpp \
   qt/bdapaddlinkdialog.cpp \
   qt/bdapadduserdialog.cpp \
   qt/bdapfeespopup.cpp \
@@ -371,15 +322,12 @@ DYNAMIC_QT_CPP += \
   qt/bdapuserdetaildialog.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \
-  qt/createassetdialog.cpp \
   qt/dynodelist.cpp \
   qt/editaddressdialog.cpp \
   qt/hashrategraphwidget.cpp \
   qt/miningpage.cpp \
   qt/mnemonicdialog.cpp \
   qt/multisenddialog.cpp \
-  qt/myrestrictedassettablemodel.cpp \
-  qt/myrestrictedassetrecord.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
   qt/paymentrequestplus.cpp \
@@ -388,11 +336,6 @@ DYNAMIC_QT_CPP += \
   qt/receivecoinsdialog.cpp \
   qt/receiverequestdialog.cpp \
   qt/recentrequeststablemodel.cpp \
-  qt/reissueassetdialog.cpp \
-  qt/restrictedassetsdialog.cpp \
-  qt/restrictedassignqualifier.cpp \
-  qt/restrictedfreezeaddress.cpp \
-  qt/sendassetsentry.cpp \
   qt/sendcoinsdialog.cpp \
   qt/sendcoinsentry.cpp \
   qt/signverifymessagedialog.cpp \

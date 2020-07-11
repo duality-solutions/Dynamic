@@ -19,7 +19,7 @@
 #include <boost/thread.hpp>
 
 
-CDomainEntryDB *pDomainEntryDB = nullptr;
+CDomainEntryDB *pDomainEntryDB = NULL;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
 {
@@ -194,7 +194,7 @@ bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
 
 void CDomainEntryDB::WriteDomainEntryIndexHistory(const CDomainEntry& entry, const int op) 
 {
-    if (gArgs.IsArgSet("-zmqpubbdaphistory")) {
+    if (IsArgSet("-zmqpubbdaphistory")) {
         UniValue oName(UniValue::VOBJ);
         BuildBDAPJson(entry, oName);
         oName.push_back(Pair("op", BDAPFromOp(op)));
@@ -204,7 +204,7 @@ void CDomainEntryDB::WriteDomainEntryIndexHistory(const CDomainEntry& entry, con
 
 void CDomainEntryDB::WriteDomainEntryIndex(const CDomainEntry& entry, const int op) 
 {
-    if (gArgs.IsArgSet("-zmqpubbdaprecord")) {
+    if (IsArgSet("-zmqpubbdaprecord")) {
         UniValue oName(UniValue::VOBJ);
         CDynamicAddress address(EncodeBase58(entry.WalletAddress));
         oName.push_back(Pair("address", address.ToString()));
@@ -361,7 +361,7 @@ bool FlushLevelDB()
 {
     {
         LOCK(cs_bdap_entry);
-        if (pDomainEntryDB != nullptr)
+        if (pDomainEntryDB != NULL)
         {
             if (!pDomainEntryDB->Flush()) {
                 LogPrintf("Failed to write to BDAP database!");
@@ -374,7 +374,7 @@ bool FlushLevelDB()
 
 void CleanupLevelDB(int& nRemoved)
 {
-    if(pDomainEntryDB != nullptr)
+    if(pDomainEntryDB != NULL)
         pDomainEntryDB->CleanupLevelDB(nRemoved);
     FlushLevelDB();
 }

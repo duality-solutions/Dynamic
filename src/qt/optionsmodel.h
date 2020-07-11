@@ -47,7 +47,6 @@ public:
         Theme,                   // QString
         Language,                // QString
         CoinControlFeatures,     // bool
-        CustomFeeFeatures,       // bool
         ThreadsScriptVerif,      // int
         DatabaseCache,           // int
         SpendZeroConfChange,     // bool
@@ -83,7 +82,6 @@ public:
     QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
-    bool getCustomFeeFeatures() const { return fCustomFeeFeatures; }
     bool getShowAdvancedPSUI() { return fShowAdvancedPSUI; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
 
@@ -101,7 +99,6 @@ private:
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
-    bool fCustomFeeFeatures;
     bool fHideOrphans;
     bool fShowAdvancedPSUI;
     /* settings that were overriden by command-line */
@@ -118,7 +115,6 @@ Q_SIGNALS:
     void privateSentAmountChanged();
     void advancedPSUIChanged(bool);
     void coinControlFeaturesChanged(bool);
-    void customFeeFeaturesChanged(bool);
     void hideOrphansChanged(bool);
     void hideTrayIconChanged(bool);
 };

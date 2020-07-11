@@ -198,18 +198,15 @@ extern std::vector<unsigned char> ParseHexV(const UniValue& v, std::string strNa
 extern std::vector<unsigned char> ParseHexO(const UniValue& o, std::string strKey);
 
 extern int64_t nWalletUnlockTime;
-extern CAmount AmountFromValue(const UniValue& value, bool p_isDYN = true);
-extern double GetDifficulty(const CBlockIndex* blockindex = nullptr);
+extern CAmount AmountFromValue(const UniValue& value);
+extern UniValue ValueFromAmount(const CAmount& amount);
+extern double GetDifficulty(const CBlockIndex* blockindex = NULL);
 extern std::string HelpRequiringPassphrase();
 extern std::string HelpExampleCli(const std::string& methodname, const std::string& args);
 extern std::string HelpExampleRpc(const std::string& methodname, const std::string& args);
 
 extern void EnsureWalletIsUnlocked();
 extern void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds);
-
-/* ASSET START */
-void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime);
-/* ASSET END */
 
 bool StartRPC();
 void InterruptRPC();

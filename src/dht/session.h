@@ -106,7 +106,7 @@ uint32_t GetLastPutDate(const HashRecordKey& recordKey);
 void CleanUpPutCommandMap();
 
 /** Start the DHT libtorrent network threads */
-void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainparams, CConnman* connman);
+void StartTorrentDHTNetwork(const bool multithreads, const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
 void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession);

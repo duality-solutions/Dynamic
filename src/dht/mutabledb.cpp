@@ -15,7 +15,7 @@
 
 static std::map<std::vector<unsigned char>, CMutableData> mapDataStorage;
 
-CMutableDataDB *pMutableDataDB = nullptr;
+CMutableDataDB *pMutableDataDB = NULL;
 
 bool AddLocalMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
 {

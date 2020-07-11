@@ -218,11 +218,11 @@ protected:
     FastRandomContext insecure_rand;
 
     //! Find an entry.
-    CAddrInfo* Find(const CService& addr, int* pnId = nullptr);
+    CAddrInfo* Find(const CService& addr, int* pnId = NULL);
 
     //! find an entry, creating it if necessary.
     //! nTime and nServices of the found node are updated, if necessary.
-    CAddrInfo* Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId = nullptr);
+    CAddrInfo* Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId = NULL);
 
     //! Swap two elements in vRandom.
     void SwapRandom(unsigned int nRandomPos1, unsigned int nRandomPos2);

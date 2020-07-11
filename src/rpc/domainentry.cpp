@@ -2,7 +2,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "amount.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
@@ -11,10 +10,8 @@
 #include "dynodeman.h"
 #include "rpc/protocol.h"
 #include "rpc/server.h"
-#include "rpc/wallet.h"
 #include "primitives/transaction.h"
 #include "spork.h"
-#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 #include "utilmoneystr.h"
 #include "validation.h"
@@ -22,8 +19,8 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
-extern void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nColorAmount, const bool fUseInstantSend, const bool fUsePrivateSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
+extern void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
 static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType)
 {
@@ -121,8 +118,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     // Send the transaction
     CWalletTx wtx;
-    CCoinControl coinControl;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -502,8 +498,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     // Send the transaction
     CWalletTx wtx;
-    CCoinControl coinControl;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -671,8 +666,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Send the transaction
     CWalletTx wtx;
     bool fUseInstantSend = false;
-    CCoinControl coinControl;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -1017,8 +1011,7 @@ UniValue makecredits(const JSONRPCRequest& request)
     scriptColorCoins += scriptDestination;
 
     CWalletTx wtx;
-    CCoinControl coinControl;
-    SendColorTransaction(scriptColorCoins, stealthScript, wtx, coinControl, nColorAmount, false, false);
+    SendColorTransaction(scriptColorCoins, stealthScript, wtx, nColorAmount, NULL, false, false);
 
     return wtx.GetHash().GetHex();
 }

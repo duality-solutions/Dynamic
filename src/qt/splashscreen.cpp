@@ -28,10 +28,6 @@
 #include <QDesktopWidget>
 #include <QPainter>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
-#define QTversionPreFiveEleven
-#endif
-
 SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) : QWidget(0, f), curAlignment(0)
 {
     // transparent background
@@ -45,11 +41,11 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) 
 
     // networkstyle.cpp can't (yet) read themes, so we do it here to get the correct Splash-screen
     QString splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash";
-    if(gArgs.GetBoolArg("-regtest", false))
+    if(GetBoolArg("-regtest", false))
         splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
-    if(gArgs.GetBoolArg("-testnet", false))
+    if(GetBoolArg("-testnet", false))
         splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
-    if(gArgs.GetBoolArg("-privatenet", false))
+    if(GetBoolArg("-privatenet", false))
         splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
 
     // load the bitmap for writing some text over it

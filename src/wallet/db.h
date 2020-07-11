@@ -9,7 +9,6 @@
 #define DYNAMIC_WALLET_DB_H
 
 #include "clientversion.h"
-#include "fs.h"
 #include "serialize.h"
 #include "streams.h"
 #include "sync.h"
@@ -82,10 +81,10 @@ public:
 
     DbTxn* TxnBegin(int flags = DB_TXN_WRITE_NOSYNC)
     {
-        DbTxn* ptxn = nullptr;
-        int ret = dbenv->txn_begin(nullptr, &ptxn, flags);
+        DbTxn* ptxn = NULL;
+        int ret = dbenv->txn_begin(NULL, &ptxn, flags);
         if (!ptxn || ret != 0)
-            return nullptr;
+            return NULL;
         return ptxn;
     }
 };
@@ -133,7 +132,7 @@ protected:
         int ret = pdb->get(activeTxn, &datKey, &datValue, 0);
         memory_cleanse(datKey.get_data(), datKey.get_size());
         bool success = false;
-        if (datValue.get_data() != nullptr) {
+        if (datValue.get_data() != NULL) {
             // Unserialize value
             try {
                 CDataStream ssValue((char*)datValue.get_data(), (char*)datValue.get_data() + datValue.get_size(), SER_DISK, CLIENT_VERSION);
@@ -225,11 +224,11 @@ protected:
     Dbc* GetCursor()
     {
         if (!pdb)
-            return nullptr;
-        Dbc* pcursor = nullptr;
-        int ret = pdb->cursor(nullptr, &pcursor, 0);
+            return NULL;
+        Dbc* pcursor = NULL;
+        int ret = pdb->cursor(NULL, &pcursor, 0);
         if (ret != 0)
-            return nullptr;
+            return NULL;
         return pcursor;
     }
 
@@ -249,7 +248,7 @@ protected:
         int ret = pcursor->get(&datKey, &datValue, fFlags);
         if (ret != 0)
             return ret;
-        else if (datKey.get_data() == nullptr || datValue.get_data() == nullptr)
+        else if (datKey.get_data() == NULL || datValue.get_data() == NULL)
             return 99999;
 
         // Convert to streams
@@ -285,7 +284,7 @@ public:
         if (!pdb || !activeTxn)
             return false;
         int ret = activeTxn->commit(0);
-        activeTxn = nullptr;
+        activeTxn = NULL;
         return (ret == 0);
     }
 
@@ -294,7 +293,7 @@ public:
         if (!pdb || !activeTxn)
             return false;
         int ret = activeTxn->abort();
-        activeTxn = nullptr;
+        activeTxn = NULL;
         return (ret == 0);
     }
 
@@ -309,7 +308,7 @@ public:
         return Write(std::string("version"), nVersion);
     }
 
-    bool static Rewrite(const std::string& strFile, const char* pszSkip = nullptr);
+    bool static Rewrite(const std::string& strFile, const char* pszSkip = NULL);
 };
 
 #endif // DYNAMIC_WALLET_DB_H

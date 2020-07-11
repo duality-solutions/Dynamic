@@ -22,7 +22,7 @@
 
 CPrivateSendClientManager privateSendClient;
 
-void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     if (fDynodeMode)
         return;
@@ -41,7 +41,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
     if (strCommand == NetMsgType::PSQUEUE) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSQUEUE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -134,7 +134,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
     }
 }
 
-void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     if (fDynodeMode)
         return;
@@ -145,7 +145,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     if (strCommand == NetMsgType::PSSTATUSUPDATE) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSSTATUSUPDATE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -188,7 +188,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     } else if (strCommand == NetMsgType::PSFINALTX) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSFINALTX -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -216,7 +216,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     } else if (strCommand == NetMsgType::PSCOMPLETE) {
         if (pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint("privatesend", "PSCOMPLETE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
+            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -482,7 +482,7 @@ void CPrivateSendClientManager::CheckTimeout()
 // Execute a mixing denomination via a Dynode.
 // This is only ran from clients
 //
-bool CPrivateSendClientSession::SendDenominate(const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, CConnman* connman)
+bool CPrivateSendClientSession::SendDenominate(const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, CConnman& connman)
 {
     if (fDynodeMode) {
         LogPrintf("CPrivateSendClientSession::SendDenominate -- PrivateSend from a Dynode is not supported currently.\n");
@@ -592,7 +592,7 @@ bool CPrivateSendClientSession::CheckPoolStateUpdate(PoolState nStateNew, int nE
 // check it to make sure it's what we want, then sign it if we agree.
 // If we refuse to sign, it's possible we'll be charged collateral
 //
-bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman* connman)
+bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -663,8 +663,9 @@ bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTr
                 }
 
                 const CKeyStore& keystore = *pwalletMain;
+
                 LogPrint("privatesend", "CPrivateSendClientSession::SignFinalTransaction -- Signing my input %i\n", nMyInputIndex);
-                if (!SignSignature(keystore, prevPubKey, finalMutableTransaction, nMyInputIndex, nValue2, int(SIGHASH_ALL | SIGHASH_ANYONECANPAY))) { // changes scriptSig
+                if (!SignSignature(keystore, prevPubKey, finalMutableTransaction, nMyInputIndex, int(SIGHASH_ALL | SIGHASH_ANYONECANPAY))) { // changes scriptSig
                     LogPrint("privatesend", "CPrivateSendClientSession::SignFinalTransaction -- Unable to sign my own transaction!\n");
                     // not sure what to do here, it will timeout...?
                 }
@@ -687,7 +688,7 @@ bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTr
     // push all of our signatures to the Dynode
     LogPrintf("CPrivateSendClientSession::SignFinalTransaction -- pushing sigs to the dynode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSSIGNFINALTX, sigs));
+    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSSIGNFINALTX, sigs));
     SetState(POOL_STATE_SIGNING);
     nTimeLastSuccessfulStep = GetTime();
 
@@ -816,7 +817,7 @@ bool CPrivateSendClientManager::CheckAutomaticBackup()
 //
 // Passively run mixing in the background to anonymize funds based on the given configuration.
 //
-bool CPrivateSendClientSession::DoAutomaticDenominating(CConnman* connman, bool fDryRun)
+bool CPrivateSendClientSession::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
     if (fDynodeMode)
         return false; // no client-side mixing on dynodes
@@ -951,7 +952,7 @@ bool CPrivateSendClientSession::DoAutomaticDenominating(CConnman* connman, bool 
     strAutoDenomResult = _("No compatible Dynode found.");
     return false;
 }
-bool CPrivateSendClientManager::DoAutomaticDenominating(CConnman* connman, bool fDryRun)
+bool CPrivateSendClientManager::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
     if (fDynodeMode)
         return false; // no client-side mixing on dynodes
@@ -1012,7 +1013,7 @@ dynode_info_t CPrivateSendClientManager::GetNotUsedDynode()
     return dnodeman.FindRandomNotInVec(vecDynodesUsed, MIN_PRIVATESEND_PEER_PROTO_VERSION);
 }
 
-bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CConnman* connman)
+bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1061,7 +1062,7 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
 
         privateSendClient.AddUsedDynode(psq.dynodeOutpoint);
 
-        if (connman->IsDynodeOrDisconnectRequested(infoDn.addr)) {
+        if (connman.IsDynodeOrDisconnectRequested(infoDn.addr)) {
             LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
             continue;
         }
@@ -1069,7 +1070,7 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
         nSessionDenom = psq.nDenom;
         infoMixingDynode = infoDn;
         pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, txMyCollateral));
-        connman->AddPendingDynode(infoDn.addr);
+        connman.AddPendingDynode(infoDn.addr);
         // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
         SetState(POOL_STATE_QUEUE);
         nTimeLastSuccessfulStep = GetTime();
@@ -1082,7 +1083,7 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
     return false;
 }
 
-bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman* connman)
+bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1128,7 +1129,7 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
             continue;
         }
 
-        if (connman->IsDynodeOrDisconnectRequested(infoDn.addr)) {
+        if (connman.IsDynodeOrDisconnectRequested(infoDn.addr)) {
             LogPrintf("CPrivateSendClientSession::StartNewQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
             nTries++;
             continue;
@@ -1144,7 +1145,7 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
         }
 
         infoMixingDynode = infoDn;
-        connman->AddPendingDynode(infoDn.addr);
+        connman.AddPendingDynode(infoDn.addr);
         pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, txMyCollateral));
         // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
         SetState(POOL_STATE_QUEUE);
@@ -1158,18 +1159,18 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
     return false;
 }
 
-bool CPrivateSendClientSession::ProcessPendingPsaRequest(CConnman* connman)
+bool CPrivateSendClientSession::ProcessPendingPsaRequest(CConnman& connman)
 {
     if (!pendingPsaRequest)
         return false;
 
-    bool fDone = connman->ForNode(pendingPsaRequest.GetAddr(), [&](CNode* pnode) {
+    bool fDone = connman.ForNode(pendingPsaRequest.GetAddr(), [&](CNode* pnode) {
         LogPrint("privatesend", "-- processing psa queue for addr=%s\n", pnode->addr.ToString());
         nTimeLastSuccessfulStep = GetTime();
         // TODO: this vvvv should be here after new state POOL_STATE_CONNECTING is added and MIN_PRIVATESEND_PEER_PROTO_VERSION is bumped
         // SetState(POOL_STATE_QUEUE);
         CNetMsgMaker msgMaker(pnode->GetSendVersion());
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSACCEPT, pendingPsaRequest.GetPSA()));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSACCEPT, pendingPsaRequest.GetPSA()));
         return true;
     });
 
@@ -1182,7 +1183,7 @@ bool CPrivateSendClientSession::ProcessPendingPsaRequest(CConnman* connman)
     return fDone;
 }
 
-void CPrivateSendClientManager::ProcessPendingPsaRequest(CConnman* connman)
+void CPrivateSendClientManager::ProcessPendingPsaRequest(CConnman& connman)
 {
     LOCK(cs_peqsessions);
     for (auto& session : peqSessions) {
@@ -1192,7 +1193,7 @@ void CPrivateSendClientManager::ProcessPendingPsaRequest(CConnman* connman)
     }
 }
 
-bool CPrivateSendClientSession::SubmitDenominate(CConnman* connman)
+bool CPrivateSendClientSession::SubmitDenominate(CConnman& connman)
 {
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
@@ -1357,7 +1358,7 @@ bool CPrivateSendClientSession::PrepareDenominate(int nMinRounds, int nMaxRounds
 }
 
 // Create collaterals by looping through inputs grouped by addresses
-bool CPrivateSendClientSession::MakeCollateralAmounts(CConnman* connman)
+bool CPrivateSendClientSession::MakeCollateralAmounts(CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1393,7 +1394,7 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(CConnman* connman)
 }
 
 // Split up large inputs or create fee sized inputs
-bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman* connman)
+bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1432,14 +1433,14 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& ta
         coinControl.Select(outpoint);
 
     bool fSuccess = pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-        nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
+        nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED);
     if (!fSuccess) {
         LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- ONLY_NONDENOMINATED: %s\n", strFail);
         // If we failed then most likely there are not enough funds on this address.
         if (fTryDenominated) {
             // Try to also use denominated coins (we can't mix denominated without collaterals anyway).
             if (!pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-                    nFeeRet, nChangePosRet, strFail, coinControl, true, ALL_COINS)) {
+                    nFeeRet, nChangePosRet, strFail, &coinControl, true, ALL_COINS)) {
                 LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- ALL_COINS Error: %s\n", strFail);
                 reservekeyCollateral.ReturnKey();
                 return false;
@@ -1457,7 +1458,7 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& ta
 
     // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     CValidationState state;
-    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, connman, state)) {
+    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
         LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
@@ -1468,7 +1469,7 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& ta
 }
 
 // Create denominations by looping through inputs grouped by addresses
-bool CPrivateSendClientSession::CreateDenominated(CConnman* connman)
+bool CPrivateSendClientSession::CreateDenominated(CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1503,7 +1504,7 @@ bool CPrivateSendClientSession::CreateDenominated(CConnman* connman)
 }
 
 // Create denominations
-bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman* connman)
+bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman& connman)
 {
     if (!pwalletMain)
         return false;
@@ -1601,7 +1602,7 @@ bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyI
     CReserveKey reservekeyChange(pwalletMain);
 
     bool fSuccess = pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-        nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
+        nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED);
     if (!fSuccess) {
         LogPrintf("CPrivateSendClientSession::CreateDenominated -- Error: %s\n", strFail);
         keyHolderStorageDenom.ReturnAll();
@@ -1611,7 +1612,7 @@ bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyI
     keyHolderStorageDenom.KeepAll();
 
     CValidationState state;
-    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, connman, state)) {
+    if (!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
         LogPrintf("CPrivateSendClientSession::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
@@ -1623,15 +1624,15 @@ bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyI
     return true;
 }
 
-void CPrivateSendClientSession::RelayIn(const CPrivateSendEntry& entry, CConnman* connman)
+void CPrivateSendClientSession::RelayIn(const CPrivateSendEntry& entry, CConnman& connman)
 {
     if (!infoMixingDynode.fInfoValid)
         return;
 
-    connman->ForNode(infoMixingDynode.addr, [&entry, &connman](CNode* pnode) {
+    connman.ForNode(infoMixingDynode.addr, [&entry, &connman](CNode* pnode) {
         LogPrintf("CPrivateSendClientSession::RelayIn -- found master, relaying message to %s\n", pnode->addr.ToString());
         CNetMsgMaker msgMaker(pnode->GetSendVersion());
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::PSVIN, entry));
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSVIN, entry));
         return true;
     });
 }
@@ -1648,7 +1649,7 @@ void CPrivateSendClientManager::UpdatedBlockTip(const CBlockIndex* pindex)
     LogPrint("privatesend", "CPrivateSendClientSession::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 }
 
-void CPrivateSendClientManager::DoMaintenance(CConnman* connman)
+void CPrivateSendClientManager::DoMaintenance(CConnman& connman)
 {
     if (fLiteMode)
         return; // disable all Dynamic specific functionality

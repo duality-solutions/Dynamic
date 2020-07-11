@@ -39,14 +39,14 @@ ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex*
     int64_t nTimeTimeout = EndTime(params);
 
     // A block's state is always the same as that of the first of its period, so it is computed based on a pindexPrev whose height equals a multiple of nPeriod - 1.
-    if (pindexPrev != nullptr) {
+    if (pindexPrev != NULL) {
         pindexPrev = pindexPrev->GetAncestor(pindexPrev->nHeight - ((pindexPrev->nHeight + 1) % nPeriod));
     }
 
     // Walk backwards in steps of nPeriod to find a pindexPrev whose information is known
     std::vector<const CBlockIndex*> vToCompute;
     while (cache.count(pindexPrev) == 0) {
-        if (pindexPrev == nullptr) {
+        if (pindexPrev == NULL) {
             // The genesis block is by definition defined.
             cache[pindexPrev] = THRESHOLD_DEFINED;
             break;
@@ -131,12 +131,12 @@ int AbstractThresholdConditionChecker::GetStateSinceHeightFor(const CBlockIndex*
     // right now pindexPrev points to the block prior to the block that we are computing for, thus:
     // if we are computing for the last block of a period, then pindexPrev points to the second to last block of the period, and
     // if we are computing for the first block of a period, then pindexPrev points to the last block of the previous period.
-    // The parent of the genesis block is represented by nullptr.
+    // The parent of the genesis block is represented by NULL.
     pindexPrev = pindexPrev->GetAncestor(pindexPrev->nHeight - ((pindexPrev->nHeight + 1) % nPeriod));
 
     const CBlockIndex* previousPeriodParent = pindexPrev->GetAncestor(pindexPrev->nHeight - nPeriod);
 
-    while (previousPeriodParent != nullptr && GetStateFor(previousPeriodParent, params, cache) == initialState) {
+    while (previousPeriodParent != NULL && GetStateFor(previousPeriodParent, params, cache) == initialState) {
         pindexPrev = previousPeriodParent;
         previousPeriodParent = pindexPrev->GetAncestor(pindexPrev->nHeight - nPeriod);
     }
@@ -158,15 +158,8 @@ private:
 protected:
     int64_t BeginTime(const Consensus::Params& params) const override { return params.vDeployments[id].nStartTime; }
     int64_t EndTime(const Consensus::Params& params) const override { return params.vDeployments[id].nTimeout; }
-    int Period(const Consensus::Params& params) const override {
-        if (params.vDeployments[id].nOverrideMinerConfirmationWindow > 0)
-            return params.vDeployments[id].nOverrideMinerConfirmationWindow;
-        return params.nMinerConfirmationWindow;
-    }    int Threshold(const Consensus::Params& params) const override {
-        if (params.vDeployments[id].nOverrideRuleChangeActivationThreshold > 0)
-            return params.vDeployments[id].nOverrideRuleChangeActivationThreshold;
-        return params.nRuleChangeActivationThreshold;
-    }
+    int Period(const Consensus::Params& params) const override { return params.vDeployments[id].nWindowSize ? params.vDeployments[id].nWindowSize : params.nMinerConfirmationWindow; }
+    int Threshold(const Consensus::Params& params) const override { return params.vDeployments[id].nThreshold ? params.vDeployments[id].nThreshold : params.nRuleChangeActivationThreshold; }
 
     bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
     {

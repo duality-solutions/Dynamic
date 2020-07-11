@@ -230,9 +230,9 @@ public:
 
     void SetNull()
     {
-        phashBlock = nullptr;
-        pprev = nullptr;
-        pskip = nullptr;
+        phashBlock = NULL;
+        pprev = NULL;
+        pskip = NULL;
         nHeight = 0;
         nFile = 0;
         nDataPos = 0;
@@ -358,7 +358,7 @@ public:
     unsigned int GetStakeEntropyBit() const
     {
         unsigned int nEntropyBit = ((GetBlockHash().Get64()) & 1);
-        if (gArgs.GetBoolArg("-printstakemodifier", false))
+        if (GetBoolArg("-printstakemodifier", false))
             LogPrintf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetBlockHash().ToString().c_str(), nEntropyBit);
 
         return nEntropyBit;
@@ -519,17 +519,17 @@ private:
     std::vector<CBlockIndex*> vChain;
 
 public:
-    /** Returns the index entry for the genesis block of this chain, or nullptr if none. */
+    /** Returns the index entry for the genesis block of this chain, or NULL if none. */
     CBlockIndex* Genesis() const
     {
-        return vChain.size() > 0 ? vChain[0] : nullptr;
+        return vChain.size() > 0 ? vChain[0] : NULL;
     }
 
-    /** Returns the index entry for the tip of this chain, or nullptr if none. */
+    /** Returns the index entry for the tip of this chain, or NULL if none. */
     CBlockIndex* Tip(bool fProofOfStake = false) const
     {
         if (vChain.size() < 1)
-            return nullptr;
+            return NULL;
 
         CBlockIndex* pindex = vChain[vChain.size() - 1];
 
@@ -540,11 +540,11 @@ public:
         return pindex;
     }
 
-    /** Returns the index entry at a particular height in this chain, or nullptr if no such height exists. */
+    /** Returns the index entry at a particular height in this chain, or NULL if no such height exists. */
     CBlockIndex* operator[](int nHeight) const
     {
         if (nHeight < 0 || nHeight >= (int)vChain.size())
-            return nullptr;
+            return NULL;
         return vChain[nHeight];
     }
 
@@ -561,13 +561,13 @@ public:
         return (*this)[pindex->nHeight] == pindex;
     }
 
-    /** Find the successor of a block in this chain, or nullptr if the given index is not found or is the tip. */
+    /** Find the successor of a block in this chain, or NULL if the given index is not found or is the tip. */
     CBlockIndex* Next(const CBlockIndex* pindex) const
     {
         if (Contains(pindex))
             return (*this)[pindex->nHeight + 1];
         else
-            return nullptr;
+            return NULL;
     }
 
     /** Return the maximal height in the chain. Is equal to chain.Tip() ? chain.Tip()->nHeight : -1. */
@@ -580,7 +580,7 @@ public:
     void SetTip(CBlockIndex* pindex);
 
     /** Return a CBlockLocator that refers to a block in this chain (by default the tip). */
-    CBlockLocator GetLocator(const CBlockIndex* pindex = nullptr) const;
+    CBlockLocator GetLocator(const CBlockIndex* pindex = NULL) const;
 
     /** Find the last common block between this chain and a block index entry. */
     const CBlockIndex* FindFork(const CBlockIndex* pindex) const;
