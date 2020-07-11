@@ -571,22 +571,21 @@ public:
 class CInputCoin {
 public:
     CInputCoin() {}
-    CInputCoin(const CWalletTx* wtx, unsigned int nOutIndex)
+    CInputCoin(const CWalletTx* wtx, unsigned int nOutIndex) : walletTx(wtx), nOut(nOutIndex)
     {
         if (!walletTx)
             throw std::invalid_argument("walletTx should not be null");
         if (nOutIndex >= walletTx->tx->vout.size())
             throw std::out_of_range("The output index is out of range");
-        walletTx = wtx;
+
         outpoint = COutPoint(walletTx->GetHash(), nOutIndex);
         txout = walletTx->tx->vout[nOutIndex];
-        nOut = nOutIndex;
     }
 
     const CWalletTx* walletTx;
+    unsigned int nOut;
     COutPoint outpoint;
     CTxOut txout;
-    unsigned int nOut;
 
     bool operator<(const CInputCoin& rhs) const {
         return outpoint < rhs.outpoint;
