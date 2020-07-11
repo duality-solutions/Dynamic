@@ -106,6 +106,10 @@ std::string to_internal(const std::string&);
 
 } // namespace boost
 
+
+// Application startup time (used for uptime calculation)
+const int64_t nStartupTime = GetTime();
+
 //Dynamic only features
 bool fDynodeMode = false;
 bool fLiteMode = false;
@@ -1068,4 +1072,10 @@ bool FileExists(const std::string& strFilePath)
     } else {
         return false;
     }
+}
+
+// Obtain the application startup time (used for uptime calculation)
+int64_t GetStartupTime()
+{
+    return nStartupTime;
 }

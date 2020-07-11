@@ -38,6 +38,9 @@
 #include <signal.h>
 #endif
 
+// Application startup time (used for uptime calculation)
+int64_t GetStartupTime();
+
 // Debugging macros
 
 // Uncomment the following line to enable debugging messages
