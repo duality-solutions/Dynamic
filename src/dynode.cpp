@@ -59,7 +59,7 @@ CDynode::CDynode(const CDynodeBroadcast& dnb) : dynode_info_t{dnb.nActiveState, 
 //
 // When a new Dynode broadcast is sent, update our information
 //
-bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman* connman)
+bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman)
 {
     if (dnb.sigTime <= sigTime && !dnb.fRecovery)
         return false;
@@ -504,7 +504,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     return true;
 }
 
-bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman* connman)
+bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 {
     nDos = 0;
 
@@ -716,7 +716,7 @@ bool CDynodeBroadcast::CheckSignature(int& nDos) const
     return true;
 }
 
-void CDynodeBroadcast::Relay(CConnman* connman) const
+void CDynodeBroadcast::Relay(CConnman& connman) const
 {
     // Do not relay until fully synced
     if (!dynodeSync.IsSynced()) {
@@ -725,7 +725,7 @@ void CDynodeBroadcast::Relay(CConnman* connman) const
     }
 
     CInv inv(MSG_DYNODE_ANNOUNCE, GetHash());
-    connman->RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
 uint256 CDynodePing::GetHash() const
@@ -858,7 +858,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     return true;
 }
 
-bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman* connman)
+bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman)
 {
     AssertLockHeld(cs_main);
 
@@ -942,7 +942,7 @@ bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos
     return true;
 }
 
-void CDynodePing::Relay(CConnman* connman)
+void CDynodePing::Relay(CConnman& connman)
 {
     // Do not relay until fully synced
     if (!dynodeSync.IsSynced()) {
@@ -951,7 +951,7 @@ void CDynodePing::Relay(CConnman* connman)
     }
 
     CInv inv(MSG_DYNODE_PING, GetHash());
-    connman->RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
 std::string CDynodePing::GetSentinelString() const

@@ -31,6 +31,9 @@
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 
+#include <boost/foreach.hpp>
+
+
 const char* CKeePassIntegrator::KEEPASS_HTTP_HOST = "localhost";
 
 CKeePassIntegrator keePassInt;
@@ -104,11 +107,11 @@ CKeePassIntegrator::CKeePassIntegrator()
 // Initialze from application context
 void CKeePassIntegrator::init()
 {
-    bIsActive = gArgs.GetBoolArg("-keepass", false);
-    nPort = gArgs.GetArg("-keepassport", DEFAULT_KEEPASS_HTTP_PORT);
-    sKeyBase64 = SecureString(gArgs.GetArg("-keepasskey", "").c_str());
-    strKeePassId = gArgs.GetArg("-keepassid", "");
-    strKeePassEntryName = gArgs.GetArg("-keepassname", "");
+    bIsActive = GetBoolArg("-keepass", false);
+    nPort = GetArg("-keepassport", DEFAULT_KEEPASS_HTTP_PORT);
+    sKeyBase64 = SecureString(GetArg("-keepasskey", "").c_str());
+    strKeePassId = GetArg("-keepassid", "");
+    strKeePassEntryName = GetArg("-keepassname", "");
     // Convert key if available
     if (sKeyBase64.size() > 0) {
         sKey = DecodeBase64Secure(sKeyBase64);
@@ -238,7 +241,7 @@ std::string CKeePassIntegrator::constructHTTPPost(const std::string& strMsg, con
               << "Content-Length: " << strMsg.size() << "\r\n"
               << "Connection: close\r\n"
               << "Accept: application/json\r\n";
-    for (const std::pair<std::string, std::string>& item : mapRequestHeaders)
+    BOOST_FOREACH (const PAIRTYPE(std::string, std::string) & item, mapRequestHeaders)
         streamOut << item.first << ": " << item.second << "\r\n";
     streamOut << "\r\n"
               << strMsg;
@@ -256,8 +259,8 @@ static void http_request_done(struct evhttp_request* req, void* ctx)
 {
     HTTPReply* reply = static_cast<HTTPReply*>(ctx);
 
-    if (req == nullptr) {
-        /* If req is nullptr, it means an error occurred while connecting, but
+    if (req == NULL) {
+        /* If req is NULL, it means an error occurred while connecting, but
          * I'm not sure how to find out which one. We also don't really care.
          */
         reply->nStatus = 0;
@@ -307,8 +310,8 @@ void CKeePassIntegrator::doHTTPPost(const std::string& sRequest, int& nStatus, s
         throw std::runtime_error("cannot create event_base");
 
     // Synchronously look up hostname
-    struct evhttp_connection* evcon = evhttp_connection_base_new(base, nullptr, KEEPASS_HTTP_HOST, DEFAULT_KEEPASS_HTTP_PORT); // TODO RAII
-    if (evcon == nullptr)
+    struct evhttp_connection* evcon = evhttp_connection_base_new(base, NULL, KEEPASS_HTTP_HOST, DEFAULT_KEEPASS_HTTP_PORT); // TODO RAII
+    if (evcon == NULL)
         throw std::runtime_error("create connection failed");
     evhttp_connection_set_timeout(evcon, KEEPASS_HTTP_CONNECT_TIMEOUT);
 
@@ -318,7 +321,7 @@ void CKeePassIntegrator::doHTTPPost(const std::string& sRequest, int& nStatus, s
 
     HTTPReply response;
     struct evhttp_request* req = evhttp_request_new(http_request_done, (void*)&response); // TODO RAII
-    if (req == nullptr)
+    if (req == NULL)
         throw std::runtime_error("create http request failed");
 
     struct evkeyvalq* output_headers = evhttp_request_get_output_headers(req);

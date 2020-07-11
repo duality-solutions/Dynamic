@@ -40,8 +40,3 @@ bool CZMQAbstractNotifier::NotifyInstantSendDoubleSpendAttempt(const CTransactio
 {
     return true;
 }
-
-bool CZMQAbstractNotifier::NotifyMessage(const CMessage &/*message*/)
-{
-    return true;
-}

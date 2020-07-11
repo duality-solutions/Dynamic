@@ -128,7 +128,7 @@ void PaymentServer::LoadRootCAs(X509_STORE* _store)
 
     // Note: use "-system-" default here so that users can pass -rootcertificates=""
     // and get 'I don't like X.509 certificates, don't trust anybody' behavior:
-    QString certFile = QString::fromStdString(gArgs.GetArg("-rootcertificates", "-system-"));
+    QString certFile = QString::fromStdString(GetArg("-rootcertificates", "-system-"));
 
     // Empty store
     if (certFile.isEmpty()) {
@@ -151,7 +151,7 @@ void PaymentServer::LoadRootCAs(X509_STORE* _store)
     const QDateTime currentTime = QDateTime::currentDateTime();
 
     Q_FOREACH (const QSslCertificate& cert, certList) {
-        // Don't log nullptr certificates
+        // Don't log NULL certificates
         if (cert.isNull())
             continue;
 
@@ -261,7 +261,7 @@ bool PaymentServer::ipcSendCommandLine()
         socket->connectToServer(ipcServerName(), QIODevice::WriteOnly);
         if (!socket->waitForConnected(DYNAMIC_IPC_CONNECT_TIMEOUT)) {
             delete socket;
-            socket = nullptr;
+            socket = NULL;
             return false;
         }
 
@@ -277,7 +277,7 @@ bool PaymentServer::ipcSendCommandLine()
         socket->disconnectFromServer();
 
         delete socket;
-        socket = nullptr;
+        socket = NULL;
         fResult = true;
     }
 
@@ -348,7 +348,7 @@ void PaymentServer::initNetManager()
 {
     if (!optionsModel)
         return;
-    if (netManager != nullptr)
+    if (netManager != NULL)
         delete netManager;
 
     // netManager is used to fetch paymentrequests given in dynamic: URIs

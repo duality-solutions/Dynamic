@@ -16,7 +16,7 @@
 #include "validation.h"
 #include "validationinterface.h"
 
-void InitMiners(const CChainParams& chainparams, CConnman* connman)
+void InitMiners(const CChainParams& chainparams, CConnman& connman)
 {
     if (!gMiners)
         gMiners.reset(new MinersController(chainparams, connman));

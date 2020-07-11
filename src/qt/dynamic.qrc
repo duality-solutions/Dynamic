@@ -60,8 +60,6 @@
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>
-        <file alias="tx_asset_input">res/icons/drk/tx_asset_input.png</file>
-        <file alias="tx_asset_output">res/icons/drk/tx_asset_output.png</file>
         <file alias="fluid">res/icons/drk/fluid.png</file>
         <file alias="unit_dyn">res/icons/drk/unit_dyn.png</file>
         <file alias="unit_mdyn">res/icons/drk/unit_mdyn.png</file>
@@ -69,14 +67,6 @@
         <file alias="unit_satoshis">res/icons/drk/unit_satoshis.png</file>
         <file alias="verify">res/icons/drk/verify.png</file>
         <file alias="warning">res/icons/drk/warning.png</file>
-        <file alias="asset_administrator">res/icons/drk/asset_administrator.png</file>
-        <file alias="asset_administrator_dark">res/icons/drk/asset_administrator_dark.png</file>
-        <file alias="asset_create">res/icons/drk/asset_create.png</file>
-        <file alias="asset_create_selected">res/icons/drk/asset_create_selected.png</file>
-        <file alias="asset_manage">res/icons/drk/asset_manage.png</file>
-        <file alias="asset_manage_selected">res/icons/drk/asset_manage_selected.png</file>
-        <file alias="asset_transfer">res/icons/drk/asset_transfer.png</file>
-        <file alias="asset_transfer_selected">res/icons/drk/asset_transfer_selected.png</file>
     </qresource>
     <qresource prefix="/css">
         <file alias="drk">res/css/drk.css</file>

@@ -37,8 +37,7 @@ public:
         Date = 3,
         Type = 4,
         ToAddress = 5,
-        Amount = 6,
-        AssetName = 7
+        Amount = 6
     };
 
     /** Roles to get specific information from a transaction row.
@@ -81,8 +80,6 @@ public:
         StatusRole,
         /** Unprocessed icon */
         RawDecorationRole,
-        /** DYN or name of an asset */
-        AssetNameRole,
     };
 
     int rowCount(const QModelIndex& parent) const;
@@ -122,7 +119,7 @@ public Q_SLOTS:
     void updateConfirmations();
     void updateDisplayUnit();
     /** Updates the column title to "Amount (DisplayUnit)" and emits headerDataChanged() signal for table headers to react. */
-    //void updateAmountColumnTitle();
+    void updateAmountColumnTitle();
     /* Needed to update fProcessingQueuedTransactions through a QueuedConnection */
     void setProcessingQueuedTransactions(bool value) { fProcessingQueuedTransactions = value; }
 

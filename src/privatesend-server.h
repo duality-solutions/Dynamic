@@ -31,19 +31,19 @@ private:
     bool AddScriptSig(const CTxIn& txin);
 
     /// Charge fees to bad actors (Charge clients a fee if they're abusive)
-    void ChargeFees(CConnman* connman);
+    void ChargeFees(CConnman& connman);
     /// Rarely charge fees to pay miners
-    void ChargeRandomFees(CConnman* connman);
+    void ChargeRandomFees(CConnman& connman);
 
     /// Check for process
-    void CheckPool(CConnman* connman);
+    void CheckPool(CConnman& connman);
 
-    void CreateFinalTransaction(CConnman* connman);
-    void CommitFinalTransaction(CConnman* connman);
+    void CreateFinalTransaction(CConnman& connman);
+    void CommitFinalTransaction(CConnman& connman);
 
     /// Is this nDenom and txCollateral acceptable?
     bool IsAcceptablePSA(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet);
-    bool CreateNewSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet, CConnman* connman);
+    bool CreateNewSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet, CConnman& connman);
     bool AddUserToExistingSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet);
     /// Do we have enough users to take entries?
     bool IsSessionReady() { return (int)vecSessionCollaterals.size() >= CPrivateSend::GetMaxPoolTransactions(); }
@@ -59,22 +59,22 @@ private:
     void SetState(PoolState nStateNew);
 
     /// Relay mixing Messages
-    void RelayFinalTransaction(const CTransaction& txFinal, CConnman* connman);
-    void PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, CConnman* connman);
-    void RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* connman, PoolMessage nMessageID = MSG_NOERR);
-    void RelayCompletedTransaction(PoolMessage nMessageID, CConnman* connman);
+    void RelayFinalTransaction(const CTransaction& txFinal, CConnman& connman);
+    void PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, CConnman& connman);
+    void RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman& connman, PoolMessage nMessageID = MSG_NOERR);
+    void RelayCompletedTransaction(PoolMessage nMessageID, CConnman& connman);
 
     void SetNull();
 
 public:
     CPrivateSendServer() : vecSessionCollaterals(), fUnitTest(false) {}
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
-    void CheckTimeout(CConnman* connman);
-    void CheckForCompleteQueue(CConnman* connman);
+    void CheckTimeout(CConnman& connman);
+    void CheckForCompleteQueue(CConnman& connman);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(CConnman& connman);
 };
 
 #endif

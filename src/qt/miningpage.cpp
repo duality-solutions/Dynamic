@@ -23,7 +23,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #ifdef ENABLE_GPU
     int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
 #endif
-    std::string PrivAddress = gArgs.GetArg("-miningprivkey", "");
+    std::string PrivAddress = GetArg("-miningprivkey", "");
     if (!PrivAddress.empty()) {
         CDynamicSecret Secret;
         Secret.SetString(PrivAddress);
@@ -228,7 +228,7 @@ void MiningPage::StartCPUMiner()
 {
     LogPrintf("StartCPUMiner %d (%s)\n", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = true;
-    InitMiners(Params(), g_connman.get());
+    InitMiners(Params(), *g_connman);
     changeNumberOfCPUThreads(ui->sliderCPUCores->value());
     updateUI();
 }
@@ -237,7 +237,7 @@ void MiningPage::StartCPUMiner()
 void MiningPage::StartGPUMiner()
 {
     fGPUMinerOn = true;
-    InitMiners(Params(), g_connman.get());
+    InitMiners(Params(), *g_connman);
     changeNumberOfGPUThreads(ui->sliderGPUCores->value());
     updateUI();
 }
@@ -275,9 +275,9 @@ void MiningPage::changeNumberOfCPUThreads(int i, bool shutdown)
 {
     if (!shutdown)
         ui->labelNCPUCores->setText(QString("%1").arg(i));
-    gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
-    gArgs.ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
-    InitMiners(Params(), g_connman.get());
+    ForceSetArg("-gen", isMinerOn() ? "1" : "0");
+    ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
+    InitMiners(Params(), *g_connman);
     SetCPUMinerThreads(i);
     if (fCPUMinerOn)
         StartMiners();
@@ -288,9 +288,9 @@ void MiningPage::changeNumberOfGPUThreads(int i, bool shutdown)
 {
     if (!shutdown)
         ui->labelNGPUCores->setText(QString("%1").arg(i));
-    gArgs.ForceSetArg("-gen", isMinerOn() ? "1" : "0");
-    gArgs.ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
-    InitMiners(Params(), g_connman.get());
+    ForceSetArg("-gen", isMinerOn() ? "1" : "0");
+    ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
+    InitMiners(Params(), *g_connman);
     SetGPUMinerThreads(i);
     if (fGPUMinerOn)
         StartMiners();

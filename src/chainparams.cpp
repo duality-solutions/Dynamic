@@ -259,35 +259,6 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
-        /** ASSET START **/
-        // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN; // TODO
-        nReissueAssetBurnAmount = 100 * COIN; // TODO
-        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
-        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
-        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
-        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
-        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
-        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
-        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
-
-        // Burn Addresses
-        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
-        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
-        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
-        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
-        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
-        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
-        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
-        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
-        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
-
-        //Global Burn Address
-        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
-
-        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
-        nMinReorganizationPeers = 4; // TODO
-        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
     }
 };
 static CMainParams mainParams;
@@ -446,35 +417,6 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
-        /** ASSET START **/
-        // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN; // TODO
-        nReissueAssetBurnAmount = 100 * COIN; // TODO
-        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
-        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
-        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
-        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
-        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
-        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
-        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
-
-        // Burn Addresses
-        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
-        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
-        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
-        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
-        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
-        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
-        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
-        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
-        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
-
-        //Global Burn Address
-        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
-
-        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
-        nMinReorganizationPeers = 4; // TODO
-        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
     }
 };
 static CTestNetParams testNetParams;
@@ -618,43 +560,12 @@ public:
         base58Prefixes[STEALTH_ADDRESS] = {0x13};
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
-
-        /** ASSET START **/
-        // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN; // TODO
-        nReissueAssetBurnAmount = 100 * COIN; // TODO
-        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
-        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
-        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
-        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
-        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
-        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
-        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
-
-        // Burn Addresses
-        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
-        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
-        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
-        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
-        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
-        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
-        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
-        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
-        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
-
-        //Global Burn Address
-        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
-
-        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
-        nMinReorganizationPeers = 4; // TODO
-        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
     }
     void UpdateBIP9Parameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
     {
         consensus.vDeployments[d].nStartTime = nStartTime;
         consensus.vDeployments[d].nTimeout = nTimeout;
     }
-
 };
 static CRegTestParams regTestParams;
 
@@ -797,35 +708,6 @@ public:
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
-        /** ASSET START **/
-        // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN; // TODO
-        nReissueAssetBurnAmount = 100 * COIN; // TODO
-        nIssueSubAssetBurnAmount = 100 * COIN; // TODO
-        nIssueUniqueAssetBurnAmount = 5 * COIN; // TODO
-        nIssueMsgChannelAssetBurnAmount = 100 * COIN; // TODO
-        nIssueQualifierAssetBurnAmount = 1000 * COIN; // TODO
-        nIssueSubQualifierAssetBurnAmount = 100 * COIN; // TODO
-        nIssueRestrictedAssetBurnAmount = 1500 * COIN; // TODO
-        nAddNullQualifierTagBurnAmount = .1 * COIN; // TODO
-
-        // Burn Addresses
-        strIssueAssetBurnAddress = "DXissueAssetXXXXXXXXXXXXXXXXXhhZGt"; // TODO
-        strReissueAssetBurnAddress = "DXReissueAssetXXXXXXXXXXXXXXVEFAWu"; // TODO
-        strIssueSubAssetBurnAddress = "DXissueSubAssetXXXXXXXXXXXXXWcwhwL"; // TODO
-        strIssueUniqueAssetBurnAddress = "DXissueUniqueAssetXXXXXXXXXXWEAe58"; // TODO
-        strIssueMsgChannelAssetBurnAddress = "DXissueMsgChanneLAssetXXXXXXSjHvAY"; // TODO
-        strIssueQualifierAssetBurnAddress = "DXissueQuaLifierXXXXXXXXXXXXUgEDbC"; // TODO
-        strIssueSubQualifierAssetBurnAddress = "DXissueSubQuaLifierXXXXXXXXXVTzvv5"; // TODO
-        strIssueRestrictedAssetBurnAddress = "DXissueRestrictedXXXXXXXXXXXXzJZ1q"; // TODO
-        strAddNullQualifierTagBurnAddress = "DXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya"; // TODO
-
-        //Global Burn Address
-        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
-
-        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes. // TODO
-        nMinReorganizationPeers = 4; // TODO
-        nMinReorganizationAge = 60 * 60 * 12; // 12 hours // TODO
     }
 };
 static CPrivateNetParams privateNetParams;

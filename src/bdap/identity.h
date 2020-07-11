@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_IDENTITY_H
 #define DYNAMIC_BDAP_IDENTITY_H
 
-#include "bdap/bdap.h"
+#include "bdap.h"
 #include "domainentry.h"
 #include "primitives/transaction.h"
 #include "serialize.h"

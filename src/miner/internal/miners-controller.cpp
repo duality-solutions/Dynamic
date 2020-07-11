@@ -11,7 +11,7 @@
 #include "validationinterface.h"
 
 
-MinersController::MinersController(const CChainParams& chainparams, CConnman* connman)
+MinersController::MinersController(const CChainParams& chainparams, CConnman& connman)
     : MinersController(std::make_shared<MinerContext>(chainparams, connman)){};
 
 MinersController::MinersController(MinerContextRef ctx)
@@ -24,7 +24,7 @@ MinersController::MinersController(MinerContextRef ctx)
 
 void MinersController::Start()
 {
-    _connected = _ctx->connman()->GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2;
+    _connected = _ctx->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2;
     _enable_start = true;
     _signals = std::make_shared<MinerSignals>(this);
     // initialize block template
@@ -61,15 +61,15 @@ int64_t MinersController::GetHashRate() const
 
 MinerSignals::MinerSignals(MinersController* ctr)
     : _ctr(ctr),
-      _node(_ctr->ctx()->connman()->ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, _1))),
+      _node(_ctr->ctx()->connman().ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, _1))),
       _block(GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinerSignals::NotifyBlock, this, _1, _2, _3))),
       _txn(GetMainSignals().SyncTransaction.connect(boost::bind(&MinerSignals::NotifyTransaction, this, _1, _2, _3))){};
 
 void MinerSignals::NotifyNode(const CNode* node)
 {
-    if (_ctr->ctx()->connman()->GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
+    if (_ctr->ctx()->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
         _ctr->_connected = true;
-    } else if (_ctr->ctx()->connman()->GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
+    } else if (_ctr->ctx()->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
         _ctr->_connected = false;
     }
 };

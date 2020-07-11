@@ -127,7 +127,7 @@ public:
     /**
      * Relay is used to send this spork message to other peers.
      */
-    void Relay(CConnman* connman);
+    void Relay(CConnman& connman);
 };
 
 /**
@@ -204,7 +204,7 @@ public:
      * it validates the spork and adds it to the internal spork storage and
      * performs any necessary processing.
      */
-    void ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
+    void ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
     /**
      * ExecuteSpork is used to perform certain actions based on the spork value.
@@ -217,7 +217,7 @@ public:
      * UpdateSpork is used by the spork RPC command to set a new spork value, sign
      * and broadcast the spork message.
      */
-    bool UpdateSpork(int nSporkID, int64_t nValue, CConnman* connman);
+    bool UpdateSpork(int nSporkID, int64_t nValue, CConnman& connman);
 
     /**
      * IsSporkActive returns a bool for time-based sporks, and should be used

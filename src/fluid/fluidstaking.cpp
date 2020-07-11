@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidStakingDB* pFluidStakingDB = nullptr;
+CFluidStakingDB* pFluidStakingDB = NULL;
 
 bool GetFluidStakingData(const CScript& scriptPubKey, CFluidStaking& entry)
 {

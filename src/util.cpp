@@ -12,7 +12,6 @@
 #include "util.h"
 
 #include "chainparamsbase.h"
-#include "fs.h"
 #include "random.h"
 #include "serialize.h"
 #include "support/allocators/secure.h"
@@ -106,10 +105,6 @@ std::string to_internal(const std::string&);
 
 } // namespace boost
 
-
-// Application startup time (used for uptime calculation)
-const int64_t nStartupTime = GetTime();
-
 //Dynamic only features
 bool fDynodeMode = false;
 bool fLiteMode = false;
@@ -124,8 +119,6 @@ int nWalletBackups = 10;
 
 const char* const DYNAMIC_CONF_FILENAME = "dynamic.conf";
 const char* const DYNAMIC_PID_FILENAME = "dynamicd.pid";
-
-ArgsManager gArgs;
 
 CCriticalSection cs_args;
 std::map<std::string, std::string> mapArgs;
@@ -143,14 +136,13 @@ std::atomic<bool> fReopenDebugLog(false);
 CTranslationInterface translationInterface;
 
 /** Init OpenSSL library multithreading support */
-static std::unique_ptr<CCriticalSection[]> ppmutexOpenSSL;
-
+static CCriticalSection** ppmutexOpenSSL;
 void locking_callback(int mode, int i, const char* file, int line) NO_THREAD_SAFETY_ANALYSIS
 {
     if (mode & CRYPTO_LOCK) {
-        ENTER_CRITICAL_SECTION(ppmutexOpenSSL[i]);
+        ENTER_CRITICAL_SECTION(*ppmutexOpenSSL[i]);
     } else {
-        LEAVE_CRITICAL_SECTION(ppmutexOpenSSL[i]);
+        LEAVE_CRITICAL_SECTION(*ppmutexOpenSSL[i]);
     }
 }
 
@@ -161,7 +153,9 @@ public:
     CInit()
     {
         // Init OpenSSL library multithreading support
-        ppmutexOpenSSL.reset(new CCriticalSection[CRYPTO_num_locks()]);
+        ppmutexOpenSSL = (CCriticalSection**)OPENSSL_malloc(CRYPTO_num_locks() * sizeof(CCriticalSection*));
+        for (int i = 0; i < CRYPTO_num_locks(); i++)
+            ppmutexOpenSSL[i] = new CCriticalSection();
         CRYPTO_set_locking_callback(locking_callback);
 
         // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
@@ -184,12 +178,12 @@ public:
         // Securely erase the memory used by the PRNG
         RAND_cleanup();
         // Shutdown OpenSSL library multithreading support
-        CRYPTO_set_locking_callback(nullptr);
-        // Clear the set of locks now to maintain symmetry with the constructor.
-        ppmutexOpenSSL.reset();
+        CRYPTO_set_locking_callback(NULL);
+        for (int i = 0; i < CRYPTO_num_locks(); i++)
+            delete ppmutexOpenSSL[i];
+        OPENSSL_free(ppmutexOpenSSL);
     }
-}
-        instance_of_cinit;
+} instance_of_cinit;
 
 /**
  * LogPrintf() has been broken a couple of times now
@@ -213,8 +207,8 @@ static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
  * the OS/libc. When the shutdown sequence is fully audited and
  * tested, explicit destruction of these objects can be implemented.
  */
-static FILE* fileout = nullptr;
-static boost::mutex* mutexDebugLog = nullptr;
+static FILE* fileout = NULL;
+static boost::mutex* mutexDebugLog = NULL;
 static std::list<std::string>* vMsgsBeforeOpenLog;
 
 static int FileWriteStr(const std::string& str, FILE* fp)
@@ -224,7 +218,7 @@ static int FileWriteStr(const std::string& str, FILE* fp)
 
 static void DebugPrintInit()
 {
-    assert(mutexDebugLog == nullptr);
+    assert(mutexDebugLog == NULL);
     mutexDebugLog = new boost::mutex();
     vMsgsBeforeOpenLog = new std::list<std::string>;
 }
@@ -234,12 +228,12 @@ void OpenDebugLog()
     boost::call_once(&DebugPrintInit, debugPrintInitFlag);
     boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
 
-    assert(fileout == nullptr);
+    assert(fileout == NULL);
     assert(vMsgsBeforeOpenLog);
     boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
     fileout = fopen(pathDebug.string().c_str(), "a");
     if (fileout) {
-        setbuf(fileout, nullptr); // unbuffered
+        setbuf(fileout, NULL); // unbuffered
         // dump buffered messages from before we opened the log
         while (!vMsgsBeforeOpenLog->empty()) {
             FileWriteStr(vMsgsBeforeOpenLog->front(), fileout);
@@ -248,12 +242,12 @@ void OpenDebugLog()
     }
 
     delete vMsgsBeforeOpenLog;
-    vMsgsBeforeOpenLog = nullptr;
+    vMsgsBeforeOpenLog = NULL;
 }
 
 bool LogAcceptCategory(const char* category)
 {
-    if (category != nullptr) {
+    if (category != NULL) {
         // Give each thread quick access to -debug settings.
         // This helps prevent issues debugging global destructors,
         // where mapMultiArgs might be deleted before another
@@ -261,14 +255,14 @@ bool LogAcceptCategory(const char* category)
         static boost::thread_specific_ptr<std::set<std::string> > ptrCategory;
 
         if (!fDebug) {
-            if (ptrCategory.get() != nullptr) {
+            if (ptrCategory.get() != NULL) {
                 LogPrintf("debug turned off: thread %s\n", GetThreadName());
                 ptrCategory.release();
             }
             return false;
         }
 
-        if (ptrCategory.get() == nullptr) {
+        if (ptrCategory.get() == NULL) {
             if (mapMultiArgs.count("-debug")) {
                 std::string strThreadName = GetThreadName();
                 LogPrintf("debug turned on:\n");
@@ -377,7 +371,7 @@ int LogPrintStr(const std::string& str)
         boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
 
         // buffer if we haven't opened the log yet
-        if (fileout == nullptr) {
+        if (fileout == NULL) {
             assert(vMsgsBeforeOpenLog);
             ret = strTimestamped.length();
             vMsgsBeforeOpenLog->push_back(strTimestamped);
@@ -386,8 +380,8 @@ int LogPrintStr(const std::string& str)
             if (fReopenDebugLog) {
                 fReopenDebugLog = false;
                 boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-                if (freopen(pathDebug.string().c_str(), "a", fileout) != nullptr)
-                    setbuf(fileout, nullptr); // unbuffered
+                if (freopen(pathDebug.string().c_str(), "a", fileout) != NULL)
+                    setbuf(fileout, NULL); // unbuffered
             }
 
             ret = FileWriteStr(strTimestamped, fileout);
@@ -413,7 +407,7 @@ static void InterpretNegativeSetting(std::string& strKey, std::string& strValue)
     }
 }
 
-void ArgsManager::ParseParameters(int argc, const char* const argv[])
+void ParseParameters(int argc, const char* const argv[])
 {
     LOCK(cs_args);
     mapArgs.clear();
@@ -447,53 +441,46 @@ void ArgsManager::ParseParameters(int argc, const char* const argv[])
     }
 }
 
-std::vector<std::string> ArgsManager::GetArgs(const std::string &strArg) const
-{
-    LOCK(cs_args);
-    auto it = mapMultiArgs.find(strArg);
-    if (it != mapMultiArgs.end()) return it->second;
-    return {};
-}
-
-bool ArgsManager::IsArgSet(const std::string &strArg) const
+bool IsArgSet(const std::string& strArg)
 {
     LOCK(cs_args);
     return mapArgs.count(strArg);
 }
 
-std::string ArgsManager::GetArg(const std::string &strArg, const std::string &strDefault) const
+std::string GetArg(const std::string& strArg, const std::string& strDefault)
 {
     LOCK(cs_args);
-    auto it = mapArgs.find(strArg);
-    if (it != mapArgs.end()) return it->second;
+    if (mapArgs.count(strArg))
+        return mapArgs[strArg];
     return strDefault;
 }
 
-int64_t ArgsManager::GetArg(const std::string &strArg, int64_t nDefault) const
+int64_t GetArg(const std::string& strArg, int64_t nDefault)
 {
     LOCK(cs_args);
-    auto it = mapArgs.find(strArg);
-    if (it != mapArgs.end()) return atoi64(it->second);
+    if (mapArgs.count(strArg))
+        return atoi64(mapArgs[strArg]);
     return nDefault;
 }
 
-bool ArgsManager::GetBoolArg(const std::string &strArg, bool fDefault) const
+bool GetBoolArg(const std::string& strArg, bool fDefault)
 {
     LOCK(cs_args);
-    auto it = mapArgs.find(strArg);
-    if (it != mapArgs.end()) return InterpretBool(it->second);
+    if (mapArgs.count(strArg))
+        return InterpretBool(mapArgs[strArg]);
     return fDefault;
 }
 
-bool ArgsManager::SoftSetArg(const std::string &strArg, const std::string &strValue)
+bool SoftSetArg(const std::string& strArg, const std::string& strValue)
 {
     LOCK(cs_args);
-    if (IsArgSet(strArg)) return false;
-    ForceSetArg(strArg, strValue);
+    if (mapArgs.count(strArg))
+        return false;
+    mapArgs[strArg] = strValue;
     return true;
 }
 
-bool ArgsManager::SoftSetBoolArg(const std::string &strArg, bool fValue)
+bool SoftSetBoolArg(const std::string& strArg, bool fValue)
 {
     if (fValue)
         return SoftSetArg(strArg, std::string("1"));
@@ -501,27 +488,25 @@ bool ArgsManager::SoftSetBoolArg(const std::string &strArg, bool fValue)
         return SoftSetArg(strArg, std::string("0"));
 }
 
-void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strValue)
+void ForceSetArg(const std::string& strArg, const std::string& strValue)
 {
     LOCK(cs_args);
     mapArgs[strArg] = strValue;
-    mapMultiArgs[strArg] = {strValue};
 }
 
-void ArgsManager::ForceSetArg(const std::string &strArg, const int64_t &nValue)
+void ForceSetArg(const std::string& strArg, const int64_t& nValue)
 {
     LOCK(cs_args);
-    mapArgs[strArg] = std::to_string(nValue);
-    mapMultiArgs[strArg] = {std::to_string(nValue)};
+    mapArgs[strArg] = i64tostr(nValue);
 }
 
-void ArgsManager::ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
+void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
 {
     LOCK(cs_args);
     _mapMultiArgs[strArg] = values;
 }
 
-void ArgsManager::ForceRemoveArg(const std::string& strArg)
+void ForceRemoveArg(const std::string& strArg)
 {
     LOCK(cs_args);
     mapArgs.erase(strArg);
@@ -549,7 +534,7 @@ static std::string FormatException(const std::exception* pex, const char* pszThr
 {
 #ifdef WIN32
     char pszModule[MAX_PATH] = "";
-    GetModuleFileNameA(nullptr, pszModule, sizeof(pszModule));
+    GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
     const char* pszModule = "dynamic";
 #endif
@@ -581,7 +566,7 @@ boost::filesystem::path GetDefaultDataDir()
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
-    if (pszHome == nullptr || strlen(pszHome) == 0)
+    if (pszHome == NULL || strlen(pszHome) == 0)
         pathRet = fs::path("/");
     else
         pathRet = fs::path(pszHome);
@@ -603,7 +588,7 @@ std::string GenerateRandomString(unsigned int len) {
     if (len == 0){
         len = 24;
     }
-    srand(time(nullptr) + len); //seed srand before using
+    srand(time(NULL) + len); //seed srand before using
     std::vector<unsigned char> vchRandString;
     static const unsigned char alphanum[] =
         "0123456789"
@@ -622,8 +607,19 @@ unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
     if (nMin == nMax)
         return nMax;
 
-    srand(time(nullptr) + nMax); //seed srand before using
+    srand(time(NULL) + nMax); //seed srand before using
     return nMin + rand() % (nMax - nMin) + 1;
+}
+
+static void WriteConfigFile(FILE* configFile)
+{
+    fputs("#Do not use special characters with username/password\n", configFile);
+    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
+    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
+    fputs(sUserID.c_str(), configFile);
+    fputs(sRPCpassword.c_str(), configFile);
+    fclose(configFile);
+    ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
 }
 
 const boost::filesystem::path& GetDataDir(bool fNetSpecific)
@@ -639,8 +635,8 @@ const boost::filesystem::path& GetDataDir(bool fNetSpecific)
     if (!path.empty())
         return path;
 
-    if (gArgs.IsArgSet("-datadir")) {
-        path = fs::system_complete(gArgs.GetArg("-datadir", ""));
+    if (IsArgSet("-datadir")) {
+        path = fs::system_complete(GetArg("-datadir", ""));
         if (!fs::is_directory(path)) {
             path = "";
             return path;
@@ -660,10 +656,10 @@ boost::filesystem::path GetBackupsDir()
 {
     namespace fs = boost::filesystem;
 
-    if (!gArgs.IsArgSet("-walletbackupsdir"))
+    if (!IsArgSet("-walletbackupsdir"))
         return GetDataDir() / "backups";
 
-    return fs::absolute(gArgs.GetArg("-walletbackupsdir", ""));
+    return fs::absolute(GetArg("-walletbackupsdir", ""));
 }
 
 void ClearDatadirCache()
@@ -683,19 +679,19 @@ boost::filesystem::path GetConfigFile(const std::string& confPath)
 
 boost::filesystem::path GetDynodeConfigFile()
 {
-    boost::filesystem::path pathConfigFile(gArgs.GetArg("-dnconf", "dynode.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-dnconf", "dynode.conf"));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir() / pathConfigFile;
     return pathConfigFile;
 }
 
-void ArgsManager::ReadConfigFile(const std::string& confPath)
+void ReadConfigFile(const std::string& confPath)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good()) {
         // Create dynamic.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile(confPath).string().c_str(), "a");
-        if (configFile != nullptr) {
+        if (configFile != NULL) {
             // Write dynamic.conf file with random username and password.
             WriteConfigFile(configFile);
             // New dynamic.conf file written, now read it.
@@ -721,21 +717,10 @@ void ArgsManager::ReadConfigFile(const std::string& confPath)
     ClearDatadirCache();
 }
 
-void ArgsManager::WriteConfigFile(FILE* configFile)
-{
-    fputs("#Do not use special characters with username/password\n", configFile);
-    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
-    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
-    fputs(sUserID.c_str(), configFile);
-    fputs(sRPCpassword.c_str(), configFile);
-    fclose(configFile);
-    gArgs.ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
-}
-
 #ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(gArgs.GetArg("-pid", DYNAMIC_PID_FILENAME));
+    boost::filesystem::path pathPidFile(GetArg("-pid", DYNAMIC_PID_FILENAME));
     if (!pathPidFile.is_complete())
         pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
@@ -898,7 +883,7 @@ void ShrinkDebugFile()
             fwrite(vch.data(), 1, nBytes, file);
             fclose(file);
         }
-    } else if (file != nullptr)
+    } else if (file != NULL)
         fclose(file);
 }
 
@@ -909,7 +894,7 @@ boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate)
 
     char pszPath[MAX_PATH] = "";
 
-    if (SHGetSpecialFolderPathA(nullptr, pszPath, nFolder, fCreate)) {
+    if (SHGetSpecialFolderPathA(NULL, pszPath, nFolder, fCreate)) {
         return fs::path(pszPath);
     }
 
@@ -958,33 +943,21 @@ std::string GetThreadName()
 
 void SetupEnvironment()
 {
-#ifdef HAVE_MALLOPT_ARENA_MAX
-    // glibc-specific: On 32-bit systems set the number of arenas to 1.
-    // By default, since glibc 2.10, the C library will create up to two heap
-    // arenas per core. This is known to cause excessive virtual address space
-    // usage in our usage. Work around it by setting the maximum number of
-    // arenas to 1.
-    if (sizeof(void*) == 4) {
-        mallopt(M_ARENA_MAX, 1);
-    }
-#endif
     // On most POSIX systems (e.g. Linux, but not BSD) the environment's locale
     // may be invalid, in which case the "C" locale is used as fallback.
 #if !defined(WIN32) && !defined(MAC_OSX) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
-    try
-    {
+    try {
         std::locale(""); // Raises a runtime error if current locale is invalid
-    } catch (const std::runtime_error &)
-    {
+    } catch (const std::runtime_error&) {
         setenv("LC_ALL", "C", 1);
     }
 #endif
     // The path locale is lazy initialized and to avoid deinitialization errors
     // in multithreading environments, it is set explicitly by the main thread.
     // A dummy locale is used to extract the internal default locale, used by
-    // fs::path, which is then used to explicitly imbue the path.
-    std::locale loc = fs::path::imbue(std::locale::classic());
-    fs::path::imbue(loc);
+    // boost::filesystem::path, which is then used to explicitly imbue the path.
+    std::locale loc = boost::filesystem::path::imbue(std::locale::classic());
+    boost::filesystem::path::imbue(loc);
 }
 
 bool SetupNetworking()
@@ -1072,10 +1045,4 @@ bool FileExists(const std::string& strFilePath)
     } else {
         return false;
     }
-}
-
-// Obtain the application startup time (used for uptime calculation)
-int64_t GetStartupTime()
-{
-    return nStartupTime;
 }

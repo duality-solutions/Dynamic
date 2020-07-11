@@ -45,7 +45,7 @@ private:
     bool fPingerEnabled;
 
     /// Ping Dynode
-    bool SendDynodePing(CConnman* connman);
+    bool SendDynodePing(CConnman& connman);
 
     //  sentinel ping data
     int64_t nSentinelPingTime;
@@ -75,7 +75,7 @@ public:
     }
 
     /// Manage state of active Dynode
-    void ManageState(CConnman* connman);
+    void ManageState(CConnman& connman);
 
     std::string GetStateString() const;
     std::string GetStatus() const;
@@ -83,10 +83,10 @@ public:
 
     bool UpdateSentinelPing(int version);
 
-    void DoMaintenance(CConnman* connman);
+    void DoMaintenance(CConnman &connman);
 
 private:
-    void ManageStateInitial(CConnman* connman);
+    void ManageStateInitial(CConnman& connman);
     void ManageStateRemote();
 };
 

@@ -11,7 +11,6 @@
 
 #include "chainparamsbase.h"
 #include "clientversion.h"
-#include "fs.h"
 #include "rpc/client.h"
 #include "rpc/protocol.h"
 #include "support/events.h"
@@ -79,10 +78,10 @@ static int AppInitRPC(int argc, char* argv[])
     //
     // Parameters
     //
-    gArgs.ParseParameters(argc, argv);
-    if (argc < 2 || gArgs.IsArgSet("-?") || gArgs.IsArgSet("-h") || gArgs.IsArgSet("-help") || gArgs.IsArgSet("-version")) {
+    ParseParameters(argc, argv);
+    if (argc < 2 || IsArgSet("-?") || IsArgSet("-h") || IsArgSet("-help") || IsArgSet("-version")) {
         std::string strUsage = _("Dynamic RPC client version") + " " + FormatFullVersion() + "\n";
-        if (!gArgs.IsArgSet("-version")) {
+        if (!IsArgSet("-version")) {
             strUsage += "\n" + _("Usage:") + "\n" +
                         "  dynamic-cli [options] <command> [params]  " + _("Send command to Dynamic") + "\n" +
                         "  dynamic-cli [options] help                " + _("List commands") + "\n" +
@@ -98,19 +97,19 @@ static int AppInitRPC(int argc, char* argv[])
         }
         return EXIT_SUCCESS;
     }
-    bool datadirFromCmdLine = gArgs.IsArgSet("-datadir");
+    bool datadirFromCmdLine = IsArgSet("-datadir");
     if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
-        fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
+        fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", GetArg("-datadir", "").c_str());
         return EXIT_FAILURE;
     }
     try {
-        gArgs.ReadConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME));
+        ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
     } catch (const std::exception& e) {
         fprintf(stderr, "Error reading configuration file: %s\n", e.what());
         return EXIT_FAILURE;
     }
     if (!datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
-        fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
+        fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", GetArg("-datadir", "").c_str());
         return EXIT_FAILURE;
     }
     // Check for -testnet or -regtest parameter (BaseParams() calls are only valid after this clause)
@@ -120,7 +119,7 @@ static int AppInitRPC(int argc, char* argv[])
         fprintf(stderr, "Error: %s\n", e.what());
         return EXIT_FAILURE;
     }
-    if (gArgs.GetBoolArg("-rpcssl", false)) {
+    if (GetBoolArg("-rpcssl", false)) {
         fprintf(stderr, "Error: SSL mode for RPC (-rpcssl) is no longer supported.\n");
         return EXIT_FAILURE;
     }
@@ -163,8 +162,8 @@ static void http_request_done(struct evhttp_request* req, void* ctx)
 {
     HTTPReply* reply = static_cast<HTTPReply*>(ctx);
 
-    if (req == nullptr) {
-        /* If req is nullptr, it means an error occurred while connecting: the
+    if (req == NULL) {
+        /* If req is NULL, it means an error occurred while connecting: the
          * error code will have been passed to http_error_cb.
          */
         reply->status = 0;
@@ -193,19 +192,19 @@ static void http_error_cb(enum evhttp_request_error err, void* ctx)
 
 UniValue CallRPC(const std::string& strMethod, const UniValue& params)
 {
-    std::string host = gArgs.GetArg("-rpcconnect", DEFAULT_RPCCONNECT);
-    int port = gArgs.GetArg("-rpcport", BaseParams().RPCPort());
+    std::string host = GetArg("-rpcconnect", DEFAULT_RPCCONNECT);
+    int port = GetArg("-rpcport", BaseParams().RPCPort());
 
     // Obtain event base
     raii_event_base base = obtain_event_base();
 
     // Synchronously look up hostname
     raii_evhttp_connection evcon = obtain_evhttp_connection_base(base.get(), host, port);
-    evhttp_connection_set_timeout(evcon.get(), gArgs.GetArg("-rpcclienttimeout", DEFAULT_HTTP_CLIENT_TIMEOUT));
+    evhttp_connection_set_timeout(evcon.get(), GetArg("-rpcclienttimeout", DEFAULT_HTTP_CLIENT_TIMEOUT));
 
     HTTPReply response;
     raii_evhttp_request req = obtain_evhttp_request(http_request_done, (void*)&response);
-    if (req == nullptr)
+    if (req == NULL)
         throw std::runtime_error("create http request failed");
 #if LIBEVENT_VERSION_NUMBER >= 0x02010300
     evhttp_request_set_error_cb(req.get(), http_error_cb);
@@ -213,15 +212,15 @@ UniValue CallRPC(const std::string& strMethod, const UniValue& params)
 
     // Get credentials
     std::string strRPCUserColonPass;
-    if (gArgs.GetArg("-rpcpassword", "") == "") {
+    if (GetArg("-rpcpassword", "") == "") {
         // Try fall back to cookie-based authentication if no password is provided
         if (!GetAuthCookie(&strRPCUserColonPass)) {
             throw std::runtime_error(strprintf(
                 _("Could not locate RPC credentials. No authentication cookie could be found, and no rpcpassword is set in the configuration file (%s)"),
-                GetConfigFile(gArgs.GetArg("-conf", DYNAMIC_CONF_FILENAME)).string().c_str()));
+                GetConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME)).string().c_str()));
         }
     } else {
-        strRPCUserColonPass = gArgs.GetArg("-rpcuser", "") + ":" + gArgs.GetArg("-rpcpassword", "");
+        strRPCUserColonPass = GetArg("-rpcuser", "") + ":" + GetArg("-rpcpassword", "");
     }
 
     struct evkeyvalq* output_headers = evhttp_request_get_output_headers(req.get());
@@ -275,7 +274,7 @@ int CommandLineRPC(int argc, char* argv[])
             argv++;
         }
         std::vector<std::string> args = std::vector<std::string>(&argv[1], &argv[argc]);
-        if (gArgs.GetBoolArg("-stdin", false)) {
+        if (GetBoolArg("-stdin", false)) {
             // Read one arg per line from stdin and append
             std::string line;
             while (std::getline(std::cin, line))
@@ -287,14 +286,14 @@ int CommandLineRPC(int argc, char* argv[])
         args.erase(args.begin()); // Remove trailing method name from arguments vector
 
         UniValue params;
-        if (gArgs.GetBoolArg("-named", DEFAULT_NAMED)) {
+        if (GetBoolArg("-named", DEFAULT_NAMED)) {
             params = RPCConvertNamedValues(strMethod, args);
         } else {
             params = RPCConvertValues(strMethod, args);
         }
 
         // Execute and handle connection failures with -rpcwait
-        const bool fWait = gArgs.GetBoolArg("-rpcwait", false);
+        const bool fWait = GetBoolArg("-rpcwait", false);
         do {
             try {
                 const UniValue reply = CallRPC(strMethod, params);
@@ -342,7 +341,7 @@ int CommandLineRPC(int argc, char* argv[])
         strPrint = std::string("error: ") + e.what();
         nRet = EXIT_FAILURE;
     } catch (...) {
-        PrintExceptionContinue(nullptr, "CommandLineRPC()");
+        PrintExceptionContinue(NULL, "CommandLineRPC()");
         throw;
     }
 
@@ -368,7 +367,7 @@ int main(int argc, char* argv[])
         PrintExceptionContinue(&e, "AppInitRPC()");
         return EXIT_FAILURE;
     } catch (...) {
-        PrintExceptionContinue(nullptr, "AppInitRPC()");
+        PrintExceptionContinue(NULL, "AppInitRPC()");
         return EXIT_FAILURE;
     }
 
@@ -378,7 +377,7 @@ int main(int argc, char* argv[])
     } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "CommandLineRPC()");
     } catch (...) {
-        PrintExceptionContinue(nullptr, "CommandLineRPC()");
+        PrintExceptionContinue(NULL, "CommandLineRPC()");
     }
     return ret;
 }

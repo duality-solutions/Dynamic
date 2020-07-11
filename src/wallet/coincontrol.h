@@ -8,45 +8,25 @@
 #ifndef DYNAMIC_COINCONTROL_H
 #define DYNAMIC_COINCONTROL_H
 
-#include "policy/feerate.h"
-#include "policy/fees.h"
 #include "primitives/transaction.h"
-#include "wallet/wallet.h"
 
 /** Coin Control Features. */
 class CCoinControl
 {
 public:
     CTxDestination destChange;
-
-/* ASSET START */
-
-    //! If set, all asset change will be sent to this address, if not destChange will be used
-    CTxDestination assetDestChange;
-/* ASSET END */
-
     bool fUsePrivateSend;
     bool fUseInstantSend;
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
     bool fAllowWatchOnly;
-    //! Override automatic min/max checks on fee, m_feerate must be set if true
+    //! Minimum absolute fee (not per kilobyte)
+    CAmount nMinimumTotalFee;
+    //! Override estimated feerate
     bool fOverrideFeeRate;
-    //! Override the default payTxFee if set
-    boost::optional<CFeeRate> m_feerate;
-    //! Override the default confirmation target if set
-    boost::optional<unsigned int> m_confirm_target;
-    //! Signal BIP-125 replace by fee.
-    bool signalRbf;
-    //! Fee estimation mode to control arguments to estimateSmartFee
-    FeeEstimateMode m_fee_mode;
-
-    /** ASSET START */
-    //! Name of the asset that is selected, used when sending assets with coincontrol
-    std::string strAssetSelected;
-    /** ASSET END */
-
+    //! Feerate to use if overrideFeeRate is true
+    CFeeRate nFeeRate;
     //! Override the default confirmation target, 0 = use default
     int nConfirmTarget;
 
@@ -58,23 +38,14 @@ public:
     void SetNull()
     {
         destChange = CNoDestination();
-/* ASSET START */
-        assetDestChange = CNoDestination();
-/* ASSET END */
         fAllowOtherInputs = false;
         fAllowWatchOnly = false;
         setSelected.clear();
         fUseInstantSend = false;
         fUsePrivateSend = true;
-        m_feerate.reset();
+        nMinimumTotalFee = 0;
+        nFeeRate = CFeeRate(0);
         fOverrideFeeRate = false;
-        m_confirm_target.reset();
-        signalRbf = fWalletRbf;
-        m_fee_mode = FeeEstimateMode::UNSET;
-/* ASSET START */
-        strAssetSelected = "";
-        setAssetsSelected.clear();
-/* ASSET END */
         nConfirmTarget = 0;
     }
 
@@ -98,31 +69,6 @@ public:
         setSelected.erase(output);
     }
 
-/* ASSET START */
-    void SelectAsset(const COutPoint& output)
-    {
-        setAssetsSelected.insert(output);
-    }
-
-    void UnSelectAsset(const COutPoint& output)
-    {
-        setAssetsSelected.erase(output);
-        if (!setSelected.size())
-            strAssetSelected = "";
-    }
-
-    bool HasAssetSelected() const
-    {
-        return (setAssetsSelected.size() > 0);
-    }
-
-    bool IsAssetSelected(const COutPoint& output) const
-    {
-        return (setAssetsSelected.count(output) > 0);
-    }
-
-/* ASSET END */
-
     void UnSelectAll()
     {
         setSelected.clear();
@@ -133,18 +79,8 @@ public:
         vOutpoints.assign(setSelected.begin(), setSelected.end());
     }
 
-/* ASSET START */
-    void ListSelectedAssets(std::vector<COutPoint>& vOutpoints) const
-    {
-        vOutpoints.assign(setAssetsSelected.begin(), setAssetsSelected.end());
-    }
-/* ASSET END */
-    
 private:
     std::set<COutPoint> setSelected;
-/* ASSET START */
-    std::set<COutPoint> setAssetsSelected;
-/* ASSET END */
 };
 
 #endif // DYNAMIC_COINCONTROL_H

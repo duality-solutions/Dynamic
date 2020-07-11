@@ -12,7 +12,6 @@
 #include "core_io.h"
 #include "keystore.h"
 #include "policy/policy.h"
-#include "policy/rbf.h"
 #include "primitives/transaction.h"
 #include "script/script.h"
 #include "script/sign.h"
@@ -40,7 +39,7 @@ static int AppInitRawTx(int argc, char* argv[])
     //
     // Parameters
     //
-    gArgs.ParseParameters(argc, argv);
+    ParseParameters(argc, argv);
 
     // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
     try {
@@ -50,9 +49,9 @@ static int AppInitRawTx(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    fCreateBlank = gArgs.GetBoolArg("-create", false);
+    fCreateBlank = GetBoolArg("-create", false);
 
-    if (argc < 2 || gArgs.IsArgSet("-?") || gArgs.IsArgSet("-h") || gArgs.IsArgSet("-help")) {
+    if (argc < 2 || IsArgSet("-?") || IsArgSet("-h") || IsArgSet("-help")) {
         // First part of help message is specific to this utility
         std::string strUsage = strprintf(_("%s dynamic-tx utility version"), _(PACKAGE_NAME)) + " " + FormatFullVersion() + "\n\n" +
                                _("Usage:") + "\n" +
@@ -197,26 +196,6 @@ static void MutateTxLocktime(CMutableTransaction& tx, const std::string& cmdVal)
         throw std::runtime_error("Invalid TX locktime requested");
 
     tx.nLockTime = (unsigned int)newLocktime;
-}
-
-static void MutateTxRBFOptIn(CMutableTransaction& tx, const std::string& strInIdx)
-{
-    // parse requested index
-    int inIdx = atoi(strInIdx);
-    if (inIdx < 0 || inIdx >= (int)tx.vin.size()) {
-        throw std::runtime_error("Invalid TX input index '" + strInIdx + "'");
-    }
-
-    // set the nSequence to MAX_INT - 2 (= RBF opt in flag)
-    int cnt = 0;
-    for (CTxIn& txin : tx.vin) {
-        if (strInIdx == "" || cnt == inIdx) {
-            if (txin.nSequence > MAX_BIP125_RBF_SEQUENCE) {
-                txin.nSequence = MAX_BIP125_RBF_SEQUENCE;
-            }
-        }
-        ++cnt;
-    }
 }
 
 static void MutateTxAddInput(CMutableTransaction& tx, const std::string& strInput)
@@ -488,18 +467,6 @@ static bool findSighashFlags(int& flags, const std::string& flagStr)
     return false;
 }
 
-static CAmount AmountFromValue(const UniValue& value)
-{
-    if (!value.isNum() && !value.isStr())
-        throw std::runtime_error("Amount is not a number or string");
-    CAmount amount;
-    if (!ParseFixedPoint(value.getValStr(), 8, &amount))
-        throw std::runtime_error("Invalid amount (1)");
-    if (!MoneyRange(amount))
-        throw std::runtime_error("Amount out of range");
-    return amount;
-}
-
 uint256 ParseHashUO(std::map<std::string, UniValue>& o, std::string strKey)
 {
     if (!o.count(strKey))
@@ -585,10 +552,7 @@ static void MutateTxSign(CMutableTransaction& tx, const std::string& flagStr)
                 }
                 Coin newcoin;
                 newcoin.out.scriptPubKey = scriptPubKey;
-                newcoin.out.nValue = 0;
-                if (prevOut.exists("amount")) {
-                    newcoin.out.nValue = AmountFromValue(prevOut["amount"]);
-                }
+                newcoin.out.nValue = 0; // we don't know the actual output value
                 newcoin.nHeight = 1;
                 view.AddCoin(out, std::move(newcoin), true);
             }
@@ -618,20 +582,17 @@ static void MutateTxSign(CMutableTransaction& tx, const std::string& flagStr)
             continue;
         }
         const CScript& prevPubKey = coin.out.scriptPubKey;
-        const CAmount& amount = coin.out.nValue;
 
         txin.scriptSig.clear();
-        SignatureData sigdata;
         // Only sign SIGHASH_SINGLE if there's a corresponding output:
         if (!fHashSingle || (i < mergedTx.vout.size()))
-            ProduceSignature(MutableTransactionSignatureCreator(&keystore, &mergedTx, i, amount, nHashType), prevPubKey, sigdata);
+            SignSignature(keystore, prevPubKey, mergedTx, i, nHashType);
 
         // ... and merge in other signatures:
-        for (const CTransaction& txv : txVariants)
-            sigdata = CombineSignatures(prevPubKey, MutableTransactionSignatureChecker(&mergedTx, i, amount), sigdata, DataFromTransaction(txv, i));
-        UpdateTransaction(mergedTx, i, sigdata);
-        
-        if (!VerifyScript(txin.scriptSig, prevPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&mergedTx, i, amount)))
+        BOOST_FOREACH (const CTransaction& txv, txVariants) {
+            txin.scriptSig = CombineSignatures(prevPubKey, mergedTx, i, txin.scriptSig, txv.vin[i].scriptSig);
+        }
+        if (!VerifyScript(txin.scriptSig, prevPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&mergedTx, i)))
             fComplete = false;
     }
 
@@ -666,10 +627,7 @@ static void MutateTx(CMutableTransaction& tx, const std::string& command, const 
         MutateTxVersion(tx, commandVal);
     else if (command == "locktime")
         MutateTxLocktime(tx, commandVal);
-    else if (command == "replaceable") {
-        MutateTxRBFOptIn(tx, commandVal);
-    }
-    
+
     else if (command == "delin")
         MutateTxDelInput(tx, commandVal);
     else if (command == "in")
@@ -730,9 +688,9 @@ static void OutputTxHex(const CTransaction& tx)
 
 static void OutputTx(const CTransaction& tx)
 {
-    if (gArgs.GetBoolArg("-json", false))
+    if (GetBoolArg("-json", false))
         OutputTxJSON(tx);
-    else if (gArgs.GetBoolArg("-txid", false))
+    else if (GetBoolArg("-txid", false))
         OutputTxHash(tx);
     else
         OutputTxHex(tx);
@@ -813,7 +771,7 @@ static int CommandLineRawTx(int argc, char* argv[])
         strPrint = std::string("error: ") + e.what();
         nRet = EXIT_FAILURE;
     } catch (...) {
-        PrintExceptionContinue(nullptr, "CommandLineRawTx()");
+        PrintExceptionContinue(NULL, "CommandLineRawTx()");
         throw;
     }
 
@@ -835,7 +793,7 @@ int main(int argc, char* argv[])
         PrintExceptionContinue(&e, "AppInitRawTx()");
         return EXIT_FAILURE;
     } catch (...) {
-        PrintExceptionContinue(nullptr, "AppInitRawTx()");
+        PrintExceptionContinue(NULL, "AppInitRawTx()");
         return EXIT_FAILURE;
     }
 
@@ -845,7 +803,7 @@ int main(int argc, char* argv[])
     } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "CommandLineRawTx()");
     } catch (...) {
-        PrintExceptionContinue(nullptr, "CommandLineRawTx()");
+        PrintExceptionContinue(NULL, "CommandLineRawTx()");
     }
     return ret;
 }

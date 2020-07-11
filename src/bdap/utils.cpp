@@ -117,7 +117,7 @@ bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
 
-    CBlockIndex *pindexSlow = nullptr;
+    CBlockIndex *pindexSlow = NULL;
 
     LOCK(cs_main);
     

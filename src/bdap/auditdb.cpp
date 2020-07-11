@@ -19,7 +19,7 @@
 
 #include <boost/thread.hpp>
 
-CAuditDB *pAuditDB = nullptr;
+CAuditDB *pAuditDB = NULL;
 
 bool GetAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit)
 {
@@ -223,7 +223,7 @@ bool FlushAuditLevelDB()
 {
     {
         LOCK(cs_bdap_audit);
-        if (pAuditDB != nullptr)
+        if (pAuditDB != NULL)
         {
             if (!pAuditDB->Flush()) {
                 LogPrintf("Failed to flush Audit BDAP database!");

@@ -107,7 +107,6 @@ BOOST_AUTO_TEST_CASE(tx_valid)
             }
 
             std::map<COutPoint, CScript> mapprevOutScriptPubKeys;
-            std::map<COutPoint, int64_t> mapprevOutValues;
             UniValue inputs = test[0].get_array();
             bool fValid = true;
         for (unsigned int inpIdx = 0; inpIdx < inputs.size(); inpIdx++) {
@@ -140,7 +139,6 @@ BOOST_AUTO_TEST_CASE(tx_valid)
             BOOST_CHECK_MESSAGE(CheckTransaction(tx, state), strTest);
             BOOST_CHECK(state.IsValid());
 
-            PrecomputedTransactionData txdata(tx);
             for (unsigned int i = 0; i < tx.vin.size(); i++)
             {
                 if (!mapprevOutScriptPubKeys.count(tx.vin[i].prevout))
@@ -149,14 +147,9 @@ BOOST_AUTO_TEST_CASE(tx_valid)
                     break;
                 }
 
-                CAmount amount = 0;
-                if (mapprevOutValues.count(tx.vin[i].prevout))
-                {
-                    amount = mapprevOutValues[tx.vin[i].prevout];
-                }
                 unsigned int verify_flags = ParseScriptFlags(test[2].get_str());
                 BOOST_CHECK_MESSAGE(VerifyScript(tx.vin[i].scriptSig, mapprevOutScriptPubKeys[tx.vin[i].prevout],
-                                                 verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata), &err),
+                                                 verify_flags, TransactionSignatureChecker(&tx, i), &err),
                                     strTest);
                 BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
             }
@@ -187,36 +180,30 @@ BOOST_AUTO_TEST_CASE(tx_invalid)
                 continue;
             }
 
-                std::map<COutPoint, CScript> mapprevOutScriptPubKeys;
-                std::map<COutPoint, int64_t> mapprevOutValues;
-                UniValue inputs = test[0].get_array();
-                bool fValid = true;
-                for (unsigned int inpIdx = 0; inpIdx < inputs.size(); inpIdx++)
+            std::map<COutPoint, CScript> mapprevOutScriptPubKeys;
+            UniValue inputs = test[0].get_array();
+            bool fValid = true;
+        for (unsigned int inpIdx = 0; inpIdx < inputs.size(); inpIdx++) {
+            const UniValue& input = inputs[inpIdx];
+                if (!input.isArray())
                 {
-                    const UniValue &input = inputs[inpIdx];
-                    if (!input.isArray())
-                    {
-                        fValid = false;
-                        break;
-                    }
-                    UniValue vinput = input.get_array();
-                    if (vinput.size() < 3 || vinput.size() > 4)
-                    {
-                        fValid = false;
-                        break;
-                    }
-                    COutPoint outpoint(uint256S(vinput[0].get_str()), vinput[1].get_int());
-                    mapprevOutScriptPubKeys[outpoint] = ParseScript(vinput[2].get_str());
-                    if (vinput.size() >= 4)
-                    {
-                        mapprevOutValues[outpoint] = vinput[3].get_int64();
-                    }
+                    fValid = false;
+                    break;
                 }
-                if (!fValid)
+                UniValue vinput = input.get_array();
+                if (vinput.size() != 3)
                 {
-                    BOOST_ERROR("Bad test: " << strTest);
-                    continue;
+                    fValid = false;
+                    break;
                 }
+
+                mapprevOutScriptPubKeys[COutPoint(uint256S(vinput[0].get_str()), vinput[1].get_int())] = ParseScript(vinput[2].get_str());
+            }
+            if (!fValid)
+            {
+                BOOST_ERROR("Bad test: " << strTest);
+                continue;
+            }
 
             std::string transaction = test[1].get_str();
             CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
@@ -225,7 +212,6 @@ BOOST_AUTO_TEST_CASE(tx_invalid)
             CValidationState state;
             fValid = CheckTransaction(tx, state) && state.IsValid();
 
-            PrecomputedTransactionData txdata(tx);
             for (unsigned int i = 0; i < tx.vin.size() && fValid; i++)
             {
                 if (!mapprevOutScriptPubKeys.count(tx.vin[i].prevout))
@@ -235,13 +221,8 @@ BOOST_AUTO_TEST_CASE(tx_invalid)
                 }
 
                 unsigned int verify_flags = ParseScriptFlags(test[2].get_str());
-                CAmount amount = 0;
-                if (mapprevOutValues.count(tx.vin[i].prevout))
-                {
-                    amount = mapprevOutValues[tx.vin[i].prevout];
-                }
                 fValid = VerifyScript(tx.vin[i].scriptSig, mapprevOutScriptPubKeys[tx.vin[i].prevout],
-                                      verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata), &err);
+                                      verify_flags, TransactionSignatureChecker(&tx, i), &err);
             }
             BOOST_CHECK_MESSAGE(!fValid, strTest);
             BOOST_CHECK_MESSAGE(err != SCRIPT_ERR_OK, ScriptErrorString(err));

@@ -7,7 +7,6 @@
 
 #include "chainparams.h"
 #include "clientversion.h"
-#include "core_io.h"
 #include "net.h"
 #include "net_processing.h"
 #include "netbase.h"
@@ -63,28 +62,6 @@ UniValue ping(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
-//// Used for testing only
-//UniValue testgetassetdata(const JSONRPCRequest& request)
-//{
-//    if (request.fHelp || request.params.size() != 1)
-//        throw std::runtime_error(
-//                "testgetassetdata\n"
-//                "\nHelper RPC CALL, dont use\n"
-//        );
-//
-//    if(!g_connman)
-//        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
-//
-//    std::string assetName = request.params[0].get_str();
-//
-//    // Request that each node send a ping during next message processing pass
-//    g_connman->ForEachNode([assetName](CNode* pnode) {
-//        pnode->setInventoryAssetsSend.insert(assetName);
-//        pnode->fGetAssetData = true;
-//    });
-//    return NullUniValue;
-//}
-
 UniValue getpeerinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -111,7 +88,6 @@ UniValue getpeerinfo(const JSONRPCRequest& request)
             "    \"version\": v,              (numeric) The peer version, such as 7001\n"
             "    \"subver\": \"/Dynamic:x.x.x/\",  (string) The string version\n"
             "    \"inbound\": true|false,     (boolean) Inbound (true) or Outbound (false)\n"
-            "    \"addnode\": true|false,     (boolean) Whether connection was due to addnode/-connect or if it was an automatic/inbound connection\n"
             "    \"startingheight\": n,       (numeric) The starting height (block) of the peer\n"
             "    \"banscore\": n,             (numeric) The ban score\n"
             "    \"synced_headers\": n,       (numeric) The last header we have in common with this peer\n"
@@ -170,7 +146,6 @@ UniValue getpeerinfo(const JSONRPCRequest& request)
         // their ver message.
         obj.push_back(Pair("subver", stats.cleanSubVer));
         obj.push_back(Pair("inbound", stats.fInbound));
-        obj.push_back(Pair("addnode", stats.m_manual_connection));
         obj.push_back(Pair("startingheight", stats.nStartingHeight));
         if (fStateStats) {
             obj.push_back(Pair("banscore", statestats.nMisbehavior));
@@ -185,14 +160,14 @@ UniValue getpeerinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("whitelisted", stats.fWhitelisted));
 
         UniValue sendPerMsgCmd(UniValue::VOBJ);
-        for (const mapMsgCmdSize::value_type& i : stats.mapSendBytesPerMsgCmd) {
+        BOOST_FOREACH (const mapMsgCmdSize::value_type& i, stats.mapSendBytesPerMsgCmd) {
             if (i.second > 0)
                 sendPerMsgCmd.push_back(Pair(i.first, i.second));
         }
         obj.push_back(Pair("bytessent_per_msg", sendPerMsgCmd));
 
         UniValue recvPerMsgCmd(UniValue::VOBJ);
-        for (const mapMsgCmdSize::value_type& i : stats.mapRecvBytesPerMsgCmd) {
+        BOOST_FOREACH (const mapMsgCmdSize::value_type& i, stats.mapRecvBytesPerMsgCmd) {
             if (i.second > 0)
                 recvPerMsgCmd.push_back(Pair(i.first, i.second));
         }
@@ -228,7 +203,7 @@ UniValue addnode(const JSONRPCRequest& request)
 
     if (strCommand == "onetry") {
         CAddress addr;
-        g_connman->OpenNetworkConnection(addr, false, nullptr, strNode.c_str());
+        g_connman->OpenNetworkConnection(addr, false, NULL, strNode.c_str());
         return NullUniValue;
     }
 
@@ -455,7 +430,7 @@ UniValue getnetworkinfo(const JSONRPCRequest& request)
     UniValue localAddresses(UniValue::VARR);
     {
         LOCK(cs_mapLocalHost);
-        for (const std::pair<CNetAddr, LocalServiceInfo>& item : mapLocalHost) {
+        BOOST_FOREACH (const PAIRTYPE(CNetAddr, LocalServiceInfo) & item, mapLocalHost) {
             UniValue rec(UniValue::VOBJ);
             rec.push_back(Pair("address", item.first.ToString()));
             rec.push_back(Pair("port", item.second.nPort));

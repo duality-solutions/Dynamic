@@ -7,7 +7,6 @@
 
 #include "chain.h"
 #include "chainparams.h"
-#include "core_io.h"
 #include "httpserver.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
@@ -142,7 +141,7 @@ static bool rest_headers(HTTPRequest* req,
     if (path.size() != 2)
         return RESTERR(req, HTTP_BAD_REQUEST, "No header count specified. Use /rest/headers/<count>/<hash>.<ext>.");
 
-    long count = strtol(path[0].c_str(), nullptr, 10);
+    long count = strtol(path[0].c_str(), NULL, 10);
     if (count < 1 || count > 2000)
         return RESTERR(req, HTTP_BAD_REQUEST, "Header count out of range: " + path[0]);
 
@@ -156,8 +155,8 @@ static bool rest_headers(HTTPRequest* req,
     {
         LOCK(cs_main);
         BlockMap::const_iterator it = mapBlockIndex.find(hash);
-        const CBlockIndex* pindex = (it != mapBlockIndex.end()) ? it->second : nullptr;
-        while (pindex != nullptr && chainActive.Contains(pindex)) {
+        const CBlockIndex* pindex = (it != mapBlockIndex.end()) ? it->second : NULL;
+        while (pindex != NULL && chainActive.Contains(pindex)) {
             headers.push_back(pindex);
             if (headers.size() == (unsigned long)count)
                 break;
@@ -166,7 +165,7 @@ static bool rest_headers(HTTPRequest* req,
     }
 
     CDataStream ssHeader(SER_NETWORK, PROTOCOL_VERSION);
-    for (const CBlockIndex* pindex : headers) {
+    BOOST_FOREACH (const CBlockIndex* pindex, headers) {
         ssHeader << pindex->GetBlockHeader();
     }
 
@@ -186,7 +185,7 @@ static bool rest_headers(HTTPRequest* req,
     }
     case RF_JSON: {
         UniValue jsonHeaders(UniValue::VARR);
-        for (const CBlockIndex* pindex : headers) {
+        BOOST_FOREACH (const CBlockIndex* pindex, headers) {
             jsonHeaders.push_back(blockheaderToJSON(pindex));
         }
         std::string strJSON = jsonHeaders.write() + "\n";
@@ -217,7 +216,7 @@ static bool rest_block(HTTPRequest* req,
         return RESTERR(req, HTTP_BAD_REQUEST, "Invalid hash: " + hashStr);
 
     CBlock block;
-    CBlockIndex* pblockindex = nullptr;
+    CBlockIndex* pblockindex = NULL;
     {
         LOCK(cs_main);
         if (mapBlockIndex.count(hash) == 0)
@@ -391,7 +390,7 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
 
     case RF_JSON: {
         UniValue objTx(UniValue::VOBJ);
-        TxToUnivWithAssets(*tx, hashBlock, objTx);
+        TxToJSON(*tx, hashBlock, objTx);
         std::string strJSON = objTx.write() + "\n";
         req->WriteHeader("Content-Type", "application/json");
         req->WriteReply(HTTP_OK, strJSON);
@@ -558,14 +557,14 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
         objGetUTXOResponse.push_back(Pair("bitmap", bitmapStringRepresentation));
 
         UniValue utxos(UniValue::VARR);
-        for (const CCoin& coin : outs) {
+        BOOST_FOREACH (const CCoin& coin, outs) {
             UniValue utxo(UniValue::VOBJ);
             utxo.push_back(Pair("height", (int32_t)coin.nHeight));
             utxo.push_back(Pair("value", ValueFromAmount(coin.out.nValue)));
 
             // include the script in a json output
             UniValue o(UniValue::VOBJ);
-            ScriptPubKeyToUnivWithAssets(coin.out.scriptPubKey, o, true);
+            ScriptPubKeyToJSON(coin.out.scriptPubKey, o, true);
             utxo.push_back(Pair("scriptPubKey", o));
             utxos.push_back(utxo);
         }

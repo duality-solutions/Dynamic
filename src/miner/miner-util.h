@@ -8,8 +8,6 @@
 #ifndef DYNAMIC_MINER_UTIL_H
 #define DYNAMIC_MINER_UTIL_H
 
-#include "rpc/mining.h"
-
 #include <atomic>
 #include <memory>
 
@@ -28,12 +26,16 @@ namespace Consensus
 struct Params;
 };
 
+static const bool DEFAULT_GENERATE = false;
+static const uint8_t DEFAULT_GENERATE_THREADS_CPU = 0;
+static const uint8_t DEFAULT_GENERATE_THREADS_GPU = 0;
+
 static const bool DEFAULT_PRINTPRIORITY = false;
 
 struct CBlockTemplate {
     CBlock block;
     std::vector<CAmount> vTxFees;
-    std::vector<int64_t> vTxSigOpsCost;
+    std::vector<int64_t> vTxSigOps;
     CTxOut txoutDynode;                 // dynode payment
     std::vector<CTxOut> voutSuperblock; // dynode payment
 };

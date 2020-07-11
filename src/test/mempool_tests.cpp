@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(MempoolRemoveTest)
     }
 
 
-    CTxMemPool testPool;
+    CTxMemPool testPool(CFeeRate(0));
 
     // Nothing in pool, remove should do nothing:
     unsigned int poolSize = testPool.size();
@@ -117,7 +117,7 @@ void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder)
 
 BOOST_AUTO_TEST_CASE(MempoolIndexingTest)
 {
-    CTxMemPool pool;
+    CTxMemPool pool(CFeeRate(0));
     TestMemPoolEntryHelper entry;
 
     /* 3rd highest fee */
@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE(MempoolIndexingTest)
 
 BOOST_AUTO_TEST_CASE(MempoolAncestorIndexingTest)
 {
-    CTxMemPool pool;
+    CTxMemPool pool(CFeeRate(0));
     TestMemPoolEntryHelper entry;
 
     /* 3rd highest fee */
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestorIndexingTest)
 
 BOOST_AUTO_TEST_CASE(MempoolSizeLimitTest)
 {
-    CTxMemPool pool;
+    CTxMemPool pool(CFeeRate(1000));
     TestMemPoolEntryHelper entry;
     entry.dPriority = 10.0;
 

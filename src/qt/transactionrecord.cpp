@@ -82,12 +82,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
             const CTxOut& txout = wtx.tx->vout[i];
             isminetype mine = wallet->IsMine(txout);
-
-            /** ASSET START */
-            if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
-                continue;
-            /** ASSET START */
-
             if (mine) {
                 TransactionRecord sub(hash, nTime);
                 CTxDestination address;
@@ -138,12 +132,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
         bool fAllToMeDenom = true;
         int nToMe = 0;
         for (const CTxOut& txout : wtx.tx->vout) {
-
-            /** ASSET START */
-            if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
-                continue;
-            /** ASSET START */
-
             if (wallet->IsMine(txout)) {
                 fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(txout.nValue);
                 nToMe++;
@@ -184,12 +172,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     sub.type = TransactionRecord::PrivateSendCollateralPayment;
                 } else {
                     for (const auto& txout : wtx.tx->vout) {
-
-                        /** ASSET START */
-                        if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
-                            continue;
-                        /** ASSET START */
-
                         if (txout.nValue == CPrivateSend::GetMaxCollateralAmount()) {
                             sub.type = TransactionRecord::PrivateSendMakeCollaterals;
                             break;
@@ -228,12 +210,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
             }
             for (unsigned int nOut = 0; nOut < wtx.tx->vout.size() && !fDone; nOut++) {
                 const CTxOut& txout = wtx.tx->vout[nOut];
-
-                /** ASSET START */
-                if (txout.scriptPubKey.IsAssetScript())
-                    continue;
-                /** ASSET START */
-
                 TransactionRecord sub(hash, nTime);
                 sub.idx = parts.size();
                 sub.involvesWatchAddress = involvesWatchAddress;
@@ -319,134 +295,14 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
 
                 parts.append(sub);
             }
-        }
-        else
-        {
+        } else {
             //
             // Mixed debit transaction, can't break down payees
             //
-
-
-            /** ASSET START */
-            // We will only show mixed debit transactions that are nNet < 0 or if they are nNet == 0 and
-            // they do not contain assets. This is so the list of transaction doesn't add 0 amount transactions to the
-            // list.
-            bool fIsMixedDebit = true;
-            if (nNet == 0) {
-                for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++) {
-                    const CTxOut &txout = wtx.tx->vout[nOut];
-
-                    if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
-                        fIsMixedDebit = false;
-                        break;
-                    }
-                }
-            }
-
-            if (fIsMixedDebit) {
-                parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
-                parts.last().involvesWatchAddress = involvesWatchAddress;
-            }
-            /** ASSET START */
+            parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
+            parts.last().involvesWatchAddress = involvesWatchAddress;
         }
     }
-
-    /** ASSET START */
-    if (AreAssetsDeployed()) {
-        CAmount nFee;
-        std::string strSentAccount;
-        std::list<COutputEntry> listReceived;
-        std::list<COutputEntry> listSent;
-
-        std::list<CAssetOutputEntry> listAssetsReceived;
-        std::list<CAssetOutputEntry> listAssetsSent;
-
-        wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount, ISMINE_ALL, listAssetsReceived, listAssetsSent);
-
-        if (listAssetsReceived.size() > 0)
-        {
-            for (const CAssetOutputEntry &data : listAssetsReceived)
-            {
-                TransactionRecord sub(hash, nTime);
-                sub.idx = data.vout;
-
-                const CTxOut& txout = wtx.tx->vout[sub.idx];
-                isminetype mine = wallet->IsMine(txout);
-
-                sub.address = EncodeDestination(data.destination);
-                sub.assetName = data.assetName;
-                sub.credit = data.nAmount;
-                sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
-
-                if (data.type == TX_NEW_ASSET)
-                    sub.type = TransactionRecord::Issue;
-                else if (data.type == TX_REISSUE_ASSET)
-                    sub.type = TransactionRecord::Reissue;
-                else if (data.type == TX_TRANSFER_ASSET)
-                    sub.type = TransactionRecord::TransferFrom;
-                else {
-                    sub.type = TransactionRecord::Other;
-                }
-
-                sub.units = DEFAULT_UNITS;
-
-                if (IsAssetNameAnOwner(sub.assetName))
-                    sub.units = OWNER_UNITS;
-                else if (CheckIssueDataTx(wtx.tx->vout[sub.idx]))
-                {
-                    CNewAsset asset;
-                    std::string strAddress;
-                    if (AssetFromTransaction(wtx, asset, strAddress))
-                        sub.units = asset.units;
-                }
-                else
-                {
-                    CNewAsset asset;
-                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
-                        sub.units = asset.units;
-                }
-
-                parts.append(sub);
-            }
-        }
-
-        if (listAssetsSent.size() > 0)
-        {
-            for (const CAssetOutputEntry &data : listAssetsSent)
-            {
-                TransactionRecord sub(hash, nTime);
-                sub.idx = data.vout;
-                sub.address = EncodeDestination(data.destination);
-                sub.assetName = data.assetName;
-                sub.credit = -data.nAmount;
-                sub.involvesWatchAddress = false;
-
-                if (data.type == TX_TRANSFER_ASSET)
-                    sub.type = TransactionRecord::TransferTo;
-                else
-                    sub.type = TransactionRecord::Other;
-
-                if (IsAssetNameAnOwner(sub.assetName))
-                    sub.units = OWNER_UNITS;
-                else if (CheckIssueDataTx(wtx.tx->vout[sub.idx]))
-                {
-                    CNewAsset asset;
-                    std::string strAddress;
-                    if (AssetFromTransaction(wtx, asset, strAddress))
-                        sub.units = asset.units;
-                }
-                else
-                {
-                    CNewAsset asset;
-                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
-                        sub.units = asset.units;
-                }
-
-                parts.append(sub);
-            }
-        }
-    }
-    /** ASSET END */
 
     return parts;
 }
@@ -457,7 +313,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
     // Determine transaction status
 
     // Find the block the tx is in
-    CBlockIndex* pindex = nullptr;
+    CBlockIndex* pindex = NULL;
     BlockMap::iterator mi = mapBlockIndex.find(wtx.hashBlock);
     if (mi != mapBlockIndex.end())
         pindex = (*mi).second;

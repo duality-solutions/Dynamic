@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_AUDITDATA_H
 #define DYNAMIC_BDAP_AUDITDATA_H
 
-#include "bdap/bdap.h"
+#include "bdap.h"
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"

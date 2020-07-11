@@ -2,11 +2,8 @@
 #define DYNAMIC_TEST_TEST_DYNAMIC_H
 
 #include "chainparamsbase.h"
-#include "fs.h"
 #include "key.h"
 #include "pubkey.h"
-#include "random.h"
-#include "scheduler.h"
 #include "txdb.h"
 #include "txmempool.h"
 
@@ -47,19 +44,13 @@ struct BasicTestingSetup {
  * and wallet (if enabled) setup.
  */
 class CConnman;
-class PeerLogicValidation;
-
-struct TestingSetup : public BasicTestingSetup
-{
+struct TestingSetup: public BasicTestingSetup {
     CCoinsViewDB *pcoinsdbview;
-    fs::path pathTemp;
+    boost::filesystem::path pathTemp;
     boost::thread_group threadGroup;
-    CConnman *connman;
-    CScheduler scheduler;
-    std::unique_ptr<PeerLogicValidation> peerLogic;
+    CConnman* connman;
 
-    explicit TestingSetup(const std::string &chainName = CBaseChainParams::MAIN);
-
+    TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~TestingSetup();
 };
 
@@ -104,8 +95,8 @@ struct TestMemPoolEntryHelper
         nFee(0), nTime(0), dPriority(0.0), nHeight(1),
         hadNoDependencies(false), spendsCoinbase(false), sigOpCount(1) { }
     
-    CTxMemPoolEntry FromTx(const CMutableTransaction &tx, CTxMemPool *pool = nullptr);
-    CTxMemPoolEntry FromTx(const CTransaction &tx, CTxMemPool *pool = nullptr);
+    CTxMemPoolEntry FromTx(const CMutableTransaction &tx, CTxMemPool *pool = NULL);
+    CTxMemPoolEntry FromTx(const CTransaction &tx, CTxMemPool *pool = NULL);
 
     // Change the default value
     TestMemPoolEntryHelper &Fee(CAmount _fee) { nFee = _fee; return *this; }

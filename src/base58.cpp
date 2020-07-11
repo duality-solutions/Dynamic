@@ -74,7 +74,6 @@ static CTxDestination DecodeDestination(const std::string& str, const CChainPara
     data.clear();
     return CNoDestination();
 }
-
 } // namespace
 
 CTxDestination DecodeDestination(const std::string& str)
@@ -86,18 +85,6 @@ std::string EncodeDestination(const CTxDestination& dest)
 {
     return boost::apply_visitor(DestinationEncoder(Params()), dest);
 }
-
-/* ASSET START*/
-bool IsValidDestinationString(const std::string& str, const CChainParams& params)
-{
-    return CDynamicAddress(str).IsValid(params);
-}
-
-bool IsValidDestinationString(const std::string& str)
-{
-    return CDynamicAddress(str).IsValid();
-}
-/* ASSET END */
 
 bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
 {
@@ -118,7 +105,7 @@ bool DecodeBase58(const char* psz, std::vector<unsigned char>& vch)
     while (*psz && !isspace(*psz)) {
         // Decode base58 character
         const char* ch = strchr(pszBase58, *psz);
-        if (ch == nullptr)
+        if (ch == NULL)
             return false;
         // Apply "b256 = b256 * 58 + ch".
         int carry = ch - pszBase58;

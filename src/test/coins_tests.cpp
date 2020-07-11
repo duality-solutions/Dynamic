@@ -18,7 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-int ApplyTxInUndo(Coin &&undo, CCoinsViewCache &view, const COutPoint &out, CAssetsCache *assetsCache = nullptr);
+int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out);
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txundo, int nHeight);
 
 namespace
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(coins_cache_simulation_test)
                     found_an_entry = true;
                 }
             }
-            for (const CCoinsViewCacheTest *test : stack) {
+            BOOST_FOREACH(const CCoinsViewCacheTest *test, stack) {
                 test->SelfTest();
             }
         }
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(updatecoins_simulation_test)
 
             // Call UpdateCoins on the top cache
             CTxUndo undo;
-            UpdateCoins(tx, *(stack.back()), undo, height, uint256());
+            UpdateCoins(tx, *(stack.back()), undo, height);
 
             // Update the utxo set for future spends
             utxoset.insert(outpoint);

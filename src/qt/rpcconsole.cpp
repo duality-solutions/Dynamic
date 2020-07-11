@@ -71,7 +71,7 @@ const struct {
     {"cmd-reply", ":/icons/tx_output"},
     {"cmd-error", ":/icons/tx_output"},
     {"misc", ":/icons/tx_inout"},
-    {nullptr, nullptr}};
+    {NULL, NULL}};
 
 /* Object for executing console RPC commands in a separate thread.
 */
@@ -403,7 +403,7 @@ RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent),
 #ifdef ENABLE_WALLET
     ui->berkeleyDBVersion->setText(DbEnv::version(0, 0, 0));
     std::string walletPath = GetDataDir().string();
-    walletPath += QDir::separator().toLatin1() + gArgs.GetArg("-wallet", "wallet.dat");
+    walletPath += QDir::separator().toLatin1() + GetArg("-wallet", "wallet.dat");
     ui->wallet_path->setText(QString::fromStdString(walletPath));
 #else
     ui->label_berkeleyDBVersion->hide();
@@ -523,7 +523,7 @@ void RPCConsole::setClientModel(ClientModel* model)
         setNumConnections(model->getNumConnections());
         connect(model, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
-        setNumBlocks(model->getNumBlocks(), model->getLastBlockDate(), model->getVerificationProgress(nullptr), false);
+        setNumBlocks(model->getNumBlocks(), model->getLastBlockDate(), model->getVerificationProgress(NULL), false);
         connect(model, SIGNAL(numBlocksChanged(int, QDateTime, double, bool)), this, SLOT(setNumBlocks(int, QDateTime, double, bool)));
 
         setDynodeCount(model->getDynodeCountString());
@@ -981,7 +981,7 @@ void RPCConsole::peerLayoutChanged()
     if (!clientModel || !clientModel->getPeerTableModel())
         return;
 
-    const CNodeCombinedStats* stats = nullptr;
+    const CNodeCombinedStats* stats = NULL;
     bool fUnselect = false;
     bool fReselect = false;
 

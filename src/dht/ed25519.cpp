@@ -20,7 +20,7 @@
 
 using namespace libtorrent;
 
-static ed25519_context* ed25519_context_sign = nullptr;
+static ed25519_context* ed25519_context_sign = NULL;
 
 // TODO (BDAP): Implement check Ed25519 keys
 
@@ -149,9 +149,9 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
 
 void ECC_Ed25519_Start() 
 {
-    assert(ed25519_context_sign == nullptr);
+    assert(ed25519_context_sign == NULL);
     ed25519_context* ctx = new ed25519_context();
-    assert(ctx != nullptr);
+    assert(ctx != NULL);
     {
         ctx->seed = dht::ed25519_create_seed();
     }
@@ -162,8 +162,8 @@ void ECC_Ed25519_Stop()
 {
     ed25519_context *ctx = ed25519_context_sign;
     ctx->SetNull();
-    ed25519_context_sign = nullptr;
-    assert(ed25519_context_sign == nullptr);
+    ed25519_context_sign = NULL;
+    assert(ed25519_context_sign == NULL);
 }
 
 static unsigned char const* StardardArrayToArrayPtr32(const std::array<char, 32>& stdArray32)

@@ -7,16 +7,13 @@
 
 #include "rpc/server.h"
 
-#include "assets/assets.h"
 #include "base58.h"
-#include "fs.h"
 #include "init.h"
 #include "random.h"
 #include "sync.h"
 #include "ui_interface.h"
 #include "util.h"
 #include "utilstrencodings.h"
-#include "validation.h"
 
 #include <univalue.h>
 
@@ -26,6 +23,7 @@
 #include <boost/algorithm/string/case_conv.hpp> // for to_upper()
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/shared_ptr.hpp>
@@ -39,7 +37,7 @@ static bool fRPCInWarmup = true;
 static std::string rpcWarmupStatus("RPC server started");
 static CCriticalSection cs_rpcWarmup;
 /* Timer-creating functions */
-static RPCTimerInterface* timerInterface = nullptr;
+static RPCTimerInterface* timerInterface = NULL;
 /* Map of name to timer. */
 static std::map<std::string, std::unique_ptr<RPCTimerBase> > deadlineTimers;
 
@@ -75,8 +73,7 @@ void RPCTypeCheck(const UniValue& params,
     bool fAllowNull)
 {
     unsigned int i = 0;
-    for (UniValue::VType t : typesExpected)
-    {
+    BOOST_FOREACH (UniValue::VType t, typesExpected) {
         if (params.size() <= i)
             break;
 
@@ -122,16 +119,26 @@ void RPCTypeCheckObj(const UniValue& o,
     }
 }
 
-CAmount AmountFromValue(const UniValue& value, bool p_isDYN)
+CAmount AmountFromValue(const UniValue& value)
 {
     if (!value.isNum() && !value.isStr())
         throw JSONRPCError(RPC_TYPE_ERROR, "Amount is not a number or string");
     CAmount amount;
     if (!ParseFixedPoint(value.getValStr(), 8, &amount))
-        throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Invalid amount (3): %s", value.getValStr()));
-    if (p_isDYN && !MoneyRange(amount))
-        throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Amount out of range: %s", amount));
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
+    if (!MoneyRange(amount))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Amount out of range");
     return amount;
+}
+
+UniValue ValueFromAmount(const CAmount& amount)
+{
+    bool sign = amount < 0;
+    int64_t n_abs = (sign ? -amount : amount);
+    int64_t quotient = n_abs / COIN;
+    int64_t remainder = n_abs % COIN;
+    return UniValue(UniValue::VNUM,
+        strprintf("%s%d.%08d", sign ? "-" : "", quotient, remainder));
 }
 
 uint256 ParseHashV(const UniValue& v, std::string strName)
@@ -181,8 +188,7 @@ std::string CRPCTable::help(const std::string& strCommand) const
         vCommands.push_back(make_pair(mi->second->category + mi->first, mi->second));
     sort(vCommands.begin(), vCommands.end());
 
-    for (const std::pair<std::string, const CRPCCommand*>& command : vCommands)
-    {
+    BOOST_FOREACH (const PAIRTYPE(std::string, const CRPCCommand*) & command, vCommands) {
         const CRPCCommand* pcmd = command.second;
         std::string strMethod = pcmd->name;
         // We already filter duplicates, but these deprecated screw up the sort order
@@ -253,22 +259,6 @@ UniValue stop(const JSONRPCRequest& jsonRequest)
     return "Dynamic server stopping";
 }
 
-UniValue uptime(const JSONRPCRequest& jsonRequest)
-{
-    if (jsonRequest.fHelp || jsonRequest.params.size() > 1)
-        throw std::runtime_error(
-                "uptime\n"
-                        "\nReturns the total uptime of the server.\n"
-                        "\nResult:\n"
-                        "ttt        (numeric) The number of seconds that the server has been running\n"
-                        "\nExamples:\n"
-                + HelpExampleCli("uptime", "")
-                + HelpExampleRpc("uptime", "")
-        );
-
-    return GetTime() - GetStartupTime();
-}
-
 /**
  * Call Table
  */
@@ -279,7 +269,6 @@ static const CRPCCommand vRPCCommands[] =
         /* Overall control/query calls */
         {"control", "help", &help, true, {"command"}},
         {"control", "stop", &stop, true, {}},
-        { "control", "uptime", &uptime, true, {}}, 
 };
 
 CRPCTable::CRPCTable()
@@ -297,7 +286,7 @@ const CRPCCommand* CRPCTable::operator[](const std::string& name) const
 {
     std::map<std::string, const CRPCCommand*>::const_iterator it = mapCommands.find(name);
     if (it == mapCommands.end())
-        return nullptr;
+        return NULL;
     return (*it).second;
 }
 
@@ -517,7 +506,7 @@ std::string HelpExampleRpc(const std::string& methodname, const std::string& arg
            "\"method\": \"" +
            methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;'"
                                                      " http://127.0.0.1:" +
-           strprintf("%d", gArgs.GetArg("-rpcport", BaseParams().RPCPort())) + "/\n";
+           strprintf("%d", GetArg("-rpcport", BaseParams().RPCPort())) + "/\n";
 }
 
 void RPCSetTimerInterfaceIfUnset(RPCTimerInterface* iface)
@@ -534,7 +523,7 @@ void RPCSetTimerInterface(RPCTimerInterface* iface)
 void RPCUnsetTimerInterface(RPCTimerInterface* iface)
 {
     if (timerInterface == iface)
-        timerInterface = nullptr;
+        timerInterface = NULL;
 }
 
 void RPCRunLater(const std::string& name, boost::function<void(void)> func, int64_t nSeconds)
@@ -547,31 +536,3 @@ void RPCRunLater(const std::string& name, boost::function<void(void)> func, int6
 }
 
 CRPCTable tableRPC;
-
-/* ASSET START */
-void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
-{
-    size_t msglen = message.length();
-    if (msglen == 46 || msglen == 64) {
-        if (msglen == 64 && !AreMessagesDeployed()) {
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until IsMsgRestAssetIsActive is activated"));
-        }
-    } else {
-        if (msglen)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters), Txid hashes (must be 64 characters)"));
-    }
-
-    bool fNotIPFS = false;
-    if (message.substr(0, 2) != "Qm") {
-        fNotIPFS = true;
-        if (!AreMessagesDeployed())
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid ipfs hash. Please use a valid ipfs hash. They usually start with Qm"));
-    }
-
-    if (fNotIPFS && !IsHex(message))
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
-
-    if (expireTime < 0)
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Expire time must be a positive number"));
-}
-/* ASSET END */

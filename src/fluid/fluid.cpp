@@ -260,7 +260,7 @@ bool CFluid::CheckIfQuorumExists(const std::string& consentToken, std::string& m
     GetLastBlockIndex(chainActive.Tip(), false);
     CBlockIndex* pindex = chainActive.Tip();
 
-    if (pindex != nullptr) {
+    if (pindex != NULL) {
         //TODO fluid
         fluidSovereigns = InitialiseAddresses();
     } else

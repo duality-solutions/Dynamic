@@ -80,7 +80,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget* parent, HelpMode helpMode) : QDial
         cursor.insertBlock();
 
         std::string strUsage = HelpMessage(HMM_DYNAMIC_QT);
-        const bool showDebug = gArgs.GetBoolArg("-help-debug", false);
+        const bool showDebug = GetBoolArg("-help-debug", false);
         strUsage += HelpMessageGroup(tr("UI Options:").toStdString());
         if (showDebug) {
             strUsage += HelpMessageOpt("-allowselfsignedrootcertificates", strprintf("Allow self signed root certificates (default: %u)", DEFAULT_SELFSIGNED_ROOTCERTS));

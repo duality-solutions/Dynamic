@@ -255,7 +255,7 @@ std::string CNetAddr::ToStringIP(bool fUseGetnameinfo) const
         socklen_t socklen = sizeof(sockaddr);
         if (serv.GetSockAddr((struct sockaddr*)&sockaddr, &socklen)) {
             char name[1025] = "";
-            if (!getnameinfo((const struct sockaddr*)&sockaddr, socklen, name, sizeof(name), nullptr, 0, NI_NUMERICHOST))
+            if (!getnameinfo((const struct sockaddr*)&sockaddr, socklen, name, sizeof(name), NULL, 0, NI_NUMERICHOST))
                 return std::string(name);
         }
     }
@@ -378,7 +378,7 @@ static const int NET_UNKNOWN = NET_MAX + 0;
 static const int NET_TEREDO = NET_MAX + 1;
 int static GetExtNetwork(const CNetAddr* addr)
 {
-    if (addr == nullptr)
+    if (addr == NULL)
         return NET_UNKNOWN;
     if (addr->IsRFC4380())
         return NET_TEREDO;

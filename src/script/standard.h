@@ -51,13 +51,7 @@ enum txnouttype {
     TX_PUBKEYHASH,
     TX_SCRIPTHASH,
     TX_MULTISIG,
-    TX_NULL_DATA,
-    /** ASSET START */
-    TX_NEW_ASSET,
-    TX_REISSUE_ASSET,
-    TX_TRANSFER_ASSET,
-    TX_RESTRICTED_ASSET_DATA //!< unspendable OP_DYN_ASSET script that carries data
-    /** ASSET END */
+    TX_NULL_DATA
 };
 
 class CNoDestination
@@ -88,10 +82,5 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, std::
 CScript GetScriptForDestination(const CTxDestination& dest);
 CScript GetScriptForRawPubKey(const CPubKey& pubkey);
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
-
-/** ASSET START */
-/** Generate a script that contains an address used for qualifier, and restricted assets data transactions */
-CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest);
-/** ASSET END */
 
 #endif // DYNAMIC_SCRIPT_STANDARD_H

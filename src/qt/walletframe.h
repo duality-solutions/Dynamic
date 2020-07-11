@@ -98,14 +98,6 @@ public Q_SLOTS:
 
     /** Pass on signal over requested out-of-sync-warning information */
     void outOfSyncWarningClicked();
-
-    /** ASSET START */
-    /** Switch to assets page */
-    void gotoAssetsPage();
-    void gotoCreateAssetsPage();
-    void gotoManageAssetsPage();
-    void gotoRestrictedAssetsPage();
-    /** ASSET END */
 };
 
 #endif // DYNAMIC_QT_WALLETFRAME_H
