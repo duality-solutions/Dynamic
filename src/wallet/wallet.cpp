@@ -5073,7 +5073,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
 
                 const CAmount nChange = nValueIn - nValueToSelect;
-                CTxOut newTxOut;
 
 /** ASSET START */
                 if (AreAssetsDeployed()) {
@@ -5213,7 +5212,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         }
 /** ASSET END */
 
-                        newTxOut = CTxOut(nChange, scriptChange);
+                        CTxOut newTxOut(nChange, scriptChange);
 
                         // We do not move dust-change to fees, because the sender would end up paying more than requested.
                         // This would be against the purpose of the all-inclusive feature.
@@ -5236,15 +5235,21 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                         // Never create dust outputs; if we would, just
                         // add the dust to the fee.
-                        if (newTxOut.IsDust(dustRelayFee)) {
+                        if (IsDust(newTxOut, discard_rate)) 
+                        {
                             nChangePosInOut = -1;
                             nFeeRet += nChange;
                             reservekey.ReturnKey();
-                        } else {
-                            if (nChangePosInOut == -1) {
+                        } 
+                        else 
+                        {
+                            if (nChangePosInOut == -1) 
+                            {
                                 // Insert change txn at random position:
                                 nChangePosInOut = GetRandInt(txNew.vout.size() + 1);
-                            } else if ((unsigned int)nChangePosInOut > txNew.vout.size()) {
+                            } 
+                            else if ((unsigned int)nChangePosInOut > txNew.vout.size()) 
+                            {
                                 strFailReason = _("Change index out of range");
                                 return false;
                             }
@@ -5305,7 +5310,9 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 sort(vecTxPSInTmp.begin(), vecTxPSInTmp.end(), CompareInputBIP69());
                 sort(txNew.vout.begin(), txNew.vout.end(), CompareOutputBIP69());
 
+/** ASSET START */
                 // If there was change output added before, we must update its position now
+                CTxOut newTxOut;
                 if (nChangePosInOut != -1) {
                     int i = 0;
                     for (const CTxOut& txOut : txNew.vout) {

@@ -218,9 +218,9 @@ public:
         return 3 * minRelayTxFee.GetFee(nSize);
     }
 
-    bool IsDust(const CFeeRate& minRelayTxFee) const
+    bool IsDust(const CFeeRate& dustRelayFeeIn) const
     {
-        return (nValue < GetDustThreshold(minRelayTxFee));
+        return (nValue < GetDustThreshold(dustRelayFeeIn));
     }
 
     friend bool operator==(const CTxOut& a, const CTxOut& b)
