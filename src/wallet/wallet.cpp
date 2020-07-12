@@ -57,6 +57,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp> // for BOOST_REVERSE_FOREACH
 #include <boost/thread.hpp>
 
 CWallet* pwalletMain = nullptr;

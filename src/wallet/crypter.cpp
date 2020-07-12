@@ -19,8 +19,6 @@
 #include <openssl/evp.h>
 #include <libtorrent/hex.hpp>
 
-#include <boost/foreach.hpp>
-
 using namespace libtorrent;
 
 bool CCrypter::SetKeyFromPassphrase(const SecureString& strKeyData, const std::vector<unsigned char>& chSalt, const unsigned int nRounds, const unsigned int nDerivationMethod)

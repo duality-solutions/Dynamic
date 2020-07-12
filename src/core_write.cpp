@@ -24,7 +24,6 @@
 #include <univalue.h>
 
 #include <boost/assign/list_of.hpp>
-#include <boost/foreach.hpp>
 
 std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
 {
