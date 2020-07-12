@@ -472,11 +472,11 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     Q_FOREACH (const CAmount& amount, CoinControlDialog::payAmounts) {
         nPayAmount += amount;
 
-        if (amount > 0) {
+        if (amount > 0)
+        {
             CTxOut txout(amount, (CScript)std::vector<unsigned char>(24, 0));
             txDummy.vout.push_back(txout);
-            if (txout.IsDust(dustRelayFee))
-                fDust = true;
+            fDust |= IsDust(txout, ::dustRelayFee);
         }
     }
 
@@ -502,7 +502,8 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
         // when selected are spent elsewhere, like rpc or another computer
         uint256 txhash = out.tx->GetHash();
         COutPoint outpt(txhash, out.i);
-        if (model->isSpent(outpt)) {
+        if (model->isSpent(outpt)) 
+        {
             coinControl->UnSelect(outpt);
             continue;
         }
@@ -575,13 +576,12 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
             // Never create dust outputs; if we would, just add the dust to the fee.
             if (nChange > 0 && nChange < MIN_CHANGE) {
                 CTxOut txout(nChange, (CScript)std::vector<unsigned char>(24, 0));
-                if (IsDust(txout, ::dustRelayFee)) {
-                    if (CoinControlDialog::fSubtractFeeFromAmount) // dust-change will be raised until no dust
-                        nChange = GetDustThreshold(txout, ::dustRelayFee);
-                    else {
-                        nPayFee += nChange;
-                        nChange = 0;
-                    }
+                if (IsDust(txout, ::dustRelayFee))
+                {
+                    nPayFee += nChange;
+                    nChange = 0;
+                    if (CoinControlDialog::fSubtractFeeFromAmount)
+                        nBytes -= 34; // we didn't detect lack of change above
                 }
             }
 
