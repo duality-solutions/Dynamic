@@ -421,7 +421,7 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txund
 /** Transaction validation functions */
 
 /** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true);
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true, bool fMempoolCheck = false, bool fBlockCheck = false);
 /** 
  * Validate the usage of BDAP credits to makes sure they are not recirculated
  * with standard DYN (trapped as fuel credit) and used to fund the appropriate BDAP operation.
@@ -540,7 +540,7 @@ void ReprocessBlocks(int nBlocks);
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true);
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fDBCheck = false);
 
 /** Context-dependent validity checks */
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, int64_t nAdjustedTime, bool fProofOfStake);
@@ -689,8 +689,9 @@ bool AreRestrictedAssetsDeployed();
 
 bool IsMsgRestAssetIsActive();
 
-
 bool AreTransferScriptsSizeDeployed();
+
+bool AreEnforcedValuesAreActive();
 
 CAssetsCache* GetCurrentAssetCache();
 

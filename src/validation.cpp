@@ -86,6 +86,13 @@
 #define MICRO 0.000001
 #define MILLI 0.001
 
+#define CHECK_DUPLICATE_TRANSACTION_TRUE true
+#define CHECK_DUPLICATE_TRANSACTION_FALSE false
+#define CHECK_MEMPOOL_TRANSACTION_TRUE true
+#define CHECK_MEMPOOL_TRANSACTION_FALSE false
+#define CHECK_BLOCK_TRANSACTION_TRUE true
+#define CHECK_BLOCK_TRANSACTION_FALSE false
+
 /**
  * Global state
  */
@@ -578,7 +585,7 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs)
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs, bool fMempoolCheck, bool fBlockCheck)
 {
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -740,7 +747,29 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
                 // Specific check and error message to go with to make sure the amount is 0
                 if (txout.nValue != 0)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-issued-amount-isn't-zero");
+            } else if (nType == TX_REISSUE_ASSET) {
+                // Specific check and error message to go with to make sure the amount is 0
+                if (AreEnforcedValuesAreActive()) {
+                    // We only want to not accept these txes when checking them from CheckBlock.
+                    // We don't want to change the behavior when reading transactions from the database
+                    // when AreEnforcedValuesDeployed return true
+                    if (fBlockCheck) {
+                        if (txout.nValue != 0) {
+                            return state.DoS(0, false, REJECT_INVALID, "bad-txns-asset-reissued-amount-isn't-zero");
+                        }
+                    }
+                }
+
+                if (fMempoolCheck) {
+                    // Don't accept to the mempool no matter what on these types of transactions
+                    if (txout.nValue != 0) {
+                        return state.DoS(0, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
+                    }
+                }
+            } else {
+                return state.DoS(0, false, REJECT_INVALID, "bad-asset-type-not-any-of-the-main-three");
             }
+
         }
     }
 
@@ -1379,7 +1408,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
-    if (!CheckTransaction(tx, state))
+    bool fCheckDuplicates = true;
+    bool fCheckMempool = true;
+    if (!CheckTransaction(tx, state, fCheckDuplicates, fCheckMempool))
         return false; // state filled in by CheckTransaction
 
     if (!fluid.ProvisionalCheckTransaction(tx))
@@ -5599,7 +5630,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fDBCheck)
 {
     // These are checks that are independent of context.
     const bool IsPoS = block.IsProofOfStake();
@@ -5691,11 +5722,22 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     // END DYNAMIC
 
     // Check transactions
+    bool fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+    bool fCheckDuplicates = CHECK_DUPLICATE_TRANSACTION_TRUE;
+    bool fCheckMempool = CHECK_MEMPOOL_TRANSACTION_FALSE;
     for (const auto& tx : block.vtx) {
-        if (!CheckTransaction(*tx, state))
+        // We only want to check the blocks when they are added to our chain
+        // We want to make sure when nodes shutdown and restart that they still
+        // verify the blocks in the database correctly even if Enforce Value BIP is active
+        fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+        if (fDBCheck){
+            fCheckBlock = CHECK_BLOCK_TRANSACTION_FALSE;
+        }
+        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock)) 
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
-                strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
-
+                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(), 
+                                          state.GetDebugMessage(), state.GetRejectReason()));
+    
         for (const auto& txout : tx->vout) {
             if (IsTransactionFluid(txout.scriptPubKey)) {
                 std::string strErrorMessage;
@@ -6603,7 +6645,10 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), true, true)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
+        bool fCheckPoW = true; 
+        bool fCheckMerkleRoot = true;
+        bool fDBCheck = true;
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), fCheckPoW, fCheckMerkleRoot, fDBCheck)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset database
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                 pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
@@ -7234,6 +7279,11 @@ bool AreTransferScriptsSizeDeployed() {
 }
 
 bool AreRestrictedAssetsDeployed() {
+
+    return AreAssetsDeployed();
+}
+
+bool AreEnforcedValuesAreActive() {
 
     return AreAssetsDeployed();
 }
