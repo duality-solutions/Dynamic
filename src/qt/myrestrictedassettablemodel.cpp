@@ -188,7 +188,7 @@ MyRestrictedAssetsTableModel::MyRestrictedAssetsTableModel(const PlatformStyle *
 
     priv->refreshWallet();
 
-    connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
+    // connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
 
     subscribeToCoreSignals();
 }
