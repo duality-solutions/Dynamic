@@ -380,8 +380,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
                 << vchMonths << vchSubject << vchSubjectPubKey << vchIssuer << vchIssuerPubKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
 
-    CKeyID vchSubjectPubKeyID = GetIdFromCharVector(vchSubjectPubKey);
-    CDynamicAddress walletAddress = CDynamicAddress(vchSubjectPubKeyID);
+    CDynamicAddress walletAddress = subjectDomainEntry.GetWalletAddress();
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
