@@ -151,6 +151,27 @@ bool CCertificate::CheckIssuerSignature(const std::vector<unsigned char>& vchPub
 
 bool CCertificate::ValidateValues(std::string& errorMessage)
 {
+    //Check that Subject exists
+    if (Subject.size() == 0)
+    {
+        errorMessage = "Subject cannot be empty.";
+        return false;
+    }
+
+    //Check that Subject signature exists
+    if (SubjectSignature.size() == 0)
+    {
+        errorMessage = "Subject Signature cannot be empty.";
+        return false;
+    }
+
+    //Check that PublicKey exists
+    if (PublicKey.size() == 0)
+    {
+        errorMessage = "Public Key cannot be empty.";
+        return false;
+    }
+
     // check Signature Algorithm
     if (SignatureAlgorithm.size() > MAX_ALGORITHM_TYPE_LENGTH) 
     {
