@@ -27,7 +27,7 @@ CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
         return 0;
 
     size_t nSize = GetSerializeSize(txout, SER_DISK, 0);
-    return 3 * dustRelayFeeIn.GetFee(nSize);
+    return dustRelayFeeIn.GetFee(nSize);
 }
 
 bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)

@@ -4995,6 +4995,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     }
 
                     if (recipient.fSubtractFeeFromAmount) {
+                        assert(nSubtractFeeFromAmount != 0);
                         txout.nValue -= nFeeRet / nSubtractFeeFromAmount; // Subtract fee equally from each selected recipient
 
                         if (fFirst) // first receiver pays the remainder not divisible by output count
@@ -5004,7 +5005,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         }
                     }
 
-                    if (txout.IsDust(dustRelayFee)) {
+                    if (IsDust(txout, ::dustRelayFee) && !IsScriptTransferAsset(recipient.scriptPubKey))
+                    {
                         if (recipient.fSubtractFeeFromAmount && nFeeRet > 0) {
                             if (txout.nValue < 0)
                                 strFailReason = _("The transaction amount is too small to pay the fee");
@@ -5215,25 +5217,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 /** ASSET END */
 
                         CTxOut newTxOut(nChange, scriptChange);
-
-                        // We do not move dust-change to fees, because the sender would end up paying more than requested.
-                        // This would be against the purpose of the all-inclusive feature.
-                        // So instead we raise the change and deduct from the recipient.
-                        if (nSubtractFeeFromAmount > 0 && newTxOut.IsDust(dustRelayFee)) {
-                            CAmount nDust = newTxOut.GetDustThreshold(dustRelayFee) - newTxOut.nValue;
-                            newTxOut.nValue += nDust;                         // raise change until no more dust
-                            for (unsigned int i = 0; i < vecSend.size(); i++) // subtract from first recipient
-                            {
-                                if (vecSend[i].fSubtractFeeFromAmount) {
-                                    txNew.vout[i].nValue -= nDust;
-                                    if (txNew.vout[i].IsDust(dustRelayFee)) {
-                                        strFailReason = _("The transaction amount is too small to send after the fee has been deducted");
-                                        return false;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
 
                         // Never create dust outputs; if we would, just
                         // add the dust to the fee.
@@ -7771,104 +7754,6 @@ bool AutoBackupWallet(CWallet* wallet, std::string strWalletFile, std::string& s
 
     LogPrintf("Automatic wallet backups are disabled!\n");
     return false;
-}
-
-void CWallet::AutoCombineDust()
-{
-    LOCK2(cs_main, cs_wallet);
-    const CBlockIndex* tip = chainActive.Tip();
-    if (tip->nTime < (GetAdjustedTime() - 300) || IsLocked()) {
-        return;
-    }
-
-    std::map<CDynamicAddress, std::vector<COutput> > mapCoinsByAddress = AvailableCoinsByAddress(true, nAutoCombineThreshold * COIN);
-
-    //coins are sectioned by address. This combination code only wants to combine inputs that belong to the same address
-    for (std::map<CDynamicAddress, std::vector<COutput> >::iterator it = mapCoinsByAddress.begin(); it != mapCoinsByAddress.end(); it++) {
-        std::vector<COutput> vCoins, vRewardCoins;
-        bool maxSize = false;
-        vCoins = it->second;
-
-        // We don't want the tx to be refused for being too large
-        // we use 50 bytes as a base tx size (2 output: 2*34 + overhead: 10 -> 90 to be certain)
-        unsigned int txSizeEstimate = 90;
-
-        //find dynode rewards that need to be combined
-        CCoinControl coinControl;
-        CAmount nTotalRewardsValue = 0;
-        for (const COutput& out : vCoins) {
-            if (!out.fSpendable)
-                continue;
-            //no coins should get this far if they dont have proper maturity, this is double checking
-            if (out.tx->IsCoinStake() && out.tx->GetDepthInMainChain() < COINBASE_MATURITY + 1)
-                continue;
-
-            COutPoint outpt(out.tx->GetHash(), out.i);
-            coinControl.Select(outpt);
-            vRewardCoins.push_back(out);
-            nTotalRewardsValue += out.tx->tx->GetValueOut();
-
-            // Combine to the threshold and not way above
-            if (nTotalRewardsValue > nAutoCombineThreshold * COIN)
-                break;
-
-            // Around 180 bytes per input. We use 190 to be certain
-            txSizeEstimate += 190;
-            // TODO: remove for assets?
-            if (txSizeEstimate >= MAX_STANDARD_TX_SIZE - 200) {
-                maxSize = true;
-                break;
-            }
-        }
-
-        //if no inputs found then return
-        if (!coinControl.HasSelected())
-            continue;
-
-        //we cannot combine one coin with itself
-        if (vRewardCoins.size() <= 1)
-            continue;
-
-        std::vector<CRecipient> vecSend;
-        CScript scriptPubKey = GetScriptForDestination(it->first.Get());
-        CRecipient recipient = {scriptPubKey, nTotalRewardsValue, false};
-        vecSend.push_back(recipient);
-
-        //Send change to same address
-        CTxDestination destMyAddress;
-        if (!ExtractDestination(scriptPubKey, destMyAddress)) {
-            LogPrintf("AutoCombineDust: failed to extract destination\n");
-            continue;
-        }
-        coinControl.destChange = destMyAddress;
-
-        // Create the transaction and commit it to the network
-        CWalletTx wtx;
-        CReserveKey keyChange(this); // this change address does not end up being used, because change is returned with coin control switch
-        std::string strErr;
-        CAmount nFeeRet = 0;
-        int nChangePosInOut = 0;
-        // 10% safety margin to avoid "Insufficient funds" errors
-        vecSend[0].nAmount = nTotalRewardsValue - (nTotalRewardsValue / 10);
-
-        if (!CreateTransaction(vecSend, wtx, keyChange, nFeeRet, nChangePosInOut, strErr, coinControl, true, ALL_COINS, false, false)) {
-            LogPrintf("AutoCombineDust createtransaction failed, reason: %s\n", strErr);
-            continue;
-        }
-
-        //we don't combine below the threshold unless the fees are 0 to avoid paying fees over fees over fees
-        if (!maxSize && nTotalRewardsValue < nAutoCombineThreshold * COIN && nFeeRet > 0)
-            continue;
-
-        CValidationState state;
-        if (!CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
-            LogPrintf("AutoCombineDust transaction commit failed\n");
-            continue;
-        }
-
-        LogPrintf("AutoCombineDust sent transaction\n");
-
-    }
 }
 
 bool CWallet::MultiSend()

@@ -68,9 +68,9 @@ static const unsigned int STANDARD_LOCKTIME_VERIFY_FLAGS = LOCKTIME_VERIFY_SEQUE
 /** Used for BDAP transactions. */
 static const int BDAP_TX_VERSION = 0x3500;
 
-CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn);
+CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFee);
 
-bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFeeIn);
+bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFee);
 
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
 /**

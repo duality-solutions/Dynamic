@@ -216,7 +216,7 @@ CFeeBumper::CFeeBumper(const CWallet *pWallet, const uint256 txidIn, const CCoin
 
     // If the output would become dust, discard it (converting the dust to fee)
     poutput->nValue -= nDelta;
-    if (poutput->nValue <= GetDustThreshold(*poutput, ::minRelayTxFee)) {
+    if (poutput->nValue <= GetDustThreshold(*poutput, ::dustRelayFee)) {
         LogPrint("rpc", "Bumping fee and discarding dust output\n");
         nNewFee += poutput->nValue;
         mtx.vout.erase(mtx.vout.begin() + nOutput);
