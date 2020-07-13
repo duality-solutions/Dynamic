@@ -2165,57 +2165,27 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
 
     // Compute fee:
     CAmount nDebit = GetDebit(filter);
-    CAmount nCredit = 0;
-    bool fFromMe = IsFromMe(filter);
-    if (fFromMe) // means we signed/sent this transaction and all inputs are from us
+    if (nDebit > 0) // debit>0 means we signed/sent this transaction
     {
         CAmount nValueOut = tx->GetValueOut();
         nFee = nDebit - nValueOut;
     }
 
-    // treat coinstake as a single "recieve" entry
-    if (IsCoinStake())
-    {
-        for (unsigned int i = 0; i < tx->vout.size(); ++i)
-        {
-            const CTxOut& txout = tx->vout[i];
-            isminetype fIsMine = pwallet->IsMine(txout);
-
-            // get my vout with positive output
-            if (!(fIsMine & filter) || txout.nValue <= 0)
-                        continue;
-
-            // get address
-            CTxDestination address = CNoDestination();
-            ExtractDestination(txout.scriptPubKey, address);
-
-            // nfee is negative for coinstake generation, because we are gaining money from it
-            COutputEntry output = {address, -nFee, (int)i};
-            listReceived.push_back(output);
-            nFee = 0;
-            return;
-        }
-
-        // if we reach here there is probably a mistake
-        COutputEntry output = {CNoDestination(), 0, 0};
-        listReceived.push_back(output);
-        return;
-    }
-
     // Sent/received.
-    for (unsigned int i = 0; i < tx->vout.size(); ++i) {
+    for (unsigned int i = 0; i < tx->vout.size(); ++i)
+    {
         const CTxOut& txout = tx->vout[i];
         isminetype fIsMine = pwallet->IsMine(txout);
         // Only need to handle txouts if AT LEAST one of these is true:
         //   1) they debit from us (sent)
         //   2) the output is to us (received)
-        if (fFromMe) {
+        if (nDebit > 0)
+        {
             // Don't report 'change' txouts
             if (pwallet->IsChange(txout))
                 continue;
         }
-
-        if (nDebit == 0 && !(fIsMine & filter))
+        else if (!(fIsMine & filter))
             continue;
 
         // In either case, we need to get the destination address
@@ -2228,23 +2198,20 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
             address = CNoDestination();
         }
 
-        COutputEntry output = {address, txout.nValue, (int)i};
-
         /** ASSET START */
         // In either case, we need to get the destination address
         if (!txout.scriptPubKey.IsAssetScript()) {
             COutputEntry output = {address, txout.nValue, (int) i};
 
             // If we are debited by the transaction, add the output as a "sent" entry
-            if (fFromMe)
+            if (nDebit > 0)
                 listSent.push_back(output);
 
             // If we are receiving the output, add it as a "received" entry
-            if (fIsMine & filter) {
-                nCredit += txout.nValue;
+            if (fIsMine & filter)
                 listReceived.push_back(output);
-            }
         }
+
         if (AreAssetsDeployed()) {
             if (txout.scriptPubKey.IsAssetScript()) {
                 CAssetOutputEntry assetoutput;
@@ -2262,15 +2229,6 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
         /** ASSET END */
     }
 
-    if (!fFromMe && nDebit > 0) {
-        if (nCredit == nDebit) {
-            for(const auto& output: listReceived)
-                listSent.push_back(output);
-        } else {
-            COutputEntry output = {CNoDestination(), nDebit, -1};
-            listSent.push_back(output);
-        }
-    }
 }
 
 void CWalletTx::GetAccountAmounts(const std::string& strAccount, CAmount& nReceived, CAmount& nSent, CAmount& nFee, const isminefilter& filter) const
@@ -4953,6 +4911,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             CFeeRate discard_rate = GetDiscardRate(::feeEstimator);
             nFeeRet = 0;
             bool pick_new_inputs = true;
+            CAmount nValueIn = 0;
 
             // Start with no fee and loop until there is enough fee
             while (true) {
@@ -5020,33 +4979,37 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
 
                 // Choose coins to use
-                CAmount nValueIn = 0;
-                setCoins.clear();
-                if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueIn, &coinControl, nCoinType, fUseInstantSend)) {
-                    if (nCoinType == ONLY_NONDENOMINATED) {
-                        strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction.");
-                    } else if (nCoinType == ONLY_DENOMINATED) {
-                        strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
-                        strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
-                    } else if (nValueIn < nValueToSelect) {
-                        strFailReason = _("Insufficient funds.");
-                        if (fUseInstantSend) {
-                            // could be not true but most likely that's the reason
-                            strFailReason += " " + strprintf(_("InstantSend requires inputs with at least %d confirmations, you might need to wait a few minutes and try again."), nInstantSendConfirmationsRequired);
-                        }
-                    }
-/** ASSET START */
-                    if (AreAssetsDeployed()) {
-                        setAssets.clear();
-                        mapAssetsIn.clear();
-                        if (!SelectAssets(mapAssetCoins, mapAssetValue, setAssets, mapAssetsIn)) {
-                            strFailReason = _("Insufficient asset funds");
+                if (pick_new_inputs) {
+                    CAmount nValueIn = 0;
+                    setCoins.clear();
+                    if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueIn, &coinControl, nCoinType, fUseInstantSend)) 
+                    {
+                        if (nCoinType == ONLY_NONDENOMINATED) {
+                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction.");
+                        } else if (nCoinType == ONLY_DENOMINATED) {
+                            strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
+                            strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
+                        } else if (nValueIn < nValueToSelect) {
+                            strFailReason = _("Insufficient funds.");
+                            if (fUseInstantSend) {
+                                // could be not true but most likely that's the reason
+                                strFailReason += " " + strprintf(_("InstantSend requires inputs with at least %d confirmations, you might need to wait a few minutes and try again."), nInstantSendConfirmationsRequired);
+                            }
                             return false;
                         }
+    /** ASSET START */
+                        if (AreAssetsDeployed()) {
+                            setAssets.clear();
+                            mapAssetsIn.clear();
+                            if (!SelectAssets(mapAssetCoins, mapAssetValue, setAssets, mapAssetsIn)) {
+                                strFailReason = _("Insufficient asset funds");
+                                return false;
+                            }
+                        }
+    /** ASSET END */
                     }
-/** ASSET END */
-                    return false;
                 }
+
                 if (fUseInstantSend && nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE) * COIN) {
                     strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
                     return false;
@@ -5385,7 +5348,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     //                        break;
                 }
                 // Standard fee not needed for BDAP
-                CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, coinControl, mempool, ::feeEstimator, nullptr)) : 0;
+                CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, coinControl, mempool, ::feeEstimator, &feeCalc)) : 0;
 
                 if (fUseInstantSend) {
                     nFeeNeeded = std::max(nFeeNeeded, CTxLockRequest(txNew).GetMinFee(true));
