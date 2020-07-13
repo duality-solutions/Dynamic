@@ -180,9 +180,9 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
     }
 
     // check SubjectSignature
-    if (SubjectSignature.size() > MAX_SIGNATURE_LENGTH) 
+    if (SubjectSignature.size() > MAX_CERTIFICATE_SIGNATURE_LENGTH) 
     {
-        errorMessage = "Invalid SubjectSignature. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
+        errorMessage = "Invalid SubjectSignature. Can not have more than " + std::to_string(MAX_CERTIFICATE_SIGNATURE_LENGTH) + " characters.";
         return false;
     }
 
@@ -194,16 +194,16 @@ bool CCertificate::ValidateValues(std::string& errorMessage)
     }
 
     // check PublicKey
-    if (PublicKey.size() > MAX_KEY_LENGTH) 
+    if (PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) 
     {
-        errorMessage = "Invalid PublicKey. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
+        errorMessage = "Invalid PublicKey. Can not have more than " + std::to_string(MAX_CERTIFICATE_KEY_LENGTH) + " characters.";
         return false;
     }
 
     // check SignatureValue
-    if (SignatureValue.size() > MAX_SIGNATURE_LENGTH) 
+    if (SignatureValue.size() > MAX_CERTIFICATE_SIGNATURE_LENGTH) 
     {
-        errorMessage = "Invalid SignatureValue. Can not have more than " + std::to_string(MAX_SIGNATURE_LENGTH) + " characters.";
+        errorMessage = "Invalid SignatureValue. Can not have more than " + std::to_string(MAX_CERTIFICATE_SIGNATURE_LENGTH) + " characters.";
         return false;
     }
 
