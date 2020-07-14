@@ -155,7 +155,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 fAllToMe = mine;
         }
 
-        if (fAllFromMeDenom && fAllToMeDenom && nFromMe * nToMe) {
+        if (fAllFromMeDenom && fAllToMeDenom && nFromMe && nToMe) {
             parts.append(TransactionRecord(hash, nTime, TransactionRecord::PrivateSendDenominate, "", -nDebit, nCredit));
             parts.last().involvesWatchAddress = false; // maybe pass to TransactionRecord as constructor argument
         } else if (fAllFromMe && fAllToMe) {
@@ -184,11 +184,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     sub.type = TransactionRecord::PrivateSendCollateralPayment;
                 } else {
                     for (const auto& txout : wtx.tx->vout) {
-
-                        /** ASSET START */
-                        if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
-                            continue;
-                        /** ASSET START */
 
                         if (txout.nValue == CPrivateSend::GetMaxCollateralAmount()) {
                             sub.type = TransactionRecord::PrivateSendMakeCollaterals;

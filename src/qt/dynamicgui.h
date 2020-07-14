@@ -161,13 +161,14 @@ private:
     QAction* showPrivateSendHelpAction;
     QAction* multiSendAction;
 
+/** ASSET START */
     QAction *transferAssetAction;
     QAction *createAssetAction;
     QAction *manageAssetAction;
     QAction *messagingAction;
     QAction *votingAction;
     QAction *restrictedAssetAction;
-    
+/** ASSET END */
     QSystemTrayIcon* trayIcon;
     QMenu* trayIconMenu;
     QMenu* dockIconMenu;

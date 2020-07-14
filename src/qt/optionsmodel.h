@@ -101,7 +101,9 @@ private:
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
+/** ASSET START */
     bool fCustomFeeFeatures;
+/** ASSET END */
     bool fHideOrphans;
     bool fShowAdvancedPSUI;
     /* settings that were overriden by command-line */
