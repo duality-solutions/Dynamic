@@ -610,7 +610,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
     bool fContainsRestrictedAssetReissue = false;
     bool fContainsNullAssetVerifierTx = false;
     int nCountAddTagOuts = 0;
-    for (const CTxOut& txout : tx.vout) {
+    for (const auto& txout : tx.vout) {
         if ((txout.nValue < 0) && !tx.IsCoinBase() && !tx.IsCoinStake())
             return state.DoS(100, error("CheckTransaction(): txout empty for user transaction"));
         if (txout.nValue < 0)
@@ -1723,7 +1723,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         CCoinsView dummy;
         CCoinsViewCache view(&dummy);
 
-        CAmount nValueIn = 0;
         LockPoints lp;
         {
             LOCK(pool.cs);
@@ -1754,8 +1753,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             // Bring the best block into scope
             view.GetBestBlock();
 
-            nValueIn = view.GetValueIn(tx);
-
             // we have all inputs cached now, so switch back to dummy, so we don't need to keep lock on mempool
             view.SetBackend(dummy);
 
@@ -1766,6 +1763,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             // CoinsViewCache instead of create its own
             if (!CheckSequenceLocks(tx, STANDARD_LOCKTIME_VERIFY_FLAGS, &lp))
                 return state.DoS(0, false, REJECT_NONSTANDARD, "non-BIP68-final");
+
         } // end LOCK(pool.cs)
 
         CAmount nFees = 0;
@@ -1795,7 +1793,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         unsigned int nSigOps = GetLegacySigOpCount(tx);
         nSigOps += GetP2SHSigOpCount(tx, view);
 
-        CAmount nValueOut = tx.GetValueOut();
         CAmount nBDAPBurn = 0;
         if (tx.nVersion == BDAP_TX_VERSION) {
             // Since fees are burned, count BDAP burn funds into fee calculation
