@@ -71,24 +71,51 @@ bool CCertificateDB::AddCertificate(const CCertificate& certificate, const int o
 
         //WIP Needs Review
 
-        //WIP Indexes
-        //SerialNumber?
-        //Should NewCertificate set txHashRequest = txHashApprove if self-signed?
-        writeStateSubjectDN = Write(make_pair(std::string("subjectdn"), certificate.Subject), vchFromString(certificate.txHashRequest.ToString()));
+        std::string labelTxId;
+        std::string labelSubjectDN;
+        std::string labelIssuerDN;
+        std::vector<unsigned char> vchTxHash;
 
+        if (certificate.IsApproved()){  //Approve
+            vchTxHash = vchFromString(certificate.txHashApprove.ToString());
+            labelTxId = "txapproveid";
+            labelSubjectDN = "subjectdnapprove";
+            labelIssuerDN = "issuerdnapprove";
+        }
+        else { //Request
+            vchTxHash = vchFromString(certificate.txHashRequest.ToString());
+            labelTxId = "txrequestid";
+            labelSubjectDN = "subjectdnrequest";
+            labelIssuerDN = "issuerdnrequest";
+        }
+
+        //Subject
+        //should be populated but check in case
+        if (certificate.Subject.size() > 0) {
+            std::vector<std::vector<unsigned char>> vvTxIdSubject;
+            CDBWrapper::Read(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
+            vvTxIdSubject.push_back(vchTxHash);
+            writeStateSubjectDN = Write(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
+        }
+        else {
+            writeStateSubjectDN = true;
+        }
+
+        //Issuer
+        //should be populated but check in case
         if (certificate.Issuer.size() > 0) {
-            writeStateIssuerDN = Write(make_pair(std::string("issuerdn"), certificate.Issuer), vchFromString(certificate.txHashRequest.ToString()));
+            std::vector<std::vector<unsigned char>> vvTxIdIssuer;
+            CDBWrapper::Read(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
+            vvTxIdIssuer.push_back(vchTxHash);
+            writeStateIssuerDN = Write(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
         }
         else {
             writeStateIssuerDN = true;
         }
 
-        if (certificate.IsApproved()){
-            writeState = Write(make_pair(std::string("txapproveid"), vchFromString(certificate.txHashApprove.ToString())), certificate);
-        }
-        else {
-            writeState = Write(make_pair(std::string("txrequestid"), vchFromString(certificate.txHashRequest.ToString())), certificate);
-        }
+        //Certificate
+        writeState = Write(make_pair(labelTxId, vchTxHash), certificate);
+
     }
 
     return writeState && writeStateIssuerDN && writeStateSubjectDN;
