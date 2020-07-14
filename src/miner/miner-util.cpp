@@ -247,7 +247,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
 
             unsigned int nTxSize = iter->GetTxSize();
-            if (fPriorityBlock && (nBlockSize + nTxSize >= nBlockPrioritySize || !AllowFree(actualPriority))) {
+            if (fPriorityBlock && (nBlockSize + nTxSize >= nBlockPrioritySize)) {
                 fPriorityBlock = false;
                 waitPriMap.clear();
             }

@@ -66,7 +66,6 @@ CWallet* pwalletMain = nullptr;
 CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 unsigned int nTxConfirmTarget = DEFAULT_TX_CONFIRM_TARGET;
 bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
-bool fSendFreeTransactions = DEFAULT_SEND_FREE_TRANSACTIONS;
 bool fWalletUnlockMixStakeOnly = WALLET_UNLOCKED_FOR_MIXING_STAKING_ONLY;
 bool fWalletRbf = DEFAULT_WALLET_RBF;
 
@@ -2199,7 +2198,7 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
         listReceived.push_back(output);
         return;
     }
-    
+
     // Sent/received.
     for (unsigned int i = 0; i < tx->vout.size(); ++i)
     {
@@ -4785,6 +4784,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
     unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
     FeeCalculation feeCalc;
+    double dPriority = 0;
     CAmount nFeeNeeded; // needed for BDAP
     {
         std::set<CInputCoin> setCoins;
@@ -4956,7 +4956,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 CAmount nValueToSelect = nValue;
                 if (nSubtractFeeFromAmount == 0)
                     nValueToSelect += nFeeRet;
-                double dPriority = 0;
                 // vouts to the payees
                 for (const auto& recipient : vecSend) {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
@@ -5275,12 +5274,12 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 //
                 // Note how the sequence number is set to max()-1 so that the
                 // nLockTime set above actually works.
+                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1; 
                 vecTxPSInTmp.clear();
                 for (const auto& coin : setCoins) {
-                    CTxIn txin = CTxIn(coin.outpoint, CScript(),
-                        std::numeric_limits<unsigned int>::max() - 1);
-                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.txout.scriptPubKey));
+                    CTxIn txin = CTxIn(coin.outpoint,CScript(), nSequence);
                     txNew.vin.push_back(txin);
+                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.txout.scriptPubKey));
                 }
 
                 sort(txNew.vin.begin(), txNew.vin.end(), CompareInputBIP69());
@@ -5300,17 +5299,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         i++;
                     }
                 }
-
-                //
-                // BIP125 defines opt-in RBF as any nSequence < maxint-1, so
-                // we use the highest possible value in that range (maxint-2)
-                // to avoid conflicting with other possible uses of nSequence,
-                // and in the spirit of "smallest possible change from prior
-                // behavior."
-                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1;
-                for (const auto& coin : setCoins)
-                    txNew.vin.push_back(CTxIn(coin.outpoint,CScript(),
-                                              nSequence));
 
 /** ASSET START */
                 if (AreAssetsDeployed()) {
@@ -5337,9 +5325,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     nIn++;
                 }
 
-                CTransaction txNewConst(txNew);
-                dPriority = txNewConst.ComputePriority(dPriority, nBytes);
-
                 // Remove scriptSigs to eliminate the fee calculation dummy signatures
                 for (auto& txin : txNew.vin) {
                     txin.scriptSig = CScript();
@@ -5358,24 +5343,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     }
                 }
 
-                // Allow to override the default confirmation target over the CoinControl instance
-                int currentConfirmationTarget = nTxConfirmTarget;
-                if (coinControl.nConfirmTarget > 0)
-                    currentConfirmationTarget = coinControl.nConfirmTarget;
-
-                // Can we complete this as a free transaction?
-                // Note: InstantSend transaction can't be a free one
-                if (!fUseInstantSend && fSendFreeTransactions && nBytes <= MAX_FREE_TRANSACTION_CREATE_SIZE) {
-                    // Not enough fee: enough priority?
-                    double dPriorityNeeded = mempool.estimateSmartPriority(currentConfirmationTarget);
-                    // Require at least hard-coded AllowFree.
-                    if (dPriority >= dPriorityNeeded && AllowFree(dPriority))
-                        break;
-
-                    // Small enough, and priority high enough, to send for free
-                    //                    if (dPriorityNeeded > 0 && dPriority >= dPriorityNeeded)
-                    //                        break;
-                }
                 // Standard fee not needed for BDAP
                 CAmount nFeeNeeded = !fIsBDAP ? std::max(nFeePay, GetMinimumFee(nBytes, coinControl, mempool, ::feeEstimator, &feeCalc)) : 0;
 
@@ -5462,6 +5429,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
         if (sign)
         {
             CTransaction txNewConst(txNew);
+            dPriority = txNewConst.ComputePriority(dPriority, nBytes);
             int nIn = 0;
             for (const auto& txpsin : vecTxPSInTmp) 
             {
@@ -7958,5 +7926,5 @@ int CMerkleTx::GetBlocksToMaturity() const
 
 bool CMerkleTx::AcceptToMemoryPool(const CAmount& nAbsurdFee, CValidationState& state)
 {
-    return ::AcceptToMemoryPool(mempool, state, tx, true, nullptr, nullptr, false, nAbsurdFee);
+    return ::AcceptToMemoryPool(mempool, state, tx, nullptr, nullptr, false, nAbsurdFee);
 }

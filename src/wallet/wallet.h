@@ -50,7 +50,6 @@ extern CWallet* pwalletMain;
 extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
-extern bool fSendFreeTransactions;
 extern bool fWalletUnlockMixStakeOnly;
 extern bool fWalletRbf;
 
