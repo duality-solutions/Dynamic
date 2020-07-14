@@ -2199,7 +2199,7 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
         listReceived.push_back(output);
         return;
     }
-    
+
     // Sent/received.
     for (unsigned int i = 0; i < tx->vout.size(); ++i)
     {
@@ -4785,6 +4785,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
     unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
     FeeCalculation feeCalc;
+    double dPriority = 0;
     CAmount nFeeNeeded; // needed for BDAP
     {
         std::set<CInputCoin> setCoins;
@@ -4956,7 +4957,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 CAmount nValueToSelect = nValue;
                 if (nSubtractFeeFromAmount == 0)
                     nValueToSelect += nFeeRet;
-                double dPriority = 0;
                 // vouts to the payees
                 for (const auto& recipient : vecSend) {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
@@ -5337,9 +5337,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     nIn++;
                 }
 
-                CTransaction txNewConst(txNew);
-                dPriority = txNewConst.ComputePriority(dPriority, nBytes);
-
                 // Remove scriptSigs to eliminate the fee calculation dummy signatures
                 for (auto& txin : txNew.vin) {
                     txin.scriptSig = CScript();
@@ -5462,6 +5459,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
         if (sign)
         {
             CTransaction txNewConst(txNew);
+            dPriority = txNewConst.ComputePriority(dPriority, nBytes);
             int nIn = 0;
             for (const auto& txpsin : vecTxPSInTmp) 
             {
