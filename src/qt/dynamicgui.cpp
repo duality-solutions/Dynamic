@@ -153,7 +153,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
     /* Open CSS when configured */
     this->setStyleSheet(GUIUtil::loadStyleSheet());
 
-    GUIUtil::restoreWindowGeometry("nWindow", QSize(850, 550), this);
+    GUIUtil::restoreWindowGeometry("MainWindowGeometry", QSize(850, 550), this);
 
     QString windowTitle = tr("Dynamic") + " - ";
 #ifdef ENABLE_WALLET
