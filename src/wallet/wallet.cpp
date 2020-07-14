@@ -5275,12 +5275,12 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 //
                 // Note how the sequence number is set to max()-1 so that the
                 // nLockTime set above actually works.
+                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1; 
                 vecTxPSInTmp.clear();
                 for (const auto& coin : setCoins) {
-                    CTxIn txin = CTxIn(coin.outpoint, CScript(),
-                        std::numeric_limits<unsigned int>::max() - 1);
-                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.txout.scriptPubKey));
+                    CTxIn txin = CTxIn(coin.outpoint,CScript(), nSequence);
                     txNew.vin.push_back(txin);
+                    vecTxPSInTmp.push_back(CTxPSIn(txin, coin.txout.scriptPubKey));
                 }
 
                 sort(txNew.vin.begin(), txNew.vin.end(), CompareInputBIP69());
@@ -5300,17 +5300,6 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         i++;
                     }
                 }
-
-                //
-                // BIP125 defines opt-in RBF as any nSequence < maxint-1, so
-                // we use the highest possible value in that range (maxint-2)
-                // to avoid conflicting with other possible uses of nSequence,
-                // and in the spirit of "smallest possible change from prior
-                // behavior."
-                const uint32_t nSequence = CTxIn::SEQUENCE_FINAL - 1;
-                for (const auto& coin : setCoins)
-                    txNew.vin.push_back(CTxIn(coin.outpoint,CScript(),
-                                              nSequence));
 
 /** ASSET START */
                 if (AreAssetsDeployed()) {
