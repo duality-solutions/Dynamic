@@ -187,9 +187,9 @@ public:
     uint256 GetIssuerHash() const;
     bool SignSubject(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
     bool SignIssuer(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
-    bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey);
-    bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey);
-    bool ValidateValues(std::string& errorMessage);
+    bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
+    bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
+    bool ValidateValues(std::string& errorMessage) const;
 };
 
 bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificate);

@@ -127,7 +127,7 @@ bool CCertificate::SignIssuer(const std::vector<unsigned char>& vchPubKey, const
     return true;
 }
 
-bool CCertificate::CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey)
+bool CCertificate::CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const
 {
     std::vector<unsigned char> msg = vchFromString(GetSubjectHash().ToString());
 
@@ -138,7 +138,7 @@ bool CCertificate::CheckSubjectSignature(const std::vector<unsigned char>& vchPu
     return true;
 }
 
-bool CCertificate::CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey)
+bool CCertificate::CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const
 {
     std::vector<unsigned char> msg = vchFromString(GetIssuerHash().ToString());
 
@@ -149,7 +149,7 @@ bool CCertificate::CheckIssuerSignature(const std::vector<unsigned char>& vchPub
     return true;
 }
 
-bool CCertificate::ValidateValues(std::string& errorMessage)
+bool CCertificate::ValidateValues(std::string& errorMessage) const
 {
     //Check that Subject exists
     if (Subject.size() == 0)
