@@ -21,6 +21,12 @@ public:
     bool AddCertificate(const CCertificate& certificate, const int op);
     bool ReadCertificate(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate);
     bool ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CCertificate& certificate);
+
+    bool ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates, bool getAll = true);
+    bool ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CCertificate>& vCertificates, bool getAll = true);
+    bool ReadCertificateSubjectDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates);
+    bool ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates);
+
     bool EraseCertificateTxId(const std::vector<unsigned char>& vchTxId);
     bool EraseCertificate(const std::vector<unsigned char>& vchCertificate);
     bool CertificateExists(const std::vector<unsigned char>& vchCertificate);
