@@ -15,6 +15,8 @@
 #include "validation.h"
 #include "validationinterface.h"
 
+#include "dht/ed25519.h"
+
 #include <univalue.h>
 
 #include <boost/thread.hpp>
@@ -365,7 +367,61 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
         return false;
     }
 
-    return false;
+    if (!certificate.ValidateValues(errorMessage)) {
+        errorMessage = "CommonDataCheck failed! Invalid certificate value. " + errorMessage;
+        return false;
+    }
+
+    if (vvchOpParameters.size() > 5) {
+        errorMessage = "CommonDataCheck failed! Too many parameters.";
+        return false;
+    }
+
+    if (vvchOpParameters.size() < 4) {
+        errorMessage = "CommonDataCheck failed! Not enough parameters.";
+        return false;
+    }
+
+    if (certificate.Subject != vvchOpParameters[1]) {
+        errorMessage = "CommonDataCheck failed! Script operation subject account parameter does not match subject account in certificate object.";
+        return false;
+    }
+
+    if (certificate.Issuer != vvchOpParameters[3]) {
+        errorMessage = "CommonDataCheck failed! Script operation subject account parameter does not match subject account in certificate object.";
+        return false;
+    }
+
+    // check SubjectFQDN size
+    if (vvchOpParameters.size() > 1 && vvchOpParameters[1].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+        errorMessage = "CommonDataCheck failed! Subject FQDN is too large.";
+        return false;
+    }
+
+    // check IssuerFQDN size
+    if (vvchOpParameters.size() > 1 && vvchOpParameters[3].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+        errorMessage = "CommonDataCheck failed! Issuer FQDN is too large.";
+        return false;
+    }
+
+    // check subject pubkey size
+    if (vvchOpParameters.size() > 1 && vvchOpParameters[2].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+        errorMessage = "CommonDataCheck failed! Subject PubKey is too large.";
+        return false;
+    }
+
+    // if approved or self signed, do additional checks
+    if (certificate.IsApproved() || certificate.SelfSignedCertificate()) {
+
+        // check issuer pubkey size
+        if (vvchOpParameters.size() > 1 && vvchOpParameters[4].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+            errorMessage = "CommonDataCheck failed! Issuer PubKey is too large.";
+            return false;
+        }
+
+    }
+
+    return true;
 }
 
 static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
@@ -377,6 +433,97 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
     if (fJustCheck)
         return true;
 
+    std::string strTxHashToUse;
+
+    if (certificate.IsApproved()){  //Approve
+        strTxHashToUse = certificate.txHashApprove.ToString();
+    }
+    else { //Request
+        strTxHashToUse = certificate.txHashRequest.ToString();
+    }
+
+    //check subject signature
+    CDomainEntry entrySubject;
+    if (!GetDomainEntry(certificate.Subject, entrySubject)) {
+        errorMessage = "CheckNewCertificateTxInputs: - Could not find specified certificate subject! " + stringFromVch(certificate.Subject);
+        return error(errorMessage.c_str());
+    }
+
+    CharString vchSubjectPubKey = entrySubject.DHTPublicKey;
+
+    if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) { //test in rpc, should work
+        errorMessage = "CheckNewCertificateTxInputs: - Could not validate subject signature. ";
+        return error(errorMessage.c_str());
+    }
+
+    //check certificate signature if approved
+    if (certificate.IsApproved()) {
+
+        CDomainEntry entryIssuer;
+        if (!GetDomainEntry(certificate.Issuer, entryIssuer)) {
+            errorMessage = "CheckNewCertificateTxInputs: - Could not find specified certificate issuer! " + stringFromVch(certificate.Issuer);
+            return error(errorMessage.c_str());
+        }
+        CDynamicAddress address = entryIssuer.GetWalletAddress();
+
+        CharString vchIssuerPubKey = entryIssuer.DHTPublicKey;
+
+        //need ed25519 version of this-----------------------------------------------------------------------------------
+        CKeyID keyID;
+        if (!address.GetKeyID(keyID)) {
+            errorMessage = "CheckNewCertificateTxInputs: - Could not get key id. " + address.ToString();
+            return error(errorMessage.c_str());
+        }
+        // check signature and pubkey belongs to bdap account.
+        CPubKey pubkey(vvchOpParameters[3]);
+
+        CDynamicAddress addressCompare(pubkey.GetID());
+
+        if (!(address == addressCompare)) {
+            errorMessage = "CheckNewCertificateTxInputs: - Wallet address does not match. ";
+            return error(errorMessage.c_str());
+        }
+        //---------------------------------------------------------------------------------------------------------------
+
+        if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) { //test in rpc, should work
+            errorMessage = "CheckNewCertificateTxInputs: - Could not validate issuer signature. ";
+            return error(errorMessage.c_str());
+        }
+
+    }
+
+    //Check if Certificate already exists - should work w/Approve TXID occurring after Request
+    CCertificate getCertificate;
+    if (GetCertificateTxId(strTxHashToUse, getCertificate)) {
+        if ((certificate.txHashApprove != txHash) && (certificate.txHashRequest != txHash)) { //check request and approve in case
+            errorMessage = "CheckNewCertificateTxInputs: - The certificate " + txHash.ToString() + " already exists.  Add new certificate failed!";
+            return error(errorMessage.c_str());
+        } else {
+            LogPrintf("%s -- Already have certificate %s in local database. Skipping add certificate step.\n", __func__, txHash.ToString());
+            return true;
+        }
+    }    
+
+    if (!pCertificateDB) {
+        errorMessage = "CheckNewCertificateTxInputs failed! Can not open LevelDB BDAP certificate database.";
+        return error(errorMessage.c_str());
+    }
+
+    int op;
+
+    //don't think op gets ussed, but just in case
+    if (certificate.IsApproved()) {
+        op = OP_BDAP_MODIFY;
+    }
+    else {
+        op = OP_BDAP_NEW;
+    }
+
+    if (!pCertificateDB->AddCertificate(certificate, op)) {
+        errorMessage = "CheckNewCertificateTxInputs failed! Error adding new certificate record to LevelDB.";
+        pCertificateDB->EraseCertificateTxId(vchFromString(txHash.ToString())); //double check this
+        return error(errorMessage.c_str());
+    }
 
     return FlushCertificateLevelDB();
 }
@@ -395,8 +542,74 @@ bool CheckCertificateTx(const CTransactionRef& tx, const CScript& scriptOp, cons
     CCertificate certificate;
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
+    int nDataOut;
+    bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
+    if(bData && !certificate.UnserializeFromTx(tx, nHeight))
+    {
+        errorMessage = ("UnserializeFromData data in tx failed!");
+        LogPrintf("%s -- %s \n", __func__, errorMessage);
+        return error(errorMessage.c_str());
+    }
+    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+    CAmount monthlyFee, oneTimeFee, depositFee;
+    if (strOperationType == "bdap_new_certificate" || strOperationType == "bdap_approve_certificate") {
+        if (!certificate.ValidateValues(errorMessage))
+            return false;
 
+        if (vvchArgs.size() > 5) {
+            errorMessage = "Failed to get fees to add a certificate request";
+            return false;
+        }
+        std::string strCount = stringFromVch(vvchArgs[0]);
+        uint32_t nCount;
+        ParseUInt32(stringFromVch(vvchArgs[0]), &nCount);
 
+        if (strOperationType == "bdap_new_certificate") { //Request
+            if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_CERTIFICATE, BDAP::ObjectType::BDAP_CERTIFICATE, (uint16_t)nCount, monthlyFee, oneTimeFee, depositFee)) {
+                errorMessage = "Failed to get fees to add a certificate request";
+                return false;
+            }
+        }
+        else { //Approve
+            if (!GetBDAPFees(OP_BDAP_MODIFY, OP_BDAP_CERTIFICATE, BDAP::ObjectType::BDAP_CERTIFICATE, (uint16_t)nCount, monthlyFee, oneTimeFee, depositFee)) {
+                errorMessage = "Failed to get fees to add a certificate appoval";
+                return false;
+            }
+
+        }
+
+        LogPrint("bdap", "%s -- nCount %d, oneTimeFee %d\n", __func__, nCount, FormatMoney(oneTimeFee));
+        // extract amounts from tx.
+        CAmount dataAmount, opAmount;
+        if (!ExtractAmountsFromTx(tx, dataAmount, opAmount)) {
+            errorMessage = "Unable to extract BDAP amounts from transaction";
+            return false;
+        }
+        LogPrint("bdap", "%s -- dataAmount %d, opAmount %d\n", __func__, FormatMoney(dataAmount), FormatMoney(opAmount));
+        if (monthlyFee > dataAmount) {
+            LogPrintf("%s -- Invalid BDAP monthly registration fee amount for certificate. Monthly paid %d but should be %d\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(monthlyFee));
+            errorMessage = "Invalid BDAP monthly registration fee amount for certificate";
+            return false;
+        }
+        else {
+            LogPrint("bdap", "%s -- Valid BDAP monthly registration fee amount for certificate. Monthly paid %d, should be %d.\n", __func__, 
+                                    FormatMoney(dataAmount), FormatMoney(monthlyFee));
+        }
+        if (depositFee > opAmount) {
+            LogPrintf("%s -- Invalid BDAP deposit fee amount for certificate. Deposit paid %d but should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
+            errorMessage = "Invalid BDAP deposit fee amount for certificate";
+            return false;
+        }
+        else {
+            LogPrint("bdap", "%s -- Valid BDAP deposit fee amount for certificate. Deposit paid %d, should be %d\n", __func__, 
+                                    FormatMoney(opAmount), FormatMoney(depositFee));
+        }
+
+        return CheckNewCertificateTxInputs(certificate, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
+    }
 
     return false;
+
 }
