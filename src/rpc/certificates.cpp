@@ -99,6 +99,11 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
         selfSign = true;
     }
 
+    //ALSO considered self-sign if subject = issuer
+    if (request.params[1].get_str() == request.params[2].get_str()) {
+        selfSign = true;
+    }
+
     //Handle Key Usage array [REQUIRED]
     std::string strKeyUsages = request.params[3].get_str();
 
@@ -164,7 +169,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
 
-    txCertificate.PublicKey = privCertificateKey.GetPubKey();  //GetPubKeyBytes?
+    txCertificate.PublicKey = privCertificateKey.GetPubKeyBytes();  //GetPubKeyBytes?
 
     txCertificate.MonthsValid = nMonths;
 
