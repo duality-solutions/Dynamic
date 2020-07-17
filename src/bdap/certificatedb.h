@@ -18,8 +18,7 @@ class CCertificateDB : public CDBWrapper {
 public:
     CCertificateDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-certificates", nCacheSize, fMemory, fWipe, obfuscate) {
     }
-    bool AddCertificate(const CCertificate& certificate, const int op);
-    bool ReadCertificate(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate);
+    bool AddCertificate(const CCertificate& certificate);
     bool ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CCertificate& certificate);
 
     bool ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates, bool getAll = true);
@@ -28,16 +27,9 @@ public:
     bool ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates);
 
     bool EraseCertificateTxId(const std::vector<unsigned char>& vchTxId);
-    bool EraseCertificate(const std::vector<unsigned char>& vchCertificate);
-    bool CertificateExists(const std::vector<unsigned char>& vchCertificate);
-    bool GetCertificateInfo(const std::vector<unsigned char>& vchCertificate, UniValue& oCertificateInfo);
-    bool GetCertificateInfo(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate);
 };
 
-bool GetCertificate(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate);
-bool GetCertificate(const std::string& strCertificate, CCertificate& certificate);
 bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate);
-bool CertificateExists(const std::vector<unsigned char>& vchCertificate);
 bool UndoAddCertificate(const CCertificate& certificate);
 bool CheckCertificateDB();
 bool FlushCertificateLevelDB();

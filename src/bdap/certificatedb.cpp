@@ -10,34 +10,17 @@
 #include "bdap/fees.h"
 #include "bdap/utils.h"
 #include "coins.h"
+#include "dht/ed25519.h"
 #include "utilmoneystr.h"
 #include "utiltime.h"
 #include "validation.h"
 #include "validationinterface.h"
-
-#include "dht/ed25519.h"
 
 #include <univalue.h>
 
 #include <boost/thread.hpp>
 
 CCertificateDB *pCertificateDB = NULL;
-
-bool GetCertificate(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate)
-{
-    if (!pCertificateDB || !pCertificateDB->ReadCertificate(vchCertificate, certificate))
-        return false;
-
-    return !certificate.IsNull();
-}
-
-bool GetCertificate(const std::string& strCertificate, CCertificate& certificate)
-{
-    if (!pCertificateDB || !pCertificateDB->ReadCertificate(vchFromString(strCertificate), certificate))
-        return false;
-
-    return !certificate.IsNull();
-}
 
 bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate)
 {
@@ -47,23 +30,21 @@ bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate)
     return !certificate.IsNull();
 }
 
-bool CertificateExists(const std::vector<unsigned char>& vchCertificate)
-{
-    if (!pCertificateDB)
-        return false;
-
-    return pCertificateDB->CertificateExists(vchCertificate);
-}
-
 bool UndoAddCertificate(const CCertificate& certificate)
 {
     if (!pCertificateDB)
         return false;
 
-    return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.GetHash().ToString()));
+    if (certificate.IsApproved()) {
+        return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.txHashApprove.ToString()));
+    }
+    else {
+        return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.txHashRequest.ToString()));
+    }
+
 }
 
-bool CCertificateDB::AddCertificate(const CCertificate& certificate, const int op) 
+bool CCertificateDB::AddCertificate(const CCertificate& certificate) 
 { 
     bool writeState = false;
     bool updateState = true;
@@ -125,19 +106,6 @@ bool CCertificateDB::ReadCertificateTxId(const std::vector<unsigned char>& vchTx
     LOCK(cs_bdap_certificate);
     if(!(CDBWrapper::Read(make_pair(std::string("txrequestid"), vchTxId), certificate))) {
         return CDBWrapper::Read(make_pair(std::string("txapproveid"), vchTxId), certificate);
-    }
-    return true;
-}
-
-bool CCertificateDB::ReadCertificate(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate) 
-{
-    std::vector<unsigned char> vchTxId;
-    LOCK(cs_bdap_certificate);
-    if (CDBWrapper::Read(make_pair(std::string("certificate"), vchCertificate), vchTxId)) {
-        if (!ReadCertificateTxId(vchTxId, certificate))
-            return false;
-    } else {
-        return false;
     }
     return true;
 }
@@ -224,11 +192,7 @@ bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned c
     return (vCertificates.size() > 0);
 }
 
-bool CCertificateDB::CertificateExists(const std::vector<unsigned char>& vchCertificate)
-{
-    LOCK(cs_bdap_certificate);
-    return CDBWrapper::Exists(make_pair(std::string("certificate"), vchCertificate));
-}
+
 
 bool CCertificateDB::EraseCertificateTxId(const std::vector<unsigned char>& vchTxId)
 {
@@ -311,32 +275,6 @@ bool CCertificateDB::EraseCertificateTxId(const std::vector<unsigned char>& vchT
     
 }
 
-bool CCertificateDB::EraseCertificate(const std::vector<unsigned char>& vchCertificate)
-{
-    LOCK(cs_bdap_certificate);
-    return CDBWrapper::Erase(make_pair(std::string("certificate"), vchCertificate));
-}
-
-bool CCertificateDB::GetCertificateInfo(const std::vector<unsigned char>& vchCertificate, UniValue& oCertificateInfo)
-{
-    CCertificate certificate;
-    if (!ReadCertificate(vchCertificate, certificate))
-        return false;
-
-    if (!BuildCertificateJson(certificate, oCertificateInfo))
-        return false;  
-
-    return true;
-}
-
-bool CCertificateDB::GetCertificateInfo(const std::vector<unsigned char>& vchCertificate, CCertificate& certificate)
-{
-    if (!ReadCertificate(vchCertificate, certificate))
-        return false;
-
-    return true;
-}
-
 bool CheckCertificateDB()
 {
     if (!pCertificateDB)
@@ -388,7 +326,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     }
 
     if (certificate.Issuer != vvchOpParameters[3]) {
-        errorMessage = "CommonDataCheck failed! Script operation subject account parameter does not match subject account in certificate object.";
+        errorMessage = "CommonDataCheck failed! Script operation issuer account parameter does not match issuer account in certificate object.";
         return false;
     }
 
@@ -399,14 +337,30 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     }
 
     // check IssuerFQDN size
-    if (vvchOpParameters.size() > 1 && vvchOpParameters[3].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+    if (vvchOpParameters.size() > 3 && vvchOpParameters[3].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
         errorMessage = "CommonDataCheck failed! Issuer FQDN is too large.";
         return false;
     }
 
     // check subject pubkey size
-    if (vvchOpParameters.size() > 1 && vvchOpParameters[2].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+    if (vvchOpParameters.size() > 2 && vvchOpParameters[2].size() > MAX_CERTIFICATE_KEY_LENGTH) {
         errorMessage = "CommonDataCheck failed! Subject PubKey is too large.";
+        return false;
+    }
+
+    // if self-signed, pubkey of subject = issuer
+    if (certificate.SelfSignedCertificate()) {
+        if (vvchOpParameters[2] != vvchOpParameters[4]) {
+            errorMessage = "CommonDataCheck failed! Self signed, but subject pubkey not equal to issuer pubkey.";
+            return false;            
+        }
+    }
+
+    // check if Months Valid is an accepted value
+    uint32_t nMonthsValid;
+    ParseUInt32(stringFromVch(vvchOpParameters[0]), &nMonthsValid);
+    if (!(nMonthsValid > 0 && nMonthsValid <=12)) { // if NOT (nMonthsValid greater than 0 and less than or equal to 12)
+        errorMessage = "CommonDataCheck failed! Months Valid is out of bounds.";
         return false;
     }
 
@@ -414,7 +368,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     if (certificate.IsApproved() || certificate.SelfSignedCertificate()) {
 
         // check issuer pubkey size
-        if (vvchOpParameters.size() > 1 && vvchOpParameters[4].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+        if (vvchOpParameters.size() > 4 && vvchOpParameters[4].size() > MAX_CERTIFICATE_KEY_LENGTH) {
             errorMessage = "CommonDataCheck failed! Issuer PubKey is too large.";
             return false;
         }
@@ -425,7 +379,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
 }
 
 static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
-                               std::string& errorMessage, bool fJustCheck)
+                               const std::string& strOpType, std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(certificate, vvchOpParameters, errorMessage))
         return error(errorMessage.c_str());
@@ -434,6 +388,20 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
         return true;
 
     std::string strTxHashToUse;
+
+    //confirm state of certificate matches strOpType
+    if (strOpType == "bdap_new_certificate") {
+        if (certificate.IsApproved()) {
+            errorMessage = "CheckNewCertificateTxInputs: - Certificate approved but this is identified as a request op";
+            return error(errorMessage.c_str());
+        }
+    }
+    else if (strOpType == "bdap_approve_certificate") {
+        if (!certificate.IsApproved()) {
+            errorMessage = "CheckNewCertificateTxInputs: - Certificate not approved but this is identified as an approve op";
+            return error(errorMessage.c_str());
+        }
+    }
 
     if (certificate.IsApproved()){  //Approve
         strTxHashToUse = certificate.txHashApprove.ToString();
@@ -458,7 +426,6 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
 
     //check certificate signature if approved
     if (certificate.IsApproved()) {
-
         CDomainEntry entryIssuer;
         if (!GetDomainEntry(certificate.Issuer, entryIssuer)) {
             errorMessage = "CheckNewCertificateTxInputs: - Could not find specified certificate issuer! " + stringFromVch(certificate.Issuer);
@@ -468,28 +435,10 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
 
         CharString vchIssuerPubKey = entryIssuer.DHTPublicKey;
 
-        //need ed25519 version of this-----------------------------------------------------------------------------------
-        CKeyID keyID;
-        if (!address.GetKeyID(keyID)) {
-            errorMessage = "CheckNewCertificateTxInputs: - Could not get key id. " + address.ToString();
-            return error(errorMessage.c_str());
-        }
-        // check signature and pubkey belongs to bdap account.
-        CPubKey pubkey(vvchOpParameters[3]);
-
-        CDynamicAddress addressCompare(pubkey.GetID());
-
-        if (!(address == addressCompare)) {
-            errorMessage = "CheckNewCertificateTxInputs: - Wallet address does not match. ";
-            return error(errorMessage.c_str());
-        }
-        //---------------------------------------------------------------------------------------------------------------
-
         if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) { //test in rpc, should work
             errorMessage = "CheckNewCertificateTxInputs: - Could not validate issuer signature. ";
             return error(errorMessage.c_str());
         }
-
     }
 
     //Check if Certificate already exists - should work w/Approve TXID occurring after Request
@@ -509,19 +458,9 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
         return error(errorMessage.c_str());
     }
 
-    int op;
-
-    //don't think op gets ussed, but just in case
-    if (certificate.IsApproved()) {
-        op = OP_BDAP_MODIFY;
-    }
-    else {
-        op = OP_BDAP_NEW;
-    }
-
-    if (!pCertificateDB->AddCertificate(certificate, op)) {
+    if (!pCertificateDB->AddCertificate(certificate)) {
         errorMessage = "CheckNewCertificateTxInputs failed! Error adding new certificate record to LevelDB.";
-        pCertificateDB->EraseCertificateTxId(vchFromString(txHash.ToString())); //double check this
+        pCertificateDB->EraseCertificateTxId(vchFromString(txHash.ToString())); 
         return error(errorMessage.c_str());
     }
 
@@ -607,7 +546,7 @@ bool CheckCertificateTx(const CTransactionRef& tx, const CScript& scriptOp, cons
                                     FormatMoney(opAmount), FormatMoney(depositFee));
         }
 
-        return CheckNewCertificateTxInputs(certificate, scriptOp, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
+        return CheckNewCertificateTxInputs(certificate, scriptOp, vvchArgs, tx->GetHash(), strOperationType, errorMessage, fJustCheck);
     }
 
     return false;
