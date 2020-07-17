@@ -329,12 +329,39 @@ bool CCertificate::ValidateValues(std::string& errorMessage) const
     return true;
 }
 
+std::string CCertificate::ToString() const
+{
+     return strprintf(
+        "CCertificate(\n"
+        "    nVersion                 = %d\n"
+        "    Months Valid             = %d\n"
+        "    Signature Algorithm      = %s\n"
+        "    Signature Hash Algorithm = %s\n"
+        "    Subject                  = %s\n"
+        "    Issuer                   = %s\n"
+        "    Serial Number            = %d\n"
+        "    Self Signed              = %s\n"
+        "    Approved                 = %s\n"
+        ")\n",
+        nVersion,
+        MonthsValid,
+        stringFromVch(SignatureAlgorithm),
+        stringFromVch(SignatureHashAlgorithm),
+        stringFromVch(Subject),
+        stringFromVch(Issuer),
+        SerialNumber,
+        SelfSignedCertificate() ? "True" : "False",
+        IsApproved() ? "True" : "False"
+        );
+}
+
 bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificate)
 {
     int64_t nTime = 0;
 
     std::vector<unsigned char> subjectSig = certificate.SubjectSignature;
     std::vector<unsigned char> issuerSig = certificate.SignatureValue;
+    std::vector<unsigned char> certPubKey = certificate.PublicKey;
 
     UniValue oKeyUsages(UniValue::VOBJ);
     int counter = 0;
@@ -354,7 +381,7 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
     oCertificate.push_back(Pair("subject", stringFromVch(certificate.Subject)));
     oCertificate.push_back(Pair("subject_signature", EncodeBase64(&subjectSig[0], subjectSig.size())));
     oCertificate.push_back(Pair("issuer", stringFromVch(certificate.Issuer)));
-    oCertificate.push_back(Pair("public_key", stringFromVch(certificate.PublicKey)));
+    oCertificate.push_back(Pair("public_key", EncodeBase64(&certPubKey[0], certPubKey.size())));
     oCertificate.push_back(Pair("signature_value", EncodeBase64(&issuerSig[0], issuerSig.size())));
     oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));

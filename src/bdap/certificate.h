@@ -165,11 +165,6 @@ public:
         return (SignatureValue.size() > 0);
     }
 
-    inline bool IsNull() const { return (Subject.empty()); }
-    void Serialize(std::vector<unsigned char>& vchData);
-    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
-    bool UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height=0);
-
     bool SelfSignedCertificate() const {
         
         if (Subject == Issuer)
@@ -182,6 +177,11 @@ public:
         return CKeyID(Hash160(PublicKey.begin(), PublicKey.end()));
     }
 
+    inline bool IsNull() const { return (Subject.empty()); }
+    void Serialize(std::vector<unsigned char>& vchData);
+    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+    bool UnserializeFromTx(const CTransactionRef& tx, const unsigned int& height=0);
+
     uint256 GetHash() const;
     uint256 GetSubjectHash() const;
     uint256 GetIssuerHash() const;
@@ -190,6 +190,7 @@ public:
     bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ValidateValues(std::string& errorMessage) const;
+    std::string ToString() const;
 };
 
 bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificate);
