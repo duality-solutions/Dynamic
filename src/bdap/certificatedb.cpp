@@ -348,6 +348,12 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
         return false;
     }
 
+    //check certificate pubkey size
+    if (certificate.PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) {
+        errorMessage = "CommonDataCheck failed! Certificate PubKey is too large.";
+        return false;
+    }
+
     // if self-signed, pubkey of subject = issuer
     if (certificate.SelfSignedCertificate()) {
         if (vvchOpParameters[2] != vvchOpParameters[4]) {
@@ -424,7 +430,7 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
         return error(errorMessage.c_str());
     }
 
-    //check certificate signature if approved
+    //if approved check issuer signature and if not self signed check if request exists
     if (certificate.IsApproved()) {
         CDomainEntry entryIssuer;
         if (!GetDomainEntry(certificate.Issuer, entryIssuer)) {
@@ -438,6 +444,15 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
         if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) { //test in rpc, should work
             errorMessage = "CheckNewCertificateTxInputs: - Could not validate issuer signature. ";
             return error(errorMessage.c_str());
+        }
+
+        //if not self signed, check if request exists
+        if (!certificate.SelfSignedCertificate()) {
+            CCertificate certificateRequest;
+            if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest)) {
+                errorMessage = "CheckNewCertificateTxInputs: - Could not find previous request. ";
+                return error(errorMessage.c_str());
+            }
         }
     }
 
