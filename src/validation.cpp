@@ -1130,6 +1130,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
                 // check pubkey belongs to bdap account and signature is correct.
                 CAudit audit(ptx);
+                std::string errorMessage;
+                if (!audit.ValidateValues(errorMessage)) 
+                    return state.Invalid(false, REJECT_INVALID, "bdap-new-audit: " + errorMessage);
+
                 CDomainEntry findDomainEntry;
                 if (!GetDomainEntry(audit.vchOwnerFullObjectPath, findDomainEntry)) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(audit.vchOwnerFullObjectPath) + " not found.  Rejected by the tx memory pool!";
@@ -1190,10 +1194,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CCertificate certificate(ptx);
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
+            std::string errorMessage;
 
-            //check certificate pubkey size
-            if (certificate.PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH)
-                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-pubkey-too-long");
+            if (!certificate.ValidateValues(errorMessage)) 
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
 
             //Check Subject BDAP
             if (!GetDomainEntry(certificate.Subject, findSubjectDomainEntry)) {
@@ -1201,15 +1205,20 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-account-exists " + strErrorMessage);
             }
 
+            CharString vchSubjectPubKey = findSubjectDomainEntry.DHTPublicKey;
+            CharString vchIssuerPubKey;
+
             //If not self signed, check issuer BDAP
             if (!certificate.SelfSignedCertificate()) {
                 if (!GetDomainEntry(certificate.Issuer, findIssuerDomainEntry)) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(certificate.Issuer) + " not found.  Rejected by the tx memory pool!";
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-account-exists " + strErrorMessage);
                 }
+                vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
             }
-
-            CharString vchSubjectPubKey = findSubjectDomainEntry.DHTPublicKey;
+            else {
+                vchIssuerPubKey = vchSubjectPubKey;
+            }
 
             //Check Subject Signature
             if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
@@ -1219,7 +1228,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
             //If Approve check Issuer Signature and if not self signed check request exists
             if (strOpType == "bdap_approve_certificate") {
-                CharString vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
 
                 //check issuer signature
                 if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) {
