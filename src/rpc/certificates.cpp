@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdap/certificate.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
@@ -430,7 +431,34 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
 static UniValue ViewCertificate(const JSONRPCRequest& request)
 {
-   UniValue oCertificateTransaction(UniValue::VOBJ);
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 2))
+        throw std::runtime_error(
+            "certificate view \"txid\" \n"
+            "\nView an X.509 certificate\n"
+            "\nArguments:\n"
+            "1. \"txid\"             (string, required)  Transaction ID of certificate\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"tbd\"               (string)            tbd\n"
+            "  \"txid\"              (string)            Certificate record transaction id\n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("certificate view", "\"txid\" ") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("certificate view", "\"txid\" "));
+
+    std::vector<unsigned char> vchTxId;
+    std::string parameter1 = request.params[1].get_str();
+    vchTxId = vchFromString(parameter1);
+    bool readCertificateState = false;
+
+    CCertificate certificate;
+    UniValue oCertificateTransaction(UniValue::VOBJ);
+
+    readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
+    if (readCertificateState) {
+        BuildCertificateJson(certificate, oCertificateTransaction);
+    }
 
     return oCertificateTransaction;
 } //ViewCertificate
