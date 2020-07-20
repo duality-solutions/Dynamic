@@ -596,6 +596,12 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     else if (strPrefix == "1 9") {
         strOpType = "bdap_new_audit";
     }
+    else if (strPrefix == "1 10") {
+        strOpType = "bdap_new_certificate";
+    }
+    else if (strPrefix == "4 10") {
+        strOpType = "bdap_approve_certificate";
+    }
     else {
         return false;
     }
