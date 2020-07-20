@@ -24,6 +24,9 @@
 #include <libtorrent/ed25519.hpp>
 #include <univalue.h>
 
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
+
+
 template <typename Out>
 void split1(const std::string &s, char delim, Out result) {
     std::istringstream iss(s);
@@ -255,18 +258,18 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    //comment out for now
-    // bool fUseInstantSend = false;
-    // // Send the transaction
-    // CWalletTx wtx;
-    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
+    bool fUseInstantSend = false;
+    // Send the transaction
+    CWalletTx wtx;
 
-    // if (selfSign) {
-    //     txCertificate.txHashApprove = wtx.GetHash();
-    // }
-    // else {
-    //     txCertificate.txHashRequest = wtx.GetHash();
-    // }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+
+    if (selfSign) {
+        txCertificate.txHashApprove = wtx.GetHash();
+    }
+    else {
+        txCertificate.txHashRequest = wtx.GetHash();
+    }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
     BuildCertificateJson(txCertificate, oCertificateTransaction);
@@ -409,14 +412,12 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    //comment out for now
-    // bool fUseInstantSend = false;
-    // // Send the transaction
-    // CWalletTx wtx;
-    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, oneTimeFee, monthlyFee + depositFee, fUseInstantSend);
+    bool fUseInstantSend = false;
+    // Send the transaction
+    CWalletTx wtx;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
-    // txCertificate.txHashApprove = wtx.GetHash();
-
+    txCertificate.txHashApprove = wtx.GetHash();
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
 
