@@ -832,7 +832,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         CScript scriptOp;
         if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
             std::string errorMessage;
-            if (vvchBDAPArgs.size() > 3) {
+            if (vvchBDAPArgs.size() > 5) {
                 errorMessage = "Too many BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
@@ -1172,7 +1172,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (vvch.size() > 3 && vvch[3].size() > MAX_OBJECT_FULL_PATH_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-fqdn-too-long");
 
-            if (vvch.size() > 2 && vvch[2].size() > MAX_CERTIFICATE_KEY_LENGTH)
+            if (vvch.size() > 2 && vvch[2].size() > MAX_KEY_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-pubkey-too-long");
 
             uint32_t nMonthsValid;
@@ -1182,7 +1182,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
             //If Approved check Issuer Pubkey length
             if (strOpType == "bdap_approve_certificate") {
-                if (vvch.size() > 4 && vvch[4].size() > MAX_CERTIFICATE_KEY_LENGTH) 
+                if (vvch.size() > 4 && vvch[4].size() > MAX_KEY_LENGTH) 
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-pubkey-too-long");
             }
 
@@ -1190,6 +1190,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CCertificate certificate(ptx);
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
+
+            //check certificate pubkey size
+            if (certificate.PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-pubkey-too-long");
 
             //Check Subject BDAP
             if (!GetDomainEntry(certificate.Subject, findSubjectDomainEntry)) {
@@ -1213,13 +1217,21 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
             }
 
-            //If Approve and not self signed check Issuer Signature
-            if ((strOpType == "bdap_approve_certificate") && (!certificate.SelfSignedCertificate())) {
+            //If Approve check Issuer Signature and if not self signed check request exists
+            if (strOpType == "bdap_approve_certificate") {
                 CharString vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
 
+                //check issuer signature
                 if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-issuer-signature-failed " + strErrorMessage);
+                }
+
+                //if not self-signed, check that request exists
+                if (!certificate.SelfSignedCertificate()) {
+                    CCertificate certificateRequest;
+                    if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest))
+                        return state.Invalid(false, REJECT_INVALID, errorPrefix + "reqeust-not-found");
                 }
             }
 
