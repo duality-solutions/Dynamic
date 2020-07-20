@@ -3990,7 +3990,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-    
+
     {
         std::set<std::pair<const CWalletTx*, unsigned int> > setCoins;
         std::vector<CTxPSIn> vecTxPSInTmp;
@@ -4007,7 +4007,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" ) {
+                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" || strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
                     // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
@@ -4346,6 +4346,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     txin.scriptSig = CScript();
                 }
 
+                //TODO: Check if audit and certificate are in mempool
                 if (fIsBDAP) {
                     if (strOpType == "bdap_new_account" || strOpType == "bdap_delete_account" || strOpType == "bdap_update_account") {
                         // Check the memory pool for a pending tranaction for the same domain entry
