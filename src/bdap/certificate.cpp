@@ -358,6 +358,7 @@ std::string CCertificate::ToString() const
 bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificate)
 {
     int64_t nTime = 0;
+    int64_t nApproveTime = 0;
 
     std::vector<unsigned char> subjectSig = certificate.SubjectSignature;
     std::vector<unsigned char> issuerSig = certificate.SignatureValue;
@@ -376,12 +377,12 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
 
     oCertificate.push_back(Pair("signature_algorithm", stringFromVch(certificate.SignatureAlgorithm)));
     oCertificate.push_back(Pair("signature_hash_algorithm", stringFromVch(certificate.SignatureHashAlgorithm)));
-    oCertificate.push_back(Pair("fingerprint", stringFromVch(certificate.FingerPrint)));
+    oCertificate.push_back(Pair("fingerprint", certificate.GetHash().ToString()));
     oCertificate.push_back(Pair("months_valid", std::to_string(certificate.MonthsValid)));
     oCertificate.push_back(Pair("subject", stringFromVch(certificate.Subject)));
     oCertificate.push_back(Pair("subject_signature", EncodeBase64(&subjectSig[0], subjectSig.size())));
     oCertificate.push_back(Pair("issuer", stringFromVch(certificate.Issuer)));
-    oCertificate.push_back(Pair("public_key", EncodeBase64(&certPubKey[0], certPubKey.size())));
+    oCertificate.push_back(Pair("public_key", stringFromVch(certificate.PublicKey)));
     oCertificate.push_back(Pair("signature_value", EncodeBase64(&issuerSig[0], issuerSig.size())));
     oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
@@ -391,15 +392,26 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
 
     oCertificate.push_back(Pair("txid_request", certificate.txHashRequest.GetHex()));
     oCertificate.push_back(Pair("txid_approve", certificate.txHashApprove.GetHex()));
-    //TODO: need to change block_height calculation
     if ((unsigned int)chainActive.Height() >= certificate.nHeightRequest) {
         CBlockIndex *pindex = chainActive[certificate.nHeightRequest];
         if (pindex) {
             nTime = pindex->GetBlockTime();
         }
     }
-    oCertificate.push_back(Pair("block_time", nTime));
-    oCertificate.push_back(Pair("block_height", std::to_string(certificate.nHeightRequest)));
+    oCertificate.push_back(Pair("request_time", nTime));
+    oCertificate.push_back(Pair("request_height", std::to_string(certificate.nHeightRequest)));
+
+    if (certificate.nHeightApprove != 0) {
+        if ((unsigned int)chainActive.Height() >= certificate.nHeightApprove) {
+            CBlockIndex *pindex = chainActive[certificate.nHeightApprove];
+            if (pindex) {
+                nApproveTime = pindex->GetBlockTime();
+            }
+        }
+        oCertificate.push_back(Pair("valid_from", nApproveTime));
+        oCertificate.push_back(Pair("valid_until", AddMonthsToBlockTime(nApproveTime,certificate.MonthsValid)));
+        oCertificate.push_back(Pair("approve_height", std::to_string(certificate.nHeightApprove)));
+    }
     
     return true;
 }

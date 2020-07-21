@@ -25,7 +25,7 @@ public:
 
     CharString SignatureAlgorithm; //only support ed25519 and secp256k1 (future)
     CharString SignatureHashAlgorithm; //sha512
-    CharString FingerPrint; //hash of the publickey (possible method)
+    CharString FingerPrint; //TODO: Delete this before starting new privatenet
     uint16_t MonthsValid;
     CharString Subject; //owner full path
     CharString SubjectSignature; //BDAP account (in lieu of proof of domain) (take this class serialized and sign it)
@@ -162,7 +162,7 @@ public:
     }
  
     bool IsApproved() const {
-        return (SignatureValue.size() > 0);
+        return ((SignatureValue.size() > 0) || (txHashApprove != 0));
     }
 
     bool SelfSignedCertificate() const {
