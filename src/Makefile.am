@@ -79,6 +79,8 @@ DYNAMIC_CORE_H = \
   bdap/audit.h \
   bdap/auditdb.h \
   bdap/bdap.h \
+  bdap/certificate.h \
+  bdap/certificatedb.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
   bdap/fees.h \
@@ -269,6 +271,8 @@ libdynamic_server_a_SOURCES = \
   checkpoints.cpp \
   bdap/audit.cpp \
   bdap/auditdb.cpp \
+  bdap/certificate.cpp \
+  bdap/certificatedb.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/fees.cpp \
@@ -341,6 +345,7 @@ libdynamic_server_a_SOURCES = \
   rest.cpp \
   rpc/audits.cpp \
   rpc/blockchain.cpp \
+  rpc/certificates.cpp \
   rpc/dht.cpp \
   rpc/domainentry.cpp \
   rpc/dynode.cpp \

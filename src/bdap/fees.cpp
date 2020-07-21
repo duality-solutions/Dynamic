@@ -70,7 +70,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
             depositFee = feeDeposit.Fee;
         }
 
-    } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_CERTIFICATE && objType == BDAP::ObjectType::BDAP_CERTIFICATE) {
+    } else if ((opCodeAction == OP_BDAP_NEW || opCodeAction == OP_BDAP_MODIFY) && opCodeObject == OP_BDAP_CERTIFICATE && objType == BDAP::ObjectType::BDAP_CERTIFICATE) {
         // Fees for a new BDAP certificate
         oneTimeFee = 0;
         CFeeItem feeMonthly;

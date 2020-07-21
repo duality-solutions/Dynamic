@@ -16,6 +16,7 @@
 #include "amount.h"
 #include "base58.h"
 #include "bdap/auditdb.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "chain.h"
 #include "chainparams.h"
@@ -376,6 +377,8 @@ void PrepareShutdown()
         delete pDomainEntryDB;
         delete pAuditDB;
         pAuditDB = NULL;
+        delete pCertificateDB;
+        pCertificateDB = NULL;
         pDomainEntryDB = NULL;
         delete pLinkDB;
         pLinkDB = NULL;
@@ -1741,6 +1744,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // BDAP Services DB's
                 delete pDomainEntryDB;
                 delete pAuditDB;
+                delete pCertificateDB;
                 delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
@@ -1762,6 +1766,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pAuditDB = new CAuditDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pCertificateDB = new CCertificateDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
