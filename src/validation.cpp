@@ -903,7 +903,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 if (!errorMessage.empty())
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
-                LogPrintf("%s -- CheckAuditTx valid.\n", __func__);
+                LogPrint("bdap", "%s -- CheckAuditTx valid.\n", __func__);
                 return true;
             }
             else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
@@ -914,7 +914,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 if (!errorMessage.empty())
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
-                LogPrintf("%s -- CheckAuditTx valid.\n", __func__);
+                LogPrint("bdap", "%s -- CheckCertificateTx valid.\n", __func__);
                 return true;
             }
             else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
