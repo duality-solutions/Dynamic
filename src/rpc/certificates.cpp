@@ -27,7 +27,6 @@
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
-
 template <typename Out>
 void split1(const std::string &s, char delim, Out result) {
     std::istringstream iss(s);
@@ -303,26 +302,19 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
+    std::vector<unsigned char> vchTxId;
+    std::string parameter1 = request.params[1].get_str();
+    vchTxId = vchFromString(parameter1);
+
     CCertificate txCertificate;
-    unsigned int height;
     int32_t nMonths = 12; // certificates last a year?
 
-    uint256 hash = ParseHashV(request.params[1], "Transaction ID");
-
-    //Retrieve Transaction
-    CTransactionRef tx;
-    uint256 hashBlock;
-    if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
-
-    //Get height - TO REVIEW
-    BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
-    CBlockIndex* pindex = (*mi).second;
-    height = pindex->nHeight;
-
-    //Retrieve certificate from tx
-    if (!txCertificate.UnserializeFromTx(tx, height))
-        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Unable to retrieve certificate from UnserializeFromTx");
+    //Retrieve certificate from CertificateDB
+    bool readCertificateState = false;
+    readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,txCertificate);
+    if (!readCertificateState) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
+    }
 
     //Check if certificate already approved
     if (txCertificate.IsApproved())
@@ -421,6 +413,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     txCertificate.txHashApprove = wtx.GetHash();
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
+    BuildCertificateJson(txCertificate, oCertificateTransaction);
 
     return oCertificateTransaction;
 #else
@@ -428,15 +421,19 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 #endif
 } //ApproveCertificate
 
-
 static UniValue ViewCertificate(const JSONRPCRequest& request)
 {
-    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 2))
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 4))
         throw std::runtime_error(
-            "certificate view \"txid\" \n"
+            "certificate view \"txid\" or \n"
+            "certificate view (\"subject\") (\"issuer\") (\"pending\") \n"
             "\nView an X.509 certificate\n"
             "\nArguments:\n"
             "1. \"txid\"             (string, required)  Transaction ID of certificate\n"
+            "      or\n"
+            "1. \"subject\"          (string, optional)  BDAP account of subject\n"
+            "2. \"issuer\"           (string, optional)  BDAP account of issuer\n"
+            "3. \"pending\"          (boolean, optional) retrieve pending only (default = false)\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"tbd\"               (string)            tbd\n"
@@ -447,9 +444,10 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("certificate view", "\"txid\" "));
 
+    //txid only
     std::vector<unsigned char> vchTxId;
-    std::string parameter1 = request.params[1].get_str();
-    vchTxId = vchFromString(parameter1);
+    std::string parameterTxId = request.params[1].get_str();
+    vchTxId = vchFromString(parameterTxId);
     bool readCertificateState = false;
 
     CCertificate certificate;
@@ -458,11 +456,112 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
     readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
     if (readCertificateState) {
         BuildCertificateJson(certificate, oCertificateTransaction);
+        return oCertificateTransaction;
     }
 
-    return oCertificateTransaction;
-} //ViewCertificate
+    //if can't find txid, use BDAP logic
+    UniValue oCertificateLists(UniValue::VARR);
+    UniValue oCertificateList(UniValue::VOBJ);
 
+    bool subjectDetected = false;
+    bool issuerDetected = false;
+    bool getAll = true;
+
+    std::string subject = "";
+    std::string issuer = "";
+    std::string pending = "";
+
+    std::vector<unsigned char> vchSubjectFQDN;
+    std::vector<unsigned char> vchIssuerFQDN;
+
+    //Subject
+    if (request.params.size() > 1) {
+        subject = request.params[1].get_str();
+        ToLowerCase(subject);
+        if (subject.size() > 0) {
+            subjectDetected = true;
+            vchSubjectFQDN = vchFromString(subject + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN);
+
+            CDomainEntry subjectDomainEntry;
+            if (!GetDomainEntry(vchSubjectFQDN, subjectDomainEntry))
+                throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", subject));
+        }
+    }
+
+    //Issuer
+    if (request.params.size() > 2) {
+        issuer = request.params[2].get_str();
+        ToLowerCase(issuer);
+        if (issuer.size() > 0) {
+            issuerDetected = true;
+            vchIssuerFQDN = vchFromString(issuer + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN);
+
+            CDomainEntry issuerDomainEntry;
+            if (!GetDomainEntry(vchIssuerFQDN, issuerDomainEntry))
+                throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", issuer));
+        }
+    }
+
+    //Pending
+    if (request.params.size() > 3) {
+        pending = request.params[3].get_str();
+        ToLowerCase(pending);
+        if (pending.size() > 0)
+            if (pending == "true")
+                getAll = false;
+    }
+
+    std::vector<CCertificate> vCertificates;
+    if ((subjectDetected) && (issuerDetected)) {
+        if (getAll) {
+            pCertificateDB->ReadCertificateSubjectDNApprove(vchSubjectFQDN, vCertificates);
+        }
+        else {
+            pCertificateDB->ReadCertificateSubjectDNRequest(vchSubjectFQDN, vCertificates, false);
+        }
+
+        for (const CCertificate& certificate : vCertificates) {
+            UniValue oCertificateList(UniValue::VOBJ);
+            if (certificate.Issuer == vchIssuerFQDN) {
+                BuildCertificateJson(certificate, oCertificateList);
+                oCertificateLists.push_back(oCertificateList);
+            }
+        };
+    }
+    else if (subjectDetected) {
+        if (getAll) {
+            pCertificateDB->ReadCertificateSubjectDNApprove(vchSubjectFQDN, vCertificates);
+        }
+        else {
+            pCertificateDB->ReadCertificateSubjectDNRequest(vchSubjectFQDN, vCertificates, false);
+        }
+
+        for (const CCertificate& certificate : vCertificates) {
+            UniValue oCertificateList(UniValue::VOBJ);
+
+            BuildCertificateJson(certificate, oCertificateList);
+            oCertificateLists.push_back(oCertificateList);
+        };
+    }
+    else if (issuerDetected) {
+        if (getAll) {
+            pCertificateDB->ReadCertificateIssuerDNApprove(vchIssuerFQDN, vCertificates);
+        }
+        else {
+            pCertificateDB->ReadCertificateIssuerDNRequest(vchIssuerFQDN, vCertificates, false);
+        }
+
+        for (const CCertificate& certificate : vCertificates) {
+            UniValue oCertificateList(UniValue::VOBJ);
+
+            BuildCertificateJson(certificate, oCertificateList);
+            oCertificateLists.push_back(oCertificateList);
+        };
+    }
+
+    return oCertificateLists;
+
+} //ViewCertificate
 
 UniValue certificate_rpc(const JSONRPCRequest& request) 
 {
@@ -477,7 +576,7 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
             "\nAvailable commands:\n"
             "  new                - Create new X.509 certificate\n"
             "  approve            - Approve an X.509 certificate\n"
-            "  view               - View X.509 certificate\n"
+            "  view               - View X.509 certificate(s)\n"
             "\nExamples:\n"
             + HelpExampleCli("certificate new", "\"owner\" (\"issuer\") ") +
             "\nAs a JSON-RPC call\n"
@@ -502,7 +601,6 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
     }
     return NullUniValue;
 }
-
 
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
