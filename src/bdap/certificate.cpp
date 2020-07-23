@@ -4,31 +4,15 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdap/certificate.h"
-
 #include "bdap/utils.h"
 #include "hash.h"
 #include "script/script.h"
 #include "streams.h"
+#include "uint256.h"
 #include "validation.h"
 
 #include <libtorrent/ed25519.hpp>
-#include "uint256.h"
-
-
 #include <univalue.h>
-
-constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-std::string hexStr(unsigned char *data, int len)
-{
-  std::string s(len * 2, ' ');
-  for (int i = 0; i < len; ++i) {
-    s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
-    s[2 * i + 1] = hexmap[data[i] & 0x0F];
-  }
-  return s;
-}
 
 void CCertificate::Serialize(std::vector<unsigned char>& vchData) 
 {
@@ -99,7 +83,21 @@ std::string CCertificate::GetPubKeyHex() const
 {
     std::vector<unsigned char> certPubKey = PublicKey;
     
-    return hexStr(&certPubKey[0], certPubKey.size());
+    return ToHex(&certPubKey[0], certPubKey.size());
+}
+
+std::string CCertificate::GetSubjectSignature() const
+{
+    std::vector<unsigned char> subjectSig = SubjectSignature;
+
+    return EncodeBase64(&subjectSig[0], subjectSig.size());
+}
+
+std::string CCertificate::GetSignatureValue() const
+{
+    std::vector<unsigned char> issuerSig = SignatureValue;
+
+    return EncodeBase64(&issuerSig[0], issuerSig.size());
 }
 
 uint256 CCertificate::GetHash() const
@@ -355,23 +353,37 @@ std::string CCertificate::ToString() const
         "CCertificate(\n"
         "    nVersion                 = %d\n"
         "    Months Valid             = %d\n"
+        "    Finger Print             = %d\n"
         "    Signature Algorithm      = %s\n"
         "    Signature Hash Algorithm = %s\n"
         "    Subject                  = %s\n"
+        "    Subject Signature        = %s\n"
+        "    PublicKey                = %s\n"
         "    Issuer                   = %s\n"
+        "    Signature Value          = %s\n"
         "    Serial Number            = %d\n"
+        "    Key ID                   = %d\n"
         "    Self Signed              = %s\n"
         "    Approved                 = %s\n"
+        "    Request TxId             = %s\n"
+        "    Approve TxId             = %s\n"
         ")\n",
         nVersion,
         MonthsValid,
+        GetFingerPrint(),
         stringFromVch(SignatureAlgorithm),
         stringFromVch(SignatureHashAlgorithm),
         stringFromVch(Subject),
+        GetSubjectSignature(),
+        GetPubKeyHex(),
         stringFromVch(Issuer),
+        GetSignatureValue(),
         SerialNumber,
+        GetCertificateKeyID().ToString(),
         SelfSignedCertificate() ? "True" : "False",
-        IsApproved() ? "True" : "False"
+        IsApproved() ? "True" : "False",
+        txHashRequest.GetHex(),
+        txHashApprove.GetHex()
         );
 }
 
@@ -379,10 +391,6 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
 {
     int64_t nTime = 0;
     int64_t nApproveTime = 0;
-
-    std::vector<unsigned char> subjectSig = certificate.SubjectSignature;
-    std::vector<unsigned char> issuerSig = certificate.SignatureValue;
-    std::vector<unsigned char> certPubKey = certificate.PublicKey;
 
     UniValue oKeyUsages(UniValue::VOBJ);
     int counter = 0;
@@ -397,13 +405,13 @@ bool BuildCertificateJson(const CCertificate& certificate, UniValue& oCertificat
 
     oCertificate.push_back(Pair("signature_algorithm", stringFromVch(certificate.SignatureAlgorithm)));
     oCertificate.push_back(Pair("signature_hash_algorithm", stringFromVch(certificate.SignatureHashAlgorithm)));
-    oCertificate.push_back(Pair("fingerprint", certificate.GetFingerPrint().ToString()));
+    oCertificate.push_back(Pair("fingerprint", certificate.GetFingerPrint()));
     oCertificate.push_back(Pair("months_valid", std::to_string(certificate.MonthsValid)));
     oCertificate.push_back(Pair("subject", stringFromVch(certificate.Subject)));
-    oCertificate.push_back(Pair("subject_signature", EncodeBase64(&subjectSig[0], subjectSig.size())));
+    oCertificate.push_back(Pair("subject_signature", certificate.GetSubjectSignature()));
     oCertificate.push_back(Pair("issuer", stringFromVch(certificate.Issuer)));
     oCertificate.push_back(Pair("public_key", certificate.GetPubKeyHex()));
-    oCertificate.push_back(Pair("signature_value", EncodeBase64(&issuerSig[0], issuerSig.size())));
+    oCertificate.push_back(Pair("signature_value", certificate.GetSignatureValue()));
     oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
 

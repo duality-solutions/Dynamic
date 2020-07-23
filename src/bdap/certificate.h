@@ -177,8 +177,8 @@ public:
         return CKeyID(Hash160(PublicKey.begin(), PublicKey.end()));
     }
 
-    uint256 GetFingerPrint() const {
-        return GetHash();
+    std::string GetFingerPrint() const {
+        return GetHash().ToString();
     }
 
     inline bool IsNull() const { return (Subject.empty()); }
@@ -190,6 +190,8 @@ public:
     uint256 GetSubjectHash() const;
     uint256 GetIssuerHash() const;
     std::string GetPubKeyHex() const;
+    std::string GetSubjectSignature() const;
+    std::string GetSignatureValue() const;
     bool SignSubject(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
     bool SignIssuer(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
     bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
