@@ -27,39 +27,6 @@
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
-template <typename Out>
-void split1(const std::string &s, char delim, Out result) {
-    std::istringstream iss(s);
-    std::string item;
-    while (std::getline(iss, item, delim)) {
-        *result++ = item;
-    }
-}
-
-std::vector<std::string> split1(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split1(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
-std::string trim1(std::string s)
-{
-    if (s.empty()) return s;
-
-    int start = 0;
-    int end = int(s.size());
-    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
-    {
-        ++start;
-    }
-
-    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
-    {
-        --end;
-    }
-    return s.substr(start, end - start);
-}
-
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
@@ -73,8 +40,27 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             "3. \"key_usage_array\"  (string, required)  Descriptions of how this certificate will be used\n"
             "\nResult:\n"
             "{(json object)\n"
-            "  \"tbd\"               (string)            tbd\n"
-            "  \"txid\"              (string)            Certificate record transaction id\n"
+            " \"version\"                   (string, required)   Version \n"
+            " \"signature_algorithm\"       (string, required)   Algorithm used to sign \n"
+            " \"signature_hash_algorithm\"  (string, required)   Algorithm used to hash \n"
+            " \"fingerprint\"               (string, required)   Fingerprint of certificate \n"
+            " \"months_valid\"              (int, required)      How long certificate is valid \n"
+            " \"subject\"                   (string, required)   BDAP account of subject \n"
+            " \"subject_signature\"         (string, required)   Signature of subject \n"
+            " \"issuer\"                    (string, required)   BDAP account of issuer \n"
+            " \"public_key\"                (string, required)   Public Key of certificate \n"
+            " \"signature_value\"           (string, optional)   Signature of approval \n"
+            " \"approved\"                  (boolean, required)  Certificate approved \n"
+            " \"serial_number\"             (string, required)   Unique serial number \n"
+            " \"certificate_keyid\"         (string, required)   Key ID \n"
+            " \"key_usage\"                 (string, required)   List of usages \n"
+            " \"txid_request\"              (string, required)   Certificate request transaction id\n"
+            " \"txid_approve\"              (string, optional)   Certificate approved transaction id  \n"
+            " \"request_time\"              (int, required)      Time when request was made \n"
+            " \"request_height\"            (int, required)      Block where request is stored \n"
+            " \"valid_from\"                (int, optional)      Time when certificate is valid \n"
+            " \"valid_until\"               (int, optional)      Time when certificate expires \n"
+            " \"approve_height\"            (int, optional)      Block where approval is stored \n"
             "}\n"
             "\nExamples\n" +
            HelpExampleCli("certificate new", "\"subject\" (\"issuer\") \"key_usage_array\" ") +
@@ -115,9 +101,9 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     }
 
     if (strKeyUsages.find(",") > 0) {
-        std::vector<std::string> vKeyUsages = split1(strKeyUsages, ',');
+        std::vector<std::string> vKeyUsages = SplitString(strKeyUsages, ',');
         for(const std::string& strKeyUsage : vKeyUsages)
-            txCertificate.KeyUsage.push_back(vchFromString(trim1(strKeyUsage)));
+            txCertificate.KeyUsage.push_back(vchFromString(TrimString(strKeyUsage)));
     } else {
         txCertificate.KeyUsage.push_back(vchFromValue(strKeyUsages));
     }
@@ -172,7 +158,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
 
-    txCertificate.PublicKey = privCertificateKey.GetPubKeyBytes();  //GetPubKeyBytes?
+    txCertificate.PublicKey = privCertificateKey.GetPubKeyBytes();
 
     txCertificate.MonthsValid = nMonths;
 
@@ -215,7 +201,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     // BDAP_CERTIFICATE
     std::vector<unsigned char> vchMonths = vchFromString(std::to_string(nMonths));
 
-    //TODO: add additional fields
     //Only send PubKeys of BDAP accounts
     CScript scriptPubKey;
     if (selfSign) { 
@@ -226,7 +211,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
                  << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchIssuerFQDN << OP_2DROP << OP_2DROP << OP_2DROP; 
     }
 
-    //this needs review
     CKeyID keyWalletID = privSubjectDHTKey.GetID();
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
@@ -241,7 +225,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Get BDAP Fees
-    //seems like there's an entry in fees.cpp
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_CERTIFICATE;
     CAmount monthlyFee, oneTimeFee, depositFee;
 
@@ -292,8 +275,27 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
             "1. \"txid\"             (string, required)  Transaction ID of certificate to approve\n"
             "\nResult:\n"
             "{(json object)\n"
-            "  \"tbd\"               (string)            tbd\n"
-            "  \"txid\"              (string)            Certificate record transaction id\n"
+            " \"version\"                   (string, required)   Version \n"
+            " \"signature_algorithm\"       (string, required)   Algorithm used to sign \n"
+            " \"signature_hash_algorithm\"  (string, required)   Algorithm used to hash \n"
+            " \"fingerprint\"               (string, required)   Fingerprint of certificate \n"
+            " \"months_valid\"              (int, required)      How long certificate is valid \n"
+            " \"subject\"                   (string, required)   BDAP account of subject \n"
+            " \"subject_signature\"         (string, required)   Signature of subject \n"
+            " \"issuer\"                    (string, required)   BDAP account of issuer \n"
+            " \"public_key\"                (string, required)   Public Key of certificate \n"
+            " \"signature_value\"           (string, optional)   Signature of approval \n"
+            " \"approved\"                  (boolean, required)  Certificate approved \n"
+            " \"serial_number\"             (string, required)   Unique serial number \n"
+            " \"certificate_keyid\"         (string, required)   Key ID \n"
+            " \"key_usage\"                 (string, required)   List of usages \n"
+            " \"txid_request\"              (string, required)   Certificate request transaction id\n"
+            " \"txid_approve\"              (string, optional)   Certificate approved transaction id  \n"
+            " \"request_time\"              (int, required)      Time when request was made \n"
+            " \"request_height\"            (int, required)      Block where request is stored \n"
+            " \"valid_from\"                (int, optional)      Time when certificate is valid \n"
+            " \"valid_until\"               (int, optional)      Time when certificate expires \n"
+            " \"approve_height\"            (int, optional)      Block where approval is stored \n"
             "}\n"
             "\nExamples\n" +
            HelpExampleCli("certificate approve", "\"txid\" ") +
@@ -375,7 +377,6 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     // BDAP_CERTIFICATE
     std::vector<unsigned char> vchMonths = vchFromString(std::to_string(nMonths));
 
-    //TODO: add additional fields
     //Only send PubKeys of BDAP accounts
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
@@ -394,7 +395,6 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Get BDAP Fees
-    //seems like there's an entry in fees.cpp
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_CERTIFICATE;
     CAmount monthlyFee, oneTimeFee, depositFee;
 
@@ -427,17 +427,36 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
         throw std::runtime_error(
             "certificate view \"txid\" or \n"
             "certificate view (\"subject\") (\"issuer\") (\"pending\") \n"
-            "\nView an X.509 certificate\n"
+            "\nView X.509 certificates from blockchain\n"
             "\nArguments:\n"
-            "1. \"txid\"             (string, required)  Transaction ID of certificate\n"
+            "1. \"txid\"                    (string, required)   Transaction ID of certificate\n"
             "      or\n"
-            "1. \"subject\"          (string, optional)  BDAP account of subject\n"
-            "2. \"issuer\"           (string, optional)  BDAP account of issuer\n"
-            "3. \"pending\"          (boolean, optional) retrieve pending only (default = false)\n"
+            "1. \"subject\"                 (string, optional)   BDAP account of subject\n"
+            "2. \"issuer\"                  (string, optional)   BDAP account of issuer\n"
+            "3. \"pending\"                 (boolean, optional)  retrieve pending only (default = false)\n"
             "\nResult:\n"
             "{(json object)\n"
-            "  \"tbd\"               (string)            tbd\n"
-            "  \"txid\"              (string)            Certificate record transaction id\n"
+            " \"version\"                   (string, required)   Version \n"
+            " \"signature_algorithm\"       (string, required)   Algorithm used to sign \n"
+            " \"signature_hash_algorithm\"  (string, required)   Algorithm used to hash \n"
+            " \"fingerprint\"               (string, required)   Fingerprint of certificate \n"
+            " \"months_valid\"              (int, required)      How long certificate is valid \n"
+            " \"subject\"                   (string, required)   BDAP account of subject \n"
+            " \"subject_signature\"         (string, required)   Signature of subject \n"
+            " \"issuer\"                    (string, required)   BDAP account of issuer \n"
+            " \"public_key\"                (string, required)   Public Key of certificate \n"
+            " \"signature_value\"           (string, optional)   Signature of approval \n"
+            " \"approved\"                  (boolean, required)  Certificate approved \n"
+            " \"serial_number\"             (string, required)   Unique serial number \n"
+            " \"certificate_keyid\"         (string, required)   Key ID \n"
+            " \"key_usage\"                 (string, required)   List of usages \n"
+            " \"txid_request\"              (string, required)   Certificate request transaction id\n"
+            " \"txid_approve\"              (string, optional)   Certificate approved transaction id  \n"
+            " \"request_time\"              (int, required)      Time when request was made \n"
+            " \"request_height\"            (int, required)      Block where request is stored \n"
+            " \"valid_from\"                (int, optional)      Time when certificate is valid \n"
+            " \"valid_until\"               (int, optional)      Time when certificate expires \n"
+            " \"approve_height\"            (int, optional)      Block where approval is stored \n"
             "}\n"
             "\nExamples\n" +
            HelpExampleCli("certificate view", "\"txid\" ") +
@@ -582,7 +601,6 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("certificate new", "\"owner\" (\"issuer\") "));
     }
-    //todo: change sign to approved
     if (strCommand == "new" || strCommand == "approve" || strCommand == "view") {
         if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
             throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use certificate functionality until the BDAP version 2 spork is active."));
