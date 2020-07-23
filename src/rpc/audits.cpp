@@ -24,39 +24,6 @@
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
-template <typename Out>
-void split(const std::string &s, char delim, Out result) {
-    std::istringstream iss(s);
-    std::string item;
-    while (std::getline(iss, item, delim)) {
-        *result++ = item;
-    }
-}
-
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
-std::string trim(std::string s)
-{
-    if (s.empty()) return s;
-
-    int start = 0;
-    int end = int(s.size());
-    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
-    {
-        ++start;
-    }
-
-    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
-    {
-        --end;
-    }
-    return s.substr(start, end - start);
-}
-
 static UniValue AddAudit(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
@@ -90,9 +57,9 @@ static UniValue AddAudit(const JSONRPCRequest& request)
     CharString vchOwnerFQDN;
     CAuditData auditData;
     if (strAudits.find(",") > 0) {
-        std::vector<std::string> vAudits = split(strAudits, ',');
+        std::vector<std::string> vAudits = SplitString(strAudits, ',');
         for(const std::string& strAuditHash : vAudits)
-            auditData.vAuditData.push_back(vchFromString(trim(strAuditHash)));
+            auditData.vAuditData.push_back(vchFromString(TrimString(strAuditHash)));
     } else {
         auditData.vAuditData.push_back(vchFromValue(strAudits));
     }
