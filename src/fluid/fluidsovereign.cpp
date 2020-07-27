@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 
-CFluidSovereignDB* pFluidSovereignDB = NULL;
+CFluidSovereignDB* pFluidSovereignDB = nullptr;
 
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
 {

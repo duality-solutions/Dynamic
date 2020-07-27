@@ -24,6 +24,7 @@
 #include "consensus/merkle.h"
 #include "consensus/params.h"
 #include "consensus/validation.h"
+#include "cuckoocache.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
@@ -34,6 +35,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidstaking.h"
+#include "fs.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -47,6 +49,7 @@
 #include "primitives/transaction.h"
 #include "pubkey.h"
 #include "random.h"
+#include "reverse_iterator.h"
 #include "rpc/server.h"
 #include "script/script.h"
 #include "script/sigcache.h"
@@ -81,6 +84,16 @@
 #error "Dynamic cannot be compiled without assertions."
 #endif
 
+#define MICRO 0.000001
+#define MILLI 0.001
+
+#define CHECK_DUPLICATE_TRANSACTION_TRUE true
+#define CHECK_DUPLICATE_TRANSACTION_FALSE false
+#define CHECK_MEMPOOL_TRANSACTION_TRUE true
+#define CHECK_MEMPOOL_TRANSACTION_FALSE false
+#define CHECK_BLOCK_TRANSACTION_TRUE true
+#define CHECK_BLOCK_TRANSACTION_FALSE false
+
 /**
  * Global state
  */
@@ -89,7 +102,7 @@ CCriticalSection cs_main;
 
 BlockMap mapBlockIndex;
 CChain chainActive;
-CBlockIndex* pindexBestHeader = NULL;
+CBlockIndex* pindexBestHeader = nullptr;
 Mutex g_best_block_mutex;
 std::condition_variable g_best_block_cv;
 uint256 g_best_block;
@@ -97,8 +110,10 @@ std::map<uint256, uint256> mapProofOfStake;
 std::map<unsigned int, unsigned int> mapHashedBlocks;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
+bool fMessaging = true;
 bool fReindex = false;
 bool fTxIndex = true;
+bool fAssetIndex = false;
 bool fAddressIndex = false;
 bool fTimestampIndex = false;
 bool fSpentIndex = false;
@@ -106,7 +121,6 @@ bool fHavePruned = false;
 bool fPruneMode = false;
 bool fIsBareMultisigStd = DEFAULT_PERMIT_BAREMULTISIG;
 bool fRequireStandard = true;
-unsigned int nBytesPerSigOp = DEFAULT_BYTES_PER_SIGOP;
 bool fCheckBlockIndex = false;
 bool fCheckpointsEnabled = DEFAULT_CHECKPOINTS_ENABLED;
 size_t nCoinCacheUsage = 5000 * 300;
@@ -114,16 +128,18 @@ uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
-bool fLoaded = false;
 bool fStealthTx = false;
 int64_t nReserveBalance = 0;
+bool fUnitTest = false;
 
 uint256 hashAssumeValid;
 
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
-CTxMemPool mempool(::minRelayTxFee);
+CBlockPolicyEstimator feeEstimator;
+CTxMemPool mempool(&feeEstimator);
+
 std::map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
 
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);
@@ -235,7 +251,7 @@ public:
     {
         pool.NotifyEntryRemoved.disconnect(boost::bind(&MemPoolConflictRemovalTracker::NotifyEntryRemoved, this, _1, _2));
         for (const auto& tx : conflictedTxs) {
-            GetMainSignals().SyncTransaction(*tx, NULL, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+            GetMainSignals().SyncTransaction(*tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
         }
         conflictedTxs.clear();
     }
@@ -244,7 +260,7 @@ public:
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator)
 {
     // Find the first block the caller has in the main chain
-    BOOST_FOREACH (const uint256& hash, locator.vHave) {
+    for (const uint256& hash : locator.vHave) {
         BlockMap::iterator mi = mapBlockIndex.find(hash);
         if (mi != mapBlockIndex.end()) {
             CBlockIndex* pindex = (*mi).second;
@@ -255,9 +271,28 @@ CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& loc
     return chain.Genesis();
 }
 
-CCoinsViewDB* pcoinsdbview = NULL;
-CCoinsViewCache* pcoinsTip = NULL;
-CBlockTreeDB* pblocktree = NULL;
+CCoinsViewDB* pcoinsdbview = nullptr;
+CCoinsViewCache* pcoinsTip = nullptr;
+CBlockTreeDB* pblocktree = nullptr;
+
+CAssetsDB *passetsdb = nullptr;
+CAssetsCache *passets = nullptr;
+CLRUCache<std::string, CDatabasedAssetData> *passetsCache = nullptr;
+CLRUCache<std::string, CMessage> *pMessagesCache = nullptr;
+CLRUCache<std::string, int> *pMessageSubscribedChannelsCache = nullptr;
+CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
+CMessageDB *pmessagedb = nullptr;
+CMessageChannelDB *pmessagechanneldb = nullptr;
+CMyRestrictedDB *pmyrestricteddb = nullptr;
+CSnapshotRequestDB *pSnapshotRequestDb = nullptr;
+CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
+CDistributeSnapshotRequestDB *pDistributeSnapshotDb = nullptr;
+
+CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsRestrictionCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache = nullptr;
+CRestrictedDB *prestricteddb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -485,7 +520,7 @@ bool CheckSequenceLocks(const CTransaction& tx, int flags, LockPoints* lp, bool 
             // lock on a mempool input, so we can use the return value of
             // CheckSequenceLocks to indicate the LockPoints validity
             int maxInputHeight = 0;
-            BOOST_FOREACH (int height, prevheights) {
+            for (int height : prevheights) {
                 // Can ignore mempool inputs since we'll fail if they had non-zero locks
                 if (height != tip->nHeight + 1) {
                     maxInputHeight = std::max(maxInputHeight, height);
@@ -501,10 +536,10 @@ bool CheckSequenceLocks(const CTransaction& tx, int flags, LockPoints* lp, bool 
 unsigned int GetLegacySigOpCount(const CTransaction& tx)
 {
     unsigned int nSigOps = 0;
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
         nSigOps += txin.scriptSig.GetSigOpCount(false);
     }
-    BOOST_FOREACH (const CTxOut& txout, tx.vout) {
+    for (const CTxOut& txout : tx.vout) {
         nSigOps += txout.scriptPubKey.GetSigOpCount(false);
     }
     return nSigOps;
@@ -551,7 +586,7 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
-bool CheckTransaction(const CTransaction& tx, CValidationState& state)
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs, bool fMempoolCheck, bool fBlockCheck)
 {
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -569,7 +604,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
     CAmount nStandardOut = 0;
     CAmount nCreditsOut = 0;
     CAmount nDataBurned = 0;
-    for (const CTxOut& txout : tx.vout) {
+    std::set<std::string> setAssetTransferNames;
+    std::map<std::pair<std::string, std::string>, int> mapNullDataTxCount; // (asset_name, address) -> int
+    std::set<std::string> setNullGlobalAssetChanges;
+    bool fContainsNewRestrictedAsset = false;
+    bool fContainsRestrictedAssetReissue = false;
+    bool fContainsNullAssetVerifierTx = false;
+    int nCountAddTagOuts = 0;
+    for (const auto& txout : tx.vout) {
         if ((txout.nValue < 0) && !tx.IsCoinBase() && !tx.IsCoinStake())
             return state.DoS(100, error("CheckTransaction(): txout empty for user transaction"));
         if (txout.nValue < 0)
@@ -593,15 +635,187 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         } else {
             nStandardOut += txout.nValue;
         }
+
+        /** ASSET START */
+        // Find and handle all new OP_DYN_ASSET null data transactions
+        if (txout.scriptPubKey.IsNullAsset()) {
+            CNullAssetTxData data;
+            std::string address;
+            std::string strError = "";
+
+            if (txout.scriptPubKey.IsNullAssetTxDataScript()) {
+                if (!AssetNullDataFromScript(txout.scriptPubKey, data, address))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-asset-data-serialization");
+
+                if (!VerifyNullAssetDataFlag(data.flag, strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
+
+                auto pair = std::make_pair(data.asset_name, address);
+                if(!mapNullDataTxCount.count(pair)){
+                    mapNullDataTxCount.insert(std::make_pair(pair, 0));
+                }
+
+                mapNullDataTxCount.at(pair)++;
+
+                if (mapNullDataTxCount.at(pair) > 1)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-change-per-asset-address");
+
+                // For each qualifier that is added, there is a burn fee
+                if (IsAssetNameAQualifier(data.asset_name)) {
+                    if (data.flag == (int)QualifierType::ADD_QUALIFIER) {
+                        nCountAddTagOuts++;
+                    }
+                }
+
+            } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                if (!GlobalAssetNullDataFromScript(txout.scriptPubKey, data))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-global-asset-data-serialization");
+
+                if (!VerifyNullAssetDataFlag(data.flag, strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
+
+                if (setNullGlobalAssetChanges.count(data.asset_name)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-global-change-per-asset-name");
+                }
+
+                setNullGlobalAssetChanges.insert(data.asset_name);
+
+            } else if (txout.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+
+                if (!CheckVerifierAssetTxOut(txout, strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
+
+                if (fContainsNullAssetVerifierTx)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-verifier-per-tx");
+
+                fContainsNullAssetVerifierTx = true;
+            }
+        }
+        /** ASSET END */
+
+        /** ASSET START */
+        bool isAsset = false;
+        int nType;
+        bool fIsOwner;
+        if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
+            isAsset = true;
+        
+        // Check for transfers that don't meet the assets units only if the assetCache is not null
+        if (isAsset) {
+            // Get the transfer transaction data from the scriptPubKey
+            if (nType == TX_TRANSFER_ASSET) {
+                CAssetTransfer transfer;
+                std::string address;
+                if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
+
+                // insert into set, so that later on we can check asset null data transactions
+                setAssetTransferNames.insert(transfer.strName);
+
+                // Check asset name validity and get type
+                AssetType assetType;
+                if (!IsAssetNameValid(transfer.strName, assetType)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-name-invalid");
+                }
+
+                // If the transfer is an ownership asset. Check to make sure that it is OWNER_ASSET_AMOUNT
+                if (IsAssetNameAnOwner(transfer.strName)) {
+                    if (transfer.nAmount != OWNER_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-owner-amount-was-not-1");
+                }
+
+                // If the transfer is a unique asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
+                if (assetType == AssetType::UNIQUE) {
+                    if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-unique-amount-was-not-1");
+                }
+
+                // If the transfer is a restricted channel asset.
+                if (assetType == AssetType::RESTRICTED) {
+                    // TODO add checks here if any
+                }
+
+                // If the transfer is a qualifier channel asset.
+                if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) {
+                    if (transfer.nAmount < QUALIFIER_ASSET_MIN_AMOUNT || transfer.nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-must be between 1 - 100");
+                }
+                
+                // Specific check and error message to go with to make sure the amount is 0
+                if (txout.nValue != 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-transfer-amount-isn't-zero");
+            } else if (nType == TX_NEW_ASSET) {
+                // Specific check and error message to go with to make sure the amount is 0
+                if (txout.nValue != 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-issued-amount-isn't-zero");
+            } else if (nType == TX_REISSUE_ASSET) {
+                // Specific check and error message to go with to make sure the amount is 0
+                if (AreEnforcedValuesAreActive()) {
+                    // We only want to not accept these txes when checking them from CheckBlock.
+                    // We don't want to change the behavior when reading transactions from the database
+                    // when AreEnforcedValuesDeployed return true
+                    if (fBlockCheck) {
+                        if (txout.nValue != 0) {
+                            return state.DoS(0, false, REJECT_INVALID, "bad-txns-asset-reissued-amount-isn't-zero");
+                        }
+                    }
+                }
+
+                if (fMempoolCheck) {
+                    // Don't accept to the mempool no matter what on these types of transactions
+                    if (txout.nValue != 0) {
+                        return state.DoS(0, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
+                    }
+                }
+            } else {
+                return state.DoS(0, false, REJECT_INVALID, "bad-asset-type-not-any-of-the-main-three");
+            }
+
+        }
     }
 
-    // Check for duplicate inputs
-    std::set<COutPoint> vInOutPoints;
-    for (const auto& txin : tx.vin)
-    {
-        if (!vInOutPoints.insert(txin.prevout).second)
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
+    // Check for Add Tag Burn Fee
+    if (nCountAddTagOuts) {
+        if (!tx.CheckAddingTagBurnFee(nCountAddTagOuts))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-doesn't-contain-required-burn-fee-for-adding-tags");
     }
+
+    for (auto entry: mapNullDataTxCount) {
+        if (entry.first.first.front() == RESTRICTED_CHAR) {
+            std::string ownerToken = entry.first.first.substr(1,  entry.first.first.size()); // $TOKEN into TOKEN
+            if (!setAssetTransferNames.count(ownerToken + OWNER_TAG)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-restricted-asset-null-tx-without-asset-transfer");
+            }
+        } else { // must be a qualifier asset QUALIFIER_CHAR
+            if (!setAssetTransferNames.count(entry.first.first)) {
+                return state.DoS(100, false, REJECT_INVALID,
+                                 "bad-txns-tx-contains-qualifier-asset-null-tx-without-asset-transfer");
+            }
+        }
+    }
+
+    for (auto name: setNullGlobalAssetChanges) {
+        if (name.size() == 0)
+            return state.DoS(100, false, REJECT_INVALID,"bad-txns-tx-contains-global-asset-null-tx-with-null-asset-name");
+
+        std::string rootName = name.substr(1,  name.size()); // $TOKEN into TOKEN
+        if (!setAssetTransferNames.count(rootName + OWNER_TAG)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-global-asset-null-tx-without-asset-transfer");
+        }
+    }
+
+    /** ASSET END */
+
+    if (fCheckDuplicateInputs) {
+        // Check for duplicate inputs
+        std::set<COutPoint> vInOutPoints;
+        for (const auto& txin : tx.vin)
+        {
+            if (!vInOutPoints.insert(txin.prevout).second)
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
+        }   
+    }
+
     CAmount nStandardIn = 0;
     CAmount nCreditsIn = 0;
     std::vector<Coin> vBdapCoins;
@@ -634,6 +848,167 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
 
     if (fIsBDAP && !CheckBDAPTxCreditUsage(tx, vBdapCoins, nStandardIn, nCreditsIn, nStandardOut, nCreditsOut, nDataBurned))
         return state.DoS(100, false, REJECT_INVALID, "bad-bdap-credit-use");
+
+    /** ASSET START */
+    if (tx.IsNewAsset()) {
+        /** Verify the reissue assets data */
+        std::string strError = "";
+        if(!tx.VerifyNewAsset(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CNewAsset asset;
+        std::string strAddress;
+        if (!AssetFromTransaction(tx, asset, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-from-transaction");
+
+        // Validate the new assets information
+        if (!IsNewOwnerTxValid(tx, asset.strName, strAddress, strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        if(!CheckNewAsset(asset, strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+    } else if (tx.IsReissueAsset()) {
+
+        /** Verify the reissue assets data */
+        std::string strError;
+        if (!tx.VerifyReissueAsset(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CReissueAsset reissue;
+        std::string strAddress;
+        if (!ReissueAssetFromTransaction(tx, reissue, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset");
+
+        if (!CheckReissueAsset(reissue, strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        // Get the assetType
+        AssetType type;
+        IsAssetNameValid(reissue.strName, type);
+
+        // If this is a reissuance of a restricted asset, mark it as such, so we can check to make sure only valid verifier string tx are added to the chain
+        if (type == AssetType::RESTRICTED) {
+            CNullAssetTxVerifierString new_verifier;
+            bool fNotFound = false;
+
+            // Try and get the verifier string if it was changed
+            if (!tx.GetVerifierStringFromTx(new_verifier, strError, fNotFound)) {
+                // If it return false for any other reason besides not being found, fail the transaction check
+                if (!fNotFound) {
+                    return state.DoS(100, false, REJECT_INVALID,
+                                     "bad-txns-reissue-restricted-verifier-" + strError);
+                }
+            }
+
+            fContainsRestrictedAssetReissue = true;
+        }
+
+    } else if (tx.IsNewUniqueAsset()) {
+
+        /** Verify the unique assets data */
+        std::string strError = "";
+        if (!tx.VerifyNewUniqueAsset(strError)) {
+            return state.DoS(100, false, REJECT_INVALID, strError);
+        }
+
+
+        for (auto out : tx.vout)
+        {
+            if (IsScriptNewUniqueAsset(out.scriptPubKey))
+            {
+                CNewAsset asset;
+                std::string strAddress;
+                if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-check-transaction-issue-unique-asset-serialization");
+
+                if (!CheckNewAsset(asset, strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique" + strError);
+            }
+        }
+    } else if (tx.IsNewMsgChannelAsset()) {
+        /** Verify the msg channel assets data */
+        std::string strError = "";
+        if(!tx.VerifyNewMsgChannelAsset(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CNewAsset asset;
+        std::string strAddress;
+        if (!MsgChannelAssetFromTransaction(tx, asset, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-from-transaction");
+
+        if (!CheckNewAsset(asset, strError))
+            return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-msgchannel" + strError);
+
+    } else if (tx.IsNewQualifierAsset()) {
+        /** Verify the qualifier channel assets data */
+        std::string strError = "";
+        if(!tx.VerifyNewQualfierAsset(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CNewAsset asset;
+        std::string strAddress;
+        if (!QualifierAssetFromTransaction(tx, asset, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-from-transaction");
+
+        if (!CheckNewAsset(asset, strError))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualfier" + strError);
+
+    } else if (tx.IsNewRestrictedAsset()) {
+        /** Verify the restricted assets data. */
+        std::string strError = "";
+        if(!tx.VerifyNewRestrictedAsset(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        // Get asset data
+        CNewAsset asset;
+        std::string strAddress;
+        if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-from-transaction");
+
+        if (!CheckNewAsset(asset, strError))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted" + strError);
+
+        // Get verifier string
+        CNullAssetTxVerifierString verifier;
+        if (!tx.GetVerifierStringFromTx(verifier, strError))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-search-" + strError);
+
+        // Mark that this transaction has a restricted asset issuance, for checks later with the verifier string tx
+        fContainsNewRestrictedAsset = true;
+    }
+    else {
+        // Fail if transaction contains any non-transfer asset scripts and hasn't conformed to one of the
+        // above transaction types.  Also fail if it contains OP_DYN_ASSET opcode but wasn't a valid script.
+        for (auto out : tx.vout) {
+            int nType;
+            bool _isOwner;
+            if (out.scriptPubKey.IsAssetScript(nType, _isOwner)) {
+                if (nType != TX_TRANSFER_ASSET) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction");
+                }
+            } else {
+                if (out.scriptPubKey.Find(OP_DYN_ASSET)) {
+                    if (out.scriptPubKey[0] != OP_DYN_ASSET) {
+                        return state.DoS(100, false, REJECT_INVALID,
+                                         "bad-txns-op-dyn-asset-not-in-right-script-location");
+                    }
+                }
+            }
+        }
+    }
+
+    // Check to make sure that if there is a verifier string, that there is also a issue or reissuance of a restricted asset
+    if (fContainsNullAssetVerifierTx && !fContainsRestrictedAssetReissue && !fContainsNewRestrictedAsset)
+        return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-cointains-verifier-string-without-restricted-asset-issuance-or-reissuance");
+
+    // If there is a restricted asset issuance, verify that there is a verifier tx associated with it.
+    if (fContainsNewRestrictedAsset && !fContainsNullAssetVerifierTx) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-cointains-restricted-asset-issuance-without-verifier");
+    }
+
+    // we allow restricted asset reissuance without having a verifier string transaction, we don't force it to be update
+    /** ASSET END */
 
     return true;
 }
@@ -778,6 +1153,9 @@ bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBd
     return true;
 }
 
+// Returns the script flags which should be checked for a given block
+static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
+
 void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age)
 {
     int expired = pool.Expire(GetTime() - age);
@@ -786,7 +1164,7 @@ void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age)
 
     std::vector<COutPoint> vNoSpendsRemaining;
     pool.TrimToSize(limit, &vNoSpendsRemaining);
-    BOOST_FOREACH (const COutPoint& removed, vNoSpendsRemaining)
+    for (const COutPoint& removed : vNoSpendsRemaining)
         pcoinsTip->Uncache(removed);
 }
 
@@ -945,16 +1323,107 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
     return true;
 }
 
-bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx, bool fLimitFree, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee, std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
+/* Make mempool consistent after a reorg, by re-adding or recursively erasing
+ * disconnected block transactions from the mempool, and also removing any
+ * other transactions from the mempool that are no longer valid given the new
+ * tip/height.
+ *
+ * Note: we assume that disconnectpool only contains transactions that are NOT
+ * confirmed in the current chain nor already in the mempool (otherwise,
+ * in-mempool descendants of such transactions would be removed).
+ *
+ * Passing fAddToMempool=false will skip trying to add the transactions back,
+ * and instead just erase from the mempool as needed.
+ */
+
+void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool fAddToMempool)
+{
+    AssertLockHeld(cs_main);
+    std::vector<uint256> vHashUpdate;
+    // disconnectpool's insertion_order index sorts the entries from
+    // oldest to newest, but the oldest entry will be the last tx from the
+    // latest mined block that was disconnected.
+    // Iterate disconnectpool in reverse, so that we add transactions
+    // back to the mempool starting with the earliest transaction that had
+    // been previously seen in a block.
+    auto it = disconnectpool.queuedTx.get<insertion_order>().rbegin();
+    while (it != disconnectpool.queuedTx.get<insertion_order>().rend()) {
+        // ignore validation errors in resurrected transactions
+        CValidationState stateDummy;
+        if (!fAddToMempool || (*it)->IsCoinBase() ||
+            !AcceptToMemoryPool(mempool, stateDummy, *it, nullptr /* pfMissingInputs */,
+                                nullptr /* plTxnReplaced */, true /* fOverrideMempoolLimit */, 0 /* nAbsurdFee */)) {
+            // If the transaction doesn't make it in to the mempool, remove any
+            // transactions that depend on it (which would now be orphans).
+            mempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
+        } else if (mempool.exists((*it)->GetHash())) {
+            vHashUpdate.push_back((*it)->GetHash());
+        }
+        ++it;
+    }
+    disconnectpool.queuedTx.clear();
+    // AcceptToMemoryPool/addUnchecked all assume that new mempool entries have
+    // no in-mempool children, which is generally not true when adding
+    // previously-confirmed transactions back to the mempool.
+    // UpdateTransactionsFromBlock finds descendants of any transactions in
+    // the disconnectpool that were added back and cleans up the mempool state.
+    mempool.UpdateTransactionsFromBlock(vHashUpdate);
+
+    // We also need to remove any now-immature transactions
+    mempool.removeForReorg(pcoinsTip, chainActive.Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
+    // Re-limit mempool size, in case we added any transactions
+    LimitMempoolSize(mempool, gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
+}
+
+// Used to avoid mempool polluting consensus critical paths if CCoinsViewMempool
+// were somehow broken and returning the wrong scriptPubKeys
+static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &view, CTxMemPool& pool,
+                 unsigned int flags, bool cacheSigStore, PrecomputedTransactionData& txdata) {
+    AssertLockHeld(cs_main);
+
+    // pool.cs should be locked already, but go ahead and re-take the lock here
+    // to enforce that mempool doesn't change between when we check the view
+    // and when we actually call through to CheckInputs
+    LOCK(pool.cs);
+
+    assert(!tx.IsCoinBase());
+    for (const CTxIn& txin : tx.vin) {
+        const Coin& coin = view.AccessCoin(txin.prevout);
+
+        // At this point we haven't actually checked if the coins are all
+        // available (or shouldn't assume we have, since CheckInputs does).
+        // So we just return failure if the inputs are not available here,
+        // and then only have to check equivalence for available inputs.
+        if (coin.IsSpent()) return false;
+
+        const CTransactionRef& txFrom = pool.get(txin.prevout.hash);
+        if (txFrom) {
+            assert(txFrom->GetHash() == txin.prevout.hash);
+            assert(txFrom->vout.size() > txin.prevout.n);
+            assert(txFrom->vout[txin.prevout.n] == coin.out);
+        } else {
+            const Coin& coinFromDisk = pcoinsTip->AccessCoin(txin.prevout);
+            assert(!coinFromDisk.IsSpent());
+            assert(coinFromDisk.out == coin.out);
+        }
+    }
+
+    return CheckInputs(tx, state, view, true, flags, cacheSigStore, true, txdata);
+}
+
+bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee, std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
 {
     const CTransaction& tx = *ptx;
     const uint256 hash = tx.GetHash();
     bool fluidTransaction = false;
+    std::vector<std::pair<std::string, uint256>> vReissueAssets;
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
-    if (!CheckTransaction(tx, state))
+    bool fCheckDuplicates = true;
+    bool fCheckMempool = true;
+    if (!CheckTransaction(tx, state, fCheckDuplicates, fCheckMempool))
         return false; // state filled in by CheckTransaction
 
     if (!fluid.ProvisionalCheckTransaction(tx))
@@ -1304,7 +1773,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             REJECT_INVALID, "bad-txlockrequest");
 
     // Check for conflicts with a completed Transaction Lock
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) {
         uint256 hashLocked;
         if (instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hash != hashLocked)
             return state.DoS(10, error("AcceptToMemoryPool : Transaction %s conflicts with completed Transaction Lock %s", hash.ToString(), hashLocked.ToString()),
@@ -1315,7 +1784,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     std::set<uint256> setConflicts;
     {
         LOCK(pool.cs); // protect pool.mapNextTx
-        BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        for (const CTxIn& txin : tx.vin) {
             auto itConflicting = pool.mapNextTx.find(txin.prevout);
             if (itConflicting != pool.mapNextTx.end()) {
                 const CTransaction* ptxConflicting = itConflicting->second;
@@ -1344,7 +1813,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                     // insecure.
                     bool fReplacementOptOut = true;
                     if (fEnableReplacement) {
-                        BOOST_FOREACH (const CTxIn& _txin, ptxConflicting->vin) {
+                        for (const CTxIn& _txin : ptxConflicting->vin) {
                             if (_txin.nSequence < std::numeric_limits<unsigned int>::max() - 1) {
                                 fReplacementOptOut = false;
                                 break;
@@ -1364,31 +1833,26 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         CCoinsView dummy;
         CCoinsViewCache view(&dummy);
 
-        CAmount nValueIn = 0;
         LockPoints lp;
         {
             LOCK(pool.cs);
             CCoinsViewMemPool viewMemPool(pcoinsTip, pool);
             view.SetBackend(viewMemPool);
 
-            // do we already have it?
-            for (size_t out = 0; out < tx.vout.size(); out++) {
-                COutPoint outpoint(hash, out);
-                bool had_coin_in_cache = pcoinsTip->HaveCoinInCache(outpoint);
-                if (view.HaveCoin(outpoint)) {
-                    if (!had_coin_in_cache) {
-                        coins_to_uncache.push_back(outpoint);
-                    }
-                    return state.Invalid(false, REJECT_ALREADY_KNOWN, "txn-already-known");
-                }
-            }
-
             // do all inputs exist?
-            BOOST_FOREACH (const CTxIn txin, tx.vin) {
+            for (const CTxIn txin : tx.vin) {
                 if (!pcoinsTip->HaveCoinInCache(txin.prevout)) {
                     coins_to_uncache.push_back(txin.prevout);
                 }
                 if (!view.HaveCoin(txin.prevout)) {
+                    // Are inputs missing because we already have the tx?
+                    for (size_t out = 0; out < tx.vout.size(); out++) {
+                        // Optimistically just do efficient check of cache for outputs
+                        if (pcoinsTip->HaveCoinInCache(COutPoint(hash, out))) {
+                            return state.Invalid(false, REJECT_DUPLICATE, "txn-already-known");
+                        }
+                    }
+                    // Otherwise assume this might be an orphan tx for which we just haven't seen parents yet
                     if (pfMissingInputs) {
                         *pfMissingInputs = true;
                     }
@@ -1398,8 +1862,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
             // Bring the best block into scope
             view.GetBestBlock();
-
-            nValueIn = view.GetValueIn(tx);
 
             // we have all inputs cached now, so switch back to dummy, so we don't need to keep lock on mempool
             view.SetBackend(dummy);
@@ -1411,7 +1873,28 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             // CoinsViewCache instead of create its own
             if (!CheckSequenceLocks(tx, STANDARD_LOCKTIME_VERIFY_FLAGS, &lp))
                 return state.DoS(0, false, REJECT_NONSTANDARD, "non-BIP68-final");
+
+        } // end LOCK(pool.cs)
+
+        CAmount nFees = 0;
+        if (!Consensus::CheckTxInputs(tx, state, view, GetSpendHeight(view), nFees)) {
+            return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
         }
+
+        /** ASSET START */
+        if (!AreAssetsDeployed()) {
+            for (auto out : tx.vout) {
+                if (out.scriptPubKey.IsAssetScript())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-contained-asset-when-not-active");
+            }
+        }
+
+        if (AreAssetsDeployed()) {
+            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets))
+                return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
+                             FormatStateMessage(state));
+        }
+        /** ASSET END */
 
         // Check for non-standard pay-to-script-hash in inputs
         if (fRequireStandard && !AreInputsStandard(tx, view))
@@ -1420,8 +1903,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         unsigned int nSigOps = GetLegacySigOpCount(tx);
         nSigOps += GetP2SHSigOpCount(tx, view);
 
-        CAmount nValueOut = tx.GetValueOut();
-        CAmount nFees = nValueIn - nValueOut;
         CAmount nBDAPBurn = 0;
         if (tx.nVersion == BDAP_TX_VERSION) {
             // Since fees are burned, count BDAP burn funds into fee calculation
@@ -1443,7 +1924,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // Keep track of transactions that spend a coinbase, which we re-scan
         // during reorgs to ensure COINBASE_MATURITY is still met.
         bool fSpendsCoinbase = false;
-        BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        for (const CTxIn& txin : tx.vin) {
             const Coin& coin = view.AccessCoin(txin.prevout);
             if (coin.IsCoinBase()) {
                 fSpendsCoinbase = true;
@@ -1458,40 +1939,22 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // Check that the transaction doesn't have an excessive number of
         // sigops, making it impossible to mine. Since the coinbase transaction
         // itself can contain sigops MAX_STANDARD_TX_SIGOPS is less than
-        // MAX_BLOCK_SIGOPS; we still consider this an invalid rather than
+        // MAX_BLOCK_SIGOPS_COST; we still consider this an invalid rather than
         // merely non-standard transaction.
         if ((nSigOps > MAX_STANDARD_TX_SIGOPS) || (nBytesPerSigOp && nSigOps > nSize / nBytesPerSigOp))
             return state.DoS(0, false, REJECT_NONSTANDARD, "bad-txns-too-many-sigops", false,
                 strprintf("%d", nSigOps));
 
-        CAmount mempoolRejectFee = pool.GetMinFee(GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFee(nSize);
-        if (mempoolRejectFee > 0 && nModifiedFees < mempoolRejectFee) {
+        CAmount mempoolRejectFee = pool.GetMinFee(gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFee(nSize);
+        if (!fOverrideMempoolLimit && mempoolRejectFee > 0 && nModifiedFees < mempoolRejectFee) {
             return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool min fee not met", false, strprintf("%d < %d", nFees, mempoolRejectFee));
-        } else if (GetBoolArg("-relaypriority", DEFAULT_RELAYPRIORITY) && nModifiedFees < ::minRelayTxFee.GetFee(nSize) && !AllowFree(entry.GetPriority(chainActive.Height() + 1))) {
-            // Require that free transactions have sufficient priority to be mined in the next block.
-            return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "insufficient priority");
         }
 
-        // Continuously rate-limit free (really, very-low-fee) transactions
-        // This mitigates 'penny-flooding' -- sending thousands of free transactions just to
-        // be annoying or make others' transactions take longer to confirm.
-        if (fLimitFree && nModifiedFees < ::minRelayTxFee.GetFee(nSize)) {
-            static CCriticalSection csFreeLimiter;
-            static double dFreeCount;
-            static int64_t nLastTime;
-            int64_t nNow = GetTime();
 
-            LOCK(csFreeLimiter);
-
-            // Use an exponentially decaying ~10-minute window:
-            dFreeCount *= pow(1.0 - 1.0 / 600.0, (double)(nNow - nLastTime));
-            nLastTime = nNow;
-            // -limitfreerelay unit is thousand-bytes-per-minute
-            // At default rate it would take over a month to fill 1GB
-            if (dFreeCount + nSize >= GetArg("-limitfreerelay", DEFAULT_LIMITFREERELAY) * 10 * 1000)
-                return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "rate limited free transaction");
-            LogPrint("mempool", "Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount + nSize);
-            dFreeCount += nSize;
+        // No transactions are allowed below minRelayTxFee except from disconnected blocks
+        if (!fOverrideMempoolLimit && nModifiedFees < ::minRelayTxFee.GetFee(nSize)) {
+            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, ::minRelayTxFee.GetFee(nSize));
+            return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
         }
 
         if (nAbsurdFee && nFees - nBDAPBurn > nAbsurdFee)
@@ -1501,10 +1964,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         // Calculate in-mempool ancestors, up to a limit.
         CTxMemPool::setEntries setAncestors;
-        size_t nLimitAncestors = GetArg("-limitancestorcount", DEFAULT_ANCESTOR_LIMIT);
-        size_t nLimitAncestorSize = GetArg("-limitancestorsize", DEFAULT_ANCESTOR_SIZE_LIMIT) * 1000;
-        size_t nLimitDescendants = GetArg("-limitdescendantcount", DEFAULT_DESCENDANT_LIMIT);
-        size_t nLimitDescendantSize = GetArg("-limitdescendantsize", DEFAULT_DESCENDANT_SIZE_LIMIT) * 1000;
+        size_t nLimitAncestors = gArgs.GetArg("-limitancestorcount", DEFAULT_ANCESTOR_LIMIT);
+        size_t nLimitAncestorSize = gArgs.GetArg("-limitancestorsize", DEFAULT_ANCESTOR_SIZE_LIMIT) * 1000;
+        size_t nLimitDescendants = gArgs.GetArg("-limitdescendantcount", DEFAULT_DESCENDANT_LIMIT);
+        size_t nLimitDescendantSize = gArgs.GetArg("-limitdescendantsize", DEFAULT_DESCENDANT_SIZE_LIMIT) * 1000;
         std::string errString;
         if (!pool.CalculateMemPoolAncestors(entry, setAncestors, nLimitAncestors, nLimitAncestorSize, nLimitDescendants, nLimitDescendantSize, errString)) {
             return state.DoS(0, false, REJECT_NONSTANDARD, "too-long-mempool-chain", false, errString);
@@ -1514,7 +1977,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // that we have the set of all ancestors we can detect this
         // pathological case by making sure setConflicts and setAncestors don't
         // intersect.
-        BOOST_FOREACH (CTxMemPool::txiter ancestorIt, setAncestors) {
+        for (CTxMemPool::txiter ancestorIt : setAncestors) {
             const uint256& hashAncestor = ancestorIt->GetTx().GetHash();
             if (setConflicts.count(hashAncestor)) {
                 return state.DoS(10, false,
@@ -1542,7 +2005,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             std::set<uint256> setConflictsParents;
             const int maxDescendantsToVisit = 100;
             CTxMemPool::setEntries setIterConflicting;
-            BOOST_FOREACH (const uint256& hashConflicting, setConflicts) {
+            for (const uint256& hashConflicting : setConflicts) {
                 CTxMemPool::txiter mi = pool.mapTx.find(hashConflicting);
                 if (mi == pool.mapTx.end())
                     continue;
@@ -1576,7 +2039,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                             oldFeeRate.ToString()));
                 }
 
-                BOOST_FOREACH (const CTxIn& txin, mi->GetTx().vin) {
+                for (const CTxIn& txin : mi->GetTx().vin) {
                     setConflictsParents.insert(txin.prevout.hash);
                 }
 
@@ -1588,10 +2051,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (nConflictingCount <= maxDescendantsToVisit) {
                 // If not too many to replace, then calculate the set of
                 // transactions that would have to be evicted
-                BOOST_FOREACH (CTxMemPool::txiter it, setIterConflicting) {
+                for (CTxMemPool::txiter it : setIterConflicting) {
                     pool.CalculateDescendants(it, allConflicting);
                 }
-                BOOST_FOREACH (CTxMemPool::txiter it, allConflicting) {
+                for (CTxMemPool::txiter it : allConflicting) {
                     nConflictingFees += it->GetModifiedFee();
                     nConflictingSize += it->GetTxSize();
                 }
@@ -1648,23 +2111,55 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         if (fDryRun)
             return true;
 
+        unsigned int scriptVerifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
+        if (!chainparams.RequireStandard()) {
+            scriptVerifyFlags = gArgs.GetArg("-promiscuousmempoolflags", scriptVerifyFlags);
+        }
+
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
-        if (!CheckInputs(tx, state, view, true, STANDARD_SCRIPT_VERIFY_FLAGS, true))
+        PrecomputedTransactionData txdata(tx);
+        if (!CheckInputs(tx, state, view, true, scriptVerifyFlags, true, false, txdata)) {
+            CValidationState stateDummy; // Want reported failures to be from first CheckInputs
+            if (CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags, true, false, txdata) &&
+                !CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags, true, false, txdata)) {
+                state.SetCorruptionPossible();
+            }
             return false; // state filled in by CheckInputs
+        }
 
-        // Check again against just the consensus-critical mandatory script
-        // verification flags, in case of bugs in the standard flags that cause
+        // Check again against the current block tip's script verification
+        // flags to cache our script execution flags. This is, of course,
+        // useless if the next block has different script flags from the
+        // previous one, but because the cache tracks script flags for us it
+        // will auto-invalidate and we'll just have a few blocks of extra
+        // misses on soft-fork activation.
+        //
+        // This is also useful in case of bugs in the standard flags that cause
         // transactions to pass as valid when they're actually invalid. For
         // instance the STRICTENC flag was incorrectly allowing certain
         // CHECKSIG NOT scripts to pass, even though they were invalid.
         //
         // There is a similar check in CreateNewBlock() to prevent creating
-        // invalid blocks, however allowing such transactions into the mempool
-        // can be exploited as a DoS attack.
-        if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true)) {
-            return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s, %s",
-                __func__, hash.ToString(), FormatStateMessage(state));
+        // invalid blocks (using TestBlockValidity), however allowing such
+        // transactions into the mempool can be exploited as a DoS attack.
+        unsigned int currentBlockScriptVerifyFlags = GetBlockScriptFlags(chainActive.Tip(), Params().GetConsensus());
+        if (!CheckInputsFromMempoolAndCache(tx, state, view, pool, currentBlockScriptVerifyFlags, true, txdata))
+        {
+            // If we're using promiscuousmempoolflags, we may hit this normally
+            // Check if current block has some flags that scriptVerifyFlags
+            // does not before printing an ominous warning
+            if (!(~scriptVerifyFlags & currentBlockScriptVerifyFlags)) {
+                return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against latest-block but not STANDARD flags %s, %s",
+                    __func__, hash.ToString(), FormatStateMessage(state));
+            } else {
+                if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true, false, txdata)) {
+                    return error("%s: ConnectInputs failed against MANDATORY but not STANDARD flags due to promiscuous mempool %s, %s",
+                        __func__, hash.ToString(), FormatStateMessage(state));
+                } else {
+                    LogPrintf("Warning: -promiscuousmempool flags set to not include currently enforced soft forks, this may break mining or otherwise cause instability!\n");
+                }
+            }
         }
 
         if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
@@ -1672,7 +2167,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
 
         // Remove conflicting transactions from the mempool
-        BOOST_FOREACH (const CTxMemPool::txiter it, allConflicting) {
+        for (const CTxMemPool::txiter it : allConflicting) {
             LogPrint("mempool", "replacing tx %s with %s for %s %s additional fees, %d delta bytes\n",
                 it->GetTx().GetHash().ToString(),
                 hash.ToString(),
@@ -1688,7 +2183,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // BIP 125 replacement transaction (may not be widely supported), the
         // node is not behind, and the transaction is not dependent on any other
         // transactions in the mempool.
-        bool validForFeeEstimation = !fReplacementTransaction && IsCurrentForFeeEstimation() && pool.HasNoInputsOf(tx);
+        bool validForFeeEstimation = !fReplacementTransaction && !fOverrideMempoolLimit && IsCurrentForFeeEstimation() && pool.HasNoInputsOf(tx);
 
         // Store transaction in memory
         pool.addUnchecked(hash, entry, setAncestors, validForFeeEstimation);
@@ -1705,28 +2200,129 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         // trim mempool and check if tx was trimmed
         if (!fOverrideMempoolLimit) {
-            LimitMempoolSize(pool, GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
+            LimitMempoolSize(pool, gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
             if (!pool.exists(hash))
                 return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool full");
+        }
+
+        for (auto out : vReissueAssets) {
+            mapReissuedAssets.insert(out);
+            mapReissuedTx.insert(std::make_pair(out.second, out.first));
+        }
+
+        if (AreAssetsDeployed()) {
+            for (auto out : tx.vout) {
+                if (out.scriptPubKey.IsAssetScript()) {
+                    CAssetOutputEntry data;
+                    if (!GetAssetData(out.scriptPubKey, data))
+                        continue;
+                    if (data.type == TX_NEW_ASSET && !IsAssetNameAnOwner(data.assetName)) {
+                        pool.mapAssetToHash[data.assetName] = hash;
+                        pool.mapHashToAsset[hash] = data.assetName;
+                    }
+
+                    // Keep track of all restricted assets tx that can become invalid if qualifier or verifiers are changed
+                    if (AreRestrictedAssetsDeployed()) {
+                        if (IsAssetNameAnRestricted(data.assetName)) {
+                            std::string address = EncodeDestination(data.destination);
+                            pool.mapAddressesQualifiersChanged[address].insert(hash);
+                            pool.mapHashQualifiersChanged[hash].insert(address);
+
+                            pool.mapAssetVerifierChanged[data.assetName].insert(hash);
+                            pool.mapHashVerifierChanged[hash].insert(data.assetName);
+                        }
+                    }
+                } else if (out.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                    CNullAssetTxData globalNullData;
+                    if (GlobalAssetNullDataFromScript(out.scriptPubKey, globalNullData)) {
+                        if (globalNullData.flag == 1) {
+                            if (pool.mapGlobalFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-freeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        } else if (globalNullData.flag == 0) {
+                            if (pool.mapGlobalUnFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-unfreeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalUnFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalUnFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        }
+                    }
+                } else if (out.scriptPubKey.IsNullAssetTxDataScript()) {
+                    // We need to track all tags that are being adding to address, that live in the mempool
+                    // This will allow us to keep the mempool clean, and only allow one tag per address at a time into the mempool
+                    CNullAssetTxData addressNullData;
+                    std::string address;
+                    if (AssetNullDataFromScript(out.scriptPubKey, addressNullData, address)) {
+                        if (IsAssetNameAQualifier(addressNullData.asset_name)) {
+                            if (addressNullData.flag == (int) QualifierType::ADD_QUALIFIER) {
+                                if (pool.mapAddressAddedTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                    return state.DoS(0, false, REJECT_INVALID,
+                                                     "bad-txns-adding-tag-already-in-mempool");
+                                }
+                                // Adding a qualifier to an address
+                                pool.mapAddressAddedTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressAddedTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            } else {
+                                    if (pool.mapAddressRemoveTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                        return state.DoS(0, false, REJECT_INVALID,
+                                                         "bad-txns-remove-tag-already-in-mempool");
+                                    }
+
+                                pool.mapAddressRemoveTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressRemoveTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Keep track of all restricted assets tx that can become invalid if address or assets are marked as frozen
+        if (AreRestrictedAssetsDeployed()) {
+            for (auto in : tx.vin) {
+                const Coin coin = pcoinsTip->AccessCoin(in.prevout);
+
+                if (!coin.IsAsset())
+                    continue;
+
+                CAssetOutputEntry data;
+                if (GetAssetData(coin.out.scriptPubKey, data)) {
+
+                    if (IsAssetNameAnRestricted(data.assetName)) {
+                        pool.mapAssetMarkedGlobalFrozen[data.assetName].insert(hash);
+                        pool.mapHashMarkedGlobalFrozen[hash].insert(data.assetName);
+
+                        auto pair = std::make_pair(EncodeDestination(data.destination), data.assetName);
+                        pool.mapAddressesMarkedFrozen[pair].insert(hash);
+                        pool.mapHashToAddressMarkedFrozen[hash].insert(pair);
+                    }
+                }
+            }
         }
     }
 
     if (!fDryRun)
-        GetMainSignals().SyncTransaction(tx, NULL, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+        GetMainSignals().SyncTransaction(tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+
+    GetMainSignals().TransactionAddedToMempool(ptx);
 
     return true;
 }
 
-bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool fLimitFree, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
     std::vector<COutPoint> coins_to_uncache;
-    bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, nAcceptTime, plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
+    bool res = AcceptToMemoryPoolWorker(pool, state, tx, pfMissingInputs, nAcceptTime, plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
     bool fluidTimestampCheck = true;
 
     if (!fluid.ProvisionalCheckTransaction(*tx))
         return false;
 
-    BOOST_FOREACH (const CTxOut& txout, tx->vout) {
+    for (const CTxOut& txout : tx->vout) {
         if (IsTransactionFluid(txout.scriptPubKey)) {
             std::string strErrorMessage;
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage)) {
@@ -1738,7 +2334,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
     if (!res || fDryRun || !fluidTimestampCheck) {
         if (!res)
             LogPrint("mempool", "%s: %s %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason(), state.GetDebugMessage());
-        BOOST_FOREACH (const COutPoint& hashTx, coins_to_uncache)
+        for (const COutPoint& hashTx : coins_to_uncache)
             pcoinsTip->Uncache(hashTx);
     }
     // After we've (potentially) uncached entries, ensure our coins cache is still within its size limits
@@ -1747,17 +2343,17 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
     return res;
 }
 
-bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool fLimitFree, bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
-    return AcceptToMemoryPoolWithTime(pool, state, tx, fLimitFree, pfMissingInputs, GetTime(), plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, fDryRun);
+    return AcceptToMemoryPoolWithTime(pool, state, tx, pfMissingInputs, GetTime(), plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, fDryRun);
 }
 
-bool GetTimestampIndex(const unsigned int& high, const unsigned int& low, std::vector<uint256>& hashes)
+bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &hashes)
 {
     if (!fTimestampIndex)
         return error("Timestamp index not enabled");
 
-    if (!pblocktree->ReadTimestampIndex(high, low, hashes))
+    if (!pblocktree->ReadTimestampIndex(high, low, fActiveOnly, hashes))
         return error("Unable to get hashes for timestamps");
 
     return true;
@@ -1773,6 +2369,17 @@ bool GetSpentIndex(CSpentIndexKey& key, CSpentIndexValue& value)
 
     if (!pblocktree->ReadSpentIndex(key, value))
         return false;
+
+    return true;
+}
+
+bool HashOnchainActive(const uint256 &hash)
+{
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+
+    if (!chainActive.Contains(pblockindex)) {
+        return false;
+    }
 
     return true;
 }
@@ -1802,7 +2409,7 @@ bool GetAddressUnspent(uint160 addressHash, int type, std::vector<std::pair<CAdd
 /** Return transaction in tx, and if it was found inside a block, its hash is placed in hashBlock */
 bool GetTransaction(const uint256& hash, CTransactionRef& txOut, const Consensus::Params& consensusParams, uint256& hashBlock, bool fAllowSlow)
 {
-    CBlockIndex* pindexSlow = NULL;
+    CBlockIndex* pindexSlow = nullptr;
 
     LOCK(cs_main);
 
@@ -1932,7 +2539,7 @@ bool IsInitialBlockDownload()
     if (fImporting || fReindex)
         return true;
     const CChainParams& chainParams = Params();
-    if (chainActive.Tip() == NULL)
+    if (chainActive.Tip() == nullptr)
         return true;
     if (chainActive.Tip()->nChainWork < int64_t(chainParams.GetConsensus().nMinimumChainWork))
         return true;
@@ -1942,7 +2549,7 @@ bool IsInitialBlockDownload()
     return false;
 }
 
-CBlockIndex *pindexBestForkTip = NULL, *pindexBestForkBase = NULL;
+CBlockIndex *pindexBestForkTip = nullptr, *pindexBestForkBase = nullptr;
 
 void CheckForkWarningConditions()
 {
@@ -1955,7 +2562,7 @@ void CheckForkWarningConditions()
     // If our best fork is no longer within 72 blocks (+/- 3 hours if no one mines it)
     // of our head, drop it
     if (pindexBestForkTip && chainActive.Height() - pindexBestForkTip->nHeight >= 72)
-        pindexBestForkTip = NULL;
+        pindexBestForkTip = nullptr;
 
     if (pindexBestForkTip || (pindexBestInvalid && pindexBestInvalid->nChainWork > chainActive.Tip()->nChainWork + (GetBlockProof(*chainActive.Tip()) * 6))) {
         if (!GetfLargeWorkForkFound() && pindexBestForkBase) {
@@ -2042,34 +2649,41 @@ void static InvalidBlockFound(CBlockIndex* pindex, const CValidationState& state
     }
 }
 
-void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight)
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache, std::pair<std::string, CBlockAssetUndo>* undoAssetData)
 {
     // mark inputs spent
     if (!tx.IsCoinBase()) {
         txundo.vprevout.reserve(tx.vin.size());
-        BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+        for (const CTxIn &txin : tx.vin) { 
             txundo.vprevout.emplace_back();
-            bool is_spent = inputs.SpendCoin(txin.prevout, &txundo.vprevout.back());
+            bool is_spent = false;
+            if (AreAssetsDeployed()) {
+                is_spent = SpendCoinWithAssets(inputs, txin.prevout, &txundo.vprevout.back(), assetCache); /** ASSET START */ /* Pass assetCache into function */ /** ASSET END */
+            } else {
+                is_spent = inputs.SpendCoin(txin.prevout, &txundo.vprevout.back());
+            }
             assert(is_spent);
         }
     }
     // add outputs
-    AddCoins(inputs, tx, nHeight);
+    if (AreAssetsDeployed()) {
+        AddCoinsWithAssets(inputs, tx, nHeight, blockHash, false, assetCache, undoAssetData); /** ASSET START */ /* Pass assetCache into function */ /** ASSET END */
+    } else {
+        // add outputs
+        AddCoins(inputs, tx, nHeight);
+    }
 }
 
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight)
 {
     CTxUndo txundo;
-    UpdateCoins(tx, inputs, txundo, nHeight);
+    UpdateCoins(tx, inputs, txundo, nHeight, uint256());
 }
 
 bool CScriptCheck::operator()()
 {
     const CScript& scriptSig = ptxTo->vin[nIn].scriptSig;
-    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error)) {
-        return false;
-    }
-    return true;
+    return VerifyScript(scriptSig, m_tx_out.scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, m_tx_out.nValue, cacheStore, *txdata), &error);
 }
 
 int GetSpendHeight(const CCoinsViewCache& inputs)
@@ -2079,58 +2693,338 @@ int GetSpendHeight(const CCoinsViewCache& inputs)
     return pindexPrev->nHeight + 1;
 }
 
+static CuckooCache::cache<uint256, SignatureCacheHasher> scriptExecutionCache;
+static uint256 scriptExecutionCacheNonce(GetRandHash());
+
+void InitScriptExecutionCache() {
+    // nMaxCacheSize is unsigned. If -maxsigcachesize is set to zero,
+    // setup_bytes creates the minimum possible cache (2 elements).
+    size_t nMaxCacheSize = std::min(std::max((int64_t)0, gArgs.GetArg("-maxsigcachesize", DEFAULT_MAX_SIG_CACHE_SIZE) / 2), MAX_MAX_SIG_CACHE_SIZE) * ((size_t) 1 << 20);
+    size_t nElems = scriptExecutionCache.setup_bytes(nMaxCacheSize);
+    LogPrintf("Using %zu MiB out of %zu/2 requested for script execution cache, able to store %zu elements\n",
+            (nElems*sizeof(uint256)) >>20, (nMaxCacheSize*2)>>20, nElems);
+}
+
 namespace Consensus
 {
-bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight)
+bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee)
 {
-    // This doesn't trigger the DoS code on purpose; if it did, it would make it easier
-    // for an attacker to attempt to split the network.
-    if (!inputs.HaveInputs(tx))
-        return state.Invalid(false, 0, "", "Inputs unavailable");
+    // are the actual inputs available?
+    if (!inputs.HaveInputs(tx)) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-missingorspent", false,
+                         strprintf("%s: inputs missing/spent", __func__), tx.GetHash());
+    }
 
     CAmount nValueIn = 0;
-    CAmount nFees = 0;
-    for (unsigned int i = 0; i < tx.vin.size(); i++) {
-        const COutPoint& prevout = tx.vin[i].prevout;
+    for (unsigned int i = 0; i < tx.vin.size(); ++i) {
+        const COutPoint &prevout = tx.vin[i].prevout;
         const Coin& coin = inputs.AccessCoin(prevout);
         assert(!coin.IsSpent());
 
         // If prev is coinbase, check that it's matured
-        if (coin.IsCoinBase() || coin.IsCoinStake()) {
-            if (nSpendHeight - coin.nHeight < COINBASE_MATURITY)
-                return state.Invalid(false,
-                    REJECT_INVALID, "bad-txns-premature-spend-of-coinbase",
-                    strprintf("tried to spend coinbase at depth %d", nSpendHeight - coin.nHeight));
+        if ((coin.IsCoinBase() || coin.IsCoinStake()) && nSpendHeight - coin.nHeight < COINBASE_MATURITY) {
+            return state.Invalid(false,
+                REJECT_INVALID, "bad-txns-premature-spend-of-coinbase",
+                strprintf("tried to spend coinbase at depth %d", nSpendHeight - coin.nHeight));
         }
 
         // Check for negative or overflow input values
         nValueIn += coin.out.nValue;
-        if (!MoneyRange(coin.out.nValue) || !MoneyRange(nValueIn))
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputvalues-outofrange");
+        if (!MoneyRange(coin.out.nValue) || !MoneyRange(nValueIn)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputvalues-outofrange", false, "", tx.GetHash());
+        }
     }
 
-    if (!tx.IsCoinStake()) {
-        if (nValueIn < tx.GetValueOut())
+    if (!tx.IsCoinStake()) {    
+        const CAmount value_out = tx.GetValueOut();
+        if (nValueIn < value_out) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-in-belowout", false,
-                strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn), FormatMoney(tx.GetValueOut())));
+                strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn), FormatMoney(value_out)), tx.GetHash());
+        }
+
         // Tally transaction fees
-        CAmount nTxFee = nValueIn - tx.GetValueOut();
-        if (nTxFee < 0)
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-negative");
-        nFees += nTxFee;
-        if (!MoneyRange(nFees))
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-outofrange");
+        const CAmount txfee_aux = nValueIn - value_out;
+        if (!MoneyRange(txfee_aux)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-out-of-range", false, "", tx.GetHash());
+        }
+
+    txfee = txfee_aux;
+    }
+
+    return true;
+}
+//! Check to make sure that the inputs and outputs CAmount match exactly.
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime,   std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData)
+{
+    // are the actual inputs available?
+    if (!inputs.HaveInputs(tx)) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-missing-or-spent", false,
+                         strprintf("%s: inputs missing/spent", __func__), tx.GetHash());
+    }
+
+    // Create map that stores the amount of an asset transaction input. Used to verify no assets are burned
+    std::map<std::string, CAmount> totalInputs;
+
+    std::map<std::string, std::string> mapAddresses;
+
+    for (unsigned int i = 0; i < tx.vin.size(); ++i) {
+        const COutPoint &prevout = tx.vin[i].prevout;
+        const Coin& coin = inputs.AccessCoin(prevout);
+        assert(!coin.IsSpent());
+
+        if (coin.IsAsset()) {
+            CAssetOutputEntry data;
+            if (!GetAssetData(coin.out.scriptPubKey, data))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-failed-to-get-asset-from-script", false, "", tx.GetHash());
+
+            // Add to the total value of assets in the inputs
+            if (totalInputs.count(data.assetName))
+                totalInputs.at(data.assetName) += data.nAmount;
+            else
+                totalInputs.insert(make_pair(data.assetName, data.nAmount));
+
+            if (AreMessagesDeployed()) {
+                mapAddresses.insert(make_pair(data.assetName,EncodeDestination(data.destination)));
+            }
+
+            if (IsAssetNameAnRestricted(data.assetName)) {
+                if (assetCache->CheckForAddressRestriction(data.assetName, EncodeDestination(data.destination), true)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-restricted-asset-transfer-from-frozen-address", false, "", tx.GetHash());
+                }
+            }
+        }
+    }
+
+    // Create map that stores the amount of an asset transaction output. Used to verify no assets are burned
+    std::map<std::string, CAmount> totalOutputs;
+    int index = 0;
+    int64_t currentTime = GetTime();
+    std::string strError = "";
+    int i = 0;
+    for (const auto& txout : tx.vout) {
+        i++;
+        bool fIsAsset = false;
+        int nType = 0;
+        bool fIsOwner = false;
+        if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
+            fIsAsset = true;
+
+        if (assetCache) {
+            if (fIsAsset && !AreAssetsDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-is-asset-and-asset-not-active");
+
+            if (txout.scriptPubKey.IsNullAsset()) {
+                if (!AreRestrictedAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID,
+                                     "bad-tx-null-asset-data-before-restricted-assets-activated");
+
+                if (txout.scriptPubKey.IsNullAssetTxDataScript()) {
+                    if (!ContextualCheckNullAssetTxOut(txout, assetCache, strError, myNullAssetData))
+                        return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+                } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                    if (!ContextualCheckGlobalAssetTxOut(txout, assetCache, strError))
+                        return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+                } else if (txout.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                    if (!ContextualCheckVerifierAssetTxOut(txout, assetCache, strError))
+                        return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+                } else {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-tx-null-asset-data-unknown-type", false, "", tx.GetHash());
+                }
+            }
+        }
+
+        if (nType == TX_TRANSFER_ASSET) {
+            CAssetTransfer transfer;
+            std::string address = "";
+            if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
+                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize", false, "", tx.GetHash());
+
+            if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError))
+                return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+
+            // Add to the total value of assets in the outputs
+            if (totalOutputs.count(transfer.strName))
+                totalOutputs.at(transfer.strName) += transfer.nAmount;
+            else
+                totalOutputs.insert(make_pair(transfer.strName, transfer.nAmount));
+
+            if (!fRunningUnitTests) {
+                if (IsAssetNameAnOwner(transfer.strName)) {
+                    if (transfer.nAmount != OWNER_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-owner-amount-was-not-1", false, "", tx.GetHash());
+                } else {
+                    // For all other types of assets, make sure they are sending the right type of units
+                    CNewAsset asset;
+                    if (!assetCache->GetAssetMetaDataIfExists(transfer.strName, asset))
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-not-exist", false, "", tx.GetHash());
+
+                    if (asset.strName != transfer.strName)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-database-corrupted", false, "", tx.GetHash());
+
+                    if (!CheckAmountWithUnits(transfer.nAmount, asset.units))
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-amount-not-match-units", false, "", tx.GetHash());
+                }
+            }
+
+            /** Get messages from the transaction, only used when getting called from ConnectBlock **/
+            // Get the messages from the Tx unless they are expired
+            if (AreMessagesDeployed() && fMessaging && setMessages) {
+                if (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName)) {
+                    if (!transfer.message.empty()) {
+                        if (transfer.nExpireTime == 0 || transfer.nExpireTime > currentTime) {
+                            if (mapAddresses.count(transfer.strName)) {
+                                if (mapAddresses.at(transfer.strName) == address) {
+                                    COutPoint out(tx.GetHash(), index);
+                                    CMessage message(out, transfer.strName, transfer.message,
+                                                     transfer.nExpireTime, nBlocktime);
+                                    setMessages->insert(message);
+                                    LogPrintf("Got message: %s\n", message.ToString()); // TODO remove after testing
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (nType == TX_REISSUE_ASSET) {
+            CReissueAsset reissue;
+            std::string address;
+            if (!ReissueAssetFromScript(txout.scriptPubKey, reissue, address))
+                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-reissue-bad-deserialize", false, "", tx.GetHash());
+
+            if (mapReissuedAssets.count(reissue.strName)) {
+                if (mapReissuedAssets.at(reissue.strName) != tx.GetHash())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-tx-reissue-chaining-not-allowed", false, "", tx.GetHash());
+            } else {
+                vPairReissueAssets.emplace_back(std::make_pair(reissue.strName, tx.GetHash()));
+            }
+        }
+        index++;
+    }
+
+    if (assetCache) {
+        if (tx.IsNewAsset()) {
+            // Get the asset type
+            CNewAsset asset;
+            std::string address;
+            if (!AssetFromScript(tx.vout[tx.vout.size() - 1].scriptPubKey, asset, address)) {
+                error("%s : Failed to get new asset from transaction: %s", __func__, tx.GetHash().GetHex());
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-serialzation-failed", false, "", tx.GetHash());
+            }
+
+            AssetType assetType;
+            IsAssetNameValid(asset.strName, assetType);
+
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
+                return state.DoS(100, false, REJECT_INVALID, strError);
+
+        } else if (tx.IsReissueAsset()) {
+            CReissueAsset reissue_asset;
+            std::string address;
+            if (!ReissueAssetFromScript(tx.vout[tx.vout.size() - 1].scriptPubKey, reissue_asset, address)) {
+                error("%s : Failed to get new asset from transaction: %s", __func__, tx.GetHash().GetHex());
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-serialzation-failed", false, "", tx.GetHash());
+            }
+            if (!ContextualCheckReissueAsset(assetCache, reissue_asset, strError, tx))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-contextual-" + strError, false, "", tx.GetHash());
+        } else if (tx.IsNewUniqueAsset()) {
+            if (!ContextualCheckUniqueAssetTx(assetCache, strError, tx))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-contextual-" + strError, false, "", tx.GetHash());
+        } else if (tx.IsNewMsgChannelAsset()) {
+            if (!AreMessagesDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-before-messaging-is-active", false, "", tx.GetHash());
+
+            CNewAsset asset;
+            std::string strAddress;
+            if (!MsgChannelAssetFromTransaction(tx, asset, strAddress))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-serialzation-failed", false, "", tx.GetHash());
+
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
+                return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID,
+                                 "bad-txns-issue-msgchannel-contextual-" + strError);
+        } else if (tx.IsNewQualifierAsset()) {
+            if (!AreRestrictedAssetsDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-before-it-is-active", false, "", tx.GetHash());
+
+            CNewAsset asset;
+            std::string strAddress;
+            if (!QualifierAssetFromTransaction(tx, asset, strAddress))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-serialzation-failed", false, "", tx.GetHash());
+
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualfier-contextual" + strError, false, "", tx.GetHash());
+
+        } else if (tx.IsNewRestrictedAsset()) {
+            if (!AreRestrictedAssetsDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-before-it-is-active", false, "", tx.GetHash());
+
+            // Get asset data
+            CNewAsset asset;
+            std::string strAddress;
+            if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-serialzation-failed", false, "", tx.GetHash());
+
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-contextual" + strError, false, "", tx.GetHash());
+
+            // Get verifier string
+            CNullAssetTxVerifierString verifier;
+            if (!tx.GetVerifierStringFromTx(verifier, strError))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-search-" + strError, false, "", tx.GetHash());
+
+            // Check the verifier string against the destination address
+            if (!ContextualCheckVerifierString(assetCache, verifier.verifier_string, strAddress, strError))
+                return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+
+        } else {
+            for (auto out : tx.vout) {
+                int nType;
+                bool _isOwner;
+                if (out.scriptPubKey.IsAssetScript(nType, _isOwner)) {
+                    if (nType != TX_TRANSFER_ASSET) {
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction", false, "", tx.GetHash());
+                    }
+                } else {
+                    if (out.scriptPubKey.Find(OP_DYN_ASSET)) {
+                        if (AreRestrictedAssetsDeployed()) {
+                            if (out.scriptPubKey[0] != OP_DYN_ASSET) {
+                                return state.DoS(100, false, REJECT_INVALID,
+                                                 "bad-txns-op-dyn-asset-not-in-right-script-location", false, "", tx.GetHash());
+                            }
+                        } else {
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script", false, "", tx.GetHash());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (const auto& outValue : totalOutputs) {
+        if (!totalInputs.count(outValue.first)) {
+            std::string errorMsg;
+            errorMsg = strprintf("Bad Transaction - Trying to create outpoint for asset that you don't have: %s", outValue.first);
+            return state.DoS(100, false, REJECT_INVALID, "bad-tx-inputs-outputs-mismatch " + errorMsg, false, "", tx.GetHash());
+        }
+
+        if (totalInputs.at(outValue.first) != outValue.second) {
+            std::string errorMsg;
+            errorMsg = strprintf("Bad Transaction - Assets would be burnt %s", outValue.first);
+            return state.DoS(100, false, REJECT_INVALID, "bad-tx-inputs-outputs-mismatch " + errorMsg, false, "", tx.GetHash());
+        }
+    }
+
+    // Check the input size and the output size
+    if (totalOutputs.size() != totalInputs.size()) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-inputs-size-does-not-match-outputs-size", false, "", tx.GetHash());
     }
     return true;
 }
 } // namespace Consensus
 
-bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, bool fScriptChecks, unsigned int flags, bool cacheStore, std::vector<CScriptCheck>* pvChecks)
+bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks)
 {
-    if (!tx.IsCoinBase()) {
-        if (!Consensus::CheckTxInputs(tx, state, inputs, GetSpendHeight(inputs)))
-            return false;
-
+    if (!tx.IsCoinBase()) 
+    {
         if (pvChecks)
             pvChecks->reserve(tx.vin.size());
 
@@ -2138,25 +3032,34 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
         // Only if ALL inputs pass do we perform expensive ECDSA signature checks.
         // Helps prevent CPU exhaustion attacks.
 
-        // Skip ECDSA signature verification when connecting blocks
-        // before the last block chain checkpoint. This is safe because block merkle hashes are
-        // still computed and checked, and any change will be caught at the next checkpoint.
+        // Skip script verification when connecting blocks under the
+        // assumevalid block. Assuming the assumevalid block is valid this
+        // is safe because block merkle hashes are still computed and checked,
+        // Of course, if an assumed valid block is invalid due to false scriptSigs
+        // this optimization would allow an invalid chain to be accepted.
         if (fScriptChecks) {
+            // First check if script executions have been cached with the same
+            // flags. Note that this assumes that the inputs provided are
+            // correct (ie that the transaction hash which is in tx's prevouts
+            // properly commits to the scriptPubKey in the inputs view of that
+            // transaction).
+            uint256 hashCacheEntry;
+            // We only use the first 19 bytes of nonce to avoid a second SHA
+            // round - giving us 19 + 32 + 4 = 55 bytes (+ 8 + 1 = 64)
+            static_assert(55 - sizeof(flags) - 32 >= 128/8, "Want at least 128 bits of nonce for script execution cache");
+            CSHA256().Write(scriptExecutionCacheNonce.begin(), 55 - sizeof(flags)).Write((unsigned char*)&flags, sizeof(flags)).Finalize(hashCacheEntry.begin());
+            AssertLockHeld(cs_main); //TODO: Remove this requirement by making CuckooCache not require external locks
+            if (scriptExecutionCache.contains(hashCacheEntry, !cacheFullScriptStore)) {
+                return true;
+            }
+
             for (unsigned int i = 0; i < tx.vin.size(); i++) {
                 const COutPoint& prevout = tx.vin[i].prevout;
                 const Coin& coin = inputs.AccessCoin(prevout);
                 assert(!coin.IsSpent());
 
-                // We very carefully only pass in things to CScriptCheck which
-                // are clearly committed to by tx' witness hash. This provides
-                // a sanity check that our caching is not introducing consensus
-                // failures through additional data in, eg, the coins being
-                // spent being checked as a part of CScriptCheck.
-                const CScript& scriptPubKey = coin.out.scriptPubKey;
-                const CAmount amount = coin.out.nValue;
-
                 // Verify signature
-                CScriptCheck check(scriptPubKey, amount, tx, i, flags, cacheStore);
+                CScriptCheck check(coin.out, tx, i, flags, cacheSigStore, &txdata);
                 if (pvChecks) {
                     pvChecks->push_back(CScriptCheck());
                     check.swap(pvChecks->back());
@@ -2168,8 +3071,8 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
                         // arguments; if so, don't trigger DoS protection to
                         // avoid splitting the network between upgraded and
                         // non-upgraded nodes.
-                        CScriptCheck check2(scriptPubKey, amount, tx, i,
-                            flags & ~STANDARD_NOT_MANDATORY_VERIFY_FLAGS, cacheStore);
+                        CScriptCheck check2(coin.out, tx, i,
+                                flags & ~STANDARD_NOT_MANDATORY_VERIFY_FLAGS, cacheSigStore, &txdata);
                         if (check2())
                             return state.Invalid(false, REJECT_NONSTANDARD, strprintf("non-mandatory-script-verify-flag (%s)", ScriptErrorString(check.GetScriptError())));
                     }
@@ -2182,6 +3085,12 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
                     // super-majority vote has passed.
                     return state.DoS(100, false, REJECT_INVALID, strprintf("mandatory-script-verify-flag-failed (%s)", ScriptErrorString(check.GetScriptError())));
                 }
+            }
+
+            if (cacheFullScriptStore && !pvChecks) {
+                // We executed all of the provided scripts, and were told to
+                // cache the result. Do so now.
+                scriptExecutionCache.insert(hashCacheEntry);
             }
         }
     }
@@ -2276,12 +3185,21 @@ enum DisconnectResult {
  * @param out The out point that corresponds to the tx input.
  * @return A DisconnectResult as an int
  */
-int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
+int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAssetsCache* assetCache = nullptr)
 {
     bool fClean = true;
 
-    if (view.HaveCoin(out))
-        fClean = false; // overwriting transaction output
+    /** ASSET START */
+    // This is needed because undo, is going to be cleared and moved when AddCoin is called. We need this for undo assets
+    Coin tempCoin;
+    bool fIsAsset = false;
+    if (undo.IsAsset()) {
+        fIsAsset = true;
+        tempCoin = undo;
+    }
+    /** ASSET END */
+
+    if (view.HaveCoin(out)) fClean = false; // overwriting transaction output
 
     if (undo.nHeight == 0) {
         // Missing undo metadata (height and coinbase). Older versions included this
@@ -2295,14 +3213,23 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
             return DISCONNECT_FAILED; // adding output for transaction without known metadata
         }
     }
-    view.AddCoin(out, std::move(undo), undo.fCoinBase);
+    view.AddCoin(out, std::move(undo), !fClean);
+
+    /** ASSET START */
+    if (AreAssetsDeployed()) {
+        if (assetCache && fIsAsset) {
+            if (!assetCache->UndoAssetCoin(tempCoin, out))
+                fClean = false;
+        }
+    }
+    /** ASSET END */
 
     return fClean ? DISCONNECT_OK : DISCONNECT_UNCLEAN;
 }
 
 /** Undo the effects of this block (with given index) on the UTXO set represented by coins.
  *  When UNCLEAN or FAILED is returned, view is left in an indeterminate state. */
-static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, int nCheckLevel)
+static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, int nCheckLevel, CAssetsCache* assetsCache = nullptr, bool ignoreAddressIndex = false, bool databaseMessaging = true)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
     bool fClean = true;
@@ -2323,15 +3250,23 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         return DISCONNECT_FAILED;
     }
 
+    std::vector<std::pair<std::string, CBlockAssetUndo> > vUndoData;
+    if (!passetsdb->ReadBlockUndoAssetData(block.GetHash(), vUndoData)) {
+        error("DisconnectBlock(): block asset undo data inconsistent");
+        return DISCONNECT_FAILED;
+    }
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
     // undo transactions in reverse order
+    CAssetsCache tempCache(*assetsCache);
     for (int i = block.vtx.size() - 1; i >= 0; i--) {
         const CTransaction& tx = *block.vtx[i];
         uint256 hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
+
         bool fIsBDAP = tx.nVersion == BDAP_TX_VERSION;
         if (fIsBDAP && !fReindex && nCheckLevel >= 4) {
             LogPrintf("%s -- BDAP tx found. Hash %s\n", __func__, hash.ToString());
@@ -2393,6 +3328,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                 }
             }
         }
+        std::vector<int> vAssetTxIndex;
+        std::vector<int> vNullAssetTxIndex;
         if (fAddressIndex) {
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut& out = tx.vout[k];
@@ -2434,27 +3371,294 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), hash, k), CAddressUnspentValue()));
 
                 } else {
-                    continue;
+                    /** ASSET START */
+                    if (AreAssetsDeployed()) {
+                        std::string assetName;
+                        CAmount assetAmount;
+                        uint160 hashBytes;
+
+                        if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
+//                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+//                                      << ", " << i << ", " << hash.GetHex() << ", " << k << ", " << "true" << ", " << assetAmount << std::endl;
+
+                            // undo receiving activity
+                            addressIndex.push_back(std::make_pair(
+                                    CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, k,
+                                                     false), assetAmount));
+
+                            // undo unspent index
+                            addressUnspentIndex.push_back(
+                                    std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), assetName, hash, k),
+                                                   CAddressUnspentValue()));
+                        } else {
+                            continue;
+                        }
+                    }
+                    /** ASSET END */
                 }
             }
         }
 
+        /** ASSET START */
         // Check that all outputs are available and match the outputs in the block itself
         // exactly.
+        int indexOfRestrictedAssetVerifierString = -1;
         for (size_t o = 0; o < tx.vout.size(); o++) {
             if (!tx.vout[o].scriptPubKey.IsUnspendable()) {
                 COutPoint out(hash, o);
                 Coin coin;
-                bool is_spent = view.SpendCoin(out, &coin);
+                bool is_spent = false;
+                if (AreAssetsDeployed()) {
+                    is_spent = SpendCoinWithAssets(view, out, &coin, &tempCache); /** ASSET START */ /* Pass assetsCache into the SpendCoin function */ /** ASSET END */
+                } else {
+                    is_spent = view.SpendCoin(out, &coin);
+                }
                 if (!is_spent || tx.vout[o] != coin.out || pindex->nHeight != coin.nHeight || is_coinbase != coin.fCoinBase) {
                     fClean = false; // transaction output mismatch
                 }
+
+                if (AreAssetsDeployed()) {
+                    if (assetsCache) {
+                        if (IsScriptTransferAsset(tx.vout[o].scriptPubKey))
+                            vAssetTxIndex.emplace_back(o);
+                    }
+                }
+            } else {
+                if(AreRestrictedAssetsDeployed()) {
+                    if (assetsCache) {
+                        if (tx.vout[o].scriptPubKey.IsNullAsset()) {
+                            if (tx.vout[o].scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                                indexOfRestrictedAssetVerifierString = o;
+                            } else {
+                                vNullAssetTxIndex.emplace_back(o);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (AreAssetsDeployed()) {
+            if (assetsCache) {
+                if (tx.IsNewAsset()) {
+                    // Remove the newly created asset
+                    CNewAsset asset;
+                    std::string strAddress;
+                    if (!AssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get asset from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+                    if (assetsCache->ContainsAsset(asset)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Remove Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+
+                    // Get the owner from the transaction and remove it
+                    std::string ownerName;
+                    std::string ownerAddress;
+                    if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
+                        error("%s : Failed to get owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveOwnerAsset(ownerName, ownerAddress)) {
+                        error("%s : Failed to Remove Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+                } else if (tx.IsReissueAsset()) {
+                    CReissueAsset reissue;
+                    std::string strAddress;
+
+                    if (!ReissueAssetFromTransaction(tx, reissue, strAddress)) {
+                        error("%s : Failed to get reissue asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(reissue.strName)) {
+                        if (!assetsCache->RemoveReissueAsset(reissue, strAddress,
+                                                             COutPoint(tx.GetHash(), tx.vout.size() - 1),
+                                                             vUndoData)) {
+                            error("%s : Failed to Undo Reissue Asset. Asset Name : %s", __func__, reissue.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+                } else if (tx.IsNewUniqueAsset()) {
+                    for (int n = 0; n < (int)tx.vout.size(); n++) {
+                        auto out = tx.vout[n];
+                        CNewAsset asset;
+                        std::string strAddress;
+
+                        if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                            if (!AssetFromScript(out.scriptPubKey, asset, strAddress)) {
+                                error("%s : Failed to get unique asset from transaction. TXID : %s, vout: %s", __func__,
+                                      tx.GetHash().GetHex(), n);
+                                return DISCONNECT_FAILED;
+                            }
+
+                            if (assetsCache->ContainsAsset(asset.strName)) {
+                                if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                                    error("%s : Failed to Undo Unique Asset. Asset Name : %s", __func__, asset.strName);
+                                    return DISCONNECT_FAILED;
+                                }
+                            }
+                        }
+                    }
+                } else if (tx.IsNewMsgChannelAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!MsgChannelAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get msgchannel asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Msg Channel Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+                } else if (tx.IsNewQualifierAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!QualifierAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get qualifier asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Qualifier Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+                } else if (tx.IsNewRestrictedAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!RestrictedAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get restricted asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Restricted Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+
+                    if (indexOfRestrictedAssetVerifierString < 0) {
+                        error("%s : Failed to find the restricted asset verifier string index from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    CNullAssetTxVerifierString verifier;
+                    if (!AssetNullVerifierDataFromScript(tx.vout[indexOfRestrictedAssetVerifierString].scriptPubKey, verifier)) {
+                        error("%s : Failed to get the restricted asset verifier string from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveRestrictedVerifier(asset.strName, verifier.verifier_string)){
+                        error("%s : Failed to Remove Restricted Verifier from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+                }
+
+                for (auto index : vAssetTxIndex) {
+                    CAssetTransfer transfer;
+                    std::string strAddress;
+                    if (!TransferAssetFromScript(tx.vout[index].scriptPubKey, transfer, strAddress)) {
+                        error("%s : Failed to get transfer asset from transaction. CTxOut : %s", __func__,
+                              tx.vout[index].ToString());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    COutPoint out(hash, index);
+                    if (!assetsCache->RemoveTransfer(transfer, strAddress, out)) {
+                        error("%s : Failed to Remove the transfer of an asset. Asset Name : %s, COutPoint : %s",
+                              __func__,
+                              transfer.strName, out.ToString());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    // Undo messages
+                    if (AreMessagesDeployed() && fMessaging && databaseMessaging && !transfer.message.empty() &&
+                        (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName))) {
+
+                        LOCK(cs_messaging);
+                        if (IsChannelSubscribed(transfer.strName)) {
+                            OrphanMessage(COutPoint(hash, index));
+                        }
+                    }
+                }
+
+                if (AreRestrictedAssetsDeployed()) {
+                    // Because of the strict rules for allowing the null asset tx types into a transaction.
+                    // We know that if these are in a transaction, that they are valid null asset tx, and can be reversed
+                    for (auto index: vNullAssetTxIndex) {
+                        CScript script = tx.vout[index].scriptPubKey;
+
+                        if (script.IsNullAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!AssetNullDataFromScript(script, data, address)) {
+                                error("%s : Failed to get null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            AssetType type;
+                            IsAssetNameValid(data.asset_name, type);
+
+                            // Handle adding qualifiers to addresses
+                            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                                if (!assetsCache->RemoveQualifierAddress(data.asset_name, address, data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER)) {
+                                    error("%s : Failed to remove qualifier from address, Qualifier : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            // Handle adding restrictions to addresses
+                            } else if (type == AssetType::RESTRICTED) {
+                                if (!assetsCache->RemoveRestrictedAddress(data.asset_name, address, data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS)) {
+                                    error("%s : Failed to remove restriction from address, Restriction : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            }
+                        } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!GlobalAssetNullDataFromScript(script, data)) {
+                                error("%s : Failed to get global null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            if (!assetsCache->RemoveGlobalRestricted(data.asset_name, data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE)) {
+                                error("%s : Failed to remove global restriction from cache. Asset Name: %s, Flag Removing %d", __func__, data.asset_name, data.flag);
+                                return DISCONNECT_FAILED;
+                            }
+                        } else if (script.IsNullAssetVerifierTxDataScript()) {
+                            // These are handled in the undo restricted asset issuance, and restricted asset reissuance
+                            continue;
+                        }
+                    }
+                }
+                /** ASSET END */
             }
         }
 
         // restore inputs
         if (i > 0) { // not coinbases
-            CTxUndo& txundo = blockUndo.vtxundo[i - 1];
+            CTxUndo &txundo = blockUndo.vtxundo[i-1];
             if (txundo.vprevout.size() != tx.vin.size()) {
                 error("DisconnectBlock(): transaction and undo data inconsistent");
                 return DISCONNECT_FAILED;
@@ -2462,7 +3666,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
             for (unsigned int j = tx.vin.size(); j-- > 0;) {
                 const COutPoint& out = tx.vin[j].prevout;
                 int undoHeight = txundo.vprevout[j].nHeight;
-                int res = ApplyTxInUndo(std::move(txundo.vprevout[j]), view, out);
+                Coin &undo = txundo.vprevout[j];
+                int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache); /* ASSET START */ /* Pass assetsCache into ApplyTxInUndo function */ /* ASSET END */
                 if (res == DISCONNECT_FAILED)
                     return DISCONNECT_FAILED;
                 fClean = fClean && res != DISCONNECT_UNCLEAN;
@@ -2509,7 +3714,32 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                         // restore unspent index
                         addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, scriptPubKey, undoHeight)));
                     } else {
-                        continue;
+
+                        /** ASSET START */
+                        if (AreAssetsDeployed()) {
+                            std::string assetName;
+                            CAmount assetAmount;
+                            uint160 hashBytes;
+
+                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
+//                                std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+//                                          << ", " << i << ", " << hash.GetHex() << ", " << j << ", " << "true" << ", " << assetAmount * -1 << std::endl;
+
+                                // undo spending activity
+                                addressIndex.push_back(std::make_pair(
+                                        CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, j,
+                                                         true), assetAmount * -1));
+
+                                // restore unspent index
+                                addressUnspentIndex.push_back(std::make_pair(
+                                        CAddressUnspentKey(1, uint160(hashBytes), assetName, input.prevout.hash,
+                                                           input.prevout.n),
+                                        CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                            } else {
+                                continue;
+                            }
+                        }
+                        /** ASSET END */
                     }
                 }
             }
@@ -2603,7 +3833,7 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
 bool GetBlockHash(uint256& hashRet, int nBlockHeight)
 {
     LOCK(cs_main);
-    if (chainActive.Tip() == NULL)
+    if (chainActive.Tip() == nullptr)
         return false;
     if (nBlockHeight < -1 || nBlockHeight > chainActive.Height())
         return false;
@@ -2670,6 +3900,29 @@ public:
 // Protected by cs_main
 static ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS];
 
+static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& consensusparams) {
+    AssertLockHeld(cs_main);
+
+    const CChainParams& chainparams = Params();
+
+    // BIP16 didn't become active until Apr 1 2012
+    int64_t nBIP16SwitchTime = 1333238400;
+    bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
+    int nLockTimeFlags = 0;
+
+    unsigned int flags = fStrictPayToScriptHash ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE;
+    flags |= SCRIPT_VERIFY_DERSIG;
+    flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+    flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
+    nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
+
+    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
+        flags |= SCRIPT_VERIFY_NULLDUMMY;
+    }
+
+    return flags;
+}
+
 static int64_t nTimeCheck = 0;
 static int64_t nTimeForks = 0;
 static int64_t nTimeVerify = 0;
@@ -2677,11 +3930,12 @@ static int64_t nTimeConnect = 0;
 static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
+static int64_t nBlocksTotal = 0;
 
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins.
  *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
  *  can fail if those validity checks fail (among other reasons). */
-static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck = false)
+static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, const CChainParams& chainparams, CAssetsCache* assetsCache = nullptr, bool fJustCheck = false, bool ignoreAddressIndex = false)
 {
     AssertLockHeld(cs_main);
 
@@ -2707,7 +3961,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     }
 
     // verify that the view's current state corresponds to the previous block
-    uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
+    uint256 hashPrevBlock = pindex->pprev == nullptr ? uint256() : pindex->pprev->GetBlockHash();
     assert(hashPrevBlock == view.GetBestBlock());
 
     // Special case for the genesis block, skipping connection of its transactions
@@ -2717,6 +3971,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             view.SetBestBlock(pindex->GetBlockHash());
         return true;
     }
+
+    nBlocksTotal++;
 
     bool fScriptChecks = true;
     if (!hashAssumeValid.IsNull()) {
@@ -2747,7 +4003,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
     int64_t nTime1 = GetTimeMicros();
     nTimeCheck += nTime1 - nTimeStart;
-    LogPrint("bench", "    - Sanity checks: %.2fms [%.2fs]\n", 0.001 * (nTime1 - nTimeStart), nTimeCheck * 0.000001);
+    LogPrint("bench", "    - Sanity checks: %.2fms [%.2fs]\n", MILLI * (nTime1 - nTimeStart), nTimeCheck * MICRO);
 
     // make sure old budget is the real one
     if (pindex->nHeight == chainparams.GetConsensus().nSuperblockStartBlock &&
@@ -2756,29 +4012,17 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         return state.DoS(100, error("ConnectBlock(): invalid superblock start"),
             REJECT_INVALID, "bad-sb-start");
 
-    // BIP16 didn't become active until Apr 1 2012
-    int64_t nBIP16SwitchTime = 1333238400;
-    bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
+    // Get the script flags for this block
+    unsigned int flags = GetBlockScriptFlags(pindex, chainparams.GetConsensus());
 
-    int nLockTimeFlags = 0;
-
-    unsigned int flags = fStrictPayToScriptHash ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE;
-    flags |= SCRIPT_VERIFY_DERSIG;
-    flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
-    flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
-    nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
-
-    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
-        flags |= SCRIPT_VERIFY_NULLDUMMY;
-    }
-    
     int64_t nTime2 = GetTimeMicros();
     nTimeForks += nTime2 - nTime1;
-    LogPrint("bench", "    - Fork checks: %.2fms [%.2fs]\n", 0.001 * (nTime2 - nTime1), nTimeForks * 0.000001);
+    LogPrint("bench", "    - Fork checks: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime2 - nTime1), nTimeForks * MICRO, nTimeForks * MILLI / nBlocksTotal);
 
     CBlockUndo blockundo;
+    std::vector<std::pair<std::string, CBlockAssetUndo> > vUndoAssetData;
 
-    CCheckQueueControl<CScriptCheck> control(fScriptChecks && nScriptCheckThreads ? &scriptcheckqueue : NULL);
+    CCheckQueueControl<CScriptCheck> control(fScriptChecks && nScriptCheckThreads ? &scriptcheckqueue : nullptr);
 
     std::vector<uint256> vOrphanErase;
     std::vector<int> prevheights;
@@ -2789,16 +4033,25 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<uint256, CDiskTxPos> > vPos;
     vPos.reserve(block.vtx.size());
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
+    std::vector<PrecomputedTransactionData> txdata;
+    txdata.reserve(block.vtx.size()); // Required so that pointers to individual PrecomputedTransactionData don't get invalidated
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
+
+/* ASSET START */
+    std::set<CMessage> setMessages;
+    std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
+/* ASSET END */
+
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
         const uint256 txhash = tx.GetHash();
 
         nInputs += tx.vin.size();
         nSigOps += GetLegacySigOpCount(tx);
-        if (nSigOps > MAX_BLOCK_SIGOPS)
+        if (nSigOps > MAX_BLOCK_SIGOPS_COST)
             return state.DoS(100, error("ConnectBlock(): too many sigops"),
                 REJECT_INVALID, "bad-blk-sigops");
 
@@ -2807,6 +4060,26 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 return state.DoS(100, error("ConnectBlock(): inputs missing/spent"),
                     REJECT_INVALID, "bad-txns-inputs-missingorspent");
 
+            /** ASSET START */
+            if (!AreAssetsDeployed()) {
+                for (auto out : tx.vout)
+                    if (out.scriptPubKey.IsAssetScript())
+                        return state.DoS(100, error("%s : Received Block with tx that contained an asset when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-assets-not-active");
+                    else if (out.scriptPubKey.IsNullAsset())
+                        return state.DoS(100, error("%s : Received Block with tx that contained an null asset data tx when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-null-data-assets-not-active");
+            }
+
+            if (AreAssetsDeployed()) {
+                std::vector<std::pair<std::string, uint256>> vReissueAssets;
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &myNullAssetData)) {
+                    state.SetFailedTransaction(tx.GetHash());
+                    return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
+                                 FormatStateMessage(state));
+                }
+            }
+
+            /** ASSET END */
+
             // Check that transaction is BIP68 final
             // BIP68 lock checks (as opposed to nLockTime checks) must
             // be in ConnectBlock because they require the UTXO set
@@ -2814,6 +4087,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             for (size_t j = 0; j < tx.vin.size(); j++) {
                 prevheights[j] = view.AccessCoin(tx.vin[j].prevout).nHeight;
             }
+
+            int nLockTimeFlags = 0;
 
             if (!SequenceLocks(tx, nLockTimeFlags, &prevheights, *pindex)) {
                 return state.DoS(100, error("%s: contains a non-BIP68-final transaction", __func__),
@@ -2825,26 +4100,54 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     const Coin& coin = view.AccessCoin(tx.vin[j].prevout);
                     const CTxOut& prevout = coin.out;
                     uint160 hashBytes;
-                    int addressType;
+                    int addressType = 0;
+                    bool isAsset = false;
+                    std::string assetName;
+                    CAmount assetAmount;
 
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
-                        hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin() + 2, prevout.scriptPubKey.begin() + 22));
+                        hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22));
                         addressType = 2;
                     } else if (prevout.scriptPubKey.IsPayToPublicKeyHash()) {
-                        hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin() + 3, prevout.scriptPubKey.begin() + 23));
+                        hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                        addressType = 1;
+                    } else if (prevout.scriptPubKey.IsPayToPublicKey()) {
+                        hashBytes = Hash160(prevout.scriptPubKey.begin() + 1, prevout.scriptPubKey.end() - 1);
                         addressType = 1;
                     } else {
-                        hashBytes.SetNull();
-                        addressType = 0;
+                        /* ASSET START */
+                        if (AreAssetsDeployed()) {
+                            hashBytes.SetNull();
+                            addressType = 0;
+
+                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
+                                addressType = 1;
+                                isAsset = true;
+                            }
+                        }
+                        /* ASSET END */
                     }
 
                     if (fAddressIndex && addressType > 0) {
-                        // record spending activity
-                        addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, pindex->nHeight, i, txhash, j, true), prevout.nValue * -1));
+                    /** ASSET START */
+                        if (isAsset) {
+//                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+//                                      << ", " << i << ", " << txhash.GetHex() << ", " << j << ", " << "true" << ", " << assetAmount * -1 << std::endl;
 
-                        // remove address from unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                            // record spending activity
+                            addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, assetName, pindex->nHeight, i, txhash, j, true), assetAmount * -1));
+
+                            // remove address from unspent index
+                            addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, assetName, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                        } else {
+                            // record spending activity
+                            addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, pindex->nHeight, i, txhash, j, true), prevout.nValue * -1));
+
+                            // remove address from unspent index
+                            addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                        }
                     }
+                    /** ASSET END */
 
                     if (fSpentIndex) {
                         // add the spent index to determine the txid and input that spent an output
@@ -2854,12 +4157,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 }
             }
 
+            int64_t nBIP16SwitchTime = 1333238400;
+            bool fStrictPayToScriptHash = (pindex->GetBlockTime() >= nBIP16SwitchTime);
+
             if (fStrictPayToScriptHash) {
                 // Add in sigops done by pay-to-script-hash inputs;
                 // this is to prevent a "rogue miner" from creating
                 // an incredibly-expensive-to-validate block.
                 nSigOps += GetP2SHSigOpCount(tx, view);
-                if (nSigOps > MAX_BLOCK_SIGOPS)
+                if (nSigOps > MAX_BLOCK_SIGOPS_COST)
                     return state.DoS(100, error("ConnectBlock(): too many sigops"),
                         REJECT_INVALID, "bad-blk-sigops");
             }
@@ -2867,12 +4173,16 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             if (!tx.IsCoinStake())
                 nFees += view.GetValueIn(tx) - tx.GetValueOut();
 
-            std::vector<CScriptCheck> vChecks;
-            bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
-            if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, nScriptCheckThreads ? &vChecks : NULL))
-                return error("ConnectBlock(): CheckInputs on %s failed with %s",
-                    tx.GetHash().ToString(), FormatStateMessage(state));
-            control.Add(vChecks);
+        txdata.emplace_back(tx);
+        if (!tx.IsCoinBase())
+            {
+                std::vector<CScriptCheck> vChecks;
+                bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
+                if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, fCacheResults, txdata[i], nScriptCheckThreads ? &vChecks : nullptr))
+                    return error("ConnectBlock(): CheckInputs on %s failed with %s",
+                        tx.GetHash().ToString(), FormatStateMessage(state));
+                control.Add(vChecks);
+            }
         }
 
         if (fAddressIndex) {
@@ -2910,7 +4220,31 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     // record unspent output
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, scriptPubKey, pindex->nHeight)));
                 } else {
-                    continue;
+                    /** ASSET START */
+                    if (AreAssetsDeployed()) {
+                        std::string assetName;
+                        CAmount assetAmount;
+                        uint160 hashBytes;
+
+                        if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
+//                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+//                                      << ", " << i << ", " << txhash.GetHex() << ", " << k << ", " << "true" << ", " << assetAmount << std::endl;
+
+                            // record receiving activity
+                            addressIndex.push_back(std::make_pair(
+                                    CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
+                                    assetAmount));
+
+                            // record unspent output
+                            addressUnspentIndex.push_back(
+                                    std::make_pair(CAddressUnspentKey(1, hashBytes, assetName, txhash, k),
+                                                   CAddressUnspentValue(assetAmount, out.scriptPubKey,
+                                                                        pindex->nHeight)));
+                        }
+                    } else {
+                        continue;
+                    }
+                    /** ASSET END */
                 }
             }
         }
@@ -2926,14 +4260,25 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (i > 0) {
             blockundo.vtxundo.push_back(CTxUndo());
         }
-        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight);
+        /** ASSET START */
+        // Create the basic empty string pair for the undoblock
+        std::pair<std::string, CBlockAssetUndo> undoPair = std::make_pair("", CBlockAssetUndo());
+        std::pair<std::string, CBlockAssetUndo>* undoAssetData = &undoPair;
+        /** ASSET END */
+        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight, block.GetHash(), assetsCache, undoAssetData);
+
+        /** ASSET START */
+        if (!undoAssetData->first.empty()) {
+            vUndoAssetData.emplace_back(*undoAssetData);
+        }
+        /** ASSET END */
 
         vPos.push_back(std::make_pair(tx.GetHash(), pos));
         pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
     }
     int64_t nTime3 = GetTimeMicros();
     nTimeConnect += nTime3 - nTime2;
-    LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs - 1), nTimeConnect * 0.000001);
+    LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs - 1), nTimeConnect * MICRO);
 
     // DYN : MODIFIED TO CHECK DYNODE PAYMENTS AND SUPERBLOCKS
 
@@ -3077,7 +4422,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
     int64_t nTime4 = GetTimeMicros();
     nTimeVerify += nTime4 - nTime2;
-    LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs - 1), nTimeVerify * 0.000001);
+    LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, MILLI * (nTime4 - nTime2), nInputs <= 1 ? 0 : MILLI * (nTime4 - nTime2) / (nInputs - 1), nTimeVerify * MICRO);
 
     if (fJustCheck)
         return true;
@@ -3101,6 +4446,11 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             pindex->nStatus |= BLOCK_HAVE_UNDO;
         }
 
+        if (vUndoAssetData.size()) {
+            if (!passetsdb->WriteBlockUndoAssetData(block.GetHash(), vUndoAssetData))
+                return AbortNode(state, "Failed to write asset undo data");
+        }
+
         pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
         setDirtyBlockIndex.insert(pindex);
     }
@@ -3109,7 +4459,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (!pblocktree->WriteTxIndex(vPos))
             return AbortNode(state, "Failed to write transaction index");
 
-    if (fAddressIndex) {
+    if (!ignoreAddressIndex && fAddressIndex) {
         if (!pblocktree->WriteAddressIndex(addressIndex)) {
             return AbortNode(state, "Failed to write address index");
         }
@@ -3119,14 +4469,66 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         }
     }
 
-    if (fSpentIndex)
+    if (!ignoreAddressIndex && fSpentIndex)
         if (!pblocktree->UpdateSpentIndex(spentIndex))
             return AbortNode(state, "Failed to write transaction index");
 
-    if (fTimestampIndex)
-        if (!pblocktree->WriteTimestampIndex(CTimestampIndexKey(pindex->nTime, pindex->GetBlockHash())))
+    if (!ignoreAddressIndex && fTimestampIndex) {
+        unsigned int logicalTS = pindex->nTime;
+        unsigned int prevLogicalTS = 0;
+
+        // retrieve logical timestamp of the previous block
+        if (pindex->pprev)
+            if (!pblocktree->ReadTimestampBlockIndex(pindex->pprev->GetBlockHash(), prevLogicalTS))
+                LogPrintf("%s: Failed to read previous block's logical timestamp\n", __func__);
+
+        if (logicalTS <= prevLogicalTS) {
+            logicalTS = prevLogicalTS + 1;
+            LogPrintf("%s: Previous logical timestamp is newer Actual[%d] prevLogical[%d] Logical[%d]\n", __func__, pindex->nTime, prevLogicalTS, logicalTS);
+        }
+
+        if (!pblocktree->WriteTimestampIndex(CTimestampIndexKey(logicalTS, pindex->GetBlockHash())))
             return AbortNode(state, "Failed to write timestamp index");
 
+        if (!pblocktree->WriteTimestampBlockIndex(CTimestampBlockIndexKey(pindex->GetBlockHash()), CTimestampBlockIndexValue(logicalTS)))
+            return AbortNode(state, "Failed to write blockhash index");
+    }
+
+    if (AreMessagesDeployed() && fMessaging && setMessages.size()) {
+        LOCK(cs_messaging);
+        for (auto message : setMessages) {
+            int nHeight = 0;
+            if (pindex)
+                nHeight = pindex->nHeight;
+            message.nBlockHeight = nHeight;
+
+            if (message.nExpiredTime == 0 || GetTime() < message.nExpiredTime)
+                GetMainSignals().NewAssetMessage(message);
+
+            if (IsChannelSubscribed(message.strName)) {
+                AddMessage(message);
+            }
+        }
+    }
+#ifdef ENABLE_WALLET
+    if (AreRestrictedAssetsDeployed() && myNullAssetData.size() && pmyrestricteddb) {
+        for (auto item : myNullAssetData) {
+            if (IsAssetNameAQualifier(item.second.asset_name)) {
+                // TODO we can add block height to this data also, and use it to pull more info on when this was tagged/untagged
+                pmyrestricteddb->WriteTaggedAddress(item.first, item.second.asset_name, item.second.flag ? true : false, block.nTime);
+            } else if (IsAssetNameAnRestricted(item.second.asset_name)) {
+                pmyrestricteddb->WriteRestrictedAddress(item.first, item.second.asset_name, item.second.flag ? true : false, block.nTime);
+            }
+
+
+            if (pwalletMain)
+                pwalletMain->UpdateMyRestrictedAssets(item.first, item.second.asset_name, item.second.flag, block.nTime);
+
+        }
+    }
+#endif
+
+    assert(pindex->phashBlock);
     // add this block to the view's block chain
     view.SetBestBlock(pindex->GetBlockHash());
 
@@ -3190,13 +4592,33 @@ bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode, int n
         if (nLastSetChain == 0) {
             nLastSetChain = nNow;
         }
-        int64_t nMempoolSizeMax = GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
-        int64_t cacheSize = pcoinsTip->DynamicMemoryUsage() * DB_PEAK_USAGE_FACTOR;
+
+        // Get the size of the memory used by the asset cache.
+        int64_t assetDynamicSize = 0;
+        int64_t assetDirtyCacheSize = 0;
+        size_t assetMapAmountSize = 0;
+        if (AreAssetsDeployed()) {
+            auto currentActiveAssetCache = GetCurrentAssetCache();
+            if (currentActiveAssetCache) {
+                assetDynamicSize = currentActiveAssetCache->DynamicMemoryUsage();
+                assetDirtyCacheSize = currentActiveAssetCache->GetCacheSizeV2();
+                assetMapAmountSize = currentActiveAssetCache->mapAssetsAddressAmount.size();
+            }
+        }
+
+        int messageCacheSize = 0;
+
+        if (fMessaging) {
+                messageCacheSize = GetMessageDirtyCacheSize();
+        }
+
+        int64_t nMempoolSizeMax = gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
+        int64_t cacheSize = pcoinsTip->DynamicMemoryUsage() + assetDynamicSize + assetDirtyCacheSize + messageCacheSize;
         int64_t nTotalSpace = nCoinCacheUsage + std::max<int64_t>(nMempoolSizeMax - nMempoolUsage, 0);
         // The cache is large and we're within 10% and 10 MiB of the limit, but we have time now (not in the middle of a block processing).
         bool fCacheLarge = mode == FLUSH_STATE_PERIODIC && cacheSize > std::max((9 * nTotalSpace) / 10, nTotalSpace - MAX_BLOCK_COINSDB_USAGE * 1024 * 1024);
         // The cache is over the limit, we have to write now.
-        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && cacheSize > nTotalSpace;
+        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && (cacheSize > nTotalSpace || assetMapAmountSize > 1000000);
         // It's been a while since we wrote the block index to disk. Do this frequently, so we don't need to redownload after a crash.
         bool fPeriodicWrite = mode == FLUSH_STATE_PERIODIC && nNow > nLastWrite + (int64_t)DATABASE_WRITE_INTERVAL * 1000000;
         // It's been very long since we flushed the cache. Do this infrequently, to optimize cache usage.
@@ -3240,11 +4662,42 @@ bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode, int n
             // twice (once in the log, and once in the tables). This is already
             // an overestimation, as most will delete an existing entry or
             // overwrite one. Still, use a conservative safety factor of 2.
-            if (!CheckDiskSpace(48 * 2 * 2 * pcoinsTip->GetCacheSize()))
+            if (!CheckDiskSpace((48 * 2 * 2 * pcoinsTip->GetCacheSize()) + assetDirtyCacheSize * 2)) /** ASSET START */ /** ASSET END */
                 return state.Error("out of disk space");
             // Flush the chainstate (which may refer to block index entries).
             if (!pcoinsTip->Flush())
                 return AbortNode(state, "Failed to write to coin database");
+
+            /** ASSET START */
+            // Flush the assetstate
+            if (AreAssetsDeployed()) {
+                // Flush the assetstate
+                auto currentActiveAssetCache = GetCurrentAssetCache();
+                if (currentActiveAssetCache) {
+                    if (!currentActiveAssetCache->DumpCacheToDatabase())
+                        return AbortNode(state, "Failed to write to asset database");
+                }
+            }
+
+            // Write the reissue mempool data to database
+            if (passetsdb)
+                passetsdb->WriteReissuedMempoolState();
+
+            if (fMessaging) {
+                if (pmessagedb) {
+                    LOCK(cs_messaging);
+                    if (!pmessagedb->Flush())
+                        return AbortNode(state, "Failed to Flush the message database");
+                }
+
+                if (pmessagechanneldb) {
+                    LOCK(cs_messaging);
+                    if (!pmessagechanneldb->Flush())
+                        return AbortNode(state, "Failed to Flush the message channel database");
+                }
+            }
+            /** ASSET END */
+
             nLastFlush = nNow;
         }
         if (fDoFullFlush || ((mode == FLUSH_STATE_ALWAYS || mode == FLUSH_STATE_PERIODIC) && nNow > nLastSetChain + (int64_t)DATABASE_WRITE_INTERVAL * 1000000)) {
@@ -3307,7 +4760,7 @@ void static UpdateTip(CBlockIndex* pindexNew, const CChainParams& chainParams)
             }
         }
         // Check the version of the last 100 blocks to see if we need to upgrade:
-        for (int i = 0; i < 100 && pindex != NULL; i++) {
+        for (int i = 0; i < 100 && pindex != nullptr; i++) {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
             if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
                 ++nUpgraded;
@@ -3334,36 +4787,67 @@ void static UpdateTip(CBlockIndex* pindexNew, const CChainParams& chainParams)
         LogPrintf("%s -- warning='%s'\n", __func__, boost::algorithm::join(warningMessages, ", "));
 }
 
-/** Disconnect chainActive's tip. You probably want to call mempool.removeForReorg and manually re-limit mempool size after this, with cs_main held. */
-bool static DisconnectTip(CValidationState& state, const CChainParams& chainparams)
+/** Disconnect chainActive's tip.
+  * After calling, the mempool will be in an inconsistent state, with
+  * transactions from disconnected blocks being added to disconnectpool.  You
+  * should make the mempool consistent again by calling UpdateMempoolForReorg.
+  * with cs_main held.
+  *
+  * If disconnectpool is nullptr, then no disconnected transactions are added to
+  * disconnectpool (note that the caller is responsible for mempool consistency
+  * in any case).
+  */
+bool static DisconnectTip(CValidationState& state, const CChainParams& chainparams, DisconnectedBlockTransactions *disconnectpool)
 {
 
     CBlockIndex* pindexDelete = chainActive.Tip();
     assert(pindexDelete);
     // Read block from disk.
-    CBlock block;
+    std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
+    CBlock& block = *pblock;
     if (!ReadBlockFromDisk(block, pindexDelete, chainparams.GetConsensus()))
         return AbortNode(state, "Failed to read block");
     // Apply the block atomically to the chain state.
     int64_t nStart = GetTimeMicros();
     {
         CCoinsViewCache view(pcoinsTip);
-        if (DisconnectBlock(block, state, pindexDelete, view, 4) != DISCONNECT_OK)
+        CAssetsCache assetCache;
+
+        assert(view.GetBestBlock() == pindexDelete->GetBlockHash());
+        if (DisconnectBlock(block, state, pindexDelete, view, 4, &assetCache) != DISCONNECT_OK)
             return error("DisconnectTip(): DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
         bool flushed = view.Flush();
         assert(flushed);
+
+        bool assetsFlushed = assetCache.Flush();
+        assert(assetsFlushed);
     }
-    LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
+    LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * MILLI);
+    
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(state, FLUSH_STATE_IF_NEEDED))
         return false;
+
+    if (disconnectpool) {
+        // Save transactions to re-add to mempool at end of reorg
+        for (auto it = block.vtx.rbegin(); it != block.vtx.rend(); ++it) {
+            disconnectpool->addTransaction(*it);
+        }
+        while (disconnectpool->DynamicMemoryUsage() > MAX_DISCONNECTED_TX_POOL_SIZE * 1000) {
+            // Drop the earliest entry, and remove its children from the mempool.
+            auto it = disconnectpool->queuedTx.get<insertion_order>().begin();
+            mempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
+            disconnectpool->removeEntry(it);
+        }
+    }
+
     // Resurrect mempool transactions from the disconnected block.
     std::vector<uint256> vHashUpdate;
     for (const auto& it : block.vtx) {
         const CTransaction& tx = *it;
         // ignore validation errors in resurrected transactions
         CValidationState stateDummy;
-        if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, it, false, NULL, NULL, true)) {
+        if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, it, nullptr, nullptr, true)) {
             mempool.removeRecursive(tx, MemPoolRemovalReason::REORG);
         } else if (mempool.exists(tx.GetHash())) {
             vHashUpdate.push_back(tx.GetHash());
@@ -3379,87 +4863,217 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
     UpdateTip(pindexDelete->pprev, chainparams);
     // Let wallets know transactions went from 1-confirmed to
     // 0-confirmed or conflicted:
-    for (const auto& tx : block.vtx) {
-        GetMainSignals().SyncTransaction(*tx, pindexDelete->pprev, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
-    }
+    GetMainSignals().BlockDisconnected(pblock);
     return true;
 }
 
 static int64_t nTimeReadFromDisk = 0;
 static int64_t nTimeConnectTotal = 0;
 static int64_t nTimeFlush = 0;
+static int64_t nTimeAssetFlush = 0;
+static int64_t nTimeAssetTasks = 0;
 static int64_t nTimeChainState = 0;
 static int64_t nTimePostConnect = 0;
 
+struct PerBlockConnectTrace {
+    CBlockIndex* pindex = nullptr;
+    std::shared_ptr<const CBlock> pblock;
+    std::shared_ptr<std::vector<CTransactionRef>> conflictedTxs;
+    PerBlockConnectTrace() : conflictedTxs(std::make_shared<std::vector<CTransactionRef>>()) {}
+};
 /**
  * Used to track blocks whose transactions were applied to the UTXO state as a
  * part of a single ActivateBestChainStep call.
+ *
+ * This class also tracks transactions that are removed from the mempool as
+ * conflicts (per block) and can be used to pass all those transactions
+ * through SyncTransaction.
+ *
+ * This class assumes (and asserts) that the conflicted transactions for a given
+ * block are added via mempool callbacks prior to the BlockConnected() associated
+ * with those transactions. If any transactions are marked conflicted, it is
+ * assumed that an associated block will always be added.
+ *
+ * This class is single-use, once you call GetBlocksConnected() you have to throw
+ * it away and make a new one.
  */
-struct ConnectTrace {
-    std::vector<std::pair<CBlockIndex*, std::shared_ptr<const CBlock> > > blocksConnected;
+class ConnectTrace {
+private:
+    std::vector<PerBlockConnectTrace> blocksConnected;
+    CTxMemPool &pool;
+
+public:
+    explicit ConnectTrace(CTxMemPool &_pool) : blocksConnected(1), pool(_pool) {
+        pool.NotifyEntryRemoved.connect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+    }
+
+    ~ConnectTrace() {
+        pool.NotifyEntryRemoved.disconnect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+    }
+
+    void BlockConnected(CBlockIndex* pindex, std::shared_ptr<const CBlock> pblock) {
+        assert(!blocksConnected.back().pindex);
+        assert(pindex);
+        assert(pblock);
+        blocksConnected.back().pindex = pindex;
+        blocksConnected.back().pblock = std::move(pblock);
+        blocksConnected.emplace_back();
+    }
+
+    std::vector<PerBlockConnectTrace>& GetBlocksConnected() {
+        // We always keep one extra block at the end of our list because
+        // blocks are added after all the conflicted transactions have
+        // been filled in. Thus, the last entry should always be an empty
+        // one waiting for the transactions from the next block. We pop
+        // the last entry here to make sure the list we return is sane.
+        assert(!blocksConnected.back().pindex);
+        assert(blocksConnected.back().conflictedTxs->empty());
+        blocksConnected.pop_back();
+        return blocksConnected;
+    }
+
+    void NotifyEntryRemoved(CTransactionRef txRemoved, MemPoolRemovalReason reason) {
+        assert(!blocksConnected.back().pindex);
+        if (reason == MemPoolRemovalReason::CONFLICT) {
+            blocksConnected.back().conflictedTxs->emplace_back(std::move(txRemoved));
+        }
+    }
 };
 
 /**
- * Connect a new block to chainActive. pblock is either NULL or a pointer to a CBlock
+ * Connect a new block to chainActive. pblock is either nullptr or a pointer to a CBlock
  * corresponding to pindexNew, to bypass loading it again from disk.
  *
- * The block is always added to connectTrace (either after loading from disk or by copying
- * pblock) - if that is not intended, care must be taken to remove the last entry in
- * blocksConnected in case of failure.
+ * The block is added to connectTrace if connection succeeds.
  */
-bool static ConnectTip(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexNew, const std::shared_ptr<const CBlock>& pblock, ConnectTrace& connectTrace)
+bool static ConnectTip(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexNew, const std::shared_ptr<const CBlock>& pblock, ConnectTrace& connectTrace, DisconnectedBlockTransactions &disconnectpool)
 {
     assert(pindexNew->pprev == chainActive.Tip());
     // Read block from disk.
     int64_t nTime1 = GetTimeMicros();
+    std::shared_ptr<const CBlock> pthisBlock;
     if (!pblock) {
         std::shared_ptr<CBlock> pblockNew = std::make_shared<CBlock>();
-        connectTrace.blocksConnected.emplace_back(pindexNew, pblockNew);
         if (!ReadBlockFromDisk(*pblockNew, pindexNew, chainparams.GetConsensus()))
             return AbortNode(state, "Failed to read block");
+        pthisBlock = pblockNew;
     } else {
-        connectTrace.blocksConnected.emplace_back(pindexNew, pblock);
+        pthisBlock = pblock;
     }
-    const CBlock& blockConnecting = *connectTrace.blocksConnected.back().second;
+    const CBlock& blockConnecting = *pthisBlock;
     // Apply the block atomically to the chain state.
     int64_t nTime2 = GetTimeMicros();
     nTimeReadFromDisk += nTime2 - nTime1;
     int64_t nTime3;
-    LogPrint("bench", "  - Load block from disk: %.2fms [%.2fs]\n", (nTime2 - nTime1) * 0.001, nTimeReadFromDisk * 0.000001);
+    int64_t nTime4;
+    int64_t nTimeAssetsFlush;
+    LogPrint("bench", "  - Load block from disk: %.2fms [%.2fs]\n", (nTime2 - nTime1) * MILLI, nTimeReadFromDisk * MICRO);
+    /** ASSET START */
+    // Initialize sets used from removing asset entries from the mempool
+    ConnectedBlockAssetData assetDataFromBlock;
+    /** ASSET END */
     {
         CCoinsViewCache view(pcoinsTip);
-        bool rv = ConnectBlock(blockConnecting, state, pindexNew, view, chainparams);
+        /** ASSET START */
+        // Create the empty asset cache, that will be sent into the connect block
+        // All new data will be added to the cache, and will be flushed back into passets after a successful
+        // Connect Block cycle
+        CAssetsCache assetCache;
+        std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
+        /** ASSET END */
+        bool rv = ConnectBlock(blockConnecting, state, pindexNew, view, chainparams, &assetCache);
         GetMainSignals().BlockChecked(blockConnecting, state);
         if (!rv) {
             if (state.IsInvalid())
                 InvalidBlockFound(pindexNew, state);
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
         }
+
+        /** ASSET START */
+        int64_t nTimeAssetsStart = GetTimeMicros();
+        // Get the newly created assets, from the connectblock assetCache so we can remove the correct assets from the mempool
+        assetDataFromBlock = {assetCache.setNewAssetsToAdd, assetCache.setNewRestrictedVerifierToAdd, assetCache.setNewRestrictedAddressToAdd, assetCache.setNewRestrictedGlobalToAdd, assetCache.setNewQualifierAddressToAdd};
+
+        // Remove all tx hashes, that were marked as reissued script from the mapReissuedTx.
+        // Without this check, you wouldn't be able to reissue for those assets again, as this maps block it
+        for (auto tx : blockConnecting.vtx) {
+            uint256 txHash = tx->GetHash();
+            if (mapReissuedTx.count(txHash)) {
+                mapReissuedAssets.erase(mapReissuedTx.at(txHash));
+                mapReissuedTx.erase(txHash);
+            }
+        }
+        int64_t nTimeAssetsEnd = GetTimeMicros(); nTimeAssetTasks += nTimeAssetsEnd - nTimeAssetsStart;
+        LogPrint("bench", "  - Compute Asset Tasks total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetsEnd - nTimeAssetsStart) * MILLI, nTimeAssetsEnd * MICRO, nTimeAssetsEnd * MILLI / nBlocksTotal);
+        /** ASSET END */
+
         nTime3 = GetTimeMicros();
         nTimeConnectTotal += nTime3 - nTime2;
-        LogPrint("bench", "  - Connect total: %.2fms [%.2fs]\n", (nTime3 - nTime2) * 0.001, nTimeConnectTotal * 0.000001);
+        LogPrint("bench", "  - Connect total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime3 - nTime2) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
         bool flushed = view.Flush();
         assert(flushed);
+        nTime4 = GetTimeMicros(); 
+        nTimeFlush += nTime4 - nTime3;
+        LogPrint("bench", "  - Flush DYN: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
+
+        /** ASSET START */
+        nTimeAssetsFlush = GetTimeMicros();
+        bool assetFlushed = assetCache.Flush();
+        assert(assetFlushed);
+        int64_t nTimeAssetFlushFinished = GetTimeMicros(); nTimeAssetFlush += nTimeAssetFlushFinished - nTimeAssetsFlush;
+        LogPrint("bench", "  - Flush Assets: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetFlushFinished - nTimeAssetsFlush) * MILLI, nTimeAssetFlush * MICRO, nTimeAssetFlush * MILLI / nBlocksTotal);
+        /** ASSET END */
     }
-    int64_t nTime4 = GetTimeMicros();
-    nTimeFlush += nTime4 - nTime3;
-    LogPrint("bench", "  - Flush: %.2fms [%.2fs]\n", (nTime4 - nTime3) * 0.001, nTimeFlush * 0.000001);
+
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(state, FLUSH_STATE_IF_NEEDED))
         return false;
     int64_t nTime5 = GetTimeMicros();
     nTimeChainState += nTime5 - nTime4;
-    LogPrint("bench", "  - Writing chainstate: %.2fms [%.2fs]\n", (nTime5 - nTime4) * 0.001, nTimeChainState * 0.000001);
+    LogPrint("bench", "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
     // Remove conflicting transactions from the mempool.;
-    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight);
+    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, assetDataFromBlock);
+    disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update chainActive & related variables.
     UpdateTip(pindexNew, chainparams);
 
     int64_t nTime6 = GetTimeMicros();
     nTimePostConnect += nTime6 - nTime5;
     nTimeTotal += nTime6 - nTime1;
-    LogPrint("bench", "  - Connect postprocess: %.2fms [%.2fs]\n", (nTime6 - nTime5) * 0.001, nTimePostConnect * 0.000001);
-    LogPrint("bench", "- Connect block: %.2fms [%.2fs]\n", (nTime6 - nTime1) * 0.001, nTimeTotal * 0.000001);
+    LogPrint("bench", "  - Connect postprocess: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime6 - nTime5) * MILLI, nTimePostConnect * MICRO, nTimePostConnect * MILLI / nBlocksTotal);
+    LogPrint("bench", "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime6 - nTime1) * MILLI, nTimeTotal * MICRO, nTimeTotal * MILLI / nBlocksTotal);
+
+    connectTrace.BlockConnected(pindexNew, std::move(pthisBlock));
+
+    /** ASSET START */
+
+    //  Determine if the new block height has any pending snapshot requests,
+    //      and if so, capture a snapshot of the relevant target assets.
+    if (pSnapshotRequestDb != nullptr) {
+        //  Retrieve the scheduled snapshot requests
+        std::set<CSnapshotRequestDBEntry> assetsToSnapshot;
+        if (pSnapshotRequestDb->RetrieveSnapshotRequestsForHeight("", pindexNew->nHeight, assetsToSnapshot)) {
+            //  Loop through them
+            for (auto const & assetEntry : assetsToSnapshot) {
+                //  Add a snapshot entry for the target asset ownership
+                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetEntry.assetName, pindexNew->nHeight)) {
+                   LogPrint("rewards", "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
+                       assetEntry.assetName.c_str(), pindexNew->nHeight);
+                }
+            }
+        }
+        else {
+            LogPrint("rewards", "ConnectTip: Failed to load payable Snapshot Requests at height %d!\n", pindexNew->nHeight);
+        }
+    }
+
+#ifdef ENABLE_WALLET
+    if (pwalletMain) {
+        CheckRewardDistributions(pwalletMain);
+    }
+#endif
+    /** ASSET END */
+
     return true;
 }
 
@@ -3469,10 +5083,11 @@ bool DisconnectBlocks(int blocks)
 
     CValidationState state;
     const CChainParams& chainparams = Params();
+    DisconnectedBlockTransactions disconnectpool;
 
     LogPrintf("DisconnectBlocks -- Got command to replay %d blocks\n", blocks);
     for (int i = 0; i < blocks; i++) {
-        if (!DisconnectTip(state, chainparams) || !state.IsValid()) {
+        if (!DisconnectTip(state, chainparams, &disconnectpool) || !state.IsValid()) {
             return false;
         }
     }
@@ -3512,13 +5127,13 @@ void ReprocessBlocks(int nBlocks)
 static CBlockIndex* FindMostWorkChain()
 {
     do {
-        CBlockIndex* pindexNew = NULL;
+        CBlockIndex* pindexNew = nullptr;
 
         // Find the best candidate header.
         {
             std::set<CBlockIndex*, CBlockIndexWorkComparator>::reverse_iterator it = setBlockIndexCandidates.rbegin();
             if (it == setBlockIndexCandidates.rend())
-                return NULL;
+                return nullptr;
             pindexNew = *it;
         }
 
@@ -3537,7 +5152,7 @@ static CBlockIndex* FindMostWorkChain()
             bool fMissingData = !(pindexTest->nStatus & BLOCK_HAVE_DATA);
             if (fFailedChain || fMissingData) {
                 // Candidate chain is not usable (either invalid or missing data)
-                if (fFailedChain && (pindexBestInvalid == NULL || pindexNew->nChainWork > pindexBestInvalid->nChainWork))
+                if (fFailedChain && (pindexBestInvalid == nullptr || pindexNew->nChainWork > pindexBestInvalid->nChainWork))
                     pindexBestInvalid = pindexNew;
                 CBlockIndex* pindexFailed = pindexNew;
                 // Remove the entire chain from the set.
@@ -3579,7 +5194,7 @@ static void PruneBlockIndexCandidates()
 
 /**
  * Try to make some progress towards making pindexMostWork the active block.
- * pblock is either NULL or a pointer to a CBlock corresponding to pindexMostWork.
+ * pblock is either nullptr or a pointer to a CBlock corresponding to pindexMostWork.
  */
 static bool ActivateBestChainStep(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexMostWork, const std::shared_ptr<const CBlock>& pblock, bool& fInvalidFound, ConnectTrace& connectTrace)
 {
@@ -3589,9 +5204,14 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 
     // Disconnect active blocks which are no longer in the best chain.
     bool fBlocksDisconnected = false;
+    DisconnectedBlockTransactions disconnectpool;
     while (chainActive.Tip() && chainActive.Tip() != pindexFork) {
-        if (!DisconnectTip(state, chainparams))
+        if (!DisconnectTip(state, chainparams, &disconnectpool)) {
+            // This is likely a fatal error, but keep the mempool consistent,
+            // just in case. Only remove from the mempool in this case.
+            UpdateMempoolForReorg(disconnectpool, false);
             return false;
+        }
         fBlocksDisconnected = true;
     }
 
@@ -3613,8 +5233,8 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
         nHeight = nTargetHeight;
 
         // Connect new blocks.
-        BOOST_REVERSE_FOREACH (CBlockIndex* pindexConnect, vpindexToConnect) {
-            if (!ConnectTip(state, chainparams, pindexConnect, pindexConnect == pindexMostWork ? pblock : std::shared_ptr<const CBlock>(), connectTrace)) {
+        for (CBlockIndex *pindexConnect : reverse_iterate(vpindexToConnect)) {
+            if (!ConnectTip(state, chainparams, pindexConnect, pindexConnect == pindexMostWork ? pblock : std::shared_ptr<const CBlock>(), connectTrace, disconnectpool)) {
                 if (state.IsInvalid()) {
                     // The block violates a consensus rule.
                     if (!state.CorruptionPossible())
@@ -3625,6 +5245,9 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
                     break;
                 } else {
                     // A system error occurred (disk space, database error, ...).
+                    // Make the mempool consistent with the current tip, just in case
+                    // any observers try to use it before shutdown.
+                    UpdateMempoolForReorg(disconnectpool, false);
                     return false;
                 }
             } else {
@@ -3639,8 +5262,9 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
     }
 
     if (fBlocksDisconnected) {
-        mempool.removeForReorg(pcoinsTip, chainActive.Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
-        LimitMempoolSize(mempool, GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
+        // If any blocks were disconnected, disconnectpool may be non empty.  Add
+        // any disconnected transactions back to the mempool.
+        UpdateMempoolForReorg(disconnectpool, true);
     }
     mempool.check(pcoinsTip);
 
@@ -3657,8 +5281,8 @@ static void NotifyHeaderTip()
 {
     bool fNotify = false;
     bool fInitialBlockDownload = false;
-    static CBlockIndex* pindexHeaderOld = NULL;
-    CBlockIndex* pindexHeader = NULL;
+    static CBlockIndex* pindexHeaderOld = nullptr;
+    CBlockIndex* pindexHeader = nullptr;
     {
         LOCK(cs_main);
         pindexHeader = pindexBestHeader;
@@ -3678,7 +5302,7 @@ static void NotifyHeaderTip()
 
 /**
  * Make the best chain active, in multiple steps. The result is either failure
- * or an activated best chain. pblock is either NULL or a pointer to a block
+ * or an activated best chain. pblock is either nullptr or a pointer to a block
  * that is already loaded (to avoid loading it again from disk).
  */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock)
@@ -3687,58 +5311,45 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
     // far from a guarantee. Things in the P2P/RPC will often end up calling
     // us in the middle of ProcessNewBlock - do not assume pblock is set
     // sanely for performance or correctness!
-    CBlockIndex* pindexMostWork = NULL;
-    CBlockIndex* pindexNewTip = NULL;
+    CBlockIndex* pindexMostWork = nullptr;
+    CBlockIndex* pindexNewTip = nullptr;
     do {
         boost::this_thread::interruption_point();
         if (ShutdownRequested())
             break;
 
         const CBlockIndex* pindexFork;
-        ConnectTrace connectTrace;
         bool fInitialDownload;
         {
             LOCK(cs_main);
-            { // TODO: Tempoarily ensure that mempool removals are notified before
-                // connected transactions.  This shouldn't matter, but the abandoned
-                // state of transactions in our wallet is currently cleared when we
-                // receive another notification and there is a race condition where
-                // notification of a connected conflict might cause an outside process
-                // to abandon a transaction and then have it inadvertantly cleared by
-                // the notification that the conflicted transaction was evicted.
-                MemPoolConflictRemovalTracker mrt(mempool);
-                CBlockIndex* pindexOldTip = chainActive.Tip();
-                if (pindexMostWork == NULL) {
-                    pindexMostWork = FindMostWorkChain();
-                }
+            ConnectTrace connectTrace(mempool); // Destructed before cs_main is unlocked
 
-                // Whether we have anything to do at all.
-                if (pindexMostWork == NULL || pindexMostWork == chainActive.Tip())
-                    return true;
+            MemPoolConflictRemovalTracker mrt(mempool);
+            CBlockIndex* pindexOldTip = chainActive.Tip();
+            if (pindexMostWork == nullptr) {
+                pindexMostWork = FindMostWorkChain();
+            }
 
-                bool fInvalidFound = false;
-                std::shared_ptr<const CBlock> nullBlockPtr;
-                if (!ActivateBestChainStep(state, chainparams, pindexMostWork, pblock && pblock->GetHash() == pindexMostWork->GetBlockHash() ? pblock : nullBlockPtr, fInvalidFound, connectTrace))
-                    return false;
+            // Whether we have anything to do at all.
+            if (pindexMostWork == nullptr || pindexMostWork == chainActive.Tip())
+                return true;
 
-                if (fInvalidFound) {
-                    // Wipe cache, we may need another branch now.
-                    pindexMostWork = NULL;
-                }
-                pindexNewTip = chainActive.Tip();
-                pindexFork = chainActive.FindFork(pindexOldTip);
-                fInitialDownload = IsInitialBlockDownload();
+            bool fInvalidFound = false;
+            std::shared_ptr<const CBlock> nullBlockPtr;
+            if (!ActivateBestChainStep(state, chainparams, pindexMostWork, pblock && pblock->GetHash() == pindexMostWork->GetBlockHash() ? pblock : nullBlockPtr, fInvalidFound, connectTrace))
+                return false;
 
-                // throw all transactions though the signal-interface
+            if (fInvalidFound) {
+                // Wipe cache, we may need another branch now.
+                pindexMostWork = nullptr;
+            }
+            pindexNewTip = chainActive.Tip();
+            pindexFork = chainActive.FindFork(pindexOldTip);
+            fInitialDownload = IsInitialBlockDownload();
 
-            } // MemPoolConflictRemovalTracker destroyed and conflict evictions are notified
-
-            // Transactions in the connnected block are notified
-            for (const auto& pair : connectTrace.blocksConnected) {
-                assert(pair.second);
-                const CBlock& block = *(pair.second);
-                for (unsigned int i = 0; i < block.vtx.size(); i++)
-                    GetMainSignals().SyncTransaction(*block.vtx[i], pair.first, i);
+            for (const PerBlockConnectTrace& trace : connectTrace.GetBlocksConnected()) {
+                assert(trace.pblock && trace.pindex);
+                GetMainSignals().BlockConnected(trace.pblock, trace.pindex, *trace.conflictedTxs);
             }
         }
         // When we reach this point, we switched to a new tip (stored in pindexNewTip).
@@ -3806,6 +5417,7 @@ bool InvalidateBlock(CValidationState& state, const CChainParams& chainparams, C
         pindexBestHeader = pindexBestHeader->pprev;
     }
 
+    DisconnectedBlockTransactions disconnectpool;
     while (chainActive.Contains(pindex)) {
         CBlockIndex* pindexWalk = chainActive.Tip();
         pindexWalk->nStatus |= BLOCK_FAILED_CHILD;
@@ -3813,8 +5425,10 @@ bool InvalidateBlock(CValidationState& state, const CChainParams& chainparams, C
         setBlockIndexCandidates.erase(pindexWalk);
         // ActivateBestChain considers blocks already in chainActive
         // unconditionally valid already, so force disconnect away from it.
-        if (!DisconnectTip(state, chainparams)) {
-            mempool.removeForReorg(pcoinsTip, chainActive.Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
+        if (!DisconnectTip(state, chainparams, &disconnectpool)) {
+            // It's probably hopeless to try to make the mempool consistent
+            // here if DisconnectTip failed, but we can try.
+            UpdateMempoolForReorg(disconnectpool, false);
             return false;
         }
         if (pindexWalk == pindexBestHeader) {
@@ -3823,7 +5437,11 @@ bool InvalidateBlock(CValidationState& state, const CChainParams& chainparams, C
         }
     }
 
-    LimitMempoolSize(mempool, GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
+    LimitMempoolSize(mempool, gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60);
+    
+    // DisconnectTip will add transactions to disconnectpool; try to add these
+    // back to the mempool.
+    UpdateMempoolForReorg(disconnectpool, true);
 
     // The resulting new best tip may not be in setBlockIndexCandidates anymore, so
     // add it again.
@@ -3858,14 +5476,14 @@ bool ResetBlockFailureFlags(CBlockIndex* pindex)
             }
             if (it->second == pindexBestInvalid) {
                 // Reset invalid block marker if it was pointing to one of those.
-                pindexBestInvalid = NULL;
+                pindexBestInvalid = nullptr;
             }
         }
         it++;
     }
 
     // Remove the invalidity flag from all ancestors too.
-    while (pindex != NULL) {
+    while (pindex != nullptr) {
         if (pindex->nStatus & BLOCK_FAILED_MASK) {
             pindex->nStatus &= ~BLOCK_FAILED_MASK;
             setDirtyBlockIndex.insert(pindex);
@@ -3892,14 +5510,14 @@ bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex)
             }
             if (it->second == pindexBestInvalid) {
                 // Reset invalid block marker if it was pointing to one of those.
-                pindexBestInvalid = NULL;
+                pindexBestInvalid = nullptr;
             }
         }
         it++;
     }
 
     // Remove the invalidity flag from all ancestors too.
-    while (pindex != NULL) {
+    while (pindex != nullptr) {
         if (pindex->nStatus & BLOCK_FAILED_MASK) {
             pindex->nStatus &= ~BLOCK_FAILED_MASK;
             setDirtyBlockIndex.insert(pindex);
@@ -3953,7 +5571,7 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
-    if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
+    if (pindexBestHeader == nullptr || pindexBestHeader->nChainWork < pindexNew->nChainWork)
         pindexBestHeader = pindexNew;
     setDirtyBlockIndex.insert(pindexNew);
 
@@ -3975,7 +5593,7 @@ bool ReceivedBlockTransactions(const CBlock& block, CValidationState& state, CBl
     pindexNew->RaiseValidity(BLOCK_VALID_TRANSACTIONS);
     setDirtyBlockIndex.insert(pindexNew);
 
-    if (pindexNew->pprev == NULL || pindexNew->pprev->nChainTx) {
+    if (pindexNew->pprev == nullptr || pindexNew->pprev->nChainTx) {
         // If pindexNew is the genesis block or all parents are BLOCK_VALID_TRANSACTIONS.
         std::deque<CBlockIndex*> queue;
         queue.push_back(pindexNew);
@@ -3989,7 +5607,7 @@ bool ReceivedBlockTransactions(const CBlock& block, CValidationState& state, CBl
                 LOCK(cs_nBlockSequenceId);
                 pindex->nSequenceId = nBlockSequenceId++;
             }
-            if (chainActive.Tip() == NULL || !setBlockIndexCandidates.value_comp()(pindex, chainActive.Tip())) {
+            if (chainActive.Tip() == nullptr || !setBlockIndexCandidates.value_comp()(pindex, chainActive.Tip())) {
                 setBlockIndexCandidates.insert(pindex);
             }
             std::pair<std::multimap<CBlockIndex*, CBlockIndex*>::iterator, std::multimap<CBlockIndex*, CBlockIndex*>::iterator> range = mapBlocksUnlinked.equal_range(pindex);
@@ -4109,7 +5727,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fDBCheck)
 {
     // These are checks that are independent of context.
     const bool IsPoS = block.IsProofOfStake();
@@ -4201,11 +5819,22 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     // END DYNAMIC
 
     // Check transactions
+    bool fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+    bool fCheckDuplicates = CHECK_DUPLICATE_TRANSACTION_TRUE;
+    bool fCheckMempool = CHECK_MEMPOOL_TRANSACTION_FALSE;
     for (const auto& tx : block.vtx) {
-        if (!CheckTransaction(*tx, state))
+        // We only want to check the blocks when they are added to our chain
+        // We want to make sure when nodes shutdown and restart that they still
+        // verify the blocks in the database correctly even if Enforce Value BIP is active
+        fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+        if (fDBCheck){
+            fCheckBlock = CHECK_BLOCK_TRANSACTION_FALSE;
+        }
+        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock)) 
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
-                strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
-
+                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(), 
+                                          state.GetDebugMessage(), state.GetRejectReason()));
+    
         for (const auto& txout : tx->vout) {
             if (IsTransactionFluid(txout.scriptPubKey)) {
                 std::string strErrorMessage;
@@ -4226,7 +5855,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         nSigOps += GetLegacySigOpCount(*tx);
     }
     // sigops limits (relaxed)
-    if (nSigOps > MAX_BLOCK_SIGOPS)
+    if (nSigOps > MAX_BLOCK_SIGOPS_COST)
         return state.DoS(100, false, REJECT_INVALID, "bad-blk-sigops", false, "out-of-bounds SigOpCount");
 
     if (fCheckPOW && fCheckMerkleRoot)
@@ -4274,9 +5903,9 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     return true;
 }
 
-bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
+bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, CAssetsCache* assetCache)
 {
-    const int nHeight = pindexPrev == NULL ? 0 : pindexPrev->nHeight + 1;
+    const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
 
     // Start enforcing BIP113 (Median Time Past) using versionbits logic.
     int nLockTimeFlags = 0;
@@ -4289,7 +5918,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Co
     // Check that all transactions are finalized and not over-sized
     // Also count sigops
     for (const auto& tx : block.vtx) {
-        if (pindexPrev != NULL) {
+        if (pindexPrev != nullptr) {
             if (!fluid.CheckTransactionToBlock(*tx, pindexPrev->GetBlockHeader()))
                 return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
         }
@@ -4347,7 +5976,7 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
     // Check for duplicate
     uint256 hash = block.GetHash();
     BlockMap::iterator miSelf = mapBlockIndex.find(hash);
-    CBlockIndex* pindex = NULL;
+    CBlockIndex* pindex = nullptr;
 
     // TODO : ENABLE BLOCK CACHE IN SPECIFIC CASES
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
@@ -4368,7 +5997,7 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
 
         // Get prev block index
-        CBlockIndex* pindexPrev = NULL;
+        CBlockIndex* pindexPrev = nullptr;
         BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
         if (mi == mapBlockIndex.end())
             return state.DoS(10, error("%s: prev block not found", __func__), 0, "bad-prevblk");
@@ -4384,7 +6013,7 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
             if (!ContextualCheckBlockHeader(block, state, chainparams.GetConsensus(), pindexPrev, GetAdjustedTime(), block.IsProofOfStake()))
                 return error("%s: Consensus::ContextualCheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
     }
-    if (pindex == NULL)
+    if (pindex == nullptr)
         pindex = AddToBlockIndex(block);
 
     if (ppindex)
@@ -4399,12 +6028,12 @@ static bool AcceptBlockHeader(const CBlock& block, CValidationState& state, cons
 }
 
 // Exposed wrapper for AcceptBlockHeader
-bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex)
+bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex, CBlockHeader *first_invalid)
 {
     {
         LOCK(cs_main);
         for (const CBlockHeader& header : headers) {
-            CBlockIndex* pindex = NULL; // Use a temp pindex instead of ppindex to avoid a const_cast
+            CBlockIndex* pindex = nullptr; // Use a temp pindex instead of ppindex to avoid a const_cast
             if (!AcceptBlockHeader(header, state, chainparams, &pindex)) {
                 return false;
             }
@@ -4430,8 +6059,8 @@ static bool CheckWork(const CBlock& block)
     return true;
 }
 
-/** Store block on disk. If dbp is non-NULL, the file is known to already reside on disk */
-static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex, bool fRequested, const CDiskBlockPos* dbp, bool* fNewBlock)
+/** Store block on disk. If dbp is non-nullptr, the file is known to already reside on disk */
+static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex, bool fRequested, const CDiskBlockPos* dbp, bool* fNewBlock, bool fFromLoad = false)
 {
     const CBlock& block = *pblock;
 
@@ -4440,7 +6069,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     AssertLockHeld(cs_main);
 
     // Get prev block index
-    CBlockIndex* pindexPrev = NULL;
+    CBlockIndex* pindexPrev = nullptr;
     if (block.GetHash() != Params().GenesisBlock().GetHash()) {
         BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
         if (mi == mapBlockIndex.end())
@@ -4465,7 +6094,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     if (block.GetHash() != Params().GenesisBlock().GetHash() && !CheckWork(block))
         return false;
 
-    CBlockIndex* pindexDummy = NULL;
+    CBlockIndex* pindexDummy = nullptr;
     CBlockIndex*& pindex = ppindex ? *ppindex : pindexDummy;
     if (!AcceptBlockHeader(block, state, chainparams, &pindex))
         return false;
@@ -4499,13 +6128,21 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     if (fNewBlock)
         *fNewBlock = true;
 
-    if (!CheckBlock(block, state, chainparams.GetConsensus()) ||
-        !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev)) {
-        if (state.IsInvalid() && !state.CorruptionPossible()) {
-            pindex->nStatus |= BLOCK_FAILED_VALID;
-            setDirtyBlockIndex.insert(pindex);
+    auto currentActiveAssetCache = GetCurrentAssetCache();
+    // Dont force the CheckBlock asset duplciates when checking from this state
+    if (!CheckBlock(block, state, chainparams.GetConsensus(), true, true) ||
+        !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev, currentActiveAssetCache)) {
+        if (fFromLoad && state.GetRejectReason() == "bad-txns-transfer-asset-bad-deserialize") {
+            // keep going, we are only loading blocks from database
+            CValidationState new_state;
+            state = new_state;
+        } else {
+            if (state.IsInvalid() && !state.CorruptionPossible()) {
+                pindex->nStatus |= BLOCK_FAILED_VALID;
+                setDirtyBlockIndex.insert(pindex);
+            }
+            return error("%s: %s", __func__, FormatStateMessage(state));
         }
-        return error("%s: %s", __func__, FormatStateMessage(state));
     }
 
     if (block.IsProofOfStake()) {
@@ -4613,11 +6250,11 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     try {
         unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
         CDiskBlockPos blockPos;
-        if (dbp != NULL)
+        if (dbp != nullptr)
             blockPos = *dbp;
-        if (!FindBlockPos(state, blockPos, nBlockSize + 8, nHeight, block.GetBlockTime(), dbp != NULL))
+        if (!FindBlockPos(state, blockPos, nBlockSize + 8, nHeight, block.GetBlockTime(), dbp != nullptr))
             return error("AcceptBlock(): FindBlockPos failed");
-        if (dbp == NULL)
+        if (dbp == nullptr)
             if (!WriteBlockToDisk(block, blockPos, chainparams.MessageStart()))
                 AbortNode(state, "Failed to write block");
         if (!ReceivedBlockTransactions(block, state, pindex, blockPos))
@@ -4635,7 +6272,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams)
 {
     unsigned int nFound = 0;
-    for (int i = 0; i < consensusParams.nMajorityWindow && nFound < nRequired && pstart != NULL; i++) {
+    for (int i = 0; i < consensusParams.nMajorityWindow && nFound < nRequired && pstart != nullptr; i++) {
         if (pstart->nVersion >= minVersion)
             ++nFound;
         pstart = pstart->pprev;
@@ -4650,7 +6287,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
         return error("ProcessNewBlock() : bad proof-of-stake block signature");
 
     {
-        CBlockIndex* pindex = NULL;
+        CBlockIndex* pindex = nullptr;
         if (fNewBlock)
             *fNewBlock = false;
         CValidationState state;
@@ -4662,7 +6299,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
 
         if (ret) {
             // Store to disk
-            ret = AcceptBlock(pblock, state, chainparams, &pindex, fForceProcessing, NULL, fNewBlock);
+            ret = AcceptBlock(pblock, state, chainparams, &pindex, fForceProcessing, nullptr, fNewBlock);
         }
         CheckBlockIndex(chainparams.GetConsensus());
         if (!ret) {
@@ -4684,10 +6321,6 @@ extern CWallet* pwalletMain;
         // If turned on MultiSend will send a transaction (or more) on the after maturity of a stake
         if (pwalletMain->isMultiSendEnabled())
             pwalletMain->MultiSend();
-
-        // If turned on Auto Combine will scan wallet for dust to combine
-        if (pwalletMain->fCombineDust)
-            pwalletMain->AutoCombineDust();
     }
 #endif //ENABLE_WALLET
 
@@ -4707,14 +6340,18 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
     indexDummy.pprev = pindexPrev;
     indexDummy.nHeight = pindexPrev->nHeight + 1;
 
+    /** ASSET START */
+    CAssetsCache assetCache = *GetCurrentAssetCache();
+    /** ASSET END */
+
     // NOTE: CheckBlockHeader is called by CheckBlock
     if (!ContextualCheckBlockHeader(block, state, chainparams.GetConsensus(), pindexPrev, GetAdjustedTime(), block.IsProofOfStake()))
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__, FormatStateMessage(state));
     if (!CheckBlock(block, state, chainparams.GetConsensus(), fCheckPOW, fCheckMerkleRoot))
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
-    if (!ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindexPrev))
+    if (!ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindexPrev, &assetCache))
         return error("%s: Consensus::ContextualCheckBlock: %s", __func__, FormatStateMessage(state));
-    if (!ConnectBlock(block, state, &indexDummy, viewNew, chainparams, true))
+    if (!ConnectBlock(block, state, &indexDummy, viewNew, chainparams, &assetCache, true))
         return false;
     assert(state.IsValid());
 
@@ -4729,7 +6366,7 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
 uint64_t CalculateCurrentUsage()
 {
     uint64_t retval = 0;
-    BOOST_FOREACH (const CBlockFileInfo& file, vinfoBlockFile) {
+    for (const CBlockFileInfo& file : vinfoBlockFile) {
         retval += file.nSize + file.nUndoSize;
     }
     return retval;
@@ -4784,7 +6421,7 @@ void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeig
     assert(fPruneMode && nManualPruneHeight > 0);
 
     LOCK2(cs_main, cs_LastBlockFile);
-    if (chainActive.Tip() == NULL)
+    if (chainActive.Tip() == nullptr)
         return;
 
     // last block to prune is the lesser of (user-specified height, MIN_BLOCKS_TO_KEEP from the tip)
@@ -4811,7 +6448,7 @@ void PruneBlockFilesManual(int nManualPruneHeight)
 void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight)
 {
     LOCK2(cs_main, cs_LastBlockFile);
-    if (chainActive.Tip() == NULL || nPruneTarget == 0) {
+    if (chainActive.Tip() == nullptr || nPruneTarget == 0) {
         return;
     }
     if ((uint64_t)chainActive.Tip()->nHeight <= nPruneAfterHeight) {
@@ -4869,7 +6506,7 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes)
 FILE* OpenDiskFile(const CDiskBlockPos& pos, const char* prefix, bool fReadOnly)
 {
     if (pos.IsNull())
-        return NULL;
+        return nullptr;
     boost::filesystem::path path = GetBlockPosFilename(pos, prefix);
     boost::filesystem::create_directories(path.parent_path());
     FILE* file = fopen(path.string().c_str(), "rb+");
@@ -4877,13 +6514,13 @@ FILE* OpenDiskFile(const CDiskBlockPos& pos, const char* prefix, bool fReadOnly)
         file = fopen(path.string().c_str(), "wb+");
     if (!file) {
         LogPrintf("Unable to open file %s\n", path.string());
-        return NULL;
+        return nullptr;
     }
     if (pos.nPos) {
         if (fseek(file, pos.nPos, SEEK_SET)) {
             LogPrintf("Unable to seek to position %u of %s\n", pos.nPos, path.string());
             fclose(file);
-            return NULL;
+            return nullptr;
         }
     }
     return file;
@@ -4907,7 +6544,7 @@ boost::filesystem::path GetBlockPosFilename(const CDiskBlockPos& pos, const char
 CBlockIndex* InsertBlockIndex(uint256 hash)
 {
     if (hash.IsNull())
-        return NULL;
+        return nullptr;
 
     // Return existing
     BlockMap::iterator mi = mapBlockIndex.find(hash);
@@ -4934,12 +6571,12 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
     // Calculate nChainWork
     std::vector<std::pair<int, CBlockIndex*> > vSortedByHeight;
     vSortedByHeight.reserve(mapBlockIndex.size());
-    BOOST_FOREACH (const PAIRTYPE(uint256, CBlockIndex*) & item, mapBlockIndex) {
+    for (const std::pair<uint256, CBlockIndex*>& item : mapBlockIndex) {
         CBlockIndex* pindex = item.second;
         vSortedByHeight.push_back(std::make_pair(pindex->nHeight, pindex));
     }
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
-    BOOST_FOREACH (const PAIRTYPE(int, CBlockIndex*) & item, vSortedByHeight) {
+    for (const std::pair<int, CBlockIndex*>& item : vSortedByHeight) {
         CBlockIndex* pindex = item.second;
         pindex->nChainWork = (pindex->pprev ? pindex->pprev->nChainWork : 0) + GetBlockProof(*pindex);
         pindex->nTimeMax = (pindex->pprev ? std::max(pindex->pprev->nTimeMax, pindex->nTime) : pindex->nTime);
@@ -4957,13 +6594,13 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
                 pindex->nChainTx = pindex->nTx;
             }
         }
-        if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS) && (pindex->nChainTx || pindex->pprev == NULL))
+        if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS) && (pindex->nChainTx || pindex->pprev == nullptr))
             setBlockIndexCandidates.insert(pindex);
         if (pindex->nStatus & BLOCK_FAILED_MASK && (!pindexBestInvalid || pindex->nChainWork > pindexBestInvalid->nChainWork))
             pindexBestInvalid = pindex;
         if (pindex->pprev)
             pindex->BuildSkip();
-        if (pindex->IsValid(BLOCK_VALID_TREE) && (pindexBestHeader == NULL || CBlockIndexWorkComparator()(pindexBestHeader, pindex)))
+        if (pindex->IsValid(BLOCK_VALID_TREE) && (pindexBestHeader == nullptr || CBlockIndexWorkComparator()(pindexBestHeader, pindex)))
             pindexBestHeader = pindex;
     }
 
@@ -4987,7 +6624,7 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
     // Check presence of blk files
     LogPrintf("Checking all blk files are present...\n");
     std::set<int> setBlkDataFiles;
-    BOOST_FOREACH (const PAIRTYPE(uint256, CBlockIndex*) & item, mapBlockIndex) {
+    for (const std::pair<uint256, CBlockIndex*>& item : mapBlockIndex) {
         CBlockIndex* pindex = item.second;
         if (pindex->nStatus & BLOCK_HAVE_DATA) {
             setBlkDataFiles.insert(pindex->nFile);
@@ -5013,6 +6650,10 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
     // Check whether we have a transaction index
     pblocktree->ReadFlag("txindex", fTxIndex);
     LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
+
+    // Check whether we have an asset index
+    pblocktree->ReadFlag("assetindex", fAssetIndex);
+    LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
 
     // Check whether we have an address index
     pblocktree->ReadFlag("addressindex", fAddressIndex);
@@ -5055,7 +6696,7 @@ CVerifyDB::~CVerifyDB()
 bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview, int nCheckLevel, int nCheckDepth)
 {
     LOCK(cs_main);
-    if (chainActive.Tip() == NULL || chainActive.Tip()->pprev == NULL)
+    if (chainActive.Tip() == nullptr || chainActive.Tip()->pprev == nullptr)
         return true;
 
     // Verify blocks in the best chain
@@ -5067,12 +6708,16 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
     LogPrintf("Verifying last %i blocks at level %i\n", nCheckDepth, nCheckLevel);
     CCoinsViewCache coins(coinsview);
     CBlockIndex* pindexState = chainActive.Tip();
-    CBlockIndex* pindexFailure = NULL;
+    CBlockIndex* pindexFailure = nullptr;
     int nGoodTransactions = 0;
     CValidationState state;
     int reportDone = 0;
+
+    auto currentActiveAssetCache = GetCurrentAssetCache();
+    CAssetsCache assetCache(*currentActiveAssetCache);
     LogPrintf("[0%%]...");
-    for (CBlockIndex* pindex = chainActive.Tip(); pindex && pindex->pprev; pindex = pindex->pprev) {
+    for (CBlockIndex* pindex = chainActive.Tip(); pindex && pindex->pprev; pindex = pindex->pprev) 
+    {
         boost::this_thread::interruption_point();
         int percentageDone = std::max(1, std::min(99, (int)(((double)(chainActive.Height() - pindex->nHeight)) / (double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100))));
         if (reportDone < percentageDone / 10) {
@@ -5093,7 +6738,10 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus()))
+        bool fCheckPoW = true; 
+        bool fCheckMerkleRoot = true;
+        bool fDBCheck = true;
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), fCheckPoW, fCheckMerkleRoot, fDBCheck)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset database
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                 pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
@@ -5107,7 +6755,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
         }
         // check level 3: check for inconsistencies during memory-only disconnect of tip blocks
         if (nCheckLevel >= 3 && pindex == pindexState && (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <= nCoinCacheUsage) {
-            DisconnectResult res = DisconnectBlock(block, state, pindex, coins, nCheckLevel);
+            DisconnectResult res = DisconnectBlock(block, state, pindex, coins, nCheckLevel, &assetCache, true, false);
             if (res == DISCONNECT_FAILED) {
                 return error("VerifyDB(): *** irrecoverable inconsistency in block data at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
             }
@@ -5135,7 +6783,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView* coinsview,
             CBlock block;
             if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
                 return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
-            if (!ConnectBlock(block, state, pindex, coins, chainparams))
+            if (!ConnectBlock(block, state, pindex, coins, chainparams, &assetCache, false, true))
                 return error("VerifyDB(): *** found unconnectable block at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         }
     }
@@ -5150,9 +6798,9 @@ void UnloadBlockIndex()
 {
     LOCK(cs_main);
     setBlockIndexCandidates.clear();
-    chainActive.SetTip(NULL);
-    pindexBestInvalid = NULL;
-    pindexBestHeader = NULL;
+    chainActive.SetTip(nullptr);
+    pindexBestInvalid = nullptr;
+    pindexBestHeader = nullptr;
     mempool.clear();
     mapBlocksUnlinked.clear();
     vinfoBlockFile.clear();
@@ -5165,7 +6813,7 @@ void UnloadBlockIndex()
         warningcache[b].clear();
     }
 
-    BOOST_FOREACH (BlockMap::value_type& entry, mapBlockIndex) {
+    for (BlockMap::value_type& entry : mapBlockIndex) {
         delete entry.second;
     }
     mapBlockIndex.clear();
@@ -5201,22 +6849,27 @@ bool InitBlockIndex(const CChainParams& chainparams)
     LOCK(cs_main);
 
     // Check whether we're already initialized
-    if (chainActive.Genesis() != NULL)
+    if (chainActive.Genesis() != nullptr)
         return true;
 
     // Use the provided setting for -txindex in the new database
-    fTxIndex = GetBoolArg("-txindex", DEFAULT_TXINDEX);
+    fTxIndex = gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX);
     pblocktree->WriteFlag("txindex", fTxIndex);
 
     // Use the provided setting for -addressindex in the new database
-    fAddressIndex = GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX);
+    fAddressIndex = gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX);
     pblocktree->WriteFlag("addressindex", fAddressIndex);
 
+    // Use the provided setting for -assetindex in the new database
+    fAssetIndex = gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
+    pblocktree->WriteFlag("assetindex", fAssetIndex);
+    LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
+
     // Use the provided setting for -timestampindex in the new database
-    fTimestampIndex = GetBoolArg("-timestampindex", DEFAULT_TIMESTAMPINDEX);
+    fTimestampIndex = gArgs.GetBoolArg("-timestampindex", DEFAULT_TIMESTAMPINDEX);
     pblocktree->WriteFlag("timestampindex", fTimestampIndex);
 
-    fSpentIndex = GetBoolArg("-spentindex", DEFAULT_SPENTINDEX);
+    fSpentIndex = gArgs.GetBoolArg("-spentindex", DEFAULT_SPENTINDEX);
     pblocktree->WriteFlag("spentindex", fSpentIndex);
 
     LogPrintf("Initializing databases...\n");
@@ -5248,7 +6901,7 @@ bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskB
     int nLoaded = 0;
     try {
         // This takes over fileIn and calls fclose() on it in the CBufferedFile destructor
-        CBufferedFile blkdat(fileIn, 2 * MAX_BLOCK_SIZE, MAX_BLOCK_SIZE + 8, SER_DISK, CLIENT_VERSION);
+        CBufferedFile blkdat(fileIn, 2 * GetMaxBlockSerializedSize(), GetMaxBlockSerializedSize() + 8, SER_DISK, CLIENT_VERSION);
         uint64_t nRewind = blkdat.GetPos();
         while (!blkdat.eof()) {
             boost::this_thread::interruption_point();
@@ -5267,7 +6920,7 @@ bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskB
                     continue;
                 // read size
                 blkdat >> nSize;
-                if (nSize < 80 || nSize > MAX_BLOCK_SIZE)
+                if (nSize < 80 || nSize > GetMaxBlockSerializedSize())
                     continue;
             } catch (const std::exception&) {
                 // no valid block header found; don't complain
@@ -5299,7 +6952,7 @@ bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskB
                 if (mapBlockIndex.count(hash) == 0 || (mapBlockIndex[hash]->nStatus & BLOCK_HAVE_DATA) == 0) {
                     LOCK(cs_main);
                     CValidationState state;
-                    if (AcceptBlock(pblock, state, chainparams, NULL, true, dbp, NULL))
+                    if (AcceptBlock(pblock, state, chainparams, nullptr, true, dbp, nullptr))
                         nLoaded++;
                     if (state.IsError())
                         break;
@@ -5332,7 +6985,7 @@ bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskB
                                 head.ToString());
                             LOCK(cs_main);
                             CValidationState dummy;
-                            if (AcceptBlock(pblockrecursive, dummy, chainparams, NULL, true, &it->second, NULL)) {
+                            if (AcceptBlock(pblockrecursive, dummy, chainparams, nullptr, true, &it->second, nullptr)) {
                                 nLoaded++;
                                 queue.push_back(pblockrecursive->GetHash());
                             }
@@ -5378,42 +7031,42 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
 
     assert(forward.size() == mapBlockIndex.size());
 
-    std::pair<std::multimap<CBlockIndex*, CBlockIndex*>::iterator, std::multimap<CBlockIndex*, CBlockIndex*>::iterator> rangeGenesis = forward.equal_range(NULL);
+    std::pair<std::multimap<CBlockIndex*, CBlockIndex*>::iterator, std::multimap<CBlockIndex*, CBlockIndex*>::iterator> rangeGenesis = forward.equal_range(nullptr);
     CBlockIndex* pindex = rangeGenesis.first->second;
     rangeGenesis.first++;
-    assert(rangeGenesis.first == rangeGenesis.second); // There is only one index entry with parent NULL.
+    assert(rangeGenesis.first == rangeGenesis.second); // There is only one index entry with parent nullptr.
 
     // Iterate over the entire block tree, using depth-first search.
     // Along the way, remember whether there are blocks on the path from genesis
     // block being explored which are the first to have certain properties.
     size_t nNodes = 0;
     int nHeight = 0;
-    CBlockIndex* pindexFirstInvalid = NULL;              // Oldest ancestor of pindex which is invalid.
-    CBlockIndex* pindexFirstMissing = NULL;              // Oldest ancestor of pindex which does not have BLOCK_HAVE_DATA.
-    CBlockIndex* pindexFirstNeverProcessed = NULL;       // Oldest ancestor of pindex for which nTx == 0.
-    CBlockIndex* pindexFirstNotTreeValid = NULL;         // Oldest ancestor of pindex which does not have BLOCK_VALID_TREE (regardless of being valid or not).
-    CBlockIndex* pindexFirstNotTransactionsValid = NULL; // Oldest ancestor of pindex which does not have BLOCK_VALID_TRANSACTIONS (regardless of being valid or not).
-    CBlockIndex* pindexFirstNotChainValid = NULL;        // Oldest ancestor of pindex which does not have BLOCK_VALID_CHAIN (regardless of being valid or not).
-    CBlockIndex* pindexFirstNotScriptsValid = NULL;      // Oldest ancestor of pindex which does not have BLOCK_VALID_SCRIPTS (regardless of being valid or not).
-    while (pindex != NULL) {
+    CBlockIndex* pindexFirstInvalid = nullptr;              // Oldest ancestor of pindex which is invalid.
+    CBlockIndex* pindexFirstMissing = nullptr;              // Oldest ancestor of pindex which does not have BLOCK_HAVE_DATA.
+    CBlockIndex* pindexFirstNeverProcessed = nullptr;       // Oldest ancestor of pindex for which nTx == 0.
+    CBlockIndex* pindexFirstNotTreeValid = nullptr;         // Oldest ancestor of pindex which does not have BLOCK_VALID_TREE (regardless of being valid or not).
+    CBlockIndex* pindexFirstNotTransactionsValid = nullptr; // Oldest ancestor of pindex which does not have BLOCK_VALID_TRANSACTIONS (regardless of being valid or not).
+    CBlockIndex* pindexFirstNotChainValid = nullptr;        // Oldest ancestor of pindex which does not have BLOCK_VALID_CHAIN (regardless of being valid or not).
+    CBlockIndex* pindexFirstNotScriptsValid = nullptr;      // Oldest ancestor of pindex which does not have BLOCK_VALID_SCRIPTS (regardless of being valid or not).
+    while (pindex != nullptr) {
         nNodes++;
-        if (pindexFirstInvalid == NULL && pindex->nStatus & BLOCK_FAILED_VALID)
+        if (pindexFirstInvalid == nullptr && pindex->nStatus & BLOCK_FAILED_VALID)
             pindexFirstInvalid = pindex;
-        if (pindexFirstMissing == NULL && !(pindex->nStatus & BLOCK_HAVE_DATA))
+        if (pindexFirstMissing == nullptr && !(pindex->nStatus & BLOCK_HAVE_DATA))
             pindexFirstMissing = pindex;
-        if (pindexFirstNeverProcessed == NULL && pindex->nTx == 0)
+        if (pindexFirstNeverProcessed == nullptr && pindex->nTx == 0)
             pindexFirstNeverProcessed = pindex;
-        if (pindex->pprev != NULL && pindexFirstNotTreeValid == NULL && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_TREE)
+        if (pindex->pprev != nullptr && pindexFirstNotTreeValid == nullptr && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_TREE)
             pindexFirstNotTreeValid = pindex;
-        if (pindex->pprev != NULL && pindexFirstNotTransactionsValid == NULL && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_TRANSACTIONS)
+        if (pindex->pprev != nullptr && pindexFirstNotTransactionsValid == nullptr && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_TRANSACTIONS)
             pindexFirstNotTransactionsValid = pindex;
-        if (pindex->pprev != NULL && pindexFirstNotChainValid == NULL && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_CHAIN)
+        if (pindex->pprev != nullptr && pindexFirstNotChainValid == nullptr && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_CHAIN)
             pindexFirstNotChainValid = pindex;
-        if (pindex->pprev != NULL && pindexFirstNotScriptsValid == NULL && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_SCRIPTS)
+        if (pindex->pprev != nullptr && pindexFirstNotScriptsValid == nullptr && (pindex->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_SCRIPTS)
             pindexFirstNotScriptsValid = pindex;
 
         // Begin: actual consistency checks.
-        if (pindex->pprev == NULL) {
+        if (pindex->pprev == nullptr) {
             // Genesis block checks.
             assert(pindex->GetBlockHash() == consensusParams.hashGenesisBlock); // Genesis block's hash must match.
             assert(pindex == chainActive.Genesis());                            // The current active chain's genesis block must be this block.
@@ -5435,29 +7088,29 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             assert(pindex->nStatus & BLOCK_HAVE_DATA);
         assert(((pindex->nStatus & BLOCK_VALID_MASK) >= BLOCK_VALID_TRANSACTIONS) == (pindex->nTx > 0)); // This is pruning-independent.
         // All parents having had data (at some point) is equivalent to all parents being VALID_TRANSACTIONS, which is equivalent to nChainTx being set.
-        assert((pindexFirstNeverProcessed != NULL) == (pindex->nChainTx == 0)); // nChainTx != 0 is used to signal that all parent blocks have been processed (but may have been pruned).
-        assert((pindexFirstNotTransactionsValid != NULL) == (pindex->nChainTx == 0));
+        assert((pindexFirstNeverProcessed != nullptr) == (pindex->nChainTx == 0)); // nChainTx != 0 is used to signal that all parent blocks have been processed (but may have been pruned).
+        assert((pindexFirstNotTransactionsValid != nullptr) == (pindex->nChainTx == 0));
         assert(pindex->nHeight == nHeight);                                               // nHeight must be consistent.
-        assert(pindex->pprev == NULL || pindex->nChainWork >= pindex->pprev->nChainWork); // For every block except the genesis block, the chainwork must be larger than the parent's.
+        assert(pindex->pprev == nullptr || pindex->nChainWork >= pindex->pprev->nChainWork); // For every block except the genesis block, the chainwork must be larger than the parent's.
         assert(nHeight < 2 || (pindex->pskip && (pindex->pskip->nHeight < nHeight)));     // The pskip pointer must point back for all but the first 2 blocks.
-        assert(pindexFirstNotTreeValid == NULL);                                          // All mapBlockIndex entries must at least be TREE valid
+        assert(pindexFirstNotTreeValid == nullptr);                                          // All mapBlockIndex entries must at least be TREE valid
         if ((pindex->nStatus & BLOCK_VALID_MASK) >= BLOCK_VALID_TREE)
-            assert(pindexFirstNotTreeValid == NULL); // TREE valid implies all parents are TREE valid
+            assert(pindexFirstNotTreeValid == nullptr); // TREE valid implies all parents are TREE valid
         if ((pindex->nStatus & BLOCK_VALID_MASK) >= BLOCK_VALID_CHAIN)
-            assert(pindexFirstNotChainValid == NULL); // CHAIN valid implies all parents are CHAIN valid
+            assert(pindexFirstNotChainValid == nullptr); // CHAIN valid implies all parents are CHAIN valid
         if ((pindex->nStatus & BLOCK_VALID_MASK) >= BLOCK_VALID_SCRIPTS)
-            assert(pindexFirstNotScriptsValid == NULL); // SCRIPTS valid implies all parents are SCRIPTS valid
-        if (pindexFirstInvalid == NULL) {
+            assert(pindexFirstNotScriptsValid == nullptr); // SCRIPTS valid implies all parents are SCRIPTS valid
+        if (pindexFirstInvalid == nullptr) {
             // Checks for not-invalid blocks.
             assert((pindex->nStatus & BLOCK_FAILED_MASK) == 0); // The failed mask cannot be set for blocks without invalid parents.
         }
-        if (!CBlockIndexWorkComparator()(pindex, chainActive.Tip()) && pindexFirstNeverProcessed == NULL) {
-            if (pindexFirstInvalid == NULL) {
+        if (!CBlockIndexWorkComparator()(pindex, chainActive.Tip()) && pindexFirstNeverProcessed == nullptr) {
+            if (pindexFirstInvalid == nullptr) {
                 // If this block sorts at least as good as the current tip and
                 // is valid and we have all data for its parents, it must be in
                 // setBlockIndexCandidates.  chainActive.Tip() must also be there
                 // even if some data has been pruned.
-                if (pindexFirstMissing == NULL || pindex == chainActive.Tip()) {
+                if (pindexFirstMissing == nullptr || pindex == chainActive.Tip()) {
                     assert(setBlockIndexCandidates.count(pindex));
                 }
                 // If some parent is missing, then it could be that this block was in
@@ -5478,15 +7131,15 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             }
             rangeUnlinked.first++;
         }
-        if (pindex->pprev && (pindex->nStatus & BLOCK_HAVE_DATA) && pindexFirstNeverProcessed != NULL && pindexFirstInvalid == NULL) {
+        if (pindex->pprev && (pindex->nStatus & BLOCK_HAVE_DATA) && pindexFirstNeverProcessed != nullptr && pindexFirstInvalid == nullptr) {
             // If this block has block data available, some parent was never received, and has no invalid parents, it must be in mapBlocksUnlinked.
             assert(foundInUnlinked);
         }
         if (!(pindex->nStatus & BLOCK_HAVE_DATA))
             assert(!foundInUnlinked); // Can't be in mapBlocksUnlinked if we don't HAVE_DATA
-        if (pindexFirstMissing == NULL)
+        if (pindexFirstMissing == nullptr)
             assert(!foundInUnlinked); // We aren't missing data for any parent -- cannot be in mapBlocksUnlinked.
-        if (pindex->pprev && (pindex->nStatus & BLOCK_HAVE_DATA) && pindexFirstNeverProcessed == NULL && pindexFirstMissing != NULL) {
+        if (pindex->pprev && (pindex->nStatus & BLOCK_HAVE_DATA) && pindexFirstNeverProcessed == nullptr && pindexFirstMissing != nullptr) {
             // We HAVE_DATA for this block, have received data for all parents at some point, but we're currently missing data for some parent.
             assert(fHavePruned); // We must have pruned.
             // This block may have entered mapBlocksUnlinked if:
@@ -5498,7 +7151,7 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             // So if this block is itself better than chainActive.Tip() and it wasn't in
             // setBlockIndexCandidates, then it must be in mapBlocksUnlinked.
             if (!CBlockIndexWorkComparator()(pindex, chainActive.Tip()) && setBlockIndexCandidates.count(pindex) == 0) {
-                if (pindexFirstInvalid == NULL) {
+                if (pindexFirstInvalid == nullptr) {
                     assert(foundInUnlinked);
                 }
             }
@@ -5520,19 +7173,19 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             // We are going to either move to a parent or a sibling of pindex.
             // If pindex was the first with a certain property, unset the corresponding variable.
             if (pindex == pindexFirstInvalid)
-                pindexFirstInvalid = NULL;
+                pindexFirstInvalid = nullptr;
             if (pindex == pindexFirstMissing)
-                pindexFirstMissing = NULL;
+                pindexFirstMissing = nullptr;
             if (pindex == pindexFirstNeverProcessed)
-                pindexFirstNeverProcessed = NULL;
+                pindexFirstNeverProcessed = nullptr;
             if (pindex == pindexFirstNotTreeValid)
-                pindexFirstNotTreeValid = NULL;
+                pindexFirstNotTreeValid = nullptr;
             if (pindex == pindexFirstNotTransactionsValid)
-                pindexFirstNotTransactionsValid = NULL;
+                pindexFirstNotTransactionsValid = nullptr;
             if (pindex == pindexFirstNotChainValid)
-                pindexFirstNotChainValid = NULL;
+                pindexFirstNotChainValid = nullptr;
             if (pindex == pindexFirstNotScriptsValid)
-                pindexFirstNotScriptsValid = NULL;
+                pindexFirstNotScriptsValid = nullptr;
             // Find our parent.
             CBlockIndex* pindexPar = pindex->pprev;
             // Find which child we just visited.
@@ -5586,7 +7239,7 @@ static const uint64_t MEMPOOL_DUMP_VERSION = 1;
 
 bool LoadMempool(void)
 {
-    int64_t nExpiryTimeout = GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60;
+    int64_t nExpiryTimeout = gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60;
     FILE* filestr = fopen((GetDataDir() / "mempool.dat").string().c_str(), "r");
     CAutoFile file(filestr, SER_DISK, CLIENT_VERSION);
     if (file.IsNull()) {
@@ -5623,7 +7276,7 @@ bool LoadMempool(void)
             CValidationState state;
             if (nTime + nExpiryTimeout > nNow) {
                 LOCK(cs_main);
-                AcceptToMemoryPoolWithTime(mempool, state, tx, true, NULL, nTime);
+                AcceptToMemoryPoolWithTime(mempool, state, tx, nullptr, nTime);
                 if (state.IsValid()) {
                     ++count;
                 } else {
@@ -5697,13 +7350,361 @@ void DumpMempool(void)
     }
 }
 
+/** ASSET START */
+bool AreAssetsDeployed() {
+
+    return sporkManager.IsSporkActive(SPORK_32_BDAP_V2);
+}
+
+bool IsMsgRestAssetIsActive()
+{
+    return AreAssetsDeployed();
+}
+
+bool AreMessagesDeployed() {
+
+    return AreAssetsDeployed();
+}
+
+bool AreTransferScriptsSizeDeployed() {
+
+    return AreAssetsDeployed();
+}
+
+bool AreRestrictedAssetsDeployed() {
+
+    return AreAssetsDeployed();
+}
+
+bool AreEnforcedValuesAreActive() {
+
+    return AreAssetsDeployed();
+}
+
+CAssetsCache* GetCurrentAssetCache()
+{
+    return passets;
+}
+
+bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin* moveout, CAssetsCache* assetsCache) 
+{
+    CCoinsMap::iterator it = cache.FetchCoin(outpoint);
+    if (it == cache.CacheCoins()->end())
+        return false;
+
+    cache.cachedCoinsUsage -= it->second.coin.DynamicMemoryUsage();
+
+    /** ASSET START */
+    Coin tempCoin = it->second.coin;
+    /** ASSET END */
+
+    if (moveout) {
+        *moveout = std::move(it->second.coin);
+    }
+    if (it->second.flags & CCoinsCacheEntry::FRESH) {
+        cache.CacheCoins()->erase(it);
+    } else {
+        it->second.flags |= CCoinsCacheEntry::DIRTY;
+        it->second.coin.Clear();
+    }
+
+    /** ASSET START */
+    if (AreAssetsDeployed()) {
+        if (assetsCache) {
+            if (!assetsCache->TrySpendCoin(outpoint, tempCoin.out)) {
+                return error("%s : Failed to try and spend the asset. COutPoint : %s", __func__, outpoint.ToString());
+            }
+        }
+    }
+    /** ASSET END */
+
+    return true;
+}
+
+void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint256 blockHash, bool check, CAssetsCache* assetsCache, std::pair<std::string, CBlockAssetUndo>* undoAssetData) {
+    bool fCoinbase = tx.IsCoinBase();
+    const uint256& txid = tx.GetHash();
+
+    /** ASSET START */
+    if (AreAssetsDeployed()) {
+        if (assetsCache) {
+            if (tx.IsNewAsset()) { // This works are all new root assets, sub asset, and restricted assets
+                CNewAsset asset;
+                std::string strAddress;
+                AssetFromTransaction(tx, asset, strAddress);
+
+                std::string ownerName;
+                std::string ownerAddress;
+                OwnerFromTransaction(tx, ownerName, ownerAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                          asset.strName);
+
+                // Add the owner asset to cache
+                if (!assetsCache->AddOwnerAsset(ownerName, ownerAddress))
+                    error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                          asset.strName);
+
+            } else if (tx.IsReissueAsset()) {
+                CReissueAsset reissue;
+                std::string strAddress;
+                ReissueAssetFromTransaction(tx, reissue, strAddress);
+
+                int reissueIndex = tx.vout.size() - 1;
+
+                // Get the asset before we change it
+                CNewAsset asset;
+                if (!assetsCache->GetAssetMetaDataIfExists(reissue.strName, asset))
+                    error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
+                          __func__, reissue.strName);
+
+                if (!assetsCache->AddReissueAsset(reissue, strAddress, COutPoint(txid, reissueIndex)))
+                    error("%s: Failed to reissue an asset. Asset Name : %s", __func__, reissue.strName);
+
+                // Check to see if we are reissuing a restricted asset
+                bool fFoundRestrictedAsset = false;
+                AssetType type;
+                IsAssetNameValid(asset.strName, type);
+                if (type == AssetType::RESTRICTED) {
+                    fFoundRestrictedAsset = true;
+                }
+
+                // Set the old IPFSHash for the blockundo
+                bool fIPFSChanged = !reissue.strIPFSHash.empty();
+                bool fUnitsChanged = reissue.nUnits != -1;
+                bool fVerifierChanged = false;
+                std::string strOldVerifier = "";
+
+                // If we are reissuing a restricted asset, we need to check to see if the verifier string is being reissued
+                if (fFoundRestrictedAsset) {
+                    CNullAssetTxVerifierString verifier;
+                    // Search through all outputs until you find a restricted verifier change.
+                    for (auto index: tx.vout) {
+                        if (index.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                            if (!AssetNullVerifierDataFromScript(index.scriptPubKey, verifier)) {
+                                error("%s: Failed to get asset null verifier data and add it to the coins CTxOut: %s", __func__,
+                                      index.ToString());
+                                break;
+                            }
+
+                            fVerifierChanged = true;
+                            break;
+                        }
+                    }
+
+                    CNullAssetTxVerifierString oldVerifer{strOldVerifier};
+                    if (fVerifierChanged && !assetsCache->GetAssetVerifierStringIfExists(asset.strName, oldVerifer))
+                        error("%s : Failed to get asset original verifier string that is getting reissued, Asset Name: %s", __func__, asset.strName);
+
+                    if (fVerifierChanged) {
+                        strOldVerifier = oldVerifer.verifier_string;
+                    }
+
+                    // Add the verifier to the cache if there was one found
+                    if (fVerifierChanged && !assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
+                        error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
+                              asset.strName, verifier.verifier_string);
+                }
+
+                // If any of the following items were changed by reissuing, we need to database the old values so it can be undone correctly
+                if (fIPFSChanged || fUnitsChanged || fVerifierChanged) {
+                    undoAssetData->first = reissue.strName; // Asset Name
+                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units, ASSET_UNDO_INCLUDES_VERIFIER_STRING, fVerifierChanged, strOldVerifier}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
+                }
+            } else if (tx.IsNewUniqueAsset()) {
+                for (int n = 0; n < (int)tx.vout.size(); n++) {
+                    auto out = tx.vout[n];
+
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                        AssetFromScript(out.scriptPubKey, asset, strAddress);
+
+                        // Add the new asset to cache
+                        if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                            error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                                  asset.strName);
+                    }
+                }
+            } else if (tx.IsNewMsgChannelAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                MsgChannelAssetFromTransaction(tx, asset, strAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                          asset.strName);
+            } else if (tx.IsNewQualifierAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                QualifierAssetFromTransaction(tx, asset, strAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new qualifier asset to our cache. asset: %s", __func__,
+                          asset.strName);
+            }  else if (tx.IsNewRestrictedAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                RestrictedAssetFromTransaction(tx, asset, strAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new restricted asset to our cache. asset: %s", __func__,
+                          asset.strName);
+
+                // Find the restricted verifier string and cache it
+                CNullAssetTxVerifierString verifier;
+                // Search through all outputs until you find a restricted verifier change.
+                for (auto index: tx.vout) {
+                    if (index.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                        CNullAssetTxVerifierString verifier;
+                        if (!AssetNullVerifierDataFromScript(index.scriptPubKey, verifier))
+                            error("%s: Failed to get asset null data and add it to the coins CTxOut: %s", __func__,
+                                  index.ToString());
+
+                        // Add the verifier to the cache
+                        if (!assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
+                            error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
+                                  asset.strName, verifier.verifier_string);
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    /** ASSET END */
+
+    for (size_t i = 0; i < tx.vout.size(); ++i) {
+        bool overwrite = check ? cache.HaveCoin(COutPoint(txid, i)) : fCoinbase;
+        // Always set the possible_overwrite flag to AddCoin for coinbase txn, in order to correctly
+        // deal with the pre-BIP30 occurrences of duplicate coinbase transactions.
+        cache.AddCoin(COutPoint(txid, i), Coin(tx.vout[i], nHeight, fCoinbase), overwrite);
+
+        /** ASSET START */
+        if (AreAssetsDeployed()) {
+            if (assetsCache) {
+                CAssetOutputEntry assetData;
+                if (GetAssetData(tx.vout[i].scriptPubKey, assetData)) {
+                    if (assetData.type == TX_TRANSFER_ASSET && !tx.vout[i].scriptPubKey.IsUnspendable()) {
+                        CAssetTransfer assetTransfer;
+                        std::string address;
+                        if (!TransferAssetFromScript(tx.vout[i].scriptPubKey, assetTransfer, address))
+                            LogPrintf(
+                                    "%s : ERROR - Received a coin that was a Transfer Asset but failed to get the transfer object from the scriptPubKey. CTxOut: %s\n",
+                                    __func__, tx.vout[i].ToString());
+
+                        if (!assetsCache->AddTransferAsset(assetTransfer, address, COutPoint(txid, i), tx.vout[i]))
+                            LogPrintf("%s : ERROR - Failed to add transfer asset CTxOut: %s\n", __func__,
+                                      tx.vout[i].ToString());
+
+                        /** Subscribe to new message channels if they are sent to a new address, or they are the owner token or message channel */
+#ifdef ENABLE_WALLET
+                        if (fMessaging && pMessageSubscribedChannelsCache) {
+                            LOCK(cs_messaging);
+                            if (pwalletMain && pwalletMain->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                                AssetType aType;
+                                IsAssetNameValid(assetTransfer.strName, aType);
+
+                                if (aType == AssetType::ROOT || aType == AssetType::SUB) {
+                                    if (!IsChannelSubscribed(GetParentName(assetTransfer.strName) + OWNER_TAG)) {
+                                        if (!IsAddressSeen(address)) {
+                                            AddChannel(GetParentName(assetTransfer.strName) + OWNER_TAG);
+                                            AddAddressSeen(address);
+                                        }
+                                    }
+                                } else if (aType == AssetType::OWNER || aType == AssetType::MSGCHANNEL) {
+                                    AddChannel(assetTransfer.strName);
+                                    AddAddressSeen(address);
+                                }
+                            }
+                        }
+#endif
+                    } else if (assetData.type == TX_NEW_ASSET) {
+                        /** Subscribe to new message channels if they are assets you created, or are new msgchannels of channels already being watched */
+#ifdef ENABLE_WALLET
+                        if (fMessaging && pMessageSubscribedChannelsCache) {
+                            LOCK(cs_messaging);
+                            if (pwalletMain) {
+                                AssetType aType;
+                                IsAssetNameValid(assetData.assetName, aType);
+                                if (pwalletMain->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                                    if (aType == AssetType::ROOT || aType == AssetType::SUB) {
+                                        AddChannel(assetData.assetName + OWNER_TAG);
+                                        AddAddressSeen(EncodeDestination(assetData.destination));
+                                    } else if (aType == AssetType::OWNER || aType == AssetType::MSGCHANNEL) {
+                                        AddChannel(assetData.assetName);
+                                        AddAddressSeen(EncodeDestination(assetData.destination));
+                                    }
+                                } else {
+                                    if (aType == AssetType::MSGCHANNEL) {
+                                        if (IsChannelSubscribed(GetParentName(assetData.assetName) + OWNER_TAG)) {
+                                            AddChannel(assetData.assetName);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+#endif
+                    }
+                }
+
+                CScript script = tx.vout[i].scriptPubKey;
+                if (script.IsNullAsset()) {
+                    if (script.IsNullAssetTxDataScript()) {
+                        CNullAssetTxData data;
+                        std::string address;
+                        AssetNullDataFromScript(script, data, address);
+
+                        AssetType type;
+                        IsAssetNameValid(data.asset_name, type);
+
+                        if (type == AssetType::RESTRICTED) {
+                            assetsCache->AddRestrictedAddress(data.asset_name, address, data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS);
+                        } else if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                            assetsCache->AddQualifierAddress(data.asset_name, address, data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER);
+                        }
+                    } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
+                        CNullAssetTxData data;
+                        GlobalAssetNullDataFromScript(script, data);
+
+                        assetsCache->AddGlobalRestricted(data.asset_name, data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE);
+                    }
+                }
+            }
+        }
+        /** ASSET END */
+    }
+}
+
+static const Coin coinEmpty; 
+static const size_t MAX_OUTPUTS_PER_BLOCK = MAX_BLOCK_SIZE / ::GetSerializeSize(CTxOut(), SER_NETWORK, PROTOCOL_VERSION); // TODO: merge with similar definition in undo.h.
+
+const Coin& AccessByTxid(const CCoinsViewCache& view, const uint256& txid)
+{
+    COutPoint iter(txid, 0);
+    while (iter.n < MAX_OUTPUTS_PER_BLOCK) {
+        const Coin& alternate = view.AccessCoin(iter);
+        if (!alternate.IsSpent())
+            return alternate;
+        ++iter.n;
+    }
+    return coinEmpty;
+}
+/** ASSET END */
+
 //! Guess how far we are in the verification process at the given block index
 double GuessVerificationProgress(const ChainTxData& data, CBlockIndex* pindex)
 {
-    if (pindex == NULL)
+    if (pindex == nullptr)
         return 0.0;
 
-    int64_t nNow = time(NULL);
+    int64_t nNow = time(nullptr);
 
     double fTxTotal;
 

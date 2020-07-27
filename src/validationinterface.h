@@ -7,6 +7,8 @@
 #ifndef DYNAMIC_VALIDATIONINTERFACE_H
 #define DYNAMIC_VALIDATIONINTERFACE_H
 
+#include "primitives/transaction.h" // CTransaction(Ref)
+
 #include <boost/shared_ptr.hpp>
 #include <boost/signals2/signal.hpp>
 #include <memory>
@@ -17,6 +19,7 @@ struct CBlockLocator;
 class CConnman;
 class CGovernanceVote;
 class CGovernanceObject;
+class CMessage;
 class CReserveScript;
 class CTransaction;
 class CValidationInterface;
@@ -39,8 +42,15 @@ protected:
     virtual void AcceptedBlockHeader(const CBlockIndex* pindexNew) {}
     virtual void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload) {}
     virtual void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload) {}
-    virtual void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock) {}
-    virtual void NotifyTransactionLock(const CTransaction& tx) {}
+    /** Notifies listeners of a transaction having been added to mempool. */
+    virtual void TransactionAddedToMempool(const CTransactionRef &ptxn) {}
+    /**
+     * Notifies listeners of a block being connected.
+     * Provides a vector of transactions evicted from the mempool as a result.
+     */
+    virtual void BlockConnected(const std::shared_ptr<const CBlock> &pblock, const CBlockIndex *pindex, const std::vector<CTransactionRef>& vtxConflicted) {}
+    /** Notifies listeners of a block being disconnected */
+    virtual void BlockDisconnected(const std::shared_ptr<const CBlock> &pblock) {}    virtual void NotifyTransactionLock(const CTransaction& tx) {}
     virtual void NotifyGovernanceVote(const CGovernanceVote& vote) {}
     virtual void NotifyGovernanceObject(const CGovernanceObject& object) {}
     virtual void NotifyInstantSendDoubleSpendAttempt(const CTransaction& currentTx, const CTransaction& previousTx) {}
@@ -53,6 +63,7 @@ protected:
     virtual void ResetRequestCount(const uint256& hash){};
     virtual void NewPoWValidBlock(const CBlockIndex* pindex, const std::shared_ptr<const CBlock>& block) {}
     virtual void NotifyBDAPUpdate(const char* value, const char* action) {}
+    virtual void NewAssetMessage(const CMessage &message) {};
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterAllValidationInterfaces();
@@ -76,6 +87,9 @@ struct CMainSignals {
      * removal was due to conflict from connected block), or appeared in a
      * disconnected block.*/
     boost::signals2::signal<void(const CTransaction&, const CBlockIndex* pindex, int posInBlock)> SyncTransaction;
+    boost::signals2::signal<void (const CTransactionRef &)> TransactionAddedToMempool;
+    boost::signals2::signal<void (const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef>&)> BlockConnected;
+    boost::signals2::signal<void (const std::shared_ptr<const CBlock> &)> BlockDisconnected;
     /** Notifies listeners of an updated transaction lock without new data. */
     boost::signals2::signal<void(const CTransaction&)> NotifyTransactionLock;
     /** Notifies listeners of a new governance vote. */
@@ -104,6 +118,10 @@ struct CMainSignals {
     boost::signals2::signal<void(const CBlockIndex*, const std::shared_ptr<const CBlock>&)> NewPoWValidBlock;
     /** Notifies listeners of an updated BDAP action */
     boost::signals2::signal<void(const char* value, const char* action)> NotifyBDAPUpdate;
+/* ASSET START */
+    boost::signals2::signal<void (const CMessage &)> NewAssetMessage;
+    boost::signals2::signal<void (const std::string &)> AssetInventory;
+/* ASSET END  */
 };
 
 CMainSignals& GetMainSignals();

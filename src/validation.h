@@ -12,16 +12,28 @@
 #include "config/dynamic-config.h"
 #endif
 
+#include "addressindex.h"
 #include "amount.h"
+#include "assets/assets.h"
+#include "assets/assetdb.h"
+#include "assets/messages.h"
+#include "assets/myassetsdb.h"
+#include "assets/restricteddb.h"
+#include "assets/assetsnapshotdb.h"
+#include "assets/snapshotrequestdb.h"
 #include "chain.h"
 #include "coins.h"
+#include "fs.h"
+#include "policy/feerate.h"
 #include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "spentindex.h"
 #include "sync.h"
+#include "timestampindex.h"
 #include "versionbits.h"
 
 #include <algorithm>
+#include <atomic>
 #include <exception>
 #include <map>
 #include <set>
@@ -31,26 +43,34 @@
 #include <utility>
 #include <vector>
 
-#include <atomic>
 #include <boost/filesystem/path.hpp>
 #include <boost/unordered_map.hpp>
 
+class CAssets;
+class CAssetsCache;
+class CAssetsDB;
 class CBloomFilter;
 class CBlockIndex;
+class CBlockPolicyEstimator;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
 class CConnman;
 class CInv;
 class CKeyStore;
+class CMessage;
+class CNullAssetTxData;
 class CScriptCheck;
+class CSnapshotRequestDB;
 class CTxMemPool;
+class CTxUndo;
 class CValidationInterface;
 class CValidationState;
-struct ChainTxData;
 
-struct LockPoints;
+struct ChainTxData;
 struct CNodeStateStats;
+struct LockPoints;
+struct PrecomputedTransactionData;
 
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;
@@ -79,6 +99,8 @@ static const unsigned int DEFAULT_DESCENDANT_LIMIT = 100;
 static const unsigned int DEFAULT_DESCENDANT_SIZE_LIMIT = 404;
 /** Default for -mempoolexpiry, expiration time for mempool transactions in hours */
 static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 336;
+/** Maximum kilobytes for transactions to store for processing during reorg */
+static const unsigned int MAX_DISCONNECTED_TX_POOL_SIZE = 20000;
 /** The maximum size of a blk?????.dat file (since 0.8) */
 static const unsigned int MAX_BLOCKFILE_SIZE = 0x20000000; // 512 MiB
 /** The pre-allocation chunk size for blk?????.dat files (since 0.8) */
@@ -132,7 +154,6 @@ static const int64_t BLOCK_DOWNLOAD_TIMEOUT_BASE = 1000000;
 /** Additional block download timeout per parallel downloading peer (i.e. 1.25 min) */
 static const int64_t BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 125000;
 
-static const unsigned int DEFAULT_LIMITFREERELAY = 0;
 static const bool DEFAULT_RELAYPRIORITY = true;
 static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 64;
 /** Maximum age of our tip in seconds for us to be considered current for fee estimation */
@@ -140,9 +161,9 @@ static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 
 /** Default for -permitbaremultisig */
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
-static const unsigned int DEFAULT_BYTES_PER_SIGOP = 20;
 static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
 static const bool DEFAULT_TXINDEX = true;
+static const bool DEFAULT_ASSETINDEX = false;
 static const bool DEFAULT_ADDRESSINDEX = false;
 static const bool DEFAULT_TIMESTAMPINDEX = false;
 static const bool DEFAULT_SPENTINDEX = false;
@@ -174,6 +195,7 @@ struct BlockHasher {
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
+extern CBlockPolicyEstimator feeEstimator;
 extern CTxMemPool mempool;
 typedef std::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap mapBlockIndex;
@@ -186,11 +208,12 @@ extern uint256 g_best_block;
 extern std::atomic_bool fImporting;
 extern bool fReindex;
 extern int nScriptCheckThreads;
+extern bool fMessaging;
 extern bool fTxIndex;
+extern bool fAssetIndex;
 extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fStealthTx;
-extern unsigned int nBytesPerSigOp;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
 extern size_t nCoinCacheUsage;
@@ -198,6 +221,7 @@ extern size_t nCoinCacheUsage;
 extern CFeeRate minRelayTxFee;
 /** Absolute maximum transaction fee (in satoshis) used by wallet and mempool (rejects high fee in sendrawtransaction) */
 extern CAmount maxTxFee;
+extern bool fUnitTest;
 extern bool fAlerts;
 /** If the tip is older than this (in seconds), the node is considered to be in initial block download. */
 extern int64_t nMaxTipAge;
@@ -217,9 +241,6 @@ extern uint256 hashAssumeValid;
 
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex* pindexBestHeader;
-
-/** BDAP, only check when fully loaded **/
-extern bool fLoaded;
 
 /** Proof-of-Stake maps **/
 extern std::map<uint256, int64_t> mapRejectedBlocks;
@@ -256,7 +277,7 @@ static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 1590 * 1024 * 1024;
  * @param[in]   pfrom   The node which we are receiving the block from; it is added to mapBlockSource and may be penalised if the block is invalid.
  * @param[in]   pblock  The block we want to process.
  * @param[in]   fForceProcessing Process this block even if unrequested; used for non-network block sources and whitelisted peers.
- * @param[out]  dbp     The already known disk position of pblock, or NULL if not yet stored.
+ * @param[out]  dbp     The already known disk position of pblock, or nullptr if not yet stored.
  * @return True if state.IsValid()
  */
 bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<const CBlock> pblock, bool fForceProcessing, bool* fNewBlock);
@@ -269,7 +290,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
  * @param[in]  chainparams The params for the chain we want to connect to
  * @param[out] ppindex If set, the pointer will be set to point to the last new block index object for the given headers
  */
-bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& block, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex = NULL);
+bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& block, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex=nullptr, CBlockHeader *first_invalid=nullptr);
 
 /** Check whether enough disk space is available for an incoming block */
 bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
@@ -280,7 +301,7 @@ FILE* OpenUndoFile(const CDiskBlockPos& pos, bool fReadOnly = false);
 /** Translation to a filesystem path */
 boost::filesystem::path GetBlockPosFilename(const CDiskBlockPos& pos, const char* prefix);
 /** Import blocks from an external file */
-bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskBlockPos* dbp = NULL);
+bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskBlockPos* dbp = nullptr);
 /** Initialize a new block tree database + block data on disk */
 bool InitBlockIndex(const CChainParams& chainparams);
 /** Load the block tree and coins database from disk */
@@ -348,10 +369,10 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
 /** (try to) add transaction to memory pool
  * plTxnReplaced will be appended to with all transactions replaced from mempool **/
 
-bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool fLimitFree, bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced = NULL, bool fOverrideMempoolLimit = false, const CAmount nAbsurdFee = 0, bool fDryRun = false);
+bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced = nullptr, bool fOverrideMempoolLimit = false, const CAmount nAbsurdFee = 0, bool fDryRun = false);
 
 /** (try to) add transaction to memory pool with a specified acceptance time **/
-bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool fLimitFree, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced = NULL, bool fOverrideMempoolLimit = false, const CAmount nAbsurdFee = 0, bool fDryRun = false);
+bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const CTransactionRef& tx, bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced = nullptr, bool fOverrideMempoolLimit = false, const CAmount nAbsurdFee = 0, bool fDryRun = false);
 
 bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin);
 int GetUTXOHeight(const COutPoint& outpoint);
@@ -386,18 +407,20 @@ unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& ma
 
 /**
  * Check whether all inputs of this transaction are valid (no double spends, scripts & sigs, amounts)
- * This does not modify the UTXO set. If pvChecks is not NULL, script checks are pushed onto it
+ * This does not modify the UTXO set. If pvChecks is not nullptr, script checks are pushed onto it
  * instead of being performed inline.
  */
-bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& view, bool fScriptChecks, unsigned int flags, bool cacheStore, std::vector<CScriptCheck>* pvChecks = NULL);
+bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& view, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks = nullptr);
 
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
+
 /** Transaction validation functions */
 
 /** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state);
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true, bool fMempoolCheck = false, bool fBlockCheck = false);
 /** 
  * Validate the usage of BDAP credits to makes sure they are not recirculated
  * with standard DYN (trapped as fuel credit) and used to fund the appropriate BDAP operation.
@@ -412,7 +435,11 @@ namespace Consensus
  * This does not modify the UTXO set. This does not check scripts and sigs.
  * Preconditions: tx.IsCoinBase() is false.
  */
-bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight);
+bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee);
+
+/* ASSET START */
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0,  std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData = nullptr);
+/* ASSET END */
 
 } // namespace Consensus
 
@@ -453,7 +480,7 @@ bool SequenceLocks(const CTransaction& tx, int flags, std::vector<int>* prevHeig
  *
  * See consensus/consensus.h for flag definitions.
  */
-bool CheckSequenceLocks(const CTransaction& tx, int flags, LockPoints* lp = NULL, bool useExistingLockPoints = false);
+bool CheckSequenceLocks(const CTransaction& tx, int flags, LockPoints* lp = nullptr, bool useExistingLockPoints = false);
 
 /**
  * Closure representing one script verification
@@ -462,35 +489,40 @@ bool CheckSequenceLocks(const CTransaction& tx, int flags, LockPoints* lp = NULL
 class CScriptCheck
 {
 private:
-    CScript scriptPubKey;
-    const CTransaction* ptxTo;
+    CTxOut m_tx_out;
+    const CTransaction *ptxTo;
     unsigned int nIn;
     unsigned int nFlags;
     bool cacheStore;
     ScriptError error;
+    PrecomputedTransactionData *txdata;
 
 public:
-    CScriptCheck() : ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CScript& scriptPubKeyIn, const CAmount amountIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn) : scriptPubKey(scriptPubKeyIn),
-                                                                                                                                                               ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(): ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) :
+        m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) { }
 
     bool operator()();
 
-    void swap(CScriptCheck& check)
-    {
-        scriptPubKey.swap(check.scriptPubKey);
+    void swap(CScriptCheck &check) {
         std::swap(ptxTo, check.ptxTo);
+        std::swap(m_tx_out, check.m_tx_out);
         std::swap(nIn, check.nIn);
         std::swap(nFlags, check.nFlags);
         std::swap(cacheStore, check.cacheStore);
         std::swap(error, check.error);
+        std::swap(txdata, check.txdata);
     }
-
+    
     ScriptError GetScriptError() const { return error; }
 };
 
-bool GetTimestampIndex(const unsigned int& high, const unsigned int& low, std::vector<uint256>& hashes);
+/** Initializes the script-execution cache */
+void InitScriptExecutionCache();
+
+bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &hashes);
 bool GetSpentIndex(CSpentIndexKey& key, CSpentIndexValue& value);
+bool HashOnchainActive(const uint256 &hash);
 bool GetAddressIndex(uint160 addressHash, int type, std::vector<std::pair<CAddressIndexKey, CAmount> >& addressIndex, int start = 0, int end = 0);
 bool GetAddressUnspent(uint160 addressHash, int type, std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> >& unspentOutputs);
 
@@ -507,11 +539,11 @@ void ReprocessBlocks(int nBlocks);
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true);
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fDBCheck = false);
 
 /** Context-dependent validity checks */
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, int64_t nAdjustedTime, bool fProofOfStake);
-bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, CAssetsCache* assetCache);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
 bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
@@ -551,6 +583,60 @@ extern CCoinsViewCache* pcoinsTip;
 
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB* pblocktree;
+
+/** ASSET START */
+
+/** Global variable that point to the active assets database (protected by cs_main) */
+extern CAssetsDB *passetsdb;
+
+/** Global variable that point to the active assets (protected by cs_main) */
+extern CAssetsCache *passets;
+
+/** Global variable that point to the assets metadata LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
+
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CMessage> *pMessagesCache;
+
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
+
+/** Global variable that points to the address seen LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
+
+/** Global variable that points to the messages database (protected by cs_main) */
+extern CMessageDB *pmessagedb;
+
+/** Global variable that points to the message channel database (protected by cs_main) */
+extern CMessageChannelDB *pmessagechanneldb;
+
+/** Global variable that points to my wallets restricted database (protected by cs_main) */
+extern CMyRestrictedDB *pmyrestricteddb;
+
+/** Global variable that points to the active restricted asset database (protected by cs_main) */
+extern CRestrictedDB *prestricteddb;
+
+/** Global variable that points to the asset verifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache;
+
+/** Global variable that points to the asset address qualifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsQualifierCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the asset address restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsRestrictionCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the global asset restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache;
+
+/** Global variable that point to the active Snapshot Request database (protected by cs_main) */
+extern CSnapshotRequestDB *pSnapshotRequestDb;
+
+/** Global variable that point to the active asset snapshot database (protected by cs_main) */
+extern CAssetSnapshotDB *pAssetSnapshotDb;
+
+extern CDistributeSnapshotRequestDB *pDistributeSnapshotDb;
+
+/** ASSET END */
 
 /**
  * Return the spend height, which is one more than the inputs.GetBestBlock().
@@ -592,6 +678,42 @@ void DumpMempool();
 
 /** Load the mempool from disk. */
 bool LoadMempool();
+
+/** ASSET START */
+bool AreAssetsDeployed();
+
+bool AreMessagesDeployed();
+
+bool AreRestrictedAssetsDeployed();
+
+bool IsMsgRestAssetIsActive();
+
+bool AreTransferScriptsSizeDeployed();
+
+bool AreEnforcedValuesAreActive();
+
+CAssetsCache* GetCurrentAssetCache();
+
+//! Utility function to add all of a transaction's outputs to a cache.
+// When check is false, this assumes that overwrites are only possible for coinbase transactions.
+// When check is true, the underlying view may be queried to determine whether an addition is
+// an overwrite.
+// TODO: pass in a boolean to limit these possible overwrites to known
+// (pre-BIP34) cases.
+void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction& tx, int nHeight, uint256 blockHash, bool check = false, CAssetsCache* assetsCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
+
+/**
+ * Spend a coin. Pass moveto in order to get the deleted data.
+ * If no unspent output exists for the passed outpoint, this call
+ * has no effect.
+*/
+bool SpendCoinWithAssets(CCoinsViewCache& cache, const COutPoint &outpoint, Coin* moveto = nullptr, CAssetsCache* assetsCache = nullptr);
+//! Utility function to find any unspent output with a given txid.
+// This function can be quite expensive because in the event of a transaction
+// which is not found in the cache, it can cause up to MAX_OUTPUTS_PER_BLOCK
+// lookups to database, so it should be used with care.
+const Coin& AccessByTxid(const CCoinsViewCache& cache, const uint256& txid);
+/** ASSET END */
 
 class CServiceCredit {
 public:

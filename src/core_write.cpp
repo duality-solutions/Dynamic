@@ -7,8 +7,10 @@
 
 #include "core_io.h"
 
+#include "assets/assets.h"
 #include "base58.h"
-#include "primitives/transaction.h"
+#include "consensus/consensus.h"
+#include "consensus/validation.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "serialize.h"
@@ -16,11 +18,38 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "wallet/wallet.h"
 
+#include <iomanip>
 #include <univalue.h>
 
 #include <boost/assign/list_of.hpp>
-#include <boost/foreach.hpp>
+
+std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
+{
+    bool sign = amount < 0;
+    int64_t n_abs = (sign ? -amount : amount);
+    int64_t quotient = n_abs / COIN;
+    int64_t remainder = n_abs % COIN;
+    remainder = remainder / pow(10, 8 - units);
+
+    if (units == 0 && remainder == 0) {
+        return strprintf("%s%d", sign ? "-" : "", quotient);
+    }
+    else {
+        return strprintf("%s%d.%0" + std::to_string(units) + "d", sign ? "-" : "", quotient, remainder);
+    }
+}
+
+UniValue ValueFromAmount(const CAmount& amount, const int8_t units)
+{
+    return UniValue(UniValue::VNUM, ValueFromAmountString(amount, units));
+}
+
+UniValue ValueFromAmount(const CAmount& amount)
+{
+    return ValueFromAmount(amount, 8);
+}
 
 std::string FormatScript(const CScript& script)
 {
@@ -92,7 +121,7 @@ std::string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDeco
                     // this won't decode correctly formatted public keys in Pubkey or Multisig scripts due to
                     // the restrictions on the pubkey formats (see IsCompressedOrUncompressedPubKey) being incongruous with the
                     // checks in CheckSignatureEncoding.
-                    if (CheckSignatureEncoding(vch, SCRIPT_VERIFY_STRICTENC, NULL)) {
+                    if (CheckSignatureEncoding(vch, SCRIPT_VERIFY_STRICTENC, nullptr)) {
                         const unsigned char chSigHashType = vch.back();
                         if (mapSigHashTypes.count(chSigHashType)) {
                             strSigHashDecode = "[" + mapSigHashTypes.find(chSigHashType)->second + "]";
@@ -111,17 +140,15 @@ std::string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDeco
     return str;
 }
 
-std::string EncodeHexTx(const CTransaction& tx)
+std::string EncodeHexTx(const CTransaction& tx, const int serializeFlags)
 {
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION | serializeFlags);
     ssTx << tx;
     return HexStr(ssTx.begin(), ssTx.end());
 }
 
-void ScriptPubKeyToUniv(const CScript& scriptPubKey,
-    UniValue& out,
-    bool fIncludeHex)
-{
+ void ScriptPubKeyToUniv(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex)
+ {
     txnouttype type;
     std::vector<CTxDestination> addresses;
     int nRequired;
@@ -139,19 +166,19 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
     out.pushKV("type", GetTxnOutputType(type));
 
     UniValue a(UniValue::VARR);
-    BOOST_FOREACH (const CTxDestination& addr, addresses)
-        a.push_back(CDynamicAddress(addr).ToString());
+    for (const CTxDestination& addr : addresses) 
+         a.push_back(CDynamicAddress(addr).ToString()); 
     out.pushKV("addresses", a);
 }
 
-void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry)
-{
+ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry) 
+ {
     entry.pushKV("txid", tx.GetHash().GetHex());
     entry.pushKV("version", tx.nVersion);
     entry.pushKV("locktime", (int64_t)tx.nLockTime);
 
     UniValue vin(UniValue::VARR);
-    BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+    for (const CTxIn& txin : tx.vin) { 
         UniValue in(UniValue::VOBJ);
         if (tx.IsCoinBase())
             in.pushKV("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end()));

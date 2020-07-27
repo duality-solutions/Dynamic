@@ -69,10 +69,10 @@ private:
 
     bool CreateTxLockCandidate(const CTxLockRequest& txLockRequest);
     void CreateEmptyTxLockCandidate(const uint256& txHash);
-    void Vote(CTxLockCandidate& txLockCandidate, CConnman& connman);
+    void Vote(CTxLockCandidate& txLockCandidate, CConnman* connman);
 
     /// Process consensus vote message
-    bool ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, CConnman& connman);
+    bool ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, CConnman* connman);
 
     void UpdateVotedOutpoints(const CTxLockVote& vote, CTxLockCandidate& txLockCandidate);
     bool ProcessOrphanTxLockVote(const CTxLockVote& vote);
@@ -118,10 +118,10 @@ public:
 
     void Clear();
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
-    bool ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman& connman);
-    void Vote(const uint256& txHash, CConnman& connman);
+    bool ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman* connman);
+    void Vote(const uint256& txHash, CConnman* connman);
 
     bool AlreadyHave(const uint256& hash);
 
@@ -144,7 +144,7 @@ public:
     /// Verify if transaction lock timed out
     bool IsTxLockCandidateTimedOut(const uint256& txHash);
 
-    void Relay(const uint256& txHash, CConnman& connman);
+    void Relay(const uint256& txHash, CConnman* connman);
 
     void UpdatedBlockTip(const CBlockIndex* pindex);
     void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock);
@@ -279,7 +279,7 @@ public:
     COutPoint GetOutpoint() const { return outpoint; }
     COutPoint GetDynodeOutpoint() const { return outpointDynode; }
 
-    bool IsValid(CNode* pnode, CConnman& connman) const;
+    bool IsValid(CNode* pnode, CConnman* connman) const;
     void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }
     bool IsExpired(int nHeight) const;
     bool IsTimedOut() const;
@@ -288,7 +288,7 @@ public:
     bool Sign();
     bool CheckSignature() const;
 
-    void Relay(CConnman& connman) const;
+    void Relay(CConnman* connman) const;
 };
 
 /**
@@ -331,7 +331,7 @@ public:
     bool IsReady() const { return !fAttacked && CountVotes() >= SIGNATURES_REQUIRED; }
     void MarkAsAttacked() { fAttacked = true; }
 
-    void Relay(CConnman& connman) const;
+    void Relay(CConnman* connman) const;
 };
 
 /**
@@ -384,7 +384,7 @@ public:
     bool IsExpired(int nHeight) const;
     bool IsTimedOut() const;
 
-    void Relay(CConnman& connman) const;
+    void Relay(CConnman* connman) const;
 };
 
 #endif // INSTANTSEND_H

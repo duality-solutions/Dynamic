@@ -19,8 +19,6 @@
 #include <openssl/evp.h>
 #include <libtorrent/hex.hpp>
 
-#include <boost/foreach.hpp>
-
 using namespace libtorrent;
 
 bool CCrypter::SetKeyFromPassphrase(const SecureString& strKeyData, const std::vector<unsigned char>& chSalt, const unsigned int nRounds, const unsigned int nDerivationMethod)
@@ -75,7 +73,7 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
 
     EVP_CIPHER_CTX_init(ctx);
     if (fOk)
-        fOk = EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, vchKey.data(), vchIV.data()) != 0;
+        fOk = EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, vchKey.data(), vchIV.data()) != 0;
     if (fOk)
         fOk = EVP_EncryptUpdate(ctx, &vchCiphertext[0], &nCLen, &vchPlaintext[0], nLen) != 0;
     if (fOk)
@@ -111,7 +109,7 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
 
     EVP_CIPHER_CTX_init(ctx);
     if (fOk)
-        fOk = EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, vchKey.data(), vchIV.data()) != 0;
+        fOk = EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, vchKey.data(), vchIV.data()) != 0;
     if (fOk)
         fOk = EVP_DecryptUpdate(ctx, &vchPlaintext[0], &nPLen, &vchCiphertext[0], nLen) != 0;
     if (fOk)
@@ -167,7 +165,7 @@ bool EncryptAES256(const SecureString& sKey, const SecureString& sPlaintext, con
 
     EVP_CIPHER_CTX_init(ctx);
     if (fOk)
-        fOk = EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)&sKey[0], (const unsigned char*)&sIV[0]);
+        fOk = EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, (const unsigned char*)&sKey[0], (const unsigned char*)&sIV[0]);
     if (fOk)
         fOk = EVP_EncryptUpdate(ctx, (unsigned char*)&sCiphertext[0], &nCLen, (const unsigned char*)&sPlaintext[0], nLen);
     if (fOk)
@@ -217,7 +215,7 @@ bool DecryptAES256(const SecureString& sKey, const std::string& sCiphertext, con
 
     EVP_CIPHER_CTX_init(ctx);
     if (fOk)
-        fOk = EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)&sKey[0], (const unsigned char*)&sIV[0]);
+        fOk = EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, (const unsigned char*)&sKey[0], (const unsigned char*)&sIV[0]);
     if (fOk)
         fOk = EVP_DecryptUpdate(ctx, (unsigned char*)&sPlaintext[0], &nPLen, (const unsigned char*)&sCiphertext[0], nLen);
     if (fOk)

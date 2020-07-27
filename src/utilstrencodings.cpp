@@ -17,289 +17,40 @@
 static const std::string CHARS_ALPHA_NUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 static const std::string SAFE_CHARS[] =
-    {
-        CHARS_ALPHA_NUM + " .,;-_/:?@()", // SAFE_CHARS_DEFAULT
-        CHARS_ALPHA_NUM + " .,;-_?@"      // SAFE_CHARS_UA_COMMENT
+{
+    CHARS_ALPHA_NUM + " .,;-_/:?@()", // SAFE_CHARS_DEFAULT
+    CHARS_ALPHA_NUM + " .,;-_?@", // SAFE_CHARS_UA_COMMENT
+    CHARS_ALPHA_NUM + ".-_", // SAFE_CHARS_FILENAME
 };
 
 std::string SanitizeString(const std::string& str, int rule)
 {
     std::string strResult;
-    for (std::string::size_type i = 0; i < str.size(); i++) {
+    for (std::string::size_type i = 0; i < str.size(); i++)
+    {
         if (SAFE_CHARS[rule].find(str[i]) != std::string::npos)
             strResult.push_back(str[i]);
     }
     return strResult;
 }
 
-std::string SanitizeSubVersionString(const std::string& str)
-{
-    std::string strResult = SanitizeString(str);
-    if ((strResult.length() > 2) && (!strResult.empty()) && (strResult.substr(0, 1) == "/") && (strResult.substr((strResult.length() - 1), 1) == "/"))
-        strResult = strResult.substr(1, (strResult.length() - 2));
-
-    return strResult;
-}
-
 const signed char p_util_hexdigit[256] =
-    {
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        0xa,
-        0xb,
-        0xc,
-        0xd,
-        0xe,
-        0xf,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        0xa,
-        0xb,
-        0xc,
-        0xd,
-        0xe,
-        0xf,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-};
+{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
+  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, };
 
 signed char HexDigit(char c)
 {
@@ -684,7 +435,7 @@ bool ParseInt32(const std::string& str, int32_t* out)
 {
     if (!ParsePrechecks(str))
         return false;
-    char* endp = NULL;
+    char* endp = nullptr;
     errno = 0; // strtol will not set errno if valid
     long int n = strtol(str.c_str(), &endp, 10);
     if (out)
@@ -697,29 +448,13 @@ bool ParseInt32(const std::string& str, int32_t* out)
            n <= std::numeric_limits<int32_t>::max();
 }
 
-bool ParseInt64(const std::string& str, int64_t* out)
-{
-    if (!ParsePrechecks(str))
-        return false;
-    char* endp = NULL;
-    errno = 0; // strtoll will not set errno if valid
-    long long int n = strtoll(str.c_str(), &endp, 10);
-    if (out)
-        *out = (int64_t)n;
-    // Note that strtoll returns a *long long int*, so even if strtol doesn't report a over/underflow
-    // we still have to check that the returned value is within the range of an *int64_t*.
-    return endp && *endp == 0 && !errno &&
-           n >= std::numeric_limits<int64_t>::min() &&
-           n <= std::numeric_limits<int64_t>::max();
-}
-
 bool ParseUInt32(const std::string& str, uint32_t* out)
 {
     if (!ParsePrechecks(str))
         return false;
     if (str.size() >= 1 && str[0] == '-') // Reject negative values, unfortunately strtoul accepts these by default if they fit in the range
         return false;
-    char* endp = NULL;
+    char* endp = nullptr;
     errno = 0; // strtoul will not set errno if valid
     unsigned long int n = strtoul(str.c_str(), &endp, 10);
     if (out)
@@ -731,13 +466,29 @@ bool ParseUInt32(const std::string& str, uint32_t* out)
            n <= std::numeric_limits<uint32_t>::max();
 }
 
+bool ParseInt64(const std::string& str, int64_t* out)
+{
+    if (!ParsePrechecks(str))
+        return false;
+    char* endp = nullptr;
+    errno = 0; // strtoll will not set errno if valid
+    long long int n = strtoll(str.c_str(), &endp, 10);
+    if (out)
+        *out = (int64_t)n;
+    // Note that strtoll returns a *long long int*, so even if strtol doesn't report a over/underflow
+    // we still have to check that the returned value is within the range of an *int64_t*.
+    return endp && *endp == 0 && !errno &&
+           n >= std::numeric_limits<int64_t>::min() &&
+           n <= std::numeric_limits<int64_t>::max();
+}
+
 bool ParseUInt64(const std::string& str, uint64_t* out)
 {
     if (!ParsePrechecks(str))
         return false;
     if (str.size() >= 1 && str[0] == '-') // Reject negative values, unfortunately strtoull accepts these by default if they fit in the range
         return false;
-    char* endp = NULL;
+    char* endp = nullptr;
     errno = 0; // strtoull will not set errno if valid
     unsigned long long int n = strtoull(str.c_str(), &endp, 10);
     if (out)
@@ -810,7 +561,7 @@ int64_t atoi64(const char* psz)
 #ifdef _MSC_VER
     return _atoi64(psz);
 #else
-    return strtoll(psz, NULL, 10);
+    return strtoll(psz, nullptr, 10);
 #endif
 }
 
@@ -819,7 +570,7 @@ int64_t atoi64(const std::string& str)
 #ifdef _MSC_VER
     return _atoi64(str.c_str());
 #else
-    return strtoll(str.c_str(), NULL, 10);
+    return strtoll(str.c_str(), nullptr, 10);
 #endif
 }
 

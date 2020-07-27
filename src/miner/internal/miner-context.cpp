@@ -7,7 +7,7 @@
 #include "txmempool.h"
 #include "validation.h"
 
-MinerContext::MinerContext(const CChainParams& chainparams_, CConnman& connman_)
+MinerContext::MinerContext(const CChainParams& chainparams_, CConnman* connman_)
     : counter(std::make_shared<HashRateCounter>()),
       shared(std::make_shared<MinerSharedContext>(chainparams_, connman_)){};
 

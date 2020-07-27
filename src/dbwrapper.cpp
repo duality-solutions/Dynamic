@@ -7,6 +7,7 @@
 
 #include "dbwrapper.h"
 
+#include "fs.h"
 #include "random.h"
 #include "util.h"
 
@@ -96,7 +97,7 @@ static leveldb::Options GetOptions(size_t nCacheSize)
 
 CDBWrapper::CDBWrapper(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate)
 {
-    penv = NULL;
+    penv = nullptr;
     readoptions.verify_checksums = true;
     iteroptions.verify_checksums = true;
     iteroptions.fill_cache = false;
@@ -119,7 +120,7 @@ CDBWrapper::CDBWrapper(const boost::filesystem::path& path, size_t nCacheSize, b
     dbwrapper_private::HandleError(status);
     LogPrintf("Opened LevelDB successfully\n");
 
-    if (GetBoolArg("-forcecompactdb", false)) {
+    if (gArgs.GetBoolArg("-forcecompactdb", false)) {
         LogPrintf("Starting database compaction of %s\n", path.string());
         pdb->CompactRange(nullptr, nullptr);
         LogPrintf("Finished database compaction of %s\n", path.string());
@@ -148,15 +149,15 @@ CDBWrapper::CDBWrapper(const boost::filesystem::path& path, size_t nCacheSize, b
 CDBWrapper::~CDBWrapper()
 {
     delete pdb;
-    pdb = NULL;
+    pdb = nullptr;
     delete options.filter_policy;
-    options.filter_policy = NULL;
+    options.filter_policy = nullptr;
     delete options.info_log;
-    options.info_log = NULL;
+    options.info_log = nullptr;
     delete options.block_cache;
-    options.block_cache = NULL;
+    options.block_cache = nullptr;
     delete penv;
-    options.env = NULL;
+    options.env = nullptr;
 }
 
 bool CDBWrapper::WriteBatch(CDBBatch& batch, bool fSync)

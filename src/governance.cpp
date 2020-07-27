@@ -87,7 +87,7 @@ bool CGovernanceManager::SerializeVoteForHash(const uint256& nHash, CDataStream&
     return cmapVoteToObject.Get(nHash, pGovobj) && pGovobj->GetVoteFile().SerializeVoteToStream(nHash, ss);
 }
 
-void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
+void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     // lite mode is not supported
     if (fLiteMode)
@@ -99,7 +99,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strComm
     if (strCommand == NetMsgType::DNGOVERNANCESYNC) {
         if (pfrom->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) {
             LogPrint("gobject", "DNGOVERNANCESYNC -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -142,7 +142,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strComm
 
         if (pfrom->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) {
             LogPrint("gobject", "DNGOVERNANCEOBJECT -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -230,7 +230,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strComm
 
         if (pfrom->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) {
             LogPrint("gobject", "DNGOVERNANCEOBJECTVOTE -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
-            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, strprintf("Version must be %d or greater", MIN_GOVERNANCE_PEER_PROTO_VERSION)));
         }
 
         // Ignore such messages until dynode list is synced
@@ -267,7 +267,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, const std::string& strComm
     }
 }
 
-void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernanceException& exception, CConnman& connman)
+void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernanceException& exception, CConnman* connman)
 {
     uint256 nHash = govobj.GetHash();
     std::vector<vote_time_pair_t> vecVotePairs;
@@ -293,7 +293,7 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
     }
 }
 
-void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman& connman, CNode* pfrom)
+void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman* connman, CNode* pfrom)
 {
     DBG(std::cout << "CGovernanceManager::AddGovernanceObject START" << std::endl;);
 
@@ -572,7 +572,7 @@ struct sortProposalsByVotes {
     }
 };
 
-void CGovernanceManager::DoMaintenance(CConnman& connman)
+void CGovernanceManager::DoMaintenance(CConnman* connman)
 {
     if (fLiteMode || !dynodeSync.IsSynced() || ShutdownRequested()) 
         return;
@@ -640,7 +640,7 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
     return true;
 }
 
-void CGovernanceManager::SyncSingleObjAndItsVotes(CNode* pnode, const uint256& nProp, const CBloomFilter& filter, CConnman& connman)
+void CGovernanceManager::SyncSingleObjAndItsVotes(CNode* pnode, const uint256& nProp, const CBloomFilter& filter, CConnman* connman)
 {
     // do not provide any data until our node is synced
     if (!dynodeSync.IsSynced())
@@ -687,12 +687,12 @@ void CGovernanceManager::SyncSingleObjAndItsVotes(CNode* pnode, const uint256& n
     }
 
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, 1));
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, 1));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount));
     LogPrintf("CGovernanceManager::%s -- sent 1 object and %d votes to peer=%d\n", __func__, nVoteCount, pnode->id);
 }
 
-void CGovernanceManager::SyncAll(CNode* pnode, CConnman& connman) const
+void CGovernanceManager::SyncAll(CNode* pnode, CConnman* connman) const
 {
     // do not provide any data until our node is synced
     if (!dynodeSync.IsSynced())
@@ -737,8 +737,8 @@ void CGovernanceManager::SyncAll(CNode* pnode, CConnman& connman) const
     }
 
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, nObjCount));
-    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, nObjCount));
+    connman->PushMessage(pnode, msgMaker.Make(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount));
     LogPrintf("CGovernanceManager::%s -- sent %d objects and %d votes to peer=%d\n", __func__, nObjCount, nVoteCount, pnode->id);
 }
 
@@ -838,7 +838,7 @@ bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, bool f
     return false;
 }
 
-bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, CGovernanceException& exception, CConnman& connman)
+bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, CGovernanceException& exception, CConnman* connman)
 {
     ENTER_CRITICAL_SECTION(cs);
     uint256 nHashVote = vote.GetHash();
@@ -892,7 +892,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
     return fOk;
 }
 
-void CGovernanceManager::CheckDynodeOrphanVotes(CConnman& connman)
+void CGovernanceManager::CheckDynodeOrphanVotes(CConnman* connman)
 {
     LOCK2(cs_main, cs);
 
@@ -903,7 +903,7 @@ void CGovernanceManager::CheckDynodeOrphanVotes(CConnman& connman)
     }
 }
 
-void CGovernanceManager::CheckDynodeOrphanObjects(CConnman& connman)
+void CGovernanceManager::CheckDynodeOrphanObjects(CConnman* connman)
 {
     LOCK2(cs_main, cs);
     int64_t nNow = GetAdjustedTime();
@@ -938,7 +938,7 @@ void CGovernanceManager::CheckDynodeOrphanObjects(CConnman& connman)
     }
 }
 
-void CGovernanceManager::CheckPostponedObjects(CConnman& connman)
+void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
 {
     if (!dynodeSync.IsSynced())
         return;
@@ -1003,7 +1003,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman& connman)
     }
 }
 
-void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nHash, CConnman& connman, bool fUseFilter)
+void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nHash, CConnman* connman, bool fUseFilter)
 {
     if (!pfrom) {
         return;
@@ -1014,7 +1014,7 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     CNetMsgMaker msgMaker(pfrom->GetSendVersion());
 
     if (pfrom->nVersion < GOVERNANCE_FILTER_PROTO_VERSION) {
-        connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::DNGOVERNANCESYNC, nHash));
+        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::DNGOVERNANCESYNC, nHash));
         return;
     }
 
@@ -1037,10 +1037,10 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     }
 
     LogPrint("gobject", "CGovernanceManager::RequestGovernanceObject -- nHash %s nVoteCount %d peer=%d\n", nHash.ToString(), nVoteCount, pfrom->id);
-    connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::DNGOVERNANCESYNC, nHash, filter));
+    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::DNGOVERNANCESYNC, nHash, filter));
 }
 
-int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode, CConnman& connman)
+int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode, CConnman* connman)
 {
     if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION)
         return -3;
@@ -1049,7 +1049,7 @@ int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode, CConnman& con
     return RequestGovernanceObjectVotes(vNodesCopy, connman);
 }
 
-int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy, CConnman& connman)
+int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy, CConnman* connman)
 {
     static std::map<uint256, std::map<CService, int64_t> > mapAskedRecently;
 
@@ -1291,7 +1291,7 @@ UniValue CGovernanceManager::ToJson() const
     return jsonObj;
 }
 
-void CGovernanceManager::UpdatedBlockTip(const CBlockIndex* pindex, CConnman& connman)
+void CGovernanceManager::UpdatedBlockTip(const CBlockIndex* pindex, CConnman* connman)
 {
     // Note this gets called from ActivateBestChain without cs_main being held
     // so it should be safe to lock our mutex here without risking a deadlock
@@ -1310,9 +1310,9 @@ void CGovernanceManager::UpdatedBlockTip(const CBlockIndex* pindex, CConnman& co
     CSuperblockManager::ExecuteBestSuperblock(pindex->nHeight);
 }
 
-void CGovernanceManager::RequestOrphanObjects(CConnman& connman)
+void CGovernanceManager::RequestOrphanObjects(CConnman* connman)
 {
-    std::vector<CNode*> vNodesCopy = connman.CopyNodeVector(CConnman::FullyConnectedOnly);
+    std::vector<CNode*> vNodesCopy = connman->CopyNodeVector(CConnman::FullyConnectedOnly);
 
     std::vector<uint256> vecHashesFiltered;
     {
@@ -1339,7 +1339,7 @@ void CGovernanceManager::RequestOrphanObjects(CConnman& connman)
         }
     }
 
-    connman.ReleaseNodeVector(vNodesCopy);
+    connman->ReleaseNodeVector(vNodesCopy);
 }
 
 void CGovernanceManager::CleanOrphanObjects()

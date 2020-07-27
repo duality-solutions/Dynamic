@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_DOMAINENTRY_H
 #define DYNAMIC_BDAP_DOMAINENTRY_H
 
-#include "bdap.h"
+#include "bdap/bdap.h"
 #include "bdap/utils.h"
 #include "amount.h"
 #include "consensus/params.h"

@@ -10,9 +10,14 @@
 #define DYNAMIC_PRIMITIVES_TRANSACTION_H
 
 #include "amount.h"
+#include "policy/feerate.h"
 #include "script/script.h"
 #include "serialize.h"
 #include "uint256.h"
+
+/** ASSET START */
+class CNullAssetTxVerifierString;
+/** ASSET END */
 
 enum DataOutputTypes
 {
@@ -30,12 +35,8 @@ public:
     uint256 hash;
     uint32_t n;
 
-    COutPoint() { SetNull(); }
-    COutPoint(uint256 hashIn, uint32_t nIn)
-    {
-        hash = hashIn;
-        n = nIn;
-    }
+    COutPoint(): n((uint32_t) -1) { }
+    COutPoint(const uint256& hashIn, uint32_t nIn): hash(hashIn), n(nIn) { }
 
     ADD_SERIALIZE_METHODS;
 
@@ -71,6 +72,7 @@ public:
 
     std::string ToString() const;
     std::string ToStringShort() const;
+    std::string ToSerializedString() const;
     bool IsDynodeReward(const CTransaction* tx) const;
 
 };
@@ -200,7 +202,7 @@ public:
         return (nValue == 0 && scriptPubKey.empty());
     }
 
-    CAmount GetDustThreshold(const CFeeRate& minRelayTxFee) const
+    CAmount GetDustThreshold(const CFeeRate& dustRelayFeeIn) const
     {
         // "Dust" is defined in terms of CTransaction::minRelayTxFee, which has units satoshis-per-kilobyte.
         // If you'd pay more than 1/3 in fees to spend something, then we consider it dust.
@@ -213,12 +215,15 @@ public:
             return 0;
 
         size_t nSize = GetSerializeSize(*this, SER_DISK, 0) + 148u;
-        return 3 * minRelayTxFee.GetFee(nSize);
+        return dustRelayFeeIn.GetFee(nSize);
     }
 
-    bool IsDust(const CFeeRate& minRelayTxFee) const
+    bool IsDust(const CFeeRate& dustRelayFeeIn) const
     {
-        return (nValue < GetDustThreshold(minRelayTxFee));
+        if (scriptPubKey.IsAssetScript())
+            return false;
+        else
+            return (nValue < GetDustThreshold(dustRelayFeeIn));
     }
 
     friend bool operator==(const CTxOut& a, const CTxOut& b)
@@ -320,8 +325,29 @@ public:
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize = 0) const;
 
+    /** ASSET START */
+    bool IsNewAsset() const;
+    bool VerifyNewAsset(std::string& strError) const;
+    bool IsNewUniqueAsset() const;
+    bool VerifyNewUniqueAsset(std::string& strError) const;
+    bool IsReissueAsset() const;
+    bool VerifyReissueAsset(std::string& strError) const;
+    bool IsNewMsgChannelAsset() const;
+    bool VerifyNewMsgChannelAsset(std::string& strError) const;
+    bool IsNewQualifierAsset() const;
+    bool VerifyNewQualfierAsset(std::string &strError) const;
+    bool IsNewRestrictedAsset() const;
+    bool VerifyNewRestrictedAsset(std::string& strError) const;
+
+    bool CheckAddingTagBurnFee(const int& count) const;
+
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const;
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
+
+    /** ASSET END */
+
     /**
-     * Get the total transaction size in bytes, including witness data.
+     * Get the total transaction size in bytes.
      * "Total Size" defined in BIP141 and BIP144.
      * @return Total transaction size in bytes
      */

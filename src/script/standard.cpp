@@ -5,13 +5,12 @@
 
 #include "script/standard.h"
 
+#include "assets/assets.h"
 #include "bdap/stealth.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "util.h"
 #include "utilstrencodings.h"
-
-#include <boost/foreach.hpp>
 
 typedef std::vector<unsigned char> valtype;
 
@@ -35,8 +34,18 @@ const char* GetTxnOutputType(txnouttype t)
         return "multisig";
     case TX_NULL_DATA:
         return "nulldata";
+    /** ASSET START */
+    case TX_RESTRICTED_ASSET_DATA: 
+        return "nullassetdata";
+    case TX_NEW_ASSET: 
+        return ASSET_NEW_STRING;
+    case TX_TRANSFER_ASSET: 
+        return ASSET_TRANSFER_STRING;
+    case TX_REISSUE_ASSET: 
+        return ASSET_REISSUE_STRING;
+    /** ASSET END */
     }
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -77,6 +86,17 @@ bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std:
         return true;
     }
 
+    /** ASSET START */
+    int nType = 0;
+    bool fIsOwner = false;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner)) {
+        typeRet = (txnouttype)nType;
+        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
+        vSolutionsRet.push_back(hashBytes);
+        return true;
+    }
+    /** ASSET END */
+
     // Provably prunable, data-carrying output
     //
     // So long as script passes the IsUnspendable() test and all but the first
@@ -87,9 +107,24 @@ bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std:
         return true;
     }
 
+    // Provably prunable, asset data-carrying output
+    //
+    // So long as script passes the IsUnspendable() test and all but the first three
+    // byte passes the IsPushOnly()
+    if (scriptPubKey.size() >= 1 && scriptPubKey[0] == OP_DYN_ASSET && scriptPubKey.IsPushOnly(scriptPubKey.begin()+1)) {
+        typeRet = TX_RESTRICTED_ASSET_DATA;
+
+        if (scriptPubKey.size() >= 23 && scriptPubKey[1] != OP_RESERVED) {
+            std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
+            vSolutionsRet.push_back(hashBytes);
+        }
+        return true;
+    }
+
     // Scan templates
     const CScript& script1 = scriptPubKey;
-    BOOST_FOREACH (const PAIRTYPE(txnouttype, CScript) & tplate, mTemplates) {
+    for (const std::pair<txnouttype, CScript>& tplate : mTemplates) 
+    {    
         const CScript& script2 = tplate.second;
         vSolutionsRet.clear();
 
@@ -177,7 +212,19 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
     } else if (whichType == TX_SCRIPTHASH) {
         addressRet = CScriptID(uint160(vSolutions[0]));
         return true;
+
+    /** ASSET START */
+    } else if (whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_TRANSFER_ASSET) {
+        addressRet = CKeyID(uint160(vSolutions[0]));
+        return true;
+    } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
+        if (vSolutions.size()) {
+            addressRet = CKeyID(uint160(vSolutions[0]));
+            return true;
+        }
     }
+    /** ASSET END */
+
     // Multisig txns have more than one address...
     return false;
 }
@@ -259,6 +306,42 @@ public:
 };
 } // namespace
 
+namespace
+{
+    class CNullAssetScriptVisitor : public boost::static_visitor<bool>
+    {
+    private:
+        CScript *script;
+    public:
+        explicit CNullAssetScriptVisitor(CScript *scriptin) { script = scriptin; }
+
+        bool operator()(const CNoDestination &dest) const {
+            script->clear();
+            return false;
+        }
+
+        bool operator()(const CKeyID &keyID) const {
+            script->clear();
+            *script << OP_DYN_ASSET << ToByteVector(keyID);
+            return true;
+        }
+
+        bool operator()(const CScriptID &scriptID) const {
+            script->clear();
+            *script << OP_DYN_ASSET << ToByteVector(scriptID);
+            return true;
+        }
+        
+        bool operator()(const CStealthAddress& sxAddr) const {
+        script->clear();
+        // TODO (BDAP): Create the correct stealth address script visitor
+        //*script << OP_DUP << OP_HASH160 << ToByteVector(sxAddr.GetSpendKeyID()) << OP_EQUALVERIFY << OP_CHECKSIG;
+        LogPrintf("CScriptVisitor(CStealthAddress) TODO\n");
+        return false;
+    }
+    };
+} // namespace
+
 CScript GetScriptForDestination(const CTxDestination& dest)
 {
     CScript script;
@@ -266,6 +349,16 @@ CScript GetScriptForDestination(const CTxDestination& dest)
     boost::apply_visitor(CScriptVisitor(&script), dest);
     return script;
 }
+
+/** ASSET START */
+CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest)
+{
+    CScript script;
+
+    boost::apply_visitor(CNullAssetScriptVisitor(&script), dest);
+    return script;
+}
+/** ASSET END */
 
 CScript GetScriptForRawPubKey(const CPubKey& pubKey)
 {
@@ -277,7 +370,7 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys)
     CScript script;
 
     script << CScript::EncodeOP_N(nRequired);
-    BOOST_FOREACH (const CPubKey& key, keys)
+    for (const CPubKey& key : keys)
         script << ToByteVector(key);
     script << CScript::EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
     return script;

@@ -17,11 +17,13 @@
 
 #include "init.h"
 #include "instantsend.h"
+#include "policy/fees.h"
 #include "policy/policy.h"
 #include "privatesend-client.h"
 #include "txmempool.h"
 #include "validation.h" // For minRelayTxFee
 #include "wallet/coincontrol.h"
+#include "wallet/fees.h"
 #include "wallet/wallet.h"
 
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
@@ -470,11 +472,11 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     Q_FOREACH (const CAmount& amount, CoinControlDialog::payAmounts) {
         nPayAmount += amount;
 
-        if (amount > 0) {
+        if (amount > 0)
+        {
             CTxOut txout(amount, (CScript)std::vector<unsigned char>(24, 0));
             txDummy.vout.push_back(txout);
-            if (txout.IsDust(dustRelayFee))
-                fDust = true;
+            fDust |= IsDust(txout, ::dustRelayFee);
         }
     }
 
@@ -484,23 +486,22 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     CAmount nChange = 0;
     unsigned int nBytes = 0;
     unsigned int nBytesInputs = 0;
-    double dPriority = 0;
     double dPriorityInputs = 0;
     unsigned int nQuantity = 0;
     int nQuantityUncompressed = 0;
-    bool fAllowFree = false;
 
     std::vector<COutPoint> vCoinControl;
     std::vector<COutput> vOutputs;
     coinControl->ListSelected(vCoinControl);
     model->getOutputs(vCoinControl, vOutputs);
 
-    BOOST_FOREACH (const COutput& out, vOutputs) {
+    for (const COutput& out : vOutputs) {
         // unselect already spent, very unlikely scenario, this could happen
         // when selected are spent elsewhere, like rpc or another computer
         uint256 txhash = out.tx->GetHash();
         COutPoint outpt(txhash, out.i);
-        if (model->isSpent(outpt)) {
+        if (model->isSpent(outpt)) 
+        {
             coinControl->UnSelect(outpt);
             continue;
         }
@@ -544,23 +545,11 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
                 nBytes -= 34;
 
         // Fee
-        nPayFee = CWallet::GetMinimumFee(nBytes, nTxConfirmTarget, mempool);
-        if (nPayFee > 0 && coinControl->nMinimumTotalFee > nPayFee)
-            nPayFee = coinControl->nMinimumTotalFee;
+        nPayFee = GetMinimumFee(nBytes, *coinControl, ::mempool, ::feeEstimator, nullptr /* FeeCalculation */);
 
         // InstantSend Fee
         if (coinControl->fUseInstantSend)
             nPayFee = std::max(nPayFee, CTxLockRequest(txDummy).GetMinFee(true));
-
-        // Allow free? (require at least hard-coded threshold and default to that if no estimate)
-        double mempoolEstimatePriority = mempool.estimateSmartPriority(nTxConfirmTarget);
-        dPriority = dPriorityInputs / (nBytes - nBytesInputs + (nQuantityUncompressed * 29)); // 29 = 180 - 151 (uncompressed public keys are over the limit. max 151 bytes of the input are ignored for priority)
-        double dPriorityNeeded = std::max(mempoolEstimatePriority, AllowFreeThreshold());
-        fAllowFree = (dPriority >= dPriorityNeeded);
-
-        if (fSendFreeTransactions)
-            if (fAllowFree && nBytes <= MAX_FREE_TRANSACTION_CREATE_SIZE)
-                nPayFee = 0;
 
         if (nPayAmount > 0) {
             nChange = nAmount - nPayAmount;
@@ -575,13 +564,12 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
             // Never create dust outputs; if we would, just add the dust to the fee.
             if (nChange > 0 && nChange < MIN_CHANGE) {
                 CTxOut txout(nChange, (CScript)std::vector<unsigned char>(24, 0));
-                if (txout.IsDust(dustRelayFee)) {
-                    if (CoinControlDialog::fSubtractFeeFromAmount) // dust-change will be raised until no dust
-                        nChange = txout.GetDustThreshold(dustRelayFee);
-                    else {
-                        nPayFee += nChange;
-                        nChange = 0;
-                    }
+                if (IsDust(txout, ::dustRelayFee))
+                {
+                    nPayFee += nChange;
+                    nChange = 0;
+                    if (CoinControlDialog::fSubtractFeeFromAmount)
+                        nBytes -= 34; // we didn't detect lack of change above
                 }
             }
 
@@ -620,7 +608,8 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     l5->setText(((nBytes > 0) ? ASYMP_UTF8 : "") + QString::number(nBytes)); // Bytes
     l7->setText(fDust ? tr("yes") : tr("no"));                               // Dust
     l8->setText(DynamicUnits::formatWithUnit(nDisplayUnit, nChange));        // Change
-    if (nPayFee > 0 && (coinControl->nMinimumTotalFee < nPayFee)) {
+    if (nPayFee > 0)
+    {
         l3->setText(ASYMP_UTF8 + l3->text());
         l4->setText(ASYMP_UTF8 + l4->text());
         if (nChange > 0 && !CoinControlDialog::fSubtractFeeFromAmount)
@@ -633,13 +622,9 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     QString toolTipDust = tr("This label turns red if any recipient receives an amount smaller than the current dust threshold.");
 
     // how many satoshis the estimated fee can vary per byte we guess wrong
-    double dFeeVary;
-    if (payTxFee.GetFeePerK() > 0)
-        dFeeVary = (double)std::max(CWallet::GetRequiredFee(1000), payTxFee.GetFeePerK()) / 1000;
-    else {
-        dFeeVary = (double)std::max(CWallet::GetRequiredFee(1000), mempool.estimateSmartFee(nTxConfirmTarget).GetFeePerK()) / 1000;
-    }
-    QString toolTip4 = tr("Can vary +/- %1 duff(s) per input.").arg(dFeeVary);
+    double dFeeVary = (nBytes != 0) ? (double)nPayFee / nBytes : 0;
+
+    QString toolTip4 = tr("Can vary +/- %1 satoshi(s) per input.").arg(dFeeVary);
 
     l3->setToolTip(toolTip4);
     l4->setToolTip(toolTip4);
@@ -676,7 +661,7 @@ void CoinControlDialog::updateView()
     std::map<QString, std::vector<COutput> > mapCoins;
     model->listCoins(mapCoins);
 
-    BOOST_FOREACH (const PAIRTYPE(QString, std::vector<COutput>) & coins, mapCoins) {
+    for (const std::pair<QString, std::vector<COutput>>& coins : mapCoins) {
         CCoinControlWidgetItem* itemWalletAddress = new CCoinControlWidgetItem();
         itemWalletAddress->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
         QString sWalletAddress = coins.first;
@@ -702,7 +687,7 @@ void CoinControlDialog::updateView()
 
         CAmount nSum = 0;
         int nChildren = 0;
-        BOOST_FOREACH (const COutput& out, coins.second) {
+        for (const COutput& out : coins.second) {
             nSum += out.tx->tx->vout[out.i].nValue;
             nChildren++;
 

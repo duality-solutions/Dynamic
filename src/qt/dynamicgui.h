@@ -161,6 +161,14 @@ private:
     QAction* showPrivateSendHelpAction;
     QAction* multiSendAction;
 
+/** ASSET START */
+    QAction *transferAssetAction;
+    QAction *createAssetAction;
+    QAction *manageAssetAction;
+    QAction *messagingAction;
+    QAction *votingAction;
+    QAction *restrictedAssetAction;
+/** ASSET END */
     QSystemTrayIcon* trayIcon;
     QMenu* trayIconMenu;
     QMenu* dockIconMenu;
@@ -219,7 +227,7 @@ public Q_SLOTS:
                             @see CClientUIInterface::MessageBoxFlags
        @param[in] ret       pointer to a bool that will be modified to whether Ok was clicked (modal only)
     */
-    void message(const QString& title, const QString& message, unsigned int style, bool* ret = NULL);
+    void message(const QString& title, const QString& message, unsigned int style, bool* ret = nullptr);
 
 #ifdef ENABLE_WALLET
     /** Set the hd-enabled status as shown in the UI.
@@ -237,7 +245,10 @@ public Q_SLOTS:
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     /** Show incoming transaction notification for new transactions. */
-    void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
+    void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName);
+
+    /** Show the assets button if assets are active */
+    void checkAssets();
 #endif // ENABLE_WALLET
 
 private Q_SLOTS:
@@ -267,6 +278,14 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
+
+    /** ASSET START */
+    /** Switch to assets page */
+    void gotoAssetsPage();
+    void gotoCreateAssetsPage();
+    void gotoManageAssetsPage();
+    void gotoRestrictedAssetsPage();
+    /** ASSET END */
 
     void setStakingStatus();
 #endif // ENABLE_WALLET

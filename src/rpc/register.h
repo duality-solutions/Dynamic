@@ -38,6 +38,9 @@ void RegisterRawBDAPAccountRPCCommands(CRPCTable &tableRPC);
 void RegisterAuditRPCCommands(CRPCTable &tableRPC);
 /** Register Raw BDAP Certificate RPC commands */
 void RegisterCertificateRPCCommands(CRPCTable &tableRPC);
+/** Register asset RPC commands */
+void RegisterAssetRPCCommands(CRPCTable &tableRPC);
+
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
 {
@@ -55,6 +58,7 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
     RegisterRawBDAPAccountRPCCommands(t);
     RegisterAuditRPCCommands(t);
     RegisterCertificateRPCCommands(t);
+    RegisterAssetRPCCommands(t);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H

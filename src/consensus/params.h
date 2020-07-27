@@ -16,6 +16,12 @@ namespace Consensus
 enum DeploymentPos {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV,              // Deployment of BIP68, BIP112, and BIP113.
+/** ASSET START */
+    DEPLOYMENT_ASSETS, // Deployment of Assets
+    DEPLOYMENT_MSG_REST_ASSETS, // Deployment of Messaging/Restricted Assets
+    DEPLOYMENT_TRANSFER_SCRIPT_SIZE,
+    DEPLOYMENT_ENFORCE_VALUE,
+/* ASSET END */
     DEPLOYMENT_BIP147, // Deployment of BIP147 (NULLDUMMY)
     DEPLOYMENT_ISAUTOLOCKS, // Deployment of automatic IS locks for simple transactions
     MAX_VERSION_BITS_DEPLOYMENTS // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
@@ -35,6 +41,10 @@ struct BIP9Deployment {
     int64_t nWindowSize;
     /** A number of blocks, in the range of 1..nWindowSize, which must signal for a fork in order to lock it in. */
     int64_t nThreshold;
+    /** Use to override the confirmation window on a specific BIP */
+    uint32_t nOverrideMinerConfirmationWindow;
+    /** Use to override the the activation threshold on a specific BIP */
+    uint32_t nOverrideRuleChangeActivationThreshold;
 };
 
 /**

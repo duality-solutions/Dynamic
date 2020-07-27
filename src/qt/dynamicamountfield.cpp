@@ -11,11 +11,16 @@
 #include "guiconstants.h"
 #include "qvaluecombobox.h"
 
+#include <QDebug>
 #include <QAbstractSpinBox>
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
 
 /** QSpinBox that uses fixed-point numbers internally and uses our own
  * formatting/parsing functions.
@@ -49,7 +54,7 @@ public:
         bool valid = false;
         CAmount val = parse(input, &valid);
         if (valid) {
-            input = DynamicUnits::format(currentUnit, val, false, DynamicUnits::separatorAlways);
+            input = DynamicUnits::format(currentUnit, val, false, DynamicUnits::separatorAlways, assetUnit);
             lineEdit()->setText(input);
         }
     }
@@ -61,7 +66,7 @@ public:
 
     void setValue(const CAmount& value)
     {
-        lineEdit()->setText(DynamicUnits::format(currentUnit, value, false, DynamicUnits::separatorAlways));
+        lineEdit()->setText(DynamicUnits::format(currentUnit, value, false, DynamicUnits::separatorAlways, assetUnit));
         Q_EMIT valueChanged();
     }
 
@@ -92,6 +97,22 @@ public:
         singleStep = step;
     }
 
+    void setAssetUnit(int unit)
+    {
+        if (unit > MAX_ASSET_UNITS)
+            unit = MAX_ASSET_UNITS;
+
+        assetUnit = unit;
+
+        bool valid = false;
+        CAmount val = value(&valid);
+
+        if(valid)
+            setValue(val);
+        else
+            clear();
+    }
+
     QSize minimumSizeHint() const
     {
         if (cachedMinimumSizeHint.isEmpty()) {
@@ -99,7 +120,11 @@ public:
 
             const QFontMetrics fm(fontMetrics());
             int h = lineEdit()->minimumSizeHint().height();
-            int w = fm.width(DynamicUnits::format(DynamicUnits::DYN, DynamicUnits::maxMoney(), false, DynamicUnits::separatorAlways));
+            #ifndef QTversionPreFiveEleven
+                int w = fm.horizontalAdvance(DynamicUnits::format(DynamicUnits::DYN, DynamicUnits::maxMoney(), false, DynamicUnits::separatorAlways, assetUnit));
+            #else
+                int w = fm.width(DynamicUnits::format(DynamicUnits::DYN, DynamicUnits::maxMoney(), false, DynamicUnits::separatorAlways, assetUnit));
+            #endif
             w += 2; // cursor blinking space
 
             QStyleOptionSpinBox opt;
@@ -129,31 +154,44 @@ private:
     int currentUnit;
     CAmount singleStep;
     mutable QSize cachedMinimumSizeHint;
+    int assetUnit;
 
     /**
      * Parse a string into a number of base monetary units and
      * return validity.
      * @note Must return 0 if !valid.
      */
-    CAmount parse(const QString& text, bool* valid_out = 0) const
+    CAmount parse(const QString &text, bool *valid_out=0) const
     {
         CAmount val = 0;
-        bool valid = DynamicUnits::parse(currentUnit, text, &val);
-        if (valid) {
-            if (val < 0 || val > DynamicUnits::maxMoney())
+
+        // Update parsing function to work with asset parsing units
+        bool valid = false;
+        if (assetUnit >= 0) {
+            valid = DynamicUnits::assetParse(assetUnit, text, &val);
+        }
+        else
+            valid = DynamicUnits::parse(currentUnit, text, &val);
+
+        if(valid)
+        {
+            if(val < 0 || val > DynamicUnits::maxMoney())
                 valid = false;
         }
-        if (valid_out)
+        if(valid_out)
             *valid_out = valid;
         return valid ? val : 0;
     }
 
+
 protected:
-    bool event(QEvent* event)
+    bool event(QEvent *event)
     {
-        if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            if (keyEvent->key() == Qt::Key_Comma) {
+        if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if (keyEvent->key() == Qt::Key_Comma)
+            {
                 // Translate a comma into a period
                 QKeyEvent periodKeyEvent(event->type(), Qt::Key_Period, keyEvent->modifiers(), ".", keyEvent->isAutoRepeat(), keyEvent->count());
                 return QAbstractSpinBox::event(&periodKeyEvent);
@@ -172,10 +210,11 @@ protected:
         StepEnabled rv = 0;
         bool valid = false;
         CAmount val = value(&valid);
-        if (valid) {
-            if (val > 0)
+        if(valid)
+        {
+            if(val > 0)
                 rv |= StepDownEnabled;
-            if (val < DynamicUnits::maxMoney())
+            if(val < DynamicUnits::maxMoney())
                 rv |= StepUpEnabled;
         }
         return rv;
@@ -260,7 +299,7 @@ QWidget* DynamicAmountField::setupTabChain(QWidget* prev)
     return unit;
 }
 
-CAmount DynamicAmountField::value(bool* valid_out) const
+CAmount DynamicAmountField::value(bool *valid_out) const
 {
     return amount->value(valid_out);
 }
@@ -294,4 +333,94 @@ void DynamicAmountField::setDisplayUnit(int newUnit)
 void DynamicAmountField::setSingleStep(const CAmount& step)
 {
     amount->setSingleStep(step);
+}
+
+AssetAmountField::AssetAmountField(QWidget *parent) :
+        QWidget(parent),
+        amount(0)
+{
+    amount = new AmountSpinBox(this);
+    amount->setLocale(QLocale::c());
+    amount->installEventFilter(this);
+    amount->setMaximumWidth(170);
+
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    layout->addWidget(amount);
+    layout->addStretch(1);
+    layout->setContentsMargins(0,0,0,0);
+
+    setLayout(layout);
+
+    setFocusPolicy(Qt::TabFocus);
+    setFocusProxy(amount);
+
+    // If one if the widgets changes, the combined content changes as well
+    connect(amount, SIGNAL(valueChanged()), this, SIGNAL(valueChanged()));
+
+    // Set default based on configuration
+    setUnit(MAX_ASSET_UNITS);
+}
+
+void AssetAmountField::clear()
+{
+    amount->clear();
+    setUnit(MAX_ASSET_UNITS);
+}
+
+void AssetAmountField::setEnabled(bool fEnabled)
+{
+    amount->setEnabled(fEnabled);
+}
+
+bool AssetAmountField::validate()
+{
+    bool valid = false;
+    value(&valid);
+    setValid(valid);
+    return valid;
+}
+
+void AssetAmountField::setValid(bool valid)
+{
+    if (valid) {
+        amount->setStyleSheet("");
+    } else {
+        amount->setStyleSheet(STYLE_INVALID);
+    }
+}
+
+bool AssetAmountField::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::FocusIn)
+    {
+        // Clear invalid flag on focus
+        setValid(true);
+    }
+    return QWidget::eventFilter(object, event);
+}
+
+CAmount AssetAmountField::value(bool *valid_out) const
+{
+    return amount->value(valid_out) * DynamicUnits::factorAsset(8 - assetUnit);
+}
+
+void AssetAmountField::setValue(const CAmount& value)
+{
+    amount->setValue(value);
+}
+
+void AssetAmountField::setReadOnly(bool fReadOnly)
+{
+    amount->setReadOnly(fReadOnly);
+}
+
+void AssetAmountField::setSingleStep(const CAmount& step)
+{
+    amount->setSingleStep(step);
+}
+
+void AssetAmountField::setUnit(int unit)
+{
+    assetUnit = unit;
+    amount->setAssetUnit(assetUnit);
 }

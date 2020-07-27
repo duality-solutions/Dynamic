@@ -23,7 +23,6 @@
 #include <stdio.h>
 
 #include <boost/algorithm/string.hpp> // boost::trim
-#include <boost/foreach.hpp>          //BOOST_FOREACH
 
 /** WWW-Authenticate to present with 401 Unauthorized response */
 static const char* WWW_AUTH_HEADER_DATA = "Basic realm=\"jsonrpc\"";
@@ -100,7 +99,7 @@ static bool multiUserAuthorized(std::string strUserPass)
 
     if (mapMultiArgs.count("-rpcauth") > 0) {
         //Search for multi-user login/pass "rpcauth" from config
-        BOOST_FOREACH (std::string strRPCAuth, mapMultiArgs.at("-rpcauth")) {
+        for (std::string strRPCAuth : mapMultiArgs.at("-rpcauth")) {
             std::vector<std::string> vFields;
             boost::split(vFields, strRPCAuth, boost::is_any_of(":$"));
             if (vFields.size() != 3) {
@@ -219,7 +218,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string&)
 
 static bool InitRPCAuthentication()
 {
-    if (GetArg("-rpcpassword", "") == "") {
+    if (gArgs.GetArg("-rpcpassword", "") == "") {
         LogPrintf("No rpcpassword set - using random cookie authentication\n");
         if (!GenerateAuthCookie(&strRPCUserColonPass)) {
             uiInterface.ThreadSafeMessageBox(
@@ -229,7 +228,7 @@ static bool InitRPCAuthentication()
         }
     } else {
         LogPrintf("Config options rpcuser and rpcpassword will soon be deprecated. Locally-run instances may remove rpcuser to use cookie-based auth, or may be replaced with rpcauth. Please see share/rpcuser for rpcauth auth generation.\n");
-        strRPCUserColonPass = GetArg("-rpcuser", "") + ":" + GetArg("-rpcpassword", "");
+        strRPCUserColonPass = gArgs.GetArg("-rpcuser", "") + ":" + gArgs.GetArg("-rpcpassword", "");
     }
     return true;
 }

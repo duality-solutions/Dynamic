@@ -75,6 +75,15 @@ DYNAMIC_CORE_H = \
   addressindex.h \
   addrman.h \
   alert.h \
+  assets/assets.h \
+  assets/assetdb.h \
+  assets/assettypes.h \
+  assets/messages.h \
+  assets/myassetsdb.h \
+  assets/restricteddb.h \
+  assets/snapshotrequestdb.h \
+  assets/assetsnapshotdb.h \
+  assets/rewards.h \
   base58.h \
   bdap/audit.h \
   bdap/auditdb.h \
@@ -141,6 +150,7 @@ DYNAMIC_CORE_H = \
   fluid/fluidsovereign.h \
   fluid/fluidstaking.h \
   fluid/operations.h \
+  fs.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -179,6 +189,7 @@ DYNAMIC_CORE_H = \
   netmessagemaker.h \
   noui.h \
   ntp.h \
+  policy/feerate.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -196,8 +207,10 @@ DYNAMIC_CORE_H = \
   reverselock.h \
   reverse_iterator.h \
   rpc/client.h \
+  rpc/mining.h \
   rpc/protocol.h \
   rpc/register.h \
+  rpc/safemode.h \
   rpc/server.h \
   rpc/wallet.h \
   scheduler.h \
@@ -216,6 +229,7 @@ DYNAMIC_CORE_H = \
   threadinterrupt.h \
   threadsafety.h \
   timedata.h \
+  timestampindex.h \
   torcontrol.h \
   txdb.h \
   txmempool.h \
@@ -231,6 +245,9 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
+  wallet/feebumper.h \
+  wallet/fees.h \
+  wallet/init.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
@@ -265,6 +282,15 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  assets/assets.cpp \
+  assets/assetdb.cpp \
+  assets/assettypes.cpp \
+  assets/messages.cpp \
+  assets/myassetsdb.cpp \
+  assets/restricteddb.cpp \
+  assets/snapshotrequestdb.cpp \
+  assets/assetsnapshotdb.cpp \
+  assets/rewards.cpp \
   blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
@@ -333,6 +359,7 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
+  policy/feerate.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pos/kernel.cpp \
@@ -344,6 +371,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpc/audits.cpp \
+  rpc/assets.cpp \
   rpc/blockchain.cpp \
   rpc/certificates.cpp \
   rpc/dht.cpp \
@@ -352,11 +380,14 @@ libdynamic_server_a_SOURCES = \
   rpc/fluid.cpp \
   rpc/governance.cpp \
   rpc/linking.cpp \
+  rpc/messages.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawbdap.cpp \
   rpc/rawtransaction.cpp \
+  rpc/rewards.cpp \
+  rpc/safemode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
@@ -401,6 +432,9 @@ libdynamic_wallet_a_SOURCES = \
   uint256.h \
   wallet/crypter.cpp \
   wallet/db.cpp \
+  wallet/feebumper.cpp \
+  wallet/fees.cpp \
+  wallet/init.cpp \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
@@ -448,16 +482,18 @@ crypto_libdynamic_crypto_a_SOURCES = \
 libdynamic_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_consensus_a_SOURCES = \
-  amount.cpp \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
+  consensus/consensus.cpp \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
   consensus/validation.h \
   hash.cpp \
   hash.h \
+  LibBoolEE.cpp \
+  LibBoolEE.h \
   prevector.h \
   primitives/block.cpp \
   primitives/block.h \
@@ -514,6 +550,7 @@ libdynamic_util_a_SOURCES = \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
+  fs.cpp \
   random.cpp \
   rpc/protocol.cpp \
   support/cleanse.cpp \

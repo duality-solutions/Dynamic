@@ -98,22 +98,22 @@ private:
     CKeyHolderStorage keyHolderStorage; // storage for keys used in PrepareDenominate
 
     /// Create denominations
-    bool CreateDenominated(CConnman& connman);
-    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman& connman);
+    bool CreateDenominated(CConnman* connman);
+    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman* connman);
 
     /// Split up large inputs or make fee sized inputs
-    bool MakeCollateralAmounts(CConnman& connman);
-    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman& connman);
+    bool MakeCollateralAmounts(CConnman* connman);
+    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman* connman);
 
-    bool JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CConnman& connman);
-    bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman& connman);
+    bool JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CConnman* connman);
+    bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman* connman);
 
     /// step 0: select denominated inputs and txouts
     bool SelectDenominate(std::string& strErrorRet, std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet);
     /// step 1: prepare denominated inputs and outputs
     bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet, bool fDryRun = false);
     /// step 2: send denominated inputs and outputs prepared in step 1
-    bool SendDenominate(const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, CConnman& connman);
+    bool SendDenominate(const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, CConnman* connman);
 
     /// Get Dynodes updates about the progress of mixing
     bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew = 0);
@@ -125,9 +125,9 @@ private:
     void CompletedTransaction(PoolMessage nMessageID);
 
     /// As a client, check and sign the final transaction
-    bool SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman& connman);
+    bool SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman* connman);
 
-    void RelayIn(const CPrivateSendEntry& entry, CConnman& connman);
+    void RelayIn(const CPrivateSendEntry& entry, CConnman* connman);
 
     void SetNull();
 
@@ -144,7 +144,7 @@ public:
     {
     }
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
     void UnlockCoins();
 
@@ -155,12 +155,12 @@ public:
     bool GetMixingDynodeInfo(dynode_info_t& dnInfoRet) const;
 
     /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(CConnman& connman, bool fDryRun = false);
+    bool DoAutomaticDenominating(CConnman* connman, bool fDryRun = false);
 
     /// As a client, submit part of a future mixing transaction to a Dynode to start the process
-    bool SubmitDenominate(CConnman& connman);
+    bool SubmitDenominate(CConnman* connman);
 
-    bool ProcessPendingPsaRequest(CConnman& connman);
+    bool ProcessPendingPsaRequest(CConnman* connman);
 
     bool CheckTimeout();
 };
@@ -219,7 +219,7 @@ public:
     {
     }
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
     bool IsDenomSkipped(const CAmount& nDenomValue);
     void AddSkippedDenom(const CAmount& nDenomValue);
@@ -235,11 +235,11 @@ public:
     bool GetMixingDynodesInfo(std::vector<dynode_info_t>& vecDnInfoRet) const;
 
     /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(CConnman& connman, bool fDryRun = false);
+    bool DoAutomaticDenominating(CConnman* connman, bool fDryRun = false);
 
     void CheckTimeout();
 
-    void ProcessPendingPsaRequest(CConnman& connman);
+    void ProcessPendingPsaRequest(CConnman* connman);
 
     void AddUsedDynode(const COutPoint& outpointDn);
     dynode_info_t GetNotUsedDynode();
@@ -248,7 +248,7 @@ public:
 
     void UpdatedBlockTip(const CBlockIndex* pindex);
 
-    void DoMaintenance(CConnman& connman);
+    void DoMaintenance(CConnman* connman);
 };
 
 #endif

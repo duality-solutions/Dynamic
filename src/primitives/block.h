@@ -19,6 +19,7 @@
  * in the block is a special one that creates a new coin owned by the creator
  * of the block.
  */
+
 class CBlockHeader
 {
 public:
@@ -31,6 +32,11 @@ public:
     uint32_t nNonce;
     // Proof-of-Stake: copy from CBlockIndex.nFlags from other clients. We need this information because we are using headers-first syncronization.
     int32_t nFlags;
+
+    //KAAAWWWPOW data
+    uint32_t nHeight;
+    uint64_t nNonce64;
+    uint256 mix_hash;
 
     CBlockHeader()
     {
@@ -48,8 +54,9 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
-            READWRITE(nFlags);
+
+    if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
+        READWRITE(nFlags);
     }
 
     void SetNull()
@@ -69,6 +76,7 @@ public:
     }
 
     uint256 GetHash() const;
+    uint256 GetHashFull() const;
 
     int64_t GetBlockTime() const
     {

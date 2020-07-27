@@ -218,6 +218,12 @@ extern const char* REJECT;
  */
 extern const char* SENDHEADERS;
 /**
+ * The feefilter message tells the receiving peer not to inv us any txs
+ * which do not meet the specified min fee rate.
+ * @since protocol version 70013 as described by BIP133
+ */
+extern const char *FEEFILTER;
+/**
  * Contains a 1-byte bool and 8-byte LE version number.
  * Indicates that a node is willing to provide blocks via "cmpctblock" messages.
  * May indicate that a node prefers to receive new block announcements via a
@@ -270,6 +276,26 @@ extern const char* DNGOVERNANCEOBJECTVOTE;
 extern const char* DNVERIFY;
 // BDAP VGP Secure Message
 extern const char* VGPMESSAGE;
+/**
+ * Contains a AssetDataRequest.
+ * Peer should respond with assetdata
+ * @since protocol version ***** // todo
+ */
+extern const char *GETASSETDATA;
+
+/**
+ * Contains a AssetData
+ * Sent in response to a "getassetdata" message.
+ * @since protocol version ***** // todo
+ */
+extern const char *ASSETDATA;
+
+/**
+ * The asstnotfound message is a reply to a getassetdata message which requested an
+ * object the receiving node does not have available for relay.
+ * @since protocol version ***** // todo
+ */
+    extern const char *ASSETNOTFOUND;
 }; // namespace NetMsgType
 
 /* Get a vector of all valid message types (see above) */
@@ -396,4 +422,28 @@ public:
     uint256 hash;
 };
 
+/*ASSET START */
+/** inv message data */
+class CInvAsset
+{
+public:
+    CInvAsset();
+    CInvAsset(std::string name);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(name);
+    }
+
+    friend bool operator<(const CInvAsset& a, const CInvAsset& b);
+
+    std::string ToString() const;
+
+public:
+    std::string name; // block height that asset data should come from
+};
+/* ASSET END */
 #endif // DYNAMIC_PROTOCOL_H

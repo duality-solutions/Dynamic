@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_ADDRDB_H
 #define DYNAMIC_ADDRDB_H
 
+#include "fs.h"
 #include "serialize.h"
 
 #include <boost/filesystem/path.hpp>

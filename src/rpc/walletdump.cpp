@@ -32,7 +32,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/foreach.hpp>
 
 void EnsureWalletIsUnlocked();
 bool EnsureWalletIsAvailable(bool avoidException);
@@ -59,7 +58,7 @@ int64_t static DecodeDumpTime(const std::string& str)
 std::string static EncodeDumpString(const std::string& str)
 {
     std::stringstream ret;
-    BOOST_FOREACH (unsigned char c, str) {
+    for (unsigned char c : str) {
         if (c <= 32 || c >= 128 || c == '%') {
             ret << '%' << HexStr(&c, &c + 1);
         } else {
@@ -932,11 +931,11 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     boost::filesystem::path backupFile = GetDataDir() / ("wallet.dat.before-mnemonic-import" + dateTimeStr);
     pwalletMain->BackupWallet(backupFile.string());
 
-    ForceSetArg("-mnemonic", strMnemonic);
-    ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
-    ForceSetArg("-mnemoniclanguage", compareLanguage);
-    SoftSetBoolArg("-importmnemonic", true);
-    SoftSetBoolArg("-skipmnemoniccheck", true);
+    gArgs.ForceSetArg("-mnemonic", strMnemonic);
+    gArgs.ForceSetArg("-mnemonicpassphrase", strMnemonicPassphrase);
+    gArgs.ForceSetArg("-mnemoniclanguage", compareLanguage);
+    gArgs.SoftSetBoolArg("-importmnemonic", true);
+    gArgs.SoftSetBoolArg("-skipmnemoniccheck", true);
 
     CWallet* const pwallet = pwalletMain->CreateWalletFromFile(DEFAULT_WALLET_DAT_MNEMONIC,true);
     pwalletMain = pwallet;
@@ -945,10 +944,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     entry.push_back(Pair("Done", "Stopping daemon... Please restart dynamic..."));
 
     //cleanup
-    ForceRemoveArg("-mnemonic");
-    ForceRemoveArg("-importmnemonic");
-    ForceRemoveArg("-mnemoniclanguage");
-    ForceRemoveArg("-skipmnemoniccheck");
+    gArgs.ForceRemoveArg("-mnemonic");
+    gArgs.ForceRemoveArg("-importmnemonic");
+    gArgs.ForceRemoveArg("-mnemoniclanguage");
+    gArgs.ForceRemoveArg("-skipmnemoniccheck");
 
     return entry;
 
@@ -1665,7 +1664,7 @@ UniValue importmulti(const JSONRPCRequest& mainRequest)
 
     UniValue response(UniValue::VARR);
 
-    BOOST_FOREACH (const UniValue& data, requests.getValues()) {
+    for (const UniValue& data : requests.getValues()) {
         const int64_t timestamp = std::max(GetImportTimestamp(data, now), minimumTimestamp);
         const UniValue result = ProcessImport(data, timestamp);
         response.push_back(result);

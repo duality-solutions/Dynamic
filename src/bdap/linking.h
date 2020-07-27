@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_LINKING_H
 #define DYNAMIC_BDAP_LINKING_H
 
-#include "bdap.h"
+#include "bdap/bdap.h"
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
