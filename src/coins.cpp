@@ -22,6 +22,8 @@
 extern CWallet* pwalletMain;
 #endif // ENABLE_WALLET
 
+static const Coin coinEmpty;
+
 bool CCoinsView::GetCoin(const COutPoint& outpoint, Coin& coin) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }
 bool CCoinsView::BatchWrite(CCoinsMap& mapCoins, const uint256& hashBlock) { return false; }
@@ -132,8 +134,6 @@ bool CCoinsViewCache::SpendCoin(const COutPoint& outpoint, Coin* moveout)
     }
     return true;
 }
-
-static const Coin coinEmpty;
 
 const Coin CCoinsViewCache::AccessCoin(const COutPoint& outpoint) const
 {
@@ -288,4 +288,18 @@ double CCoinsViewCache::GetPriority(const CTransaction& tx, int nHeight, CAmount
         }
     }
     return tx.ComputePriority(dResult);
+}
+
+static const size_t MAX_OUTPUTS_PER_BLOCK = MAX_BLOCK_SIZE / ::GetSerializeSize(CTxIn(), SER_NETWORK, PROTOCOL_VERSION);
+
+const Coin& AccessByTxid(const CCoinsViewCache& view, const uint256& txid)
+{
+    COutPoint iter(txid, 0);
+    while (iter.n < MAX_OUTPUTS_PER_BLOCK) {
+        const Coin& alternate = view.AccessCoin(iter);
+        if (!alternate.IsSpent())
+            return alternate;
+        ++iter.n;
+    }
+    return coinEmpty;
 }

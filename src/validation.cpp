@@ -7681,21 +7681,6 @@ void AddCoinsWithAssets(CCoinsViewCache& cache, const CTransaction &tx, int nHei
         /** ASSET END */
     }
 }
-
-static const Coin coinEmpty; 
-static const size_t MAX_OUTPUTS_PER_BLOCK = MAX_BLOCK_SIZE / ::GetSerializeSize(CTxOut(), SER_NETWORK, PROTOCOL_VERSION); // TODO: merge with similar definition in undo.h.
-
-const Coin& AccessByTxid(const CCoinsViewCache& view, const uint256& txid)
-{
-    COutPoint iter(txid, 0);
-    while (iter.n < MAX_OUTPUTS_PER_BLOCK) {
-        const Coin& alternate = view.AccessCoin(iter);
-        if (!alternate.IsSpent())
-            return alternate;
-        ++iter.n;
-    }
-    return coinEmpty;
-}
 /** ASSET END */
 
 //! Guess how far we are in the verification process at the given block index
