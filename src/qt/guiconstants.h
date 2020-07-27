@@ -69,7 +69,7 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_LABELS QColor("#4960ad")
 
 /* Dynamic label color as a string */
-#define STRING_LABEL_COLOR "color: #4960ad"
+#define STRING_LABEL_COLOR "color: #FFFFFF"
 #define STRING_LABEL_COLOR_WARNING "color: #FF8080"
 
 /* Tooltips longer than this (in characters) are converted into rich text,
