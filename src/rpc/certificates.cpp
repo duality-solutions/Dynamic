@@ -20,12 +20,13 @@
 #include "uint256.h"
 #include "utilstrencodings.h"
 #include "validation.h"
+#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 
 #include <libtorrent/ed25519.hpp>
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CCoinControl& coinControl, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
@@ -244,8 +245,8 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     bool fUseInstantSend = false;
     // Send the transaction
     CWalletTx wtx;
-
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
     if (selfSign) {
         txCertificate.txHashApprove = wtx.GetHash();
@@ -408,7 +409,8 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     bool fUseInstantSend = false;
     // Send the transaction
     CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    CCoinControl coinControl;
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, coinControl, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
     txCertificate.txHashApprove = wtx.GetHash();
 
