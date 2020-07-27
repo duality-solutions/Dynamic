@@ -384,9 +384,9 @@ void PrepareShutdown()
         // BDAP Services DB's
         delete pDomainEntryDB;
         delete pAuditDB;
+        pAuditDB = nullptr;
         delete pCertificateDB;
         pCertificateDB = nullptr;
-        pAuditDB = nullptr;
         pDomainEntryDB = nullptr;
         delete pLinkDB;
         pLinkDB = nullptr;
