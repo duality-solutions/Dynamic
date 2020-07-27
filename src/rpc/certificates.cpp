@@ -8,6 +8,7 @@
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
 #include "bdap/utils.h"
+#include "bdap/x509.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynode-sync.h"
 #include "dynodeman.h"
@@ -582,6 +583,47 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
 
 } //ViewCertificate
 
+static UniValue ExportCertificate(const JSONRPCRequest& request)
+{
+    if (request.fHelp || (request.params.size() < 2 || request.params.size() > 3))
+        throw std::runtime_error(
+            "certificate export \"txid\" \n"
+            "\\nExport an X.509 certificate to file\n"
+            "\nArguments:\n"
+            "1. \"txid\"             (string, required)  Transaction ID of certificate to approve\n"
+            "2. \"filename\"         (string, optional)  Filename of certificate (default=x509.pem)\n"
+            "\nExamples\n" +
+           HelpExampleCli("certificate export", "\"txid\" ") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("certificate export", "\"txid\" "));
+
+    //txid
+    std::vector<unsigned char> vchTxId;
+    std::string parameterTxId = request.params[1].get_str();
+    vchTxId = vchFromString(parameterTxId);
+    bool readCertificateState = false;
+
+    CCertificate certificate;
+    UniValue oCertificateTransaction(UniValue::VOBJ);
+
+    readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
+    if (!readCertificateState) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
+    }
+
+    UniValue oCertificateLists(UniValue::VARR);
+
+    if (certificate.nHeightApprove == 0)
+        throw JSONRPCError(RPC_BDAP_ERROR, "Certificate is not approved");
+
+    if (!ExportX509Certificate(certificate)) {
+        throw JSONRPCError(RPC_MISC_ERROR, "Unable to export X509 Certificate to file");
+    }
+
+    return oCertificateLists;
+
+} //ExportCertificate
+
 UniValue certificate_rpc(const JSONRPCRequest& request) 
 {
     std::string strCommand;
@@ -596,12 +638,13 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
             "  new                - Create new X.509 certificate\n"
             "  approve            - Approve an X.509 certificate\n"
             "  view               - View X.509 certificate(s)\n"
+            "  export             - Export X.509 certificate to file\n"
             "\nExamples:\n"
             + HelpExampleCli("certificate new", "\"owner\" (\"issuer\") ") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("certificate new", "\"owner\" (\"issuer\") "));
     }
-    if (strCommand == "new" || strCommand == "approve" || strCommand == "view") {
+    if (strCommand == "new" || strCommand == "approve" || strCommand == "view" || strCommand == "export" ) {
         if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
             throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use certificate functionality until the BDAP version 2 spork is active."));
     }
@@ -613,6 +656,9 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
     }
     else if (strCommand == "view") {
         return ViewCertificate(request);
+    }
+    else if (strCommand == "export") {
+        return ExportCertificate(request);
     }
     else {
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, strprintf("%s is an unknown BDAP certificate method command.", strCommand));
