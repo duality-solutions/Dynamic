@@ -53,9 +53,7 @@ extern bool bSpendZeroConfChange;
 extern bool fWalletUnlockMixStakeOnly;
 extern bool fWalletRbf;
 
-//Set the following 2 constants together
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
-static const int DEFAULT_RESCAN_THRESHOLD = 150;
 
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;

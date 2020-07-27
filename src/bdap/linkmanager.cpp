@@ -796,17 +796,20 @@ uint256 GetLinkID(const CLinkAccept& accept)
 
 uint256 GetLinkID(const std::string& account1, const std::string& account2)
 {
-    std::vector<unsigned char> vchSeparator = {':'};
-    std::set<std::string> sorted;
-    sorted.insert(account1);
-    sorted.insert(account2);
-    std::set<std::string>::iterator it = sorted.begin();
-    std::vector<unsigned char> vchLink1 = vchFromString(*it);
-    std::advance(it, 1);
-    std::vector<unsigned char> vchLink2 = vchFromString(*it);
-    vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
-    vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
-    return Hash(vchLink1.begin(), vchLink1.end());
+    if (account1 != account2) {
+        std::vector<unsigned char> vchSeparator = {':'};
+        std::set<std::string> sorted;
+        sorted.insert(account1);
+        sorted.insert(account2);
+        std::set<std::string>::iterator it = sorted.begin();
+        std::vector<unsigned char> vchLink1 = vchFromString(*it);
+        std::advance(it, 1);
+        std::vector<unsigned char> vchLink2 = vchFromString(*it);
+        vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
+        vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
+        return Hash(vchLink1.begin(), vchLink1.end());
+    }
+    return uint256();
 }
 
 bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage)

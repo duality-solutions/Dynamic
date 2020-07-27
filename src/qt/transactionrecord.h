@@ -108,7 +108,9 @@ public:
         PrivateSendMakeCollaterals,
         PrivateSendCreateDenominations,
         PrivateSend,
-        NewAudit
+        NewAudit,
+        NewCertificate,
+        ApproveCertificate
     };
 
     /** Number of confirmation recommended for accepting a transaction */

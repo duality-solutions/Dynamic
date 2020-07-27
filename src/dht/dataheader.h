@@ -122,7 +122,7 @@ public:
         return *this;
     }
  
-    inline bool IsNull() const { return (nFormat == 7); }
+    inline bool IsNull() const { return (nFormat == DHT::DataFormat::Null); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 

@@ -296,6 +296,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                         else if (strOpType == "bdap_new_audit" ) {
                             sub.type = TransactionRecord::NewAudit;
                         }
+                        else if (strOpType == "bdap_new_certificate" ) {
+                            sub.type = TransactionRecord::NewCertificate;
+                        }
+                        else if (strOpType == "bdap_approve_certificate" ) {
+                            sub.type = TransactionRecord::ApproveCertificate;
+                        }
                     }
                 }
                 if (IsTransactionFluid(txout.scriptPubKey)) {

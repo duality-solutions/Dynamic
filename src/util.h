@@ -320,6 +320,11 @@ void TraceThread(const char* name, Callable func)
     }
 }
 
+template <typename Out>
+void SplitString(const std::string &s, char delim, Out result);
+std::vector<std::string> SplitString(const std::string &s, char delim);
+std::string TrimString(const std::string& s);
+
 /**
  * @brief Converts version strings to 4-byte unsigned integer
  * @param strVersion version in "x.x.x" format (decimal digits only)

@@ -27,7 +27,6 @@ class CMutableGetEvent;
 
 typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<int, EventPair> EventTypeMap;
-typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
 
 static constexpr int DHT_BOOTSTRAP_ALERT_TYPE_CODE = 62;
 static constexpr int STATS_ALERT_TYPE_CODE = 70;
@@ -65,11 +64,10 @@ public:
     std::string strErrorMessage;
     bool fShutdown = false;
     EventTypeMap m_EventTypeMap;
-    DHTGetEventMap m_DHTGetEventMap;
+    
     libtorrent::dht_stats_alert* DHTStats = nullptr;
     libtorrent::session_stats_alert* SessionStats = nullptr;
     CCriticalSection cs_EventMap;
-    CCriticalSection cs_DHTGetEventMap;
 
     CHashTableSession() : strName(""), vDataEntries(CDataRecordBuffer(32)), strErrorMessage(""), fShutdown(false) {};
 
@@ -77,7 +75,10 @@ public:
 
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
     bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
-                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence = 0);
+    bool SubmitGetAuthoritative(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence);
+
     /** Get a mutable record in the libtorrent DHT */
     bool SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record);
     bool SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords);
@@ -90,16 +91,16 @@ public:
     void StopEventListener();
     bool ReannounceEntry(const CMutableData& mutableData);
     void GetEvents(const int64_t& startTime, std::vector<CEvent>& events);
+    bool RemoveDHTGetEvent(const std::string& infoHash);
 
 private:
     bool GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event);
     //bool LoadSessionState();
     //int SaveSessionState();
     //std::string GetSessionStatePath();
-    bool RemoveDHTGetEvent(const std::string& infoHash);
     bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-    bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
-
+    bool FindDHTGetEvent(const std::string& infoHash, const int64_t& min_seq, CMutableGetEvent& event);
+    bool CheckRecordMap(const CMutableGetEvent& event);
 };
 
 uint32_t GetLastPutDate(const HashRecordKey& recordKey);
@@ -128,7 +129,8 @@ namespace DHT
     void GetDHTStats(CSessionStats& stats);
     bool ReannounceEntry(const CMutableData& mutableData);
     void GetEvents(const int64_t& startTime, std::vector<CEvent>& events);
-
+    bool SubmitGetAuthoritative(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence);
 }
 
 #endif // DYNAMIC_DHT_SESSION_H

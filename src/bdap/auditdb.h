@@ -18,7 +18,7 @@ class CAuditDB : public CDBWrapper {
 public:
     CAuditDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-audits", nCacheSize, fMemory, fWipe, obfuscate) {
     }
-    bool AddAudit(const CAudit& audit, const int op);
+    bool AddAudit(const CAudit& audit);
     bool ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit);
     bool ReadAuditTxId(const std::vector<unsigned char>& vchTxId, CAudit& audit);
     bool ReadAuditDN(const std::vector<unsigned char>& vchOwnerFullObjectPath, std::vector<CAudit>& vAudits);
@@ -26,12 +26,8 @@ public:
     bool EraseAuditTxId(const std::vector<unsigned char>& vchTxId);
     bool EraseAudit(const std::vector<unsigned char>& vchAudit);
     bool AuditExists(const std::vector<unsigned char>& vchAudit);
-    bool GetAuditInfo(const std::vector<unsigned char>& vchAudit, UniValue& oAuditInfo);
-    bool GetAuditInfo(const std::vector<unsigned char>& vchAudit, CAudit& audit);
 };
 
-bool GetAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit);
-bool GetAudit(const std::string& strAudit, CAudit& audit);
 bool GetAuditTxId(const std::string& strTxId, CAudit& audit);
 bool AuditExists(const std::vector<unsigned char>& vchAudit);
 bool UndoAddAudit(const CAudit& audit);

@@ -21,22 +21,6 @@
 
 CAuditDB *pAuditDB = nullptr;
 
-bool GetAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit)
-{
-    if (!pAuditDB || !pAuditDB->ReadAudit(vchAudit, audit))
-        return false;
-
-    return !audit.IsNull();
-}
-
-bool GetAudit(const std::string& strAudit, CAudit& audit)
-{
-    if (!pAuditDB || !pAuditDB->ReadAudit(vchFromString(strAudit), audit))
-        return false;
-
-    return !audit.IsNull();
-}
-
 bool GetAuditTxId(const std::string& strTxId, CAudit& audit)
 {
     if (!pAuditDB || !pAuditDB->ReadAuditTxId(vchFromString(strTxId), audit))
@@ -58,10 +42,10 @@ bool UndoAddAudit(const CAudit& audit)
     if (!pAuditDB)
         return false;
 
-    return pAuditDB->EraseAuditTxId(vchFromString(audit.GetHash().ToString()));
+    return pAuditDB->EraseAuditTxId(vchFromString(audit.txHash.ToString()));
 }
 
-bool CAuditDB::AddAudit(const CAudit& audit, const int op) 
+bool CAuditDB::AddAudit(const CAudit& audit) 
 { 
     bool writeState = false;
     bool writeStateDN = false;
@@ -138,20 +122,6 @@ bool CAuditDB::ReadAuditHash(const std::vector<unsigned char>& vchAudit, std::ve
     return (vAudits.size() > 0);
 }
 
-
-bool CAuditDB::ReadAudit(const std::vector<unsigned char>& vchAudit, CAudit& audit) 
-{
-    std::vector<unsigned char> vchTxId;
-    LOCK(cs_bdap_audit);
-    if (CDBWrapper::Read(make_pair(std::string("audit"), vchAudit), vchTxId)) {
-        if (!ReadAuditTxId(vchTxId, audit))
-            return false;
-    } else {
-        return false;
-    }
-    return true;
-}
-
 bool CAuditDB::AuditExists(const std::vector<unsigned char>& vchAudit)
 {
     LOCK(cs_bdap_audit);
@@ -189,26 +159,6 @@ bool CAuditDB::EraseAudit(const std::vector<unsigned char>& vchAudit)
 {
     LOCK(cs_bdap_audit);
     return CDBWrapper::Erase(make_pair(std::string("audit"), vchAudit));
-}
-
-bool CAuditDB::GetAuditInfo(const std::vector<unsigned char>& vchAudit, UniValue& oAuditInfo)
-{
-    CAudit audit;
-    if (!ReadAudit(vchAudit, audit))
-        return false;
-
-    if (!BuildAuditJson(audit, oAuditInfo))
-        return false;  
-
-    return true;
-}
-
-bool CAuditDB::GetAuditInfo(const std::vector<unsigned char>& vchAudit, CAudit& audit)
-{
-    if (!ReadAudit(vchAudit, audit))
-        return false;
-
-    return true;
 }
 
 bool CheckAuditDB()
@@ -335,7 +285,7 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
     }
 
     CAudit getAudit;
-    if (GetAudit(vchFromString(audit.txHash.ToString()), getAudit)) {
+    if (GetAuditTxId(audit.txHash.ToString(), getAudit)) {
         if (audit.txHash != txHash) {
             errorMessage = "CheckNewAuditTxInputs: - The audit " + audit.txHash.ToString() + " already exists.  Add new audit failed!";
             return error(errorMessage.c_str());
@@ -349,8 +299,7 @@ static bool CheckNewAuditTxInputs(const CAudit& audit, const CScript& scriptOp, 
         errorMessage = "CheckNewAuditTxInputs failed! Can not open LevelDB BDAP audit database.";
         return error(errorMessage.c_str());
     }
-    int op = OP_BDAP_NEW;
-    if (!pAuditDB->AddAudit(audit, op)) {
+    if (!pAuditDB->AddAudit(audit)) {
         errorMessage = "CheckNewAuditTxInputs failed! Error adding new audit record to LevelDB.";
         pAuditDB->EraseAuditTxId(vchFromString(audit.txHash.ToString()));
         return error(errorMessage.c_str());

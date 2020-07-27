@@ -90,6 +90,7 @@ enum RPCErrorCode {
     RPC_BDAP_FEE_UNKNOWN = -305,           //! BDAP fee can not be calculated
     RPC_BDAP_AUDIT_INVALID = -306,         //! Invalid audit data
     RPC_BDAP_INVALID_SIGNATURE = -307,     //! Invalid signature
+    RPC_BDAP_CERTIFICATE_INVALID = -308,   //! Invalid certificate data
 
     //! DHT errors
     RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT

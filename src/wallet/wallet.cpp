@@ -1500,7 +1500,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     }
                 }
             } else {
-                TopUpKeyPoolCombo(0, true);
+                TopUpKeyPoolCombo();
                 for (const CTxOut& txout : tx.vout) {
                     CScript scriptPubKey = txout.scriptPubKey;
                     CTxDestination dest;
@@ -1515,6 +1515,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     CPubKey retrievePubKey;
                     if (GetPubKey(keyID, retrievePubKey)) {
                         if (ReserveKeyForTransactions(retrievePubKey)) {
+                            TopUpKeyPoolCombo(0, true);
                             SetAddressBook(dest, "", "");
                             fNeedToRescanTransactions = true;
                         }
@@ -2316,7 +2317,7 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
                 ShowProgress(_("Rescanning..."), std::max(1, std::min(99, (int)((GuessVerificationProgress(chainParams.TxData(), pindex) - dProgressStart) / (dProgressTip - dProgressStart) * 100))));
             if (GetTime() >= nNow + 60) {
                 nNow = GetTime();
-                LogPrintf("Still rescanning. At block %d. Progress=%f\n", pindex->nHeight, GuessVerificationProgress(chainParams.TxData(), pindex));
+                LogPrintf("Still rescanning. At block %d. Progress=%f\n", pindex->nHeight, GuessVerificationProgress(chainParams.TxData(), pindex) * 100);
             }
 
             CBlock block;
@@ -4813,7 +4814,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" ) {
+                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" || strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
                     // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, &coinControl, false, nCoinType, fUseInstantSend, true);
                 }
@@ -5330,6 +5331,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     txin.scriptSig = CScript();
                 }
 
+                //TODO: Check if audit and certificate are in mempool
                 nFeeNeeded = GetMinimumFee(nBytes, coinControl, ::mempool, ::feeEstimator, &feeCalc);
 
                 if (fIsBDAP) {
@@ -5895,7 +5897,7 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
             }
 
             if (fIncreaseSize) {
-                DynamicKeyPoolSize = DynamicKeyPoolSize + 1;
+                DynamicKeyPoolSize = DynamicKeyPoolSize + 2;
             } //if fIncreaseSize
 
             nTargetSize = DynamicKeyPoolSize; 
@@ -6099,9 +6101,10 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
                 foundPubKey = true;
                 KeepKey(nIndex);
                 EraseIndex = true;
+                fNeedToUpdateKeyPools = true;
                 IndexToErase = nIndex;
                 ReserveKeyCount++;
-                if (ReserveKeyCount <= DEFAULT_RESCAN_THRESHOLD) {
+                if (ReserveKeyCount < DEFAULT_KEYPOOL_SIZE) {
                     SaveRescanIndex = true;
                 }
             }

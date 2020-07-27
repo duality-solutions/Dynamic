@@ -202,7 +202,7 @@ enum opcodetype {
     OP_BDAP_NEW = 0x01,                  // = BDAP new entry
     OP_BDAP_DELETE = 0x02,               // = BDAP delete entry
     OP_BDAP_EXPIRE = 0x03,               // = BDAP expire entry
-    OP_BDAP_MODIFY = 0x04,               // = BDAP update entry
+    OP_BDAP_MODIFY = 0x04,               // = BDAP update/approve entry
     OP_BDAP_MOVE = 0x05,                 // = BDAP move entry
     OP_BDAP_ACCOUNT_ENTRY  = 0x06,       // = BDAP domain account entry (users and groups) 
     OP_BDAP_LINK_REQUEST = 0x07,         // = BDAP link request
