@@ -175,7 +175,11 @@ class DynamicCore : public QObject
     Q_OBJECT
 public:
     explicit DynamicCore();
-
+    /** Basic initialization, before starting initialization/shutdown thread.
+     * Return true on success.
+     */
+    static bool baseInitialize();
+    
 public Q_SLOTS:
     void initialize();
     void shutdown();
@@ -268,23 +272,33 @@ void DynamicCore::handleRunawayException(const std::exception* e)
     Q_EMIT runawayException(QString::fromStdString(GetWarnings("gui")));
 }
 
+bool DynamicCore::baseInitialize()
+{
+    if (!AppInitBasicSetup())
+    {
+        return false;
+    }
+    if (!AppInitParameterInteraction())
+    {
+        return false;
+    }
+    if (!AppInitSanityChecks())
+    {
+        return false;
+    }
+    if (!AppInitLockDataDirectory())
+    {
+        return false;
+    }
+    return true;
+}
+
 void DynamicCore::initialize()
 {
-    try {
-        qDebug() << __func__ << ": Running AppInit2 in thread";
-        if (!AppInitBasicSetup()) {
-            Q_EMIT initializeResult(false);
-            return;
-        }
-        if (!AppInitParameterInteraction()) {
-            Q_EMIT initializeResult(false);
-            return;
-        }
-        if (!AppInitSanityChecks()) {
-            Q_EMIT initializeResult(false);
-            return;
-        }
-        int rv = AppInitMain(threadGroup, scheduler);
+    try
+    {
+        qDebug() << __func__ << ": Running initialization in thread";
+        bool rv = AppInitMain(threadGroup, scheduler);
         Q_EMIT initializeResult(rv);
     } catch (const std::exception& e) {
         handleRunawayException(&e);
@@ -297,21 +311,22 @@ void DynamicCore::restart(QStringList args)
 {
     static bool executing_restart{false};
 
-    if (!executing_restart) { // Only restart 1x, no matter how often a user clicks on a restart-button
+    if(!executing_restart) { // Only restart 1x, no matter how often a user clicks on a restart-button
         executing_restart = true;
-        try {
+        try
+        {
             qDebug() << __func__ << ": Running Restart in thread";
             Interrupt(threadGroup);
             threadGroup.join_all();
             StartRestart();
             PrepareShutdown();
             qDebug() << __func__ << ": Shutdown finished";
-            Q_EMIT shutdownResult(1);
+            Q_EMIT shutdownResult(true);
             CExplicitNetCleanup::callCleanup();
             QProcess::startDetached(QApplication::applicationFilePath(), args);
             qDebug() << __func__ << ": Restart initiated...";
             QApplication::quit();
-        } catch (const std::exception& e) {
+        } catch (std::exception& e) {
             handleRunawayException(&e);
         } catch (...) {
             handleRunawayException(nullptr);
@@ -705,15 +720,26 @@ int main(int argc, char* argv[])
     if (gArgs.GetBoolArg("-splash", DEFAULT_SPLASHSCREEN) && !gArgs.GetBoolArg("-min", false))
         app.createSplashScreen(networkStyle.data());
 
-    try {
+    int rv = EXIT_SUCCESS;
+    try
+    {
         app.createWindow(networkStyle.data());
-        app.requestInitialize();
+        // Perform base initialization before spinning up initialization/shutdown thread
+        // This is acceptable because this function only contains steps that are quick to execute,
+        // so the GUI thread won't be held up.
+        if (DynamicCore::baseInitialize()) {
+            app.requestInitialize();
 #if defined(Q_OS_WIN) && QT_VERSION >= 0x050000
-        WinShutdownMonitor::registerShutdownBlockReason(QObject::tr("Dynamic didn't yet exit safely..."), (HWND)app.getMainWinId());
+            WinShutdownMonitor::registerShutdownBlockReason(QObject::tr("%1 didn't yet exit safely...").arg(QObject::tr(PACKAGE_NAME)), (HWND)app.getMainWinId());
 #endif
-        app.exec();
-        app.requestShutdown();
-        app.exec();
+            app.exec();
+            app.requestShutdown();
+            app.exec();
+            rv = app.getReturnValue();
+        } else {
+            // A dialog with detailed error will have been shown by InitError()
+            rv = EXIT_FAILURE;
+        }
     } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "Runaway exception");
         app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
@@ -721,6 +747,6 @@ int main(int argc, char* argv[])
         PrintExceptionContinue(nullptr, "Runaway exception");
         app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
     }
-    return app.getReturnValue();
+    return rv;
 }
 #endif // DYNAMIC_QT_TEST
