@@ -103,9 +103,6 @@ public:
     static QString formatWithCustomName(QString customName, const CAmount& amount, int unit = MAX_ASSET_UNITS, bool plussign=false, SeparatorStyle separators=separatorStandard);
     //! Format as HTML string (with unit)
     static QString formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign = false, SeparatorStyle separators = separatorStandard);
-    //! Format as string (with unit) but floor value up to "digits" settings
-    static QString floorWithUnit(int unit, const CAmount& amount, bool plussign = false, SeparatorStyle separators = separatorStandard);
-    static QString floorHtmlWithUnit(int unit, const CAmount& amount, bool plussign = false, SeparatorStyle separators = separatorStandard);
     //! Parse string to coin amount
     static bool parse(int unit, const QString& value, CAmount* val_out);
     static bool assetParse(int assetUnit, const QString &value, CAmount *val_out);

@@ -103,11 +103,14 @@ public:
         } else {
             foreground = option.palette.color(QPalette::Text);
         }
+        
         painter->setPen(foreground);
-        QString amountText = DynamicUnits::floorWithUnit(unit, amount, true, DynamicUnits::separatorAlways);
+
+        QString amountText = index.data(TransactionTableModel::FormattedAmountRole).toString();
         if (!confirmed) {
             amountText = QString("[") + amountText + QString("]");
         }
+
         painter->drawText(amountRect, Qt::AlignRight | Qt::AlignVCenter, amountText);
 
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
@@ -476,17 +479,17 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& total, cons
     currentWatchImmatureBalance = watchImmatureBalance;
     currentWatchOnlyStake = watchOnlyStake;
 
-    ui->labelBalance->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, balance, false, DynamicUnits::separatorAlways));
+    ui->labelBalance->setText(DynamicUnits::formatWithUnit(nDisplayUnit, balance, false, DynamicUnits::separatorAlways));
     ui->labelTotal->setText(DynamicUnits::formatWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance + stake, false, DynamicUnits::separatorAlways));
     ui->labelStake->setText(DynamicUnits::formatWithUnit(nDisplayUnit, stake, false, DynamicUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, unconfirmedBalance, false, DynamicUnits::separatorAlways));
-    ui->labelImmature->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, immatureBalance, false, DynamicUnits::separatorAlways));
-    ui->labelAnonymized->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, anonymizedBalance, false, DynamicUnits::separatorAlways));
-    ui->labelTotal->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, DynamicUnits::separatorAlways));
-    ui->labelWatchAvailable->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, DynamicUnits::separatorAlways));
-    ui->labelWatchPending->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, DynamicUnits::separatorAlways));
-    ui->labelWatchImmature->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, DynamicUnits::separatorAlways));
-    ui->labelWatchTotal->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelUnconfirmed->setText(DynamicUnits::formatWithUnit(nDisplayUnit, unconfirmedBalance, false, DynamicUnits::separatorAlways));
+    ui->labelImmature->setText(DynamicUnits::formatWithUnit(nDisplayUnit, immatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelAnonymized->setText(DynamicUnits::formatWithUnit(nDisplayUnit, anonymizedBalance, false, DynamicUnits::separatorAlways));
+    ui->labelTotal->setText(DynamicUnits::formatWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchAvailable->setText(DynamicUnits::formatWithUnit(nDisplayUnit, watchOnlyBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchPending->setText(DynamicUnits::formatWithUnit(nDisplayUnit, watchUnconfBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchImmature->setText(DynamicUnits::formatWithUnit(nDisplayUnit, watchImmatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchTotal->setText(DynamicUnits::formatWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, DynamicUnits::separatorAlways));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
