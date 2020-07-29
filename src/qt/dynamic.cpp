@@ -179,15 +179,15 @@ public:
      * Return true on success.
      */
     static bool baseInitialize();
-    
+
 public Q_SLOTS:
     void initialize();
     void shutdown();
     void restart(QStringList args);
 
 Q_SIGNALS:
-    void initializeResult(int retval);
-    void shutdownResult(int retval);
+    void initializeResult(bool success);
+    void shutdownResult(bool success);
     void runawayException(const QString& message);
 
 private:
@@ -231,8 +231,8 @@ public:
     WId getMainWinId() const;
 
 public Q_SLOTS:
-    void initializeResult(int retval);
-    void shutdownResult(int retval);
+    void initializeResult(bool success);
+    void shutdownResult(bool success);
     /// Handle runaway exceptions. Shows a message box with the problem and quits the program.
     void handleRunawayException(const QString& message);
 
@@ -442,8 +442,8 @@ void DynamicApplication::startThread()
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
-    connect(executor, SIGNAL(initializeResult(int)), this, SLOT(initializeResult(int)));
-    connect(executor, SIGNAL(shutdownResult(int)), this, SLOT(shutdownResult(int)));
+    connect(executor, SIGNAL(initializeResult(bool)), this, SLOT(initializeResult(bool)));
+    connect(executor, SIGNAL(shutdownResult(bool)), this, SLOT(shutdownResult(bool)));
     connect(executor, SIGNAL(runawayException(QString)), this, SLOT(handleRunawayException(QString)));
     connect(this, SIGNAL(requestedInitialize()), executor, SLOT(initialize()));
     connect(this, SIGNAL(requestedShutdown()), executor, SLOT(shutdown()));
@@ -493,12 +493,12 @@ void DynamicApplication::requestShutdown()
     Q_EMIT requestedShutdown();
 }
 
-void DynamicApplication::initializeResult(int retval)
+void DynamicApplication::initializeResult(bool success)
 {
-    qDebug() << __func__ << ": Initialization result: " << retval;
+    qDebug() << __func__ << ": Initialization result: " << success;
     // Set exit result: 0 if successful, 1 if failure
-    returnValue = retval ? 0 : 1;
-    if (retval) {
+    returnValue = success ? EXIT_SUCCESS : EXIT_FAILURE;
+    if (success) {
         // Log this only after AppInit2 finishes, as then logging setup is guaranteed complete
         qWarning() << "Platform customization:" << platformStyle->getName();
 #ifdef ENABLE_WALLET
@@ -545,9 +545,10 @@ void DynamicApplication::initializeResult(int retval)
     }
 }
 
-void DynamicApplication::shutdownResult(int retval)
+void DynamicApplication::shutdownResult(bool success)
 {
-    qDebug() << __func__ << ": Shutdown result: " << retval;
+    returnValue = success ? EXIT_SUCCESS : EXIT_FAILURE;
+    qDebug() << __func__ << ": Shutdown result: " << returnValue;
     quit(); // Exit main loop after shutdown finished
 }
 
@@ -630,7 +631,7 @@ int main(int argc, char* argv[])
     /// 5. Now that settings and translations are available, ask user for data directory
     // User language is set up: pick a data directory
     if (!Intro::pickDataDirectory())
-        return 0;
+        return EXIT_SUCCESS;
 
     /// 6. Determine availability of data directory and parse dynamic.conf
     /// - Do not call GetDataDir(true) before this step finishes
