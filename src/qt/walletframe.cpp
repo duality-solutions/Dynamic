@@ -10,6 +10,7 @@
 #include "dynamicgui.h"
 #include "walletview.h"
 
+#include <cassert>
 #include <cstdio>
 
 #include <QHBoxLayout>
@@ -71,6 +72,7 @@ bool WalletFrame::setCurrentWallet(const QString& name)
 
     WalletView* walletView = mapWalletViews.value(name);
     walletStack->setCurrentWidget(walletView);
+    assert(walletView);
     walletView->updateEncryptionStatus();
     return true;
 }
