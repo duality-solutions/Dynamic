@@ -2305,9 +2305,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
     }
 
-    if (!fDryRun)
-        GetMainSignals().SyncTransaction(tx, nullptr, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
-
     GetMainSignals().TransactionAddedToMempool(ptx);
 
     return true;
@@ -2331,7 +2328,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
         }
     }
 
-    if (!res || fDryRun || !fluidTimestampCheck) {
+    if (!res || !fluidTimestampCheck) {
         if (!res)
             LogPrint("mempool", "%s: %s %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason(), state.GetDebugMessage());
         for (const COutPoint& hashTx : coins_to_uncache)
@@ -7277,7 +7274,8 @@ bool LoadMempool(void)
             if (nTime + nExpiryTimeout > nNow) {
                 LOCK(cs_main);
                 AcceptToMemoryPoolWithTime(mempool, state, tx, nullptr /* pfMissingInputs */, nTime,
-                                           nullptr /* plTxnReplaced */, false /* fOverrideMempoolLimit */, 0 /* nAbsurdFee */);
+                                           nullptr /* plTxnReplaced */, false /* fOverrideMempoolLimit */, 0 /* nAbsurdFee */,
+                                           false /* fDryRun */);
                 if (state.IsValid()) {
                     ++count;
                 } else {
