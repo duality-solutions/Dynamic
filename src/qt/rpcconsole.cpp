@@ -15,6 +15,7 @@
 #include "clientmodel.h"
 #include "guiutil.h"
 #include "peertablemodel.h"
+#include "sendcoinsdialog.h"
 
 #include "chainparams.h"
 #include "rpc/client.h"
@@ -730,7 +731,19 @@ void RPCConsole::walletUpgrade()
 /** Restart wallet with "-reindex" */
 void RPCConsole::walletReindex()
 {
-    buildParameterlist(REINDEX);
+  QString questionString = tr("Are you sure you want to reindex?");
+  questionString.append(QString("<br /><br />This process may take a few hours."));
+
+  SendConfirmationDialog confirmationDialog(tr("Confirm reindex"), questionString, 0, this);
+  confirmationDialog.exec();
+  QMessageBox::StandardButton retval = (QMessageBox::StandardButton)confirmationDialog.result();
+
+  if(retval != QMessageBox::Yes)
+  {
+      return;
+  }
+
+  buildParameterlist(REINDEX);
 }
 
 /** Build command-line parameter list for restart */
