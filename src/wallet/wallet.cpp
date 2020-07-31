@@ -4783,7 +4783,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-    unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
+    unsigned int nBytes = GetVirtualTransactionSize(txNew);
     FeeCalculation feeCalc;
     double dPriority = 0;
     CAmount nFeeNeeded; // needed for BDAP
@@ -7558,7 +7558,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBi
             }
 
             // Limit size
-            unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
+            unsigned int nBytes = GetVirtualTransactionSize(txNew);
             if (nBytes >= DEFAULT_BLOCK_MAX_SIZE / 5)
                 return error("CreateCoinStake : exceeded coinstake size limit");
 
