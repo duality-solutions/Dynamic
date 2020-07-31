@@ -23,8 +23,6 @@
 #include <iomanip>
 #include <univalue.h>
 
-#include <boost/assign/list_of.hpp>
-
 std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
 {
     bool sign = amount < 0;
