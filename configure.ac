@@ -1180,11 +1180,15 @@ if test x$raven_enable_qt != xno; then
     echo "    qt version    = $dynamic_qt_got_major_vers"
     echo "    with qr       = $use_qr"
 fi
+echo "  with GPU miner  = $enable_gpu"
+echo "  with CUDA       = $enable_cuda"
+echo "  with ssse3      = $have_ssse3"
+echo "  with avx2       = $have_avx2"
+echo "  with avx512f    = $have_avx512f"
 echo "  with zmq        = $use_zmq"
 echo "  with test       = $use_tests"
 echo "  with bench      = $use_bench"
 echo "  with upnp       = $use_upnp"
-echo "  use asm         = $use_asm"
 echo "  debug enabled   = $enable_debug"
 echo "  werror          = $enable_werror"
 echo
