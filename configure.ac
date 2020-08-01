@@ -12,6 +12,17 @@ AC_CONFIG_HEADERS([src/config/dynamic-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 
+DYNAMIC_DAEMON_NAME=dynamicd
+DYNAMIC_GUI_NAME=dynamic-qt
+DYNAMIC_CLI_NAME=dynamic-cli
+DYNAMIC_TX_NAME=dynamic-tx
+
+dnl Unless the user specified ARFLAGS, force it to be cr
+AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
+if test "x${ARFLAGS+set}" != "xset"; then
+  ARFLAGS="cr"
+fi
+
 AC_CANONICAL_HOST
 
 AH_TOP([#ifndef DYNAMIC_CONFIG_H])
@@ -251,11 +262,17 @@ if test "x$CXXFLAGS_overridden" = "xno"; then
 fi
 CPPFLAGS="$CPPFLAGS -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
-AC_ARG_WITH([utils],
-  [AS_HELP_STRING([--with-utils],
-  [build dynamic-cli dynamic-tx (default=yes)])],
-  [build_dynamic_utils=$withval],
-  [build_dynamic_utils=yes])
+AC_ARG_WITH([cli],
+  [AS_HELP_STRING([--with-cli],
+  [build dynamic-cli (default=yes)])],
+  [build_dynamic_cli=$withval],
+  [build_dynamic_cli=yes])
+
+AC_ARG_WITH([tx],
+  [AS_HELP_STRING([--with-tx],
+  [build dynamic-tx (default=yes)])],
+  [build_dynamic_tx=$withval],
+  [build_dynamic_tx=yes])
 
 AC_ARG_WITH([libs],
   [AS_HELP_STRING([--with-libs],
@@ -650,7 +667,7 @@ DYNAMIC_QT_INIT
 dnl sets $dynamic_enable_qt, $dynamic_enable_qt_test, $dynamic_enable_qt_dbus
 DYNAMIC_QT_CONFIGURE([$use_pkgconfig], [qt5])
 
-if test x$build_dynamic_utils$build_dynamicd$dynamic_enable_qt$use_tests = xnononono; then
+if test x$build_dynamic_cli$build_dynamic_tx$build_dynamicd$dynamic_enable_qt$use_tests$use_bench = xnononononono; then
     use_boost=no
 else
     use_boost=yes
@@ -833,7 +850,7 @@ if test x$use_pkgconfig = xyes; then
       if test x$use_qr != xno; then
         DYNAMIC_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
       fi
-      if test x$build_dynamic_utils$build_dynamicd$dynamic_enable_qt$use_tests != xnononono; then
+      if test x$build_dynamic_cli$build_dynamic_tx$build_dynamicd$dynamic_enable_qt$use_tests != xnonononono; then
         PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
         if test x$TARGET_OS != xwindows; then
           PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
@@ -858,7 +875,7 @@ else
   AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
   AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
 
-  if test x$build_dynamic_utils$build_dynamicd$dynamic_enable_qt$use_tests != xnononono; then
+  if test x$build_dynamic_cli$build_dynamic_tx$build_dynamicd$dynamic_enable_qt$use_tests != xnonononono; then
     AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
     AC_CHECK_LIB([event],[main],EVENT_LIBS=-levent,AC_MSG_ERROR(libevent missing))
     if test x$TARGET_OS != xwindows; then
@@ -901,9 +918,13 @@ AC_MSG_CHECKING([whether to build dynamicd])
 AM_CONDITIONAL([BUILD_DYNAMICD], [test x$build_dynamicd = xyes])
 AC_MSG_RESULT($build_dynamicd)
 
-AC_MSG_CHECKING([whether to build utils (dynamic-cli dynamic-tx)])
-AM_CONDITIONAL([BUILD_DYNAMIC_UTILS], [test x$build_dynamic_utils = xyes])
-AC_MSG_RESULT($build_dynamic_utils)
+AC_MSG_CHECKING([whether to build dynamic-cli])
+AM_CONDITIONAL([BUILD_DYNAMIC_CLI], [test x$build_dynamic_cli = xyes])
+AC_MSG_RESULT($build_dynamic_cli)
+
+AC_MSG_CHECKING([whether to build dynamic-tx])
+AM_CONDITIONAL([BUILD_DYNAMIC_TX], [test x$build_dynamic_tx = xyes])
+AC_MSG_RESULT($build_dynamic_tx)
 
 AC_MSG_CHECKING([whether to build libraries])
 AM_CONDITIONAL([BUILD_DYNAMIC_LIBS], [test x$build_dynamic_libs = xyes])
@@ -1041,8 +1062,8 @@ else
   AC_MSG_RESULT([no])
 fi
 
-if test x$build_dynamic_utils$build_dynamic_libs$build_dynamicd$dynamic_enable_qt$use_tests = xnonononono; then
-  AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-libs --with-daemon --with-gui or --enable-tests])
+if test x$build_dynamic_cli$build_dynamic_tx$build_dynamic_libs$build_dynamicd$dynamic_enable_qt$use_bench$use_tests = xnonononononono; then
+  AC_MSG_ERROR([No targets! Please specify at least one of: --with-cli --with-tx --with-libs --with-daemon --with-gui --enable-bench or --enable-tests])
 fi
 
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
@@ -1075,6 +1096,10 @@ AC_SUBST(CLIENT_VERSION_REVISION, _CLIENT_VERSION_REVISION)
 AC_SUBST(CLIENT_VERSION_BUILD, _CLIENT_VERSION_BUILD)
 AC_SUBST(CLIENT_VERSION_IS_RELEASE, _CLIENT_VERSION_IS_RELEASE)
 AC_SUBST(COPYRIGHT_YEAR, _COPYRIGHT_YEAR)
+AC_SUBST(DYNAMIC_DAEMON_NAME)
+AC_SUBST(DYNAMIC_GUI_NAME)
+AC_SUBST(DYNAMIC_CLI_NAME)
+AC_SUBST(DYNAMIC_TX_NAME)
 
 AC_SUBST(RELDFLAGS)
 AC_SUBST(HARDENED_CXXFLAGS)
@@ -1144,3 +1169,33 @@ case ${OS} in
      mv qa/pull-tester/tests_config-2.py qa/pull-tester/tests_config.py
    ;;
 esac
+
+echo
+echo "Options used to compile and link:"
+echo "  build dynamic-cli = $build_dynamic_cli"
+echo "  build dynamic-tx  = $build_dynamic_tx"
+echo "  with wallet     = $enable_wallet"
+echo "  with gui / qt   = $dynamic_enable_qt"
+if test x$raven_enable_qt != xno; then
+    echo "    qt version    = $dynamic_qt_got_major_vers"
+    echo "    with qr       = $use_qr"
+fi
+echo "  with zmq        = $use_zmq"
+echo "  with test       = $use_tests"
+echo "  with bench      = $use_bench"
+echo "  with upnp       = $use_upnp"
+echo "  use asm         = $use_asm"
+echo "  debug enabled   = $enable_debug"
+echo "  werror          = $enable_werror"
+echo
+echo "  target os       = $TARGET_OS"
+echo "  build os        = $BUILD_OS"
+echo
+echo "  CC              = $CC"
+echo "  CFLAGS          = $CFLAGS"
+echo "  CPPFLAGS        = $CPPFLAGS"
+echo "  CXX             = $CXX"
+echo "  CXXFLAGS        = $CXXFLAGS"
+echo "  LDFLAGS         = $LDFLAGS"
+echo "  ARFLAGS         = $ARFLAGS"
+echo

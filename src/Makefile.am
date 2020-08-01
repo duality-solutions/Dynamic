@@ -37,7 +37,8 @@ EXTRA_LIBRARIES += \
   $(LIBDYNAMIC_CONSENSUS) \
   $(LIBDYNAMIC_SERVER) \
   $(LIBDYNAMIC_CLI) \
-  $(LIBDYNAMIC_WALLET)
+  $(LIBDYNAMIC_WALLET) \
+  $(LIBDYNAMIC_ZMQ)
 
 if ENABLE_WALLET
 DYNAMIC_INCLUDES += $(BDB_CPPFLAGS)
@@ -63,8 +64,12 @@ if BUILD_DYNAMICD
   bin_PROGRAMS += dynamicd
 endif
 
-if BUILD_DYNAMIC_UTILS
-  bin_PROGRAMS += dynamic-cli dynamic-tx
+if BUILD_DYNAMIC_CLI
+  bin_PROGRAMS += dynamic-cli
+endif
+
+if BUILD_DYNAMIC_TX
+  bin_PROGRAMS += dynamic-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
