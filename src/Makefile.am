@@ -92,6 +92,7 @@ DYNAMIC_CORE_H = \
   bdap/utils.h \
   bdap/vgpmessage.h \
   bdap/x509.h \
+  bdap/x509certificate.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -284,6 +285,7 @@ libdynamic_server_a_SOURCES = \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
   bdap/x509.cpp \
+  bdap/x509certificate.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \
