@@ -47,6 +47,7 @@ static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
 static constexpr unsigned int MAX_CERTIFICATE_CATEGORY    = 32;
 static constexpr unsigned int MAX_CERTIFICATE_FINGERPRINT = 32;
+static constexpr unsigned int MAX_CERTIFICATE_PEM_LENGTH  = 3600;
 static constexpr unsigned int MAX_CERTIFICATE_EXTENSION_RECORDS = 10;
 static constexpr unsigned int MAX_CERTIFICATE_EXTENSION_LENGTH  = 100;
 static constexpr unsigned int MAX_CERTIFICATE_KEY_LENGTH        = 512;
