@@ -28,7 +28,9 @@
 #endif
 
 int add_ext(X509 *cert, int nid, char *value);
-bool vchPEMfromX509(X509 *x509, std::vector<unsigned char> vchPEM);
+int add_ext_req(STACK_OF(X509_EXTENSION) *sk, int nid, char *value); 
+bool vchPEMfromX509(X509 *x509, std::vector<unsigned char>& vchPEM);
+bool vchPEMfromX509req(X509_REQ *x509, std::vector<unsigned char>& vchPEM);
 
 void CX509Certificate::Serialize(std::vector<unsigned char>& vchData) 
 {
@@ -133,7 +135,7 @@ uint256 CX509Certificate::GetSubjectHash() const
 uint256 CX509Certificate::GetIssuerHash() const
 {
     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
-    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << IssuerSignature << PublicKey << SerialNumber << PEM;
+    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << PublicKey << SerialNumber << PEM;
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
 
@@ -181,8 +183,6 @@ bool CX509Certificate::CheckIssuerSignature(const std::vector<unsigned char>& vc
     return true;
 }
 
-
-//TODO: review compiler warnings
 int add_ext(X509 *cert, int nid, char *value)
 {
     X509_EXTENSION *ex;
@@ -203,7 +203,18 @@ int add_ext(X509 *cert, int nid, char *value)
     return 1;
 }
 
-bool vchPEMfromX509(X509 *x509, std::vector<unsigned char> vchPEM)
+int add_ext_req(STACK_OF(X509_EXTENSION) *sk, int nid, char *value) 
+{
+    X509_EXTENSION *ex;
+    ex = X509V3_EXT_conf_nid(NULL, NULL, nid, value);
+    if (!ex)
+        return 0;
+    sk_X509_EXTENSION_push(sk, ex);
+    return 1;
+}
+
+
+bool vchPEMfromX509(X509 *x509, std::vector<unsigned char>& vchPEM)
 {
     int rc = 0;
     unsigned long err = 0;
@@ -232,7 +243,93 @@ bool vchPEMfromX509(X509 *x509, std::vector<unsigned char> vchPEM)
     return true;
 }
 
-bool CX509Certificate::SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey)  //Pass PrivKeyBytes
+bool vchPEMfromX509req(X509_REQ *x509, std::vector<unsigned char>& vchPEM)
+{
+    int rc = 0;
+    unsigned long err = 0;
+
+    std::unique_ptr<BIO, decltype(&::BIO_free)> bio(BIO_new(BIO_s_mem()), ::BIO_free);
+
+    rc = PEM_write_bio_X509_REQ(bio.get(), x509);
+    err = ERR_get_error();
+
+    if (rc != 1)
+    {
+        return false;
+    }
+
+    BUF_MEM *mem = NULL;
+    BIO_get_mem_ptr(bio.get(), &mem);
+    err = ERR_get_error();
+
+    if (!mem || !mem->data || !mem->length)
+    {
+        return false;
+    }
+
+    std::string pem(mem->data, mem->length);
+    vchPEM = vchFromString(pem);
+    return true;
+}
+
+bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivKey)  //Pass PrivKeyBytes
+{
+    X509_REQ *certificate;
+    X509_NAME *subjectName=NULL;
+	EVP_PKEY* pubkeyEd25519;
+	EVP_PKEY* privkeyEd25519;
+
+    STACK_OF(X509_EXTENSION) *exts = NULL;
+
+	pubkeyEd25519=EVP_PKEY_new();
+    privkeyEd25519=EVP_PKEY_new();
+
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &PublicKey[0], 32);
+	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
+
+    if ((certificate=X509_REQ_new()) == NULL)
+        return false;
+
+    X509_REQ_set_version(certificate,2);
+    X509_REQ_set_pubkey(certificate,pubkeyEd25519);
+
+    subjectName=X509_REQ_get_subject_name(certificate);
+
+    X509_NAME_add_entry_by_txt(subjectName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
+
+	exts = sk_X509_EXTENSION_new_null();
+
+    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+
+	add_ext_req(exts, NID_key_usage, keyUsage);
+
+    X509_REQ_add_extensions(certificate, exts);
+
+    if (!X509_REQ_sign(certificate,privkeyEd25519,EVP_md_null()))
+        return false;
+
+    std::vector<unsigned char> vchPEM;
+    if (!vchPEMfromX509req(certificate,vchPEM))
+        return false;
+
+    PEM = vchPEM; //Store PEM in certificate object
+
+    sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
+    EVP_PKEY_free(pubkeyEd25519);
+    EVP_PKEY_free(privkeyEd25519);
+    X509_REQ_free(certificate);
+
+    return true;
+
+} //X509RequestSign
+
+
+bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey)  //Pass PrivKeyBytes
 {
     X509 *certificate;
     X509_NAME *subjectName=NULL;
@@ -259,17 +356,20 @@ bool CX509Certificate::SelfSign(const std::vector<unsigned char>& vchSubjectPriv
     X509_NAME_add_entry_by_txt(subjectName, "C",  MBSTRING_ASC,
                             (unsigned char *)"US", -1, -1, 0);
     X509_NAME_add_entry_by_txt(subjectName, "O",  MBSTRING_ASC,
-                            (unsigned char *)"Duality Blockchain Solutions", -1, -1, 0);
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
     X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
                             (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
 
     //self signed so subject=issuer
     X509_set_issuer_name(certificate,subjectName);
 
-    add_ext(certificate, NID_basic_constraints, "critical,CA:TRUE");
-    add_ext(certificate, NID_key_usage, "critical,keyCertSign,cRLSign");
+    char* basicConstraints = strdup("critical,CA:TRUE"); 
+    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+    char* keyIdentifier = strdup("hash");
 
-    add_ext(certificate, NID_subject_key_identifier, "hash");
+    add_ext(certificate, NID_basic_constraints, basicConstraints);
+    add_ext(certificate, NID_key_usage, keyUsage);
+    add_ext(certificate, NID_subject_key_identifier, keyIdentifier);
 
     if (!X509_sign(certificate,privkeyEd25519,EVP_md_null()))
         return false;
@@ -286,7 +386,76 @@ bool CX509Certificate::SelfSign(const std::vector<unsigned char>& vchSubjectPriv
 
     return true;
 
-}
+} //X509SelfSign
+
+bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssuerPrivKey)  //Pass PrivKeyBytes
+{
+    X509 *certificate;
+    X509_NAME *subjectName=NULL;
+    X509_NAME *issuerName=NULL;
+	EVP_PKEY* pubkeyEd25519;
+	EVP_PKEY* privkeyEd25519;
+
+	pubkeyEd25519=EVP_PKEY_new();
+    privkeyEd25519=EVP_PKEY_new();
+
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &PublicKey[0], 32);
+	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivKey[0], 32);
+
+    if ((certificate=X509_new()) == NULL)
+        return false;
+
+    X509_set_version(certificate,2);
+    ASN1_INTEGER_set(X509_get_serialNumber(certificate), SerialNumber);
+    X509_gmtime_adj(X509_get_notBefore(certificate),(long)0);
+    X509_gmtime_adj(X509_get_notAfter(certificate),(long)AddMonthsToBlockTime(0,MonthsValid));
+    X509_set_pubkey(certificate,pubkeyEd25519);
+
+    subjectName=X509_get_subject_name(certificate);
+    issuerName=X509_get_issuer_name(certificate);
+
+    X509_NAME_add_entry_by_txt(subjectName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
+
+    X509_NAME_add_entry_by_txt(issuerName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(issuerName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(issuerName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Issuer).c_str()), -1, -1, 0);
+
+    //self signed so subject=issuer
+    X509_set_issuer_name(certificate,issuerName);
+
+    char* basicConstraints = strdup("critical,CA:TRUE"); 
+    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+    char* keyIdentifier = strdup("hash");
+
+    add_ext(certificate, NID_basic_constraints, basicConstraints);
+    add_ext(certificate, NID_key_usage, keyUsage);
+    add_ext(certificate, NID_subject_key_identifier, keyIdentifier);
+
+    if (!X509_sign(certificate,privkeyEd25519,EVP_md_null()))
+        return false;
+
+    std::vector<unsigned char> vchPEM;
+    if (!vchPEMfromX509(certificate,vchPEM))
+        return false;
+
+    PEM = vchPEM; //Store PEM in certificate object
+
+    EVP_PKEY_free(pubkeyEd25519);
+    EVP_PKEY_free(privkeyEd25519);
+    X509_free(certificate);
+
+    return true;
+
+} //X509ApproveSign
+
 
 bool CX509Certificate::ValidateValues(std::string& errorMessage) const
 {
@@ -318,7 +487,11 @@ bool CX509Certificate::ValidateValues(std::string& errorMessage) const
         return false;
     }
 
-    //TODO: check against max pem size
+    if (PEM.size() > MAX_CERTIFICATE_PEM_LENGTH)
+    {
+        errorMessage = "Invalid PEM size. Can not have more than " + std::to_string(MAX_CERTIFICATE_PEM_LENGTH) + " characters.";
+        return false;
+    }
 
     // check subject owner path
     if (Subject.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
@@ -406,6 +579,8 @@ bool BuildX509CertificateJson(const CX509Certificate& certificate, UniValue& oCe
     oCertificate.push_back(Pair("issuer_signature", certificate.GetIssuerSignature()));
     oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
+
+    oCertificate.push_back(Pair("pem", stringFromVch(certificate.PEM)));
 
     oCertificate.push_back(Pair("txid_request", certificate.txHashRequest.GetHex()));
     oCertificate.push_back(Pair("txid_approve", certificate.txHashApprove.GetHex()));

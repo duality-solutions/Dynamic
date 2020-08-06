@@ -157,7 +157,9 @@ public:
     bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ValidateValues(std::string& errorMessage) const;
-    bool SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+    bool X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+    bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+    bool X509ApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
 
     std::string ToString() const;
 };
