@@ -1191,7 +1191,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             }
 
             // check bdap accounts and signature is correct.
-            CCertificate certificate(ptx);
+            CX509Certificate certificate(ptx);
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
             std::string errorMessage;
@@ -1209,7 +1209,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CharString vchIssuerPubKey;
 
             //If not self signed, check issuer BDAP
-            if (!certificate.SelfSignedCertificate()) {
+            if (!certificate.SelfSignedX509Certificate()) {
                 if (!GetDomainEntry(certificate.Issuer, findIssuerDomainEntry)) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(certificate.Issuer) + " not found.  Rejected by the tx memory pool!";
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-account-exists " + strErrorMessage);
@@ -1236,14 +1236,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
 
                 //if not self-signed, check that request exists
-                if (!certificate.SelfSignedCertificate()) {
-                    CCertificate certificateRequest;
+                if (!certificate.SelfSignedX509Certificate()) {
+                    CX509Certificate certificateRequest;
                     if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest))
                         return state.Invalid(false, REJECT_INVALID, errorPrefix + "reqeust-not-found");
                 }
             }
 
-            CCertificate certificateCheck;
+            CX509Certificate certificateCheck;
             if (GetCertificateTxId(tx.GetHash().GetHex(), certificateCheck))
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "already-exists");
         }
@@ -2383,7 +2383,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     }
                 }
                 else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
-                    CCertificate certificate(ptx);
+                    CX509Certificate certificate(ptx);
                     if (!UndoAddCertificate(certificate)) {
                         LogPrintf("%s -- Failed to undo add BDAP certificate transaction %s. Disconnect %s transaction failed.\n", __func__, certificate.ToString(), hash.ToString());
                     }

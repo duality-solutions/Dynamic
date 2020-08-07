@@ -22,7 +22,7 @@
 
 CCertificateDB *pCertificateDB = NULL;
 
-bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate)
+bool GetCertificateTxId(const std::string& strTxId, CX509Certificate& certificate)
 {
     if (!pCertificateDB || !pCertificateDB->ReadCertificateTxId(vchFromString(strTxId), certificate))
         return false;
@@ -30,7 +30,7 @@ bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate)
     return !certificate.IsNull();
 }
 
-bool UndoAddCertificate(const CCertificate& certificate)
+bool UndoAddCertificate(const CX509Certificate& certificate)
 {
     if (!pCertificateDB)
         return false;
@@ -44,7 +44,7 @@ bool UndoAddCertificate(const CCertificate& certificate)
 
 }
 
-bool CCertificateDB::AddCertificate(const CCertificate& certificate) 
+bool CCertificateDB::AddCertificate(const CX509Certificate& certificate) 
 { 
     bool writeState = false;
     bool updateState = true;
@@ -89,8 +89,8 @@ bool CCertificateDB::AddCertificate(const CCertificate& certificate)
         writeState = Write(make_pair(labelTxId, vchTxHash), certificate);
 
         //if an approve (not self-signed), update the previous request certificate with txHashApprove
-        if ((certificate.IsApproved()) && (!certificate.SelfSignedCertificate())) {
-            CCertificate requestCertificate;
+        if ((certificate.IsApproved()) && (!certificate.SelfSignedX509Certificate())) {
+            CX509Certificate requestCertificate;
             if (ReadCertificateTxId(vchTxHashRequest, requestCertificate)) {
                 requestCertificate.txHashApprove = certificate.txHashApprove;
                 updateState = Write(make_pair(std::string("txrequestid"), vchTxHashRequest), requestCertificate);
@@ -101,7 +101,7 @@ bool CCertificateDB::AddCertificate(const CCertificate& certificate)
     return writeState && writeStateIssuerDN && writeStateSubjectDN && updateState;
 }
 
-bool CCertificateDB::ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CCertificate& certificate) 
+bool CCertificateDB::ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CX509Certificate& certificate) 
 {
     LOCK(cs_bdap_certificate);
     if(!(CDBWrapper::Read(make_pair(std::string("txrequestid"), vchTxId), certificate))) {
@@ -110,7 +110,7 @@ bool CCertificateDB::ReadCertificateTxId(const std::vector<unsigned char>& vchTx
     return true;
 }
 
-bool CCertificateDB::ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates, bool getAll) 
+bool CCertificateDB::ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates, bool getAll) 
 {
     LOCK(cs_bdap_certificate);
     std::vector<std::vector<unsigned char>> vvTxId;
@@ -120,7 +120,7 @@ bool CCertificateDB::ReadCertificateSubjectDNRequest(const std::vector<unsigned 
 
     if (readState) {
         for (const std::vector<unsigned char>& vchTxId : vvTxId) {
-            CCertificate certificate;
+            CX509Certificate certificate;
             if (ReadCertificateTxId(vchTxId, certificate)) {
                 if (getAll || (!certificate.IsApproved())) {
                     vCertificates.push_back(certificate);
@@ -132,7 +132,7 @@ bool CCertificateDB::ReadCertificateSubjectDNRequest(const std::vector<unsigned 
     return (vCertificates.size() > 0);
 }
 
-bool CCertificateDB::ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CCertificate>& vCertificates, bool getAll) 
+bool CCertificateDB::ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CX509Certificate>& vCertificates, bool getAll) 
 {
     LOCK(cs_bdap_certificate);
     std::vector<std::vector<unsigned char>> vvTxId;
@@ -142,7 +142,7 @@ bool CCertificateDB::ReadCertificateIssuerDNRequest(const std::vector<unsigned c
 
     if (readState) {
         for (const std::vector<unsigned char>& vchTxId : vvTxId) {
-            CCertificate certificate;
+            CX509Certificate certificate;
             if (ReadCertificateTxId(vchTxId, certificate)) {
                 if (getAll || (!certificate.IsApproved())) {
                     vCertificates.push_back(certificate);
@@ -154,7 +154,7 @@ bool CCertificateDB::ReadCertificateIssuerDNRequest(const std::vector<unsigned c
     return (vCertificates.size() > 0);
 }
 
-bool CCertificateDB::ReadCertificateSubjectDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates) 
+bool CCertificateDB::ReadCertificateSubjectDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates) 
 {
     LOCK(cs_bdap_certificate);
     std::vector<std::vector<unsigned char>> vvTxId;
@@ -163,7 +163,7 @@ bool CCertificateDB::ReadCertificateSubjectDNApprove(const std::vector<unsigned 
 
     if (readState) {
         for (const std::vector<unsigned char>& vchTxId : vvTxId) {
-            CCertificate certificate;
+            CX509Certificate certificate;
             if (ReadCertificateTxId(vchTxId, certificate)) {
                 vCertificates.push_back(certificate);
             }
@@ -173,7 +173,7 @@ bool CCertificateDB::ReadCertificateSubjectDNApprove(const std::vector<unsigned 
     return (vCertificates.size() > 0);
 }
 
-bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchIssuer, std::vector<CCertificate>& vCertificates) 
+bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchIssuer, std::vector<CX509Certificate>& vCertificates) 
 {
     LOCK(cs_bdap_certificate);
     std::vector<std::vector<unsigned char>> vvTxId;
@@ -182,7 +182,7 @@ bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned c
 
     if (readState) {
         for (const std::vector<unsigned char>& vchTxId : vvTxId) {
-            CCertificate certificate;
+            CX509Certificate certificate;
             if (ReadCertificateTxId(vchTxId, certificate)) {
                 vCertificates.push_back(certificate);
             }
@@ -197,7 +197,7 @@ bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned c
 bool CCertificateDB::EraseCertificateTxId(const std::vector<unsigned char>& vchTxId)
 {
     LOCK(cs_bdap_certificate);
-    CCertificate certificate;
+    CX509Certificate certificate;
 
     if (!ReadCertificateTxId(vchTxId, certificate))
         return false;
@@ -298,7 +298,7 @@ bool FlushCertificateLevelDB()
     return true;
 }
 
-static bool CommonDataCheck(const CCertificate& certificate, const vchCharString& vvchOpParameters, std::string& errorMessage)
+static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharString& vvchOpParameters, std::string& errorMessage)
 {
     if (certificate.IsNull()) {
         errorMessage = "CommonDataCheck failed! Certificate is null.";
@@ -355,7 +355,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     }
 
     // if self-signed, pubkey of subject = issuer
-    if (certificate.SelfSignedCertificate()) {
+    if (certificate.SelfSignedX509Certificate()) {
         if (vvchOpParameters[2] != vvchOpParameters[4]) {
             errorMessage = "CommonDataCheck failed! Self signed, but subject pubkey not equal to issuer pubkey.";
             return false;            
@@ -371,7 +371,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     }
 
     // if approved or self signed, do additional checks
-    if (certificate.IsApproved() || certificate.SelfSignedCertificate()) {
+    if (certificate.IsApproved() || certificate.SelfSignedX509Certificate()) {
 
         // check issuer pubkey size
         if (vvchOpParameters.size() > 4 && vvchOpParameters[4].size() > MAX_CERTIFICATE_KEY_LENGTH) {
@@ -384,7 +384,7 @@ static bool CommonDataCheck(const CCertificate& certificate, const vchCharString
     return true;
 }
 
-static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
+static bool CheckNewCertificateTxInputs(const CX509Certificate& certificate, const CScript& scriptOp, const vchCharString& vvchOpParameters, const uint256& txHash,
                                const std::string& strOpType, std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(certificate, vvchOpParameters, errorMessage))
@@ -447,8 +447,8 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
         }
 
         //if not self signed, check if request exists
-        if (!certificate.SelfSignedCertificate()) {
-            CCertificate certificateRequest;
+        if (!certificate.SelfSignedX509Certificate()) {
+            CX509Certificate certificateRequest;
             if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest)) {
                 errorMessage = "CheckNewCertificateTxInputs: - Could not find previous request. ";
                 return error(errorMessage.c_str());
@@ -457,7 +457,7 @@ static bool CheckNewCertificateTxInputs(const CCertificate& certificate, const C
     }
 
     //Check if Certificate already exists - should work w/Approve TXID occurring after Request
-    CCertificate getCertificate;
+    CX509Certificate getCertificate;
     if (GetCertificateTxId(strTxHashToUse, getCertificate)) {
         if ((certificate.txHashApprove != txHash) && (certificate.txHashRequest != txHash)) { //check request and approve in case
             errorMessage = "CheckNewCertificateTxInputs: - The certificate " + txHash.ToString() + " already exists.  Add new certificate failed!";
@@ -493,7 +493,7 @@ bool CheckCertificateTx(const CTransactionRef& tx, const CScript& scriptOp, cons
     LogPrint("bdap", "%s -- BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
 
     // unserialize BDAP from txn, check if the certificate is valid and does not conflict with a previous certificate
-    CCertificate certificate;
+    CX509Certificate certificate;
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nDataOut;
