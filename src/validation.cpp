@@ -832,7 +832,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         CScript scriptOp;
         if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
             std::string errorMessage;
-            if (vvchBDAPArgs.size() > 5) {
+            if (vvchBDAPArgs.size() > 6) {
                 errorMessage = "Too many BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
@@ -1164,29 +1164,29 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
                 return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
 
-            if (vvch.size() < 4)
+            if (vvch.size() < 5)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "not-enough-parameters");
 
-            if (vvch.size() > 5)
+            if (vvch.size() > 6)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "too-many-parameters");
 
-            if (vvch.size() > 1 && vvch[1].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+            if (vvch.size() > 2 && vvch[2].size() > MAX_OBJECT_FULL_PATH_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-fqdn-too-long");
 
-            if (vvch.size() > 3 && vvch[3].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+            if (vvch.size() > 4 && vvch[4].size() > MAX_OBJECT_FULL_PATH_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-fqdn-too-long");
 
-            if (vvch.size() > 2 && vvch[2].size() > MAX_KEY_LENGTH)
+            if (vvch.size() > 3 && vvch[3].size() > MAX_KEY_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-pubkey-too-long");
 
             uint32_t nMonthsValid;
-            ParseUInt32(stringFromVch(vvch[0]), &nMonthsValid);
+            ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
             if (!(nMonthsValid > 0 && nMonthsValid <=12))
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
 
             //If Approved check Issuer Pubkey length
             if (strOpType == "bdap_approve_certificate") {
-                if (vvch.size() > 4 && vvch[4].size() > MAX_KEY_LENGTH) 
+                if (vvch.size() > 5 && vvch[5].size() > MAX_KEY_LENGTH) 
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-pubkey-too-long");
             }
 
@@ -1195,6 +1195,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
             std::string errorMessage;
+
+            if (!certificate.ValidatePEM(errorMessage)) 
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
 
             if (!certificate.ValidateValues(errorMessage)) 
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);

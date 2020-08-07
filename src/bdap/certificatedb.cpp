@@ -310,40 +310,40 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
         return false;
     }
 
-    if (vvchOpParameters.size() > 5) {
+    if (vvchOpParameters.size() > 6) {
         errorMessage = "CommonDataCheck failed! Too many parameters.";
         return false;
     }
 
-    if (vvchOpParameters.size() < 4) {
+    if (vvchOpParameters.size() < 5) {
         errorMessage = "CommonDataCheck failed! Not enough parameters.";
         return false;
     }
 
-    if (certificate.Subject != vvchOpParameters[1]) {
+    if (certificate.Subject != vvchOpParameters[2]) {
         errorMessage = "CommonDataCheck failed! Script operation subject account parameter does not match subject account in certificate object.";
         return false;
     }
 
-    if (certificate.Issuer != vvchOpParameters[3]) {
+    if (certificate.Issuer != vvchOpParameters[4]) {
         errorMessage = "CommonDataCheck failed! Script operation issuer account parameter does not match issuer account in certificate object.";
         return false;
     }
 
     // check SubjectFQDN size
-    if (vvchOpParameters.size() > 1 && vvchOpParameters[1].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+    if (vvchOpParameters.size() > 2 && vvchOpParameters[2].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
         errorMessage = "CommonDataCheck failed! Subject FQDN is too large.";
         return false;
     }
 
     // check IssuerFQDN size
-    if (vvchOpParameters.size() > 3 && vvchOpParameters[3].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
+    if (vvchOpParameters.size() > 4 && vvchOpParameters[4].size() > MAX_OBJECT_FULL_PATH_LENGTH) {
         errorMessage = "CommonDataCheck failed! Issuer FQDN is too large.";
         return false;
     }
 
     // check subject pubkey size
-    if (vvchOpParameters.size() > 2 && vvchOpParameters[2].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+    if (vvchOpParameters.size() > 3 && vvchOpParameters[3].size() > MAX_CERTIFICATE_KEY_LENGTH) {
         errorMessage = "CommonDataCheck failed! Subject PubKey is too large.";
         return false;
     }
@@ -356,7 +356,7 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
 
     // if self-signed, pubkey of subject = issuer
     if (certificate.SelfSignedX509Certificate()) {
-        if (vvchOpParameters[2] != vvchOpParameters[4]) {
+        if (vvchOpParameters[3] != vvchOpParameters[5]) {
             errorMessage = "CommonDataCheck failed! Self signed, but subject pubkey not equal to issuer pubkey.";
             return false;            
         }
@@ -364,7 +364,7 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
 
     // check if Months Valid is an accepted value
     uint32_t nMonthsValid;
-    ParseUInt32(stringFromVch(vvchOpParameters[0]), &nMonthsValid);
+    ParseUInt32(stringFromVch(vvchOpParameters[1]), &nMonthsValid);
     if (!(nMonthsValid > 0 && nMonthsValid <=12)) { // if NOT (nMonthsValid greater than 0 and less than or equal to 12)
         errorMessage = "CommonDataCheck failed! Months Valid is out of bounds.";
         return false;
@@ -374,7 +374,7 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
     if (certificate.IsApproved() || certificate.SelfSignedX509Certificate()) {
 
         // check issuer pubkey size
-        if (vvchOpParameters.size() > 4 && vvchOpParameters[4].size() > MAX_CERTIFICATE_KEY_LENGTH) {
+        if (vvchOpParameters.size() > 5 && vvchOpParameters[5].size() > MAX_CERTIFICATE_KEY_LENGTH) {
             errorMessage = "CommonDataCheck failed! Issuer PubKey is too large.";
             return false;
         }
@@ -507,16 +507,19 @@ bool CheckCertificateTx(const CTransactionRef& tx, const CScript& scriptOp, cons
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
     CAmount monthlyFee, oneTimeFee, depositFee;
     if (strOperationType == "bdap_new_certificate" || strOperationType == "bdap_approve_certificate") {
+        if (!certificate.ValidatePEM(errorMessage))
+            return false;
+
         if (!certificate.ValidateValues(errorMessage))
             return false;
 
-        if (vvchArgs.size() > 5) {
+        if (vvchArgs.size() > 6) {
             errorMessage = "Failed to get fees to add a certificate request";
             return false;
         }
-        std::string strCount = stringFromVch(vvchArgs[0]);
+        std::string strCount = stringFromVch(vvchArgs[1]);
         uint32_t nCount;
-        ParseUInt32(stringFromVch(vvchArgs[0]), &nCount);
+        ParseUInt32(stringFromVch(vvchArgs[1]), &nCount);
 
         if (strOperationType == "bdap_new_certificate") { //Request
             if (!GetBDAPFees(OP_BDAP_NEW, OP_BDAP_CERTIFICATE, BDAP::ObjectType::BDAP_CERTIFICATE, (uint16_t)nCount, monthlyFee, oneTimeFee, depositFee)) {

@@ -2,13 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/certificate.h"
+#include "bdap/x509certificate.h"
 #include "bdap/certificatedb.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
 #include "bdap/utils.h"
-#include "bdap/x509.h"
+//#include "bdap/x509.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynode-sync.h"
 #include "dynodeman.h"
@@ -31,14 +31,16 @@ extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bd
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
-    if (request.fHelp || (request.params.size() != 4 ))
+    if (request.fHelp || (request.params.size() < 2 ) || (request.params.size() > 3 ))
+    //if (request.fHelp || (request.params.size() != 4 ))
         throw std::runtime_error(
-            "certificate new \"subject\" ( \"issuer\" ) \"key_usage_array\" \n"
+            //"certificate new \"subject\" ( \"issuer\" ) \"key_usage_array\" \n"
+            "certificate new \"subject\" ( \"issuer\" ) \n"
             "\nAdds an X.509 certificate to the blockchain.\n"
             "\nArguments:\n"
             "1. \"subject\"          (string, required)  BDAP account that created certificate\n"
             "2. \"issuer\"           (string, optional)  BDAP account that issued certificate\n"
-            "3. \"key_usage_array\"  (string, required)  Descriptions of how this certificate will be used\n"
+            //"3. \"key_usage_array\"  (string, required)  Descriptions of how this certificate will be used\n"
             "\nResult:\n"
             "{(json object)\n"
             " \"version\"                   (string, required)   Version \n"
@@ -70,44 +72,49 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    CCertificate txCertificate;
+    CX509Certificate txCertificate;
     CharString vchSubjectFQDN;
     CharString vchIssuerFQDN;
     bool selfSign = false;
     int32_t nMonths = 12; // certificates last a year?
 
     //initialize Certificate with values we know
-    txCertificate.SignatureAlgorithm = vchFromString("ed25519"); 
-    txCertificate.SignatureHashAlgorithm = vchFromString("sha512"); 
     txCertificate.SerialNumber = GetTimeMillis();
 
-    std::string strIssuer = request.params[2].get_str();
-    if (strIssuer.size() > 0) {
-        selfSign = false;
-    }
-    else {
+    if (request.params.size() == 2) {
         selfSign = true;
+    } 
+    else if (request.params.size() == 3)
+    {
+        std::string strIssuer = request.params[2].get_str();
+        if (strIssuer.size() > 0) {
+            selfSign = false;
+        }
+        else {
+            selfSign = true;
+        }
+
+        //ALSO considered self-sign if subject = issuer
+        if (request.params[1].get_str() == request.params[2].get_str()) {
+            selfSign = true;
+        }
     }
 
-    //ALSO considered self-sign if subject = issuer
-    if (request.params[1].get_str() == request.params[2].get_str()) {
-        selfSign = true;
-    }
-
+    //Leave in to allow custom key usage in the future
     //Handle Key Usage array [REQUIRED]
-    std::string strKeyUsages = request.params[3].get_str();
+    // std::string strKeyUsages = request.params[3].get_str();
 
-    if (!(strKeyUsages.size() > 0)) {
-        throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Key usage cannot be empty");
-    }
+    // if (!(strKeyUsages.size() > 0)) {
+    //     throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Key usage cannot be empty");
+    // }
 
-    if (strKeyUsages.find(",") > 0) {
-        std::vector<std::string> vKeyUsages = SplitString(strKeyUsages, ',');
-        for(const std::string& strKeyUsage : vKeyUsages)
-            txCertificate.KeyUsage.push_back(vchFromString(TrimString(strKeyUsage)));
-    } else {
-        txCertificate.KeyUsage.push_back(vchFromValue(strKeyUsages));
-    }
+    // if (strKeyUsages.find(",") > 0) {
+    //     std::vector<std::string> vKeyUsages = SplitString(strKeyUsages, ',');
+    //     for(const std::string& strKeyUsage : vKeyUsages)
+    //         txCertificate.KeyUsage.push_back(vchFromString(TrimString(strKeyUsage)));
+    // } else {
+    //     txCertificate.KeyUsage.push_back(vchFromValue(strKeyUsages));
+    // }
 
     //Handle SUBJECT [required]
     std::string strSubjectFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
@@ -168,6 +175,11 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
         //Issuer = Subject
         txCertificate.Issuer = txCertificate.Subject;
 
+        //PEM needs to be populated before SignIssuer
+        if (!txCertificate.X509SelfSign(SubjectSecretKey)) {
+            throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+        }
+
         //Issuer Signs
         if (!txCertificate.SignIssuer(SubjectPublicKey, SubjectSecretKey)) {
             throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer signing.");
@@ -177,8 +189,18 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Issuer Signature invalid.");
         }
 
+        LogPrintf("DEBUGGER %s - PEM Subject: [%s]\n",__func__,txCertificate.GetPEMSubject());
+        LogPrintf("DEBUGGER %s - PEM Issuer: [%s]\n",__func__,txCertificate.GetPEMIssuer());
+        LogPrintf("DEBUGGER %s - PEM PubKey: [%s]\n",__func__,txCertificate.GetPEMPubKey());
+        LogPrintf("DEBUGGER %s - PubKey Base64: [%s]\n",__func__,txCertificate.GetPubKeyBase64());
+        LogPrintf("DEBUGGER %s - SerialNumber: [%s]\n",__func__,txCertificate.GetPEMSerialNumber());
+
     } //end Self Sign
     else {
+        if (!txCertificate.X509RequestSign(SubjectSecretKey)) {
+            throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+        }
+
         //Handle ISSUER [optional]
         std::string strIssuerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strIssuerFQDN);
@@ -193,6 +215,10 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     std::string strMessage;
 
+    //Validate PEM
+    if (!txCertificate.ValidatePEM(strMessage))
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
+
     //Validate BDAP values
     if (!txCertificate.ValidateValues(strMessage))
         throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
@@ -204,12 +230,14 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     //Only send PubKeys of BDAP accounts
     CScript scriptPubKey;
+    int nVersion = txCertificate.nVersion;
+    LogPrintf("DBUGGER %s - nversion: [%d]\n",__func__,nVersion);
     if (selfSign) { 
         scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
-                 << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchSubjectFQDN << SubjectPublicKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
+                 << nVersion << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchSubjectFQDN << SubjectPublicKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP; 
     } else { //NEW CERTIFICATE REQUEST
         scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
-                 << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchIssuerFQDN << OP_2DROP << OP_2DROP << OP_2DROP; 
+                 << nVersion << vchMonths << vchSubjectFQDN << SubjectPublicKey << vchIssuerFQDN << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
     }
 
     CKeyID keyWalletID = privSubjectDHTKey.GetID();
@@ -242,21 +270,21 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    bool fUseInstantSend = false;
-    // Send the transaction
-    CWalletTx wtx;
+    // bool fUseInstantSend = false;
+    // // Send the transaction
+    // CWalletTx wtx;
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
-    if (selfSign) {
-        txCertificate.txHashApprove = wtx.GetHash();
-    }
-    else {
-        txCertificate.txHashRequest = wtx.GetHash();
-    }
+    // if (selfSign) {
+    //     txCertificate.txHashApprove = wtx.GetHash();
+    // }
+    // else {
+    //     txCertificate.txHashRequest = wtx.GetHash();
+    // }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
-    BuildCertificateJson(txCertificate, oCertificateTransaction);
+    BuildX509CertificateJson(txCertificate, oCertificateTransaction);
 
     return oCertificateTransaction;
 #else
@@ -309,7 +337,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     std::string parameter1 = request.params[1].get_str();
     vchTxId = vchFromString(parameter1);
 
-    CCertificate txCertificate;
+    CX509Certificate txCertificate;
     int32_t nMonths = 12; // certificates last a year?
 
     //Retrieve certificate from CertificateDB
@@ -358,6 +386,11 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
     IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
 
+    //PEM needs to be populated before SignIssuer
+    if (!txCertificate.X509ApproveSign(IssuerSecretKey)) {
+        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+    }
+
     //Issuer Signs
     if (!txCertificate.SignIssuer(IssuerPublicKey, IssuerSecretKey)) {
         throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer signing.");
@@ -368,6 +401,10 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
         }
 
     std::string strMessage;
+
+    //Validate PEM
+    if (!txCertificate.ValidatePEM(strMessage))
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
 
     //Validate BDAP values
     if (!txCertificate.ValidateValues(strMessage))
@@ -380,8 +417,9 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     //Only send PubKeys of BDAP accounts
     CScript scriptPubKey;
+    int nVersion = txCertificate.nVersion;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_CERTIFICATE) 
-                << vchMonths << vchSubject << vchSubjectPubKey << vchIssuer << vchIssuerPubKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP; 
+                << nVersion << vchMonths << vchSubject << vchSubjectPubKey << vchIssuer << vchIssuerPubKey << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP; 
 
     CDynamicAddress walletAddress = subjectDomainEntry.GetWalletAddress();
 
@@ -406,15 +444,15 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     if (monthlyFee + oneTimeFee + depositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("Insufficient funds for BDAP transaction. %s DYN required.", FormatMoney(monthlyFee + oneTimeFee + depositFee)));
 
-    bool fUseInstantSend = false;
-    // Send the transaction
-    CWalletTx wtx;
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
+    // bool fUseInstantSend = false;
+    // // Send the transaction
+    // CWalletTx wtx;
+    // SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
-    txCertificate.txHashApprove = wtx.GetHash();
+    // txCertificate.txHashApprove = wtx.GetHash();
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
-    BuildCertificateJson(txCertificate, oCertificateTransaction);
+    BuildX509CertificateJson(txCertificate, oCertificateTransaction);
 
     return oCertificateTransaction;
 #else
@@ -470,12 +508,12 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
     vchTxId = vchFromString(parameterTxId);
     bool readCertificateState = false;
 
-    CCertificate certificate;
+    CX509Certificate certificate;
     UniValue oCertificateTransaction(UniValue::VOBJ);
 
     readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
     if (readCertificateState) {
-        BuildCertificateJson(certificate, oCertificateTransaction);
+        BuildX509CertificateJson(certificate, oCertificateTransaction);
         return oCertificateTransaction;
     }
 
@@ -531,7 +569,7 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
                 getAll = false;
     }
 
-    std::vector<CCertificate> vCertificates;
+    std::vector<CX509Certificate> vCertificates;
     if ((subjectDetected) && (issuerDetected)) {
         if (getAll) {
             pCertificateDB->ReadCertificateSubjectDNApprove(vchSubjectFQDN, vCertificates);
@@ -540,10 +578,10 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
             pCertificateDB->ReadCertificateSubjectDNRequest(vchSubjectFQDN, vCertificates, false);
         }
 
-        for (const CCertificate& certificate : vCertificates) {
+        for (const CX509Certificate& certificate : vCertificates) {
             UniValue oCertificateList(UniValue::VOBJ);
             if (certificate.Issuer == vchIssuerFQDN) {
-                BuildCertificateJson(certificate, oCertificateList);
+                BuildX509CertificateJson(certificate, oCertificateList);
                 oCertificateLists.push_back(oCertificateList);
             }
         };
@@ -556,10 +594,10 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
             pCertificateDB->ReadCertificateSubjectDNRequest(vchSubjectFQDN, vCertificates, false);
         }
 
-        for (const CCertificate& certificate : vCertificates) {
+        for (const CX509Certificate& certificate : vCertificates) {
             UniValue oCertificateList(UniValue::VOBJ);
 
-            BuildCertificateJson(certificate, oCertificateList);
+            BuildX509CertificateJson(certificate, oCertificateList);
             oCertificateLists.push_back(oCertificateList);
         };
     }
@@ -571,10 +609,10 @@ static UniValue ViewCertificate(const JSONRPCRequest& request)
             pCertificateDB->ReadCertificateIssuerDNRequest(vchIssuerFQDN, vCertificates, false);
         }
 
-        for (const CCertificate& certificate : vCertificates) {
+        for (const CX509Certificate& certificate : vCertificates) {
             UniValue oCertificateList(UniValue::VOBJ);
 
-            BuildCertificateJson(certificate, oCertificateList);
+            BuildX509CertificateJson(certificate, oCertificateList);
             oCertificateLists.push_back(oCertificateList);
         };
     }
@@ -603,7 +641,7 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
     vchTxId = vchFromString(parameterTxId);
     bool readCertificateState = false;
 
-    CCertificate certificate;
+    CX509Certificate certificate;
     UniValue oCertificateTransaction(UniValue::VOBJ);
 
     readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
@@ -611,14 +649,68 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
     }
 
-    UniValue oCertificateLists(UniValue::VARR);
+    UniValue oCertificateLists(UniValue::VOBJ);
 
     if (certificate.nHeightApprove == 0)
         throw JSONRPCError(RPC_BDAP_ERROR, "Certificate is not approved");
 
-    if (!ExportX509Certificate(certificate)) {
-        throw JSONRPCError(RPC_MISC_ERROR, "Unable to export X509 Certificate to file");
-    }
+    // CDomainEntry subjectDomainEntry;
+    // if (!GetDomainEntry(certificate.Subject, subjectDomainEntry))
+    //     throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", stringFromVch(certificate.Subject)));
+
+    CDomainEntry issuerDomainEntry;
+    if (!GetDomainEntry(certificate.Issuer, issuerDomainEntry))
+        throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", stringFromVch(certificate.Issuer)));
+
+    //Get Issuer BDAP user Public Key
+    CharString vchIssuerPubKey = issuerDomainEntry.DHTPublicKey;
+    CKeyEd25519 privIssuerDHTKey;
+    std::vector<unsigned char> IssuerSecretKey;
+    std::vector<unsigned char> IssuerPublicKey;
+    std::vector<unsigned char> IssuerPrivateSeed;
+
+    //Get Issuer ed25519 key
+    CKeyID vchIssuerPubKeyID = GetIdFromCharVector(vchIssuerPubKey);
+    if (!pwalletMain->GetDHTKey(vchIssuerPubKeyID, privIssuerDHTKey))
+        throw std::runtime_error("BDAP_CERTIFICATE_EXPORT_RPC_ERROR: Unable to retrieve DHT Key");
+
+    IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
+    IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
+    IssuerPrivateSeed = privIssuerDHTKey.GetPrivSeedBytes();
+
+    // if (!ExportX509Certificate(certificate, privIssuerDHTKey)) {
+    //     throw JSONRPCError(RPC_MISC_ERROR, "Unable to export X509 Certificate to file");
+    // }
+
+    oCertificateLists.push_back(Pair("issuer privkey", EncodeBase64(&IssuerSecretKey[0], IssuerSecretKey.size())));
+    oCertificateLists.push_back(Pair("issuer pubkey", EncodeBase64(&IssuerPublicKey[0], IssuerPublicKey.size())));
+    oCertificateLists.push_back(Pair("issuer privseed", EncodeBase64(&IssuerPrivateSeed[0], IssuerPrivateSeed.size())));
+
+
+
+    // //Get Subject BDAP user Public Key
+    // CharString vchSubjectPubKey = subjectDomainEntry.DHTPublicKey;
+    // CKeyEd25519 privSubjectDHTKey;
+    // std::vector<unsigned char> SubjectSecretKey;
+    // std::vector<unsigned char> SubjectPublicKey;
+    // std::vector<unsigned char> SubjectPrivateSeed;
+
+    // //Get Subject ed25519 key
+    // CKeyID vchSubjectPubKeyID = GetIdFromCharVector(vchSubjectPubKey);
+    // if (!pwalletMain->GetDHTKey(vchSubjectPubKeyID, privSubjectDHTKey))
+    //     throw std::runtime_error("BDAP_CERTIFICATE_EXPORT_RPC_ERROR: Unable to retrieve DHT Key");
+
+    // SubjectSecretKey = privSubjectDHTKey.GetPrivKeyBytes();
+    // SubjectPublicKey = privSubjectDHTKey.GetPubKeyBytes();
+    // SubjectPrivateSeed = privSubjectDHTKey.GetPrivSeedBytes();
+
+    // if (!ExportX509Certificate(certificate, privSubjectDHTKey)) {
+    //     throw JSONRPCError(RPC_MISC_ERROR, "Unable to export X509 Certificate to file");
+    // }
+
+    // oCertificateLists.push_back(Pair("subject privkey", ToHex(&SubjectSecretKey[0], SubjectSecretKey.size())));
+    // oCertificateLists.push_back(Pair("subject pubkey", ToHex(&SubjectPublicKey[0], SubjectPublicKey.size())));
+    // oCertificateLists.push_back(Pair("subject privseed", ToHex(&SubjectPrivateSeed[0], SubjectPrivateSeed.size())));
 
     return oCertificateLists;
 
