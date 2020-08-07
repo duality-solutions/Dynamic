@@ -21,7 +21,7 @@ class CKeyEd25519;
 //Implementing X.509 X509Certificates
 class CX509Certificate {
 public:
-    static const int CURRENT_VERSION = 1;
+    static const int CURRENT_VERSION = 2;
     int nVersion;
 
     uint16_t MonthsValid;
@@ -122,7 +122,7 @@ public:
     }
  
     bool IsApproved() const {
-        return (txHashApprove != 0);
+        return ((IssuerSignature.size() > 0) || (txHashApprove != 0));
     }
 
     bool SelfSignedX509Certificate() const {
@@ -150,6 +150,7 @@ public:
     uint256 GetSubjectHash() const;
     uint256 GetIssuerHash() const;
     std::string GetPubKeyHex() const;
+    std::string GetPubKeyBase64() const;
     std::string GetSubjectSignature() const;
     std::string GetIssuerSignature() const;
     bool SignSubject(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
@@ -157,9 +158,17 @@ public:
     bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ValidateValues(std::string& errorMessage) const;
+    bool ValidatePEM(std::string& errorMessage) const;
     bool X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
     bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
     bool X509ApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+
+    std::string GetPEMSubject() const;
+    std::string GetReqPEMSubject() const;
+    std::string GetPEMIssuer() const;
+    std::string GetPEMPubKey() const;
+    std::string GetReqPEMPubKey() const;
+    std::string GetPEMSerialNumber() const;
 
     std::string ToString() const;
 };

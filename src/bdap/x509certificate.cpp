@@ -104,6 +104,13 @@ std::string CX509Certificate::GetPubKeyHex() const
     return ToHex(&certPubKey[0], certPubKey.size());
 }
 
+std::string CX509Certificate::GetPubKeyBase64() const
+{
+    std::vector<unsigned char> certPubKey = PublicKey;
+    
+    return EncodeBase64(&certPubKey[0], certPubKey.size());
+}
+
 std::string CX509Certificate::GetSubjectSignature() const
 {
     std::vector<unsigned char> subjectSig = SubjectSignature;
@@ -456,6 +463,266 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssu
 
 } //X509ApproveSign
 
+std::string CX509Certificate::GetPEMSubject() const {
+  
+    X509 *certRetrieve = NULL;
+    BIO *certbio = NULL;
+
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509(certbio, NULL, NULL, NULL)))
+        return "";
+
+    char line[2000+1];
+    X509_NAME_oneline(X509_get_subject_name(certRetrieve), line, 2000 ); // convert
+    line[2000] = '\0'; // set paranoid terminator in case DN is exactly MAX_DN_SIZE long
+
+    outputString = line;
+
+    pem = "";
+
+    X509_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+std::string CX509Certificate::GetReqPEMSubject() const {
+  
+    X509_REQ *certRetrieve = NULL;
+    BIO *certbio = NULL;
+
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509_REQ(certbio, NULL, NULL, NULL)))
+        return "";
+
+    char line[2000+1];
+    X509_NAME_oneline(X509_REQ_get_subject_name(certRetrieve), line, 2000 ); // convert
+    line[2000] = '\0'; // set paranoid terminator in case DN is exactly MAX_DN_SIZE long
+
+    outputString = line;
+
+    pem = "";
+
+    X509_REQ_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+std::string CX509Certificate::GetPEMIssuer() const {
+  
+    X509 *certRetrieve = NULL;
+    BIO *certbio = NULL;
+
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509(certbio, NULL, NULL, NULL)))
+        return "";
+
+    char line[2000+1];
+    X509_NAME_oneline(X509_get_issuer_name(certRetrieve), line, 2000 ); // convert
+    line[2000] = '\0'; // set paranoid terminator in case DN is exactly MAX_DN_SIZE long
+
+    outputString = line;
+
+    pem = "";
+
+    X509_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+std::string CX509Certificate::GetPEMPubKey() const {
+  
+    X509 *certRetrieve = NULL;
+    BIO *certbio = NULL;
+
+    std::unique_ptr<BIO, decltype(&::BIO_free)> output_bio(BIO_new(BIO_s_mem()), ::BIO_free);
+
+    BIO_reset(output_bio.get());
+
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509(certbio, NULL, NULL, NULL)))
+        return "";
+
+    EVP_PKEY *pkey = X509_get_pubkey(certRetrieve);
+    PEM_write_bio_PUBKEY(output_bio.get(), pkey);
+
+    BUF_MEM *mem = NULL;
+    BIO_get_mem_ptr(output_bio.get(), &mem);
+
+    if (!mem || !mem->data || !mem->length)
+    {
+        return "";
+    }
+
+    std::string pubkey(mem->data, mem->length);
+
+    outputString = pubkey;    
+
+    X509_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+std::string CX509Certificate::GetReqPEMPubKey() const {
+  
+    X509_REQ *certRetrieve = NULL;
+    BIO *certbio = NULL;
+
+    std::unique_ptr<BIO, decltype(&::BIO_free)> output_bio(BIO_new(BIO_s_mem()), ::BIO_free);
+
+    BIO_reset(output_bio.get());
+
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509_REQ(certbio, NULL, NULL, NULL)))
+        return "";
+
+    EVP_PKEY *pkey = X509_REQ_get_pubkey(certRetrieve);
+    PEM_write_bio_PUBKEY(output_bio.get(), pkey);
+
+    BUF_MEM *mem = NULL;
+    BIO_get_mem_ptr(output_bio.get(), &mem);
+
+    if (!mem || !mem->data || !mem->length)
+    {
+        return "";
+    }
+
+    std::string pubkey(mem->data, mem->length);
+
+    outputString = pubkey;    
+
+    X509_REQ_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+std::string CX509Certificate::GetPEMSerialNumber() const {
+    static constexpr unsigned int SERIAL_NUM_LEN = 1000;
+    char serial_number[SERIAL_NUM_LEN+1];
+    X509 *certRetrieve = NULL;
+    BIO *certbio = NULL;
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509(certbio, NULL, NULL, NULL)))
+        return "";
+
+    ASN1_INTEGER *serial = X509_get_serialNumber(certRetrieve);
+
+    BIGNUM *bn = ASN1_INTEGER_to_BN(serial, NULL);
+    if (!bn) {
+        return "";
+    }
+
+    char *tmp = BN_bn2dec(bn);
+    if (!tmp) {
+        fprintf(stderr, "unable to convert BN to decimal string.\n");
+        BN_free(bn);
+        return "";
+    }
+
+    if (strlen(tmp) >= SERIAL_NUM_LEN) {
+        BN_free(bn);
+        OPENSSL_free(tmp);
+        return "";
+    }
+
+    strncpy(serial_number, tmp, SERIAL_NUM_LEN);
+    outputString = serial_number;
+    BN_free(bn);
+    OPENSSL_free(tmp);
+    X509_free(certRetrieve);
+    BIO_free(certbio);
+
+    return outputString;
+}
+
+bool CX509Certificate::ValidatePEM(std::string& errorMessage) const
+{
+    std::string certSubject = stringFromVch(Subject);
+    std::string certIssuer = stringFromVch(Issuer);
+    std::string certPublickKey = GetPubKeyBase64();
+    std::string certSerialNumber = std::to_string(SerialNumber);
+    std::string BDAPprefix = "/C=US/O=Duality Blockchain Solutions/CN=";
+
+    if (!IsApproved()) { //REQUEST
+        std::string PEMSubject = GetReqPEMSubject();
+        std::size_t foundSubject = PEMSubject.find(certSubject);
+        if (foundSubject == std::string::npos)
+        {
+            errorMessage = "Certificate subject does not match PEM";
+            return false;
+        }
+
+        std::string PEMPubKey = GetReqPEMPubKey();
+        std::size_t foundPubKey = PEMPubKey.find(certPublickKey);
+        if (foundPubKey == std::string::npos)
+        {
+            errorMessage = "Certificate PublicKey does not match PEM";
+            return false;
+        }
+    }
+    else { //APPROVE
+        std::string PEMPubKey = GetPEMPubKey();
+        std::size_t foundPubKey = PEMPubKey.find(certPublickKey);
+        if (foundPubKey == std::string::npos)
+        {
+            errorMessage = "Certificate PublicKey does not match PEM";
+            return false;
+        }
+
+        std::string PEMSerialNumber = GetPEMSerialNumber();
+        if (PEMSerialNumber != certSerialNumber)
+        {
+            errorMessage = "Certificate SerialNumber does not match PEM";
+            return false;
+        }
+
+        std::string PEMSubject = GetPEMSubject();
+        std::size_t foundSubject = PEMSubject.find(certSubject);
+        if (foundSubject == std::string::npos)
+        {
+            errorMessage = "Certificate subject does not match PEM";
+            return false;
+        }
+
+        std::string PEMIssuer = GetPEMIssuer();
+        std::size_t foundIssuer = PEMIssuer.find(certIssuer);
+        if (foundIssuer == std::string::npos)
+        {
+            errorMessage = "Certificate Issuer does not match PEM";
+            return false;
+        }
+    }
+
+    return true;
+} //ValidatePEM
 
 bool CX509Certificate::ValidateValues(std::string& errorMessage) const
 {
