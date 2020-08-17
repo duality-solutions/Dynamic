@@ -26,20 +26,23 @@ public:
 
     uint16_t MonthsValid;
     CharString Subject; //owner full path
-    CharString SubjectSignature;
+    CharString SubjectSignature; //BDAP ed25519 signature (PubKeyBytes)
     CharString Issuer; //authority full path
-    CharString IssuerSignature;
-    CharString PublicKey; //new PublicKey for the x509certificate owned by the subject
+    CharString IssuerSignature; //BDAP ed25519 signature (PubKeyBytes)
+    CharString SubjectPublicKey; //new ed25519 PublicKey for the x509certificate owned by the subject (PubKeyBytes)
+    CharString IssuerPublicKey; //new ed25519 PublicKey for the x509certificate owned by the issuer [rootCA] (PubKeyBytes)
     uint64_t SerialNumber; //must be unique
     CharString PEM;
     CharString ExternalVerificationFile;
+    bool IsRootCA;
 
     //Needed for blockchain
     unsigned int nHeightRequest; 
     unsigned int nHeightApprove; 
+    unsigned int nHeightRootCA; 
     uint256 txHashRequest;
-    
     uint256 txHashApprove;
+    uint256 txHashRootCA;
 
     CX509Certificate() {
         SetNull();
@@ -58,14 +61,18 @@ public:
         SubjectSignature.clear();
         Issuer.clear();
         IssuerSignature.clear();
-        PublicKey.clear();
+        SubjectPublicKey.clear();
+        IssuerPublicKey.clear();
         SerialNumber = 0;
         PEM.clear();
         ExternalVerificationFile.clear();
+        IsRootCA = false;
         nHeightRequest = 0;
         nHeightApprove = 0;
+        nHeightRootCA = 0;
         txHashRequest.SetNull();
         txHashApprove.SetNull();
+        txHashRootCA.SetNull();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -78,14 +85,18 @@ public:
         READWRITE(SubjectSignature);
         READWRITE(Issuer);
         READWRITE(IssuerSignature);
-        READWRITE(PublicKey);
+        READWRITE(SubjectPublicKey);
+        READWRITE(IssuerPublicKey);
         READWRITE(VARINT(SerialNumber));
         READWRITE(PEM);
+        READWRITE(IsRootCA);
         READWRITE(ExternalVerificationFile);
         READWRITE(VARINT(nHeightRequest));
         READWRITE(VARINT(nHeightApprove));
+        READWRITE(VARINT(nHeightRootCA));
         READWRITE(txHashRequest);
         READWRITE(txHashApprove);
+        READWRITE(txHashRootCA);
     }
 
     inline friend bool operator==(const CX509Certificate &a, const CX509Certificate &b) {
@@ -94,9 +105,11 @@ public:
         a.SubjectSignature == b.SubjectSignature &&
         a.Issuer == b.Issuer &&
         a.IssuerSignature == b.IssuerSignature &&
-        a.PublicKey == b.PublicKey &&
+        a.SubjectPublicKey == b.SubjectPublicKey &&
+        a.IssuerPublicKey == b.IssuerPublicKey &&
         a.SerialNumber == b.SerialNumber &&
         a.PEM == b.PEM &&
+        a.IsRootCA == b.IsRootCA &&
         a.ExternalVerificationFile == b.ExternalVerificationFile);
     }
 
@@ -110,14 +123,18 @@ public:
         SubjectSignature = b.SubjectSignature;
         Issuer = b.Issuer;
         IssuerSignature = b.IssuerSignature;
-        PublicKey = b.PublicKey;
+        SubjectPublicKey = b.SubjectPublicKey;
+        IssuerPublicKey = b.IssuerPublicKey;
         SerialNumber = b.SerialNumber;
         PEM = b.PEM;
+        IsRootCA = b.IsRootCA;
         ExternalVerificationFile = b.ExternalVerificationFile;
         nHeightRequest = b.nHeightRequest;
         nHeightApprove = b.nHeightApprove;
+        nHeightRootCA = b.nHeightRootCA;
         txHashRequest = b.txHashRequest;
         txHashApprove = b.txHashApprove;
+        txHashRootCA = b.txHashRootCA;
         return *this;
     }
  
@@ -133,8 +150,9 @@ public:
         return false;
     }
 
+    //needs review
     CKeyID GetX509CertificateKeyID() const {
-        return CKeyID(Hash160(PublicKey.begin(), PublicKey.end()));
+        return CKeyID(Hash160(SubjectPublicKey.begin(), SubjectPublicKey.end()));
     }
 
     std::string GetFingerPrint() const {
@@ -159,9 +177,11 @@ public:
     bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool ValidateValues(std::string& errorMessage) const;
     bool ValidatePEM(std::string& errorMessage) const;
+    bool ValidatePEMSignature(std::string& errorMessage) const;
     bool X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
     bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
     bool X509ApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+    bool X509TestApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey, const std::vector<unsigned char>& vchIssuerPrivKey);
 
     std::string GetPEMSubject() const;
     std::string GetReqPEMSubject() const;

@@ -349,7 +349,7 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
     }
 
     //check certificate pubkey size
-    if (certificate.PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) {
+    if (certificate.SubjectPublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) {
         errorMessage = "CommonDataCheck failed! Certificate PubKey is too large.";
         return false;
     }

@@ -28,6 +28,58 @@
 
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 
+static UniValue NewRootCA(const JSONRPCRequest& request)
+{
+#ifdef ENABLE_WALLET
+    if (request.fHelp || (request.params.size() < 2 ) || (request.params.size() > 3 ))
+    //if (request.fHelp || (request.params.size() != 4 ))
+        throw std::runtime_error(
+            //"certificate new \"subject\" ( \"issuer\" ) \"key_usage_array\" \n"
+            "certificate newrootca \"issuer\"  \n"
+            "\nAdds an X.509 root certificate (CA) to the blockchain.\n"
+            "\nArguments:\n"
+            "1. \"issuer\"          (string, required)  BDAP account that will be Certificate Authority\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            " \"version\"                   (string, required)   Version \n"
+            " \"signature_algorithm\"       (string, required)   Algorithm used to sign \n"
+            " \"signature_hash_algorithm\"  (string, required)   Algorithm used to hash \n"
+            " \"fingerprint\"               (string, required)   Fingerprint of certificate \n"
+            " \"months_valid\"              (int, required)      How long certificate is valid \n"
+            " \"subject\"                   (string, required)   BDAP account of subject \n"
+            " \"subject_signature\"         (string, required)   Signature of subject \n"
+            " \"issuer\"                    (string, required)   BDAP account of issuer \n"
+            " \"public_key\"                (string, required)   Public Key of certificate \n"
+            " \"signature_value\"           (string, optional)   Signature of approval \n"
+            " \"approved\"                  (boolean, required)  Certificate approved \n"
+            " \"serial_number\"             (string, required)   Unique serial number \n"
+            " \"certificate_keyid\"         (string, required)   Key ID \n"
+            " \"key_usage\"                 (string, required)   List of usages \n"
+            " \"txid_request\"              (string, required)   Certificate request transaction id\n"
+            " \"txid_approve\"              (string, optional)   Certificate approved transaction id  \n"
+            " \"request_time\"              (int, required)      Time when request was made \n"
+            " \"request_height\"            (int, required)      Block where request is stored \n"
+            " \"valid_from\"                (int, optional)      Time when certificate is valid \n"
+            " \"valid_until\"               (int, optional)      Time when certificate expires \n"
+            " \"approve_height\"            (int, optional)      Block where approval is stored \n"
+            "}\n"
+            "\nExamples\n" +
+           HelpExampleCli("certificate new", "\"subject\" (\"issuer\") \"key_usage_array\" ") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("certificate new", "\"subject\" (\"issuer\")  \"key_usage_array\" "));
+
+    EnsureWalletIsUnlocked();
+
+    UniValue oCertificateTransaction(UniValue::VOBJ);
+
+    return oCertificateTransaction;
+#else
+    throw JSONRPCError(RPC_WALLET_ERROR, strprintf("New root certificate transaction is not available when the wallet is disabled."));
+#endif
+
+}; //NewRootCA
+
+
 static UniValue NewCertificate(const JSONRPCRequest& request)
 {
 #ifdef ENABLE_WALLET
@@ -162,11 +214,16 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     if (!pwalletMain->GetKeysFromPool(pubWalletKey, vchCertificatePubKey, true))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
+
+
+    
+
+
     CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
 
-    txCertificate.PublicKey = privCertificateKey.GetPubKeyBytes();
+    txCertificate.SubjectPublicKey = privCertificateKey.GetPubKeyBytes();
 
     txCertificate.MonthsValid = nMonths;
 
@@ -174,6 +231,14 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
         //Issuer = Subject
         txCertificate.Issuer = txCertificate.Subject;
+
+
+        // std::array<char, 32> seed = GetLinkSharedPrivateKey(privCertificateKey, SubjectPublicKey);
+
+        // CKeyEd25519 sharedCertKey(seed);
+
+        //txCertificate.SubjectPublicKey = privCertificateKey.GetPubKeyBytes();
+
 
         //PEM needs to be populated before SignIssuer
         if (!txCertificate.X509SelfSign(SubjectSecretKey)) {
@@ -197,6 +262,8 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     } //end Self Sign
     else {
+        //txCertificate.SubjectPublicKey = privCertificateKey.GetPubKeyBytes();
+
         if (!txCertificate.X509RequestSign(SubjectSecretKey)) {
             throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
         }
@@ -211,13 +278,47 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strIssuerFQDN));
 
         txCertificate.Issuer = issuerDomainEntry.vchFullObjectPath();
+
+
+//testing
+    //Get Issuer BDAP user Public Key
+    CharString vchIssuerPubKey = issuerDomainEntry.DHTPublicKey;
+    CKeyEd25519 privIssuerDHTKey;
+    std::vector<unsigned char> IssuerSecretKey;
+    std::vector<unsigned char> IssuerPublicKey;
+
+    CKeyID vchIssuerPubKeyID = GetIdFromCharVector(vchIssuerPubKey);
+
+    //Check if I'm the correct account to approve
+    //look for issuer public key in the wallet
+    if (!pwalletMain->HaveDHTKey(vchIssuerPubKeyID))
+        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Issuer public key not found in wallet");
+
+    //Get Issuer ed25519 key
+    if (!pwalletMain->GetDHTKey(vchIssuerPubKeyID, privIssuerDHTKey))
+        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve DHT Key");
+
+    IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
+    IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
+
+
+        if (!txCertificate.X509TestApproveSign(SubjectSecretKey,IssuerSecretKey)) {
+            throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+        }
+
+    // UniValue oCertificateTransaction(UniValue::VOBJ);
+
+    // return oCertificateTransaction;
+
+//end testing
+
     } //end ISSUER
 
     std::string strMessage;
 
     //Validate PEM
-    if (!txCertificate.ValidatePEM(strMessage))
-        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
+    // if (!txCertificate.ValidatePEM(strMessage))
+    //     throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
 
     //Validate BDAP values
     if (!txCertificate.ValidateValues(strMessage))
@@ -728,6 +829,7 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
             "certificate \"command\"...\n"
             "\nAvailable commands:\n"
             "  new                - Create new X.509 certificate\n"
+            "  newrootca          - Create new X.509 root certificate (CA)\n"
             "  approve            - Approve an X.509 certificate\n"
             "  view               - View X.509 certificate(s)\n"
             "  export             - Export X.509 certificate to file\n"
@@ -736,12 +838,15 @@ UniValue certificate_rpc(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("certificate new", "\"owner\" (\"issuer\") "));
     }
-    if (strCommand == "new" || strCommand == "approve" || strCommand == "view" || strCommand == "export" ) {
+    if (strCommand == "new" || strCommand == "newrootca" || strCommand == "approve" || strCommand == "view" || strCommand == "export" ) {
         if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
             throw JSONRPCError(RPC_BDAP_SPORK_INACTIVE, strprintf("Can not use certificate functionality until the BDAP version 2 spork is active."));
     }
     if (strCommand == "new") {
         return NewCertificate(request);
+    }
+    if (strCommand == "newrootca") {
+        return NewRootCA(request);
     }
     else if (strCommand == "approve") {
         return ApproveCertificate(request);

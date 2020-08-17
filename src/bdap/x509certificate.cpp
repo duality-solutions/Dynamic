@@ -10,6 +10,8 @@
 #include "uint256.h"
 #include "validation.h"
 
+#include "util.h"
+
 #include "dht/ed25519.h"
 #include <libtorrent/ed25519.hpp>
 #include <univalue.h>
@@ -17,6 +19,8 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
+
+#include <openssl/asn1.h>
 
 #include <openssl/ec.h>
 
@@ -91,6 +95,10 @@ bool CX509Certificate::UnserializeFromTx(const CTransactionRef& tx, const unsign
             txHashApprove = tx->GetHash();
             nHeightApprove = height;
         }
+        else if (strOpType == "bdap_rootca_certificate") {
+            txHashRootCA = tx->GetHash();
+            nHeightRootCA = height;
+        }
         //TODO: bdap_revoke_certificate?
     }
 
@@ -99,14 +107,14 @@ bool CX509Certificate::UnserializeFromTx(const CTransactionRef& tx, const unsign
 
 std::string CX509Certificate::GetPubKeyHex() const
 {
-    std::vector<unsigned char> certPubKey = PublicKey;
+    std::vector<unsigned char> certPubKey = SubjectPublicKey;
     
     return ToHex(&certPubKey[0], certPubKey.size());
 }
 
 std::string CX509Certificate::GetPubKeyBase64() const
 {
-    std::vector<unsigned char> certPubKey = PublicKey;
+    std::vector<unsigned char> certPubKey = SubjectPublicKey;
     
     return EncodeBase64(&certPubKey[0], certPubKey.size());
 }
@@ -135,14 +143,14 @@ uint256 CX509Certificate::GetHash() const
 uint256 CX509Certificate::GetSubjectHash() const
 {
     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
-    dsX509Certificate << Subject << PublicKey << SerialNumber << PEM;
+    dsX509Certificate << Subject << SubjectPublicKey << SerialNumber << PEM;
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
 
 uint256 CX509Certificate::GetIssuerHash() const
 {
     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
-    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << PublicKey << SerialNumber << PEM;
+    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << SubjectPublicKey << SerialNumber << PEM;
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
 
@@ -281,6 +289,13 @@ bool vchPEMfromX509req(X509_REQ *x509, std::vector<unsigned char>& vchPEM)
 
 bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivKey)  //Pass PrivKeyBytes
 {
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+
+
     X509_REQ *certificate;
     X509_NAME *subjectName=NULL;
 	EVP_PKEY* pubkeyEd25519;
@@ -291,14 +306,14 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
 	pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &PublicKey[0], 32);
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
 	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
 
     if ((certificate=X509_REQ_new()) == NULL)
         return false;
 
     X509_REQ_set_version(certificate,2);
-    X509_REQ_set_pubkey(certificate,pubkeyEd25519);
+    X509_REQ_set_pubkey(certificate,privkeyEd25519);
 
     subjectName=X509_REQ_get_subject_name(certificate);
 
@@ -311,7 +326,7 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
 
 	exts = sk_X509_EXTENSION_new_null();
 
-    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+    char* keyUsage = strdup("digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment"); //critical,keyCertSign,cRLSign
 
 	add_ext_req(exts, NID_key_usage, keyUsage);
 
@@ -319,6 +334,79 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
 
     if (!X509_REQ_sign(certificate,privkeyEd25519,EVP_md_null()))
         return false;
+
+EVP_PKEY *pkey = X509_REQ_get_pubkey(certificate);
+int signVerify = X509_REQ_verify(certificate,pkey);
+LogPrintf("DEBUGGER %s - signVerify: [%d]\n",__func__,signVerify);
+
+
+//  void X509_get0_signature(const ASN1_BIT_STRING **psig,
+//                           const X509_ALGOR **palg,
+//                           const X509 *x);
+
+//digestverify test begin--------------------------------------------------------------------------------------------------------
+
+// const ASN1_BIT_STRING *psig;
+// const X509_ALGOR *palg;
+
+// X509_REQ_get0_signature(certificate, (&psig), (&palg));
+
+// // const ASN1_ITEM *it = ASN1_ITEM_rptr(X509_REQ_INFO);
+// // unsigned char *buf_in = NULL;
+// // size_t inl = 0;
+// //inl = ASN1_item_i2d(certificate->req_info, &buf_in, it);
+
+// unsigned char* tbs = NULL;
+
+// i2d_re_X509_REQ_tbs(certificate, &tbs);
+// int tbs_size = i2d_re_X509_REQ_tbs(certificate, &tbs);
+
+// int outResult = 0;
+
+
+
+// LogPrintf("DEBUGGER %s - made it here 1\n",__func__);
+// EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+// LogPrintf("DEBUGGER %s - made it here 2\n",__func__);
+// EVP_PKEY_CTX* ppctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+// LogPrintf("DEBUGGER %s - made it here 3\n",__func__);
+// int result = EVP_DigestVerifyInit(ctx, &ppctx, NULL, NULL, pkey);
+// if (result == 1) {
+// LogPrintf("DEBUGGER %s - made it here 4a, tbs_size: [%d]\n",__func__, tbs_size);
+// LogPrintf("DEBUGGER %s - made it here 4b, psig length: [%d]\n",__func__,(psig)->length);
+// LogPrintf("DEBUGGER %s - made it here 4c, psig null: [%s]\n",__func__,psig->data ? "True" : "False" );
+// LogPrintf("DEBUGGER %s - made it here 4d, psig data: [%s]\n",__func__,EncodeBase64(psig->data,(psig)->length));
+
+// // result = EVP_DigestVerifyUpdate(ctx, (tbs), tbs_size);
+// // LogPrintf("DEBUGGER %s - EVP_DigestVerifyUpdate result: [%d]\n",__func__,result);
+// //     if (result != 1)
+// //         LogPrintf("DEBBGUGER %s - EVP_DigestVerifyUpdate geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+
+// //     int result3 = EVP_DigestVerifyFinal(ctx,(psig)->data, (psig)->length);
+// //     LogPrintf("DEBUGGER %s - result3: [%d]\n",__func__,result3);
+// //     if (result3 != 1)
+// //         LogPrintf("DEBBGUGER %s - EVP_DigestVerifyFinal geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+//     //const unsigned char* sigret = NULL;
+//     //result = EVP_DigestVerify(ctx, sigret, 64, tbs, 64);
+//     result = EVP_DigestVerify(ctx, (psig)->data, (psig)->length, (tbs), tbs_size);
+//     LogPrintf("DEBUGGER %s - EVP_DigestVerify result: [%d]\n",__func__,result);
+
+//     if (result == 1) {
+//         // passed signature verification
+//         outResult = 1;
+//     } else {
+//         // failed signature verification
+//         LogPrintf("DEBBGUGER %s - geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+//     }
+// }
+
+// LogPrintf("DEBUGGER %s - made it here 5, outResult: [%d]\n",__func__,outResult);
+
+//digestverify test end--------------------------------------------------------------------------------------------------------
+
 
     std::vector<unsigned char> vchPEM;
     if (!vchPEMfromX509req(certificate,vchPEM))
@@ -338,6 +426,11 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
 
 bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey)  //Pass PrivKeyBytes
 {
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
     X509 *certificate;
     X509_NAME *subjectName=NULL;
 	EVP_PKEY* pubkeyEd25519;
@@ -346,7 +439,7 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
 	pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &PublicKey[0], 32);
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
 	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
 
     if ((certificate=X509_new()) == NULL)
@@ -356,7 +449,7 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
     ASN1_INTEGER_set(X509_get_serialNumber(certificate), SerialNumber);
     X509_gmtime_adj(X509_get_notBefore(certificate),(long)0);
     X509_gmtime_adj(X509_get_notAfter(certificate),(long)AddMonthsToBlockTime(0,MonthsValid));
-    X509_set_pubkey(certificate,pubkeyEd25519);
+    X509_set_pubkey(certificate,privkeyEd25519);
 
     subjectName=X509_get_subject_name(certificate);
 
@@ -373,13 +466,97 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
     char* basicConstraints = strdup("critical,CA:TRUE"); 
     char* keyUsage = strdup("critical,keyCertSign,cRLSign");
     char* keyIdentifier = strdup("hash");
+    char* authKeyIdentifier = strdup("keyid,issuer");
 
     add_ext(certificate, NID_basic_constraints, basicConstraints);
     add_ext(certificate, NID_key_usage, keyUsage);
     add_ext(certificate, NID_subject_key_identifier, keyIdentifier);
+    add_ext(certificate, NID_authority_key_identifier, authKeyIdentifier);
+     int resultverifyx509;
+
+     EVP_PKEY *pkey = X509_get_pubkey(certificate);
+
+
+    // result = X509_verify(certificate, pkey);
+
+
+    // LogPrintf("DEBUGGER %s - result before sign: [%d]\n",__func__,result);
+    // LogPrintf("DEBBGUGER %s - geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
 
     if (!X509_sign(certificate,privkeyEd25519,EVP_md_null()))
         return false;
+
+    resultverifyx509 = X509_verify(certificate, pkey);
+
+    LogPrintf("DEBUGGER %s - result after sign: [%d]\n",__func__,resultverifyx509);
+    LogPrintf("DEBBGUGER %s - geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+//digestverify test begin--------------------------------------------------------------------------------------------------------
+
+// const ASN1_BIT_STRING *psig;
+// const X509_ALGOR *palg;
+
+// X509_get0_signature((&psig), (&palg), certificate);
+
+// // const ASN1_ITEM *it = ASN1_ITEM_rptr(X509_REQ_INFO);
+// // unsigned char *buf_in = NULL;
+// // size_t inl = 0;
+// //inl = ASN1_item_i2d(certificate->req_info, &buf_in, it);
+
+// unsigned char* tbs = NULL;
+
+// i2d_re_X509_tbs(certificate, &tbs);
+// int tbs_size = i2d_re_X509_tbs(certificate, &tbs);
+
+// int outResult = 0;
+
+// //EVP_PKEY *pkey = X509_get_pubkey(certificate);
+
+
+// LogPrintf("DEBUGGER %s - made it here 1\n",__func__);
+// EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+// LogPrintf("DEBUGGER %s - made it here 2\n",__func__);
+// EVP_PKEY_CTX* ppctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+// LogPrintf("DEBUGGER %s - made it here 3\n",__func__);
+// int result = EVP_DigestVerifyInit(ctx, &ppctx, NULL, NULL, pkey);
+// if (result == 1) {
+// LogPrintf("DEBUGGER %s - made it here 4a, tbs_size: [%d]\n",__func__, tbs_size);
+// LogPrintf("DEBUGGER %s - made it here 4b, psig length: [%d]\n",__func__,(psig)->length);
+// LogPrintf("DEBUGGER %s - made it here 4c, psig null: [%s]\n",__func__,psig->data ? "True" : "False" );
+// LogPrintf("DEBUGGER %s - made it here 4d, psig data: [%s]\n",__func__,EncodeBase64(psig->data,(psig)->length));
+
+// // result = EVP_DigestVerifyUpdate(ctx, (tbs), tbs_size);
+// // LogPrintf("DEBUGGER %s - EVP_DigestVerifyUpdate result: [%d]\n",__func__,result);
+// //     if (result != 1)
+// //         LogPrintf("DEBBGUGER %s - EVP_DigestVerifyUpdate geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+
+// //     int result3 = EVP_DigestVerifyFinal(ctx,(psig)->data, (psig)->length);
+// //     LogPrintf("DEBUGGER %s - result3: [%d]\n",__func__,result3);
+// //     if (result3 != 1)
+// //         LogPrintf("DEBBGUGER %s - EVP_DigestVerifyFinal geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+//     //const unsigned char* sigret = NULL;
+//     //result = EVP_DigestVerify(ctx, sigret, 64, tbs, 64);
+//     result = EVP_DigestVerify(ctx, (psig)->data, (psig)->length, (tbs), tbs_size);
+//     LogPrintf("DEBUGGER %s - EVP_DigestVerify result: [%d]\n",__func__,result);
+
+//     if (result == 1) {
+//         // passed signature verification
+//         outResult = 1;
+//     } else {
+//         // failed signature verification
+//         LogPrintf("DEBBGUGER %s - geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+//     }
+// }
+
+// LogPrintf("DEBUGGER %s - made it here 5, outResult: [%d]\n",__func__,outResult);
+//digestverify test end--------------------------------------------------------------------------------------------------------
+
+
+
 
     std::vector<unsigned char> vchPEM;
     if (!vchPEMfromX509(certificate,vchPEM))
@@ -389,11 +566,233 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
 
     EVP_PKEY_free(pubkeyEd25519);
     EVP_PKEY_free(privkeyEd25519);
+    //EVP_PKEY_free(pkey);
     X509_free(certificate);
 
     return true;
 
 } //X509SelfSign
+
+
+bool CX509Certificate::X509TestApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey, const std::vector<unsigned char>& vchIssuerPrivKey)  //Pass PrivKeyBytes
+{
+    //create root CA certificate w/issuer info
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+    X509 *certificateCA;
+    X509_NAME *subjectName=NULL;
+    X509_NAME *issuerName=NULL;
+	EVP_PKEY* subjectprivkeyEd25519;
+	EVP_PKEY* issuerprivkeyEd25519;
+
+	subjectprivkeyEd25519=EVP_PKEY_new();
+    issuerprivkeyEd25519=EVP_PKEY_new();
+
+	subjectprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
+	issuerprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivKey[0], 32);
+
+    if ((certificateCA=X509_new()) == NULL)
+        return false;
+
+    X509_set_version(certificateCA,2);
+    ASN1_INTEGER_set(X509_get_serialNumber(certificateCA), SerialNumber);
+    X509_gmtime_adj(X509_get_notBefore(certificateCA),(long)0);
+    X509_gmtime_adj(X509_get_notAfter(certificateCA),(long)AddMonthsToBlockTime(0,MonthsValid));
+    X509_set_pubkey(certificateCA,issuerprivkeyEd25519);
+
+    subjectName=X509_get_subject_name(certificateCA);
+
+    X509_NAME_add_entry_by_txt(subjectName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Issuer).c_str()), -1, -1, 0);
+
+    //self signed so subject=issuer
+    X509_set_issuer_name(certificateCA,subjectName);
+
+    char* basicConstraints = strdup("critical,CA:TRUE"); 
+    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+    char* keyIdentifier = strdup("hash");
+    char* authKeyIdentifier = strdup("keyid,issuer");
+
+    add_ext(certificateCA, NID_basic_constraints, basicConstraints);
+    add_ext(certificateCA, NID_key_usage, keyUsage);
+    add_ext(certificateCA, NID_subject_key_identifier, keyIdentifier);
+    add_ext(certificateCA, NID_authority_key_identifier, authKeyIdentifier);
+     int resultverifyx509;
+
+     EVP_PKEY *pkey = X509_get_pubkey(certificateCA);
+
+    if (!X509_sign(certificateCA,issuerprivkeyEd25519,EVP_md_null()))
+        return false;
+
+
+    resultverifyx509 = X509_verify(certificateCA, pkey);
+
+    LogPrintf("DEBUGGER %s - result after CA sign: [%d]\n",__func__,resultverifyx509);
+
+    FILE * x509CAFile;
+    x509CAFile = fopen("CA.pem", "wb");
+
+    //PEM_write_PrivateKey(stdout,pkey,NULL,NULL,0,NULL, NULL);
+    PEM_write_X509(x509CAFile,certificateCA);
+    fclose(x509CAFile);
+
+
+//request portion
+
+    X509_REQ *certificateREQ;
+    X509_NAME *subjectNameREQ=NULL;
+
+    if ((certificateREQ=X509_REQ_new()) == NULL)
+        return false;
+
+    X509_REQ_set_version(certificateREQ,2);
+    X509_REQ_set_pubkey(certificateREQ,subjectprivkeyEd25519);
+
+    subjectNameREQ=X509_REQ_get_subject_name(certificateREQ);
+
+    X509_NAME_add_entry_by_txt(subjectNameREQ, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectNameREQ, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectNameREQ, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
+
+
+    STACK_OF(X509_EXTENSION) *exts = NULL;
+
+	exts = sk_X509_EXTENSION_new_null();
+
+    char* keyUsageREQ = strdup("digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment"); //critical,keyCertSign,cRLSign
+
+	add_ext_req(exts, NID_key_usage, keyUsageREQ);
+
+    X509_REQ_add_extensions(certificateREQ, exts);
+
+     int resultverifyx509REQ;
+
+     EVP_PKEY *pkeyREQ = X509_REQ_get_pubkey(certificateREQ);
+
+    if (!X509_REQ_sign(certificateREQ,subjectprivkeyEd25519,EVP_md_null()))
+        return false;
+
+    resultverifyx509REQ = X509_REQ_verify(certificateREQ, pkeyREQ);
+
+    LogPrintf("DEBUGGER %s - result after REQ sign: [%d]\n",__func__,resultverifyx509REQ);
+
+    FILE * x509REQFile;
+    x509REQFile = fopen("subject.csr", "wb");
+
+    //PEM_write_PrivateKey(stdout,pkey,NULL,NULL,0,NULL, NULL);
+    PEM_write_X509_REQ(x509REQFile,certificateREQ);
+    fclose(x509REQFile);
+
+
+//signed cert portion
+    X509 *certificateCRT;
+
+    if ((certificateCRT=X509_new()) == NULL)
+        return false;
+
+    X509_set_version(certificateCRT,2);
+    ASN1_INTEGER_set(X509_get_serialNumber(certificateCRT), GetTimeMillis());
+    X509_gmtime_adj(X509_get_notBefore(certificateCRT),(long)0);
+    X509_gmtime_adj(X509_get_notAfter(certificateCRT),(long)AddMonthsToBlockTime(0,MonthsValid));
+    X509_set_pubkey(certificateCRT,subjectprivkeyEd25519);
+
+    subjectName=X509_get_subject_name(certificateCRT);
+    issuerName=X509_get_issuer_name(certificateCRT);
+
+    X509_NAME_add_entry_by_txt(subjectName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
+
+    X509_NAME_add_entry_by_txt(issuerName, "C",  MBSTRING_ASC,
+                            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(issuerName, "O",  MBSTRING_ASC,
+                            (unsigned char *)DEFAULT_ORGANIZATION_NAME.c_str(), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(issuerName, "CN", MBSTRING_ASC,
+                            (unsigned char *)(stringFromVch(Issuer).c_str()), -1, -1, 0);
+
+    X509_set_issuer_name(certificateCRT,issuerName);
+
+    //char* basicConstraintsCRT = strdup("critical,CA:FALSE"); 
+    //char* keyUsageCRT = strdup("critical");
+    //char* keyIdentifierCRT = strdup("hash");
+    //char* authKeyIdentifierCRT = strdup("keyid:always"); //keyid,issuer
+
+    //add_ext(certificateCRT, NID_basic_constraints, basicConstraintsCRT);
+    //add_ext(certificateCRT, NID_key_usage, keyUsageCRT);
+    //add_ext(certificateCRT, NID_subject_key_identifier, keyIdentifierCRT);
+    //add_ext(certificateCRT, NID_authority_key_identifier, authKeyIdentifierCRT);
+
+    X509_EXTENSION *ex;
+    X509V3_CTX v3ctx;
+    X509V3_set_ctx(&v3ctx, certificateCA, certificateCRT, 0, 0, 0); 
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_basic_constraints, "critical,CA:FALSE");
+    X509_add_ext(certificateCRT, ex, -1);
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_key_usage, "digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment");
+    X509_add_ext(certificateCRT, ex, -1);
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_authority_key_identifier, "keyid:always");
+    X509_add_ext(certificateCRT, ex, -1);
+    X509_EXTENSION_free(ex);
+
+     int resultverifyx509CRT;
+
+     //EVP_PKEY *pkeyCRT = X509_get_pubkey(certificateCRT);
+
+    if (!X509_sign(certificateCRT,issuerprivkeyEd25519,EVP_md_null()))
+        return false;
+
+    //resultverifyx509CRT = X509_verify(certificateCRT, pkeyCRT);
+
+    X509_STORE_CTX *ctx2 = X509_STORE_CTX_new();
+    X509_STORE *store = X509_STORE_new();
+    X509_STORE_add_cert(store, certificateCA);
+    X509_STORE_CTX_init(ctx2,store,certificateCRT, NULL);
+    resultverifyx509CRT  = X509_verify_cert(ctx2);
+
+    LogPrintf("DEBUGGER %s - result after CRT sign: [%d]\n",__func__,resultverifyx509CRT);
+
+    FILE * x509CRTFile;
+    x509CRTFile = fopen("subject.crt", "wb");
+
+    //PEM_write_PrivateKey(stdout,pkey,NULL,NULL,0,NULL, NULL);
+    PEM_write_X509(x509CRTFile,certificateCRT);
+    fclose(x509CRTFile);
+
+
+    X509_STORE_CTX_free(ctx2);
+    X509_STORE_free(store);
+    EVP_PKEY_free(subjectprivkeyEd25519);
+    EVP_PKEY_free(issuerprivkeyEd25519);
+    EVP_PKEY_free(pkey);
+    //EVP_PKEY_free(pkeyCRT);
+    EVP_PKEY_free(pkeyREQ);
+    X509_free(certificateCA);
+    X509_free(certificateCRT);
+    X509_REQ_free(certificateREQ);
+
+    return true;    
+
+
+
+
+} //X509TestApproveSign
+
+
 
 bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssuerPrivKey)  //Pass PrivKeyBytes
 {
@@ -406,7 +805,7 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssu
 	pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &PublicKey[0], 32);
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
 	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivKey[0], 32);
 
     if ((certificate=X509_new()) == NULL)
@@ -663,6 +1062,131 @@ std::string CX509Certificate::GetPEMSerialNumber() const {
     return outputString;
 }
 
+bool CX509Certificate::ValidatePEMSignature(std::string& errorMessage) const
+{
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+
+
+	EVP_PKEY* pubkeyEd25519;
+	pubkeyEd25519=EVP_PKEY_new();
+
+    X509 *certRetrieve = NULL;
+    BIO *certbio = NULL;
+    std::string pem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(pem.c_str(), -1);
+
+    if (!(certRetrieve = PEM_read_bio_X509(certbio, NULL, NULL, NULL))) {
+        errorMessage = "Cannot retrieve X509 certificate";
+        return false;
+    }
+
+	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
+
+    EVP_PKEY *pkey = X509_get_pubkey(certRetrieve);
+
+    // int resulttest = X509_verify(certRetrieve, pkey);
+
+    // LogPrintf("DEBUGGER %s - resulttest: [%d]\n",__func__,resulttest);
+
+
+    int outResult = 0;
+
+//test begin-------------------------------------------------------------------------------------------------
+ X509_STORE_CTX *ctx2 = X509_STORE_CTX_new();
+ X509_STORE *store = X509_STORE_new();
+ X509_STORE_add_cert(store, certRetrieve);
+ X509_STORE_CTX_init(ctx2,store,certRetrieve, NULL);
+int status  = X509_verify_cert(ctx2);
+
+LogPrintf("DEBUGGER %s - status [%d]\n",__func__,status);
+
+X509_STORE_free(store);
+X509_STORE_CTX_free(ctx2);
+
+LogPrintf("DEBUGGER %s - made it here 1\n",__func__);
+EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+LogPrintf("DEBUGGER %s - made it here 2\n",__func__);
+EVP_PKEY_CTX* ppctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+LogPrintf("DEBUGGER %s - made it here 3\n",__func__);
+int result = EVP_DigestVerifyInit(ctx, &ppctx, NULL, NULL, pkey);
+if (result == 1) {
+LogPrintf("DEBUGGER %s - made it here 4\n",__func__);
+    const unsigned char* sigret = NULL;
+    const unsigned char* tbs = NULL;
+    result = EVP_DigestVerify(ctx, sigret, 64, tbs, 64);
+    //result = EVP_DigestVerify(ctx, certRetrieve->signature.data, certRetrieve->signature.length, tbs, 64);
+    if (result == 1) {
+        // passed signature verification
+        outResult = 1;
+    } else {
+        // failed signature verification
+    }
+}
+
+LogPrintf("DEBUGGER %s - made it here 5\n",__func__);
+
+
+EVP_MD_CTX_free(ctx);
+EVP_PKEY_CTX_free(ppctx);
+
+//test end---------------------------------------------------------------------------------------------------
+
+//test2 begin-------------------------------------------------------------------------------------------------
+//   unsigned char* encMessage;
+//   size_t encMessageLength;
+//   Base64Decode(signatureBase64, &encMessage, &encMessageLength);
+
+//   bool authentic = false;
+//   EVP_PKEY* pubKey  = EVP_PKEY_new();
+//   EVP_PKEY_assign_RSA(pubKey, rsa);
+//   EVP_MD_CTX* m_RSAVerifyCtx = EVP_MD_CTX_create();
+//   if (EVP_DigestVerifyInit(m_RSAVerifyCtx,NULL, EVP_sha256(),NULL,pubKey)<=0) {
+//     return false;
+//   }
+//   if (EVP_DigestVerifyUpdate(m_RSAVerifyCtx, Msg, MsgLen) <= 0) {
+//     return false;
+//   }
+//   int AuthStatus = EVP_DigestVerifyFinal(m_RSAVerifyCtx, encMessage, encMessageLength);
+//   if (AuthStatus==1) {
+//     authentic = true;
+//     EVP_MD_CTX_cleanup(m_RSAVerifyCtx);
+//     return true;
+//   } else if(AuthStatus==0){
+//     authentic = false;
+//     EVP_MD_CTX_cleanup(m_RSAVerifyCtx);
+//     return true;
+//   } else{
+//     authentic = false;
+//     EVP_MD_CTX_cleanup(m_RSAVerifyCtx);
+//     return false;
+//   }
+
+//test2 end---------------------------------------------------------------------------------------------------
+
+
+
+
+    LogPrintf("DEBUGGER %s - outResult: [%d]\n",__func__,outResult);
+
+    if (outResult != 1) {
+        errorMessage = "PEM Certificate cannot be verified";
+        return false;
+    }
+
+    EVP_PKEY_free(pubkeyEd25519);
+    EVP_PKEY_free(pkey);
+    X509_free(certRetrieve);
+    BIO_free(certbio);
+
+    return true;
+}
+
 bool CX509Certificate::ValidatePEM(std::string& errorMessage) const
 {
     std::string certSubject = stringFromVch(Subject);
@@ -719,6 +1243,10 @@ bool CX509Certificate::ValidatePEM(std::string& errorMessage) const
             errorMessage = "Certificate Issuer does not match PEM";
             return false;
         }
+
+        // if (!ValidatePEMSignature(errorMessage)) {
+        //     return false;
+        // }
     }
 
     return true;
@@ -741,7 +1269,7 @@ bool CX509Certificate::ValidateValues(std::string& errorMessage) const
     }
 
     //Check that PublicKey exists
-    if (PublicKey.size() == 0)
+    if (SubjectPublicKey.size() == 0)
     {
         errorMessage = "Public Key cannot be empty.";
         return false;
@@ -782,7 +1310,7 @@ bool CX509Certificate::ValidateValues(std::string& errorMessage) const
     }
 
     // check PublicKey
-    if (PublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) 
+    if (SubjectPublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) 
     {
         errorMessage = "Invalid PublicKey. Can not have more than " + std::to_string(MAX_CERTIFICATE_KEY_LENGTH) + " characters.";
         return false;
@@ -792,6 +1320,13 @@ bool CX509Certificate::ValidateValues(std::string& errorMessage) const
     if (IssuerSignature.size() > MAX_CERTIFICATE_SIGNATURE_LENGTH) 
     {
         errorMessage = "Invalid IssuerSignature. Can not have more than " + std::to_string(MAX_CERTIFICATE_SIGNATURE_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check ExternalVerificationFile
+    if (ExternalVerificationFile.size() > MAX_CERTIFICATE_FILENAME) 
+    {
+        errorMessage = "Invalid ExternalVerificationFile. Can not have more than " + std::to_string(MAX_CERTIFICATE_FILENAME) + " characters.";
         return false;
     }
 
