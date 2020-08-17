@@ -43,6 +43,7 @@ static constexpr unsigned int MAX_WALLET_ADDRESS_LENGTH   = 105; // Stealth addr
 static constexpr unsigned int MAX_RESOURCE_POINTER_LENGTH = 127;
 static constexpr unsigned int MAX_KEY_LENGTH              = 156;
 static constexpr unsigned int MAX_DESCRIPTION_LENGTH      = 256;
+static constexpr unsigned int MAX_CERTIFICATE_FILENAME    = 256;
 static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
 static constexpr unsigned int MAX_CERTIFICATE_CATEGORY    = 32;
