@@ -30,13 +30,21 @@ bool GetCertificateTxId(const std::string& strTxId, CX509Certificate& certificat
     return !certificate.IsNull();
 }
 
+bool GetCertificateSerialNumber(const std::string& strSerialNumber, CX509Certificate& certificate)
+{
+    if (!pCertificateDB || !pCertificateDB->ReadCertificateSerialNumber(std::stoi(strSerialNumber), certificate))
+        return false;
+
+    return !certificate.IsNull();
+}
+
 bool UndoAddCertificate(const CX509Certificate& certificate)
 {
     if (!pCertificateDB)
         return false;
 
     if (certificate.IsApproved()) {
-        return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.txHashApprove.ToString()));
+        return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.txHashSigned.ToString()));
     }
     else {
         return pCertificateDB->EraseCertificateTxId(vchFromString(certificate.txHashRequest.ToString()));
@@ -47,9 +55,11 @@ bool UndoAddCertificate(const CX509Certificate& certificate)
 bool CCertificateDB::AddCertificate(const CX509Certificate& certificate) 
 { 
     bool writeState = false;
+    bool writeStateCA = true;
+    bool writeStateSerial = true;
     bool updateState = true;
-    bool writeStateIssuerDN = false;
-    bool writeStateSubjectDN = false;
+    bool writeStateIssuerDN = true;
+    bool writeStateSubjectDN = true;
     {
         LOCK(cs_bdap_certificate);
 
@@ -59,8 +69,15 @@ bool CCertificateDB::AddCertificate(const CX509Certificate& certificate)
         std::vector<unsigned char> vchTxHash;
         std::vector<unsigned char> vchTxHashRequest;
 
-        if (certificate.IsApproved()){  //Approve
-            vchTxHash = vchFromString(certificate.txHashApprove.ToString());
+
+        if (certificate.IsRootCA){  //Root certificate
+            vchTxHash = vchFromString(certificate.txHashSigned.ToString());
+            labelTxId = "txrootcaid";
+            //labelSubjectDN = "subjectdnrootca";
+            //labelIssuerDN = "issuerdnrootca";
+        }
+        else if (certificate.IsApproved()){  //Approve
+            vchTxHash = vchFromString(certificate.txHashSigned.ToString());
             vchTxHashRequest = vchFromString(certificate.txHashRequest.ToString());
             labelTxId = "txapproveid";
             labelSubjectDN = "subjectdnapprove";
@@ -73,39 +90,83 @@ bool CCertificateDB::AddCertificate(const CX509Certificate& certificate)
             labelIssuerDN = "issuerdnrequest";
         }
 
-        //Subject
-        std::vector<std::vector<unsigned char>> vvTxIdSubject;
-        CDBWrapper::Read(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
-        vvTxIdSubject.push_back(vchTxHash);
-        writeStateSubjectDN = Write(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
+        if (!certificate.IsRootCA) {
+            //Subject
+            std::vector<std::vector<unsigned char>> vvTxIdSubject;
+            CDBWrapper::Read(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
+            vvTxIdSubject.push_back(vchTxHash);
+            writeStateSubjectDN = Write(make_pair(labelSubjectDN, certificate.Subject), vvTxIdSubject);
 
-        //Issuer
-        std::vector<std::vector<unsigned char>> vvTxIdIssuer;
-        CDBWrapper::Read(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
-        vvTxIdIssuer.push_back(vchTxHash);
-        writeStateIssuerDN = Write(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
+            //Issuer
+            std::vector<std::vector<unsigned char>> vvTxIdIssuer;
+            CDBWrapper::Read(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
+            vvTxIdIssuer.push_back(vchTxHash);
+            writeStateIssuerDN = Write(make_pair(labelIssuerDN, certificate.Issuer), vvTxIdIssuer);
+        }
 
         //Certificate
         writeState = Write(make_pair(labelTxId, vchTxHash), certificate);
 
-        //if an approve (not self-signed), update the previous request certificate with txHashApprove
-        if ((certificate.IsApproved()) && (!certificate.SelfSignedX509Certificate())) {
+        //Serial Number
+        if (certificate.SerialNumber != 0) {
+            writeStateSerial = Write(make_pair(std::string("serialnumber"), certificate.SerialNumber), vchTxHash);
+        }
+
+        //if root certificate, index the issuer (subject=issuer). only one root certificate per bdap account
+        if (certificate.IsRootCA){
+            writeStateCA = Write(make_pair(std::string("issuerrootca"), certificate.Issuer), vchTxHash);
+        }
+        //if an approve (not self-signed), update the previous request certificate with txHashSigned
+        else if ((certificate.IsApproved()) && (!certificate.SelfSignedX509Certificate())) {
             CX509Certificate requestCertificate;
             if (ReadCertificateTxId(vchTxHashRequest, requestCertificate)) {
-                requestCertificate.txHashApprove = certificate.txHashApprove;
+                requestCertificate.txHashSigned = certificate.txHashSigned;
                 updateState = Write(make_pair(std::string("txrequestid"), vchTxHashRequest), requestCertificate);
             }
         }
 
     }
-    return writeState && writeStateIssuerDN && writeStateSubjectDN && updateState;
+    return writeState && writeStateIssuerDN && writeStateSubjectDN && updateState && writeStateCA && writeStateSerial;
 }
 
 bool CCertificateDB::ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CX509Certificate& certificate) 
 {
     LOCK(cs_bdap_certificate);
     if(!(CDBWrapper::Read(make_pair(std::string("txrequestid"), vchTxId), certificate))) {
-        return CDBWrapper::Read(make_pair(std::string("txapproveid"), vchTxId), certificate);
+        if(!(CDBWrapper::Read(make_pair(std::string("txapproveid"), vchTxId), certificate))) {
+            return CDBWrapper::Read(make_pair(std::string("txrootcaid"), vchTxId), certificate);
+        }
+    }
+    return true;
+}
+
+bool CCertificateDB::ReadCertificateIssuerRootCA(const std::vector<unsigned char>& vchIssuer, CX509Certificate& certificate) 
+{
+    LOCK(cs_bdap_certificate);
+    std::vector<unsigned char> vchTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("issuerrootca"), vchIssuer), vchTxId);
+
+    if (readState) {
+        return ReadCertificateTxId(vchTxId, certificate);
+    }
+    else {
+        return false;
+    }
+}
+
+bool CCertificateDB::ReadCertificateSerialNumber(const uint64_t& nSerialNumber, CX509Certificate& certificate) 
+{
+    LOCK(cs_bdap_certificate);
+    std::vector<unsigned char> vchTxId;
+    bool readState = false;
+    readState = CDBWrapper::Read(make_pair(std::string("serialnumber"), nSerialNumber), vchTxId);
+
+    if (readState) {
+        return ReadCertificateTxId(vchTxId, certificate);
+    }
+    else {
+        return false;
     }
     return true;
 }
@@ -266,7 +327,14 @@ bool CCertificateDB::EraseCertificateTxId(const std::vector<unsigned char>& vchT
         Write(make_pair(std::string("issuerdnapprove"), certificate.Issuer), vvTxIdIssuerApproveNew);
     }
 
-    if (certificate.IsApproved()) {
+    if (certificate.SerialNumber != 0) {
+        CDBWrapper::Erase(make_pair(std::string("serialnumber"), certificate.SerialNumber));
+    }
+
+    if (certificate.IsRootCA) {
+        return (CDBWrapper::Erase(make_pair(std::string("issuerrootca"), certificate.Issuer))) && (CDBWrapper::Erase(make_pair(std::string("txrootcaid"), vchTxId)));
+    }
+    else if (certificate.IsApproved()) {
         return CDBWrapper::Erase(make_pair(std::string("txapproveid"), vchTxId));
     }
     else {
@@ -365,9 +433,18 @@ static bool CommonDataCheck(const CX509Certificate& certificate, const vchCharSt
     // check if Months Valid is an accepted value
     uint32_t nMonthsValid;
     ParseUInt32(stringFromVch(vvchOpParameters[1]), &nMonthsValid);
-    if (!(nMonthsValid > 0 && nMonthsValid <=12)) { // if NOT (nMonthsValid greater than 0 and less than or equal to 12)
-        errorMessage = "CommonDataCheck failed! Months Valid is out of bounds.";
-        return false;
+
+    if (certificate.IsRootCA) {
+        if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_CA_MONTHS_VALID)) { // if NOT (nMonthsValid greater than 0 and less than or equal to 120)
+            errorMessage = "CommonDataCheck failed! Months Valid is out of bounds.";
+            return false;
+        }
+    }
+    else {
+        if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_MONTHS_VALID)) { // if NOT (nMonthsValid greater than 0 and less than or equal to 12)
+            errorMessage = "CommonDataCheck failed! Months Valid is out of bounds.";
+            return false;
+        }
     }
 
     // if approved or self signed, do additional checks
@@ -410,7 +487,7 @@ static bool CheckNewCertificateTxInputs(const CX509Certificate& certificate, con
     }
 
     if (certificate.IsApproved()){  //Approve
-        strTxHashToUse = certificate.txHashApprove.ToString();
+        strTxHashToUse = certificate.txHashSigned.ToString();
     }
     else { //Request
         strTxHashToUse = certificate.txHashRequest.ToString();
@@ -459,7 +536,7 @@ static bool CheckNewCertificateTxInputs(const CX509Certificate& certificate, con
     //Check if Certificate already exists - should work w/Approve TXID occurring after Request
     CX509Certificate getCertificate;
     if (GetCertificateTxId(strTxHashToUse, getCertificate)) {
-        if ((certificate.txHashApprove != txHash) && (certificate.txHashRequest != txHash)) { //check request and approve in case
+        if ((certificate.txHashSigned != txHash) && (certificate.txHashRequest != txHash)) { //check request and approve in case
             errorMessage = "CheckNewCertificateTxInputs: - The certificate " + txHash.ToString() + " already exists.  Add new certificate failed!";
             return error(errorMessage.c_str());
         } else {
@@ -467,6 +544,15 @@ static bool CheckNewCertificateTxInputs(const CX509Certificate& certificate, con
             return true;
         }
     }    
+
+    //make sure serial number doesn't already exist. 
+    if (certificate.SerialNumber != 0) {
+        CX509Certificate getCertificateSerial;
+        if (GetCertificateSerialNumber(std::to_string(certificate.SerialNumber), getCertificateSerial)) {
+            errorMessage = "CheckNewCertificateTxInputs: - The certificate serial number " + std::to_string(certificate.SerialNumber) + " already exists.  Add new certificate failed!";
+            return error(errorMessage.c_str());
+        }
+    }
 
     if (!pCertificateDB) {
         errorMessage = "CheckNewCertificateTxInputs failed! Can not open LevelDB BDAP certificate database.";

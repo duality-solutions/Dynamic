@@ -92,12 +92,8 @@ bool CX509Certificate::UnserializeFromTx(const CTransactionRef& tx, const unsign
             nHeightRequest = height;
         }
         else if (strOpType == "bdap_approve_certificate") {
-            txHashApprove = tx->GetHash();
-            nHeightApprove = height;
-        }
-        else if (strOpType == "bdap_rootca_certificate") {
-            txHashRootCA = tx->GetHash();
-            nHeightRootCA = height;
+            txHashSigned = tx->GetHash();
+            nHeightSigned = height;
         }
         //TODO: bdap_revoke_certificate?
     }
@@ -108,6 +104,13 @@ bool CX509Certificate::UnserializeFromTx(const CTransactionRef& tx, const unsign
 std::string CX509Certificate::GetPubKeyHex() const
 {
     std::vector<unsigned char> certPubKey = SubjectPublicKey;
+    
+    return ToHex(&certPubKey[0], certPubKey.size());
+}
+
+std::string CX509Certificate::GetIssuerPubKeyHex() const
+{
+    std::vector<unsigned char> certPubKey = IssuerPublicKey;
     
     return ToHex(&certPubKey[0], certPubKey.size());
 }
@@ -153,6 +156,30 @@ uint256 CX509Certificate::GetIssuerHash() const
     dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << SubjectPublicKey << SerialNumber << PEM;
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
+
+// bool CX509Certificate::SetSerialNumber() 
+// {
+//     //don't overwrite if already assigned
+//     if (SerialNumber.size() > 0) {
+//         return false;
+//     }
+    
+//     //if subject and issuer not assigned, error out
+//     if ((Subject.size() == 0) || (Issuer.size() == 0)) {
+//         return false;
+//     }
+
+//     int64_t now = GetTimeMillis();  
+//     uint256 hash;
+//     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
+//     dsX509Certificate << Subject << Issuer << std::to_string(now);
+//     hash = Hash(dsX509Certificate.begin(), dsX509Certificate.end());
+//     std::vector<unsigned char> vchSerialNumber(hash.begin(), hash.end());
+
+//     SerialNumber = vchSerialNumber;
+
+//     return true;
+// }
 
 bool CX509Certificate::SignSubject(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey)
 {
@@ -378,8 +405,10 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
     if ((certificate=X509_new()) == NULL)
         return false;
 
+    //long longSerialNumber = std::stol(SerialNumber.ToString());
+
     X509_set_version(certificate,2);
-    ASN1_INTEGER_set(X509_get_serialNumber(certificate), SerialNumber);
+    //ASN1_INTEGER_set(X509_get_serialNumber(certificate), longSerialNumber);
     X509_gmtime_adj(X509_get_notBefore(certificate),(long)0);
     X509_gmtime_adj(X509_get_notAfter(certificate),(long)AddMonthsToBlockTime(0,MonthsValid));
     X509_set_pubkey(certificate,privkeyEd25519);
@@ -516,7 +545,6 @@ bool CX509Certificate::X509RootCASign(const std::vector<unsigned char>& vchIssue
 
     X509 *certificateCA;
     X509_NAME *subjectName=NULL;
-    X509_NAME *issuerName=NULL;
 	EVP_PKEY* issuerprivkeyEd25519;
 
     issuerprivkeyEd25519=EVP_PKEY_new();
@@ -527,6 +555,11 @@ bool CX509Certificate::X509RootCASign(const std::vector<unsigned char>& vchIssue
 
     if ((certificateCA=X509_new()) == NULL)
         return false;
+
+    //long int n = strtol(str.c_str(), &endp, 10);
+    //long int longSerialNumber = std::strtol(stringFromVch(SerialNumber).c_str(),NULL,10);
+
+    //int longSerialNumber = std::stoi(stringFromVch(SerialNumber));
 
     X509_set_version(certificateCA,2);
     ASN1_INTEGER_set(X509_get_serialNumber(certificateCA), SerialNumber);
@@ -622,8 +655,10 @@ bool CX509Certificate::X509TestApproveSign(const std::vector<unsigned char>& vch
     if ((certificateCA=X509_new()) == NULL)
         return false;
 
+    //long longSerialNumber = std::stol(SerialNumber.ToString());
+
     X509_set_version(certificateCA,2);
-    ASN1_INTEGER_set(X509_get_serialNumber(certificateCA), SerialNumber);
+    //ASN1_INTEGER_set(X509_get_serialNumber(certificateCA), longSerialNumber);
     X509_gmtime_adj(X509_get_notBefore(certificateCA),(long)0);
     X509_gmtime_adj(X509_get_notAfter(certificateCA),(long)AddMonthsToBlockTime(0,MonthsValid));
     X509_set_pubkey(certificateCA,issuerprivkeyEd25519);
@@ -819,22 +854,41 @@ bool CX509Certificate::X509TestApproveSign(const std::vector<unsigned char>& vch
 
 
 
-bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssuerPrivKey)  //Pass PrivKeyBytes
+bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& pemCA, const std::vector<unsigned char>& vchIssuerPrivSeedBytes)  //Pass PrivKeySeedBytes
 {
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
     X509 *certificate;
     X509_NAME *subjectName=NULL;
     X509_NAME *issuerName=NULL;
 	EVP_PKEY* pubkeyEd25519;
 	EVP_PKEY* privkeyEd25519;
 
+    //retrieve root certificate from PEM
+    X509 *certificateCA = NULL;
+    BIO *certbio = NULL;
+
+    std::string strpemCA = stringFromVch(pemCA);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(strpemCA.c_str(), -1);
+
+    if (!(certificateCA = PEM_read_bio_X509(certbio, NULL, NULL, NULL))) {
+        return false;
+    }
+
 	pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
 	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
-	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivKey[0], 32);
+	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
 
-    if ((certificate=X509_new()) == NULL)
+    if ((certificate=X509_new()) == NULL) {
         return false;
+    }
 
     X509_set_version(certificate,2);
     ASN1_INTEGER_set(X509_get_serialNumber(certificate), SerialNumber);
@@ -862,16 +916,44 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssu
     //self signed so subject=issuer
     X509_set_issuer_name(certificate,issuerName);
 
-    char* basicConstraints = strdup("critical,CA:TRUE"); 
-    char* keyUsage = strdup("critical,keyCertSign,cRLSign");
-    char* keyIdentifier = strdup("hash");
+    // char* basicConstraints = strdup("critical,CA:TRUE"); 
+    // char* keyUsage = strdup("critical,keyCertSign,cRLSign");
+    // char* keyIdentifier = strdup("hash");
 
-    add_ext(certificate, NID_basic_constraints, basicConstraints);
-    add_ext(certificate, NID_key_usage, keyUsage);
-    add_ext(certificate, NID_subject_key_identifier, keyIdentifier);
+    // add_ext(certificate, NID_basic_constraints, basicConstraints);
+    // add_ext(certificate, NID_key_usage, keyUsage);
+    // add_ext(certificate, NID_subject_key_identifier, keyIdentifier);
+
+    //assign x509 extensions. retrieve authority key identifier from root certificate
+    X509_EXTENSION *ex;
+    X509V3_CTX v3ctx;
+    X509V3_set_ctx(&v3ctx, certificateCA, certificate, 0, 0, 0); 
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_basic_constraints, "critical,CA:FALSE");
+    X509_add_ext(certificate, ex, -1);
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_key_usage, "digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment");
+    X509_add_ext(certificate, ex, -1);
+
+    ex = X509V3_EXT_conf_nid(0, &v3ctx, NID_authority_key_identifier, "keyid:always");
+    X509_add_ext(certificate, ex, -1);
+    X509_EXTENSION_free(ex);
 
     if (!X509_sign(certificate,privkeyEd25519,EVP_md_null()))
         return false;
+
+     int resultverifyx509;
+
+    //verify signed certificate against root certiricate
+    X509_STORE_CTX *ctx2 = X509_STORE_CTX_new();
+    X509_STORE *store = X509_STORE_new();
+    X509_STORE_add_cert(store, certificateCA);
+    X509_STORE_CTX_init(ctx2,store,certificate, NULL);
+    resultverifyx509  = X509_verify_cert(ctx2);
+
+    if (resultverifyx509 != 1) {
+        return false;
+    }
 
     std::vector<unsigned char> vchPEM;
     if (!vchPEMfromX509(certificate,vchPEM))
@@ -879,9 +961,13 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& vchIssu
 
     PEM = vchPEM; //Store PEM in certificate object
 
+    X509_STORE_CTX_free(ctx2);
+    X509_STORE_free(store);
     EVP_PKEY_free(pubkeyEd25519);
     EVP_PKEY_free(privkeyEd25519);
     X509_free(certificate);
+    X509_free(certificateCA);
+    BIO_free(certbio);
 
     return true;
 
@@ -1066,7 +1152,7 @@ std::string CX509Certificate::GetPEMSerialNumber() const {
 
     char *tmp = BN_bn2dec(bn);
     if (!tmp) {
-        fprintf(stderr, "unable to convert BN to decimal string.\n");
+        //fprintf(stderr, "unable to convert BN to decimal string.\n");
         BN_free(bn);
         return "";
     }
@@ -1334,10 +1420,17 @@ bool CX509Certificate::ValidateValues(std::string& errorMessage) const
         return false;
     }
 
-    // check PublicKey
+    // check SubjectPublicKey
     if (SubjectPublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) 
     {
-        errorMessage = "Invalid PublicKey. Can not have more than " + std::to_string(MAX_CERTIFICATE_KEY_LENGTH) + " characters.";
+        errorMessage = "Invalid SubjectPublicKey. Can not have more than " + std::to_string(MAX_CERTIFICATE_KEY_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check IssuerPublicKey
+    if (IssuerPublicKey.size() > MAX_CERTIFICATE_KEY_LENGTH) 
+    {
+        errorMessage = "Invalid IssuerPublicKey. Can not have more than " + std::to_string(MAX_CERTIFICATE_KEY_LENGTH) + " characters.";
         return false;
     }
 
@@ -1386,7 +1479,7 @@ std::string CX509Certificate::ToString() const
         SelfSignedX509Certificate() ? "True" : "False",
         IsApproved() ? "True" : "False",
         txHashRequest.GetHex(),
-        txHashApprove.GetHex()
+        txHashSigned.GetHex()
         );
 }
 
@@ -1401,16 +1494,18 @@ bool BuildX509CertificateJson(const CX509Certificate& certificate, UniValue& oCe
     oCertificate.push_back(Pair("months_valid", std::to_string(certificate.MonthsValid)));
     oCertificate.push_back(Pair("subject", stringFromVch(certificate.Subject)));
     oCertificate.push_back(Pair("subject_signature", certificate.GetSubjectSignature()));
-    oCertificate.push_back(Pair("public_key", certificate.GetPubKeyHex()));
+    oCertificate.push_back(Pair("subject_public_key", certificate.GetPubKeyHex()));
+    oCertificate.push_back(Pair("issuer_public_key", certificate.GetIssuerPubKeyHex()));
     oCertificate.push_back(Pair("issuer", stringFromVch(certificate.Issuer)));
     oCertificate.push_back(Pair("issuer_signature", certificate.GetIssuerSignature()));
     oCertificate.push_back(Pair("approved", certificate.IsApproved() ? "True" : "False"));
+    oCertificate.push_back(Pair("root_certificate", certificate.IsRootCA ? "True" : "False"));
     oCertificate.push_back(Pair("serial_number", std::to_string(certificate.SerialNumber)));
 
     oCertificate.push_back(Pair("pem", stringFromVch(certificate.PEM)));
 
     oCertificate.push_back(Pair("txid_request", certificate.txHashRequest.GetHex()));
-    oCertificate.push_back(Pair("txid_approve", certificate.txHashApprove.GetHex()));
+    oCertificate.push_back(Pair("txid_signed", certificate.txHashSigned.GetHex()));
     if ((unsigned int)chainActive.Height() >= certificate.nHeightRequest) {
         CBlockIndex *pindex = chainActive[certificate.nHeightRequest];
         if (pindex) {
@@ -1420,16 +1515,16 @@ bool BuildX509CertificateJson(const CX509Certificate& certificate, UniValue& oCe
     oCertificate.push_back(Pair("request_time", nTime));
     oCertificate.push_back(Pair("request_height", std::to_string(certificate.nHeightRequest)));
 
-    if (certificate.nHeightApprove != 0) {
-        if ((unsigned int)chainActive.Height() >= certificate.nHeightApprove) {
-            CBlockIndex *pindex = chainActive[certificate.nHeightApprove];
+    if (certificate.nHeightSigned != 0) {
+        if ((unsigned int)chainActive.Height() >= certificate.nHeightSigned) {
+            CBlockIndex *pindex = chainActive[certificate.nHeightSigned];
             if (pindex) {
                 nApproveTime = pindex->GetBlockTime();
             }
         }
         oCertificate.push_back(Pair("valid_from", nApproveTime));
         oCertificate.push_back(Pair("valid_until", AddMonthsToBlockTime(nApproveTime,certificate.MonthsValid)));
-        oCertificate.push_back(Pair("approve_height", std::to_string(certificate.nHeightApprove)));
+        oCertificate.push_back(Pair("approve_height", std::to_string(certificate.nHeightSigned)));
     }
     
     return true;

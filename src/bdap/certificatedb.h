@@ -20,6 +20,8 @@ public:
     }
     bool AddCertificate(const CX509Certificate& certificate);
     bool ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CX509Certificate& certificate);
+    bool ReadCertificateIssuerRootCA(const std::vector<unsigned char>& vchIssuer, CX509Certificate& certificate); 
+    bool ReadCertificateSerialNumber(const uint64_t& nSerialNumber, CX509Certificate& certificate); 
 
     bool ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates, bool getAll = true);
     bool ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CX509Certificate>& vCertificates, bool getAll = true);
@@ -30,6 +32,7 @@ public:
 };
 
 bool GetCertificateTxId(const std::string& strTxId, CX509Certificate& certificate);
+bool GetCertificateSerialNumber(const std::string& strSerialNumber, CX509Certificate& certificate);
 bool UndoAddCertificate(const CX509Certificate& certificate);
 bool CheckCertificateDB();
 bool FlushCertificateLevelDB();

@@ -23,6 +23,9 @@
 #include "validation.h"
 #include "wallet/wallet.h"
 
+#include <libtorrent/hex.hpp>
+
+
 #include <libtorrent/ed25519.hpp>
 #include <univalue.h>
 
@@ -74,10 +77,7 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
     CharString vchIssuerFQDN;
     int32_t nMonths = 120; // root CA last 10 years
 
-    //TODO/CHECK - see if user already has a root certificate
-
     //initialize Certificate with values we know
-    txCertificateCA.SerialNumber = GetTimeMillis();
     txCertificateCA.IsRootCA = true;
 
     //NOTE - root certificate is self-signed so subject=issuer
@@ -90,6 +90,12 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
     CDomainEntry subjectDomainEntry;
     if (!GetDomainEntry(vchSubjectFQDN, subjectDomainEntry))
         throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strSubjectFQDN));
+
+    //see if user already has a root certificate. maybe add a warning and require overwrite parameter before replacing. reject for now
+    CX509Certificate certificateCA;
+    if (pCertificateDB->ReadCertificateIssuerRootCA(vchSubjectFQDN,certificateCA)) {
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("%s account already has root certificate.", strSubjectFQDN));
+    }
 
     txCertificateCA.Subject = subjectDomainEntry.vchFullObjectPath();
     
@@ -134,6 +140,16 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
     //self sign issuer portion
     txCertificateCA.Issuer = txCertificateCA.Subject;
     txCertificateCA.IssuerPublicKey = txCertificateCA.SubjectPublicKey;
+
+    //can't get serialnumber until subject and issuer are set
+    //txCertificateCA.SetSerialNumber();
+    txCertificateCA.SerialNumber = GetTimeMicros();
+
+    //see if serial number already exists. reject if it does
+    CX509Certificate certificateSerial;
+    if (pCertificateDB->ReadCertificateSerialNumber(txCertificateCA.SerialNumber,certificateSerial)) {
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("%s serial number already has exists. Try again.", std::to_string(txCertificateCA.SerialNumber)));
+    }
 
     //PEM needs to be populated before SignIssuer. Use certificate private seed
     if (!txCertificateCA.X509RootCASign(privCertificateKey.GetPrivSeedBytes())) {
@@ -264,8 +280,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     bool selfSign = false;
     int32_t nMonths = 12; // certificates last a year?
 
-    //initialize Certificate with values we know
-    txCertificate.SerialNumber = GetTimeMillis();
+    //Note: Certificate Requests should not have a SerialNumber
 
     //NOTE: not currently supporting self sign. 
 
@@ -288,6 +303,8 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Self signed certificates not supported");
         }
     }
+
+    //TODO: Earlier check - does Issuer BDAP have a root certificate (is a CA?)
 
     //Leave in to allow custom key usage in the future
     //Handle Key Usage array [REQUIRED]
@@ -379,11 +396,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
 
     } //end Self Sign
     else {
-        //pass privseedbytes for certificate (subject)
-        if (!txCertificate.X509RequestSign(privCertificateKey.GetPrivSeedBytes())) {
-            throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
-        }
-
         //Handle ISSUER 
         std::string strIssuerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
         ToLowerCase(strIssuerFQDN);
@@ -392,6 +404,18 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
         CDomainEntry issuerDomainEntry;
         if (!GetDomainEntry(vchIssuerFQDN, issuerDomainEntry))
             throw JSONRPCError(RPC_BDAP_ACCOUNT_NOT_FOUND, strprintf("%s account not found.", strIssuerFQDN));
+
+//ADD BACK IN AFTER TESTING
+        // //check if issuer has a root certificate (is a designated certificate authority)
+        // CX509Certificate certificateCA;
+        // if (!pCertificateDB->ReadCertificateIssuerRootCA(vchIssuerFQDN,certificateCA)) {
+        //     throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("%s is not a certificate authority.", strSubjectFQDN));
+        // }
+
+        //pass privseedbytes for certificate (subject)
+        if (!txCertificate.X509RequestSign(privCertificateKey.GetPrivSeedBytes())) {
+            throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+        }
 
         txCertificate.Issuer = issuerDomainEntry.vchFullObjectPath();
 
@@ -461,7 +485,7 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     // SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
     // if (selfSign) {
-    //     txCertificate.txHashApprove = wtx.GetHash();
+    //     txCertificate.txHashSigned = wtx.GetHash();
     // }
     // else {
     //     txCertificate.txHashRequest = wtx.GetHash();
@@ -522,6 +546,8 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     vchTxId = vchFromString(parameter1);
 
     CX509Certificate txCertificate;
+
+    //initialize Certificate with values we know
     int32_t nMonths = 12; // certificates last a year?
 
     //Retrieve certificate from CertificateDB
@@ -570,12 +596,48 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
     IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
 
-    //PEM needs to be populated before SignIssuer
-    if (!txCertificate.X509ApproveSign(IssuerSecretKey)) {
+    //can't get serialnumber until subject and issuer are set
+    //txCertificate.SetSerialNumber();
+    txCertificate.SerialNumber = GetTimeMicros();
+
+    //check if serial number already exists. reject if it does
+    CX509Certificate certificateSerial;
+    if (pCertificateDB->ReadCertificateSerialNumber(txCertificate.SerialNumber,certificateSerial)) {
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("%s serial number already has exists. Try again.", std::to_string(txCertificate.SerialNumber)));
+    }
+
+    //get issuer's root certificate
+    CX509Certificate certificateRootCA;
+    if (pCertificateDB->ReadCertificateIssuerRootCA(txCertificate.Issuer,certificateRootCA)) {
+        throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Could not retrieve %s root certificate", stringFromVch(vchIssuer)));
+    }
+    
+    //get issuer certificate privatekey from publickey
+    CKeyEd25519 privIssuerCertificateKey;
+
+    std::vector<unsigned char> privCertificateKeyPubKeyBytes;
+    std::vector<unsigned char> privCertificateKeyPubKey;
+    std::string privCertificateKeyPubKeyString;
+
+    //Get issuer's root certificate public key
+    privCertificateKeyPubKeyBytes = certificateRootCA.IssuerPublicKey;
+    privCertificateKeyPubKeyString = ToHex(&privCertificateKeyPubKeyBytes[0],32);
+    privCertificateKeyPubKey = std::vector<unsigned char>(privCertificateKeyPubKeyString.begin(), privCertificateKeyPubKeyString.end());
+
+    CKeyID vchCertificatePubKeyIDIssuer = GetIdFromCharVector(privCertificateKeyPubKey);
+    if (!pwalletMain->GetDHTKey(vchCertificatePubKeyIDIssuer, privIssuerCertificateKey))
+        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve Issuer Certificate Key");
+
+    CharString pemCA;
+
+    pemCA = certificateRootCA.PEM;
+
+    //PEM needs to be populated before SignIssuer. Sign with Issuer Certificate Key
+    if (!txCertificate.X509ApproveSign(pemCA, privIssuerCertificateKey.GetPrivSeedBytes())) {
         throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
     }
 
-    //Issuer Signs
+    //Issuer Signs with Issuer BDAP key
     if (!txCertificate.SignIssuer(IssuerPublicKey, IssuerSecretKey)) {
         throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer signing.");
     }
@@ -633,7 +695,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     // CWalletTx wtx;
     // SendBDAPTransaction(scriptData, scriptPubKey, wtx, monthlyFee, oneTimeFee + depositFee, fUseInstantSend);
 
-    // txCertificate.txHashApprove = wtx.GetHash();
+    // txCertificate.txHashSigned = wtx.GetHash();
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
     BuildX509CertificateJson(txCertificate, oCertificateTransaction);
@@ -835,7 +897,7 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
 
     UniValue oCertificateLists(UniValue::VOBJ);
 
-    if (certificate.nHeightApprove == 0)
+    if (certificate.nHeightSigned == 0)
         throw JSONRPCError(RPC_BDAP_ERROR, "Certificate is not approved");
 
     // CDomainEntry subjectDomainEntry;

@@ -18,10 +18,10 @@ class CTransaction;
 class UniValue;
 class CKeyEd25519;
 
-//Implementing X.509 X509Certificates
+//Implementing X.509 Certificates
 class CX509Certificate {
 public:
-    static const int CURRENT_VERSION = 2;
+    static const int CURRENT_VERSION = 1;
     int nVersion;
 
     uint16_t MonthsValid;
@@ -38,11 +38,9 @@ public:
 
     //Needed for blockchain
     unsigned int nHeightRequest; 
-    unsigned int nHeightApprove; 
-    unsigned int nHeightRootCA; 
+    unsigned int nHeightSigned; 
     uint256 txHashRequest;
-    uint256 txHashApprove;
-    uint256 txHashRootCA;
+    uint256 txHashSigned;
 
     CX509Certificate() {
         SetNull();
@@ -68,11 +66,9 @@ public:
         ExternalVerificationFile.clear();
         IsRootCA = false;
         nHeightRequest = 0;
-        nHeightApprove = 0;
-        nHeightRootCA = 0;
+        nHeightSigned = 0;
         txHashRequest.SetNull();
-        txHashApprove.SetNull();
-        txHashRootCA.SetNull();
+        txHashSigned.SetNull();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -92,11 +88,9 @@ public:
         READWRITE(IsRootCA);
         READWRITE(ExternalVerificationFile);
         READWRITE(VARINT(nHeightRequest));
-        READWRITE(VARINT(nHeightApprove));
-        READWRITE(VARINT(nHeightRootCA));
+        READWRITE(VARINT(nHeightSigned));
         READWRITE(txHashRequest);
-        READWRITE(txHashApprove);
-        READWRITE(txHashRootCA);
+        READWRITE(txHashSigned);
     }
 
     inline friend bool operator==(const CX509Certificate &a, const CX509Certificate &b) {
@@ -130,16 +124,15 @@ public:
         IsRootCA = b.IsRootCA;
         ExternalVerificationFile = b.ExternalVerificationFile;
         nHeightRequest = b.nHeightRequest;
-        nHeightApprove = b.nHeightApprove;
-        nHeightRootCA = b.nHeightRootCA;
+        nHeightSigned = b.nHeightSigned;
         txHashRequest = b.txHashRequest;
-        txHashApprove = b.txHashApprove;
-        txHashRootCA = b.txHashRootCA;
+        txHashSigned = b.txHashSigned;
         return *this;
     }
  
+    //Note: if root certificate, consider approved (self-signed)
     bool IsApproved() const {
-        return ((IssuerSignature.size() > 0) || (txHashApprove != 0));
+        return ((IssuerSignature.size() > 0) || (txHashSigned != 0) || (IsRootCA));
     }
 
     bool SelfSignedX509Certificate() const {
@@ -167,7 +160,9 @@ public:
     uint256 GetHash() const;
     uint256 GetSubjectHash() const;
     uint256 GetIssuerHash() const;
+    //bool SetSerialNumber();
     std::string GetPubKeyHex() const;
+    std::string GetIssuerPubKeyHex() const;
     std::string GetPubKeyBase64() const;
     std::string GetSubjectSignature() const;
     std::string GetIssuerSignature() const;
@@ -180,7 +175,7 @@ public:
     bool ValidatePEMSignature(std::string& errorMessage) const;
     bool X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
     bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivSeedBytes); //Pass PrivKeyBytes
-    bool X509ApproveSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
+    bool X509ApproveSign(const std::vector<unsigned char>& pemCA, const std::vector<unsigned char>& vchIssuerPrivSeedBytes);
     bool X509TestApproveSign(const std::vector<unsigned char>& vchSubjectPrivSeedBytes, const std::vector<unsigned char>& vchIssuerPrivSeedBytes);
     bool X509RootCASign(const std::vector<unsigned char>& vchIssuerPrivSeedBytes);  //Pass PrivKeyBytes
 
