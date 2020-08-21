@@ -1179,11 +1179,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (vvch.size() > 3 && vvch[3].size() > MAX_KEY_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-pubkey-too-long");
 
-            uint32_t nMonthsValid;
-            ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
-            if (!(nMonthsValid > 0 && nMonthsValid <=12))
-                return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
-
             //If Approved check Issuer Pubkey length
             if (strOpType == "bdap_approve_certificate") {
                 if (vvch.size() > 5 && vvch[5].size() > MAX_KEY_LENGTH) 
@@ -1195,6 +1190,19 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
             std::string errorMessage;
+
+            uint32_t nMonthsValid;
+            ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
+
+            //update months valid check to handle root certificates
+            if (certificate.IsRootCA) {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_CA_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "rootca-months-valid-incorrect");
+            }
+            else {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
+            }
 
             if (!certificate.ValidatePEM(errorMessage)) 
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
@@ -1249,6 +1257,15 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CX509Certificate certificateCheck;
             if (GetCertificateTxId(tx.GetHash().GetHex(), certificateCheck))
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "already-exists");
+
+            //check if a certificate with given serial number already exists
+            if (certificate.SerialNumber > 0) {
+                CX509Certificate certificateSerialCheck;
+                if (GetCertificateSerialNumber(std::to_string(certificate.SerialNumber), certificateSerialCheck))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "serialnumber-already-exists");
+
+            }
+
         }
         // TODO (BDAP): Implement link delete
         /*
