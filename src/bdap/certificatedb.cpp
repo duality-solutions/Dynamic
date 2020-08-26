@@ -32,7 +32,11 @@ bool GetCertificateTxId(const std::string& strTxId, CX509Certificate& certificat
 
 bool GetCertificateSerialNumber(const std::string& strSerialNumber, CX509Certificate& certificate)
 {
-    if (!pCertificateDB || !pCertificateDB->ReadCertificateSerialNumber(std::stoi(strSerialNumber), certificate))
+    uint64_t value;
+    std::istringstream iss(strSerialNumber);
+    iss >> value;
+
+    if (!pCertificateDB || !pCertificateDB->ReadCertificateSerialNumber(value, certificate))
         return false;
 
     return !certificate.IsNull();
@@ -68,7 +72,6 @@ bool CCertificateDB::AddCertificate(const CX509Certificate& certificate)
         std::string labelIssuerDN;
         std::vector<unsigned char> vchTxHash;
         std::vector<unsigned char> vchTxHashRequest;
-
 
         if (certificate.IsRootCA){  //Root certificate
             vchTxHash = vchFromString(certificate.txHashSigned.ToString());
@@ -252,8 +255,6 @@ bool CCertificateDB::ReadCertificateIssuerDNApprove(const std::vector<unsigned c
 
     return (vCertificates.size() > 0);
 }
-
-
 
 bool CCertificateDB::EraseCertificateTxId(const std::vector<unsigned char>& vchTxId)
 {
@@ -493,18 +494,19 @@ static bool CheckNewCertificateTxInputs(const CX509Certificate& certificate, con
         strTxHashToUse = certificate.txHashRequest.ToString();
     }
 
-    //check subject signature
     CDomainEntry entrySubject;
     if (!GetDomainEntry(certificate.Subject, entrySubject)) {
         errorMessage = "CheckNewCertificateTxInputs: - Could not find specified certificate subject! " + stringFromVch(certificate.Subject);
         return error(errorMessage.c_str());
     }
+   CharString vchSubjectPubKey = entrySubject.DHTPublicKey;
 
-    CharString vchSubjectPubKey = entrySubject.DHTPublicKey;
-
-    if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) { //test in rpc, should work
-        errorMessage = "CheckNewCertificateTxInputs: - Could not validate subject signature. ";
-        return error(errorMessage.c_str());
+    if ( (!certificate.SelfSignedX509Certificate()) && (!certificate.IsApproved()) ) {
+        //check subject signature (only if Request)
+        if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) { //test in rpc, should work
+            errorMessage = "CheckNewCertificateTxInputs: - Could not validate subject signature. ";
+            return error(errorMessage.c_str());
+        }
     }
 
     //if approved check issuer signature and if not self signed check if request exists
