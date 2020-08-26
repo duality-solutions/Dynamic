@@ -174,10 +174,12 @@ public:
     bool ValidatePEM(std::string& errorMessage) const;
     bool ValidatePEMSignature(std::string& errorMessage) const;
     bool X509SelfSign(const std::vector<unsigned char>& vchSubjectPrivKey); //Pass PrivKeyBytes
-    bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivSeedBytes); //Pass PrivKeyBytes
+    bool X509RequestSign(const std::vector<unsigned char>& vchSubjectPrivSeedBytes); //Pass PrivSeedBytes
     bool X509ApproveSign(const std::vector<unsigned char>& pemCA, const std::vector<unsigned char>& vchIssuerPrivSeedBytes);
     bool X509TestApproveSign(const std::vector<unsigned char>& vchSubjectPrivSeedBytes, const std::vector<unsigned char>& vchIssuerPrivSeedBytes);
-    bool X509RootCASign(const std::vector<unsigned char>& vchIssuerPrivSeedBytes);  //Pass PrivKeyBytes
+    bool X509RootCASign(const std::vector<unsigned char>& vchIssuerPrivSeedBytes);  //Pass PrivSeedBytes
+    bool X509Export(const std::vector<unsigned char>& vchSubjectPrivSeedBytes, std::string filename = "");  //Pass PrivSeedBytes
+    bool X509ExportRoot(std::string filename = "");
 
     std::string GetPEMSubject() const;
     std::string GetReqPEMSubject() const;
