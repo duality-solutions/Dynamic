@@ -1194,6 +1194,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             uint32_t nMonthsValid;
             ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
 
+            if (certificate.IsNull()) {
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-is-empty");
+            }
+
             //update months valid check to handle root certificates
             if (certificate.IsRootCA) {
                 if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_CA_MONTHS_VALID))
@@ -1226,15 +1230,16 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-account-exists " + strErrorMessage);
                 }
                 vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
+
+                //only check subject signature if NOT self signed because PEM gets modified
+                //Check Subject Signature
+                if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                }
             }
             else {
                 vchIssuerPubKey = vchSubjectPubKey;
-            }
-
-            //Check Subject Signature
-            if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
-                strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
-                return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
             }
 
             //If Approve check Issuer Signature and if not self signed check request exists
