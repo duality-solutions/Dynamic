@@ -172,30 +172,6 @@ uint256 CX509Certificate::GetIssuerHash() const
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
 
-// bool CX509Certificate::SetSerialNumber() 
-// {
-//     //don't overwrite if already assigned
-//     if (SerialNumber.size() > 0) {
-//         return false;
-//     }
-    
-//     //if subject and issuer not assigned, error out
-//     if ((Subject.size() == 0) || (Issuer.size() == 0)) {
-//         return false;
-//     }
-
-//     int64_t now = GetTimeMillis();  
-//     uint256 hash;
-//     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
-//     dsX509Certificate << Subject << Issuer << std::to_string(now);
-//     hash = Hash(dsX509Certificate.begin(), dsX509Certificate.end());
-//     std::vector<unsigned char> vchSerialNumber(hash.begin(), hash.end());
-
-//     SerialNumber = vchSerialNumber;
-
-//     return true;
-// }
-
 bool CX509Certificate::SignSubject(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey)
 {
     std::vector<unsigned char> msg = vchFromString(GetSubjectHash().ToString());
