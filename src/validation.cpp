@@ -1231,11 +1231,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
                 vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
 
-                //only check subject signature if NOT self signed because PEM gets modified
+                //only check subject signature if NOT self signed and NOT approved because PEM gets modified [so check for REQUEST only]
                 //Check Subject Signature
-                if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
-                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
-                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                if (!certificate.IsApproved()) {
+                    if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
+                        strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                        return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                    }
                 }
             }
             else {
