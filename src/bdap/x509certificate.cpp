@@ -168,7 +168,7 @@ uint256 CX509Certificate::GetSubjectHash() const
 uint256 CX509Certificate::GetIssuerHash() const
 {
     CDataStream dsX509Certificate(SER_NETWORK, PROTOCOL_VERSION);
-    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << SubjectPublicKey << SerialNumber << PEM;
+    dsX509Certificate << MonthsValid << Subject << SubjectSignature << Issuer << SubjectPublicKey << IssuerPublicKey << SerialNumber << PEM;
     return Hash(dsX509Certificate.begin(), dsX509Certificate.end());
 }
 

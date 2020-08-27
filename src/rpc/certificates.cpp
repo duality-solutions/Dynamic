@@ -564,6 +564,8 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     privCertificateKeyPubKeyString = ToHex(&privCertificateKeyPubKeyBytes[0],32);
     privCertificateKeyPubKey = std::vector<unsigned char>(privCertificateKeyPubKeyString.begin(), privCertificateKeyPubKeyString.end());
 
+    txCertificate.IssuerPublicKey = privCertificateKeyPubKeyBytes;
+
     CKeyID vchCertificatePubKeyIDIssuer = GetIdFromCharVector(privCertificateKeyPubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyIDIssuer, privIssuerCertificateKey))
         throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve Issuer Certificate Key");
