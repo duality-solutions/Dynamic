@@ -79,7 +79,6 @@ DYNAMIC_CORE_H = \
   bdap/audit.h \
   bdap/auditdb.h \
   bdap/bdap.h \
-  bdap/certificate.h \
   bdap/certificatedb.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
@@ -91,6 +90,7 @@ DYNAMIC_CORE_H = \
   bdap/stealth.h \
   bdap/utils.h \
   bdap/vgpmessage.h \
+  bdap/x509certificate.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -271,7 +271,6 @@ libdynamic_server_a_SOURCES = \
   checkpoints.cpp \
   bdap/audit.cpp \
   bdap/auditdb.cpp \
-  bdap/certificate.cpp \
   bdap/certificatedb.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
@@ -282,6 +281,7 @@ libdynamic_server_a_SOURCES = \
   bdap/linkstorage.cpp \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
+  bdap/x509certificate.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \

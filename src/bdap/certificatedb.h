@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_BDAP_CERTIFICATEDB_H
 #define DYNAMIC_BDAP_CERTIFICATEDB_H
 
-#include "bdap/certificate.h"
+#include "bdap/x509certificate.h"
 #include "dbwrapper.h"
 #include "sync.h"
 
@@ -18,19 +18,22 @@ class CCertificateDB : public CDBWrapper {
 public:
     CCertificateDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-certificates", nCacheSize, fMemory, fWipe, obfuscate) {
     }
-    bool AddCertificate(const CCertificate& certificate);
-    bool ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CCertificate& certificate);
+    bool AddCertificate(const CX509Certificate& certificate);
+    bool ReadCertificateTxId(const std::vector<unsigned char>& vchTxId, CX509Certificate& certificate);
+    bool ReadCertificateIssuerRootCA(const std::vector<unsigned char>& vchIssuer, CX509Certificate& certificate); 
+    bool ReadCertificateSerialNumber(const uint64_t& nSerialNumber, CX509Certificate& certificate); 
 
-    bool ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates, bool getAll = true);
-    bool ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CCertificate>& vCertificates, bool getAll = true);
-    bool ReadCertificateSubjectDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates);
-    bool ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CCertificate>& vCertificates);
+    bool ReadCertificateSubjectDNRequest(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates, bool getAll = true);
+    bool ReadCertificateIssuerDNRequest(const std::vector<unsigned char>& vchIssuer, std::vector<CX509Certificate>& vCertificates, bool getAll = true);
+    bool ReadCertificateSubjectDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates);
+    bool ReadCertificateIssuerDNApprove(const std::vector<unsigned char>& vchSubject, std::vector<CX509Certificate>& vCertificates);
 
     bool EraseCertificateTxId(const std::vector<unsigned char>& vchTxId);
 };
 
-bool GetCertificateTxId(const std::string& strTxId, CCertificate& certificate);
-bool UndoAddCertificate(const CCertificate& certificate);
+bool GetCertificateTxId(const std::string& strTxId, CX509Certificate& certificate);
+bool GetCertificateSerialNumber(const std::string& strSerialNumber, CX509Certificate& certificate);
+bool UndoAddCertificate(const CX509Certificate& certificate);
 bool CheckCertificateDB();
 bool FlushCertificateLevelDB();
 bool CheckCertificateTx(const CTransactionRef& tx, const CScript& scriptOp, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 

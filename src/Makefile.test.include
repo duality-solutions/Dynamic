@@ -56,7 +56,7 @@ DYNAMIC_TESTS =\
   test/bswap_tests.cpp \
   test/cachemap_tests.cpp \
   test/cachemultimap_tests.cpp \
-  test/certificate_tests.cpp \
+  test/certificatex509_tests.cpp \
   test/checkblock_tests.cpp \
   test/coins_tests.cpp \
   test/compress_tests.cpp \

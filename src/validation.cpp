@@ -832,7 +832,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         CScript scriptOp;
         if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
             std::string errorMessage;
-            if (vvchBDAPArgs.size() > 5) {
+            if (vvchBDAPArgs.size() > 6) {
                 errorMessage = "Too many BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
@@ -903,7 +903,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 if (!errorMessage.empty())
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
-                LogPrintf("%s -- CheckAuditTx valid.\n", __func__);
+                LogPrint("bdap", "%s -- CheckAuditTx valid.\n", __func__);
                 return true;
             }
             else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
@@ -914,7 +914,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 if (!errorMessage.empty())
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
-                LogPrintf("%s -- CheckAuditTx valid.\n", __func__);
+                LogPrint("bdap", "%s -- CheckCertificateTx valid.\n", __func__);
                 return true;
             }
             else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
@@ -1164,37 +1164,52 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
                 return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
 
-            if (vvch.size() < 4)
+            if (vvch.size() < 5)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "not-enough-parameters");
 
-            if (vvch.size() > 5)
+            if (vvch.size() > 6)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "too-many-parameters");
 
-            if (vvch.size() > 1 && vvch[1].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+            if (vvch.size() > 2 && vvch[2].size() > MAX_OBJECT_FULL_PATH_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-fqdn-too-long");
 
-            if (vvch.size() > 3 && vvch[3].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+            if (vvch.size() > 4 && vvch[4].size() > MAX_OBJECT_FULL_PATH_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-fqdn-too-long");
 
-            if (vvch.size() > 2 && vvch[2].size() > MAX_KEY_LENGTH)
+            if (vvch.size() > 3 && vvch[3].size() > MAX_KEY_LENGTH)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-pubkey-too-long");
-
-            uint32_t nMonthsValid;
-            ParseUInt32(stringFromVch(vvch[0]), &nMonthsValid);
-            if (!(nMonthsValid > 0 && nMonthsValid <=12))
-                return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
 
             //If Approved check Issuer Pubkey length
             if (strOpType == "bdap_approve_certificate") {
-                if (vvch.size() > 4 && vvch[4].size() > MAX_KEY_LENGTH) 
+                if (vvch.size() > 5 && vvch[5].size() > MAX_KEY_LENGTH) 
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-pubkey-too-long");
             }
 
             // check bdap accounts and signature is correct.
-            CCertificate certificate(ptx);
+            CX509Certificate certificate(ptx);
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
             std::string errorMessage;
+
+            uint32_t nMonthsValid;
+            ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
+
+            if (certificate.IsNull()) {
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-is-empty");
+            }
+
+            //update months valid check to handle root certificates
+            if (certificate.IsRootCA) {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_CA_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "rootca-months-valid-incorrect");
+            }
+            else {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
+            }
+
+            if (!certificate.ValidatePEM(errorMessage)) 
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
 
             if (!certificate.ValidateValues(errorMessage)) 
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
@@ -1209,21 +1224,22 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             CharString vchIssuerPubKey;
 
             //If not self signed, check issuer BDAP
-            if (!certificate.SelfSignedCertificate()) {
+            if (!certificate.SelfSignedX509Certificate()) {
                 if (!GetDomainEntry(certificate.Issuer, findIssuerDomainEntry)) {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(certificate.Issuer) + " not found.  Rejected by the tx memory pool!";
                     return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-account-exists " + strErrorMessage);
                 }
                 vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
+
+                //only check subject signature if NOT self signed because PEM gets modified
+                //Check Subject Signature
+                if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                }
             }
             else {
                 vchIssuerPubKey = vchSubjectPubKey;
-            }
-
-            //Check Subject Signature
-            if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
-                strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
-                return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
             }
 
             //If Approve check Issuer Signature and if not self signed check request exists
@@ -1236,16 +1252,25 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
 
                 //if not self-signed, check that request exists
-                if (!certificate.SelfSignedCertificate()) {
-                    CCertificate certificateRequest;
+                if (!certificate.SelfSignedX509Certificate()) {
+                    CX509Certificate certificateRequest;
                     if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest))
                         return state.Invalid(false, REJECT_INVALID, errorPrefix + "reqeust-not-found");
                 }
             }
 
-            CCertificate certificateCheck;
+            CX509Certificate certificateCheck;
             if (GetCertificateTxId(tx.GetHash().GetHex(), certificateCheck))
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "already-exists");
+
+            //check if a certificate with given serial number already exists
+            if (certificate.SerialNumber > 0) {
+                CX509Certificate certificateSerialCheck;
+                if (GetCertificateSerialNumber(std::to_string(certificate.SerialNumber), certificateSerialCheck))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "serialnumber-already-exists");
+
+            }
+
         }
         // TODO (BDAP): Implement link delete
         /*
@@ -2383,7 +2408,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     }
                 }
                 else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
-                    CCertificate certificate(ptx);
+                    CX509Certificate certificate(ptx);
                     if (!UndoAddCertificate(certificate)) {
                         LogPrintf("%s -- Failed to undo add BDAP certificate transaction %s. Disconnect %s transaction failed.\n", __func__, certificate.ToString(), hash.ToString());
                     }
