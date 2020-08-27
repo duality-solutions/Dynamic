@@ -326,15 +326,6 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     SubjectSecretKey = privSubjectDHTKey.GetPrivKeyBytes();
     SubjectPublicKey = privSubjectDHTKey.GetPubKeyBytes();
 
-    //Subject Signs
-    if (!txCertificate.SignSubject(SubjectPublicKey, SubjectSecretKey)) {
-        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Subject signing.");
-    }
-
-    if (!txCertificate.CheckSubjectSignature(SubjectPublicKey)) {
-        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Subject Signature invalid.");
-    }
-
     //Handle ISSUER 
     std::string strIssuerFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strIssuerFQDN);
@@ -376,6 +367,15 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
     //pass privseedbytes for certificate (subject)
     if (!txCertificate.X509RequestSign(privCertificateKey.GetPrivSeedBytes())) {
         throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Issuer X509 signing.");
+    }
+
+    //Subject Signs
+    if (!txCertificate.SignSubject(SubjectPublicKey, SubjectSecretKey)) {
+        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Error Subject signing.");
+    }
+
+    if (!txCertificate.CheckSubjectSignature(SubjectPublicKey)) {
+        throw JSONRPCError(RPC_BDAP_INVALID_SIGNATURE, "Subject Signature invalid.");
     }
 
     std::string strMessage;
@@ -548,7 +548,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     //get issuer's root certificate
     CX509Certificate certificateRootCA;
-    if (pCertificateDB->ReadCertificateIssuerRootCA(txCertificate.Issuer,certificateRootCA)) {
+    if (!pCertificateDB->ReadCertificateIssuerRootCA(txCertificate.Issuer,certificateRootCA)) {
         throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Could not retrieve %s root certificate", stringFromVch(vchIssuer)));
     }
     
@@ -831,11 +831,13 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
     if (request.fHelp || (request.params.size() < 2)  || (request.params.size() > 3))
         throw std::runtime_error(
-            "certificate export \"txid\" ( \"filename\" ) \n"
+            "certificate export \"txid\" or \"serial_number\" ( \"filename\" ) \n"
             "\nExport an X.509 certificate to file\n"
             "\nArguments:\n"
             "1. \"txid\"             (string, required)  Transaction ID of certificate to export. You must be the owner/subject\n"
-            "2. \"filename\"         (string, optional)  Name of file to export to (default = x509.crt) \n"
+            "      or\n"
+            "1. \"serial_number\"    (string, required)  Serial Number of certificate to export. You must be the owner/subject\n"
+            "2. \"filename\"         (string, optional)  Name of file to export to (default = subject.pem) \n"
             "\nExamples\n" +
            HelpExampleCli("certificate export", "\"txid\" ") +
            "\nAs a JSON-RPC call\n" + 
@@ -845,9 +847,9 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
 
     //txid
     std::vector<unsigned char> vchTxId;
-    std::string parameterTxId = request.params[1].get_str();
+    std::string parameterValue = request.params[1].get_str();
     std::string parameterFilename = "";
-    vchTxId = vchFromString(parameterTxId);
+    vchTxId = vchFromString(parameterValue);
     bool readCertificateState = false;
     bool filenameExists = false;
 
@@ -857,14 +859,20 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
     }
 
     CX509Certificate certificate;
-    UniValue oCertificateTransaction(UniValue::VOBJ);
 
     readCertificateState = pCertificateDB->ReadCertificateTxId(vchTxId,certificate);
     if (!readCertificateState) {
-        throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
+        if (is_number(parameterValue)) {
+            bool readCertificateSerial = false;
+            readCertificateSerial = GetCertificateSerialNumber(parameterValue,certificate);
+            if (!readCertificateSerial) {
+                throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
+            }
+        }
+        else {
+            throw JSONRPCError(RPC_DATABASE_ERROR, "Unable to retrieve certificate from CertificateDB");
+        }
     }
-
-    UniValue oCertificateLists(UniValue::VOBJ);
 
     if (certificate.nHeightSigned == 0)
         throw JSONRPCError(RPC_BDAP_ERROR, "Certificate is not approved");
@@ -896,7 +904,10 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
         certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes());
     }
 
-    return oCertificateLists;
+    UniValue oCertificateTransaction(UniValue::VOBJ);
+    BuildX509CertificateJson(certificate, oCertificateTransaction);
+    oCertificateTransaction.push_back(Pair("file_export:", "ok"));
+    return oCertificateTransaction;
 
 #else
     throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Export certificate transaction is not available when the wallet is disabled."));
@@ -911,7 +922,7 @@ static UniValue ExportRootCertificate(const JSONRPCRequest& request)
             "\nExport an X.509 root certificate to file\n"
             "\nArguments:\n"
             "1. \"issuer\"           (string, required)  BDAP account of issuer\n"
-            "2. \"filename\"         (string, optional)  Name of file to export to (default = x509.crt) \n"
+            "2. \"filename\"         (string, optional)  Name of file to export to (default = issuer_CA.pem) \n"
             "\nExamples\n" +
            HelpExampleCli("certificate exportrootca", "\"issuer\" ") +
            "\nAs a JSON-RPC call\n" + 
@@ -950,10 +961,10 @@ static UniValue ExportRootCertificate(const JSONRPCRequest& request)
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
     BuildX509CertificateJson(certificateCA, oCertificateTransaction);
+    oCertificateTransaction.push_back(Pair("file_export:", "ok"));
     return oCertificateTransaction;
 
 } //ExportRootCertificate
-
 
 UniValue certificate_rpc(const JSONRPCRequest& request) 
 {
