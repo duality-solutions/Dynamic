@@ -5,12 +5,13 @@
 #include "bdap/x509certificate.h"
 #include "bdap/utils.h"
 #include "hash.h"
+#include "policy/policy.h"
 #include "script/script.h"
 #include "streams.h"
+#include "txmempool.h"
 #include "uint256.h"
-#include "validation.h"
-
 #include "util.h"
+#include "validation.h"
 
 #include "dht/ed25519.h"
 #include <libtorrent/ed25519.hpp>
@@ -214,6 +215,28 @@ bool CX509Certificate::CheckIssuerSignature(const std::vector<unsigned char>& vc
     }
 
     return true;
+}
+
+/** Checks if certificate transaction exists in the memory pool */
+bool CX509Certificate::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage)
+{
+    for (const CTxMemPoolEntry& e : pool.mapTx) {
+        const CTransactionRef& tx = e.GetSharedTx();
+        if (tx->nVersion != BDAP_TX_VERSION) {
+            continue;
+        } 
+        //TODO: debug make sure it's hitting this
+        for (const CTxOut& txOut : tx->vout) {
+            if (IsBDAPDataOutput(txOut)) {
+                CX509Certificate certificate(tx);
+                if ((this->Subject == certificate.Subject) && (this->Issuer == certificate.Issuer)) {
+                    errorMessage = "CheckIfExistsInMemPool: A certificate transaction for subject " + stringFromVch(Subject) + " and issuer " + stringFromVch(Issuer) +" is already in the memory pool!";
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 int add_ext(X509 *cert, int nid, char *value)
