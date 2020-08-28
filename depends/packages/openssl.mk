@@ -64,7 +64,7 @@ define $(package)_build_cmds
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) INSTALL_PREFIX=$($(package)_staging_dir) -j1 install_sw
+  $(MAKE) DESTDIR=$($(package)_staging_dir) -j1 install_sw
 endef
 
 define $(package)_postprocess_cmds
