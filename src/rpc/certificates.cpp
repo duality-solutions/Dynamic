@@ -261,9 +261,9 @@ static UniValue NewCertificate(const JSONRPCRequest& request)
             " \"approve_height\"            (int, optional)      Block where approval is stored \n"
             "}\n"
             "\nExamples\n" +
-           HelpExampleCli("certificate new", "\"subject\" (\"issuer\") \"key_usage_array\" ") +
+           HelpExampleCli("certificate new", "\"subject\" \"issuer\" ") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("certificate new", "\"subject\" (\"issuer\")  \"key_usage_array\" "));
+           HelpExampleRpc("certificate new", "\"subject\" \"issuer\" "));
 
     EnsureWalletIsUnlocked();
 
