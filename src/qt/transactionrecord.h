@@ -106,7 +106,8 @@ public:
         PrivateSend,
         NewAudit,
         NewCertificate,
-        ApproveCertificate
+        ApproveCertificate,
+        ApproveRootCertificate
     };
 
     /** Number of confirmation recommended for accepting a transaction */
