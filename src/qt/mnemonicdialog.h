@@ -10,6 +10,9 @@
 #include <QDialog>
 
 namespace Ui {
+class MnemonicDialog;
+}
+
 class MnemonicDialog : public QDialog
 {
     Q_OBJECT
