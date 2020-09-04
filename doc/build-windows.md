@@ -19,6 +19,7 @@ installing the toolchain will be different.
 First install the toolchains:
 
     sudo apt-get install g++-mingw-w64-i686 mingw-w64-i686-dev g++-mingw-w64-x86-64 mingw-w64-x86-64-dev
+    sudo ln -s /usr/bin/x86_64-w64-mingw32-windres /usr/bin/windres
 
 To build executables for Windows 32-bit:
 
