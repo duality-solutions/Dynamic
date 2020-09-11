@@ -105,7 +105,7 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
     //Get Subject BDAP ed25519 key
     CKeyID vchSubjectPubKeyID = GetIdFromCharVector(vchSubjectPubKey);
     if (!pwalletMain->GetDHTKey(vchSubjectPubKeyID, privSubjectDHTKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_NEW_RPC_ERROR: Unable to retrieve DHT Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",strSubjectFQDN));
 
     SubjectSecretKey = privSubjectDHTKey.GetPrivKeyBytes();
     SubjectPublicKey = privSubjectDHTKey.GetPubKeyBytes();
@@ -128,7 +128,7 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
 
     CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: Unable to retrieve DHT Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",strSubjectFQDN));
 
     txCertificateCA.SubjectPublicKey = privCertificateKey.GetPubKeyBytes();
 
@@ -281,7 +281,7 @@ static UniValue RequestCertificate(const JSONRPCRequest& request)
     //ALSO considered self-sign if subject = issuer
     if (request.params[1].get_str() == request.params[2].get_str()) {
         //selfSign = true;
-        throw std::runtime_error("BDAP_CERTIFICATE_REQUEST_RPC_ERROR: Self signed certificates not supported");
+        throw JSONRPCError(RPC_BDAP_SELF_SIGNED_CERTIFICATE_NOT_ALLOWED, strprintf("Self signed certificates not supported [%s].",request.params[1].get_str()));
     }
 
     //Leave in to allow custom key usage in the future
@@ -320,7 +320,7 @@ static UniValue RequestCertificate(const JSONRPCRequest& request)
     //Generate Subject ed25519 key
     CKeyID vchSubjectPubKeyID = GetIdFromCharVector(vchSubjectPubKey);
     if (!pwalletMain->GetDHTKey(vchSubjectPubKeyID, privSubjectDHTKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_REQUEST_RPC_ERROR: Unable to retrieve DHT Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",strSubjectFQDN));
 
     SubjectSecretKey = privSubjectDHTKey.GetPrivKeyBytes();
     SubjectPublicKey = privSubjectDHTKey.GetPubKeyBytes();
@@ -355,7 +355,7 @@ static UniValue RequestCertificate(const JSONRPCRequest& request)
 
     CKeyID vchCertificatePubKeyID = GetIdFromCharVector(vchCertificatePubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyID, privCertificateKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_REQUEST_RPC_ERROR: Unable to retrieve DHT Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",strSubjectFQDN));
 
     txCertificate.SubjectPublicKey = privCertificateKey.GetPubKeyBytes();
 
@@ -526,11 +526,11 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
     //Check if I'm the correct account to approve
     //look for issuer public key in the wallet
     if (!pwalletMain->HaveDHTKey(vchIssuerPubKeyID))
-        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Issuer public key not found in wallet");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",stringFromVch(vchIssuer)));
 
     //Get Issuer ed25519 key
     if (!pwalletMain->GetDHTKey(vchIssuerPubKeyID, privIssuerDHTKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve DHT Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",stringFromVch(vchIssuer)));
 
     IssuerSecretKey = privIssuerDHTKey.GetPrivKeyBytes();
     IssuerPublicKey = privIssuerDHTKey.GetPubKeyBytes();
@@ -567,7 +567,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     CKeyID vchCertificatePubKeyIDIssuer = GetIdFromCharVector(privCertificateKeyPubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyIDIssuer, privIssuerCertificateKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_APPROVE_RPC_ERROR: Unable to retrieve Issuer Certificate Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",stringFromVch(vchIssuer)));
 
     CharString pemCA;
 
@@ -871,7 +871,7 @@ static UniValue ViewPending(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    std::string accountType {""};
+    //std::string accountType {""};
 
     std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
     std::vector<std::vector<unsigned char>> vvchDHTBDAPAccounts;
@@ -993,7 +993,7 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
 
     CKeyID vchCertificatePubKeyIDIssuer = GetIdFromCharVector(privCertificateKeyPubKey);
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyIDIssuer, privSubjectCertificateKey))
-        throw std::runtime_error("BDAP_CERTIFICATE_EXPORT_RPC_ERROR: Unable to retrieve Subject Certificate Key");
+        throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",stringFromVch(certificate.Subject)));
 
     if (filenameExists) {
         certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes(),parameterFilename);

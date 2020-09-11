@@ -89,6 +89,7 @@ enum RPCErrorCode {
     RPC_BDAP_AUDIT_INVALID = -306,         //! Invalid audit data
     RPC_BDAP_INVALID_SIGNATURE = -307,     //! Invalid signature
     RPC_BDAP_CERTIFICATE_INVALID = -308,   //! Invalid certificate data
+    RPC_BDAP_SELF_SIGNED_CERTIFICATE_NOT_ALLOWED = -309,   //! Self signed certificate not allowed
 
     //! DHT errors
     RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT
