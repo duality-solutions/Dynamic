@@ -181,6 +181,8 @@ public:
     bool X509Export(const std::vector<unsigned char>& vchSubjectPrivSeedBytes, std::string filename = "");  //Pass PrivSeedBytes
     bool X509ExportRoot(std::string filename = "");
 
+    bool CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage);
+
     std::string GetPEMSubject() const;
     std::string GetReqPEMSubject() const;
     std::string GetPEMIssuer() const;

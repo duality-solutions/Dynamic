@@ -1155,14 +1155,20 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-audit-already-exists");
 
         } else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+            if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
+                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
+
             std::string errorPrefix = "bdap-new-certificate-";
 
             if (strOpType == "bdap_approve_certificate") {
                 errorPrefix = "bdap-approve-certificate-";
             }
 
-            if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
-                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
+            CX509Certificate certificate(ptx);
+
+            if (certificate.CheckIfExistsInMemPool(mempool, strErrorMessage)) {
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "already-exists-in-mempool");
+            }
 
             if (vvch.size() < 5)
                 return state.Invalid(false, REJECT_INVALID, errorPrefix + "not-enough-parameters");
@@ -1186,7 +1192,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             }
 
             // check bdap accounts and signature is correct.
-            CX509Certificate certificate(ptx);
             CDomainEntry findSubjectDomainEntry;
             CDomainEntry findIssuerDomainEntry;
             std::string errorMessage;
@@ -1231,11 +1236,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
                 vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
 
-                //only check subject signature if NOT self signed because PEM gets modified
+                //only check subject signature if NOT self signed and NOT approved because PEM gets modified [so check for REQUEST only]
                 //Check Subject Signature
-                if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
-                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
-                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                if (!certificate.IsApproved()) {
+                    if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
+                        strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                        return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                    }
                 }
             }
             else {
