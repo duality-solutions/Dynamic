@@ -170,6 +170,9 @@ public:
     bool SignIssuer(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchPrivKey);
     bool CheckSubjectSignature(const std::vector<unsigned char>& vchPubKey) const;
     bool CheckIssuerSignature(const std::vector<unsigned char>& vchPubKey) const;
+    unsigned char* TestSign(const std::vector<unsigned char>& vchPrivSeedBytes, const std::vector<unsigned char>& vchData) const;
+    bool VerifySignature(const std::vector<unsigned char>& vchSignature, const std::vector<unsigned char>& vchData) const;
+
     bool ValidateValues(std::string& errorMessage) const;
     bool ValidatePEM(std::string& errorMessage) const;
     bool ValidatePEMSignature(std::string& errorMessage) const;
