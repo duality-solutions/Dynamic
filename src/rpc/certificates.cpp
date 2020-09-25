@@ -1198,8 +1198,8 @@ static UniValue Verify(const JSONRPCRequest& request)
     }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
-    oCertificateTransaction.push_back(Pair("valid:", "true"));
-    oCertificateTransaction.push_back(Pair("certificate_subject_pubkey:", certificate.GetPubKeyHex()));
+    oCertificateTransaction.push_back(Pair("valid", "true"));
+    oCertificateTransaction.push_back(Pair("certificate_subject_pubkey", certificate.GetPubKeyHex()));
     return oCertificateTransaction;
 
 #else
