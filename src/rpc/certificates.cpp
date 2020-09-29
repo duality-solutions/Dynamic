@@ -1074,7 +1074,7 @@ static UniValue Verify(const JSONRPCRequest& request)
             "1. \"serial_number\"    (string, required)  Serial number of certificate\n"
             "2. \"subject\"          (string, required)  Subject BDAP account of certificate\n"
             "3. \"signature\"        (string, required)  Signature (Base64 encoded)\n"
-            "4. \"data\"             (string, required)  Data (Base64 encoded)\n"
+            "4. \"data\"             (string, required)  Data\n"
             "\nExamples\n" +
            HelpExampleCli("certificate verify", " \"serial_number\" \"subject\" \"signature\" \"data\" ") +
            "\nAs a JSON-RPC call\n" + 

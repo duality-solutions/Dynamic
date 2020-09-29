@@ -243,10 +243,6 @@ bool CX509Certificate::VerifySignature(const std::vector<unsigned char>& vchSign
     EVP_MD_CTX* ctx = EVP_MD_CTX_new();
     EVP_PKEY_CTX* ppctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
 
-    //message hardcoded for now. NEED TO REMOVE!
-    uint8_t tbs[] = {0};
-    //size_t siglen = 64;
-
     //get Signature from Hex
     //std::vector<unsigned char> signature = ParseHex(stringFromVch(vchSignature));
 
@@ -255,7 +251,7 @@ bool CX509Certificate::VerifySignature(const std::vector<unsigned char>& vchSign
 
     int result = EVP_DigestVerifyInit(ctx, &ppctx, NULL, NULL, pubkey);
     if (result == 1) {
-        result = EVP_DigestVerify(ctx, &signature[0], 64, tbs, sizeof(tbs));
+        result = EVP_DigestVerify(ctx, &signature[0], 64, &vchData[0], vchData.size());
 
         //cleanup before returning
         EVP_MD_CTX_free(ctx);
@@ -310,10 +306,11 @@ unsigned char* CX509Certificate::TestSign(const std::vector<unsigned char>& vchP
     // fclose(x509File);
     // write privatekey to file END-----------------------------------------------------------------------------
 
-    uint8_t tbs[] = {0};
+    //uint8_t tbs[] = {0};
     size_t siglen = 64;
     std::string hexSignature;
     std::string base64Signature;
+    std::string base64Data;
     unsigned char* sigret = new unsigned char[64];
 
     /* Create the Message Digest Context */
@@ -322,7 +319,8 @@ unsigned char* CX509Certificate::TestSign(const std::vector<unsigned char>& vchP
     /* Initialise the DigestSign operation - SHA-256 has been selected as the message digest function in this example */
     if(1 != EVP_DigestSignInit(mdctx, &pctx, NULL, NULL, privkeyEd25519)) goto err;
 
-    EVP_DigestSign(mdctx, sigret, &siglen, tbs, sizeof(tbs));
+    //EVP_DigestSign(mdctx, sigret, &siglen, tbs, sizeof(tbs));
+    EVP_DigestSign(mdctx, sigret, &siglen, &vchData[0], vchData.size());
 
     LogPrintf("DEBUGGER %s - sig: [%s]\n",__func__,sigret);
 
@@ -331,6 +329,11 @@ unsigned char* CX509Certificate::TestSign(const std::vector<unsigned char>& vchP
 
     LogPrintf("DEBUGGER %s - HEX signature: [%s]\n",__func__,hexSignature);
     LogPrintf("DEBUGGER %s - Base64 signature: [%s]\n",__func__,base64Signature);
+
+    base64Data = EncodeBase64(&vchData[0], vchData.size());
+    LogPrintf("DEBUGGER %s - Data: [%s]\n",__func__,stringFromVch(vchData));
+    LogPrintf("DEBUGGER %s - Data size1: [%d], size2: [%d]\n",__func__,vchData.size(),sizeof(&vchData[0]));
+    LogPrintf("DEBUGGER %s - Base64 data: [%s]\n",__func__,base64Data);
 
     if(mdctx) EVP_MD_CTX_destroy(mdctx);
 
