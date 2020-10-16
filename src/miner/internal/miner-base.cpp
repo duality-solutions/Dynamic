@@ -45,6 +45,7 @@ void MinerBase::Loop()
         while (true) {
             // Update block and tip if changed
             if (block_time != _ctx->shared->block_time()) {
+                LogPrintf("MinerBase::%s Update block and tip if changed\n", __func__);
                 // set new block template
                 block_template = _ctx->shared->block_template();
                 block = block_template->block;
@@ -92,6 +93,13 @@ void MinerBase::Loop()
                 if (_ctx->chainparams().GetConsensus().fPowAllowMinDifficultyBlocks) {
                     // Changing block.nTime can change work required on testnet:
                     _hash_target.SetCompact(block.nBits);
+                }
+                // TODO: repleace this hack with a better method to recreate the block after tip has changed.
+                // Find out why the catches above are not working.
+                if (block.hashPrevBlock != chainActive.Tip()->GetBlockHash()) {
+                    LogPrintf("MinerBase::%s Previous block hash incorrect\n", __func__);
+                    // set new block template
+                    break;
                 }
             }
         }
