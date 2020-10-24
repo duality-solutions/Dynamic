@@ -29,6 +29,8 @@
 #include <event2/thread.h>
 #include <event2/util.h>
 
+#include <deque>
+
 #ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #ifdef _XOPEN_SOURCE_EXTENDED

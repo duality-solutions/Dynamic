@@ -10,6 +10,8 @@
 #include "validation.h"
 #include "validationinterface.h"
 
+#include <boost/bind/bind.hpp>
+
 
 MinersController::MinersController(const CChainParams& chainparams, CConnman& connman)
     : MinersController(std::make_shared<MinerContext>(chainparams, connman)){};
@@ -61,9 +63,9 @@ int64_t MinersController::GetHashRate() const
 
 MinerSignals::MinerSignals(MinersController* ctr)
     : _ctr(ctr),
-      _node(_ctr->ctx()->connman().ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, _1))),
-      _block(GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinerSignals::NotifyBlock, this, _1, _2, _3))),
-      _txn(GetMainSignals().SyncTransaction.connect(boost::bind(&MinerSignals::NotifyTransaction, this, _1, _2, _3))){};
+      _node(_ctr->ctx()->connman().ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, boost::placeholders::_1))),
+      _block(GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinerSignals::NotifyBlock, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3))),
+      _txn(GetMainSignals().SyncTransaction.connect(boost::bind(&MinerSignals::NotifyTransaction, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3))){};
 
 void MinerSignals::NotifyNode(const CNode* node)
 {
