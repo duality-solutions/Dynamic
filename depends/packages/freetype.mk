@@ -1,8 +1,8 @@
 package=freetype
-$(package)_version=2.9.1
+$(package)_version=2.10.4
 $(package)_download_path=http://download.savannah.gnu.org/releases/$(package)
-$(package)_file_name=$(package)-$($(package)_version).tar.bz2
-$(package)_sha256_hash=db8d87ea720ea9d5edc5388fc7a0497bb11ba9fe972245e0f7f4c7e8b1e1e84d
+$(package)_file_name=$(package)-$($(package)_version).tar.xz
+$(package)_sha256_hash=86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784
 
 define $(package)_set_vars
   $(package)_config_opts=--without-zlib --without-png --disable-static
