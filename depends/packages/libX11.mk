@@ -1,8 +1,8 @@
 package=libX11
-$(package)_version=1.6.5
+$(package)_version=1.6.12
 $(package)_download_path=http://xorg.freedesktop.org/releases/individual/lib/
 $(package)_file_name=$(package)-$($(package)_version).tar.bz2
-$(package)_sha256_hash=4d3890db2ba225ba8c55ca63c6409c1ebb078a2806de59fb16342768ae63435d
+$(package)_sha256_hash=f108227469419ac04d196df0f3b80ce1f7f65059bb54c0de811f4d8e03fd6ec7
 $(package)_dependencies=libxcb xtrans xextproto xproto
 
 define $(package)_set_vars
