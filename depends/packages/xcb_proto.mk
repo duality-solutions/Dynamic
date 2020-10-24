@@ -1,8 +1,8 @@
 package=xcb_proto
-$(package)_version=1.13
+$(package)_version=1.14
 $(package)_download_path=http://xcb.freedesktop.org/dist
-$(package)_file_name=xcb-proto-$($(package)_version).tar.bz2
-$(package)_sha256_hash=7b98721e669be80284e9bbfeab02d2d0d54cd11172b72271e47a2fe875e2bde1
+$(package)_file_name=xcb-proto-$($(package)_version).tar.gz
+$(package)_sha256_hash=1c3fa23d091fb5e4f1e9bf145a902161cec00d260fabf880a7a248b02ab27031
 
 define $(package)_set_vars
   $(package)_config_opts=--disable-shared
