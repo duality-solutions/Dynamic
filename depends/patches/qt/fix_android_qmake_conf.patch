@@ -1,0 +1,10 @@
+--- old/qtbase/mkspecs/android-clang/qmake.conf
++++ new/qtbase/mkspecs/android-clang/qmake.conf
+@@ -34,1 +34,1 @@
+-QMAKE_LINK    = $$QMAKE_CXX $$QMAKE_CFLAGS -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a
++QMAKE_LINK    = $$QMAKE_CXX $$QMAKE_CFLAGS -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -nostdlib++
+
+@@ -50,1 +50,1 @@
+-    ANDROID_CXX_STL_LIBS = -lc++
++    ANDROID_CXX_STL_LIBS = -lc++_shared
+

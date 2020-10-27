@@ -10,10 +10,11 @@
 
 --- x/qtbase/src/plugins/plugins.pro
 +++ y/qtbase/src/plugins/plugins.pro
-@@ -8,6 +8,3 @@ qtHaveModule(gui) {
+@@ -8,7 +8,4 @@ qtHaveModule(gui) {
      qtConfig(imageformatplugin): SUBDIRS *= imageformats
      !android:qtConfig(library): SUBDIRS *= generic
  }
+ qtHaveModule(widgets): SUBDIRS += styles
 -
 -!winrt:qtHaveModule(printsupport): \
 -    SUBDIRS += printsupport
