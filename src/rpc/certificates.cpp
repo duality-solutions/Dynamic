@@ -995,11 +995,18 @@ static UniValue ExportCertificate(const JSONRPCRequest& request)
     if (!pwalletMain->GetDHTKey(vchCertificatePubKeyIDIssuer, privSubjectCertificateKey))
         throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Unable to retrieve DHT Key for [%s].",stringFromVch(certificate.Subject)));
 
+    bool exportSuccessful = false;
+
     if (filenameExists) {
-        certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes(),parameterFilename);
+        exportSuccessful = certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes(),parameterFilename);
     }
     else {
-        certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes());
+        exportSuccessful = certificate.X509Export(privSubjectCertificateKey.GetPrivSeedBytes());
+    }
+
+    if (!exportSuccessful) {
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_EXPORT_ERROR, strprintf("Unable to export certificate to file."));
+
     }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);
@@ -1050,11 +1057,18 @@ static UniValue ExportRootCertificate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_BDAP_DB_ERROR, strprintf("Could not find root certificate for %s.", strIssuerFQDN));
     }
 
+    bool exportSuccessful = false;
+
     if (filenameExists) {
-        certificateCA.X509ExportRoot(parameterFilename);
+        exportSuccessful = certificateCA.X509ExportRoot(parameterFilename);
     }
     else {
-        certificateCA.X509ExportRoot();
+        exportSuccessful = certificateCA.X509ExportRoot();
+    }
+
+    if (!exportSuccessful) {
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_EXPORT_ERROR, strprintf("Unable to export certificate to file."));
+
     }
 
     UniValue oCertificateTransaction(UniValue::VOBJ);

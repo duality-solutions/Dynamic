@@ -729,6 +729,9 @@ bool CX509Certificate::X509Export(const std::vector<unsigned char>& vchSubjectPr
 
     FILE * x509File;
     x509File = fopen(filename.c_str(), "wb");
+    if (x509File == NULL) {
+        return false;
+    }
 
     //include private key with certificate
     if (!PEM_write_PrivateKey(x509File,subjectprivkeyEd25519,NULL,NULL,0,NULL, NULL)) {
@@ -775,7 +778,10 @@ bool CX509Certificate::X509ExportRoot(std::string filename)
 
     FILE * x509File;
     x509File = fopen(filename.c_str(), "wb");
-
+    if (x509File == NULL) {
+        return false;
+    }
+    
     //retrieve root certificate from PEM
     X509 *certificate = NULL;
     BIO *certbio = NULL;
