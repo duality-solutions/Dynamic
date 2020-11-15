@@ -217,6 +217,147 @@ bool CX509Certificate::CheckIssuerSignature(const std::vector<unsigned char>& vc
     return true;
 }
 
+bool CX509Certificate::VerifySignature(const std::vector<unsigned char>& vchSignature, const std::vector<unsigned char>& vchData) const
+{
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+    //retrieve certificate from PEM
+    X509 *certificate = NULL;
+    BIO *certbio = NULL;
+
+    std::string strpem = stringFromVch(PEM);
+    std::string outputString = "";
+
+    certbio = BIO_new_mem_buf(strpem.c_str(), -1);
+
+    if (!(certificate = PEM_read_bio_X509(certbio, NULL, NULL, NULL))) {
+        return false;
+    }
+
+    //get PubKey from certificate
+    EVP_PKEY *pubkey = X509_get_pubkey(certificate);
+
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    EVP_PKEY_CTX* ppctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+
+    //get Signature from Hex
+    //std::vector<unsigned char> signature = ParseHex(stringFromVch(vchSignature));
+
+    //get Signature from Base64
+    std::vector<unsigned char> signature = vchFromString(DecodeBase64(stringFromVch(vchSignature)));
+
+    int result = EVP_DigestVerifyInit(ctx, &ppctx, NULL, NULL, pubkey);
+    if (result == 1) {
+        result = EVP_DigestVerify(ctx, &signature[0], 64, &vchData[0], vchData.size());
+
+        //cleanup before returning
+        EVP_MD_CTX_free(ctx);
+        EVP_PKEY_free(pubkey);
+        X509_free(certificate);
+        //EVP_PKEY_CTX_free(ppctx);
+
+        if (result == 1) {
+            // passed signature verification
+            return true;
+        } else {
+            // failed signature verification
+            return false;
+        }
+    }
+
+    //cleanup before returning (if first result fails)
+    EVP_MD_CTX_free(ctx);
+    EVP_PKEY_free(pubkey);
+    X509_free(certificate);
+
+    return false;
+} //VerifySignature
+
+//for testing purposes to generate signature for verification
+unsigned char* CX509Certificate::TestSign(const std::vector<unsigned char>& vchPrivSeedBytes, const std::vector<unsigned char>& vchData) const
+{
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_all_digests();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+    EVP_MD_CTX *mdctx = NULL;
+    int ret = 0;
+    //size_t *slen;
+    
+    EVP_PKEY* privkeyEd25519;
+    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+    privkeyEd25519=EVP_PKEY_new();
+
+    privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchPrivSeedBytes[0], 32);
+
+    // write privatekey to file BEGIN-----------------------------------------------------------------------------
+    // FILE * x509File;
+    // x509File = fopen("privatekeytest.key", "wb");
+
+    // //include private key with certificate
+    // if (!PEM_write_PrivateKey(x509File,privkeyEd25519,NULL,NULL,0,NULL, NULL)) {
+    //     //return "";
+    // }
+
+    // fclose(x509File);
+    // write privatekey to file END-----------------------------------------------------------------------------
+
+    //uint8_t tbs[] = {0};
+    size_t siglen = 64;
+    std::string hexSignature;
+    std::string base64Signature;
+    std::string base64Data;
+    unsigned char* sigret = new unsigned char[64];
+
+    /* Create the Message Digest Context */
+    if(!(mdctx = EVP_MD_CTX_new())) goto err;
+    
+    /* Initialise the DigestSign operation - SHA-256 has been selected as the message digest function in this example */
+    if(1 != EVP_DigestSignInit(mdctx, &pctx, NULL, NULL, privkeyEd25519)) goto err;
+
+    //EVP_DigestSign(mdctx, sigret, &siglen, tbs, sizeof(tbs));
+    EVP_DigestSign(mdctx, sigret, &siglen, &vchData[0], vchData.size());
+
+    LogPrintf("DEBUGGER %s - sig: [%s]\n",__func__,sigret);
+
+    hexSignature = ToHex(&sigret[0], siglen);
+    base64Signature = EncodeBase64(&sigret[0], siglen);
+
+    LogPrintf("DEBUGGER %s - HEX signature: [%s]\n",__func__,hexSignature);
+    LogPrintf("DEBUGGER %s - Base64 signature: [%s]\n",__func__,base64Signature);
+
+    base64Data = EncodeBase64(&vchData[0], vchData.size());
+    LogPrintf("DEBUGGER %s - Data: [%s]\n",__func__,stringFromVch(vchData));
+    LogPrintf("DEBUGGER %s - Data size1: [%d], size2: [%d]\n",__func__,vchData.size(),sizeof(&vchData[0]));
+    LogPrintf("DEBUGGER %s - Base64 data: [%s]\n",__func__,base64Data);
+
+    if(mdctx) EVP_MD_CTX_destroy(mdctx);
+
+    return sigret;
+    err:
+    LogPrintf("DEBBGUGER %s - geterror: [%s]\n",__func__,ERR_error_string(ERR_get_error(),NULL));
+
+    if(ret != 1)
+    {
+        //return false;
+    }
+    
+    // /* Clean up */
+    // //if(*sig && !ret) OPENSSL_free(*sig);
+    if(mdctx) EVP_MD_CTX_destroy(mdctx);
+
+//older code END-----------------------------------------------------------------------------------------------------------------
+
+    return sigret;
+
+}
+
+
+
 /** Checks if certificate transaction exists in the memory pool */
 bool CX509Certificate::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage)
 {
@@ -352,12 +493,12 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
 
     X509_REQ *certificate;
     X509_NAME *subjectName=NULL;
-	EVP_PKEY* privkeyEd25519;
+    EVP_PKEY* privkeyEd25519;
 
     STACK_OF(X509_EXTENSION) *exts = NULL;
 
     privkeyEd25519 = EVP_PKEY_new();
-	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
+    privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
 
     //write out for debugging purposes
     //PEM_write_PrivateKey(stdout,privkeyEd25519,NULL,NULL,0,NULL, NULL);
@@ -377,11 +518,11 @@ bool CX509Certificate::X509RequestSign(const std::vector<unsigned char>& vchSubj
     X509_NAME_add_entry_by_txt(subjectName, "CN", MBSTRING_ASC,
                             (unsigned char *)(stringFromVch(Subject).c_str()), -1, -1, 0);
 
-	exts = sk_X509_EXTENSION_new_null();
+    exts = sk_X509_EXTENSION_new_null();
 
     char* keyUsage = strdup("digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment"); //critical,keyCertSign,cRLSign
 
-	add_ext_req(exts, NID_key_usage, keyUsage);
+    add_ext_req(exts, NID_key_usage, keyUsage);
 
     X509_REQ_add_extensions(certificate, exts);
 
@@ -423,14 +564,14 @@ bool CX509Certificate::X509SelfSign(const std::vector<unsigned char>& vchSubject
 
     X509 *certificate;
     X509_NAME *subjectName=NULL;
-	EVP_PKEY* pubkeyEd25519;
-	EVP_PKEY* privkeyEd25519;
+    EVP_PKEY* pubkeyEd25519;
+    EVP_PKEY* privkeyEd25519;
 
-	pubkeyEd25519=EVP_PKEY_new();
+    pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
-	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
+    pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
+    privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivKey[0], 32);
 
     if ((certificate=X509_new()) == NULL)
         return false;
@@ -503,11 +644,11 @@ bool CX509Certificate::X509RootCASign(const std::vector<unsigned char>& vchIssue
 
     X509 *certificateCA;
     X509_NAME *subjectName=NULL;
-	EVP_PKEY* issuerprivkeyEd25519;
+    EVP_PKEY* issuerprivkeyEd25519;
 
     issuerprivkeyEd25519=EVP_PKEY_new();
 
-	issuerprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
+    issuerprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
 
     //PEM_write_PrivateKey(stdout,issuerprivkeyEd25519,NULL,NULL,0,NULL, NULL);
 
@@ -580,14 +721,17 @@ bool CX509Certificate::X509Export(const std::vector<unsigned char>& vchSubjectPr
         filename = stringFromVch(Subject) + ".pem";
     }
 
-	EVP_PKEY* subjectprivkeyEd25519;
+    EVP_PKEY* subjectprivkeyEd25519;
 
     subjectprivkeyEd25519=EVP_PKEY_new();
 
-	subjectprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
+    subjectprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
 
     FILE * x509File;
     x509File = fopen(filename.c_str(), "wb");
+    if (x509File == NULL) {
+        return false;
+    }
 
     //include private key with certificate
     if (!PEM_write_PrivateKey(x509File,subjectprivkeyEd25519,NULL,NULL,0,NULL, NULL)) {
@@ -634,7 +778,10 @@ bool CX509Certificate::X509ExportRoot(std::string filename)
 
     FILE * x509File;
     x509File = fopen(filename.c_str(), "wb");
-
+    if (x509File == NULL) {
+        return false;
+    }
+    
     //retrieve root certificate from PEM
     X509 *certificate = NULL;
     BIO *certbio = NULL;
@@ -671,14 +818,14 @@ bool CX509Certificate::X509TestApproveSign(const std::vector<unsigned char>& vch
     X509 *certificateCA;
     X509_NAME *subjectName=NULL;
     X509_NAME *issuerName=NULL;
-	EVP_PKEY* subjectprivkeyEd25519;
-	EVP_PKEY* issuerprivkeyEd25519;
+    EVP_PKEY* subjectprivkeyEd25519;
+    EVP_PKEY* issuerprivkeyEd25519;
 
-	subjectprivkeyEd25519=EVP_PKEY_new();
+    subjectprivkeyEd25519=EVP_PKEY_new();
     issuerprivkeyEd25519=EVP_PKEY_new();
 
-	subjectprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
-	issuerprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
+    subjectprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchSubjectPrivSeedBytes[0], 32);
+    issuerprivkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
 
     FILE * subjKeyFile;
     subjKeyFile = fopen("subject.key", "wb");
@@ -762,11 +909,11 @@ bool CX509Certificate::X509TestApproveSign(const std::vector<unsigned char>& vch
 
     STACK_OF(X509_EXTENSION) *exts = NULL;
 
-	exts = sk_X509_EXTENSION_new_null();
+    exts = sk_X509_EXTENSION_new_null();
 
     char* keyUsageREQ = strdup("digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment"); //critical,keyCertSign,cRLSign
 
-	add_ext_req(exts, NID_key_usage, keyUsageREQ);
+    add_ext_req(exts, NID_key_usage, keyUsageREQ);
 
     X509_REQ_add_extensions(certificateREQ, exts);
 
@@ -882,8 +1029,8 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& pemCA, 
     X509 *certificate;
     X509_NAME *subjectName=NULL;
     X509_NAME *issuerName=NULL;
-	EVP_PKEY* pubkeyEd25519;
-	EVP_PKEY* privkeyEd25519;
+    EVP_PKEY* pubkeyEd25519;
+    EVP_PKEY* privkeyEd25519;
 
     //retrieve root certificate from PEM
     X509 *certificateCA = NULL;
@@ -898,11 +1045,11 @@ bool CX509Certificate::X509ApproveSign(const std::vector<unsigned char>& pemCA, 
         return false;
     }
 
-	pubkeyEd25519=EVP_PKEY_new();
+    pubkeyEd25519=EVP_PKEY_new();
     privkeyEd25519=EVP_PKEY_new();
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
-	privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
+    pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
+    privkeyEd25519 = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, &vchIssuerPrivSeedBytes[0], 32);
 
     if ((certificate=X509_new()) == NULL) {
         return false;
@@ -1199,8 +1346,8 @@ bool CX509Certificate::ValidatePEMSignature(std::string& errorMessage) const
     ERR_load_BIO_strings();
     ERR_load_crypto_strings();
 
-	EVP_PKEY* pubkeyEd25519;
-	pubkeyEd25519=EVP_PKEY_new();
+    EVP_PKEY* pubkeyEd25519;
+    pubkeyEd25519=EVP_PKEY_new();
 
     X509 *certRetrieve = NULL;
     BIO *certbio = NULL;
@@ -1214,7 +1361,7 @@ bool CX509Certificate::ValidatePEMSignature(std::string& errorMessage) const
         return false;
     }
 
-	pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
+    pubkeyEd25519 = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, &SubjectPublicKey[0], 32);
 
     EVP_PKEY *pkey = X509_get_pubkey(certRetrieve);
 
