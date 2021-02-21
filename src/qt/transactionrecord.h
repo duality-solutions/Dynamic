@@ -82,7 +82,6 @@ public:
         Fluid,
         DNReward,
         Generated,
-        Stake,
         SendToAddress,
         SendToOther,
         RecvWithAddress,

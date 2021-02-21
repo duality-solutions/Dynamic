@@ -46,8 +46,6 @@ void MultiSendDialog::setAddress(const QString& address, QLineEdit* addrEdit)
 
 void MultiSendDialog::updateCheckBoxes()
 {
-    ui->multiSendStakeCheckBox->setChecked(pwalletMain->fMultiSendStake);
-    ui->multiSendDynodeCheckBox->setChecked(pwalletMain->fMultiSendDynodeReward);
 }
 
 void MultiSendDialog::on_addressBookButton_clicked()
@@ -72,15 +70,7 @@ void MultiSendDialog::on_viewButton_clicked()
     std::pair<std::string, int> pMultiSend;
     std::string strMultiSendPrint;
     QString strStatus;
-    if (pwalletMain->isMultiSendEnabled()) {
-        if (pwalletMain->fMultiSendStake && pwalletMain->fMultiSendDynodeReward)
-            strStatus += tr("MultiSend Active for Stakes and Dynode Rewards") + "\n";
-        else if (pwalletMain->fMultiSendStake)
-            strStatus += tr("MultiSend Active for Stakes") + "\n";
-        else if (pwalletMain->fMultiSendDynodeReward)
-            strStatus += tr("MultiSend Active for Dynode Rewards") + "\n";
-    } else
-        strStatus += tr("MultiSend Not Active") + "\n";
+    strStatus += tr("MultiSend Not Active") + "\n";
 
     for (int i = 0; i < (int)pwalletMain->vMultiSend.size(); i++) {
         pMultiSend = pwalletMain->vMultiSend[i];
@@ -193,21 +183,7 @@ void MultiSendDialog::on_deleteButton_clicked()
 void MultiSendDialog::on_activateButton_clicked()
 {
     QString strRet;
-    if (pwalletMain->vMultiSend.size() < 1)
-        strRet = tr("Unable to activate MultiSend, check MultiSend vector");
-    else if (!(ui->multiSendStakeCheckBox->isChecked() || ui->multiSendDynodeCheckBox->isChecked())) {
-        strRet = tr("Need to select to send on stake and/or Dynode rewards");
-    } else if (CDynamicAddress(pwalletMain->vMultiSend[0].first).IsValid()) {
-        pwalletMain->fMultiSendStake = ui->multiSendStakeCheckBox->isChecked();
-        pwalletMain->fMultiSendDynodeReward = ui->multiSendDynodeCheckBox->isChecked();
-
-        CWalletDB walletdb(pwalletMain->strWalletFile);
-        if (!walletdb.WriteMSettings(pwalletMain->fMultiSendStake, pwalletMain->fMultiSendDynodeReward, pwalletMain->nLastMultiSendHeight))
-            strRet = tr("MultiSend activated but writing settings to DB failed");
-        else
-            strRet = tr("MultiSend activated");
-    } else
-        strRet = tr("First Address Not Valid");
+    strRet = tr("First Address Not Valid");
     ui->message->setProperty("status", "ok");
     ui->message->style()->polish(ui->message);
     ui->message->setText(strRet);
@@ -218,12 +194,6 @@ void MultiSendDialog::on_disableButton_clicked()
     QString strRet;
     pwalletMain->setMultiSendDisabled();
     CWalletDB walletdb(pwalletMain->strWalletFile);
-
-    if (!walletdb.WriteMSettings(false, false, pwalletMain->nLastMultiSendHeight))
-        strRet = tr("MultiSend deactivated but writing settings to DB failed");
-    else
-        strRet = tr("MultiSend deactivated");
-
     ui->message->setProperty("status", "");
     ui->message->style()->polish(ui->message);
     ui->message->setText(strRet);

@@ -367,8 +367,6 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("Dynode Reward");
     case TransactionRecord::Generated:
         return tr("Mined");
-    case TransactionRecord::Stake:
-        return tr("Stake");
     case TransactionRecord::NewDomainUser:
     case TransactionRecord::UpdateDomainUser:
     case TransactionRecord::DeleteDomainUser:
@@ -415,8 +413,6 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
         return QIcon(":/icons/" + theme + "/dynode_network");
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
-    case TransactionRecord::Stake:
-        return QIcon(":/icons/" + theme + "/pos");
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
@@ -473,7 +469,6 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
     case TransactionRecord::SendToAddress:
     case TransactionRecord::DNReward:
     case TransactionRecord::Generated:
-    case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
@@ -523,7 +518,6 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
             return COLOR_BAREADDRESS;
     }
     case TransactionRecord::Generated:
-    case TransactionRecord::Stake:
     case TransactionRecord::PrivateSend:
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::NewDomainUser:
@@ -717,13 +711,6 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         // Generated Rewards
         if (rec->type == TransactionRecord::Generated) {
                 return COLOR_GENERATED;
-        }
-        // Stake Rewards
-        if (rec->type == TransactionRecord::Stake) {
-            if (rec->status.status == TransactionStatus::Conflicted || rec->status.status == TransactionStatus::NotAccepted)
-                return COLOR_ORPHAN;
-            else
-                return COLOR_STAKE;
         }
         if (index.column() == Amount && (rec->credit + rec->debit) < 0) {
             return COLOR_NEGATIVE;

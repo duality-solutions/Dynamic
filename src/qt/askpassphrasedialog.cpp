@@ -45,8 +45,6 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
 
     ui->passLabelDuration->hide();
     ui->passEditDuration->hide();
-    ui->passLabelMixStakeOnly->hide();
-    ui->passCheckBoxMixStakeOnly->hide();
 
     switch (mode) {
     case Encrypt: // Ask passphrase x2
@@ -63,8 +61,6 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
         ui->passEdit3->hide();
         ui->passLabelDuration->show();
         ui->passEditDuration->show();
-        ui->passLabelMixStakeOnly->show();
-        ui->passCheckBoxMixStakeOnly->show();
         ui->passEditDuration->setValidator( new QIntValidator(0, 1000000000, this) );
         setWindowTitle(tr("Unlock wallet"));
         break;
@@ -76,8 +72,6 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
         ui->passEdit3->hide();
         ui->passLabelDuration->show();
         ui->passEditDuration->show();
-        ui->passLabelMixStakeOnly->show();
-        ui->passCheckBoxMixStakeOnly->show();
         ui->passEditDuration->setValidator( new QIntValidator(0, 1000000000, this) );
         setWindowTitle(tr("Unlock wallet"));
         break;

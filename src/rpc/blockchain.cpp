@@ -15,7 +15,6 @@
 #include "hash.h"
 #include "instantsend.h"
 #include "policy/policy.h"
-#include "pos/kernel.cpp"
 #include "primitives/transaction.h"
 #include "rpc/server.h"
 #include "streams.h"
@@ -139,33 +138,6 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     CBlockIndex* pnext = chainActive.Next(blockindex);
     if (pnext)
         result.push_back(Pair("nextblockhash", pnext->GetBlockHash().GetHex()));
-
-    //////////
-    ////////// Coin stake data ////////////////
-    /////////
-    if (block.IsProofOfStake()) {
-        // First grab it
-        uint256 hashProofOfStakeRet;
-        std::unique_ptr <CStakeInput> stake;
-        // Initialize the stake object (we should look for this in some other place and not initialize it every time..)
-        if (!initStakeInput(block, stake, blockindex->nHeight - 1))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot initialize stake input");
-
-        unsigned int nTxTime = block.nTime;
-        // todo: Add the debug as param..
-        if (!GetHashProofOfStake(blockindex->pprev, stake.get(), nTxTime, false, hashProofOfStakeRet))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot get proof of stake hash");
-
-        UniValue stakeData(UniValue::VOBJ);
-        stakeData.push_back(Pair("BlockFromHash", stake.get()->GetIndexFrom()->GetBlockHash().GetHex()));
-        stakeData.push_back(Pair("BlockFromHeight", stake.get()->GetIndexFrom()->nHeight));
-        stakeData.push_back(Pair("hashProofOfStake", hashProofOfStakeRet.GetHex()));
-        stakeData.push_back(Pair("stakeModifier", blockindex->nStakeModifier.ToString()));
-        stakeData.push_back(Pair("nFlags", (std::to_string(blockindex->nFlags))));
-        stakeData.push_back(Pair("prevoutStake", blockindex->prevoutStake.ToStringShort()));
-        result.push_back(Pair("CoinStake", stakeData));
-    }
-
     return result;
 }
 
@@ -330,17 +302,14 @@ UniValue getdifficulty(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getdifficulty\n"
-            "\nReturns the proof-of-work & proof-of-stake difficulty as a multiple of the minimum difficulty.\n"
+            "\nReturns the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
             "\nResult:\n"
-            "n.nnn       (numeric) the proof-of-work & proof-of-stake difficulty as a multiple of the minimum difficulty.\n"
+            "n.nnn       (numeric) the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
             "\nExamples:\n" +
             HelpExampleCli("getdifficulty", "") + HelpExampleRpc("getdifficulty", ""));
 
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("proof-of-work",        GetDifficulty()));
-    obj.push_back(Pair("proof-of-stake",       GetDifficulty(GetLastBlockIndex(chainActive.Tip(), true))));
-    obj.push_back(Pair("search-interval",      (int)nLastCoinStakeSearchInterval));
-    return obj;
+    LOCK(cs_main);
+    return GetDifficulty();
 }
 
 std::string EntryDescriptionString()
