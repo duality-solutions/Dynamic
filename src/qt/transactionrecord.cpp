@@ -48,34 +48,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
     uint256 hash = wtx.GetHash();
     std::map<std::string, std::string> mapValue = wtx.mapValue;
 
-    if (wtx.IsCoinStake()) {
-        TransactionRecord sub(hash, nTime);
-        CTxDestination address;
-        if (!ExtractDestination(wtx.tx->vout[1].scriptPubKey, address))
-            return parts;
-
-        if (isminetype mine = wallet->IsMine(wtx.tx->vout[1])) {
-            // Stake reward
-            sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
-            sub.type = TransactionRecord::Stake;
-            sub.address = CDynamicAddress(address).ToString();
-            sub.credit = nNet;
-        } else {
-            //Dynode reward
-            CTxDestination destDN;
-            int nIndexDN = wtx.tx->vout.size() - 1;
-            if (ExtractDestination(wtx.tx->vout[nIndexDN].scriptPubKey, destDN) && IsMine(*wallet, destDN)) {
-                isminetype mine = wallet->IsMine(wtx.tx->vout[nIndexDN]);
-                sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
-                sub.type = TransactionRecord::DNReward;
-                sub.address = CDynamicAddress(destDN).ToString();
-                sub.credit = wtx.tx->vout[nIndexDN].nValue;
-            }
-        }
-
-        parts.append(sub);
-    }
-
     if (nNet > 0 || wtx.IsCoinBase()) {
         //
         // Credit
@@ -101,12 +73,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     // Fluid type
                     sub.type = TransactionRecord::Fluid;
-                } else if (wtx.IsCoinBase() && !wtx.IsCoinStake()) {
-                    // Generated
-                    sub.type = TransactionRecord::Generated;
-                } else if (wtx.IsCoinStake()) {
-                    // Staked
-                    continue;
                 }
 
                 parts.append(sub);
@@ -357,7 +323,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
         }
     }
     // For generated transactions, determine maturity
-    else if (type == TransactionRecord::Generated || type == TransactionRecord::Stake || type == TransactionRecord::DNReward) {
+    else if (type == TransactionRecord::Generated || type == TransactionRecord::DNReward) {
         if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;
             status.matures_in = wtx.GetBlocksToMaturity();

@@ -124,7 +124,7 @@ bool CCoinsViewCache::SpendCoin(const COutPoint& outpoint, Coin* moveout)
 
 static const Coin coinEmpty;
 
-const Coin CCoinsViewCache::AccessCoin(const COutPoint& outpoint) const
+const Coin& CCoinsViewCache::AccessCoin(const COutPoint& outpoint) const
 {
     CCoinsMap::const_iterator it = FetchCoin(outpoint);
     if (it == cacheCoins.end()) {
@@ -264,7 +264,7 @@ bool CCoinsViewCache::HaveInputs(const CTransaction& tx) const
 double CCoinsViewCache::GetPriority(const CTransaction& tx, int nHeight, CAmount& inChainInputValue) const
 {
     inChainInputValue = 0;
-    if (tx.IsCoinBase() || tx.IsCoinStake())
+    if (tx.IsCoinBase())
         return 0.0;
     double dResult = 0.0;
     BOOST_FOREACH (const CTxIn& txin, tx.vin) {
