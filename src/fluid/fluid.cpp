@@ -257,7 +257,7 @@ bool CFluid::CheckIfQuorumExists(const std::string& consentToken, std::string& m
     keyOne.second = false, keyTwo.second = false;
     keyThree.second = false;
 
-    GetLastBlockIndex(chainActive.Tip(), false);
+    GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL) {

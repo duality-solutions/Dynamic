@@ -37,7 +37,6 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidsovereign.h"
-#include "fluid/fluidstaking.h"
 #include "governance.h"
 #include "httprpc.h"
 #include "httpserver.h"
@@ -56,7 +55,6 @@
 #endif // ENABLE_WALLET
 #include "compat/sanity.h"
 #include "consensus/validation.h"
-#include "pos/staker.h"
 #include "privatesend-server.h"
 #include "psnotificationinterface.h"
 #include "rpc/register.h"
@@ -365,8 +363,6 @@ void PrepareShutdown()
         pFluidDynodeDB = NULL;
         delete pFluidMiningDB;
         pFluidMiningDB = NULL;
-        delete pFluidStakingDB;
-        pFluidStakingDB = NULL;
         delete pFluidMintDB;
         pFluidMintDB = NULL;
         delete pFluidSovereignDB;
@@ -1737,7 +1733,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Fluid transaction DB's
                 delete pFluidDynodeDB;
                 delete pFluidMiningDB;
-                delete pFluidStakingDB;
                 delete pFluidMintDB;
                 delete pFluidSovereignDB;
                 delete pBanAccountDB;
@@ -1759,7 +1754,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Init Fluid transaction DB's
                 pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
-                pFluidStakingDB = new CFluidStakingDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
@@ -2157,11 +2151,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->postInitProcess(threadGroup);
-
-    if (GetBoolArg("-staking", false)) {
-        // ppcoin:mint proof-of-stake blocks in the background
-        threadGroup.create_thread(boost::bind(&ThreadStakeMinter));
-    }
 #endif
 
     threadGroup.create_thread(boost::bind(&ThreadSendAlert, boost::ref(connman)));

@@ -29,8 +29,6 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
-    // Proof-of-Stake: copy from CBlockIndex.nFlags from other clients. We need this information because we are using headers-first syncronization.
-    int32_t nFlags;
 
     CBlockHeader()
     {
@@ -48,8 +46,6 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        if (!(s.GetType() & SER_GETHASH) && s.GetType() & SER_POSMARKER)
-            READWRITE(nFlags);
     }
 
     void SetNull()
@@ -60,7 +56,6 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
-        nFlags = 0;
     }
 
     bool IsNull() const
@@ -74,17 +69,6 @@ public:
     {
         return (int64_t)nTime;
     }
-
-    bool IsHeaderProofOfStake() const
-    {
-        return (nFlags > 0);
-    }
-
-    bool IsHeaderProofOfWork() const
-    {
-        return !IsHeaderProofOfStake();
-    }
-
 };
 
 
@@ -93,9 +77,6 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransactionRef> vtx;
-
-    // peercoin: block signature - signed by coin base txout[0]'s owner
-    std::vector<unsigned char> vchBlockSig;
 
     // memory only
     mutable CTxOut txoutDynode;                 // dynode payment
@@ -120,8 +101,6 @@ public:
     {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
-        if(vtx.size() > 1 && vtx[1]->IsCoinStake())
-            READWRITE(vchBlockSig);
     }
 
     void SetNull()
@@ -131,7 +110,6 @@ public:
         txoutDynode = CTxOut();
         voutSuperblock.clear();
         fChecked = false;
-        vchBlockSig.clear();
     }
 
     CBlockHeader GetBlockHeader() const
@@ -143,24 +121,7 @@ public:
         block.nTime = nTime;
         block.nBits = nBits;
         block.nNonce = nNonce;
-        block.nFlags = nFlags;
         return block;
-    }
-
-    // ppcoin: two types of block: proof-of-work or proof-of-stake
-    bool IsProofOfStake() const
-    {
-        return (vtx.size() > 1 && vtx[1]->IsCoinStake());
-    }
-
-    bool IsProofOfWork() const
-    {
-        return !IsProofOfStake();
-    }
-
-    bool IsHeaderOnly() const
-    {
-        return (vtx.size() == 0);
     }
 
     std::string ToString() const;

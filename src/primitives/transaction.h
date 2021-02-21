@@ -21,8 +21,6 @@ enum DataOutputTypes
     DO_STEALTH_PREFIX       = 2,
 };
 
-class CTransaction;
-
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
 {
@@ -71,8 +69,6 @@ public:
 
     std::string ToString() const;
     std::string ToStringShort() const;
-    bool IsDynodeReward(const CTransaction* tx) const;
-
 };
 
 /** An input of a transaction.  It contains the location of the previous
@@ -189,17 +185,6 @@ public:
         return (nValue == -1);
     }
 
-    void SetEmpty()
-    {
-        nValue = 0;
-        scriptPubKey.clear();
-    }
-
-    bool IsEmpty() const
-    {
-        return (nValue == 0 && scriptPubKey.empty());
-    }
-
     CAmount GetDustThreshold(const CFeeRate& minRelayTxFee) const
     {
         // "Dust" is defined in terms of CTransaction::minRelayTxFee, which has units satoshis-per-kilobyte.
@@ -281,8 +266,6 @@ public:
     CTransaction(const CMutableTransaction& tx);
     CTransaction(CMutableTransaction&& tx);
 
-    CTransaction& operator=(const CTransaction& tx);
-
     template <typename Stream>
     inline void Serialize(Stream& s) const
     {
@@ -331,8 +314,6 @@ public:
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
-
-    bool IsCoinStake() const;
 
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
