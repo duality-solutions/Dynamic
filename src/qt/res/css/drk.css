@@ -722,10 +722,6 @@ min-height:33px;
 
 }
 
-QDialog#OptionsDialog QLabel#labelStakeSplitThresholdText {
-font-size:14px;
-}
-
 QDialog#OptionsDialog QLabel#labelprivateSendRoundsText {
 font-size:14px;
 }
@@ -876,32 +872,6 @@ margin-left:0px;
 }
 
 QWidget .QFrame#frame .QLabel#labelWatchAvailable { /* Watch-only Balance */
-qproperty-alignment: 'AlignVCenter | AlignLeft';
-font-size:12px;
-margin-left:16px;
-}
-
-QWidget .QFrame#frame .QLabel#labelStakeText { /* Total Staking Label */
-qproperty-alignment: 'AlignVCenter | AlignRight';
-min-width:160px;
-background-color:#520072;
-color:#ffffff;
-margin-right:5px;
-padding-right:5px;
-font-weight:bold;
-font-size:14px;
-min-height:35px;
-}
-
-QWidget .QFrame#frame .QLabel#labelStake { /* Total Staking */
-qproperty-alignment: 'AlignVCenter | AlignLeft';
-font-size:12px;
-font-weight:bold;
-color:#762894;
-margin-left:0px;
-}
-
-QWidget .QFrame#frame .QLabel#labelWatchStake { /* Watch-only Stake Balance */
 qproperty-alignment: 'AlignVCenter | AlignLeft';
 font-size:12px;
 margin-left:16px;
@@ -2177,10 +2147,3 @@ QDialog#MnemonicDialog .QPushButton#pushButtonCreateMnemonic_Validate:pressed {
     border: 1px groove gray
 }
 */
-
-/* MultiSendDialog*/
-QDialog#MultiSendDialog {
-    background-color:#000000;
-    color:#FFFFFF;
-    border:2px solid white;
-}

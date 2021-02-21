@@ -123,7 +123,6 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  mnemonicAction(0),
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
-                                                                                                                 multiSendAction(0),
                                                                                                                  trayIcon(0),
                                                                                                                  trayIconMenu(0),
                                                                                                                  dockIconMenu(0),
@@ -435,9 +434,6 @@ void DynamicGUI::createActions()
     signMessageAction->setStatusTip(tr("Sign messages with your Dynamic addresses to prove you own them"));
     verifyMessageAction = new QAction(QIcon(":/icons/" + theme + "/transaction_0"), tr("&Verify message..."), this);
     verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Dynamic addresses"));
-    multiSendAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("&MultiSend"), this);
-    multiSendAction->setToolTip(tr("MultiSend Settings"));
-    multiSendAction->setCheckable(true);
 
     openInfoAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Information"), this);
     openInfoAction->setStatusTip(tr("Show diagnostic information"));
@@ -520,7 +516,6 @@ void DynamicGUI::createActions()
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
         connect(mnemonicAction, SIGNAL(triggered()), this, SLOT(mnemonicClicked()));
-        connect(multiSendAction, SIGNAL(triggered()), this, SLOT(gotoMultiSendDialog()));
     }
 #endif // ENABLE_WALLET
 
@@ -562,7 +557,6 @@ void DynamicGUI::createMenuBar()
         settings->addAction(changePassphraseAction);
         settings->addAction(unlockWalletAction);
         settings->addAction(lockWalletAction);
-        settings->addAction(multiSendAction);
         settings->addSeparator();
     }
     settings->addAction(optionsAction);
@@ -972,13 +966,6 @@ void DynamicGUI::gotoVerifyMessageTab(QString addr)
     if (walletFrame)
         walletFrame->gotoVerifyMessageTab(addr);
 }
-
-void DynamicGUI::gotoMultiSendDialog()
-{
-    multiSendAction->setChecked(true);
-    if (walletFrame)
-        walletFrame->gotoMultiSendDialog();
-}
 #endif // ENABLE_WALLET
 
 void DynamicGUI::setNumConnections(int count)
@@ -1293,7 +1280,7 @@ void DynamicGUI::showEvent(QShowEvent* event)
 void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label)
 {
     // On new transaction, make an info balloon
-    message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
+    message((amount) < 0 ? (tr("Sent transaction")) : tr("Incoming transaction"),
         tr("Date: %1\n"
            "Amount: %2\n"
            "Type: %3\n"
@@ -1303,9 +1290,6 @@ void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmoun
             .arg(type)
             .arg(address),
         CClientUIInterface::MSG_INFORMATION);
-
-    pwalletMain->fMultiSendNotify = false;
-
 }
 #endif // ENABLE_WALLET
 
@@ -1364,7 +1348,7 @@ void DynamicGUI::setEncryptionStatus(int status)
     case WalletModel::Unlocked:
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(QIcon(":/icons/" + theme + "/lock_open").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-        //labelWalletEncryptionIcon->setToolTip(fWalletUnlockMixStakeOnly ? tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing only</b>") : tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing and staking</b>"));
+        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(false);
@@ -1374,7 +1358,7 @@ void DynamicGUI::setEncryptionStatus(int status)
     case WalletModel::UnlockedForMixingOnly:
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(QIcon(":/icons/" + theme + "/lock_open").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-        //labelWalletEncryptionIcon->setToolTip(fWalletUnlockMixStakeOnly ? tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing only</b>") : tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing only</b>"));
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(true);
         lockWalletAction->setVisible(true);

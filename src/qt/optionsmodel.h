@@ -60,7 +60,6 @@ public:
         PrivateSendAmount,       // int
         PrivateSendMultiSession, // bool
         Listen,                  // bool
-        StakeSplitThreshold,     // int
         OptionIDRowCount,
     };
 
