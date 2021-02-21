@@ -139,7 +139,6 @@ DYNAMIC_CORE_H = \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
   fluid/fluidsovereign.h \
-  fluid/fluidstaking.h \
   fluid/operations.h \
   governance.h \
   governance-classes.h \
@@ -182,9 +181,6 @@ DYNAMIC_CORE_H = \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
-  pos/kernel.h \
-  pos/stakeinput.h \
-  pos/staker.h \
   pow.h \
   privatesend-client.h \
   privatesend.h \
@@ -306,7 +302,6 @@ libdynamic_server_a_SOURCES = \
   fluid/fluidmining.cpp \
   fluid/fluidmint.cpp \
   fluid/fluidsovereign.cpp \
-  fluid/fluidstaking.cpp \
   fluid/operations.cpp \
   governance.cpp \
   governance-classes.cpp \
@@ -335,9 +330,6 @@ libdynamic_server_a_SOURCES = \
   ntp.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
-  pos/kernel.cpp \
-  pos/stakeinput.cpp \
-  pos/staker.cpp \
   pow.cpp \
   privatesend.cpp \
   privatesend-server.cpp \
@@ -391,8 +383,6 @@ libdynamic_wallet_a_SOURCES = \
   bdap/stealth.cpp \
   keepass.cpp \
   policy/rbf.cpp \
-  pos/kernel.cpp \
-  pos/stakeinput.cpp \
   privatesend-client.cpp \
   privatesend-util.cpp \
   rpc/wallet.cpp \

@@ -35,7 +35,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Max Block Size: 4MB
 
 
-[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic utlises Proof-of-Work & Proof-of-Stake mining, and can be used to run incentivized Dynodes; the second tier of nodes on the network used for BDAP, the DHT, and processing, verifying, validating and storing data.
+[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic utlises Proof-of-Work, and can be used to run incentivized Dynodes; the second tier of nodes on the network used for BDAP, the DHT, and processing, verifying, validating and storing data.
 
 **MainNet Parameters**
 P2P Port = 33300
@@ -360,13 +360,6 @@ At configure time for OpenCL(Nvidia/AMD):
 At configure time for CUDA(Nvidia):
 
     --enable-gpu --enable-cuda
-
-
-PoS (Proof of Stake) Mining
---------------------------
-To enable PoS (Proof of Stake) mining within the wallet you must have confirmed funds available. Add this line to your dynamic.conf file to enable staking:
-    
-    staking=1
 
 or run the daemon with:
 

@@ -42,7 +42,6 @@ WalletModel::WalletModel(const PlatformStyle* platformStyle, CWallet* _wallet, O
                                                                                                                                recentRequestsTableModel(0),
                                                                                                                                cachedBalance(0),
                                                                                                                                cachedTotal(0),
-                                                                                                                               cachedStake(0),
                                                                                                                                cachedUnconfirmedBalance(0),
                                                                                                                                cachedImmatureBalance(0),
                                                                                                                                cachedAnonymizedBalance(0),
@@ -95,11 +94,6 @@ CAmount WalletModel::getTotal() const
     return wallet->GetTotal();
 }
 
-CAmount WalletModel::getStake() const
-{
-    return wallet->GetStake();
-}
-
 CAmount WalletModel::getAnonymizedBalance() const
 {
     return wallet->GetAnonymizedBalance();
@@ -133,11 +127,6 @@ CAmount WalletModel::getWatchUnconfirmedBalance() const
 CAmount WalletModel::getWatchImmatureBalance() const
 {
     return wallet->GetImmatureWatchOnlyBalance();
-}
-
-CAmount WalletModel::getWatchStake() const
-{
-    return wallet->GetWatchOnlyStake();
 }
 
 void WalletModel::updateStatus()
@@ -178,27 +167,23 @@ void WalletModel::checkBalanceChanged()
 {
     CAmount newBalance = getBalance();
     CAmount newTotal = getTotal();
-    CAmount newStake = getStake();
     CAmount newUnconfirmedBalance = getUnconfirmedBalance();
     CAmount newImmatureBalance = getImmatureBalance();
     CAmount newAnonymizedBalance = getAnonymizedBalance();
     CAmount newWatchOnlyBalance = 0;
-    CAmount newWatchOnlyStake = 0;
     CAmount newWatchUnconfBalance = 0;
     CAmount newWatchImmatureBalance = 0;
     if (haveWatchOnly()) {
         newWatchOnlyBalance = getWatchBalance();
-        newWatchOnlyStake = getWatchStake();
         newWatchUnconfBalance = getWatchUnconfirmedBalance();
         newWatchImmatureBalance = getWatchImmatureBalance();
     }
 
-    if (cachedBalance != newBalance || cachedTotal != newTotal || cachedStake != newStake || cachedUnconfirmedBalance != newUnconfirmedBalance || cachedImmatureBalance != newImmatureBalance ||
+    if (cachedBalance != newBalance || cachedTotal != newTotal || cachedUnconfirmedBalance != newUnconfirmedBalance || cachedImmatureBalance != newImmatureBalance ||
         cachedAnonymizedBalance != newAnonymizedBalance || cachedTxLocks != nCompleteTXLocks ||
-        cachedWatchOnlyBalance != newWatchOnlyBalance || cachedWatchOnlyStake != newWatchOnlyStake || cachedWatchUnconfBalance != newWatchUnconfBalance || cachedWatchImmatureBalance != newWatchImmatureBalance) {
+        cachedWatchOnlyBalance != newWatchOnlyBalance || cachedWatchUnconfBalance != newWatchUnconfBalance || cachedWatchImmatureBalance != newWatchImmatureBalance) {
         cachedBalance = newBalance;
         cachedTotal = newTotal;
-        cachedStake = newStake;
         cachedUnconfirmedBalance = newUnconfirmedBalance;
         cachedImmatureBalance = newImmatureBalance;
         cachedAnonymizedBalance = newAnonymizedBalance;
@@ -206,8 +191,8 @@ void WalletModel::checkBalanceChanged()
         cachedWatchOnlyBalance = newWatchOnlyBalance;
         cachedWatchUnconfBalance = newWatchUnconfBalance;
         cachedWatchImmatureBalance = newWatchImmatureBalance;
-        Q_EMIT balanceChanged(newBalance,  newTotal, newStake, newUnconfirmedBalance, newImmatureBalance, newAnonymizedBalance,
-            newWatchOnlyBalance, newWatchOnlyStake, newWatchUnconfBalance, newWatchImmatureBalance);
+        Q_EMIT balanceChanged(newBalance,  newTotal, newUnconfirmedBalance, newImmatureBalance, newAnonymizedBalance,
+            newWatchOnlyBalance, newWatchUnconfBalance, newWatchImmatureBalance);
     }
 }
 
@@ -251,9 +236,6 @@ void WalletModel::updateAddressBookLabels(const CTxDestination& dest, const std:
 
 WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
 {
-    if (fWalletUnlockMixStakeOnly)
-        return MixStakeOnlyMode;
-
     CAmount total = 0;
     bool fSubtractFeeFromAmount = false;
     QList<SendCoinsRecipient> recipients = transaction.getRecipients();
@@ -524,8 +506,6 @@ bool WalletModel::setWalletLocked(bool locked, const SecureString& passPhrase, i
         // Unlock
         if (!wallet->Unlock(passPhrase))
             return false;
-
-        fWalletUnlockMixStakeOnly = fMixing;
 
         if (nSeconds > 0)  // seconds
             relockWalletAfterDuration(wallet, nSeconds);

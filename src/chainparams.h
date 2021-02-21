@@ -71,19 +71,6 @@ public:
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** Policy: Filter transactions that do not match well-defined patterns */
     bool RequireStandard() const { return fRequireStandard; }
-    /** The target time span between Proof-of-Stake blocks */
-    int64_t TargetPosSpacing() const { return consensus.nPosTargetSpacing; }
-    int64_t TargetPosTimespan() const { return consensus.nTargetPosTimespan; }
-    /** returns the coinstake maturity (min depth required) **/
-    int COINSTAKE_MIN_DEPTH() const { return consensus.nStakeMinDepth; }
-    bool HasStakeMinDepth(const int contextHeight, const int utxoFromBlockHeight) const
-    {
-        return (contextHeight - utxoFromBlockHeight >= COINSTAKE_MIN_DEPTH());
-    }
-    bool HasStakeMinAge(const uint32_t contextTime, const uint32_t utxoFromBlockTime) const
-    {
-        return (contextTime - utxoFromBlockTime >= consensus.nStakeMinAge);
-    }
     /** returns the max future time (and drift in seconds) allowed for a block in the future **/
     int FutureBlockTimeDrift(const bool isPoS) const { return nFutureTimeDriftPoS; }
     uint32_t MaxFutureBlockTime(uint32_t time, const bool isPoS) const { return time + FutureBlockTimeDrift(isPoS); }
