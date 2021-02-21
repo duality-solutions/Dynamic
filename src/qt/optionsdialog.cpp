@@ -162,9 +162,6 @@ void OptionsDialog::setModel(OptionsModel* _model)
         setMapper();
         mapper->toFirst();
 
-        /* keep consistency for action triggered elsewhere */
-        connect(model, SIGNAL(hideOrphansChanged(bool)), this, SLOT(updateHideOrphans(bool)));
-        
         updateDefaultProxyNets();
     }
 
@@ -196,7 +193,6 @@ void OptionsDialog::setMapper()
 
     /* Wallet */
     mapper->addMapping(ui->coinControlFeatures, OptionsModel::CoinControlFeatures);
-    mapper->addMapping(ui->spinBoxStakeSplitThreshold, OptionsModel::StakeSplitThreshold);
     mapper->addMapping(ui->showDynodesTab, OptionsModel::ShowDynodesTab);
     mapper->addMapping(ui->showAdvancedPSUI, OptionsModel::ShowAdvancedPSUI);
     mapper->addMapping(ui->showPrivateSendPopups, OptionsModel::ShowPrivateSendPopups);
@@ -231,7 +227,6 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
-    mapper->addMapping(ui->checkBoxHideOrphans, OptionsModel::HideOrphans);
 }
 
 void OptionsDialog::setOkButtonState(bool fState)
@@ -300,12 +295,6 @@ void OptionsDialog::showRestartWarning(bool fPersistent)
 void OptionsDialog::clearStatusLabel()
 {
     ui->statusLabel->clear();
-}
-
-void OptionsDialog::updateHideOrphans(bool fHide)
-{
-    if(ui->checkBoxHideOrphans->isChecked() != fHide)
-        ui->checkBoxHideOrphans->setChecked(fHide);
 }
 
 void OptionsDialog::updateProxyValidationState()

@@ -44,8 +44,6 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_DYNODE_REWARD QColor(150, 20, 150)
 /* Transaction list -- TX status decoration - Generated (Gold) */
 #define COLOR_GENERATED QColor(156, 123, 19)
-/* Transaction list -- TX status decoration - stake (Green) */
-#define COLOR_STAKE QColor(102, 128, 14)
 /* Transaction list -- TX status decoration - orphan (Light Gray) */
 #define COLOR_ORPHAN QColor(211, 211, 211)
 

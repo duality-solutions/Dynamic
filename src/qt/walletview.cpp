@@ -14,7 +14,6 @@
 #include "dynamicgui.h"
 #include "guiutil.h"
 #include "miningpage.h"
-#include "multisenddialog.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
 #include "platformstyle.h"
@@ -295,13 +294,6 @@ void WalletView::gotoVerifyMessageTab(QString addr)
 
     if (!addr.isEmpty())
         signVerifyMessageDialog->setAddress_VM(addr);
-}
-
-void WalletView::gotoMultiSendDialog()
-{
-    MultiSendDialog* multiSendDialog = new MultiSendDialog(platformStyle, this);
-    multiSendDialog->setModel(walletModel);
-    multiSendDialog->show();
 }
 
 bool WalletView::handlePaymentRequest(const SendCoinsRecipient& recipient)
