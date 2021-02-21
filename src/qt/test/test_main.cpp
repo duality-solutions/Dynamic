@@ -15,10 +15,6 @@
 #include "compattests.h"
 #include "trafficgraphdatatests.h"
 
-#ifdef ENABLE_WALLET
-#include "paymentservertests.h"
-#endif
-
 #include <QCoreApplication>
 #include <QObject>
 #include <QTest>
@@ -56,11 +52,6 @@ int main(int argc, char *argv[])
     URITests test1;
     if (QTest::qExec(&test1) != 0)
         fInvalid = true;
-#ifdef ENABLE_WALLET
-    PaymentServerTests test2;
-    if (QTest::qExec(&test2) != 0)
-        fInvalid = true;
-#endif
     RPCNestedTests test3;
     if (QTest::qExec(&test3) != 0)
         fInvalid = true;

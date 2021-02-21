@@ -10,6 +10,7 @@
 
 #include "amount.h"
 
+#include <QNetworkProxy>
 #include <QAbstractListModel>
 
 QT_BEGIN_NAMESPACE

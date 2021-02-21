@@ -387,7 +387,7 @@ void DynamicGUI::createActions()
 #else
     bdapAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
 #endif
-    tabGroup->addAction(bdapAction);    
+    tabGroup->addAction(bdapAction);
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
@@ -1128,7 +1128,7 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             tooltip += tr("Less than 60 seconds behind.");
         } else {
             tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
-        }        
+        }
         tooltip += QString("<br>");
         tooltip += tr("Transactions after this will not yet be visible.");
     } else if (fLiteMode) {
@@ -1367,18 +1367,6 @@ void DynamicGUI::setStakingStatus()
         }
     }
 }
-
-bool DynamicGUI::handlePaymentRequest(const SendCoinsRecipient& recipient)
-{
-    // URI has to be valid
-    if (walletFrame && walletFrame->handlePaymentRequest(recipient)) {
-        showNormalIfMinimized();
-        gotoSendCoinsPage();
-        return true;
-    }
-    return false;
-}
-
 
 void DynamicGUI::setHDStatus(int hdEnabled)
 {

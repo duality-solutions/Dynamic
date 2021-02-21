@@ -132,7 +132,7 @@ private:
     QAction* historyAction;
     QAction* dynodeAction;
     QAction* miningAction;
-    QAction* bdapAction;        
+    QAction* bdapAction;
     QAction* quitAction;
     QAction* usedSendingAddressesAction;
     QAction* usedReceivingAddressesAction;
@@ -234,8 +234,6 @@ public Q_SLOTS:
     */
     void setEncryptionStatus(int status);
 
-    bool handlePaymentRequest(const SendCoinsRecipient& recipient);
-
     /** Show incoming transaction notification for new transactions. */
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
 #endif // ENABLE_WALLET
@@ -263,7 +261,7 @@ private Q_SLOTS:
     void gotoVerifyMessageTab(QString addr = "");
     /** Show MultiSend Dialog */
     void gotoMultiSendDialog();
-    
+
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();

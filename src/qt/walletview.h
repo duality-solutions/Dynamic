@@ -58,8 +58,6 @@ public:
     */
     void setWalletModel(WalletModel* walletModel);
 
-    bool handlePaymentRequest(const SendCoinsRecipient& recipient);
-
     void showOutOfSyncWarning(bool fShow);
 
 private:
@@ -103,7 +101,7 @@ public Q_SLOTS:
     void gotoVerifyMessageTab(QString addr = "");
     /** Show MultiSend Dialog */
     void gotoMultiSendDialog();
-    
+
     /** Show incoming transaction notification for new transactions.
 
         The new items are those between start and end inclusive, under the given parent item.

@@ -304,11 +304,6 @@ void WalletView::gotoMultiSendDialog()
     multiSendDialog->show();
 }
 
-bool WalletView::handlePaymentRequest(const SendCoinsRecipient& recipient)
-{
-    return sendCoinsPage->handlePaymentRequest(recipient);
-}
-
 void WalletView::showOutOfSyncWarning(bool fShow)
 {
     overviewPage->showOutOfSyncWarning(fShow);

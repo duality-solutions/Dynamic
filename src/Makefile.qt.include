@@ -50,7 +50,7 @@ QT_FORMS_UI = \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
-  qt/forms/transactiondescdialog.ui 
+  qt/forms/transactiondescdialog.ui
 
 QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
@@ -91,7 +91,6 @@ QT_MOC_CPP = \
   qt/moc_optionsmodel.cpp \
   qt/moc_overviewpage.cpp \
   qt/moc_peertablemodel.cpp \
-  qt/moc_paymentserver.cpp \
   qt/moc_privatesendconfig.cpp \
   qt/moc_qvalidatedlineedit.cpp \
   qt/moc_qvaluecombobox.cpp \
@@ -129,10 +128,6 @@ QT_QRC_CPP = qt/qrc_dynamic.cpp
 QT_QRC = qt/dynamic.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_dynamic_locale.cpp
 QT_QRC_LOCALE = qt/dynamic_locale.qrc
-
-PROTOBUF_CC = qt/paymentrequest.pb.cc
-PROTOBUF_H = qt/paymentrequest.pb.h
-PROTOBUF_PROTO = qt/paymentrequest.proto
 
 DYNAMIC_QT_H = \
   qt/addressbookpage.h \
@@ -174,8 +169,6 @@ DYNAMIC_QT_H = \
   qt/optionsdialog.h \
   qt/optionsmodel.h \
   qt/overviewpage.h \
-  qt/paymentrequestplus.h \
-  qt/paymentserver.h \
   qt/peertablemodel.h \
   qt/platformstyle.h \
   qt/privatesendconfig.h \
@@ -203,7 +196,7 @@ DYNAMIC_QT_H = \
   qt/walletmodeltransaction.h \
   qt/walletview.h \
   qt/winshutdownmonitor.h
-  
+
 RES_ICONS = \
   qt/res/icons/dynamic.icns \
   qt/res/icons/dynamic.ico \
@@ -330,8 +323,6 @@ DYNAMIC_QT_CPP += \
   qt/multisenddialog.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
-  qt/paymentrequestplus.cpp \
-  qt/paymentserver.cpp \
   qt/privatesendconfig.cpp \
   qt/receivecoinsdialog.cpp \
   qt/receiverequestdialog.cpp \
@@ -365,10 +356,10 @@ RES_IMAGES = \
   qt/res/images/drk/dynamic_logo_horizontal.png \
   qt/res/images/drk/splash_testnet.png \
   qt/res/images/drk/splash.png \
-  qt/res/images/drk/unchecked.png 
+  qt/res/images/drk/unchecked.png
 
 RES_CSS = \
-  qt/res/css/drk.css 
+  qt/res/css/drk.css
 
 RES_MOVIES = $(wildcard qt/res/movies/spinner-*.png)
 

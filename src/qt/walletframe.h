@@ -37,8 +37,6 @@ public:
     bool removeWallet(const QString& name);
     void removeAllWallets();
 
-    bool handlePaymentRequest(const SendCoinsRecipient& recipient);
-
     void showOutOfSyncWarning(bool fShow);
 
 Q_SIGNALS:
@@ -79,7 +77,7 @@ public Q_SLOTS:
     void gotoVerifyMessageTab(QString addr = "");
     /** Show MultiSend Dialog **/
     void gotoMultiSendDialog();
-    
+
     /** Encrypt the wallet */
     void encryptWallet(bool status);
     /** Backup the wallet */

@@ -328,8 +328,6 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
         address.append("</span>");
 
         QString recipientElement;
-
-        if (!rcp.paymentRequest.IsInitialized()) // normal payment
         {
             if (rcp.label.length() > 0) // label with address
             {
@@ -339,12 +337,6 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
             {
                 recipientElement = tr("%1 to %2").arg(amount, address);
             }
-        } else if (!rcp.authenticatedMerchant.isEmpty()) // authenticated payment request
-        {
-            recipientElement = tr("%1 to %2").arg(amount, GUIUtil::HtmlEscape(rcp.authenticatedMerchant));
-        } else // unauthenticated payment request
-        {
-            recipientElement = tr("%1 to %2").arg(amount, address);
         }
 
         formatted.append(recipientElement);
@@ -532,14 +524,6 @@ void SendCoinsDialog::pasteEntry(const SendCoinsRecipient& rv)
     updateTabsAndLabels();
 }
 
-bool SendCoinsDialog::handlePaymentRequest(const SendCoinsRecipient& rv)
-{
-    // Just paste the entry, all pre-checks
-    // are done in paymentserver.cpp.
-    pasteEntry(rv);
-    return true;
-}
-
 void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& total, const CAmount &stake, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchBalance, const CAmount& watchStake, const CAmount& watchUnconfirmedBalance, const CAmount& watchImmatureBalance)
 {
     Q_UNUSED(stake);
@@ -619,10 +603,6 @@ void SendCoinsDialog::processSendCoinsReturn(const WalletModel::SendCoinsReturn&
         break;
     case WalletModel::AbsurdFee:
         msgParams.first = tr("A fee higher than %1 is considered an absurdly high fee.").arg(DynamicUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), maxTxFee));
-        break;
-    case WalletModel::PaymentRequestExpired:
-        msgParams.first = tr("Payment request expired.");
-        msgParams.second = CClientUIInterface::MSG_ERROR;
         break;
     case WalletModel::MixStakeOnlyMode:
         msgParams.first = tr("Wallet unlocked for mixing and staking only, unable to create transaction.");
