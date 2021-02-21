@@ -386,9 +386,11 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
     case TransactionRecord::NewAudit:
         return tr("BDAP Audit");
     case TransactionRecord::NewCertificate:
-        return tr("BDAP Certificate Request");
+        return tr("BDAP X509 Certificate Request");
     case TransactionRecord::ApproveCertificate:
-        return tr("BDAP Certificate Approved");
+        return tr("BDAP X509 Certificate Approved");
+    case TransactionRecord::ApproveRootCertificate:
+        return tr("New BDAP X509 Root Certificate");
     case TransactionRecord::PrivateSendDenominate:
         return tr("PrivateSend Denominate");
     case TransactionRecord::PrivateSendCollateralPayment:
@@ -447,6 +449,8 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
         return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::ApproveCertificate:
         return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::ApproveRootCertificate:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::LinkRequest:
     case TransactionRecord::LinkAccept:
         return QIcon(":/icons/" + theme + "/bdap");
@@ -504,6 +508,8 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
         return tr("Certificate Request Entry");
     case TransactionRecord::ApproveCertificate:
         return tr("Certificate Approved Entry");
+    case TransactionRecord::ApproveRootCertificate:
+        return tr("Certificate Root Entry");
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;
@@ -530,6 +536,7 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
     case TransactionRecord::NewAudit:
     case TransactionRecord::NewCertificate:
     case TransactionRecord::ApproveCertificate:
+    case TransactionRecord::ApproveRootCertificate:
     case TransactionRecord::UpdateDomainUser:
     case TransactionRecord::DeleteDomainUser:
     case TransactionRecord::RevokeDomainUser:

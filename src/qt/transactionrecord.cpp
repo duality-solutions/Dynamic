@@ -10,6 +10,7 @@
 #include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/utils.h"
+#include "bdap/x509certificate.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
@@ -247,7 +248,18 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                             sub.type = TransactionRecord::NewCertificate;
                         }
                         else if (strOpType == "bdap_approve_certificate" ) {
-                            sub.type = TransactionRecord::ApproveCertificate;
+                            //need to distinguish if this is a root certificate for Qt GUI
+                            std::vector<unsigned char> vchData;
+                            std::vector<unsigned char> vchHash;
+                            CX509Certificate certificate;
+                            GetBDAPData(txout, vchData, vchHash);
+                            certificate.UnserializeFromData(vchData, vchHash);
+                            if (certificate.IsRootCA) {
+                                sub.type = TransactionRecord::ApproveRootCertificate;
+                            }
+                            else {
+                               sub.type = TransactionRecord::ApproveCertificate;
+                            }
                         }
                     }
                 }

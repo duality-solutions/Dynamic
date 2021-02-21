@@ -11,6 +11,7 @@
 
 #include "base58.h"
 #include "bdap/bdap.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/linkstorage.h"
@@ -4287,7 +4288,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     txin.scriptSig = CScript();
                 }
 
-                //TODO: Check if audit and certificate are in mempool
+                //TODO: Check if audits are in mempool
                 if (fIsBDAP) {
                     if (strOpType == "bdap_new_account" || strOpType == "bdap_delete_account" || strOpType == "bdap_update_account") {
                         // Check the memory pool for a pending tranaction for the same domain entry
@@ -4297,6 +4298,19 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                             return false;
                         }
                     }
+
+                    //certificates
+                    if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+                        // Check the memory pool for a pending tranaction for the same certificate (subject)
+                        CTransactionRef pTxNew = MakeTransactionRef(txNew);
+                        CX509Certificate certificate(pTxNew);
+                        if (certificate.CheckIfExistsInMemPool(mempool, strFailReason)) {
+                            return false;
+                        }
+                    }
+
+                    //TODO: audits (need to check all audit hashes)
+
                 }
 
                 // Allow to override the default confirmation target over the CoinControl instance
