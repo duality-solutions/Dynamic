@@ -1,5 +1,5 @@
-packages:=boost openssl libevent
-native_packages := native_ccache 
+packages:=boost openssl libevent zeromq gmp chia_bls backtrace
+native_packages := native_ccache
 
 qt_native_packages = native_protobuf
 qt_packages = qrencode protobuf zlib
