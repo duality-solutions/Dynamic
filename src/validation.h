@@ -164,7 +164,6 @@ static const CAmount PHASE_1_POW_REWARD = COIN * 1;
 static const CAmount PHASE_1_DYNODE_PAYMENT = COIN * 0.382;
 static const CAmount PHASE_2_DYNODE_PAYMENT = COIN * 1.618;
 static const CAmount INITIAL_SUPERBLOCK_PAYMENT = 11500000 * COIN;
-static const CAmount INITIAL_STAKE_PAYMENT = COIN * 0.0100001;
 
 static const bool DEFAULT_PEERBLOOMFILTERS = true;
 
@@ -206,8 +205,6 @@ extern bool fEnableReplacement;
 extern bool fLargeWorkForkFound;
 extern bool fLargeWorkInvalidChainFound;
 
-extern int64_t nLastCoinStakeSearchInterval;
-extern int64_t nLastCoinStakeSearchTime;
 extern int64_t nReserveBalance;
 
 extern std::map<uint256, int64_t> mapRejectedBlocks;
@@ -220,10 +217,6 @@ extern CBlockIndex* pindexBestHeader;
 
 /** BDAP, only check when fully loaded **/
 extern bool fLoaded;
-
-/** Proof-of-Stake maps **/
-extern std::map<uint256, int64_t> mapRejectedBlocks;
-extern std::map<unsigned int, unsigned int> mapHashedBlocks;
 
 /** Minimum disk space required - used in CheckDiskSpace() */
 static const uint64_t nMinDiskSpace = 52428800;
@@ -510,7 +503,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
 bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
 /** Context-dependent validity checks */
-bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, int64_t nAdjustedTime, bool fProofOfStake);
+bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, int64_t nAdjustedTime);
 bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
@@ -605,9 +598,5 @@ public:
     CServiceCredit(const std::string& op_str, const CAmount& value,const std::vector<std::vector<unsigned char>>& params)
         : OpType(op_str), nValue(value), vParameters(params) {}
 };
-
-// peercoin: Proof-of-Stake
-bool SignBlock(CBlock& block, const CKeyStore& keystore);
-bool CheckBlockSignature(const CBlock& block);
 
 #endif // DYNAMIC_VALIDATION_H

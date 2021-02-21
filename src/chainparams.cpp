@@ -151,13 +151,6 @@ public:
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.posLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
-        consensus.nTargetPosTimespan = 30 * 60;  // 30 minutes
-        consensus.nStakeMinDepth = 675; // 675 blocks = 1 day
-        consensus.nStakeMinAge = 1 * 60 * 60 * 24; // 1 day minimum stake age
-        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -311,13 +304,6 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.posLimit = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
-        consensus.nTargetPosTimespan = 30 * 60;  // 30 minutes
-        consensus.nStakeMinDepth = 20;
-        consensus.nStakeMinAge = 1 * 60 * 60;     // 1 hour minimum stake age
-        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -468,13 +454,6 @@ public:
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
-        consensus.nTargetPosTimespan = 30 * 60;  // 30 minutes
-        consensus.nStakeMinDepth = 20;
-        consensus.nStakeMinAge = 1 * 60 * 60;     // 1 hour minimum stake age
-        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -617,13 +596,6 @@ public:
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
-
-        consensus.posLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPosTargetSpacing = DEFAULT_AVERAGE_POS_BLOCK_TIME;
-        consensus.nTargetPosTimespan = 30 * 60;  // 30 minutes
-        consensus.nStakeMinDepth = 20;
-        consensus.nStakeMinAge = 1 * 60 * 60; // 1 hour
-        consensus.nMaxClockDrift = 15 * 60;    // 15 minutes to elapse before new modifier is computed
 
         consensus.nMaxReorganizationDepth = 100;
 

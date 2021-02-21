@@ -34,7 +34,6 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_DYNODE = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN;    // Max minting amount per fluid transaction
-    static const CAmount FLUID_MAX_REWARD_FOR_STAKING = 1000 * COIN;// Max mining block reward using fluid OP_REWARD_STAKE
 
     std::vector<std::pair<std::string, CDynamicAddress> > InitialiseSovereignIdentities();
 
@@ -80,7 +79,6 @@ public:
 /** Standard Reward Payment Determination Functions */
 CAmount GetStandardPoWBlockPayment(const int& nHeight);
 CAmount GetStandardDynodePayment(const int& nHeight);
-CAmount GetStandardStakePayment(const int& nHeight);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount& nExpectedBlockValue, bool fDynodePaid);
 bool IsTransactionFluid(const CScript& txOut);

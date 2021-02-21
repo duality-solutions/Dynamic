@@ -31,7 +31,6 @@ std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_14_REQUIRE_SENTINEL_FLAG, 4070908800ULL},     // OFF
     {SPORK_15_INSTANTSEND_AUTOLOCKS, 4070908800ULL},     // OFF
     {SPORK_30_ACTIVATE_BDAP, 4070908800ULL},             // OFF
-    {SPORK_31_PROOF_OF_STAKE_ENABLED, 4070908800ULL},    // OFF
     {SPORK_32_BDAP_V2, 4070908800ULL},                   // OFF
 };
 
@@ -292,8 +291,6 @@ int CSporkManager::GetSporkIDByName(std::string strName)
         return SPORK_15_INSTANTSEND_AUTOLOCKS;
     if (strName == "SPORK_30_ACTIVATE_BDAP")
         return SPORK_30_ACTIVATE_BDAP;
-    if (strName == "SPORK_31_PROOF_OF_STAKE_ENABLED")
-        return SPORK_31_PROOF_OF_STAKE_ENABLED;
     if (strName == "SPORK_32_BDAP_V2")
         return SPORK_32_BDAP_V2;
 
@@ -328,8 +325,6 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         return "SPORK_15_INSTANTSEND_AUTOLOCKS";
     case SPORK_30_ACTIVATE_BDAP:
         return "SPORK_30_ACTIVATE_BDAP";
-    case SPORK_31_PROOF_OF_STAKE_ENABLED:
-        return "SPORK_31_PROOF_OF_STAKE_ENABLED";
     case SPORK_32_BDAP_V2:
         return "SPORK_32_BDAP_V2";
     default:
