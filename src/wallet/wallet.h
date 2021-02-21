@@ -897,14 +897,6 @@ public:
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID;
 
-    //MultiSend
-    std::vector<std::pair<std::string, int> > vMultiSend;
-    bool fMultiSendDynodeReward;
-    bool fMultiSendNotify;
-    std::string strMultiSendChangeAddress;
-    int nLastMultiSendHeight;
-    std::vector<std::string> vDisabledAddresses;
-
     //Auto Combine Inputs
     bool fCombineDust;
     CAmount nAutoCombineThreshold;
@@ -944,26 +936,9 @@ public:
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
         nFoundStealth = 0;
-        //MultiSend
-        vMultiSend.clear();
-        fMultiSendDynodeReward = false;
-        fMultiSendNotify = false;
-        strMultiSendChangeAddress = "";
-        nLastMultiSendHeight = 0;
-        vDisabledAddresses.clear();
         //Auto Combine Dust
         fCombineDust = false;
         nAutoCombineThreshold = 0;
-    }
-
-    bool isMultiSendEnabled()
-    {
-        return fMultiSendDynodeReward;
-    }
-
-    void setMultiSendDisabled()
-    {
-        fMultiSendDynodeReward = false;
     }
 
     std::map<uint256, CWalletTx> mapWallet;

@@ -99,7 +99,6 @@ public:
     void removeAllWallets();
 #endif // ENABLE_WALLET
     bool enableWallet;
-    bool fMultiSend = false;
     QLabel* labelWalletEncryptionIcon;
 
 protected:
@@ -158,7 +157,6 @@ private:
     QAction *mnemonicAction;
     QAction* showHelpMessageAction;
     QAction* showPrivateSendHelpAction;
-    QAction* multiSendAction;
 
     QSystemTrayIcon* trayIcon;
     QMenu* trayIconMenu;
@@ -260,9 +258,6 @@ private Q_SLOTS:
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
     void gotoVerifyMessageTab(QString addr = "");
-    /** Show MultiSend Dialog */
-    void gotoMultiSendDialog();
-    
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
