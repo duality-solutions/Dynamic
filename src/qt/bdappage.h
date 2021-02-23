@@ -76,7 +76,8 @@ public:
     std::string getPARequestorSearch();    
     std::string getPARecipientSearch();    
     std::string getPRRequestorSearch();    
-    std::string getPRRecipientSearch();  
+    std::string getPRRecipientSearch();
+    WalletModel* getWalletModel() { return model; }
 
 private:
     Ui::BdapPage* ui;
