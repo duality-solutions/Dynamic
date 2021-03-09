@@ -1,4 +1,4 @@
-dnl Copyright (c) 2013-2016 The Dualiy Blockchain Solutions developers
+dnl Copyright (c) 2013-2016 The Dynamic Core developers
 dnl Distributed under the MIT software license, see the accompanying
 dnl file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -87,7 +87,17 @@ dnl Outputs: See _DYNAMIC_QT_FIND_LIBS_*
 dnl Outputs: Sets variables for all qt-related tools.
 dnl Outputs: dynamic_enable_qt, dynamic_enable_qt_dbus, dynamic_enable_qt_test
 AC_DEFUN([DYNAMIC_QT_CONFIGURE],[
-  DYNAMIC_QT_CHECK([_DYNAMIC_QT_FIND_LIBS])
+  use_pkgconfig=$1
+
+  if test "x$use_pkgconfig" = x; then
+    use_pkgconfig=yes
+  fi
+
+  if test "x$use_pkgconfig" = xyes; then
+    DYNAMIC_QT_CHECK([_DYNAMIC_QT_FIND_LIBS_WITH_PKGCONFIG])
+  else
+    DYNAMIC_QT_CHECK([_DYNAMIC_QT_FIND_LIBS_WITHOUT_PKGCONFIG])
+  fi
 
   dnl This is ugly and complicated. Yuck. Works as follows:
   dnl For Qt5, we can check a header to find out whether Qt is build
@@ -142,7 +152,7 @@ AC_DEFUN([DYNAMIC_QT_CONFIGURE],[
   CXXFLAGS=$TEMP_CXXFLAGS
   ])
 
-  if test "x$qt_bin_path" = x; then
+  if test "x$use_pkgconfig$qt_bin_path" = xyes; then
     qt_bin_path="`$PKG_CONFIG --variable=host_bins Qt5Core 2>/dev/null`"
   fi
 
@@ -254,6 +264,47 @@ dnl All macros below are internal and should _not_ be used from the main
 dnl configure.ac.
 dnl ----
 
+dnl Internal. Check if the included version of Qt is Qt5.
+dnl Requires: INCLUDES must be populated as necessary.
+dnl Output: dynamic_cv_qt5=yes|no
+AC_DEFUN([_DYNAMIC_QT_CHECK_QT5],[
+  AC_CACHE_CHECK(for Qt 5, dynamic_cv_qt5,[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #include <QtCore/qconfig.h>
+      #ifndef QT_VERSION
+      #  include <QtCore/qglobal.h>
+      #endif
+    ]],
+    [[
+      #if QT_VERSION < 0x050000 || QT_VERSION_MAJOR < 5
+      choke
+      #endif
+    ]])],
+    [dynamic_cv_qt5=yes],
+    [dynamic_cv_qt5=no])
+])])
+
+dnl Internal. Check if the included version of Qt is greater than Qt58.
+dnl Requires: INCLUDES must be populated as necessary.
+dnl Output: dynamic_cv_qt5=yes|no
+AC_DEFUN([_DYNAMIC_QT_CHECK_QT58],[
+  AC_CACHE_CHECK(for > Qt 5.7, dynamic_cv_qt58,[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #include <QtCore/qconfig.h>
+      #ifndef QT_VERSION
+      #  include <QtCore/qglobal.h>
+      #endif
+    ]],
+    [[
+      #if QT_VERSION_MINOR < 8
+      choke
+      #endif
+    ]])],
+    [dynamic_cv_qt58=yes],
+    [dynamic_cv_qt58=no])
+])])
+
+
 dnl Internal. Check if the linked version of Qt was built as static libs.
 dnl Requires: Qt5.
 dnl Requires: INCLUDES and LIBS must be populated as necessary.
@@ -308,13 +359,24 @@ AC_DEFUN([_DYNAMIC_QT_FIND_STATIC_PLUGINS],[
       if test -d "$qt_plugin_path/accessible"; then
         QT_LIBS="$QT_LIBS -L$qt_plugin_path/accessible"
       fi
+     if test "x$use_pkgconfig" = xyes; then
+     : dnl
      m4_ifdef([PKG_CHECK_MODULES],[
-      PKG_CHECK_MODULES([QTFONTDATABASE], [Qt5FontDatabaseSupport], [QT_LIBS="-lQt5FontDatabaseSupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTEVENTDISPATCHER], [Qt5EventDispatcherSupport], [QT_LIBS="-lQt5EventDispatcherSupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTTHEME], [Qt5ThemeSupport], [QT_LIBS="-lQt5ThemeSupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTDEVICEDISCOVERY], [Qt5DeviceDiscoverySupport], [QT_LIBS="-lQt5DeviceDiscoverySupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTACCESSIBILITY], [Qt5AccessibilitySupport], [QT_LIBS="-lQt5AccessibilitySupport $QT_LIBS"])
-      PKG_CHECK_MODULES([QTFB], [Qt5FbSupport], [QT_LIBS="-lQt5FbSupport $QT_LIBS"])
+       case $host in
+         *linux*)
+           dynamic_cv_qt58=no
+         ;;
+       esac
+       if test "x$dynamic_cv_qt58" = xno; then
+         PKG_CHECK_MODULES([QTPLATFORM], [Qt5PlatformSupport], [QT_LIBS="$QTPLATFORM_LIBS $QT_LIBS"])
+       else
+         PKG_CHECK_MODULES([QTFONTDATABASE], [Qt5FontDatabaseSupport], [QT_LIBS="-lQt5FontDatabaseSupport $QT_LIBS"])
+         PKG_CHECK_MODULES([QTEVENTDISPATCHER], [Qt5EventDispatcherSupport], [QT_LIBS="-lQt5EventDispatcherSupport $QT_LIBS"])
+         PKG_CHECK_MODULES([QTTHEME], [Qt5ThemeSupport], [QT_LIBS="-lQt5ThemeSupport $QT_LIBS"])
+         PKG_CHECK_MODULES([QTDEVICEDISCOVERY], [Qt5DeviceDiscoverySupport], [QT_LIBS="-lQt5DeviceDiscoverySupport $QT_LIBS"])
+         PKG_CHECK_MODULES([QTACCESSIBILITY], [Qt5AccessibilitySupport], [QT_LIBS="-lQt5AccessibilitySupport $QT_LIBS"])
+         PKG_CHECK_MODULES([QTFB], [Qt5FbSupport], [QT_LIBS="-lQt5FbSupport $QT_LIBS"])
+       fi
        if test "x$TARGET_OS" = xlinux; then
          PKG_CHECK_MODULES([X11XCB], [x11-xcb], [QT_LIBS="$X11XCB_LIBS $QT_LIBS"])
          if ${PKG_CONFIG} --exists "Qt5Core >= 5.5" 2>/dev/null; then
@@ -326,6 +388,38 @@ AC_DEFUN([_DYNAMIC_QT_FIND_STATIC_PLUGINS],[
          PKG_CHECK_MODULES([QTCGL], [Qt5CglSupport], [QT_LIBS="-lQt5CglSupport $QT_LIBS"])
        fi
      ])
+     else
+       if test "x$TARGET_OS" = xwindows; then
+         AC_CACHE_CHECK(for Qt >= 5.6, dynamic_cv_need_platformsupport,[
+           AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+               #include <QtCore/qconfig.h>
+               #ifndef QT_VERSION
+               #  include <QtCore/qglobal.h>
+               #endif
+             ]],
+             [[
+               #if QT_VERSION < 0x050600 || QT_VERSION_MINOR < 6
+               choke
+               #endif
+             ]])],
+           [dynamic_cv_need_platformsupport=yes],
+           [dynamic_cv_need_platformsupport=no])
+         ])
+         if test "x$dynamic_cv_need_platformsupport" = xyes; then
+           if test x$dynamic_cv_qt58 = xno; then
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}PlatformSupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXPlatformSupport not found)))
+           else
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}FontDatabaseSupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXFontDatabaseSupport not found)))
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}EventDispatcherSupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXEventDispatcherSupport not found)))
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}ThemeSupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXThemeSupport not found)))
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}FbSupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXFbSupport not found)))
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}DeviceDiscoverySupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXDeviceDiscoverySupport not found)))
+             DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}AccessibilitySupport],[main],,DYNAMIC_QT_FAIL(lib$QT_LIB_PREFIXAccessibilitySupport not found)))
+             QT_LIBS="$QT_LIBS -lversion -ldwmapi -luxtheme"
+           fi
+         fi
+       fi
+     fi
    fi
 ])
 
@@ -336,7 +430,7 @@ dnl Inputs: $1: If dynamic_qt_want_version is "auto", check for this version
 dnl         first.
 dnl Outputs: All necessary QT_* variables are set.
 dnl Outputs: have_qt_test and have_qt_dbus are set (if applicable) to yes|no.
-AC_DEFUN([_DYNAMIC_QT_FIND_LIBS],[
+AC_DEFUN([_DYNAMIC_QT_FIND_LIBS_WITH_PKGCONFIG],[
   m4_ifdef([PKG_CHECK_MODULES],[
     QT_LIB_PREFIX=Qt5
     qt5_modules="Qt5Core Qt5Gui Qt5Network Qt5Widgets"
@@ -356,4 +450,85 @@ AC_DEFUN([_DYNAMIC_QT_FIND_LIBS],[
     ])
   ])
   true; dnl
+])
+
+dnl Internal. Find Qt libraries without using pkg-config. Version is deduced
+dnl from the discovered headers.
+dnl Inputs: dynamic_qt_want_version (from --with-gui=). The version to use.
+dnl         If "auto", the version will be discovered by _DYNAMIC_QT_CHECK_QT5.
+dnl Outputs: All necessary QT_* variables are set.
+dnl Outputs: have_qt_test and have_qt_dbus are set (if applicable) to yes|no.
+AC_DEFUN([_DYNAMIC_QT_FIND_LIBS_WITHOUT_PKGCONFIG],[
+  TEMP_CPPFLAGS="$CPPFLAGS"
+  TEMP_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$PIC_FLAGS $CXXFLAGS"
+  TEMP_LIBS="$LIBS"
+  DYNAMIC_QT_CHECK([
+    if test "x$qt_include_path" != x; then
+      QT_INCLUDES="-I$qt_include_path -I$qt_include_path/QtCore -I$qt_include_path/QtGui -I$qt_include_path/QtWidgets -I$qt_include_path/QtNetwork -I$qt_include_path/QtTest -I$qt_include_path/QtDBus"
+      CPPFLAGS="$QT_INCLUDES $CPPFLAGS"
+    fi
+  ])
+
+  DYNAMIC_QT_CHECK([AC_CHECK_HEADER([QtPlugin],,DYNAMIC_QT_FAIL(QtCore headers missing))])
+  DYNAMIC_QT_CHECK([AC_CHECK_HEADER([QApplication],, DYNAMIC_QT_FAIL(QtGui headers missing))])
+  DYNAMIC_QT_CHECK([AC_CHECK_HEADER([QLocalSocket],, DYNAMIC_QT_FAIL(QtNetwork headers missing))])
+
+  DYNAMIC_QT_CHECK([
+    if test "x$dynamic_qt_want_version" = xauto; then
+      _DYNAMIC_QT_CHECK_QT5
+      _DYNAMIC_QT_CHECK_QT58
+    fi
+    QT_LIB_PREFIX=Qt5
+  ])
+
+  DYNAMIC_QT_CHECK([
+    LIBS=
+    if test "x$qt_lib_path" != x; then
+      LIBS="$LIBS -L$qt_lib_path"
+    fi
+
+    if test "x$TARGET_OS" = xwindows; then
+      AC_CHECK_LIB([imm32],      [main],, DYNAMIC_QT_FAIL(libimm32 not found))
+    fi
+  ])
+
+  DYNAMIC_QT_CHECK(AC_CHECK_LIB([z] ,[main],,AC_MSG_WARN([zlib not found. Assuming qt has it built-in])))
+  DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([jpeg_create_decompress] ,[qtjpeg jpeg],,AC_MSG_WARN([libjpeg not found. Assuming qt has it built-in])))
+  if test x$dynamic_cv_qt58 = xno; then
+    DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([png_error] ,[qtpng png],,AC_MSG_WARN([libpng not found. Assuming qt has it built-in])))
+    DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([pcre16_exec], [qtpcre pcre16],,AC_MSG_WARN([libpcre16 not found. Assuming qt has it built-in])))
+  else
+    DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([png_error] ,[qtlibpng png],,AC_MSG_WARN([libpng not found. Assuming qt has it built-in])))
+    DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([pcre2_match_16], [qtpcre2 libqtpcre2],,AC_MSG_WARN([libqtpcre2 not found. Assuming qt has it built-in])))
+  fi
+  DYNAMIC_QT_CHECK(AC_SEARCH_LIBS([hb_ot_tags_from_script] ,[qtharfbuzzng qtharfbuzz harfbuzz],,AC_MSG_WARN([libharfbuzz not found. Assuming qt has it built-in or support is disabled])))
+  DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}Core]   ,[main],,DYNAMIC_QT_FAIL(lib${QT_LIB_PREFIX}Core not found)))
+  DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}Gui]    ,[main],,DYNAMIC_QT_FAIL(lib${QT_LIB_PREFIX}Gui not found)))
+  DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}Network],[main],,DYNAMIC_QT_FAIL(lib${QT_LIB_PREFIX}Network not found)))
+  DYNAMIC_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}Widgets],[main],,DYNAMIC_QT_FAIL(lib${QT_LIB_PREFIX}Widgets not found)))
+  QT_LIBS="$LIBS"
+  LIBS="$TEMP_LIBS"
+
+  DYNAMIC_QT_CHECK([
+    LIBS=
+    if test "x$qt_lib_path" != x; then
+      LIBS="-L$qt_lib_path"
+    fi
+    AC_CHECK_LIB([${QT_LIB_PREFIX}Test],      [main],, have_qt_test=no)
+    AC_CHECK_HEADER([QTest],, have_qt_test=no)
+    QT_TEST_LIBS="$LIBS"
+    if test "x$use_dbus" != xno; then
+      LIBS=
+      if test "x$qt_lib_path" != x; then
+        LIBS="-L$qt_lib_path"
+      fi
+      AC_CHECK_LIB([${QT_LIB_PREFIX}DBus],      [main],, have_qt_dbus=no)
+      AC_CHECK_HEADER([QtDBus],, have_qt_dbus=no)
+      QT_DBUS_LIBS="$LIBS"
+    fi
+  ])
+  CPPFLAGS="$TEMP_CPPFLAGS"
+  CXXFLAGS="$TEMP_CXXFLAGS"
+  LIBS="$TEMP_LIBS"
 ])
