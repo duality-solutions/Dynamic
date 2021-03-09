@@ -52,7 +52,7 @@ dnl Require C++14 compiler (no GNU extensions)
 AX_CXX_COMPILE_STDCXX([14], [ext], [mandatory], [nodefault])
 dnl Check if -latomic is required for <std::atomic>
 CHECK_ATOMIC
- 
+
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
 m4_ifdef([AC_PROG_OBJCXX],[
@@ -351,8 +351,8 @@ case $host in
        AC_CHECK_PROG([BREW],brew, brew)
        if test x$BREW = xbrew; then
          dnl These Homebrew packages may be keg-only, meaning that they won't be found
-         dnl in expected paths because they may conflict with system files. Ask
          dnl Homebrew where each one is located, then adjust paths accordingly.
+         dnl in expected paths because they may conflict with system files. Ask
          dnl It's safe to add these paths even if the functionality is disabled by
          dnl the user (--without-wallet or --without-gui for example).
 
@@ -661,10 +661,10 @@ if test x$use_upnp != xno; then
   )
 fi
 
-DYNAMIC_QT_INIT
+DYNAMIC_QT_INIT()
 
 dnl sets $dynamic_enable_qt, $dynamic_enable_qt_test, $dynamic_enable_qt_dbus
-DYNAMIC_QT_CONFIGURE([$use_pkgconfig], [qt5])
+DYNAMIC_QT_CONFIGURE([$use_pkgconfig])
 
 if test x$build_dynamic_utils$build_dynamicd$dynamic_enable_qt$use_tests = xnononono; then
     use_boost=no
