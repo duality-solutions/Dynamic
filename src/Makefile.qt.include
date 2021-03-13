@@ -89,7 +89,6 @@ QT_MOC_CPP = \
   qt/moc_optionsmodel.cpp \
   qt/moc_overviewpage.cpp \
   qt/moc_peertablemodel.cpp \
-  qt/moc_paymentserver.cpp \
   qt/moc_privatesendconfig.cpp \
   qt/moc_qvalidatedlineedit.cpp \
   qt/moc_qvaluecombobox.cpp \
@@ -167,7 +166,6 @@ DYNAMIC_QT_H = \
   qt/optionsdialog.h \
   qt/optionsmodel.h \
   qt/overviewpage.h \
-  qt/paymentserver.h \
   qt/peertablemodel.h \
   qt/platformstyle.h \
   qt/privatesendconfig.h \
@@ -321,7 +319,6 @@ DYNAMIC_QT_CPP += \
   qt/mnemonicdialog.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
-  qt/paymentserver.cpp \
   qt/privatesendconfig.cpp \
   qt/receivecoinsdialog.cpp \
   qt/receiverequestdialog.cpp \

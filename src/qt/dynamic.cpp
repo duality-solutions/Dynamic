@@ -23,7 +23,6 @@
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
 #ifdef ENABLE_WALLET
-#include "paymentserver.h"
 #include "walletmodel.h"
 #endif
 
@@ -202,10 +201,6 @@ public:
     explicit DynamicApplication(int& argc, char** argv);
     ~DynamicApplication();
 
-#ifdef ENABLE_WALLET
-    /// Create payment server
-    void createPaymentServer();
-#endif
     /// parameter interaction/setup based on rules
     void parameterSetup();
     /// Create options model
@@ -246,7 +241,6 @@ private:
     DynamicGUI* window;
     QTimer* pollShutdownTimer;
 #ifdef ENABLE_WALLET
-    PaymentServer* paymentServer;
     WalletModel* walletModel;
 #endif
     int returnValue;
@@ -342,7 +336,6 @@ DynamicApplication::DynamicApplication(int& argc, char** argv) : QApplication(ar
                                                                  window(0),
                                                                  pollShutdownTimer(0),
 #ifdef ENABLE_WALLET
-                                                                 paymentServer(0),
                                                                  walletModel(0),
 #endif
                                                                  returnValue(0)
@@ -371,10 +364,6 @@ DynamicApplication::~DynamicApplication()
 
     delete window;
     window = 0;
-#ifdef ENABLE_WALLET
-    delete paymentServer;
-    paymentServer = 0;
-#endif
     // Delete Qt-settings if user clicked on "Reset Options"
     QSettings settings;
     if (optionsModel && optionsModel->resetSettings) {
@@ -386,13 +375,6 @@ DynamicApplication::~DynamicApplication()
     delete platformStyle;
     platformStyle = 0;
 }
-
-#ifdef ENABLE_WALLET
-void DynamicApplication::createPaymentServer()
-{
-    paymentServer = new PaymentServer(this);
-}
-#endif
 
 void DynamicApplication::createOptionsModel(bool resetSettings)
 {
@@ -486,10 +468,6 @@ void DynamicApplication::initializeResult(int retval)
     if (retval) {
         // Log this only after AppInit2 finishes, as then logging setup is guaranteed complete
         qWarning() << "Platform customization:" << platformStyle->getName();
-#ifdef ENABLE_WALLET
-        paymentServer->setOptionsModel(optionsModel);
-#endif
-
         clientModel = new ClientModel(optionsModel);
         window->setClientModel(clientModel);
 
@@ -509,18 +487,6 @@ void DynamicApplication::initializeResult(int retval)
             window->show();
         }
         Q_EMIT splashFinished(window);
-
-#ifdef ENABLE_WALLET
-        // Now that initialization/startup is done, process any command-line
-        // dynamic: URIs or payment requests:
-        connect(paymentServer, SIGNAL(receivedPaymentRequest(SendCoinsRecipient)),
-            window, SLOT(handlePaymentRequest(SendCoinsRecipient)));
-        connect(window, SIGNAL(receivedURI(QString)),
-            paymentServer, SLOT(handleURIOrFile(QString)));
-        connect(paymentServer, SIGNAL(message(QString, QString, unsigned int)),
-            window, SLOT(message(QString, QString, unsigned int)));
-        QTimer::singleShot(100, paymentServer, SLOT(uiReady()));
-#endif
     } else {
         quit(); // Exit main loop
     }
@@ -641,10 +607,6 @@ int main(int argc, char* argv[])
         QMessageBox::critical(0, QObject::tr("Dynamic"), QObject::tr("Error: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
-#ifdef ENABLE_WALLET
-    // Parse URIs on command line -- this can affect Params()
-    PaymentServer::ipcParseCommandLine(argc, argv);
-#endif
 
     QScopedPointer<const NetworkStyle> networkStyle(NetworkStyle::instantiate(QString::fromStdString(Params().NetworkIDString())));
     assert(!networkStyle.isNull());
@@ -662,18 +624,6 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    /// 8. URI IPC sending
-    // - Do this early as we don't want to bother initializing if we are just calling IPC
-    // - Do this *after* setting up the data directory, as the data directory hash is used in the name
-    // of the server.
-    // - Do this after creating app and setting up translations, so errors are
-    // translated properly.
-    if (PaymentServer::ipcSendCommandLine())
-        exit(EXIT_SUCCESS);
-
-    // Start up the payment server early, too, so impatient users that click on
-    // dynamic: links repeatedly have their payment requests routed to this process:
-    app.createPaymentServer();
 #endif
 
     /// 9. Main GUI initialization

@@ -9,7 +9,6 @@
 
 #include "dynamicunits.h"
 #include "guiutil.h"
-#include "paymentserver.h"
 #include "transactionrecord.h"
 
 #include "base58.h"
