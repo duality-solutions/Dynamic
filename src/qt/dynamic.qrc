@@ -15,7 +15,6 @@
         <file alias="connect_3">res/icons/drk/connect3_16.png</file>
         <file alias="connect_4">res/icons/drk/connect4_16.png</file>
         <file alias="debugwindow">res/icons/drk/debugwindow.png</file>
-        <file alias="decentralised">res/icons/drk/decentralised.png</file>
         <file alias="drkpurple_address-book">res/icons/drk/drkpurple_address-book.png</file>
         <file alias="drkpurple_editpaste">res/icons/drk/drkpurple_editpaste.png</file>
         <file alias="drkpurple_editcopy">res/icons/drk/drkpurple_editcopy.png</file>
@@ -36,6 +35,8 @@
         <file alias="key">res/icons/drk/key.png</file>
         <file alias="lock_closed">res/icons/drk/lock_closed.png</file>
         <file alias="lock_open">res/icons/drk/lock_open.png</file>
+        <file alias="staking_active">res/icons/drk/staking_active.png</file>
+        <file alias="staking_inactive">res/icons/drk/staking_inactive.png</file>
         <file alias="options">res/icons/drk/configure.png</file>
         <file alias="history">res/icons/drk/history.png</file>
         <file alias="overview">res/icons/drk/overview.png</file>
@@ -54,7 +55,8 @@
         <file alias="transaction_4">res/icons/drk/clock4.png</file>
         <file alias="transaction_5">res/icons/drk/clock5.png</file>
         <file alias="tx_mined">res/icons/drk/tx_mined.png</file>
-        <file alias="tx_bdap">res/icons/drk/bdap.png</file>
+        <file alias="pos">res/icons/drk/pos.png</file>
+        <file alias="bdap">res/icons/drk/bdap.png</file>
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>

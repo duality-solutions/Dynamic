@@ -76,7 +76,10 @@ DYNAMIC_CORE_H = \
   addrman.h \
   alert.h \
   base58.h \
+  bdap/audit.h \
+  bdap/auditdb.h \
   bdap/bdap.h \
+  bdap/certificatedb.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
   bdap/fees.h \
@@ -87,6 +90,7 @@ DYNAMIC_CORE_H = \
   bdap/stealth.h \
   bdap/utils.h \
   bdap/vgpmessage.h \
+  bdap/x509certificate.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
@@ -261,6 +265,9 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  bdap/audit.cpp \
+  bdap/auditdb.cpp \
+  bdap/certificatedb.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/fees.cpp \
@@ -270,6 +277,7 @@ libdynamic_server_a_SOURCES = \
   bdap/linkstorage.cpp \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
+  bdap/x509certificate.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \
@@ -327,7 +335,9 @@ libdynamic_server_a_SOURCES = \
   privatesend-server.cpp \
   psnotificationinterface.cpp \
   rest.cpp \
+  rpc/audits.cpp \
   rpc/blockchain.cpp \
+  rpc/certificates.cpp \
   rpc/dht.cpp \
   rpc/domainentry.cpp \
   rpc/dynode.cpp \
@@ -377,6 +387,8 @@ libdynamic_wallet_a_SOURCES = \
   privatesend-util.cpp \
   rpc/wallet.cpp \
   rpc/walletdump.cpp \
+  uint256.cpp \
+  uint256.h \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/wallet.cpp \
@@ -661,10 +673,6 @@ if HARDEN
 	@echo "Checking binary security..."
 	$(AM_V_at) READELF=$(READELF) OBJDUMP=$(OBJDUMP) $(top_srcdir)/contrib/devtools/security-check.py < $(bin_PROGRAMS)
 endif
-
-%.pb.cc %.pb.h: %.proto
-	@test -f $(PROTOC)
-	$(AM_V_GEN) $(PROTOC) --cpp_out=$(@D) --proto_path=$(abspath $(<D) $<)
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include

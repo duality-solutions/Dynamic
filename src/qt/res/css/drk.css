@@ -722,6 +722,14 @@ min-height:33px;
 
 }
 
+QDialog#OptionsDialog QLabel#labelprivateSendRoundsText {
+font-size:14px;
+}
+
+QDialog#OptionsDialog QLabel#labelprivateSendAmountText {
+font-size:14px;
+}
+
 /* TOOLS MENU */
 
 QDialog#RPCConsole { /* RPC Console Dialog Box */

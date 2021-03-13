@@ -454,8 +454,6 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (request.params.size() >= 3) {
         if (!ParseUInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
-        if (nMonths < 0)
-            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Error: registration months must be greater than or equal to zero"));
         if (nMonths > MAX_REGISTRATION_MONTHS)
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Error: Registration period can not be more than 1,200 months (100 years)"));
     }
@@ -895,7 +893,7 @@ UniValue addgroup(const JSONRPCRequest& request)
 
 UniValue mybdapaccounts(const JSONRPCRequest& request)
 {
-    if (request.params.size() > 1)
+    if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
             "mybdapaccounts\n"
             + HelpRequiringPassphrase() +
@@ -914,6 +912,7 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("mybdapaccounts", ""));
 
+    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
@@ -1040,6 +1039,7 @@ UniValue getcredits(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("getcredits", ""));
 
+    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
 

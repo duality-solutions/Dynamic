@@ -10,6 +10,7 @@
 #include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/utils.h"
+#include "bdap/x509certificate.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
@@ -72,9 +73,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     // Fluid type
                     sub.type = TransactionRecord::Fluid;
-                } else if (wtx.IsCoinBase()) {
-                    // Generated
-                    sub.type = TransactionRecord::Generated;
                 }
 
                 parts.append(sub);
@@ -213,7 +211,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     if (GetBDAPOpScript(wtx.tx, scriptOp, vvchBDAPArgs, op1, op2)) {
                         std::string errorMessage;
                         std::string strOpType = GetBDAPOpTypeString(op1, op2);
-                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                        if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account" ) {
                             std::vector<unsigned char> vchData;
                             std::vector<unsigned char> vchHash;
                             CDomainEntry entry;
@@ -242,6 +240,26 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                         }
                         else if (strOpType == "bdap_new_link_accept" || strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
                             sub.type = TransactionRecord::LinkAccept;
+                        }
+                        else if (strOpType == "bdap_new_audit" ) {
+                            sub.type = TransactionRecord::NewAudit;
+                        }
+                        else if (strOpType == "bdap_new_certificate" ) {
+                            sub.type = TransactionRecord::NewCertificate;
+                        }
+                        else if (strOpType == "bdap_approve_certificate" ) {
+                            //need to distinguish if this is a root certificate for Qt GUI
+                            std::vector<unsigned char> vchData;
+                            std::vector<unsigned char> vchHash;
+                            CX509Certificate certificate;
+                            GetBDAPData(txout, vchData, vchHash);
+                            certificate.UnserializeFromData(vchData, vchHash);
+                            if (certificate.IsRootCA) {
+                                sub.type = TransactionRecord::ApproveRootCertificate;
+                            }
+                            else {
+                               sub.type = TransactionRecord::ApproveCertificate;
+                            }
                         }
                     }
                 }
@@ -305,14 +323,13 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
         }
     }
     // For generated transactions, determine maturity
-    else if (type == TransactionRecord::Generated) {
+    else if (type == TransactionRecord::Generated || type == TransactionRecord::DNReward) {
         if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;
+            status.matures_in = wtx.GetBlocksToMaturity();
 
-            if (wtx.IsInMainChain()) {
-                status.matures_in = wtx.GetBlocksToMaturity();
-
-                // Check if the block was requested by anyone
+            if (pindex && chainActive.Contains(pindex)) {
+                // Check if the block was requested by anyone                
                 if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
                     status.status = TransactionStatus::MaturesWarning;
             } else {
@@ -320,6 +337,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
             }
         } else {
             status.status = TransactionStatus::Confirmed;
+            status.matures_in = 0;
         }
     } else {
         status.lockedByInstantSend = wtx.IsLockedByInstantSend();

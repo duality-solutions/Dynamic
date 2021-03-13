@@ -48,43 +48,6 @@
     </dict>
   </array>
 
-  <key>UTExportedTypeDeclarations</key>
-  <array>
-    <dict>
-      <key>UTTypeIdentifier</key>
-      <string>io.dynamic.paymentrequest</string>
-      <key>UTTypeDescription</key>
-      <string>Dynamic payment request</string>
-      <key>UTTypeConformsTo</key>
-      <array>
-        <string>public.data</string>
-      </array>
-      <key>UTTypeTagSpecification</key>
-      <dict>
-        <key>public.mime-type</key>
-        <string>application/x-dynamic-payment-request</string>
-        <key>public.filename-extension</key>
-        <array>
-          <string>dynamicpaymentrequest</string>
-        </array>
-      </dict>
-    </dict>
-  </array>
-
-  <key>CFBundleDocumentTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>LSItemContentTypes</key>
-      <array>
-        <string>io.dynamic.paymentrequest</string>
-      </array>
-      <key>LSHandlerRank</key>
-      <string>Owner</string>
-    </dict>
-  </array>
-
   <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 
@@ -96,7 +59,7 @@
 
   <key>NSRequiresAquaSystemAppearance</key>
     <string>True</string>
-    
+
   <key>LSApplicationCategoryType</key>
     <string>public.app-category.finance</string>
 </dict>

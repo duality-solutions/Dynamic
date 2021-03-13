@@ -130,7 +130,7 @@ private:
     QAction* historyAction;
     QAction* dynodeAction;
     QAction* miningAction;
-    QAction* bdapAction;        
+    QAction* bdapAction;
     QAction* quitAction;
     QAction* usedSendingAddressesAction;
     QAction* usedReceivingAddressesAction;
@@ -253,7 +253,6 @@ private Q_SLOTS:
     void gotoMiningPage();
     /** Switch to BDAP page */
     void gotoBdapPage();
-
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
@@ -262,6 +261,7 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
+
 #endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();

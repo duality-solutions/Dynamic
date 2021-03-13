@@ -9,11 +9,11 @@
 
 #include "addressbookpage.h"
 #include "askpassphrasedialog.h"
+#include "bdappage.h"
 #include "clientmodel.h"
 #include "dynamicgui.h"
 #include "guiutil.h"
 #include "miningpage.h"
-#include "bdappage.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
 #include "platformstyle.h"

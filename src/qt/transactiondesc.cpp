@@ -9,7 +9,6 @@
 
 #include "dynamicunits.h"
 #include "guiutil.h"
-#include "paymentserver.h"
 #include "transactionrecord.h"
 
 #include "base58.h"
@@ -251,23 +250,9 @@ QString TransactionDesc::toHTML(CWallet* wallet, CWalletTx& wtx, TransactionReco
         if (r.first == "Message")
             strHTML += "<br><b>" + tr("Message") + ":</b><br>" + GUIUtil::HtmlEscape(r.second, true) + "<br>";
 
-    //
-    // PaymentRequest info:
-    //
-    Q_FOREACH (const PAIRTYPE(std::string, std::string) & r, wtx.vOrderForm) {
-        if (r.first == "PaymentRequest") {
-            PaymentRequestPlus req;
-            req.parse(QByteArray::fromRawData(r.second.data(), r.second.size()));
-            QString merchant;
-            if (req.getMerchant(PaymentServer::getCertStore(), merchant))
-                strHTML += "<b>" + tr("Merchant") + ":</b> " + GUIUtil::HtmlEscape(merchant) + "<br>";
-        }
-    }
-
-    if (wtx.IsCoinBase()) {
-        quint32 numBlocksToMaturity = COINBASE_MATURITY + 1;
+    quint32 numBlocksToMaturity = COINBASE_MATURITY + 1;
+    if (wtx.IsCoinBase())
         strHTML += "<br>" + tr("Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to \"not accepted\" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.").arg(QString::number(numBlocksToMaturity)) + "<br>";
-    }
 
     //
     // Debug view

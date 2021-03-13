@@ -72,7 +72,8 @@ private:
     QComboBox *instantsendWidget;
     QLineEdit* addressWidget;
     QLineEdit* amountWidget;
-
+    QAction* hideOrphansAction;
+    
     QMenu* contextMenu;
     QSignalMapper* mapperThirdPartyTxUrls;
 
@@ -116,6 +117,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void chooseDate(int idx);
     void chooseType(int idx);
+    void hideOrphans(bool fHide);
+    void updateHideOrphans(bool fHide);
     void chooseWatchonly(int idx);
     void chooseInstantSend(int idx);
     void changedPrefix(const QString& prefix);

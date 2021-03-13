@@ -19,8 +19,7 @@ Build-Depends: debhelper,
  libboost-test-dev (>> 1.35) | libboost-test1.35-dev,
  qt4-qmake,
  libqt4-dev,
- libqrencode-dev,
- libprotobuf-dev, protobuf-compiler
+ libqrencode-dev
 Standards-Version: 3.9.2
 Homepage: http://www.dynamicpay.io/
 Vcs-Git: git://github.com/duality-solutions/dynamic.git

@@ -11,6 +11,7 @@
 #include "dht/dataheader.h" // for CRecordHeader
 #include "dht/datarecord.h" // for CDataRecord
 #include "dht/ed25519.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
@@ -66,13 +67,12 @@ static UniValue GetMutable(const JSONRPCRequest& request)
     std::string strValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-    bool fAuthoritative;
-    fRet = DHT::SubmitGet(0, pubKey, strSalt, 2000, strValue, iSequence, fAuthoritative);
+    fRet = DHT::SubmitGetAuthoritative(0, pubKey, strSalt, 20000, strValue, iSequence);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
         result.push_back(Pair("Sequence Number", iSequence));
-        result.push_back(Pair("Authoritative", fAuthoritative ? "True" : "False"));
+        result.push_back(Pair("Authoritative", "True"));
         result.push_back(Pair("DHT Entry Value", strValue));
     }
     else {
@@ -137,14 +137,13 @@ static UniValue PutMutable(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
-    bool fAuthoritative = false;
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        DHT::SubmitGet(0, pubKey, strOperationType, 2000, strGetLastValue, iSequence, fAuthoritative);
+        DHT::SubmitGetAuthoritative(0, pubKey, strOperationType, 20000, strGetLastValue, iSequence);
         iSequence++;
     }
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = vchFromValue(request.params[1]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(key.GetPubKeyBytes());
@@ -301,7 +300,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
             "  \"put_pubkey\"          (string)      BDAP account DHT public key\n"
             "  \"put_operation\"       (string)      Mutable data put operation or salt\n"
             "  \"put_seq\"             (string)      Mutable data sequence number\n"
-            "  \"put_value\"           (string)      Mutable data entry value\n"
+            "  \"put_data_size\"       (int)         Put data entry value size\n"
+            "  \"timestamp\"           (int)         Put data entry timestamp\n"
             "  }\n"
             "\nExamples\n" +
             HelpExampleCli("dht putrecord", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\" 0") +
@@ -348,11 +348,10 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -360,7 +359,7 @@ static UniValue PutRecord(const JSONRPCRequest& request)
     iSequence++;
     uint16_t nVersion = 1;
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     const std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
     bool fEncrypt = true;
     if (request.params.size() > 4)
@@ -384,6 +383,8 @@ static UniValue PutRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
+
     return result;
 }
 
@@ -451,11 +452,10 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     result.push_back(Pair("put_operation", strOperationType));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -464,7 +464,7 @@ static UniValue ClearRecord(const JSONRPCRequest& request)
     iSequence++;
     uint16_t nVersion = 0;
     uint32_t nExpire = 0;
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
@@ -497,7 +497,14 @@ static UniValue GetRecord(const JSONRPCRequest& request)
             "  \"get_pubkey\"          (string)      BDAP account DHT public key\n"
             "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"data_encrypted\"      (bool)        Returns if the record is encrypted\n"
+            "  \"data_version\"        (int)         Record data version number\n"
+            "  \"data_chunks\"         (int)         Number of data chunks according to header\n"
             "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  \"get_value_size\"      (int)         Mutable data entry value size\n"
+            "  \"get_milliseconds\"    (string)      Number of milliseconds to get record\n"
+            "  \"null_record\"         (bool)        Record is null according to header\n"
+            "  \"timestamp\"           (int)         Epoch timestamp for the record creation date/time\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht getrecord", "Duality avatar") +
@@ -555,6 +562,8 @@ static UniValue GetRecord(const JSONRPCRequest& request)
 
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+    result.push_back(Pair("null_record", record.GetHeader().IsNull() ? "true" : "false"));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
@@ -574,7 +583,7 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
             "  \"success_count\"      (string)      Put entry success count\n"
             "  \"message\"            (string)      Put entry message\n"
             "  \"what\"               (string)      Type of DHT alert event\n"
-            "  \"timestamp\"          (string)      Put entry timestamp\n"
+            "  \"timestamp\"          (string)      Put entry epoch timestamp\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dhtputmessages", "") +
@@ -628,7 +637,7 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
             "  \"authoritative\"      (string)      Get entry value is authoritative\n"
             "  \"message\"            (string)      Get entry message\n"
             "  \"what\"               (string)      Type of DHT alert event\n"
-            "  \"timestamp\"          (string)      Get entry timestamp\n"
+            "  \"timestamp\"          (string)      Get entry epoch timestamp\n"
             "  \"value\"              (string)      Get entry value\n"
             "  }\n"
             "\nExamples\n" +
@@ -686,7 +695,14 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
             "  \"get_pubkey\"          (string)      BDAP account DHT public key for account1\n"
             "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"data_encrypted\"      (bool)        Returns if the record is encrypted\n"
+            "  \"data_version\"        (int)         Record data version number\n"
+            "  \"data_chunks\"         (int)         Number of data chunks according to header\n"
             "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  \"get_value_size\"      (int)         Mutable data entry value size\n"
+            "  \"get_milliseconds\"    (string)      Number of milliseconds to get record\n"
+            "  \"null_record\"         (bool)        Record is null according to header\n"
+            "  \"timestamp\"           (int)         Epoch timestamp for the record creation date/time\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht getlinkrecord", "duality bob auth") +
@@ -779,9 +795,10 @@ static UniValue GetLinkRecord(const JSONRPCRequest& request)
     result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
     result.push_back(Pair("get_value", record.Value()));
     result.push_back(Pair("get_value_size", (int)record.Value().size()));
-
     int64_t nEnd = GetTimeMillis();
     result.push_back(Pair("get_milliseconds", (nEnd - nStart)));
+    result.push_back(Pair("null_record", record.GetHeader().IsNull() ? "true" : "false"));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
@@ -891,6 +908,8 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
             "  \"put_operation\"       (string)      Mutable data operation code or salt\n"
             "  \"put_seq\"             (string)      Mutable data sequence number\n"
             "  \"put_value\"           (string)      Mutable data entry value\n"
+            "  \"put_data_size\"       (int)         Put data entry value size\n"
+            "  \"timestamp\"           (int)         Put epoch timestamp\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht putlinkrecord", "duality bob auth \"save this auth data\"") +
@@ -958,12 +977,11 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
     if (header.nUnlockTime  > GetTime())
         throw JSONRPCError(RPC_DHT_RECORD_LOCKED, strprintf("DHT data entry is locked for another %lli seconds", (header.nUnlockTime  - GetTime())));
@@ -972,7 +990,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = vchFromValue(request.params[4]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     bool fEncrypt = true;
@@ -997,6 +1015,7 @@ static UniValue PutLinkRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }
@@ -1017,7 +1036,9 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
             "  \"link_acceptor\"       (string)      BDAP account that accepted the link\n"
             "  \"put_pubkey\"          (string)      BDAP account DHT public key for account1\n"
             "  \"put_operation\"       (string)      Mutable data operation code or salt\n"
-            "  \"put_seq\"             (string)      Mutable data sequence number\n"
+            "  \"put_seq\"             (string)      Put data sequence number\n"
+            "  \"put_data_size\"       (int)         Put data size\n"
+            "  \"timestamp\"           (int)         Epoch timestamp when record was cleared\n"
             "  }\n"
             "\nExamples\n" +
            HelpExampleCli("dht clearlinkrecord", "duality bob auth") +
@@ -1086,12 +1107,11 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DHT_GET_KEY_FAILED, strprintf("Error getting ed25519 private key for the %s BDAP entry", entry1.GetFullObjectPath()));
 
     int64_t iSequence = 0;
-    bool fAuthoritative = false;
     std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    DHT::SubmitGet(0, getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    DHT::SubmitGetAuthoritative(0, getKey.GetDHTPubKey(), strHeaderSalt, 20000, strHeaderHex, iSequence);
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
@@ -1101,7 +1121,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     uint16_t nVersion = 0;
     uint32_t nExpire = 0;
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
@@ -1114,6 +1134,7 @@ static UniValue ClearLinkRecord(const JSONRPCRequest& request)
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
+    result.push_back(Pair("timestamp", (int)record.GetHeader().nTimeStamp));
 
     return result;
 }

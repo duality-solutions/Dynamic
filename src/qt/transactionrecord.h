@@ -80,6 +80,7 @@ public:
     enum Type {
         Other,
         Fluid,
+        DNReward,
         Generated,
         SendToAddress,
         SendToOther,
@@ -101,7 +102,11 @@ public:
         PrivateSendCollateralPayment,
         PrivateSendMakeCollaterals,
         PrivateSendCreateDenominations,
-        PrivateSend
+        PrivateSend,
+        NewAudit,
+        NewCertificate,
+        ApproveCertificate,
+        ApproveRootCertificate
     };
 
     /** Number of confirmation recommended for accepting a transaction */

@@ -994,6 +994,39 @@ int GetNumCores()
 #endif
 }
 
+template <typename Out>
+void SplitString(const std::string &s, char delim, Out result) {
+    std::istringstream iss(s);
+    std::string item;
+    while (std::getline(iss, item, delim)) {
+        *result++ = item;
+    }
+}
+
+std::vector<std::string> SplitString(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    SplitString(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+std::string TrimString(const std::string& s)
+{
+    if (s.empty()) return s;
+
+    int start = 0;
+    int end = int(s.size());
+    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
+    {
+        ++start;
+    }
+
+    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
+    {
+        --end;
+    }
+    return s.substr(start, end - start);
+}
+
 uint32_t StringVersionToInt(const std::string& strVersion)
 {
     std::vector<std::string> tokens;

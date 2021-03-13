@@ -40,8 +40,9 @@ class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
-class CInv;
 class CConnman;
+class CInv;
+class CKeyStore;
 class CScriptCheck;
 class CTxMemPool;
 class CValidationInterface;
@@ -203,6 +204,8 @@ extern bool fEnableReplacement;
 
 extern bool fLargeWorkForkFound;
 extern bool fLargeWorkInvalidChainFound;
+
+extern int64_t nReserveBalance;
 
 extern std::map<uint256, int64_t> mapRejectedBlocks;
 
@@ -523,6 +526,9 @@ bool PreciousBlock(CValidationState& state, const CChainParams& params, CBlockIn
 
 /** Mark a block as invalid. */
 bool InvalidateBlock(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindex);
+
+/** Remove invalidity status from a block and its descendants. */
+bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex);
 
 /** Remove invalidity status from a block and its descendants. */
 bool ResetBlockFailureFlags(CBlockIndex* pindex);

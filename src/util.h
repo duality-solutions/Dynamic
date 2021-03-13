@@ -61,12 +61,12 @@ static const bool DEFAULT_LOGTHREADNAMES = false;
 /**
  * Default average PoW block span time.
  */
-static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Dynamic average block span time is set to 128 seconds
+static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Proof-of-Work average block span time is set to 128 seconds
 /**
  * Maximum amount of time that a block timestamp is allowed to exceed the
  * current network-adjusted time before the block will be accepted.
  */
-static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * DEFAULT_AVERAGE_POW_BLOCK_TIME; // ~26 minutes for Dynamic or 12 blocks
+static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * DEFAULT_AVERAGE_POW_BLOCK_TIME; // ~12.8 minutes for Dynamic or 12 blocks
 
 /** Signals for translation. */
 class CTranslationInterface
@@ -286,6 +286,11 @@ void TraceThread(const char* name, Callable func)
         throw;
     }
 }
+
+template <typename Out>
+void SplitString(const std::string &s, char delim, Out result);
+std::vector<std::string> SplitString(const std::string &s, char delim);
+std::string TrimString(const std::string& s);
 
 /**
  * @brief Converts version strings to 4-byte unsigned integer
