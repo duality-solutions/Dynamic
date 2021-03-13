@@ -10,6 +10,10 @@
 #include <string>
 #include <vector>
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 namespace DHT {
     enum DataFormat : std::uint32_t {
       Undefined = 0,
