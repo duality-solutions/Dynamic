@@ -76,6 +76,8 @@ private:
     std::string searchUserPath;
     std::string searchGroupCommon;
     std::string searchGroupPath;
+
+    bool walletLocked();
     
 };
 
