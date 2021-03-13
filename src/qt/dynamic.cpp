@@ -487,7 +487,6 @@ void DynamicApplication::initializeResult(int retval)
         // Log this only after AppInit2 finishes, as then logging setup is guaranteed complete
         qWarning() << "Platform customization:" << platformStyle->getName();
 #ifdef ENABLE_WALLET
-        PaymentServer::LoadRootCAs();
         paymentServer->setOptionsModel(optionsModel);
 #endif
 
@@ -500,9 +499,6 @@ void DynamicApplication::initializeResult(int retval)
 
             window->addWallet(DynamicGUI::DEFAULT_WALLET, walletModel);
             window->setCurrentWallet(DynamicGUI::DEFAULT_WALLET);
-
-            connect(walletModel, SIGNAL(coinsSent(CWallet*, SendCoinsRecipient, QByteArray)),
-                paymentServer, SLOT(fetchPaymentACK(CWallet*, const SendCoinsRecipient&, QByteArray)));
         }
 #endif
 
