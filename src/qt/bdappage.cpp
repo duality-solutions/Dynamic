@@ -101,7 +101,6 @@ BdapPage::~BdapPage()
 void BdapPage::setModel(WalletModel* model)
 {
     this->model = model;
-
 }
 
 void BdapPage::setClientModel(ClientModel* _clientModel)
