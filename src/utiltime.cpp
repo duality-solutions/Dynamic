@@ -113,10 +113,10 @@ std::string DurationToDHMS(int64_t nDurationTime)
 std::string FormatISO8601DateTime(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
-    gmtime_s(&ts, &time_val);
-#else
+#ifdef HAVE_GMTIME_R
     gmtime_r(&time_val, &ts);
+#else
+    gmtime_s(&ts, &time_val);
 #endif
     return strprintf("%04i-%02i-%02iT%02i:%02i:%02iZ", ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec);
 }
@@ -124,10 +124,10 @@ std::string FormatISO8601DateTime(int64_t nTime) {
 std::string FormatISO8601Date(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
-    gmtime_s(&ts, &time_val);
-#else
+#ifdef HAVE_GMTIME_R
     gmtime_r(&time_val, &ts);
+#else
+    gmtime_s(&ts, &time_val);
 #endif
     return strprintf("%04i-%02i-%02i", ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday);
 }

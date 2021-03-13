@@ -12,10 +12,6 @@
 
 #include <QAbstractListModel>
 
-QT_BEGIN_NAMESPACE
-class QNetworkProxy;
-QT_END_NAMESPACE
-
 /** Interface from Qt to configuration data structure for Dynamic client.
    To Qt, the options are presented as a list with the different options
    laid out vertically.
@@ -59,7 +55,6 @@ public:
         PrivateSendAmount,       // int
         PrivateSendMultiSession, // bool
         Listen,                  // bool
-        StakeSplitThreshold,     // int
         OptionIDRowCount,
     };
 
@@ -71,8 +66,6 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
     /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
     void setDisplayUnit(const QVariant& value);
-    /* Update StakeSplitThreshold's value in wallet */
-    void setStakeSplitThreshold(int value);
 
     /* Explicit getters */
     bool getHideTrayIcon() { return fHideTrayIcon; }
@@ -80,7 +73,6 @@ public:
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
     QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
-    bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
     bool getShowAdvancedPSUI() { return fShowAdvancedPSUI; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }

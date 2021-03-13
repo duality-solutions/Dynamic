@@ -8,7 +8,6 @@
 #ifndef DYNAMIC_QT_WALLETMODEL_H
 #define DYNAMIC_QT_WALLETMODEL_H
 
-#include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
 
 #include "support/allocators/secure.h"
@@ -60,12 +59,6 @@ public:
     CAmount amount;
     // If from a payment request, this is used for storing the memo
     QString message;
-
-    // If from a payment request, paymentRequest.IsInitialized() will be true
-    PaymentRequestPlus paymentRequest;
-    // Empty if no authentication or invalid signature/cert/etc.
-    QString authenticatedMerchant;
-
     bool fSubtractFeeFromAmount; // memory only
 
     static const int CURRENT_VERSION = 1;
@@ -79,26 +72,17 @@ public:
         std::string sAddress = address.toStdString();
         std::string sLabel = label.toStdString();
         std::string sMessage = message.toStdString();
-        std::string sPaymentRequest;
-        if (!ser_action.ForRead() && paymentRequest.IsInitialized())
-            paymentRequest.SerializeToString(&sPaymentRequest);
-        std::string sAuthenticatedMerchant = authenticatedMerchant.toStdString();
 
         READWRITE(this->nVersion);
         READWRITE(sAddress);
         READWRITE(sLabel);
         READWRITE(amount);
         READWRITE(sMessage);
-        READWRITE(sPaymentRequest);
-        READWRITE(sAuthenticatedMerchant);
 
         if (ser_action.ForRead()) {
             address = QString::fromStdString(sAddress);
             label = QString::fromStdString(sLabel);
             message = QString::fromStdString(sMessage);
-            if (!sPaymentRequest.empty())
-                paymentRequest.parse(QByteArray::fromRawData(sPaymentRequest.data(), sPaymentRequest.size()));
-            authenticatedMerchant = QString::fromStdString(sAuthenticatedMerchant);
         }
     }
 };
@@ -123,8 +107,7 @@ public:
         TransactionCreationFailed, // Error returned when wallet is still locked
         TransactionCommitFailed,
         AbsurdFee,
-        PaymentRequestExpired,
-        MixStakeOnlyMode
+        PaymentRequestExpired
     };
 
     enum EncryptionStatus {
@@ -143,13 +126,11 @@ public:
 
     CAmount getBalance(const CCoinControl* coinControl = NULL) const;
     CAmount getTotal() const;
-    CAmount getStake() const;
     CAmount getUnconfirmedBalance() const;
     CAmount getImmatureBalance() const;
     CAmount getAnonymizedBalance() const;
     bool haveWatchOnly() const;
     CAmount getWatchBalance() const;
-    CAmount getWatchStake() const;
     CAmount getWatchUnconfirmedBalance() const;
     CAmount getWatchImmatureBalance() const;
     EncryptionStatus getEncryptionStatus() const;
@@ -251,12 +232,10 @@ private:
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
     CAmount cachedTotal;
-    CAmount cachedStake;
     CAmount cachedUnconfirmedBalance;
     CAmount cachedImmatureBalance;
     CAmount cachedAnonymizedBalance;
     CAmount cachedWatchOnlyBalance;
-    CAmount cachedWatchOnlyStake;
     CAmount cachedWatchUnconfBalance;
     CAmount cachedWatchImmatureBalance;
     EncryptionStatus cachedEncryptionStatus;
@@ -272,7 +251,7 @@ private:
 
 Q_SIGNALS:
     // Signal that balance in wallet changed
-    void balanceChanged(const CAmount& balance, const CAmount& total, const CAmount& stake, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchOnlyStake, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void balanceChanged(const CAmount& balance, const CAmount& total, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
 
     // Encryption status of wallet changed
     void encryptionStatusChanged(int status);

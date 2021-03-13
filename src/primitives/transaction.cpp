@@ -22,14 +22,6 @@ std::string COutPoint::ToStringShort() const
     return strprintf("%s-%u", hash.ToString().substr(0, 64), n);
 }
 
-bool COutPoint::IsDynodeReward(const CTransaction* tx) const
-{
-    if(!tx->IsCoinStake())
-        return false;
-
-    return (n == tx->vout.size() - 1) && (tx->vout[1].scriptPubKey != tx->vout[n].scriptPubKey);
-}
-
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, uint32_t nSequenceIn)
 {
     prevout = prevoutIn;
@@ -149,15 +141,6 @@ CTransaction::CTransaction() : nVersion(CTransaction::CURRENT_VERSION), vin(), v
 CTransaction::CTransaction(const CMutableTransaction& tx) : nVersion(tx.nVersion), vin(tx.vin), vout(tx.vout), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 CTransaction::CTransaction(CMutableTransaction&& tx) : nVersion(tx.nVersion), vin(std::move(tx.vin)), vout(std::move(tx.vout)), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 
-CTransaction& CTransaction::operator=(const CTransaction &tx) {
-    *const_cast<int*>(&nVersion) = tx.nVersion;
-    *const_cast<std::vector<CTxIn>*>(&vin) = tx.vin;
-    *const_cast<std::vector<CTxOut>*>(&vout) = tx.vout;
-    *const_cast<unsigned int*>(&nLockTime) = tx.nLockTime;
-    *const_cast<uint256*>(&hash) = tx.hash;
-    return *this;
-}
-
 CAmount CTransaction::GetValueOut() const
 {
     CAmount nValueOut = 0;
@@ -198,18 +181,6 @@ unsigned int CTransaction::CalculateModifiedSize(unsigned int nTxSize) const
 unsigned int CTransaction::GetTotalSize() const
 {
     return ::GetSerializeSize(*this, SER_NETWORK, PROTOCOL_VERSION);
-}
-
-bool CTransaction::IsCoinStake() const
-{
-    if (vin.empty())
-        return false;
-
-    // ppcoin: the coin stake transaction is marked with the first output empty
-    if (vin[0].prevout.IsNull())
-        return false;
-
-    return (vout.size() >= 2 && vout[0].IsEmpty());
 }
 
 std::string CTransaction::ToString() const

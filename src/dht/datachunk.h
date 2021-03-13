@@ -10,6 +10,10 @@
 #include <string>
 #include <vector>
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 static constexpr unsigned int DHT_DATA_MAX_CHUNK_SIZE = 900;
 
 class CDataChunk

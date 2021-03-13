@@ -151,7 +151,6 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressmempool", 0, "addresses"},
         {"reservebalance", 0, "reserve"},
         {"reservebalance", 1, "amount"},
-        {"setstakesplitthreshold", 0, "value"},
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},
