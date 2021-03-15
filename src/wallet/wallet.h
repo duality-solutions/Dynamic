@@ -48,7 +48,6 @@ extern CFeeRate payTxFee;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
-extern bool fWalletUnlockMixStakeOnly;
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
 
@@ -68,8 +67,6 @@ static const CAmount MIN_FINAL_CHANGE = MIN_CHANGE / 2;
 static const bool DEFAULT_SPEND_ZEROCONF_CHANGE = true;
 //! Default for -sendfreetransactions
 static const bool DEFAULT_SEND_FREE_TRANSACTIONS = false;
-//! Default for -walletunlockmixstakeonly
-static const bool WALLET_UNLOCKED_FOR_MIXING_STAKING_ONLY = false;
 //! Default for -walletrejectlongchains
 static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS = false;
 //! -txconfirmtarget default
@@ -93,7 +90,6 @@ class CCoinControl;
 class COutput;
 class CReserveKey;
 class CScript;
-class CStakeInput;
 class CTxMemPool;
 class CWalletTx;
 
@@ -115,8 +111,7 @@ enum AvailableCoinsType {
     ONLY_DENOMINATED,
     ONLY_NONDENOMINATED,
     ONLY_1000, // find dynode outputs including locked ones (use with caution)
-    ONLY_PRIVATESEND_COLLATERAL,
-    STAKABLE_COINS // UTXO's that are valid for staking 
+    ONLY_PRIVATESEND_COLLATERAL
 };
 
 struct CompactTallyItem {
@@ -333,7 +328,6 @@ public:
 
     const uint256& GetHash() const { return tx->GetHash(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
-    bool IsCoinStake() const { return tx->IsCoinStake(); }
 };
 
 /** 
@@ -903,21 +897,6 @@ public:
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID;
 
-    // Stake Settings
-    unsigned int nHashDrift;
-    unsigned int nHashInterval;
-    uint64_t nStakeSplitThreshold;
-    int nStakeSetUpdateTime;
-
-    //MultiSend
-    std::vector<std::pair<std::string, int> > vMultiSend;
-    bool fMultiSendStake;
-    bool fMultiSendDynodeReward;
-    bool fMultiSendNotify;
-    std::string strMultiSendChangeAddress;
-    int nLastMultiSendHeight;
-    std::vector<std::string> vDisabledAddresses;
-
     //Auto Combine Inputs
     bool fCombineDust;
     CAmount nAutoCombineThreshold;
@@ -957,33 +936,9 @@ public:
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
         nFoundStealth = 0;
-        // Stake Settings
-        nHashDrift = 45;
-        nStakeSplitThreshold = 2000;
-        nHashInterval = 22;
-        nStakeSetUpdateTime = 300; // 5 minutes
-        //MultiSend
-        vMultiSend.clear();
-        fMultiSendStake = false;
-        fMultiSendDynodeReward = false;
-        fMultiSendNotify = false;
-        strMultiSendChangeAddress = "";
-        nLastMultiSendHeight = 0;
-        vDisabledAddresses.clear();
         //Auto Combine Dust
         fCombineDust = false;
         nAutoCombineThreshold = 0;
-    }
-
-    bool isMultiSendEnabled()
-    {
-        return fMultiSendDynodeReward || fMultiSendStake;
-    }
-
-    void setMultiSendDisabled()
-    {
-        fMultiSendDynodeReward = false;
-        fMultiSendStake = false;
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -1167,12 +1122,10 @@ public:
     void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) override;
     std::vector<uint256> ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman);
     CAmount GetBalance() const;
-    CAmount GetTotal() const;
-    CAmount GetStake() const;
+    CAmount GetTotal() const; 
     CAmount GetUnconfirmedBalance() const;
     CAmount GetImmatureBalance() const;
     CAmount GetWatchOnlyBalance() const;
-    CAmount GetWatchOnlyStake() const;
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
 
@@ -1407,11 +1360,6 @@ public:
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
     bool HaveStealthAddress(const CKeyID& address) const;
-    bool MintableCoins();
-    bool SelectStakeCoins(std::list<std::unique_ptr<CStakeInput> >& listInputs, const CAmount& nTargetAmount, const int& blockHeight, const bool fPrecompute = false);
-    bool CreateCoinStake(const CKeyStore& keystore, const unsigned int& nBits, const int64_t& nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime);
-    bool MultiSend();
-    void AutoCombineDust();
 };
 
 /** A key allocated from the key pool. */

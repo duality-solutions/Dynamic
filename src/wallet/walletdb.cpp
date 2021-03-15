@@ -207,78 +207,6 @@ bool CWalletDB::WriteOrderPosNext(int64_t nOrderPosNext)
     return Write(std::string("orderposnext"), nOrderPosNext);
 }
 
-// presstab HyperStake
-bool CWalletDB::WriteStakeSplitThreshold(uint64_t nStakeSplitThreshold)
-{
-    nWalletDBUpdated++;
-    return Write(std::string("stakeSplitThreshold"), nStakeSplitThreshold);
-}
-
-bool CWalletDB::WriteMultiSend(std::vector<std::pair<std::string, int> > vMultiSend)
-{
-    nWalletDBUpdated++;
-    bool ret = true;
-    for (unsigned int i = 0; i < vMultiSend.size(); i++) {
-        std::pair<std::string, int> pMultiSend;
-        pMultiSend = vMultiSend[i];
-        if (!Write(std::make_pair(std::string("multisend"), i), pMultiSend, true))
-            ret = false;
-    }
-    return ret;
-}
-
-bool CWalletDB::EraseMultiSend(std::vector<std::pair<std::string, int> > vMultiSend)
-{
-    nWalletDBUpdated++;
-    bool ret = true;
-    for (unsigned int i = 0; i < vMultiSend.size(); i++) {
-        std::pair<std::string, int> pMultiSend;
-        pMultiSend = vMultiSend[i];
-        if (!Erase(std::make_pair(std::string("multisend"), i)))
-            ret = false;
-    }
-    return ret;
-}
-
-bool CWalletDB::WriteMSettings(bool fMultiSendStake, bool fMultiSendDynode, int nLastMultiSendHeight)
-{
-    nWalletDBUpdated++;
-    std::pair<bool, bool> enabledMS(fMultiSendStake, fMultiSendDynode);
-    std::pair<std::pair<bool, bool>, int> pSettings(enabledMS, nLastMultiSendHeight);
-
-    return Write(std::string("msettings"), pSettings, true);
-}
-
-bool CWalletDB::WriteMSDisabledAddresses(std::vector<std::string> vDisabledAddresses)
-{
-    nWalletDBUpdated++;
-    bool ret = true;
-    for (unsigned int i = 0; i < vDisabledAddresses.size(); i++) {
-        if (!Write(std::make_pair(std::string("mdisabled"), i), vDisabledAddresses[i]))
-            ret = false;
-    }
-    return ret;
-}
-
-bool CWalletDB::EraseMSDisabledAddresses(std::vector<std::string> vDisabledAddresses)
-{
-    nWalletDBUpdated++;
-    bool ret = true;
-    for (unsigned int i = 0; i < vDisabledAddresses.size(); i++) {
-        if (!Erase(std::make_pair(std::string("mdisabled"), i)))
-            ret = false;
-    }
-    return ret;
-}
-bool CWalletDB::WriteAutoCombineSettings(bool fEnable, CAmount nCombineThreshold)
-{
-    nWalletDBUpdated++;
-    std::pair<bool, CAmount> pSettings;
-    pSettings.first = fEnable;
-    pSettings.second = nCombineThreshold;
-    return Write(std::string("autocombinesettings"), pSettings, true);
-}
-
 bool CWalletDB::WriteDefaultKey(const CPubKey& vchPubKey)
 {
     nWalletDBUpdateCounter++;
@@ -668,35 +596,6 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             }
         } else if (strType == "orderposnext") {
             ssValue >> pwallet->nOrderPosNext;
-        } else if (strType == "stakeSplitThreshold") //presstab HyperStake
-        {
-            ssValue >> pwallet->nStakeSplitThreshold;
-        } else if (strType == "multisend") //presstab HyperStake
-        {
-            unsigned int i;
-            ssKey >> i;
-            std::pair<std::string, int> pMultiSend;
-            ssValue >> pMultiSend;
-            if (CDynamicAddress(pMultiSend.first).IsValid()) {
-                pwallet->vMultiSend.push_back(pMultiSend);
-            }
-        } else if (strType == "msettings") //presstab HyperStake
-        {
-            std::pair<std::pair<bool, bool>, int> pSettings;
-            ssValue >> pSettings;
-            pwallet->fMultiSendStake = pSettings.first.first;
-            pwallet->fMultiSendDynodeReward = pSettings.first.second;
-            pwallet->nLastMultiSendHeight = pSettings.second;
-        } else if (strType == "mdisabled") //presstab HyperStake
-        {
-            std::string strDisabledAddress;
-            ssValue >> strDisabledAddress;
-            pwallet->vDisabledAddresses.push_back(strDisabledAddress);
-        } else if (strType == "autocombinesettings") {
-            std::pair<bool, CAmount> pSettings;
-            ssValue >> pSettings;
-            pwallet->fCombineDust = pSettings.first;
-            pwallet->nAutoCombineThreshold = pSettings.second;
         } else if (strType == "destdata") {
             std::string strAddress, strKey, strValue;
             ssKey >> strAddress;

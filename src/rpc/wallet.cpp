@@ -57,8 +57,6 @@ void EnsureWalletIsUnlocked()
 {
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet unlocked for mixing and staking only.");
 }
 
 void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
@@ -67,7 +65,7 @@ void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
     bool fLocked = instantsend.IsLockedInstantSendTransaction(wtx.GetHash());
     entry.push_back(Pair("confirmations", confirms));
     entry.push_back(Pair("instantlock", fLocked));
-    if (wtx.IsCoinBase() || wtx.IsCoinStake())
+    if (wtx.IsCoinBase())
         entry.push_back(Pair("generated", true));
     if (confirms > 0) {
         entry.push_back(Pair("blockhash", wtx.hashBlock.GetHex()));
@@ -426,9 +424,6 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     if (pwalletMain->GetBroadcastTransactions() && !g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
-
     CScript scriptPubKey;
     std::vector<uint8_t> vStealthData;
     bool fStealthAddress = false;
@@ -496,10 +491,6 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
-
-    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -542,10 +533,6 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
 
     if (nOneTimeFee + nDepositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendLinkingTransaction insufficient funds");
-
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
-
     
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
@@ -593,9 +580,6 @@ void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealt
 
     if (nColorAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("%s insufficient funds", __func__));
-
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
     
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
@@ -637,9 +621,6 @@ void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CA
 
     if (nValue > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
-
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
 
     // Parse Dynamic address
     CScript scriptPubKey = generatedScript;
@@ -706,9 +687,6 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
 
     if (nValue > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
-
-    if (fWalletUnlockMixStakeOnly)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet unlocked for mixing and staking only, unable to create transaction.");
 
     LogPrintf("%s - Script public key to be sent over to the burn transaction processing: %s\n", __func__, ScriptToAsmStr(burnScript));
 
@@ -1044,7 +1022,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
     CAmount nAmount = 0;
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
-        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
             continue;
 
         BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout)
@@ -1055,7 +1033,6 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
 
     return ValueFromAmount(nAmount);
 }
-
 
 UniValue getreceivedbyaccount(const JSONRPCRequest& request)
 {
@@ -1096,7 +1073,7 @@ UniValue getreceivedbyaccount(const JSONRPCRequest& request)
     CAmount nAmount = 0;
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
-        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
             continue;
 
         BOOST_FOREACH (const CTxOut& txout, wtx.tx->vout) {
@@ -1543,7 +1520,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
     for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it) {
         const CWalletTx& wtx = (*it).second;
 
-        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(*wtx.tx))
+        if (wtx.IsCoinBase() || !CheckFinalTx(*wtx.tx))
             continue;
 
         int nDepth = wtx.GetDepthInMainChain();
@@ -1777,19 +1754,7 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
                         entry.push_back(Pair("category", "immature"));
                     else
                         entry.push_back(Pair("category", "generate"));
-                }
-                else if (wtx.IsCoinStake())
-                {
-                    if (wtx.GetDepthInMainChain() < 1)
-                            entry.push_back(Pair("category", "stake-orphan"));
-                        else if (wtx.GetBlocksToMaturity() > 0)
-                            entry.push_back(Pair("category", "stake"));
-                        else
-                            entry.push_back(Pair("category", "stake-mint"));
-
-                } 
-                else 
-                {
+                } else {
                     entry.push_back(Pair("category", "receive"));
                 }
                 entry.push_back(Pair("amount", ValueFromAmount(r.amount)));
@@ -2358,15 +2323,13 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     strWalletPass = request.params[0].get_str().c_str();
 
     int64_t nSleepTime = request.params[1].get_int64();
+
     bool fForMixingOnly = false;
+    if (request.params.size() >= 3)
+        fForMixingOnly = request.params[2].get_bool();
 
-    if (request.params.size() > 2)
-        fWalletUnlockMixStakeOnly = request.params[2].get_bool();
-    else
-        fWalletUnlockMixStakeOnly = false;
-
-    if (fWalletUnlockMixStakeOnly && !pwalletMain->IsLocked(true) && pwalletMain->IsLocked())
-        throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked for staking and mixing only.");
+    if (fForMixingOnly && !pwalletMain->IsLocked(true) && pwalletMain->IsLocked())
+        throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked for mixing only.");
 
     if (!pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already fully unlocked.");
@@ -2379,9 +2342,6 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     LOCK(cs_nWalletUnlockTime);
     nWalletUnlockTime = GetTime() + nSleepTime;
     RPCRunLater("lockwallet", boost::bind(LockWallet, pwalletMain), nSleepTime);
-
-    UniValue ret(UniValue::VOBJ);
-    ret.push_back(Pair("mixstakeonly", fForMixingOnly));
 
     return NullUniValue;
 }
@@ -2802,176 +2762,6 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     return obj;
 }
 
-// ppcoin: reserve balance from being staked for network protection
-UniValue reservebalance(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() > 2)
-        throw std::runtime_error(
-            "reservebalance ( reserve amount )\n"
-            "\nShow or set the reserve amount not participating in network protection\n"
-            "If no parameters provided current setting is printed.\n"
-
-            "\nArguments:\n"
-            "1. reserve     (boolean, optional) is true or false to turn balance reserve on or off.\n"
-            "2. amount      (numeric, optional) is a real and rounded to cent.\n"
-
-            "\nResult:\n"
-            "{\n"
-            "  \"reserve\": true|false,     (boolean) Status of the reserve balance\n"
-            "  \"amount\": x.xxxx       (numeric) Amount reserved\n"
-            "}\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("reservebalance", "true 5000") + HelpExampleRpc("reservebalance", "true 5000"));
-
-    if (request.params.size() > 0) {
-        bool fReserve = request.params[0].get_bool();
-        if (fReserve) {
-            if (request.params.size() == 1)
-                throw std::runtime_error("must provide amount to reserve balance.\n");
-            CAmount nAmount = AmountFromValue(request.params[1]);
-            nAmount = (nAmount / CENT) * CENT; // round to cent
-            if (nAmount < 0)
-                throw std::runtime_error("amount cannot be negative.\n");
-            nReserveBalance = nAmount;
-        } else {
-            if (request.params.size() > 1)
-                throw std::runtime_error("cannot specify amount to turn off reserve.\n");
-            nReserveBalance = 0;
-        }
-    }
-
-    UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("reserve", (nReserveBalance > 0)));
-    result.push_back(Pair("amount", ValueFromAmount(nReserveBalance)));
-    return result;
-}
-
-// presstab HyperStake
-UniValue setstakesplitthreshold(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "setstakesplitthreshold value\n"
-            "\nThis will set the output size of your stakes to never be below this number\n" +
-            HelpRequiringPassphrase() + "\n"
-
-            "\nArguments:\n"
-            "1. value   (numeric, required) Threshold value between 1 and 999999\n"
-
-            "\nResult:\n"
-            "{\n"
-            "  \"threshold\": n,    (numeric) Threshold value set\n"
-            "  \"saved\": true|false    (boolean) 'true' if successfully saved to the wallet file\n"
-            "}\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("setstakesplitthreshold", "5000") + HelpExampleRpc("setstakesplitthreshold", "5000"));
-
-    EnsureWalletIsUnlocked();
-
-    uint64_t nStakeSplitThreshold = request.params[0].get_int();
-
-    if (nStakeSplitThreshold > 999999)
-        throw std::runtime_error("Value out of range, max allowed is 999999");
-
-    CWalletDB walletdb(pwalletMain->strWalletFile);
-    LOCK(pwalletMain->cs_wallet);
-    {
-        bool fFileBacked = pwalletMain->fFileBacked;
-
-        UniValue result(UniValue::VOBJ);
-        pwalletMain->nStakeSplitThreshold = nStakeSplitThreshold;
-        result.push_back(Pair("threshold", int(pwalletMain->nStakeSplitThreshold)));
-        if (fFileBacked) {
-            walletdb.WriteStakeSplitThreshold(nStakeSplitThreshold);
-            result.push_back(Pair("saved", "true"));
-        } else
-            result.push_back(Pair("saved", "false"));
-
-        return result;
-    }
-}
-
-// presstab HyperStake
-UniValue getstakesplitthreshold(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getstakesplitthreshold\n"
-            "Returns the threshold for stake splitting\n"
-
-            "\nResult:\n"
-            "n      (numeric) Threshold value\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("getstakesplitthreshold", "") + HelpExampleRpc("getstakesplitthreshold", ""));
-
-    return int(pwalletMain->nStakeSplitThreshold);
-}
-
-UniValue autocombinerewards(const UniValue& params, bool fHelp)
-{
-    bool fEnable;
-    if (params.size() >= 1)
-        fEnable = params[0].get_bool();
-
-    if (fHelp || params.size() < 1 || (fEnable && params.size() != 2) || params.size() > 2)
-        throw std::runtime_error(
-            "autocombinerewards enable ( threshold )\n"
-            "\nWallet will automatically monitor for any coins with value below the threshold amount, and combine them if they reside with the same Dynamic address\n"
-            "When autocombinerewards runs it will create a transaction, and therefore will be subject to transaction fees.\n"
-
-            "\nArguments:\n"
-            "1. enable          (boolean, required) Enable auto combine (true) or disable (false)\n"
-            "2. threshold       (numeric, optional) Threshold amount (default: 0)\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("autocombinerewards", "true 500") + HelpExampleRpc("autocombinerewards", "true 500"));
-
-    CWalletDB walletdb(pwalletMain->strWalletFile);
-    CAmount nThreshold = 0;
-
-    if (fEnable)
-        nThreshold = params[1].get_int();
-
-    pwalletMain->fCombineDust = fEnable;
-    pwalletMain->nAutoCombineThreshold = nThreshold;
-
-    if (!walletdb.WriteAutoCombineSettings(fEnable, nThreshold))
-        throw std::runtime_error("Changed settings in wallet but failed to save to database\n");
-
-    return NullUniValue;
-}
-
-UniValue printMultiSend()
-{
-    UniValue ret(UniValue::VARR);
-    UniValue act(UniValue::VOBJ);
-    act.push_back(Pair("MultiSendStake Activated?", pwalletMain->fMultiSendStake));
-    act.push_back(Pair("MultiSendDynode Activated?", pwalletMain->fMultiSendDynodeReward));
-    ret.push_back(act);
-
-    if (pwalletMain->vDisabledAddresses.size() >= 1) {
-        UniValue disAdd(UniValue::VOBJ);
-        for (unsigned int i = 0; i < pwalletMain->vDisabledAddresses.size(); i++) {
-            disAdd.push_back(Pair("Disabled From Sending", pwalletMain->vDisabledAddresses[i]));
-        }
-        ret.push_back(disAdd);
-    }
-
-    ret.push_back("MultiSend Addresses to Send To:");
-
-    UniValue vMS(UniValue::VOBJ);
-    for (unsigned int i = 0; i < pwalletMain->vMultiSend.size(); i++) {
-        vMS.push_back(Pair("Address " + std::to_string(i), pwalletMain->vMultiSend[i].first));
-        vMS.push_back(Pair("Percent", pwalletMain->vMultiSend[i].second));
-    }
-
-    ret.push_back(vMS);
-    return ret;
-}
-
 UniValue printAddresses()
 {
     std::vector<COutput> vCoins;
@@ -2999,191 +2789,6 @@ UniValue printAddresses()
     }
 
     return ret;
-}
-
-unsigned int sumMultiSend()
-{
-    unsigned int sum = 0;
-    for (unsigned int i = 0; i < pwalletMain->vMultiSend.size(); i++)
-        sum += pwalletMain->vMultiSend[i].second;
-    return sum;
-}
-
-UniValue multisend(const UniValue& params, bool fHelp)
-{
-    CWalletDB walletdb(pwalletMain->strWalletFile);
-    bool fFileBacked;
-    //MultiSend Commands
-    if (params.size() == 1) {
-        std::string strCommand = params[0].get_str();
-        UniValue ret(UniValue::VOBJ);
-        if (strCommand == "print") {
-            return printMultiSend();
-        } else if (strCommand == "printaddress" || strCommand == "printaddresses") {
-            return printAddresses();
-        } else if (strCommand == "clear") {
-            LOCK(pwalletMain->cs_wallet);
-            {
-                bool erased = false;
-                if (pwalletMain->fFileBacked) {
-                    if (walletdb.EraseMultiSend(pwalletMain->vMultiSend))
-                        erased = true;
-                }
-
-                pwalletMain->vMultiSend.clear();
-                pwalletMain->setMultiSendDisabled();
-
-                UniValue obj(UniValue::VOBJ);
-                obj.push_back(Pair("Erased from database", erased));
-                obj.push_back(Pair("Erased from RAM", true));
-
-                return obj;
-            }
-        } else if (strCommand == "enablestake" || strCommand == "activatestake") {
-            if (pwalletMain->vMultiSend.size() < 1)
-                throw JSONRPCError(RPC_INVALID_REQUEST, "Unable to activate MultiSend, check MultiSend vector");
-
-            if (CDynamicAddress(pwalletMain->vMultiSend[0].first).IsValid()) {
-                pwalletMain->fMultiSendStake = true;
-                if (!walletdb.WriteMSettings(true, pwalletMain->fMultiSendDynodeReward, pwalletMain->nLastMultiSendHeight)) {
-                    UniValue obj(UniValue::VOBJ);
-                    obj.push_back(Pair("error", "MultiSend activated but writing settings to DB failed"));
-                    UniValue arr(UniValue::VARR);
-                    arr.push_back(obj);
-                    arr.push_back(printMultiSend());
-                    return arr;
-                } else
-                    return printMultiSend();
-            }
-
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unable to activate MultiSend, check MultiSend vector");
-        } else if (strCommand == "enabledynode" || strCommand == "activatedynode") {
-            if (pwalletMain->vMultiSend.size() < 1)
-                throw JSONRPCError(RPC_INVALID_REQUEST, "Unable to activate MultiSend, check MultiSend vector");
-
-            if (CDynamicAddress(pwalletMain->vMultiSend[0].first).IsValid()) {
-                pwalletMain->fMultiSendDynodeReward = true;
-
-                if (!walletdb.WriteMSettings(pwalletMain->fMultiSendStake, true, pwalletMain->nLastMultiSendHeight)) {
-                    UniValue obj(UniValue::VOBJ);
-                    obj.push_back(Pair("error", "MultiSend activated but writing settings to DB failed"));
-                    UniValue arr(UniValue::VARR);
-                    arr.push_back(obj);
-                    arr.push_back(printMultiSend());
-                    return arr;
-                } else
-                    return printMultiSend();
-            }
-
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unable to activate MultiSend, check MultiSend vector");
-        } else if (strCommand == "disable" || strCommand == "deactivate") {
-            pwalletMain->setMultiSendDisabled();
-            if (!walletdb.WriteMSettings(false, false, pwalletMain->nLastMultiSendHeight))
-                throw JSONRPCError(RPC_DATABASE_ERROR, "MultiSend deactivated but writing settings to DB failed");
-
-            return printMultiSend();
-        } else if (strCommand == "enableall") {
-            if (!walletdb.EraseMSDisabledAddresses(pwalletMain->vDisabledAddresses))
-                return "failed to clear old vector from walletDB";
-            else {
-                pwalletMain->vDisabledAddresses.clear();
-                return printMultiSend();
-            }
-        }
-    }
-    if (params.size() == 2 && params[0].get_str() == "delete") {
-        int del = std::stoi(params[1].get_str().c_str());
-        if (!walletdb.EraseMultiSend(pwalletMain->vMultiSend))
-            throw JSONRPCError(RPC_DATABASE_ERROR, "failed to delete old MultiSend vector from database");
-
-        pwalletMain->vMultiSend.erase(pwalletMain->vMultiSend.begin() + del);
-        if (!walletdb.WriteMultiSend(pwalletMain->vMultiSend))
-            throw JSONRPCError(RPC_DATABASE_ERROR, "walletdb WriteMultiSend failed!");
-
-        return printMultiSend();
-    }
-    if (params.size() == 2 && params[0].get_str() == "disable") {
-        std::string disAddress = params[1].get_str();
-        if (!CDynamicAddress(disAddress).IsValid())
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "address you want to disable is not valid");
-        else {
-            pwalletMain->vDisabledAddresses.push_back(disAddress);
-            if (!walletdb.EraseMSDisabledAddresses(pwalletMain->vDisabledAddresses))
-                throw JSONRPCError(RPC_DATABASE_ERROR, "disabled address from sending, but failed to clear old vector from walletDB");
-
-            if (!walletdb.WriteMSDisabledAddresses(pwalletMain->vDisabledAddresses))
-                throw JSONRPCError(RPC_DATABASE_ERROR, "disabled address from sending, but failed to store it to walletDB");
-            else
-                return printMultiSend();
-        }
-    }
-
-    //if no commands are used
-    if (fHelp || params.size() != 2)
-        throw std::runtime_error(
-            "multisend <command>\n"
-            "****************************************************************\n"
-            "WHAT IS MULTISEND?\n"
-            "MultiSend allows a user to automatically send a percent of their stake reward to as many addresses as you would like\n"
-            "The MultiSend transaction is sent when the staked coins mature (100 confirmations)\n"
-            "****************************************************************\n"
-            "TO CREATE OR ADD TO THE MULTISEND VECTOR:\n"
-            "multisend <Dynamic Address> <percent>\n"
-            "This will add a new address to the MultiSend vector\n"
-            "Percent is a whole number 1 to 100.\n"
-            "****************************************************************\n"
-            "MULTISEND COMMANDS (usage: multisend <command>)\n"
-            " print - displays the current MultiSend vector \n"
-            " clear - deletes the current MultiSend vector \n"
-            " enablestake/activatestake - activates the current MultiSend vector to be activated on stake rewards\n"
-            " enabledynode/activatedynode - activates the current MultiSend vector to be activated on dynode rewards\n"
-            " disable/deactivate - disables the current MultiSend vector \n"
-            " delete <Address #> - deletes an address from the MultiSend vector \n"
-            " disable <address> - prevents a specific address from sending MultiSend transactions\n"
-            " enableall - enables all addresses to be eligible to send MultiSend transactions\n"
-            "****************************************************************\n");
-
-    //if the user is entering a new MultiSend item
-    std::string strAddress = params[0].get_str();
-    CDynamicAddress address(strAddress);
-    if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid PIV address");
-    if (std::stoi(params[1].get_str().c_str()) < 0)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, expected valid percentage");
-    if (pwalletMain->IsLocked())
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
-    unsigned int nPercent = (unsigned int) std::stoul(params[1].get_str().c_str());
-
-    LOCK(pwalletMain->cs_wallet);
-    {
-        fFileBacked = pwalletMain->fFileBacked;
-        //Error if 0 is entered
-        if (nPercent == 0) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Sending 0% of stake is not valid");
-        }
-
-        //MultiSend can only send 100% of your stake
-        if (nPercent + sumMultiSend() > 100)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Failed to add to MultiSend vector, the sum of your MultiSend is greater than 100%");
-
-        for (unsigned int i = 0; i < pwalletMain->vMultiSend.size(); i++) {
-            if (pwalletMain->vMultiSend[i].first == strAddress)
-                throw JSONRPCError(RPC_INVALID_PARAMETER, "Failed to add to MultiSend vector, cannot use the same address twice");
-        }
-
-        if (fFileBacked)
-            walletdb.EraseMultiSend(pwalletMain->vMultiSend);
-
-        std::pair<std::string, int> newMultiSend;
-        newMultiSend.first = strAddress;
-        newMultiSend.second = nPercent;
-        pwalletMain->vMultiSend.push_back(newMultiSend);
-        if (fFileBacked) {
-            if (!walletdb.WriteMultiSend(pwalletMain->vMultiSend))
-                throw JSONRPCError(RPC_DATABASE_ERROR, "walletdb WriteMultiSend failed!");
-        }
-    }
-    return printMultiSend();
 }
 
 UniValue keepass(const JSONRPCRequest& request)
@@ -3578,7 +3183,6 @@ static const CRPCCommand commands[] =
         {"wallet", "getreceivedbyaddress", &getreceivedbyaddress, false, {"address", "minconf", "addlocked"}},
         {"wallet", "gettransaction", &gettransaction, false, {"txid", "include_watchonly"}},
         {"wallet", "getunconfirmedbalance", &getunconfirmedbalance, false, {}},
-        {"wallet", "getstakesplitthreshold", &getstakesplitthreshold, false, {}},
         {"wallet", "getwalletinfo", &getwalletinfo, false, {}},
         {"wallet", "importmulti", &importmulti, true, {"requests", "options"}},
         {"wallet", "importprivkey", &importprivkey, true, {"privkey", "label", "rescan"}},
@@ -3599,14 +3203,12 @@ static const CRPCCommand commands[] =
         {"wallet", "listunspent", &listunspent, false, {"minconf", "maxconf", "addresses", "include_unsafe"}},
         {"wallet", "lockunspent", &lockunspent, true, {"unlock", "transactions"}},
         {"wallet", "move", &movecmd, false, {"fromaccount", "toaccount", "amount", "minconf", "comment"}},
-        {"wallet", "reservebalance", &reservebalance, true, {"amount"}},
         {"wallet", "sendfrom", &sendfrom, false, {"fromaccount", "toaddress", "amount", "minconf", "addlocked", "comment", "comment_to"}},
         {"wallet", "sendmany", &sendmany, false, {"fromaccount", "amounts", "minconf", "addlocked", "comment", "subtractfeefrom"}},
         {"wallet", "sendtoaddress", &sendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
         {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
         {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},
-        {"wallet", "setstakesplitthreshold", &setstakesplitthreshold, false, {"amount"}},
         {"wallet", "settxfee", &settxfee, true, {"amount"}},
         {"wallet", "signmessage", &signmessage, true, {"address", "message"}},
         {"wallet", "walletlock", &walletlock, true, {}},

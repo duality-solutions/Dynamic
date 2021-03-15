@@ -17,7 +17,6 @@
 
 #include "support/allocators/secure.h"
 
-#include <QIntValidator>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QPushButton>
@@ -43,11 +42,6 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
     ui->passEdit2->installEventFilter(this);
     ui->passEdit3->installEventFilter(this);
 
-    ui->passLabelDuration->hide();
-    ui->passEditDuration->hide();
-    ui->passLabelMixStakeOnly->hide();
-    ui->passCheckBoxMixStakeOnly->hide();
-
     switch (mode) {
     case Encrypt: // Ask passphrase x2
         ui->warningLabel->setText(tr("Enter the new passphrase to the wallet.<br/>Please use a passphrase of <b>ten or more random characters</b>, or <b>eight or more words</b>."));
@@ -61,12 +55,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
         ui->passEdit2->hide();
         ui->passLabel3->hide();
         ui->passEdit3->hide();
-        ui->passLabelDuration->show();
-        ui->passEditDuration->show();
-        ui->passLabelMixStakeOnly->show();
-        ui->passCheckBoxMixStakeOnly->show();
-        ui->passEditDuration->setValidator( new QIntValidator(0, 1000000000, this) );
-        setWindowTitle(tr("Unlock wallet"));
+        setWindowTitle(tr("Unlock wallet for mixing only"));
         break;
     case Unlock: // Ask passphrase
         ui->warningLabel->setText(tr("This operation needs your wallet passphrase to unlock the wallet."));
@@ -74,11 +63,6 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget* parent) : QDialog(
         ui->passEdit2->hide();
         ui->passLabel3->hide();
         ui->passEdit3->hide();
-        ui->passLabelDuration->show();
-        ui->passEditDuration->show();
-        ui->passLabelMixStakeOnly->show();
-        ui->passCheckBoxMixStakeOnly->show();
-        ui->passEditDuration->setValidator( new QIntValidator(0, 1000000000, this) );
         setWindowTitle(tr("Unlock wallet"));
         break;
     case Decrypt: // Ask passphrase
@@ -186,7 +170,7 @@ void AskPassphraseDialog::accept()
         if (model->getWallet()->WalletNeedsUpgrading()) {
             QMessageBox::StandardButton reply;
             ui->buttonBox->clear();
-            ui->capsLabel->setText(tr("Rescanning... Please wait, this may take several minutes."));
+            ui->statuslabel->setText(tr("Rescanning... Please wait, this may take several minutes."));
             reply = QMessageBox::question(this, QObject::tr("Confirm Additional Operations"), QObject::tr("The current wallet needs to be upgraded to a newer version. This will require the creation of new keys and a full rescan. This may take several minutes to complete. Continue?"), QMessageBox::Yes|QMessageBox::No);
 
             if (reply == QMessageBox::No) {
@@ -195,7 +179,7 @@ void AskPassphraseDialog::accept()
             }
         }
 
-        if (!model->setWalletLocked(false, oldpass, ui->passEditDuration->text().toLongLong(), ui->passCheckBoxMixStakeOnly->isChecked())) {
+        if (!model->setWalletLocked(false, oldpass, mode == UnlockMixing)) {
             QMessageBox::critical(this, tr("Wallet unlock failed"),
                 tr("The passphrase entered for the wallet decryption was incorrect."));
         } else {

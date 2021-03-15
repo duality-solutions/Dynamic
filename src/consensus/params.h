@@ -81,13 +81,6 @@ struct Params {
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
     int64_t nMinimumChainWork;
-    /**Proof of Stake parameters */
-    uint256 posLimit;
-    int64_t nPosTargetSpacing;
-    int64_t nTargetPosTimespan;
-    int nStakeMinDepth;
-    int64_t nStakeMinAge;
-    int64_t nMaxClockDrift;
 
     uint256 defaultAssumeValid;
 

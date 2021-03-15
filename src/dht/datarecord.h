@@ -13,6 +13,10 @@
 #include "dht/datachunk.h"
 #include "dht/dataheader.h"
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 namespace DHT {
     enum DataMode : std::uint8_t {
       Put = 1,

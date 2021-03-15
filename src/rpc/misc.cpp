@@ -95,7 +95,6 @@ UniValue getinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("balance", ValueFromAmount(pwalletMain->GetBalance())));
         if (!fLiteMode)
             obj.push_back(Pair("privatesend_balance", ValueFromAmount(pwalletMain->GetAnonymizedBalance())));
-        obj.push_back(Pair("stake",         ValueFromAmount(pwalletMain->GetStake())));
     }
 #endif
     obj.push_back(Pair("blocks", (int)chainActive.Height()));
@@ -109,8 +108,6 @@ UniValue getinfo(const JSONRPCRequest& request)
     if (pwalletMain) {
         obj.push_back(Pair("keypoololdest", pwalletMain->GetOldestKeyPoolTime()));
         obj.push_back(Pair("keypoolsize", (int)pwalletMain->GetKeyPoolSize()));
-        obj.push_back(Pair("encrypted",   pwalletMain->IsCrypted()));
-        obj.push_back(Pair("mixstakeonly",   fWalletUnlockMixStakeOnly));
     }
     if (pwalletMain && pwalletMain->IsCrypted())
         obj.push_back(Pair("unlocked_until", nWalletUnlockTime));
@@ -1104,54 +1101,6 @@ UniValue echo(const JSONRPCRequest& request)
     return request.params;
 }
 
-#ifdef ENABLE_WALLET
-UniValue getstakingstatus(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getstakingstatus\n"
-            "\nReturns an object containing various staking information.\n"
-
-            "\nResult:\n"
-            "{\n"
-            "  \"walletunlocked\": true|false,     (boolean) if the wallet is unlocked\n"
-            "  \"mintablecoins\": true|false,      (boolean) if the wallet has mintable coins\n"
-            "  \"enoughcoins\": true|false,        (boolean) if available coins are greater than reserve balance\n"
-            "  \"dnsync\": true|false,             (boolean) if dynode data is synced\n"
-            "  \"staking status\": true|false,     (boolean) if the wallet is staking or not\n"
-            "}\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("getstakingstatus", "") + HelpExampleRpc("getstakingstatus", ""));
-
-    if (!sporkManager.IsSporkActive(SPORK_31_PROOF_OF_STAKE_ENABLED ))
-        throw JSONRPCError(RPC_PROOF_OF_STAKE_INACTIVE, strprintf("Proof of Stake is not yet activated."));
-
-#ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
-#else
-    LOCK(cs_main);
-#endif
-    
-    UniValue obj(UniValue::VOBJ);
-    if (pwalletMain) {
-        obj.push_back(Pair("walletunlocked", !pwalletMain->IsLocked()));
-        obj.push_back(Pair("mintablecoins", pwalletMain->MintableCoins()));
-        obj.push_back(Pair("enoughcoins", nReserveBalance <= pwalletMain->GetBalance()));
-    }
-    obj.push_back(Pair("dnsync", dynodeSync.IsSynced()));
-
-    bool nStaking = false;
-    if (mapHashedBlocks.count(chainActive.Tip()->nHeight))
-        nStaking = true;
-    else if (mapHashedBlocks.count(chainActive.Tip()->nHeight - 1) && nLastCoinStakeSearchInterval)
-        nStaking = true;
-    obj.push_back(Pair("staking status", nStaking));
-
-    return obj;
-}
-#endif // ENABLE_WALLET
-
 static const CRPCCommand commands[] =
     {
         //  category              name                      actor (function)         okSafe argNames
@@ -1176,7 +1125,6 @@ static const CRPCCommand commands[] =
 
         /* Dynamic features */
         {"dynamic", "dnsync", &dnsync, true, {}},
-        {"dynamic", "getstakingstatus", &getstakingstatus, true, {}},
         {"dynamic", "spork", &spork, true, {"value"}},
 
         /* Not shown in help */

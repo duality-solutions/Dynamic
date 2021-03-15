@@ -17,6 +17,10 @@
 #include <string>
 #include <vector>
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 /** Template base class for fixed-sized opaque blobs. */
 template <unsigned int BITS>
 class base_blob
