@@ -1423,7 +1423,7 @@ bool CX509Certificate::ValidatePEM(std::string& errorMessage) const
         std::string PEMSerialNumber = GetPEMSerialNumber();
         if (PEMSerialNumber != certSerialNumber)
         {
-            errorMessage = "Certificate SerialNumber does not match PEM";
+            errorMessage = "Certificate SerialNumber does not match PEM certSerialNumber=" + certSerialNumber + " PEMSerialNumber=" +  PEMSerialNumber;
             return false;
         }
 

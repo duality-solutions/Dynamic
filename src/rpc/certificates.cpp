@@ -140,7 +140,7 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
 
     //can't get serialnumber until subject and issuer are set
     //txCertificateCA.SetSerialNumber();
-    txCertificateCA.SerialNumber = GetTimeMicros();
+    txCertificateCA.SerialNumber = GetTime();
 
     //see if serial number already exists. reject if it does
     CX509Certificate certificateSerial;
@@ -166,11 +166,11 @@ static UniValue NewRootCA(const JSONRPCRequest& request)
 
     //Validate PEM
     if (!txCertificateCA.ValidatePEM(strMessage))
-        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid PEM certificate transaction. %s", strMessage));
 
     //Validate BDAP values
     if (!txCertificateCA.ValidateValues(strMessage))
-        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid certificate transaction. %s", strMessage));
+        throw JSONRPCError(RPC_BDAP_CERTIFICATE_INVALID, strprintf("Invalid value(s) in certificate transaction. %s", strMessage));
 
     // Create BDAP operation script
     // OP_BDAP_CERTIFICATE
@@ -537,7 +537,7 @@ static UniValue ApproveCertificate(const JSONRPCRequest& request)
 
     //can't get serialnumber until subject and issuer are set
     //txCertificate.SetSerialNumber();
-    txCertificate.SerialNumber = GetTimeMicros();
+    txCertificate.SerialNumber = GetTime();
 
     //check if serial number already exists. reject if it does
     CX509Certificate certificateSerial;
