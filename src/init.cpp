@@ -25,8 +25,6 @@
 #include "bdap/linkingdb.h"
 #include "bdap/linkmanager.h"
 #include "dht/ed25519.h"
-#include "dht/session.h"
-#include "dht/mutabledb.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -287,7 +285,7 @@ void PrepareShutdown()
     /// module was initialized.
     RenameThread("dynamic-shutoff");
     mempool.AddTransactionsUpdated(1);
-    StopTorrentDHTNetwork();
+    //StopTorrentDHTNetwork();
     StopHTTPRPC();
     StopREST();
     StopRPC();
@@ -381,8 +379,8 @@ void PrepareShutdown()
         delete pLinkManager;
         pLinkManager = NULL;
         // LibTorrent DHT Netowrk Services
-        delete pMutableDataDB;
-        pMutableDataDB = NULL;
+        //delete pMutableDataDB;
+        //pMutableDataDB = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1743,7 +1741,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
-                delete pMutableDataDB;
+                //delete pMutableDataDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1764,7 +1762,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
-                pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
+                //pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
@@ -2141,8 +2139,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // Start the DHT Torrent networks in the background
-    const bool fMultiSessions = GetArg("-multidhtsessions", true);
-    StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
+    //const bool fMultiSessions = GetArg("-multidhtsessions", false);
+    //StartTorrentDHTNetwork(fMultiSessions, chainparams, connman);
     // ********************************************************* Step 13: finished
 
     SetRPCWarmupFinished();
