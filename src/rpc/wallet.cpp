@@ -10,6 +10,7 @@
 #include "amount.h"
 #include "base58.h"
 #include "chain.h"
+#include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
@@ -483,6 +484,10 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     if (nOpAmount <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
 
+    //NOTE: nDataAmount cannot be 0
+    if (nDataAmount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount. Data and operation amounts must be greater than zero.");
+
     if (nDataAmount + nOpAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
@@ -528,7 +533,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
 
     if (nOneTimeFee + nDepositFee > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendLinkingTransaction insufficient funds");
-
+    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -575,7 +580,7 @@ void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealt
 
     if (nColorAmount > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strprintf("%s insufficient funds", __func__));
-
+    
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
     CAmount nFeeRequired;
@@ -1028,7 +1033,6 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
 
     return ValueFromAmount(nAmount);
 }
-
 
 UniValue getreceivedbyaccount(const JSONRPCRequest& request)
 {
@@ -2342,6 +2346,15 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+// Used only in one place - WalletModel::setWalletLocked.
+void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds)
+{
+    wallet->TopUpKeyPoolCombo(); //TopUpKeyPool();
+
+    LOCK(cs_nWalletUnlockTime);
+    nWalletUnlockTime = GetTime() + nSeconds;
+    RPCRunLater("lockwallet", boost::bind(LockWallet, wallet), nSeconds);
+}
 
 UniValue walletpassphrasechange(const JSONRPCRequest& request)
 {
@@ -2749,6 +2762,34 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     return obj;
 }
 
+UniValue printAddresses()
+{
+    std::vector<COutput> vCoins;
+    pwalletMain->AvailableCoins(vCoins);
+    std::map<std::string, double> mapAddresses;
+    for (const COutput& out : vCoins) {
+        CTxDestination utxoAddress;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, utxoAddress);
+        std::string strAdd = CDynamicAddress(utxoAddress).ToString();
+
+        if (mapAddresses.find(strAdd) == mapAddresses.end()) //if strAdd is not already part of the map
+            mapAddresses[strAdd] = (double)out.tx->tx->vout[out.i].nValue / (double)COIN;
+        else
+            mapAddresses[strAdd] += (double)out.tx->tx->vout[out.i].nValue / (double)COIN;
+    }
+
+    UniValue ret(UniValue::VARR);
+    for (std::map<std::string, double>::const_iterator it = mapAddresses.begin(); it != mapAddresses.end(); ++it) {
+        UniValue obj(UniValue::VOBJ);
+        const std::string* strAdd = &(*it).first;
+        const double* nBalance = &(*it).second;
+        obj.push_back(Pair("Address ", *strAdd));
+        obj.push_back(Pair("Balance ", *nBalance));
+        ret.push_back(obj);
+    }
+
+    return ret;
+}
 
 UniValue keepass(const JSONRPCRequest& request)
 {

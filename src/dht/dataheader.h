@@ -10,6 +10,10 @@
 #include <string>
 #include <vector>
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 namespace DHT {
     enum DataFormat : std::uint32_t {
       Undefined = 0,
@@ -122,7 +126,7 @@ public:
         return *this;
     }
  
-    inline bool IsNull() const { return (nFormat == 7); }
+    inline bool IsNull() const { return (nFormat == DHT::DataFormat::Null); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 

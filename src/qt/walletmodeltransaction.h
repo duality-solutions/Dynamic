@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_QT_WALLETMODELTRANSACTION_H
 #define DYNAMIC_QT_WALLETMODELTRANSACTION_H
 
+#include "amount.h"
 #include "walletmodel.h"
 
 #include <QObject>

@@ -8,6 +8,7 @@
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "util.h"
 #include "utilstrencodings.h"
+#include "utiltime.h"
 
 #include <string>
 #include <vector>
@@ -57,6 +58,7 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
         InitPut();
     }
     else {
+        fIsNull = true;
         InitClear();
     }
     dataHeader.SetHex();
@@ -115,6 +117,7 @@ bool CDataRecord::InitPut()
         dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
         dataHeader.nDataSize = size;
+        dataHeader.nTimeStamp = GetTime();
     }
     else
     {
@@ -125,23 +128,21 @@ bool CDataRecord::InitPut()
         dataHeader.nChunkSize = vchRaw.size();
         dataHeader.nIndexLocation = 0;
         dataHeader.nDataSize = vchRaw.size();
+        dataHeader.nTimeStamp = GetTime();
     }
     return true;
 }
 
 bool CDataRecord::InitClear()
 {
-    std::string strNullValue = ZeroString();
-    for(unsigned int i = 0; i < nTotalSlots; i++) {
-        uint16_t nPlacement = i + 1;
-        std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
-        CDataChunk chunk(i, nPlacement, strSalt, strNullValue);
-        vChunks.push_back(chunk);
-    }
-    dataHeader.nChunks = nTotalSlots;
+    dataHeader.nVersion = 0; // unencrypted
+    dataHeader.nExpireTime = 0;
+    dataHeader.nChunks = 0;
     dataHeader.nChunkSize = 0;
+    dataHeader.nDataSize = 0;
+    dataHeader.nFormat = DHT::DataFormat::Null;
     dataHeader.nIndexLocation = 0;
-
+    dataHeader.nTimeStamp = GetTime();
     return true;
 }
 
@@ -174,18 +175,22 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
     } else {
         vchUnHexValue = vchChunks;
     }
-    if (vchUnHexValue.size() != dataHeader.nDataSize)
-    {
-        LogPrintf("CDataRecord::%s --Warning, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
+    if (dataHeader.nFormat == DHT::DataFormat::Null) {
+        fIsNull = true;
+        LogPrintf("CDataRecord::%s -- Null value found", __func__);
     }
+
+    if (vchUnHexValue.size() != dataHeader.nDataSize) {
+        LogPrintf("CDataRecord::%s -- Error, data size in header (%d) mismatches the total size (%d) from all chunks (%d).\n", __func__, dataHeader.nDataSize, vchUnHexValue.size(), dataHeader.nChunks);
+        return false;
+    }
+
     if (dataHeader.nVersion == 0) {
         vchData = vchChunks;
     }
     else if (dataHeader.nVersion == 1) {
-
-        if (!Decrypt(privateKey, vchUnHexValue, vchData, strErrorMessage)) {
+        if (!Decrypt(privateKey, vchUnHexValue, vchData, strErrorMessage))
             return false;
-        }
     }
     else {
         strErrorMessage = "Unsupported version.";

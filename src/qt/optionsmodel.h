@@ -12,10 +12,6 @@
 
 #include <QAbstractListModel>
 
-QT_BEGIN_NAMESPACE
-class QNetworkProxy;
-QT_END_NAMESPACE
-
 /** Interface from Qt to configuration data structure for Dynamic client.
    To Qt, the options are presented as a list with the different options
    laid out vertically.
@@ -50,6 +46,7 @@ public:
         ThreadsScriptVerif,      // int
         DatabaseCache,           // int
         SpendZeroConfChange,     // bool
+        HideOrphans,             // bool
         ShowDynodesTab,          // bool
         ShowAdvancedPSUI,        // bool
         ShowPrivateSendPopups,   // bool
@@ -76,7 +73,6 @@ public:
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
     QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
-    bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
     bool getShowAdvancedPSUI() { return fShowAdvancedPSUI; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
@@ -95,6 +91,7 @@ private:
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
+    bool fHideOrphans;
     bool fShowAdvancedPSUI;
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;
@@ -110,6 +107,7 @@ Q_SIGNALS:
     void privateSentAmountChanged();
     void advancedPSUIChanged(bool);
     void coinControlFeaturesChanged(bool);
+    void hideOrphansChanged(bool);
     void hideTrayIconChanged(bool);
 };
 

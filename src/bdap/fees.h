@@ -48,7 +48,7 @@ public:
     CFeeItem(const int32_t& type, const CAmount& fee, const unsigned int& start, const unsigned int& end) : nVersion(CURRENT_VERSION), nType(type), Fee(fee), nStartHeight(start), nEndHeight(end) {}
 };
 
-bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee);
+bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nQuantity, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee);
 bool ExtractAmountsFromTx(const CTransactionRef& ptx, CAmount& dataAmount, CAmount& opAmount);
 
 #endif // DYNAMIC_BDAP_FEES_H

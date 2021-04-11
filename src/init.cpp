@@ -15,6 +15,8 @@
 #include "addrman.h"
 #include "amount.h"
 #include "base58.h"
+#include "bdap/auditdb.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "chain.h"
 #include "chainparams.h"
@@ -366,6 +368,10 @@ void PrepareShutdown()
         pBanAccountDB = NULL;
         // BDAP Services DB's
         delete pDomainEntryDB;
+        delete pAuditDB;
+        pAuditDB = NULL;
+        delete pCertificateDB;
+        pCertificateDB = NULL;
         pDomainEntryDB = NULL;
         delete pLinkDB;
         pLinkDB = NULL;
@@ -711,6 +717,10 @@ std::string LicenseInfo()
            FormatParagraph(strprintf(_("Copyright (C) 2009-%i The Bitcoin Core Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(strprintf(_("Copyright (C) 2014-%i The Dash Developers"), COPYRIGHT_YEAR)) + "\n" +
+           "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2017-%i The Particl Core developers"), COPYRIGHT_YEAR)) + "\n" +
+           "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2003-%i Arvid Norberg"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(_("This is experimental software.")) + "\n" +
            "\n" +
@@ -1257,6 +1267,13 @@ bool AppInitParameterInteraction()
     RegisterWalletRPCCommands(tableRPC);
 #endif
 
+    if (IsArgSet("-reservebalance")) {
+        if (!ParseMoney(GetArg("-reservebalance", ""), nReserveBalance)) {
+            InitError(_("Invalid amount for -reservebalance=<amount>"));
+            return false;
+        }
+    }
+    
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
     if (nConnectTimeout <= 0)
         nConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -1718,6 +1735,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pBanAccountDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
+                delete pAuditDB;
+                delete pCertificateDB;
                 delete pLinkDB;
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
@@ -1737,6 +1756,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pBanAccountDB = new CBanAccountDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pAuditDB = new CAuditDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pCertificateDB = new CCertificateDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkDB = new CLinkDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB

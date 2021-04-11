@@ -31,4 +31,17 @@ CBlockIndex* GetLastCheckpoint(const CCheckpointData& data)
     return NULL;
 }
 
+bool fEnabled = true;
+
+bool CheckBlock(int nHeight, const uint256& hash, bool fMatchesCheckpoint)
+{
+    if (!fEnabled)
+        return true;
+
+    const MapCheckpoints& checkpoints = Params().Checkpoints().mapCheckpoints;
+    MapCheckpoints::const_iterator i = checkpoints.find(nHeight);
+    // If looking for an exact match, then return false
+    if (i == checkpoints.end()) return !fMatchesCheckpoint;
+    return hash == i->second;
+}
 } // namespace Checkpoints

@@ -107,14 +107,14 @@ void CDynodeMan::AskForDN(CNode* pnode, const COutPoint& outpoint, CConnman& con
                 return;
             }
             // we asked this node for this outpoint but it's ok to ask again already
-            LogPrintf("CDynodeMan::AskForDN -- Asking same peer %s for missing Dynode entry again: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
+            LogPrint("dynode", "CDynodeMan::AskForDN -- Asking same peer %s for missing Dynode entry again: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
         } else {
             // we already asked for this outpoint but not this node
-            LogPrintf("CDynodeMan::AskForDN -- Asking new peer %s for missing Dynode entry: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
+            LogPrint("dynode", "CDynodeMan::AskForDN -- Asking new peer %s for missing Dynode entry: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
         }
     } else {
         // we never asked any node for this outpoint
-        LogPrintf("CDynodeMan::AskForDN -- Asking peer %s for missing Dynode entry for the first time: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeMan::AskForDN -- Asking peer %s for missing Dynode entry for the first time: %s\n", addrSquashed.ToString(), outpoint.ToStringShort());
     }
     mWeAskedForDynodeListEntry[outpoint][addrSquashed] = GetTime() + PSEG_UPDATE_SECONDS;
 
@@ -1470,18 +1470,18 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
 
         CDynode* pdn1 = Find(dnv.dynodeOutpoint1);
         if (!pdn1) {
-            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- can't find Dynode1 %s\n", dnv.dynodeOutpoint1.ToStringShort());
+            LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- can't find Dynode1 %s\n", dnv.dynodeOutpoint1.ToStringShort());
             return;
         }
 
         CDynode* pdn2 = Find(dnv.dynodeOutpoint2);
         if (!pdn2) {
-            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- can't find Dynode %s\n", dnv.dynodeOutpoint2.ToStringShort());
+            LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- can't find Dynode %s\n", dnv.dynodeOutpoint2.ToStringShort());
             return;
         }
 
         if (pdn1->addr != dnv.addr) {
-            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- addr %s does not match %s\n", dnv.addr.ToString(), pdn1->addr.ToString());
+            LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- addr %s does not match %s\n", dnv.addr.ToString(), pdn1->addr.ToString());
             return;
         }
 
@@ -1490,12 +1490,12 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
             uint256 hash2 = dnv.GetSignatureHash2(blockHash);
 
             if (!CHashSigner::VerifyHash(hash1, pdn1->pubKeyDynode, dnv.vchSig1, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
+                LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
                 return;
             }
 
             if (!CHashSigner::VerifyHash(hash2, pdn2->pubKeyDynode, dnv.vchSig2, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
+                LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
                 return;
             }
         } else {
@@ -1504,12 +1504,12 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
                 dnv.dynodeOutpoint1.ToStringShort(), dnv.dynodeOutpoint2.ToStringShort());
 
             if (!CMessageSigner::VerifyMessage(pdn1->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode1 failed, error: %s\n", strError);
+                LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode1 failed, error: %s\n", strError);
                 return;
             }
 
             if (!CMessageSigner::VerifyMessage(pdn2->pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode2 failed, error: %s\n", strError);
+                LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode2 failed, error: %s\n", strError);
                 return;
             }
         }
@@ -1519,7 +1519,7 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
         }
         dnv.Relay();
 
-        LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- verified Dynode %s for addr %s\n",
+        LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- verified Dynode %s for addr %s\n",
             pdn1->outpoint.ToStringShort(), pdn1->addr.ToString());
 
         // increase ban score for everyone else with the same addr

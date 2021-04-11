@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2020 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -32,7 +32,7 @@ public:
     uint32_t Category() const { return category; }
     std::string What() const { return what; }
     std::int64_t Timestamp() const { return timestamp; }
-    std::string ToString() const;
+    virtual std::string ToString() const;
 
     inline CEvent operator=(const CEvent& b) {
         message = b.Message();
@@ -66,6 +66,7 @@ public:
     std::string Signature() const { return signature; }
     bool Authoritative() const { return authoritative; }
     std::string InfoHash() const { return infohash; }
+    std::string RecordInfoHash() const;
 
     inline friend bool operator==(const CMutableGetEvent& a, const CMutableGetEvent& b) {
         return (a.ToString() == b.ToString() && a.PublicKey() == b.PublicKey() && a.Salt() == b.Salt() && a.SequenceNumber() == b.SequenceNumber());
@@ -74,6 +75,8 @@ public:
     inline friend bool operator!=(const CMutableGetEvent& a, const CMutableGetEvent& b) {
         return !(a == b);
     }
+
+    std::string ToString() const override;
 
     inline CMutableGetEvent operator=(const CMutableGetEvent& b) {
         pubkey = b.PublicKey();

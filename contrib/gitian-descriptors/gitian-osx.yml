@@ -1,6 +1,4 @@
----
-name: "dynamic-osx-2.4.4.1"
-enable_cache: true
+name: "dynamic-osx-2.5.0.0"
 suites:
 - "trusty"
 architectures:
