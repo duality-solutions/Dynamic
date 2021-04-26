@@ -912,7 +912,6 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("mybdapaccounts", ""));
 
-    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
