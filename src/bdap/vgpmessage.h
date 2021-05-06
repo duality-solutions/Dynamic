@@ -183,12 +183,15 @@ uint256 GetSubjectIDFromKey(const CKeyEd25519& key);
 bool ReceivedMessage(const uint256& messageHash);
 void CleanupRecentMessageLog();
 void CleanupMyMessageMap();
+
+#ifdef ENABLE_WALLET
 bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage);
 void AddMyMessage(const CVGPMessage& message);
 void GetMyLinkMessages(const uint256& subjectID, std::vector<CUnsignedVGPMessage>& vMessages);
 void GetMyLinkMessagesByType(const std::vector<unsigned char>& vchType, const std::vector<unsigned char>& vchRecipientFQDN, std::vector<CVGPMessage>& vMessages, bool& fKeepLast);
 void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::vector<unsigned char>& vchSenderFQDN, 
                                             const std::vector<unsigned char>& vchType, std::vector<CVGPMessage>& vchMessages, bool& fKeepLast);
+#endif // ENABLE_WALLET
 void KeepLastTypeBySender(std::vector<CVGPMessage>& vMessages);
 
 #endif // DYNAMIC_BDAP_VGPMESSAGE_H
