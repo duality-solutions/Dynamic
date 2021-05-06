@@ -1121,6 +1121,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     return oLink;
 }
 
+#ifdef ENABLE_WALLET
 static UniValue GetAccountMessages(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 4 || request.params.size() < 3)
@@ -1263,6 +1264,7 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     }
     return oMessages;
 }
+#endif // ENABLE_WALLET
 
 UniValue link(const JSONRPCRequest& request) 
 {
