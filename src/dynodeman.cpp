@@ -23,6 +23,7 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "warnings.h"
+#include "bdap/stealth.h"
 
 /** Dynode manager */
 CDynodeMan dnodeman;
