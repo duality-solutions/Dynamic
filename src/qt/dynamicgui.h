@@ -8,10 +8,6 @@
 #ifndef DYNAMIC_QT_DYNAMICGUI_H
 #define DYNAMIC_QT_DYNAMICGUI_H
 
-#if defined(HAVE_CONFIG_H)
-#include "config/dynamic-config.h"
-#endif
-
 #include "amount.h"
 
 #include <QLabel>

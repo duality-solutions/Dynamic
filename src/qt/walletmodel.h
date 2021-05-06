@@ -10,7 +10,9 @@
 
 #include "walletmodeltransaction.h"
 
+#include "script/standard.h"
 #include "support/allocators/secure.h"
+
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif // ENABLE_WALLET
@@ -28,6 +30,7 @@ class TransactionTableModel;
 class WalletModelTransaction;
 
 class CCoinControl;
+class CKey;
 class CKeyID;
 class COutPoint;
 class COutput;

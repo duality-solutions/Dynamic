@@ -256,8 +256,10 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
     // Install event filter to be able to catch status tip events (QEvent::StatusTip)
     this->installEventFilter(this);
 
+#ifdef ENABLE_WALLET
     // Initially wallet actions should be disabled
     setWalletActionsEnabled(false);
+#endif // ENABLE_WALLET
 
     // Subscribe to notifications from core
     subscribeToCoreSignals();
