@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
 {
     while (pindex && pindex->pprev)
@@ -24,50 +25,49 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
     return pindex;
 }
 
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
-{
+unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params) {
     assert(pindexLast != nullptr);
+
     if (pindexLast->nHeight + 1 <= params.nUpdateDiffAlgoHeight)
         return UintToArith256(params.powLimit).GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
 
+    return DigiShield(pindexLast, params.nPowAveragingWindow, params.AveragingWindowTimespan(), params.MinActualTimespan(), params.MaxActualTimespan(), params);
+}
+
+unsigned int DigiShield(const CBlockIndex* pindexLast, const int64_t AveragingWindow, const int64_t AveragingWindowTimespan, const int64_t MinActualTimespan, const int64_t MaxActualTimespan, const Consensus::Params& params)
+{
     // Find the first block in the averaging interval
     const CBlockIndex* pindexFirst = pindexLast;
     arith_uint256 bnTot{0};
-    for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
+
+    for (int i = 0; pindexFirst && i < AveragingWindow; i++) {
         arith_uint256 bnTmp;
         bnTmp.SetCompact(pindexFirst->nBits);
         bnTot += bnTmp;
         pindexFirst = pindexFirst->pprev;
     }
-    arith_uint256 bnAvg{bnTot / params.nPowAveragingWindow};
+
+    arith_uint256 bnAvg { bnTot / AveragingWindow };
 
     // Use medians to prevent time-warp attacks
     int64_t nLastBlockTime = pindexLast->GetMedianTimePast();
     int64_t nFirstBlockTime = pindexFirst->GetMedianTimePast();
     int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
-    LogPrint("pow", "  nActualTimespan = %d  before dampening\n", nActualTimespan);
-    nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan()) / 4;
-    LogPrint("pow", "  nActualTimespan = %d  before bounds\n", nActualTimespan);
+    nActualTimespan = AveragingWindowTimespan + (nActualTimespan - AveragingWindowTimespan) / 4;
 
-    if (nActualTimespan < params.MinActualTimespan())
-        nActualTimespan = params.MinActualTimespan();
-    if (nActualTimespan > params.MaxActualTimespan())
-        nActualTimespan = params.MaxActualTimespan();
+    if (nActualTimespan < MinActualTimespan)
+        nActualTimespan = MinActualTimespan;
+    if (nActualTimespan > MaxActualTimespan)
+        nActualTimespan = MaxActualTimespan;
 
     // Retarget
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     arith_uint256 bnNew{bnAvg};
-    bnNew /= params.AveragingWindowTimespan();
+    bnNew /= AveragingWindowTimespan;
     bnNew *= nActualTimespan;
 
     if (bnNew > bnPowLimit)
         bnNew = bnPowLimit;
-
-    /// debug print
-    LogPrint("pow", "GetNextWorkRequired RETARGET\n");
-    LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
-    LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
-    LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
 
     return bnNew.GetCompact();
 }
