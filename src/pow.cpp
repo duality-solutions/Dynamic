@@ -30,6 +30,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     if (pindexLast->nHeight + 1 <= params.nUpdateDiffAlgoHeight)
         return UintToArith256(params.powLimit).GetCompact(); // genesis block and first x (nUpdateDiffAlgoHeight) blocks use the default difficulty
+    
+    if (block.nTime < std::numeric_limits<uint64_t>::max())
+        return DigiShield(pindexLast, 5, 5 * (2 * 64), ((5 * (2 * 64)) * (100 - 32)) / 100, ((5 * (2 * 64)) * (100 + 48)) / 100, params);
 
     return DigiShield(pindexLast, params.nPowAveragingWindow, params.AveragingWindowTimespan(), params.MinActualTimespan(), params.MaxActualTimespan(), params);
 }
