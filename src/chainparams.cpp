@@ -142,7 +142,6 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = 128;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -295,7 +294,6 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = 128;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -445,7 +443,6 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = 128;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -588,7 +585,6 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = 128;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
