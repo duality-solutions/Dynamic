@@ -25,7 +25,7 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
     return pindex;
 }
 
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params) {
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader& block, const Consensus::Params& params) {
     assert(pindexLast != nullptr);
 
     if (pindexLast->nHeight + 1 <= params.nUpdateDiffAlgoHeight)
