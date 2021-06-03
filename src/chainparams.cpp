@@ -188,6 +188,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT;
         nPruneAfterHeight = 20545;
         startNewChain = false;
+        nSwitchDifficultyBlock = 722000;
 
         genesis = CreateGenesisBlock(1513619300, 626614, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
