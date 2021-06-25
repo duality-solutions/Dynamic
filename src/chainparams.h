@@ -95,6 +95,7 @@ public:
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     const std::vector<std::string>& SporkAddresses() const { return vSporkAddresses; }
     int MinSporkKeys() const { return nMinSporkKeys; }
+    uint64_t DifficultySwitchBlock() const { return nSwitchDifficultyBlock; }
 
 protected:
     CChainParams() {}
@@ -128,6 +129,7 @@ protected:
     std::string strDynodePaymentsPubKey;
     int64_t nTargetPosSpacing;
     int nFutureTimeDriftPoS;
+    uint64_t nSwitchDifficultyBlock;
 };
 
 /**

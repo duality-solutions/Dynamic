@@ -113,38 +113,31 @@ public:
     CMainParams()
     {
         strNetworkID = "main";
+        
         consensus.nRewardsStart = 5137;               // PoW Rewards begin on block 5137
         consensus.nDynodePaymentsStartBlock = 10273;  // Dynode Payments begin on block 10273
         consensus.nMinCountDynodesPaymentStart = 500; // Dynode Payments begin once 500 Dynodes exist or more.
-
         consensus.nInstantSendConfirmationsRequired = 11;
         consensus.nInstantSendKeepLock = 24;
-
         consensus.nBudgetPaymentsStartBlock = 2055;   // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
         consensus.nBudgetProposalEstablishingTime = 24 * 60 * 60;
-
         consensus.nSuperblockStartBlock = 2055;
         consensus.nSuperblockStartHash = uint256S("0000008d283128ffecb10803a3317348908fd23bc9dceaba26f6d520a387de28");
         consensus.nSuperblockCycle = 20545; // 675 (Blocks per day) x 365.25 (Days per Year) / 12 = 20545
-
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
-
         consensus.nDynodeMinimumConfirmations = 15;
-
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
+        consensus.nPowTargetSpacing = 128;
+        consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -195,6 +188,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT;
         nPruneAfterHeight = 20545;
         startNewChain = false;
+        nSwitchDifficultyBlock = 722000;
 
         genesis = CreateGenesisBlock(1513619300, 626614, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
@@ -269,41 +263,32 @@ public:
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
         consensus.nMinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
-
         consensus.nInstantSendConfirmationsRequired = 11;
         consensus.nInstantSendKeepLock = 24;
-
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60 * 20;
-
         consensus.nSuperblockStartBlock = 0;
         consensus.nSuperblockStartHash = uint256(); // do not check this on testnet
         consensus.nSuperblockCycle = 24;            // Superblocks can be issued hourly on testnet
-
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 500;
-
         consensus.nDynodeMinimumConfirmations = 1;
-
         consensus.nMajorityEnforceBlockUpgrade = 510;
         consensus.nMajorityRejectBlockOutdated = 750;
         consensus.nMajorityWindow = 1000;
-
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowAveragingWindow = 5;
-        consensus.nPowMaxAdjustUp = 32;
-        consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
+        consensus.nPowAveragingWindow = 17;
+        consensus.nPowMaxAdjustUp = 16;
+        consensus.nPowMaxAdjustDown = 32;
+        consensus.nPowTargetSpacing = 75;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -416,44 +401,36 @@ public:
     CRegTestParams()
     {
         strNetworkID = "regtest";
+
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
         consensus.nMinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
-
         consensus.nInstantSendConfirmationsRequired = 11;
         consensus.nInstantSendKeepLock = 24;
-
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60 * 20;
-
         consensus.nSuperblockStartBlock = 0;
         consensus.nSuperblockStartHash = uint256(); // do not check this on regtest
         consensus.nSuperblockCycle = 10;
-
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 100;
-
         consensus.nDynodeMinimumConfirmations = 1;
-
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-
         consensus.powLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowAveragingWindow = 5;
-        consensus.nPowMaxAdjustUp = 32;
-        consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
+        consensus.nPowAveragingWindow = 17;
+        consensus.nPowMaxAdjustUp = 16;
+        consensus.nPowMaxAdjustDown = 32;
+        consensus.nPowTargetSpacing = 75;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -562,41 +539,32 @@ public:
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
         consensus.nMinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
-
         consensus.nInstantSendConfirmationsRequired = 11;
         consensus.nInstantSendKeepLock = 24;
-
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60 * 20;
-
         consensus.nSuperblockStartBlock = 0;
         consensus.nSuperblockStartHash = uint256(); // do not check this on testnet
         consensus.nSuperblockCycle = 24;            // Superblocks can be issued hourly on testnet
-
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 500;
-
         consensus.nDynodeMinimumConfirmations = 1;
-
         consensus.nMajorityEnforceBlockUpgrade = 510;
         consensus.nMajorityRejectBlockOutdated = 750;
         consensus.nMajorityWindow = 1000;
-
         consensus.powLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowAveragingWindow = 5;
-        consensus.nPowMaxAdjustUp = 32;
-        consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
+        consensus.nPowAveragingWindow = 17;
+        consensus.nPowMaxAdjustUp = 16;
+        consensus.nPowMaxAdjustDown = 32;
+        consensus.nPowTargetSpacing = 75;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint / UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 30;        // nPowTargetTimespan / nPowTargetSpacing
-
         consensus.nMaxReorganizationDepth = 100;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
