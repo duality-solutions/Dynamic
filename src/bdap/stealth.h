@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2017-2018 The Particl Core developers
 // Copyright (c) 2014 The ShadowCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying

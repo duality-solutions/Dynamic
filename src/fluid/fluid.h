@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_PROTOCOL_H
 #define FLUID_PROTOCOL_H

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2017-2021 Duality Blockchain Solutions Developers
 
 
 #include "bdap/domainentrydb.h"
