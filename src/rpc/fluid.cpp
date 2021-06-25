@@ -157,6 +157,7 @@ UniValue gettime(const JSONRPCRequest& request)
     return GetTime();
 }
 
+#ifdef ENABLE_WALLET
 UniValue burndynamic(const JSONRPCRequest& request)
 {
 
@@ -285,26 +286,6 @@ UniValue signtoken(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue verifyquorum(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "verifyquorum \"tokenkey\"\n"
-            "\nVerify if the token provided has required quorum\n"
-            "\nArguments:\n"
-            "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
-            "\nExamples:\n" +
-            HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + 
-            HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
-
-    std::string message;
-
-    if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
-        throw std::runtime_error("Instruction does not meet minimum quorum for validity");
-
-    return "Quorum is present!";
-}
-
 UniValue consenttoken(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
@@ -342,6 +323,27 @@ UniValue consenttoken(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Message signing failed");
 
     return result;
+}
+#endif // ENABLE_WALLET
+
+UniValue verifyquorum(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "verifyquorum \"tokenkey\"\n"
+            "\nVerify if the token provided has required quorum\n"
+            "\nArguments:\n"
+            "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
+            "\nExamples:\n" +
+            HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") +
+            HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
+
+    std::string message;
+
+    if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
+        throw std::runtime_error("Instruction does not meet minimum quorum for validity");
+
+    return "Quorum is present!";
 }
 
 UniValue getfluidhistoryraw(const JSONRPCRequest& request)

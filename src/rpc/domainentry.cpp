@@ -12,13 +12,18 @@
 #include "rpc/server.h"
 #include "primitives/transaction.h"
 #include "spork.h"
-#include "wallet/wallet.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "dynode-sync.h"
+#include "base58.h"
+
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <univalue.h>
 
+#ifdef ENABLE_WALLET
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 extern void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
@@ -777,6 +782,7 @@ UniValue deletegroup(const JSONRPCRequest& request)
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return DeleteDomainEntry(request, bdapType);
 }
+#endif // ENABLE_WALLET
 
 UniValue makekeypair(const JSONRPCRequest& request)
 {
@@ -840,6 +846,7 @@ UniValue makekeypair(const JSONRPCRequest& request)
     return result;
 }
 
+#ifdef ENABLE_WALLET
 UniValue addgroup(const JSONRPCRequest& request) 
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
@@ -912,7 +919,6 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("mybdapaccounts", ""));
 
-    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
@@ -1207,6 +1213,7 @@ UniValue bdapfees(const JSONRPCRequest& request)
 
     return oFees;
 }
+#endif // ENABLE_WALLET
 
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames

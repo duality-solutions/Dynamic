@@ -107,6 +107,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"sendrawtransaction", 2, "instantsend"},
         {"sendrawtransaction", 3, "bypasslimits"},
         {"fundrawtransaction", 1, "options"},
+        {"getsubsidy", 0, "height"},
         {"gettxout", 1, "n"},
         {"gettxout", 2, "include_mempool"},
         {"gettxoutproof", 0, "txids"},

@@ -46,10 +46,8 @@ public:
         std::string getExpirationDate {""};
         std::string tableWidgetName {""};
         std::string outputmessage = "";
-
         bool hasValues = false;
 
-    
         if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
         //check if table has been previously sorted
@@ -61,32 +59,27 @@ public:
             } //if rowcount
         } //if not isempty
 
-
         //Execute proper RPC call 
         if (tableWidgetName == "tableWidget_Groups") {
             if (filterOn) {
-                if (!locked) {
-                    params.push_back("groups");
-                    jreq.params = RPCConvertValues("mybdapaccounts", params);
-                    jreq.strMethod = "mybdapaccounts";
-                }
+                params.push_back("groups");
+                jreq.params = RPCConvertValues("mybdapaccounts", params);
+                jreq.strMethod = "mybdapaccounts";
             } else {
                 jreq.params = RPCConvertValues("getgroups", params);
                 jreq.strMethod = "getgroups";
             } //(filterOn Groups)
         } else { 
             if (filterOn) {
-                if (!locked) {
-                    params.push_back("users");
-                    jreq.params = RPCConvertValues("mybdapaccounts", params);
-                    jreq.strMethod = "mybdapaccounts";
-                }
+                params.push_back("users");
+                jreq.params = RPCConvertValues("mybdapaccounts", params);
+                jreq.strMethod = "mybdapaccounts";
             } else {
                 jreq.params = RPCConvertValues("getusers", params);
                 jreq.strMethod = "getusers";
             } //(filterOn Users)
         }
-        
+
         UniValue result = UniValue(UniValue::VOBJ);
         if (jreq.strMethod != "")
         {
