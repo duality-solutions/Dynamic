@@ -114,22 +114,22 @@ C++ compilers are memory-hungry. It is recommended to have at least 3 GB of memo
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 
-It is required to build Dynamic on Ubuntu 18.04LTS(Bionic) or later due to C++14/GCC7 requirements. Also OpenSSL 1.1.0g is included in Ubuntu 18.04LTS and later, however it is suggested to use OpenSSL 1.1.1LTS.
+It is required to build Dynamic on Ubuntu 20.04LTS(Focal) or later due to C++14/GCC7 requirements. Also OpenSSL 1.1.1f is included in Ubuntu 20.04LTS and later. It is required to use OpenSSL 1.1.1LTS.
 
 Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
     
-For Ubuntu 18.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
+For Ubuntu 20.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
 
 db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).  You can add the repository using the following command:
 
-    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo add-apt-repository ppa:pivx/pivx
     sudo apt-get update
 
-Ubuntu 18.04 and later have packages for libdb 5.3.21 but using these will break binary wallet compatibility, and is not recommended.
+Ubuntu 20.04 and later have packages for libdb 5.3.21 but using these will break binary wallet compatibility, and is not recommended.
 
 for Debian 7 (Wheezy) and later:
  The oldstable repository contains db4.8 packages.
