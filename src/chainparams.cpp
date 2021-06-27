@@ -188,7 +188,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT;
         nPruneAfterHeight = 20545;
         startNewChain = false;
-        nSwitchDifficultyBlock = 722000;
+        nSwitchDifficultyBlock = 774000; // approx: August 20th, 2021
 
         genesis = CreateGenesisBlock(1513619300, 626614, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
@@ -328,6 +328,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nPruneAfterHeight = 100;
         startNewChain = false;
+        nSwitchDifficultyBlock = 5000; // ~ 1 week
 
         genesis = CreateGenesisBlock(1515641597, 747, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
@@ -463,6 +464,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT + 200;
         nPruneAfterHeight = 100;
         startNewChain = false;
+        nSwitchDifficultyBlock = 500;
 
         genesis = CreateGenesisBlock(1513619951, 1754, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
@@ -591,6 +593,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT + 300; // 33600 
         nPruneAfterHeight = 100;
         startNewChain = false;
+        nSwitchDifficultyBlock = 500000;
 
         genesis = CreateGenesisBlock(1559867972, 60883, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
