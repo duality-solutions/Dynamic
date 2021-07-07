@@ -335,7 +335,8 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        vAlertPubKey = ParseHex("04b375643a0b5fe3a9882b412be4046272528ad24576c72a933b44935a8491d52e243e905b1dd6947094984fc8e9f42d17cc1058033036d7940d9078851641a445");
+        // To import alert key:  importprivkey QPgivWGaJY1dmeFiag7NZcwfhjJ6e4KnovMSxahbAXhF4o9YNH1T
+        vAlertPubKey = ParseHex("04225c72dec8bdebe119373b5ba75ea2e769d54766093438400342bf4d53ac50845b8044cb0d879ee92255d386883044181c2627ca03e57a0ad49d372a368fe273");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nPruneAfterHeight = 100;
         startNewChain = false;
@@ -383,14 +384,12 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        vSporkAddresses = {"DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"};
+        vSporkAddresses = {"DLWYuC7SNhnqZeY87UMqJzVdMVyLzwebhE"}; // QVdXi1qyxxQwTuZ8h3Dh3YRdpMDBWv6oMs9dTmvJmGzQcnsKtdGm
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
             (0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))
-            (101, uint256S("0x00000ad8c5b094f7d6e63c658f8b29dfb2fbe49bb395bd41751d70e73e1f765b"))
-            (702, uint256S("0x000004ca904b66049dbb93c7f129dec1c9e42213d42a5983a4b6ff7f4f88a912"))
         };
 
         chainTxData = ChainTxData{
