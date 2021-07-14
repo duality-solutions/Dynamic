@@ -1618,6 +1618,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
     else if (strCommand == NetMsgType::INV) {
         vector<CInv> vInv;
+        vector<CInv> vToFetch;
         vRecv >> vInv;
         if (vInv.size() > MAX_INV_SZ) {
             LOCK(cs_main);
@@ -1647,7 +1648,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             bool fAlreadyHave = AlreadyHave(inv);
             LogPrint("net", "got inv: %s  %s peer=%d\n", inv.ToString(), fAlreadyHave ? "have" : "new", pfrom->id);
 
-#ifdef ENABLE_HEADERS_FIRST
             if (inv.type == MSG_BLOCK) {
                 UpdateBlockAvailability(pfrom->GetId(), inv.hash);
 
@@ -1660,6 +1660,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     continue;
                 }
 
+#ifdef ENABLE_HEADERS_FIRST
                 // Download if this is a nice peer, or we have no nice peers and this one might do.
                 bool fFetch = state->fPreferredDownload || (nPreferredDownload == 0 && !pfrom->fOneShot);
                 // Only actively request headers from a single peer, unless we're close to end of initial download.
@@ -1676,6 +1677,9 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexBestHeader), inv.hash));
                     LogPrint("net", "getheaders (%d) %s to peer=%d\n", pindexBestHeader->nHeight, inv.hash.ToString(), pfrom->id);
                 }
+#else
+                vToFetch.push_back(inv);
+#endif // ENABLE_HEADERS_FIRST
             } else {
                 pfrom->AddInventoryKnown(inv);
                 if (fBlocksOnly)
@@ -1687,10 +1691,12 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 #endif // ENABLE_HEADERS_FIRST
                     pfrom->AskFor(inv);
             }
-#endif // ENABLE_HEADERS_FIRST
 
             // Track requests for our stuff
             GetMainSignals().Inventory(inv.hash);
+        }
+        if (!vToFetch.empty()) {
+            connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::GETDATA, vToFetch));
         }
     }
 
@@ -2546,11 +2552,11 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         if (!mapBlockIndex.count(pblock->hashPrevBlock)) {
             if (pfrom->setBlockAskedFor.count(hashBlock)) {
                 // We already asked for this block, so lets work backwards and ask for the previous block
-                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCK, chainActive.GetLocator(), pblock->hashPrevBlock));
+                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::GETBLOCKS, chainActive.GetLocator(), pblock->hashPrevBlock));
                 pfrom->setBlockAskedFor.emplace(pblock->hashPrevBlock);
             } else {
                 // Ask to sync to this block
-                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCK, chainActive.GetLocator(), hashBlock));
+                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::GETBLOCKS, chainActive.GetLocator(), hashBlock));
                 pfrom->setBlockAskedFor.emplace(hashBlock);
             }
         } else {
