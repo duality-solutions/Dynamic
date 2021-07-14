@@ -2522,6 +2522,18 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         LogPrint("net", "received block %s peer=%d\n", pblock->GetHash().ToString(), pfrom->id);
 
+        auto hashBlock = pblock->GetHash();
+        if (!mapBlockIndex.count(pblock->hashPrevBlock)) {
+            if (pfrom->setBlockAskedFor.count(hashBlock)) {
+                // We already asked for this block, so lets work backwards and ask for the previous block
+                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCK, chainActive.GetLocator(), pblock->hashPrevBlock));
+                pfrom->setBlockAskedFor.emplace(pblock->hashPrevBlock);
+            } else {
+                // Ask to sync to this block
+                connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCK, chainActive.GetLocator(), hashBlock));
+                pfrom->setBlockAskedFor.emplace(hashBlock);
+            }
+        } else {
         // Process all blocks from whitelisted peers, even if not requested,
         // unless we're still syncing with the network.
         // Such an unrequested block may still be processed, subject to the
@@ -2543,6 +2555,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock);
         if (fNewBlock)
             pfrom->nLastBlockTime = GetTime();
+        }
 
     }
 
