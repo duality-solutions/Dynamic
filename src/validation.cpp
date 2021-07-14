@@ -4027,7 +4027,7 @@ bool FindUndoPos(CValidationState& state, int nFile, CDiskBlockPos& pos, unsigne
 
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
 {
-#if ENABLE_HEADER_VALIDATION
+#if ENABLE_HEADERS_FIRST
     // Check proof of work matches claimed amount
     if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
@@ -4036,7 +4036,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     if (block.GetBlockTime() > GetAdjustedTime())
         return state.Invalid(error("CheckBlockHeader() : block timestamp too far in the future"),
                              REJECT_INVALID, "time-too-new");
-#endif // ENABLE_HEADER_VALIDATION
+#endif // ENABLE_HEADERS_FIRST
 
     return true;
 }
@@ -4314,7 +4314,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 // Exposed wrapper for AcceptBlockHeader
 bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex)
 {
-#if ENABLE_HEADER_VALIDATION
+#if ENABLE_HEADERS_FIRST
     {
         LOCK(cs_main);
         for (const CBlockHeader& header : headers) {
@@ -4328,7 +4328,7 @@ bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidatio
         }
     }
     NotifyHeaderTip();
-#endif // ENABLE_HEADER_VALIDATION
+#endif // ENABLE_HEADERS_FIRST
     return true;
 }
 

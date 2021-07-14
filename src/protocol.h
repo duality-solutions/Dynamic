@@ -112,6 +112,7 @@ extern const char* MERKLEBLOCK;
  * @see https://bitcoin.org/en/developer-reference#getblocks
  */
 extern const char* GETBLOCKS;
+#ifdef ENABLE_HEADERS_FIRST
 /**
  * The getheaders message requests a headers message that provides block
  * headers starting from a particular point in the block chain.
@@ -119,11 +120,13 @@ extern const char* GETBLOCKS;
  * @see https://bitcoin.org/en/developer-reference#getheaders
  */
 extern const char* GETHEADERS;
+#endif // ENABLE_HEADERS_FIRST
 /**
  * The tx message transmits a single transaction.
  * @see https://bitcoin.org/en/developer-reference#tx
  */
 extern const char* TX;
+#ifdef ENABLE_HEADERS_FIRST
 /**
  * The headers message sends one or more block headers to a node which
  * previously requested certain headers with a getheaders message.
@@ -131,6 +134,7 @@ extern const char* TX;
  * @see https://bitcoin.org/en/developer-reference#headers
  */
 extern const char* HEADERS;
+#endif // ENABLE_HEADERS_FIRST
 /**
  * The block message transmits a single serialized block.
  * @see https://bitcoin.org/en/developer-reference#block
@@ -210,6 +214,7 @@ extern const char* FILTERCLEAR;
  * @see https://bitcoin.org/en/developer-reference#reject
  */
 extern const char* REJECT;
+#ifdef ENABLE_HEADERS_FIRST
 /**
  * Indicates that a node prefers to receive new block announcements via a
  * "headers" message rather than an "inv".
@@ -243,6 +248,7 @@ extern const char* GETBLOCKTXN;
  * @since protocol version 71000 as described by BIP 152
  */
 extern const char* BLOCKTXN;
+#endif // ENABLE_HEADERS_FIRST
 // Dynamic message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description

@@ -23,9 +23,13 @@ const char* INV = "inv";
 const char* GETDATA = "getdata";
 const char* MERKLEBLOCK = "merkleblock";
 const char* GETBLOCKS = "getblocks";
+#ifdef ENABLE_HEADERS_FIRST
 const char* GETHEADERS = "getheaders";
+#endif // ENABLE_HEADERS_FIRST
 const char* TX = "tx";
+#ifdef ENABLE_HEADERS_FIRST
 const char* HEADERS = "headers";
+#endif // ENABLE_HEADERS_FIRST
 const char* BLOCK = "block";
 const char* GETADDR = "getaddr";
 const char* MEMPOOL = "mempool";
@@ -37,11 +41,13 @@ const char* FILTERLOAD = "filterload";
 const char* FILTERADD = "filteradd";
 const char* FILTERCLEAR = "filterclear";
 const char* REJECT = "reject";
+#ifdef ENABLE_HEADERS_FIRST
 const char* SENDHEADERS = "sendheaders";
 const char* SENDCMPCT = "sendcmpct";
 const char* CMPCTBLOCK = "cmpctblock";
 const char* GETBLOCKTXN = "getblocktxn";
 const char* BLOCKTXN = "blocktxn";
+#endif // ENABLE_HEADERS_FIRST
 // Dynamic message types
 const char* TXLOCKREQUEST = "is";
 const char* TXLOCKVOTE = "txlvote";
@@ -104,9 +110,13 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::GETDATA,
     NetMsgType::MERKLEBLOCK,
     NetMsgType::GETBLOCKS,
+#ifdef ENABLE_HEADERS_FIRST
     NetMsgType::GETHEADERS,
+#endif // ENABLE_HEADERS_FIRST
     NetMsgType::TX,
+#ifdef ENABLE_HEADERS_FIRST
     NetMsgType::HEADERS,
+#endif // ENABLE_HEADERS_FIRST
     NetMsgType::BLOCK,
     NetMsgType::GETADDR,
     NetMsgType::MEMPOOL,
@@ -118,11 +128,13 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::FILTERADD,
     NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
+#ifdef ENABLE_HEADERS_FIRST
     NetMsgType::SENDHEADERS,
     NetMsgType::SENDCMPCT,
     NetMsgType::CMPCTBLOCK,
     NetMsgType::GETBLOCKTXN,
     NetMsgType::BLOCKTXN,
+#endif // ENABLE_HEADERS_FIRST
     // Dynamic message types
     // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
     NetMsgType::TXLOCKREQUEST,

@@ -410,6 +410,7 @@ void UpdateBlockAvailability(NodeId nodeid, const uint256& hash)
     }
 }
 
+#ifdef ENABLE_HEADERS_FIRST
 void MaybeSetPeerAsAnnouncingHeaderAndIDs(NodeId nodeid, CConnman& connman)
 {
     AssertLockHeld(cs_main);
@@ -445,6 +446,7 @@ void MaybeSetPeerAsAnnouncingHeaderAndIDs(NodeId nodeid, CConnman& connman)
         });
     }
 }
+#endif // ENABLE_HEADERS_FIRST
 
 // Requires cs_main
 bool CanDirectFetch(const Consensus::Params& consensusParams)
@@ -804,6 +806,7 @@ void PeerLogicValidation::NewPoWValidBlock(const CBlockIndex* pindex, const std:
         most_recent_compact_block = pcmpctblock;
     }
 
+#ifdef ENABLE_HEADERS_FIRST
     connman->ForEachNode([this, &pcmpctblock, pindex, &msgMaker, &hashBlock](CNode* pnode) {
         // TODO: Avoid the repeated-serialization here
         if (pnode->fDisconnect)
@@ -820,6 +823,7 @@ void PeerLogicValidation::NewPoWValidBlock(const CBlockIndex* pindex, const std:
             state.pindexBestHeaderSent = pindex;
         }
     });
+#endif // ENABLE_HEADERS_FIRST
 }
 
 void PeerLogicValidation::UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload)
@@ -880,9 +884,11 @@ void PeerLogicValidation::BlockChecked(const CBlock& block, const CValidationSta
     else if (state.IsValid() &&
              !IsInitialBlockDownload() &&
              mapBlocksInFlight.count(hash) == mapBlocksInFlight.size()) {
+#ifdef ENABLE_HEADERS_FIRST
         if (it != mapBlockSource.end()) {
             MaybeSetPeerAsAnnouncingHeaderAndIDs(it->second.first, *connman);
         }
+#endif // ENABLE_HEADERS_FIRST
     }
     if (it != mapBlockSource.end())
         mapBlockSource.erase(it);
@@ -1102,6 +1108,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         // else
                         // no response
                     } else if (inv.type == MSG_CMPCT_BLOCK) {
+#ifdef ENABLE_HEADERS_FIRST
                         // If a peer is asking for old blocks, we're almost guaranteed
                         // they won't have a useful mempool to match against a compact block,
                         // and we don't feel like constructing the object for them, so
@@ -1110,6 +1117,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                             CBlockHeaderAndShortTxIDs cmpctblock(block);
                             connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::CMPCTBLOCK, cmpctblock));
                         } else
+#endif // ENABLE_HEADERS_FIRST
                             connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCK, block));
                     }
 
@@ -1284,6 +1292,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
     }
 }
 
+#ifdef ENABLE_HEADERS_FIRST
 inline void static SendBlockTransactions(const CBlock& block, const BlockTransactionsRequest& req, CNode* pfrom, CConnman& connman)
 {
     BlockTransactions resp(req);
@@ -1300,6 +1309,7 @@ inline void static SendBlockTransactions(const CBlock& block, const BlockTransac
     CNetMsgMaker msgMaker(pfrom->GetSendVersion());
     connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::BLOCKTXN, resp));
 }
+#endif // ENABLE_HEADERS_FIRST
 
 bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman& connman, const std::atomic<bool>& interruptMsgProc)
 {
@@ -1514,6 +1524,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             State(pfrom->GetId())->fCurrentlyConnected = true;
         }
 
+#ifdef ENABLE_HEADERS_FIRST
         if (pfrom->nVersion >= SENDHEADERS_VERSION) {
             // Tell our peer we prefer to receive headers rather than inv's
             // We send this to non-NODE NETWORK peers as well, because even
@@ -1532,6 +1543,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             uint64_t nCMPCTBLOCKVersion = 1;
             connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDCMPCT, fAnnounceUsingCMPCTBLOCK, nCMPCTBLOCKVersion));
         }
+#endif
 
         pfrom->fSuccessfullyConnected = true;
     }
@@ -1585,6 +1597,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->fDisconnect = true;
     }
 
+#ifdef ENABLE_HEADERS_FIRST
     else if (strCommand == NetMsgType::SENDHEADERS) {
         LOCK(cs_main);
         State(pfrom->GetId())->fPreferHeaders = true;
@@ -1601,6 +1614,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             State(pfrom->GetId())->fSupportsDesiredCmpctVersion = true;
         }
     }
+#endif // ENABLE_HEADERS_FIRST
 
     else if (strCommand == NetMsgType::INV) {
         vector<CInv> vInv;
@@ -1750,6 +1764,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
     }
 
+#ifdef ENABLE_HEADERS_FIRST
     else if (strCommand == NetMsgType::GETBLOCKTXN) {
         BlockTransactionsRequest req;
         vRecv >> req;
@@ -1849,6 +1864,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::HEADERS, vHeaders));
     }
 
+#endif // ENABLE_HEADERS_FIRST
 
     else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::PSTX || strCommand == NetMsgType::TXLOCKREQUEST) {
         // Stop processing the transaction early if
@@ -2103,9 +2119,9 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
     }
 
+#ifdef ENABLE_HEADERS_FIRST
     else if (strCommand == NetMsgType::CMPCTBLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
     {
-#ifdef ENABLE_HEADER_VALIDATION
         CBlockHeaderAndShortTxIDs cmpctblock;
         vRecv >> cmpctblock;
 
@@ -2292,7 +2308,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
         }
 
-#endif // ENABLE_HEADER_VALIDATION
     }
 
     else if (strCommand == NetMsgType::BLOCKTXN && !fImporting && !fReindex) // Ignore blocks received while importing
@@ -2365,7 +2380,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
     else if (strCommand == NetMsgType::HEADERS && !fImporting && !fReindex) // Ignore headers received while importing
     {
-#ifdef ENABLE_HEADER_VALIDATION
         std::vector<CBlockHeader> headers;
 
         // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
@@ -2512,8 +2526,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 }
             }
         }
-#endif // ENABLE_HEADER_VALIDATION
     }
+#endif // ENABLE_HEADERS_FIRST
 
     else if (strCommand == NetMsgType::BLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
     {
@@ -3138,6 +3152,7 @@ bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interr
             const CBlockIndex* pBestIndex = NULL; // last header queued for delivery
             ProcessBlockAvailability(pto->id);    // ensure pindexBestKnownBlock is up-to-date
 
+#ifdef ENABLE_HEADERS_FIRST
             if (!fRevertToInv) {
                 bool fFoundStartingHeader = false;
                 // Try to find first header that our peer doesn't have, and
@@ -3225,6 +3240,9 @@ bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interr
                 } else
                     fRevertToInv = true;
             }
+#else
+            fRevertToInv = true;
+#endif // ENABLE_HEADERS_FIRST
             if (fRevertToInv) {
                 // If falling back to using an inv, just try to inv the tip.
                 // The last entry in vBlockHashesToAnnounce was our tip at some point
