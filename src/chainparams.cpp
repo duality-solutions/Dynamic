@@ -187,7 +187,7 @@ public:
         nDefaultPort = DEFAULT_P2P_PORT;
         nPruneAfterHeight = 20545;
         startNewChain = false;
-        nSwitchDifficultyBlock = 774000; // approx: August 20th, 2021
+        nSwitchDifficultyBlock = 795350; // approx: September 22, 2021
 
         genesis = CreateGenesisBlock(1513619300, 626614, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
