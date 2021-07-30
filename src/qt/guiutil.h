@@ -116,6 +116,12 @@ bool isObscured(QWidget* w);
 // Open debug.log
 void openDebugLogfile();
 
+// Activate, show and raise the widget
+void bringToFront(QWidget* w);
+
+// Open debug.log
+void openDebugLogfile();
+
 // Open dynamic.conf
 void openConfigfile();
 
