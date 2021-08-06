@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -33,9 +33,8 @@ public:
     Qt::SortOrder sortOrder;
 
     /** Populate tableWidget_Users via RPC call */
-    void refreshAccounts(QTableWidget* inputtable, QLabel* statusDisplay, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "")
+    void refreshAccounts(QTableWidget* inputtable, QLabel* statusDisplay, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "", bool locked = true)
     {
-
         JSONRPCRequest jreq;
         std::vector<std::string> params;
         int nNewRow = 0;
@@ -47,10 +46,8 @@ public:
         std::string getExpirationDate {""};
         std::string tableWidgetName {""};
         std::string outputmessage = "";
-
         bool hasValues = false;
 
-    
         if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
         //check if table has been previously sorted
@@ -61,7 +58,6 @@ public:
                 sortOrder = inputtable->horizontalHeader()->sortIndicatorOrder();
             } //if rowcount
         } //if not isempty
-
 
         //Execute proper RPC call 
         if (tableWidgetName == "tableWidget_Groups") {
@@ -83,23 +79,24 @@ public:
                 jreq.strMethod = "getusers";
             } //(filterOn Users)
         }
-        
+
         UniValue result = UniValue(UniValue::VOBJ);
-
-        //Handle RPC errors
-        try {
-            result = tableRPC.execute(jreq);
-        } catch (const UniValue& objError) {
-            std::string message = find_value(objError, "message").get_str();
-            outputmessage = message;
-            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
-            return;
-        } catch (const std::exception& e) {
-            outputmessage = e.what();
-            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
-            return;
+        if (jreq.strMethod != "")
+        {
+            //Handle RPC errors
+            try {
+                result = tableRPC.execute(jreq);
+            } catch (const UniValue& objError) {
+                std::string message = find_value(objError, "message").get_str();
+                outputmessage = message;
+                QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
+                return;
+            } catch (const std::exception& e) {
+                outputmessage = e.what();
+                QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
+                return;
+            }
         }
-
         inputtable->clearContents();
         inputtable->setRowCount(0);
         inputtable->setSortingEnabled(true);
@@ -266,14 +263,27 @@ void BdapAccountTableModel::refresh()
     refreshGroups();
 }
 
+bool BdapAccountTableModel::walletLocked()
+{
+    bool walletLocked = true;
+    if (bdapPage && bdapPage->getWalletModel() && bdapPage->getWalletModel()->getEncryptionStatus()) {
+        WalletModel::EncryptionStatus encStatus = bdapPage->getWalletModel()->getEncryptionStatus();
+        if (encStatus == WalletModel::EncryptionStatus::Unencrypted || encStatus == WalletModel::EncryptionStatus::Unlocked)
+        {
+            walletLocked = false;
+        }
+    }
+    return walletLocked;
+}
+
 void BdapAccountTableModel::refreshUsers()
 {
     myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
     searchUserCommon = bdapPage->getCommonUserSearch();
     searchUserPath = bdapPage->getPathUserSearch();
-
+    bool walletLocked = BdapAccountTableModel::walletLocked();
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable, userStatus, myUsersChecked, searchUserCommon, searchUserPath);
+    priv->refreshAccounts(userTable, userStatus, myUsersChecked, searchUserCommon, searchUserPath, walletLocked);
     Q_EMIT layoutChanged();
 }
 
@@ -282,9 +292,9 @@ void BdapAccountTableModel::refreshGroups()
     myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
     searchGroupCommon = bdapPage->getCommonGroupSearch();
     searchGroupPath = bdapPage->getPathGroupSearch();
-
+    bool walletLocked = BdapAccountTableModel::walletLocked();
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(groupTable, groupStatus, myGroupsChecked, searchGroupCommon, searchGroupPath);
+    priv->refreshAccounts(groupTable, groupStatus, myGroupsChecked, searchGroupCommon, searchGroupPath, walletLocked);
     Q_EMIT layoutChanged();
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2017-2018 The Particl Core developers
 // Copyright (c) 2014 The ShadowCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -223,7 +223,7 @@ int StealthShared(const CKey &secret, const ec_point &pubkey, CKey &sharedSOut)
     }
 
     // H(eQ)
-    if (!secp256k1_ecdh(secp256k1_ctx_stealth, sharedSOut.begin_nc(), &Q, secret.begin())) {
+    if (!secp256k1_ecdh(secp256k1_ctx_stealth, sharedSOut.begin_nc(), &Q, secret.begin(), nullptr, nullptr)) {
         return errorN(1, "%s: secp256k1_ctx_stealth failed.", __func__);
     }
 
@@ -275,7 +275,7 @@ int StealthSecret(const CKey &secret, const ec_point &pubkey, const ec_point &pk
     }
 
     // H(eQ)
-    if (!secp256k1_ecdh(secp256k1_ctx_stealth, sharedSOut.begin_nc(), &Q, secret.begin())) {
+    if (!secp256k1_ecdh(secp256k1_ctx_stealth, sharedSOut.begin_nc(), &Q, secret.begin(), nullptr, nullptr)) {
         return errorN(1, "%s: secp256k1_ctx_stealth failed.", __func__);
     }
 
@@ -294,7 +294,7 @@ int StealthSecret(const CKey &secret, const ec_point &pubkey, const ec_point &pk
     size_t len = 33;
     secp256k1_ec_pubkey_serialize(secp256k1_ctx_stealth, &pkOut[0], &len, &R, SECP256K1_EC_COMPRESSED); // Returns: 1 always.
     sharedSOut.SetFlags(1, 1);
-    LogPrint("stealth", "%s address from id %s, address from key %s\n", __func__, 
+    LogPrint("stealth", "%s address from id %s, address from key %s\n", __func__,
                                 CDynamicAddress(CPubKey(pkOut).GetID()).ToString(), CDynamicAddress(sharedSOut.GetPubKey().GetID()).ToString());
     return 0;
 }
@@ -318,7 +318,7 @@ int StealthSecretSpend(const CKey &scanSecret, const ec_point &ephemPubkey, cons
 
     uint8_t tmp32[32];
     // H(dP)
-    if (!secp256k1_ecdh(secp256k1_ctx_stealth, tmp32, &P, scanSecret.begin())) {
+    if (!secp256k1_ecdh(secp256k1_ctx_stealth, tmp32, &P, scanSecret.begin(), nullptr, nullptr)) {
         return errorN(1, "%s: secp256k1_ctx_stealth failed.", __func__);
     }
 
@@ -458,8 +458,8 @@ int MakeStealthData(const stealth_prefix& prefix, const CKey& sShared, const CPu
 
 int PrepareStealthOutput(const CStealthAddress &sx, CScript& scriptPubKey, std::vector<uint8_t>& vData, std::string& sError)
 {
-    LogPrint("stealth", "%s -- scan_pubkey %d, spend_pubkey %d, spend_secret_id %s, scan_secret valid %s, spend_secret_id isnull = %s\n", __func__, 
-                                 sx.scan_pubkey.size(), sx.spend_pubkey.size(), CDynamicAddress(sx.spend_secret_id).ToString(), 
+    LogPrint("stealth", "%s -- scan_pubkey %d, spend_pubkey %d, spend_secret_id %s, scan_secret valid %s, spend_secret_id isnull = %s\n", __func__,
+                                 sx.scan_pubkey.size(), sx.spend_pubkey.size(), CDynamicAddress(sx.spend_secret_id).ToString(),
                                  sx.scan_secret.IsValid() ? "True" : "False", sx.spend_secret_id.IsNull() ? "Yes" : "No");
     if (sx.IsNull()) {
         sError = "Stealth address is null.";
@@ -521,4 +521,3 @@ void ECC_Stop_Stealth()
         secp256k1_context_destroy(ctx);
     }
 }
-

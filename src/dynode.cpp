@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -460,14 +460,14 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 
     // make sure addr is valid
     if (!IsValidNetAddr()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
             outpoint.ToStringShort(), addr.ToString());
         return false;
     }
 
     // make sure signature isn't in the future (past is OK)
     if (sigTime > GetAdjustedTime() + 60 * 60) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- Signature rejected, too far into the future: Dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- Signature rejected, too far into the future: Dynode=%s\n", outpoint.ToStringShort());
         nDos = 1;
         return false;
     }
@@ -479,7 +479,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     }
 
     if (nProtocolVersion < dnpayments.GetMinDynodePaymentsProto()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", outpoint.ToStringShort(), nProtocolVersion);
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", outpoint.ToStringShort(), nProtocolVersion);
         nActiveState = DYNODE_UPDATE_REQUIRED;
     }
 
@@ -487,7 +487,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     pubkeyScript = GetScriptForDestination(pubKeyCollateralAddress.GetID());
 
     if (pubkeyScript.size() != 25) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- pubKeyCollateralAddress has the wrong size\n");
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- pubKeyCollateralAddress has the wrong size\n");
         nDos = 100;
         return false;
     }
@@ -496,7 +496,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     pubkeyScript2 = GetScriptForDestination(pubKeyDynode.GetID());
 
     if (pubkeyScript2.size() != 25) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- pubKeyDynode has the wrong size\n");
+        LogPrint("dynode", "CDynodeBroadcast::SimpleCheck -- pubKeyDynode has the wrong size\n");
         nDos = 100;
         return false;
     }
@@ -526,7 +526,7 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
     // this broadcast is older than the one that we already have - it's bad and should never happen
     // unless someone is doing something fishy
     if (pdn->sigTime > sigTime) {
-        LogPrintf("CDynodeBroadcast::Update -- Bad sigTime %d (existing broadcast is at %d) for Dynode %s %s\n",
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Bad sigTime %d (existing broadcast is at %d) for Dynode %s %s\n",
             sigTime, pdn->sigTime, outpoint.ToStringShort(), addr.ToString());
         return false;
     }
@@ -535,26 +535,26 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 
     // Dynode is banned by PoSe
     if (pdn->IsPoSeBanned()) {
-        LogPrintf("CDynodeBroadcast::Update -- Banned by PoSe, Dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Banned by PoSe, Dynode=%s\n", outpoint.ToStringShort());
         return false;
     }
 
     // IsVnAssociatedWithPubkey is validated once in CheckOutpoint, after that they just need to match
     if (pdn->pubKeyCollateralAddress != pubKeyCollateralAddress) {
-        LogPrintf("CDynodeBroadcast::Update -- Got mismatched pubKeyCollateralAddress and vin\n");
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Got mismatched pubKeyCollateralAddress and vin\n");
         nDos = 33;
         return false;
     }
 
     if (!CheckSignature(nDos)) {
-        LogPrintf("CDynodeBroadcast::Update -- CheckSignature() failed, dynode=%s\n", outpoint.ToStringShort());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- CheckSignature() failed, dynode=%s\n", outpoint.ToStringShort());
         return false;
     }
 
     // if there was no Dynode broadcast recently or if it matches our Dynode privkey...
     if (!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDynodeMode && pubKeyDynode == activeDynode.pubKeyDynode)) {
         // take the newest entry
-        LogPrintf("CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
+        LogPrint("dynode", "CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
         if (pdn->UpdateFromNewBroadcast(*this, connman)) {
             pdn->Check();
             Relay(connman);
@@ -896,7 +896,7 @@ bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos
     {
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CDynodePing::CheckAndUpdate -- Dynode ping is invalid, block hash is too old: dynode=%s  blockHash=%s\n", dynodeOutpoint.ToStringShort(), blockHash.ToString());
+            LogPrint("dynode", "CDynodePing::CheckAndUpdate -- Dynode ping is invalid, block hash is too old: dynode=%s  blockHash=%s\n", dynodeOutpoint.ToStringShort(), blockHash.ToString());
             // nDos = 1;
             return false;
         }

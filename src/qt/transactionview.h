@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -72,7 +72,8 @@ private:
     QComboBox *instantsendWidget;
     QLineEdit* addressWidget;
     QLineEdit* amountWidget;
-
+    QAction* hideOrphansAction;
+    
     QMenu* contextMenu;
     QSignalMapper* mapperThirdPartyTxUrls;
 
@@ -116,6 +117,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void chooseDate(int idx);
     void chooseType(int idx);
+    void hideOrphans(bool fHide);
+    void updateHideOrphans(bool fHide);
     void chooseWatchonly(int idx);
     void chooseInstantSend(int idx);
     void changedPrefix(const QString& prefix);

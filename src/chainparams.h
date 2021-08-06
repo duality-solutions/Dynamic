@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -71,6 +71,9 @@ public:
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** Policy: Filter transactions that do not match well-defined patterns */
     bool RequireStandard() const { return fRequireStandard; }
+    /** returns the max future time (and drift in seconds) allowed for a block in the future **/
+    int FutureBlockTimeDrift(const bool isPoS) const { return nFutureTimeDriftPoS; }
+    uint32_t MaxFutureBlockTime(uint32_t time, const bool isPoS) const { return time + FutureBlockTimeDrift(isPoS); }
     /** Require addresses specified with "-externalip" parameter to be routable */
     bool RequireRoutableExternalIP() const { return fRequireRoutableExternalIP; }
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
@@ -92,6 +95,7 @@ public:
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     const std::vector<std::string>& SporkAddresses() const { return vSporkAddresses; }
     int MinSporkKeys() const { return nMinSporkKeys; }
+    uint64_t DifficultySwitchBlock() const { return nSwitchDifficultyBlock; }
 
 protected:
     CChainParams() {}
@@ -123,6 +127,9 @@ protected:
     std::vector<std::string> vSporkAddresses;
     int nMinSporkKeys;
     std::string strDynodePaymentsPubKey;
+    int64_t nTargetPosSpacing;
+    int nFutureTimeDriftPoS;
+    uint64_t nSwitchDifficultyBlock;
 };
 
 /**

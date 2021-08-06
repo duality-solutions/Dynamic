@@ -1,7 +1,7 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
-#ifndef FLUID_MINER
-#define FLUID_MINER
+#ifndef FLUID_MINING
+#define FLUID_MINING
 
 #include "amount.h"
 #include "dbwrapper.h"
@@ -123,8 +123,7 @@ public:
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
 bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
 bool CheckFluidMiningDB();
-CAmount GetFluidMiningReward();
 
 extern CFluidMiningDB* pFluidMiningDB;
 
-#endif // FLUID_MINER
+#endif // FLUID_MINING

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,8 +40,9 @@ class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
 class CCoinsViewDB;
-class CInv;
 class CConnman;
+class CInv;
+class CKeyStore;
 class CScriptCheck;
 class CTxMemPool;
 class CValidationInterface;
@@ -203,6 +204,8 @@ extern bool fEnableReplacement;
 
 extern bool fLargeWorkForkFound;
 extern bool fLargeWorkInvalidChainFound;
+
+extern int64_t nReserveBalance;
 
 extern std::map<uint256, int64_t> mapRejectedBlocks;
 
@@ -523,6 +526,9 @@ bool PreciousBlock(CValidationState& state, const CChainParams& params, CBlockIn
 
 /** Mark a block as invalid. */
 bool InvalidateBlock(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindex);
+
+/** Remove invalidity status from a block and its descendants. */
+bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex);
 
 /** Remove invalidity status from a block and its descendants. */
 bool ResetBlockFailureFlags(CBlockIndex* pindex);

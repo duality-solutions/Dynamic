@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_PROTOCOL_H
 #define FLUID_PROTOCOL_H
@@ -77,8 +77,8 @@ public:
 };
 
 /** Standard Reward Payment Determination Functions */
-CAmount GetStandardPoWBlockPayment(const int nHeight);
-CAmount GetStandardDynodePayment(const int nHeight);
+CAmount GetStandardPoWBlockPayment(const int& nHeight);
+CAmount GetStandardDynodePayment(const int& nHeight);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount& nExpectedBlockValue, bool fDynodePaid);
 bool IsTransactionFluid(const CScript& txOut);

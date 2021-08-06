@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -109,6 +109,7 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
     typeWidget->addItem(tr("PrivateSend Collateral Payment"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSendCollateralPayment));
     typeWidget->addItem(tr("Fluid"), TransactionFilterProxy::TYPE(TransactionRecord::Fluid));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
+    typeWidget->addItem(tr("Dynode Reward"), TransactionFilterProxy::TYPE(TransactionRecord::DNReward));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
     typeWidget->addItem(tr("BDAP"), TransactionFilterProxy::TYPE(TransactionRecord::NewDomainUser) |
                                         TransactionFilterProxy::TYPE(TransactionRecord::UpdateDomainUser) |
@@ -180,6 +181,10 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
     QAction* copyTxPlainText = new QAction(tr("Copy full transaction details"), this);
     QAction* editLabelAction = new QAction(tr("Edit label"), this);
     QAction* showDetailsAction = new QAction(tr("Show transaction details"), this);
+    hideOrphansAction = new QAction(tr("Hide orphans"), this);
+
+    hideOrphansAction->setCheckable(true);
+    hideOrphansAction->setChecked(settings.value("fHideOrphans", false).toBool());
 
     contextMenu = new QMenu(this);
     contextMenu->addAction(copyAddressAction);
@@ -189,6 +194,7 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
     contextMenu->addAction(copyTxHexAction);
     contextMenu->addAction(copyTxPlainText);
     contextMenu->addAction(showDetailsAction);
+    contextMenu->addAction(hideOrphansAction);
     contextMenu->addSeparator();
     contextMenu->addAction(abandonAction);
     contextMenu->addAction(editLabelAction);
@@ -218,6 +224,7 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
     connect(copyTxPlainText, SIGNAL(triggered()), this, SLOT(copyTxPlainText()));
     connect(editLabelAction, SIGNAL(triggered()), this, SLOT(editLabel()));
     connect(showDetailsAction, SIGNAL(triggered()), this, SLOT(showDetails()));
+    connect(hideOrphansAction, SIGNAL(toggled(bool)), this, SLOT(updateHideOrphans(bool)));
 }
 
 void TransactionView::setModel(WalletModel* _model)
@@ -268,6 +275,7 @@ void TransactionView::setModel(WalletModel* _model)
                     mapperThirdPartyTxUrls->setMapping(thirdPartyTxUrlAction, listUrls[i].trimmed());
                 }
             }
+            connect(model->getOptionsModel(), SIGNAL(hideOrphansChanged(bool)), this, SLOT(updateHideOrphans(bool)));
         }
 
         // show/hide column Watch-only
@@ -279,6 +287,9 @@ void TransactionView::setModel(WalletModel* _model)
         // Update transaction list with persisted settings
         chooseType(settings.value("transactionType").toInt());
         chooseDate(settings.value("transactionDate").toInt());
+
+        // Hide orphans
+        hideOrphans(settings.value("fHideOrphans", false).toBool());
     }
 }
 
@@ -346,6 +357,28 @@ void TransactionView::chooseType(int idx)
     // Persist settings
     QSettings settings;
     settings.setValue("transactionType", idx);
+}
+
+void TransactionView::hideOrphans(bool fHide)
+{
+    if (!transactionProxyModel)
+        return;
+    transactionProxyModel->setHideOrphans(fHide);
+}
+
+void TransactionView::updateHideOrphans(bool fHide)
+{
+    QSettings settings;
+    if (settings.value("fHideOrphans", false).toBool() != fHide) {
+        settings.setValue("fHideOrphans", fHide);
+        if (model && model->getOptionsModel())
+            Q_EMIT model->getOptionsModel()->hideOrphansChanged(fHide);
+    }
+    hideOrphans(fHide);
+    // retain consistency with other checkboxes
+    if (hideOrphansAction->isChecked() != fHide)
+        hideOrphansAction->setChecked(fHide);
+
 }
 
 void TransactionView::chooseWatchonly(int idx)

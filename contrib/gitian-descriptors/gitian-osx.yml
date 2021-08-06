@@ -1,5 +1,5 @@
 ---
-name: "dynamic-osx-2.4.4.1"
+name: "dynamic-osx-2.5.0.0"
 enable_cache: true
 suites:
 - "trusty"

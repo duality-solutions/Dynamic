@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -37,7 +37,7 @@ CDHTSettings::CDHTSettings(const uint16_t ordinal, const uint16_t threads, const
     if (listen_interfaces.size() > 1) {
         listen_interfaces.pop_back(); // removes trailing comma
     }
-    LogPrintf("%s -- listening interfaces: %s\n", __func__, listen_interfaces);
+    LogPrint("dht", "%s -- listening interfaces: %s\n", __func__, listen_interfaces);
 }
 
 void CDHTSettings::LoadPeerList()
@@ -70,13 +70,13 @@ void CDHTSettings::LoadPeerList()
         strPeerList.pop_back(); // removes trailing comma
         dht_bootstrap_nodes = strPeerList;
     }
-    LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
+    LogPrint("dht", "CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
 }
 
 void CDHTSettings::LoadPeerID(const std::string& strPeerID)
 {
     peer_fingerprint = strPeerID;
-    LogPrintf("CDHTSettings::%s -- peer_fingerprint = %s\n", __func__, peer_fingerprint);
+    LogPrint("dht", "CDHTSettings::%s -- peer_fingerprint = %s\n", __func__, peer_fingerprint);
 }
 
 void CDHTSettings::LoadSettings()

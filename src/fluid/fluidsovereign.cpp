@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
 
 #include "fluidsovereign.h"

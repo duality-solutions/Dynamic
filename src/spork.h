@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -30,9 +30,11 @@ static const int SPORK_13_OLD_SUPERBLOCK_FLAG = 10012;
 static const int SPORK_14_REQUIRE_SENTINEL_FLAG = 10013;
 static const int SPORK_15_INSTANTSEND_AUTOLOCKS = 10015;
 static const int SPORK_30_ACTIVATE_BDAP = 10030;
+static const int SPORK_32_BDAP_V2 = 10032;
 
 static const int SPORK_START = SPORK_2_INSTANTSEND_ENABLED;
-static const int SPORK_END = SPORK_30_ACTIVATE_BDAP;
+static const int SPORK_END = SPORK_32_BDAP_V2;
+
 
 extern std::map<int, int64_t> mapSporkDefaults;
 extern CSporkManager sporkManager;

@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+# Copyright (c) 2018-2021 Duality Blockchain Solutions Developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -113,7 +113,6 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/session_impl.cpp                   \
   libtorrent/src/session_settings.cpp               \
   libtorrent/src/session_stats.cpp                  \
-  libtorrent/src/session_udp_sockets.cpp            \
   libtorrent/src/settings_pack.cpp                  \
   libtorrent/src/sha1.cpp                           \
   libtorrent/src/sha1_hash.cpp                      \

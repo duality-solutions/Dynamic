@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -78,6 +78,7 @@ enum RPCErrorCode {
     RPC_WALLET_ENCRYPTION_FAILED = -16,    //! Failed to encrypt the wallet
     RPC_WALLET_ALREADY_UNLOCKED = -17,     //! Wallet is already unlocked
     RPC_WALLET_NEEDS_UPGRADING = -18,      //! Wallet needs upgrading
+    RPC_WALLET_PRIV_KEY_NOT_FOUND = -19,   //! Can not get the private key from the local wallet
     //! BDAP errors
     RPC_BDAP_ERROR = -300,                 //! Unspecified BDAP error
     RPC_BDAP_SPORK_INACTIVE = -301,        //! BDAP spork is not active
@@ -85,6 +86,12 @@ enum RPCErrorCode {
     RPC_BDAP_LINK_MNGR_ERROR = -303,       //! BDAP link manager error
     RPC_BDAP_ACCOUNT_NOT_FOUND = -304,     //! BDAP account not found
     RPC_BDAP_FEE_UNKNOWN = -305,           //! BDAP fee can not be calculated
+    RPC_BDAP_AUDIT_INVALID = -306,         //! Invalid audit data
+    RPC_BDAP_INVALID_SIGNATURE = -307,     //! Invalid signature
+    RPC_BDAP_CERTIFICATE_INVALID = -308,   //! Invalid certificate data
+    RPC_BDAP_SELF_SIGNED_CERTIFICATE_NOT_ALLOWED = -309,   //! Self signed certificate not allowed
+    RPC_BDAP_CERTIFICATE_EXPORT_ERROR = -310,   //! Could not export certificate
+
     //! DHT errors
     RPC_DHT_ERROR = -400,                  //! Unspecified problem with the DHT
     RPC_DHT_NOT_STARTED = -401,            //! DHT session not started
@@ -97,7 +104,7 @@ enum RPCErrorCode {
     RPC_DHT_PUBKEY_MISMATCH = -408,        //! DHT public key mismatch
     //! Fluid errors
     RPC_FLUID_ERROR = -500,                //! Unspecified fluid error
-    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp 
+    RPC_FLUID_INVALID_TIMESTAMP = -501,    //! Invalid fluid timestamp
 };
 
 UniValue JSONRPCRequestObj(const std::string& strMethod, const UniValue& params, const UniValue& id);

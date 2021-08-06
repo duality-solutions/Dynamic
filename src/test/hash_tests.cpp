@@ -6,6 +6,7 @@
 #include "utilstrencodings.h"
 #include "test/test_dynamic.h"
 
+#include <string>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>

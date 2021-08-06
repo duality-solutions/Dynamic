@@ -1,6 +1,6 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -397,7 +397,11 @@ int CVGPMessage::ProcessMessage(std::string& strErrorMessage) const
     int nMyLinkStatus = pLinkManager->IsMyMessage(unsignedMessage.SubjectID, unsignedMessage.MessageID, unsignedMessage.nTimeStamp);
     if (nMyLinkStatus == 1)
     {
+#ifdef ENABLE_WALLET
         AddMyMessage((*this));
+#else
+        LogPrintf("%s -- Unable to add message %s to map, wallet functionality is disabled\n", __func__, unsignedMessage.ToString());
+#endif
     }
     else if (nMyLinkStatus < 0)
     {   
@@ -454,6 +458,7 @@ void CVGPMessage::MineMessage()
     LogPrintf("%s -- Milliseconds %d, nNonce %d, Hash %s\n", __func__, GetTimeMillis() - nStart, message.nNonce, GetHash().ToString());
 }
 
+#ifdef ENABLE_WALLET
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage)
 {
     if (!pLinkManager)
@@ -479,6 +484,7 @@ bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& str
 
     return true;
 }
+#endif // ENABLE_WALLET
 
 uint256 GetSubjectIDFromKey(const CKeyEd25519& key)
 {
@@ -565,6 +571,7 @@ void CleanupMyMessageMap()
     LogPrintf("%s -- Size %d\n", __func__, mapMyVGPMessages.size());
 }
 
+#ifdef ENABLE_WALLET
 bool DecryptMessage(CUnsignedVGPMessage& unsignedMessage)
 {
     CLink link;
@@ -696,6 +703,7 @@ void GetMyLinkMessagesBySubjectAndSender(const uint256& subjectID, const std::ve
         itr++;
     }
 }
+#endif // ENABLE_WALLET
 
 void KeepLastTypeBySender(std::vector<CVGPMessage>& vMessages)
 {

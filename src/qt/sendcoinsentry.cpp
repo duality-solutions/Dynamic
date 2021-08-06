@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -129,11 +129,8 @@ bool SendCoinsEntry::validate()
     // Check input validity
     bool retval = true;
 
-    // Skip checks for payment request
-    if (recipient.paymentRequest.IsInitialized())
-        return retval;
-
-    if (!model->validateAddress(ui->payTo->text())) {
+    if (!model->validateAddress(ui->payTo->text()))
+    {
         ui->payTo->setValid(false);
         retval = false;
     }
@@ -159,11 +156,6 @@ bool SendCoinsEntry::validate()
 
 SendCoinsRecipient SendCoinsEntry::getValue()
 {
-    // Payment request
-    if (recipient.paymentRequest.IsInitialized())
-        return recipient;
-
-    // Normal payment
     recipient.address = ui->payTo->text();
     recipient.label = ui->addAsLabel->text();
     recipient.amount = ui->payAmount->value();
@@ -188,25 +180,6 @@ QWidget* SendCoinsEntry::setupTabChain(QWidget* prev)
 void SendCoinsEntry::setValue(const SendCoinsRecipient& value)
 {
     recipient = value;
-
-    if (recipient.paymentRequest.IsInitialized()) // payment request
-    {
-        if (recipient.authenticatedMerchant.isEmpty()) // unauthenticated
-        {
-            ui->payTo_is->setText(recipient.address);
-            ui->memoTextLabel_is->setText(recipient.message);
-            ui->payAmount_is->setValue(recipient.amount);
-            ui->payAmount_is->setReadOnly(true);
-            setCurrentWidget(ui->SendCoins_UnauthenticatedPaymentRequest);
-        } else // authenticated
-        {
-            ui->payTo_s->setText(recipient.authenticatedMerchant);
-            ui->memoTextLabel_s->setText(recipient.message);
-            ui->payAmount_s->setValue(recipient.amount);
-            ui->payAmount_s->setReadOnly(true);
-            setCurrentWidget(ui->SendCoins_AuthenticatedPaymentRequest);
-        }
-    } else // normal payment
     {
         // message
         ui->messageTextLabel->setText(recipient.message);

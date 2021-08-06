@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -992,6 +992,39 @@ int GetNumCores()
 #else // Must fall back to hardware_concurrency, which unfortunately counts virtual cores
     return boost::thread::hardware_concurrency();
 #endif
+}
+
+template <typename Out>
+void SplitString(const std::string &s, char delim, Out result) {
+    std::istringstream iss(s);
+    std::string item;
+    while (std::getline(iss, item, delim)) {
+        *result++ = item;
+    }
+}
+
+std::vector<std::string> SplitString(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    SplitString(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+std::string TrimString(const std::string& s)
+{
+    if (s.empty()) return s;
+
+    int start = 0;
+    int end = int(s.size());
+    while (strchr(" \r\n\t", s[start]) != NULL && start < end)
+    {
+        ++start;
+    }
+
+    while (strchr(" \r\n\t", s[end-1]) != NULL && end > start)
+    {
+        --end;
+    }
+    return s.substr(start, end - start);
 }
 
 uint32_t StringVersionToInt(const std::string& strVersion)

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers 
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,13 +12,18 @@
 #include "rpc/server.h"
 #include "primitives/transaction.h"
 #include "spork.h"
-#include "wallet/wallet.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "dynode-sync.h"
+#include "base58.h"
+
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <univalue.h>
 
+#ifdef ENABLE_WALLET
 extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nDataAmount, const CAmount& nOpAmount, const bool fUseInstantSend);
 extern void SendColorTransaction(const CScript& scriptColorCoins, const CScript& stealthDataScript, CWalletTx& wtxNew, const CAmount& nColorAmount, const CCoinControl* coinControl, const bool fUseInstantSend, const bool fUsePrivateSend);
 
@@ -454,8 +459,6 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (request.params.size() >= 3) {
         if (!ParseUInt32(request.params[2].get_str(), &nMonths))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
-        if (nMonths < 0)
-            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Error: registration months must be greater than or equal to zero"));
         if (nMonths > MAX_REGISTRATION_MONTHS)
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Error: Registration period can not be more than 1,200 months (100 years)"));
     }
@@ -779,6 +782,7 @@ UniValue deletegroup(const JSONRPCRequest& request)
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return DeleteDomainEntry(request, bdapType);
 }
+#endif // ENABLE_WALLET
 
 UniValue makekeypair(const JSONRPCRequest& request)
 {
@@ -842,6 +846,7 @@ UniValue makekeypair(const JSONRPCRequest& request)
     return result;
 }
 
+#ifdef ENABLE_WALLET
 UniValue addgroup(const JSONRPCRequest& request) 
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
@@ -895,7 +900,7 @@ UniValue addgroup(const JSONRPCRequest& request)
 
 UniValue mybdapaccounts(const JSONRPCRequest& request)
 {
-    if (request.params.size() > 1)
+    if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
             "mybdapaccounts\n"
             + HelpRequiringPassphrase() +
@@ -1040,6 +1045,7 @@ UniValue getcredits(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("getcredits", ""));
 
+    EnsureWalletIsUnlocked();
     if (!pwalletMain)
         throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Error accessing wallet."));
 
@@ -1207,6 +1213,7 @@ UniValue bdapfees(const JSONRPCRequest& request)
 
     return oFees;
 }
+#endif // ENABLE_WALLET
 
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames

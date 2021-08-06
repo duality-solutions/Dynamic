@@ -75,7 +75,6 @@ struct Params {
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
-    int64_t nPowTargetTimespan;
     int64_t nPowAveragingWindow;
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
@@ -84,10 +83,13 @@ struct Params {
 
     uint256 defaultAssumeValid;
 
+    int nMaxReorganizationDepth;
+
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
     int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp)) / 100; }
     int64_t MaxActualTimespan() const { return (AveragingWindowTimespan() * (100 + nPowMaxAdjustDown)) / 100; }
-    int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
+    int64_t DifficultyAdjustmentInterval() const { return nPowTargetSpacing; }
+    int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
 };
 } // namespace Consensus
 

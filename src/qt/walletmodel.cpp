@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,6 @@
 #include "consensus/validation.h"
 #include "guiconstants.h"
 #include "guiutil.h"
-#include "paymentserver.h"
 #include "recentrequeststablemodel.h"
 #include "transactiontablemodel.h"
 
@@ -20,6 +19,7 @@
 #include "keystore.h"
 #include "net.h" // for g_connman
 #include "privatesend-client.h"
+#include "rpc/server.h"
 #include "spork.h"
 #include "sync.h"
 #include "ui_interface.h"
@@ -40,6 +40,7 @@ WalletModel::WalletModel(const PlatformStyle* platformStyle, CWallet* _wallet, O
                                                                                                                                transactionTableModel(0),
                                                                                                                                recentRequestsTableModel(0),
                                                                                                                                cachedBalance(0),
+                                                                                                                               cachedTotal(0),
                                                                                                                                cachedUnconfirmedBalance(0),
                                                                                                                                cachedImmatureBalance(0),
                                                                                                                                cachedAnonymizedBalance(0),
@@ -87,6 +88,10 @@ CAmount WalletModel::getBalance(const CCoinControl* coinControl) const
     return wallet->GetBalance();
 }
 
+CAmount WalletModel::getTotal() const
+{
+    return wallet->GetTotal();
+}
 
 CAmount WalletModel::getAnonymizedBalance() const
 {
@@ -160,6 +165,7 @@ void WalletModel::pollBalanceChanged()
 void WalletModel::checkBalanceChanged()
 {
     CAmount newBalance = getBalance();
+    CAmount newTotal = getTotal();
     CAmount newUnconfirmedBalance = getUnconfirmedBalance();
     CAmount newImmatureBalance = getImmatureBalance();
     CAmount newAnonymizedBalance = getAnonymizedBalance();
@@ -172,10 +178,11 @@ void WalletModel::checkBalanceChanged()
         newWatchImmatureBalance = getWatchImmatureBalance();
     }
 
-    if (cachedBalance != newBalance || cachedUnconfirmedBalance != newUnconfirmedBalance || cachedImmatureBalance != newImmatureBalance ||
+    if (cachedBalance != newBalance || cachedTotal != newTotal || cachedUnconfirmedBalance != newUnconfirmedBalance || cachedImmatureBalance != newImmatureBalance ||
         cachedAnonymizedBalance != newAnonymizedBalance || cachedTxLocks != nCompleteTXLocks ||
         cachedWatchOnlyBalance != newWatchOnlyBalance || cachedWatchUnconfBalance != newWatchUnconfBalance || cachedWatchImmatureBalance != newWatchImmatureBalance) {
         cachedBalance = newBalance;
+        cachedTotal = newTotal;
         cachedUnconfirmedBalance = newUnconfirmedBalance;
         cachedImmatureBalance = newImmatureBalance;
         cachedAnonymizedBalance = newAnonymizedBalance;
@@ -183,7 +190,7 @@ void WalletModel::checkBalanceChanged()
         cachedWatchOnlyBalance = newWatchOnlyBalance;
         cachedWatchUnconfBalance = newWatchUnconfBalance;
         cachedWatchImmatureBalance = newWatchImmatureBalance;
-        Q_EMIT balanceChanged(newBalance, newUnconfirmedBalance, newImmatureBalance, newAnonymizedBalance,
+        Q_EMIT balanceChanged(newBalance,  newTotal, newUnconfirmedBalance, newImmatureBalance, newAnonymizedBalance,
             newWatchOnlyBalance, newWatchUnconfBalance, newWatchImmatureBalance);
     }
 }
@@ -212,6 +219,20 @@ bool WalletModel::validateAddress(const QString& address)
     return IsValidDestination(dest);
 }
 
+void WalletModel::updateAddressBookLabels(const CTxDestination& dest, const std::string& strName, const std::string& strPurpose)
+{
+    LOCK(wallet->cs_wallet);
+
+    std::map<CTxDestination, CAddressBookData>::iterator mi = wallet->mapAddressBook.find(dest);
+
+    // Check if we have a new address or an updated label
+    if (mi == wallet->mapAddressBook.end()) {
+        wallet->SetAddressBook(dest, strName, strPurpose);
+    } else if (mi->second.name != strName) {
+        wallet->SetAddressBook(dest, strName, ""); // "" means don't change purpose
+    }
+}
+
 WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction& transaction, const CCoinControl* coinControl)
 {
     CAmount total = 0;
@@ -235,27 +256,9 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
     Q_FOREACH (const SendCoinsRecipient& rcp, recipients) {
         if (rcp.fSubtractFeeFromAmount)
             fSubtractFeeFromAmount = true;
-
-        if (rcp.paymentRequest.IsInitialized()) { // PaymentRequest...
-            CAmount subtotal = 0;
-            const payments::PaymentDetails& details = rcp.paymentRequest.getDetails();
-            for (int i = 0; i < details.outputs_size(); i++) {
-                const payments::Output& out = details.outputs(i);
-                if (out.amount() <= 0)
-                    continue;
-                subtotal += out.amount();
-                const unsigned char* scriptStr = (const unsigned char*)out.script().data();
-                CScript scriptPubKey(scriptStr, scriptStr + out.script().size());
-                CAmount nAmount = out.amount();
-                CRecipient recipient = {scriptPubKey, nAmount, rcp.fSubtractFeeFromAmount};
-                vecSend.push_back(recipient);
-            }
-            if (subtotal <= 0) {
-                return InvalidAmount;
-            }
-            total += subtotal;
-        } else { // User-entered dynamic address / amount:
-            if (!validateAddress(rcp.address)) {
+        {   // User-entered dynamic address / amount:
+            if(!validateAddress(rcp.address))
+            {
                 return InvalidAddress;
             }
             if (rcp.amount <= 0) {
@@ -283,7 +286,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
                 CTxDestination newDest;
                 if (ExtractDestination(scriptPubKey, newDest))
                     LogPrint("stealth", "%s -- Stealth send to address: %s\n", __func__, CDynamicAddress(newDest).ToString());
-            } 
+            }
             else {
                 scriptPubKey = GetScriptForDestination(dest);
             }
@@ -372,21 +375,8 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
         QList<SendCoinsRecipient> recipients = transaction.getRecipients();
 
         Q_FOREACH (const SendCoinsRecipient& rcp, recipients) {
-            if (rcp.paymentRequest.IsInitialized()) {
-                // Make sure any payment requests involved are still valid.
-                if (PaymentServer::verifyExpired(rcp.paymentRequest.getDetails())) {
-                    return PaymentRequestExpired;
-                }
-
-                // Store PaymentRequests in wtx.vOrderForm in wallet.
-                std::string key("PaymentRequest");
-                std::string value;
-                rcp.paymentRequest.SerializeToString(&value);
-                newTx->vOrderForm.push_back(make_pair(key, value));
-            } else if (!rcp.message.isEmpty()) // Message from normal dynamic:URI (dynamic:XyZ...?message=example)
-            {
+            if (!rcp.message.isEmpty()) // Message from normal dynamic:URI (dynamic:XyZ...?message=example)
                 newTx->vOrderForm.push_back(make_pair("Message", rcp.message.toStdString()));
-            }
         }
 
         CReserveKey* keyChange = transaction.getPossibleKeyChange();
@@ -401,9 +391,9 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
 
     // Add addresses / update labels that we've sent to to the address book,
     // and emit coinsSent signal for each recipient
-    Q_FOREACH (const SendCoinsRecipient& rcp, transaction.getRecipients()) {
-        // Don't touch the address book when we have a payment request
-        if (!rcp.paymentRequest.IsInitialized()) {
+    for (const SendCoinsRecipient &rcp : transaction.getRecipients())
+    {
+        {
             std::string strAddress = rcp.address.toStdString();
             CTxDestination dest = CDynamicAddress(strAddress).Get();
             std::string strLabel = rcp.label.toStdString();
@@ -472,14 +462,23 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString& passphr
     }
 }
 
-bool WalletModel::setWalletLocked(bool locked, const SecureString& passPhrase, bool fMixing)
+bool WalletModel::setWalletLocked(bool locked, const SecureString& passPhrase, int64_t nSeconds, bool fMixing)
 {
-    if (locked) {
+    if(locked)
+    {
         // Lock
         return wallet->Lock(fMixing);
-    } else {
+    }
+    else
+    {
         // Unlock
-        return wallet->Unlock(passPhrase, fMixing);
+        if (!wallet->Unlock(passPhrase))
+            return false;
+
+        if (nSeconds > 0)  // seconds
+            relockWalletAfterDuration(wallet, nSeconds);
+
+        return true;
     }
 }
 

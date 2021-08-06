@@ -43,6 +43,7 @@ DYNAMIC_TESTS =\
   test/addrman_tests.cpp \
   test/alert_tests.cpp \
   test/allocator_tests.cpp \
+  test/audit_tests.cpp \
   test/base32_tests.cpp \
   test/base58_tests.cpp \
   test/base64_tests.cpp \
@@ -55,6 +56,7 @@ DYNAMIC_TESTS =\
   test/bswap_tests.cpp \
   test/cachemap_tests.cpp \
   test/cachemultimap_tests.cpp \
+  test/certificatex509_tests.cpp \
   test/checkblock_tests.cpp \
   test/coins_tests.cpp \
   test/compress_tests.cpp \

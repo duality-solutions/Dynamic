@@ -1,9 +1,9 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2017-2021 The Particl Core developers
 // Copyright (c) 2014 The ShadowCoin developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,6 +11,7 @@
 
 #include "base58.h"
 #include "bdap/bdap.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/linkstorage.h"
@@ -23,6 +24,7 @@
 #include "core_io.h"
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"
@@ -1384,7 +1386,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         bool fIsMyStealth = false;
         if (fStealthTx || dynodeSync.IsBlockchainSynced()) {
             // Check if stealth address belongs to this wallet
-            fIsMyStealth = ScanForOwnedOutputs(tx);
+            fIsMyStealth = ScanForStealthOwnedOutputs(tx);
         }
 
         if (fExisted || IsMine(tx) || IsRelevantToMe(tx) || fIsMyStealth) {
@@ -1442,7 +1444,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     }
                 }
             } else {
-                TopUpKeyPoolCombo(0, true);
+                TopUpKeyPoolCombo();
                 for (const CTxOut& txout : tx.vout) {
                     CScript scriptPubKey = txout.scriptPubKey;
                     CTxDestination dest;
@@ -1457,6 +1459,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                     CPubKey retrievePubKey;
                     if (GetPubKey(keyID, retrievePubKey)) {
                         if (ReserveKeyForTransactions(retrievePubKey)) {
+                            TopUpKeyPoolCombo(0, true);
                             SetAddressBook(dest, "", "");
                             fNeedToRescanTransactions = true;
                         }
@@ -2168,7 +2171,7 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool f
                 ShowProgress(_("Rescanning..."), std::max(1, std::min(99, (int)((GuessVerificationProgress(chainParams.TxData(), pindex) - dProgressStart) / (dProgressTip - dProgressStart) * 100))));
             if (GetTime() >= nNow + 60) {
                 nNow = GetTime();
-                LogPrintf("Still rescanning. At block %d. Progress=%f\n", pindex->nHeight, GuessVerificationProgress(chainParams.TxData(), pindex));
+                LogPrintf("Still rescanning. At block %d. Progress=%f\n", pindex->nHeight, GuessVerificationProgress(chainParams.TxData(), pindex) * 100);
             }
 
             CBlock block;
@@ -2642,6 +2645,21 @@ CAmount CWallet::GetBalance() const
     return nTotal;
 }
 
+CAmount CWallet::GetTotal() const
+{
+    CAmount nTotal = 0;
+    {
+        LOCK2(cs_main, cs_wallet);
+        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+        {
+            const CWalletTx* pcoin = &(*it).second;
+            if (pcoin->IsTrusted())
+                nTotal += pcoin->GetAvailableCredit();
+        }
+    }
+
+    return nTotal;
+}
 
 CAmount CWallet::GetAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) const
 {
@@ -3046,6 +3064,26 @@ void CWallet::AvailableBDAPCredits(std::vector<std::pair<CTxOut, COutPoint>>& vC
             }
         }
     }
+}
+
+std::map<CDynamicAddress, std::vector<COutput> > CWallet::AvailableCoinsByAddress(bool fConfirmed, CAmount maxCoinValue)
+{
+    std::vector<COutput> vCoins;
+    AvailableCoins(vCoins, fConfirmed);
+
+    std::map<CDynamicAddress, std::vector<COutput> > mapCoins;
+    for (COutput out : vCoins) {
+        if (maxCoinValue > 0 && out.tx->tx->vout[out.i].nValue > maxCoinValue)
+            continue;
+
+        CTxDestination address;
+        if (!ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, address))
+            continue;
+
+        mapCoins[CDynamicAddress(address)].push_back(out);
+    }
+
+    return mapCoins;
 }
 
 static void ApproximateBestSubset(std::vector<std::pair<CAmount, std::pair<const CWalletTx*, unsigned int> > > vValue, const CAmount& nTotalLower, const CAmount& nTargetValue, std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
@@ -3894,7 +3932,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-    
+
     {
         std::set<std::pair<const CWalletTx*, unsigned int> > setCoins;
         std::vector<CTxPSIn> vecTxPSInTmp;
@@ -3911,7 +3949,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_account") {
+                if (strOpType == "bdap_new_account" || strOpType == "bdap_new_audit" || strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
                     // Use BDAP credits first.
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend, true);
                 }
@@ -4250,6 +4288,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     txin.scriptSig = CScript();
                 }
 
+                //TODO: Check if audits are in mempool
                 if (fIsBDAP) {
                     if (strOpType == "bdap_new_account" || strOpType == "bdap_delete_account" || strOpType == "bdap_update_account") {
                         // Check the memory pool for a pending tranaction for the same domain entry
@@ -4259,6 +4298,19 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                             return false;
                         }
                     }
+
+                    //certificates
+                    if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+                        // Check the memory pool for a pending tranaction for the same certificate (subject)
+                        CTransactionRef pTxNew = MakeTransactionRef(txNew);
+                        CX509Certificate certificate(pTxNew);
+                        if (certificate.CheckIfExistsInMemPool(mempool, strFailReason)) {
+                            return false;
+                        }
+                    }
+
+                    //TODO: audits (need to check all audit hashes)
+
                 }
 
                 // Allow to override the default confirmation target over the CoinControl instance
@@ -4793,7 +4845,7 @@ bool CWallet::TopUpKeyPoolCombo(unsigned int kpSize, bool fIncreaseSize)
             }
 
             if (fIncreaseSize) {
-                DynamicKeyPoolSize = DynamicKeyPoolSize + 1;
+                DynamicKeyPoolSize = DynamicKeyPoolSize + 2;
             } //if fIncreaseSize
 
             nTargetSize = DynamicKeyPoolSize; 
@@ -4997,9 +5049,10 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
                 foundPubKey = true;
                 KeepKey(nIndex);
                 EraseIndex = true;
+                fNeedToUpdateKeyPools = true;
                 IndexToErase = nIndex;
                 ReserveKeyCount++;
-                if (ReserveKeyCount <= DEFAULT_RESCAN_THRESHOLD) {
+                if (ReserveKeyCount < DEFAULT_KEYPOOL_SIZE) {
                     SaveRescanIndex = true;
                 }
             }
@@ -6326,7 +6379,7 @@ bool CWallet::HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript)
     return false;
 }
 
-bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
+bool CWallet::ScanForStealthOwnedOutputs(const CTransaction& tx)
 {
     bool fIsMine = false;
     CScript bdapOpScript;
@@ -6339,12 +6392,18 @@ bool CWallet::ScanForOwnedOutputs(const CTransaction& tx)
             // TODO (BDAP): Do not count BDAP OP_RETURN account.
             bool fIsData = IsDataScript(txData.scriptPubKey);
             if (fIsData) {
-                txOutData = txData;
-                fDataFound = true;
-                LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
-                break;
+                std::vector<uint8_t> vData;
+                if (GetDataFromScript(txData.scriptPubKey, vData)) {
+                    if (vData.size() < 65) {
+                        txOutData = txData;
+                        fDataFound = true;
+                        LogPrint("stealth", "%s -- ASM Script = %s, txOutData = %s\n", __func__, ScriptToAsmStr(txOutData.scriptPubKey), txOutData.ToString());
+                        break;
+                    }
+                }
             }
         }
+
         if (fDataFound) {
             int32_t nOutputId = 0;
             for (const CTxOut& txOut : tx.vout) {
@@ -6411,7 +6470,6 @@ bool CWallet::HaveStealthAddress(const CKeyID& address) const
         return true;
     return false;
 }
-
 //! End Stealth Address Support
 
 // This should be called carefully:

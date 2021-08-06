@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2017-2021 Duality Blockchain Solutions Developers
 
 
 #include "bdap/domainentrydb.h"
@@ -42,14 +42,12 @@ struct DynodeCompareTimeStamp {
     }
 };
 
-
 struct MintCompareTimeStamp {
     bool operator()(const CFluidMint& a, const CFluidMint& b)
     {
     return (a.nTimeStamp < b.nTimeStamp);
     }
 };
-
 
 struct MiningCompareTimeStamp {
     bool operator()(const CFluidMining& a, const CFluidMining& b)
@@ -159,6 +157,7 @@ UniValue gettime(const JSONRPCRequest& request)
     return GetTime();
 }
 
+#ifdef ENABLE_WALLET
 UniValue burndynamic(const JSONRPCRequest& request)
 {
 
@@ -287,26 +286,6 @@ UniValue signtoken(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue verifyquorum(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "verifyquorum \"tokenkey\"\n"
-            "\nVerify if the token provided has required quorum\n"
-            "\nArguments:\n"
-            "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
-            "\nExamples:\n" +
-            HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + 
-            HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
-
-    std::string message;
-
-    if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
-        throw std::runtime_error("Instruction does not meet minimum quorum for validity");
-
-    return "Quorum is present!";
-}
-
 UniValue consenttoken(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
@@ -344,6 +323,27 @@ UniValue consenttoken(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Message signing failed");
 
     return result;
+}
+#endif // ENABLE_WALLET
+
+UniValue verifyquorum(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "verifyquorum \"tokenkey\"\n"
+            "\nVerify if the token provided has required quorum\n"
+            "\nArguments:\n"
+            "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
+            "\nExamples:\n" +
+            HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") +
+            HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
+
+    std::string message;
+
+    if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
+        throw std::runtime_error("Instruction does not meet minimum quorum for validity");
+
+    return "Quorum is present!";
 }
 
 UniValue getfluidhistoryraw(const JSONRPCRequest& request)
@@ -447,12 +447,13 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
+
         CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
 
-        CFluidMining lastMiningRecord;
         CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
+
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));
     }
@@ -619,11 +620,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
+
         CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
-        CFluidMining lastMiningRecord;
+
         CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
+
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));
     }

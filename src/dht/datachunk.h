@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +9,10 @@
 
 #include <string>
 #include <vector>
+
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 
 static constexpr unsigned int DHT_DATA_MAX_CHUNK_SIZE = 900;
 

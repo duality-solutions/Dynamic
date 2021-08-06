@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers 
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +26,20 @@
 
 #include <univalue.h>
 
+UniValue ConvertParameterValues(const std::vector<std::string>& strParams)
+{
+    UniValue params(UniValue::VARR);
+
+    for (unsigned int idx = 0; idx < strParams.size(); idx++) {
+        const std::string& strVal = strParams[idx];
+        // insert string value directly
+        params.push_back(strVal);
+    }
+
+    return params;
+}
+
+#ifdef ENABLE_WALLET
 UniValue createrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
@@ -208,19 +222,6 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     return EncodeHexTx(rawTx);
 }
 
-UniValue ConvertParameterValues(const std::vector<std::string>& strParams)
-{
-    UniValue params(UniValue::VARR);
-
-    for (unsigned int idx = 0; idx < strParams.size(); idx++) {
-        const std::string& strVal = strParams[idx];
-        // insert string value directly
-        params.push_back(strVal);
-    }
-
-    return params;
-}
-
 UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -288,6 +289,7 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
 
     return strTxId;
 }
+#endif // ENABLE_WALLET
 
 static const CRPCCommand commands[] =
 { //  category              name                          actor (function)           okSafe argNames

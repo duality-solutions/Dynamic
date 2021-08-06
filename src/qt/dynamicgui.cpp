@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,6 +40,7 @@
 #include "init.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "validation.h"
 
 #include <iostream>
 
@@ -255,8 +256,10 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
     // Install event filter to be able to catch status tip events (QEvent::StatusTip)
     this->installEventFilter(this);
 
+#ifdef ENABLE_WALLET
     // Initially wallet actions should be disabled
     setWalletActionsEnabled(false);
+#endif // ENABLE_WALLET
 
     // Subscribe to notifications from core
     subscribeToCoreSignals();
@@ -367,7 +370,7 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(miningAction);
 
-    bdapAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&BDAP"), this);
+    bdapAction = new QAction(QIcon(":/icons/" + theme + "/bdap"), tr("&BDAP"), this);
     bdapAction->setStatusTip(tr("BDAP"));
     bdapAction->setToolTip(bdapAction->statusTip());
     bdapAction->setCheckable(true);
@@ -376,7 +379,7 @@ void DynamicGUI::createActions()
 #else
     bdapAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
 #endif
-    tabGroup->addAction(bdapAction);    
+    tabGroup->addAction(bdapAction);
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
@@ -463,7 +466,7 @@ void DynamicGUI::createActions()
     usedReceivingAddressesAction->setStatusTip(tr("Show the list of used receiving addresses and labels"));
 
     openAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), tr("Open &URI..."), this);
-    openAction->setStatusTip(tr("Open a dynamic: URI or payment request"));
+    openAction->setStatusTip(tr("Open a dynamic: URI"));
 
     mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("&Import mnemonic/private key..."), this);
     mnemonicAction->setStatusTip(tr("Import Mnemonic Phrase or Private Key"));
@@ -1105,7 +1108,7 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             tooltip += tr("Less than 60 seconds behind.");
         } else {
             tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
-        }        
+        }
         tooltip += QString("<br>");
         tooltip += tr("Transactions after this will not yet be visible.");
     } else if (fLiteMode) {
@@ -1279,15 +1282,16 @@ void DynamicGUI::showEvent(QShowEvent* event)
 void DynamicGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label)
 {
     // On new transaction, make an info balloon
-    QString msg = tr("Date: %1\n").arg(date) +
-                  tr("Amount: %1\n").arg(DynamicUnits::formatWithUnit(unit, amount, true)) +
-                  tr("Type: %1\n").arg(type);
-    if (!label.isEmpty())
-        msg += tr("Label: %1\n").arg(label);
-    else if (!address.isEmpty())
-        msg += tr("Address: %1\n").arg(address);
-    message((amount) < 0 ? tr("Sent transaction") : tr("Incoming transaction"),
-        msg, CClientUIInterface::MSG_INFORMATION);
+    message((amount) < 0 ? (tr("Sent transaction")) : tr("Incoming transaction"),
+        tr("Date: %1\n"
+           "Amount: %2\n"
+           "Type: %3\n"
+           "Address: %4\n")
+            .arg(date)
+            .arg(DynamicUnits::formatWithUnit(unit, amount, true))
+            .arg(type)
+            .arg(address),
+        CClientUIInterface::MSG_INFORMATION);
 }
 #endif // ENABLE_WALLET
 
@@ -1331,7 +1335,6 @@ bool DynamicGUI::handlePaymentRequest(const SendCoinsRecipient& recipient)
     return false;
 }
 
-
 void DynamicGUI::setHDStatus(int hdEnabled)
 {
     QString theme = GUIUtil::getThemeName();
@@ -1368,8 +1371,7 @@ void DynamicGUI::setEncryptionStatus(int status)
     case WalletModel::UnlockedForMixingOnly:
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(QIcon(":/icons/" + theme + "/lock_open").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for mixing only"));
-        encryptWalletAction->setChecked(true);
+        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked for mixing only</b>"));
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(true);
         lockWalletAction->setVisible(true);

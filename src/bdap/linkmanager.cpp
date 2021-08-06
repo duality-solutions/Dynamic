@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -104,6 +104,7 @@ std::string CLink::RecipientPubKeyString() const
     return stringFromVch(RecipientPubKey);
 }
 
+#ifdef ENABLE_WALLET
 bool CLinkManager::IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey)
 {
     if (!pwalletMain)
@@ -171,6 +172,7 @@ bool CLinkManager::GetLinkPrivateKey(const std::vector<unsigned char>& vchSender
     }
     return false;
 }
+#endif // ENABLE_WALLET
 
 bool CLinkManager::FindLink(const uint256& id, CLink& link)
 {
@@ -194,6 +196,7 @@ bool CLinkManager::FindLinkBySubjectID(const uint256& subjectID, CLink& getLink)
     return false;
 }
 
+#ifdef ENABLE_WALLET
 void CLinkManager::ProcessQueue()
 {
     if (!pwalletMain)
@@ -216,6 +219,14 @@ void CLinkManager::ProcessQueue()
     }
     LogPrintf("CLinkManager::%s -- Finished links in queue = %d\n", __func__, QueueSize());
 }
+#else
+void CLinkManager::ProcessQueue()
+{
+    return;
+}
+#endif // ENABLE_WALLET
+
+
 
 bool CLinkManager::ListMyPendingRequests(std::vector<CLink>& vchLinks)
 {
@@ -257,6 +268,10 @@ bool CLinkManager::ListMyCompleted(std::vector<CLink>& vchLinks)
 bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly)
 {
 
+#ifndef ENABLE_WALLET
+    linkQueue.push(storage);
+    return true;
+#else
     if (!pwalletMain) {
         linkQueue.push(storage);
         return true;
@@ -727,6 +742,7 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
         }
     }
     return true;
+#endif // ENABLE_WALLET
 }
 
 std::vector<CLinkInfo> CLinkManager::GetCompletedLinkInfo(const std::vector<unsigned char>& vchFullObjectPath)
@@ -796,19 +812,23 @@ uint256 GetLinkID(const CLinkAccept& accept)
 
 uint256 GetLinkID(const std::string& account1, const std::string& account2)
 {
-    std::vector<unsigned char> vchSeparator = {':'};
-    std::set<std::string> sorted;
-    sorted.insert(account1);
-    sorted.insert(account2);
-    std::set<std::string>::iterator it = sorted.begin();
-    std::vector<unsigned char> vchLink1 = vchFromString(*it);
-    std::advance(it, 1);
-    std::vector<unsigned char> vchLink2 = vchFromString(*it);
-    vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
-    vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
-    return Hash(vchLink1.begin(), vchLink1.end());
+    if (account1 != account2) {
+        std::vector<unsigned char> vchSeparator = {':'};
+        std::set<std::string> sorted;
+        sorted.insert(account1);
+        sorted.insert(account2);
+        std::set<std::string>::iterator it = sorted.begin();
+        std::vector<unsigned char> vchLink1 = vchFromString(*it);
+        std::advance(it, 1);
+        std::vector<unsigned char> vchLink2 = vchFromString(*it);
+        vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
+        vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
+        return Hash(vchLink1.begin(), vchLink1.end());
+    }
+    return uint256();
 }
 
+#ifdef ENABLE_WALLET
 bool GetSharedPrivateSeed(const CLink& link, std::array<char, 32>& seed, std::string& strErrorMessage)
 {
     if (!pwalletMain)
@@ -961,6 +981,7 @@ bool GetMessageInfo(CLink& link, std::string& strErrorMessage)
     link.SubjectID = Hash(link.vchSecretPubKeyBytes.begin(), link.vchSecretPubKeyBytes.end());
     return true;
 }
+#endif // ENABLE_WALLET
 
 uint256 GetMessageID(const std::vector<unsigned char>& vchPubKey, const int64_t& timestamp)
 {

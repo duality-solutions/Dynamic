@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -113,10 +113,10 @@ std::string DurationToDHMS(int64_t nDurationTime)
 std::string FormatISO8601DateTime(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
-    gmtime_s(&ts, &time_val);
-#else
+#ifdef HAVE_GMTIME_R
     gmtime_r(&time_val, &ts);
+#else
+    gmtime_s(&ts, &time_val);
 #endif
     return strprintf("%04i-%02i-%02iT%02i:%02i:%02iZ", ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec);
 }
@@ -124,10 +124,10 @@ std::string FormatISO8601DateTime(int64_t nTime) {
 std::string FormatISO8601Date(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
-    gmtime_s(&ts, &time_val);
-#else
+#ifdef HAVE_GMTIME_R
     gmtime_r(&time_val, &ts);
+#else
+    gmtime_s(&ts, &time_val);
 #endif
     return strprintf("%04i-%02i-%02i", ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday);
 }
@@ -154,10 +154,6 @@ int64_t AddMonthsToCurrentEpoch(const short nMonths)
 
 int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths)
 {
-    struct std::tm epoch_date;
-    epoch_date.tm_hour = 0;   epoch_date.tm_min = 0; epoch_date.tm_sec = 0;
-    epoch_date.tm_year = 70; epoch_date.tm_mon = 0; epoch_date.tm_mday = 1;
-
     boost::gregorian::date dt = boost::posix_time::from_time_t(nBlockTime).date();
     short nYear = dt.year() + ((dt.month() + nMonths)/12);
     short nMonth = (dt.month() + nMonths) % 12;
@@ -166,9 +162,27 @@ int64_t AddMonthsToBlockTime(const uint32_t& nBlockTime, const short nMonths)
     struct std::tm month_date;
     month_date.tm_hour = 0;   month_date.tm_min = 0; month_date.tm_sec = 0;
     month_date.tm_year = nYear - 1900; month_date.tm_mon = nMonth -1; month_date.tm_mday = nDay;
+    time_t mkTimeEnd = std::mktime(&month_date);
+    time_t mkTimeStart = 0;
+#if defined(WIN32) || defined(_WIN32)
+    std::tm timeInfo = {};
+#ifdef HAVE_GMTIME_R
+    gmtime_r(&mkTimeStart, &timeInfo);
+#else
+    gmtime_s(&timeInfo, &mkTimeStart);
+#endif
+    mkTimeStart = std::mktime(&timeInfo);
+#else
+    struct std::tm epoch_date;
+    epoch_date.tm_hour = 0;   epoch_date.tm_min = 0; epoch_date.tm_sec = 0;
+    epoch_date.tm_year = 70; epoch_date.tm_mon = 0; epoch_date.tm_mday = 1;
+    mkTimeStart = std::mktime(&epoch_date);
+#endif
+    if (mkTimeStart < 0)
+        mkTimeStart == 0;
 
-    int64_t seconds = (int64_t)std::difftime(std::mktime(&month_date), std::mktime(&epoch_date));
-
+    int64_t seconds = (int64_t)std::difftime(mkTimeEnd, mkTimeStart);
+    //LogPrintf("%s -- seconds %d\n", __func__, seconds);
     return seconds + SECONDS_PER_DAY;
 }
 

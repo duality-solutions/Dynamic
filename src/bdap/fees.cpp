@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -34,7 +34,7 @@ std::map<int32_t, CFeeItem> mapNoRefundDeposits = {
     {BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, CFeeItem(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT, 7500 * BDAP_CREDIT, 0, std::numeric_limits<unsigned int>::max())},
 };
 
-bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nMonths, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee)
+bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject, const BDAP::ObjectType objType, const uint16_t nQuantity, CAmount& monthlyFee, CAmount& oneTimeFee, CAmount& depositFee)
 {
     std::string strObjectType = BDAP::GetObjectTypeString((unsigned int)objType);
     LogPrint("bdap", "%s -- strObjectType = %s, OpAction %d, OpObject %d\n", __func__, strObjectType, opCodeAction, opCodeObject);
@@ -45,7 +45,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_USER_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         CFeeItem feeDeposit;
         std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_USER_DEPOSIT);
@@ -61,7 +61,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_GROUP_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         CFeeItem feeDeposit;
         std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_GROUP_DEPOSIT);
@@ -70,14 +70,14 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
             depositFee = feeDeposit.Fee;
         }
 
-    } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_CERTIFICATE && objType == BDAP::ObjectType::BDAP_CERTIFICATE) {
+    } else if ((opCodeAction == OP_BDAP_NEW || opCodeAction == OP_BDAP_MODIFY) && opCodeObject == OP_BDAP_CERTIFICATE && objType == BDAP::ObjectType::BDAP_CERTIFICATE) {
         // Fees for a new BDAP certificate
         oneTimeFee = 0;
         CFeeItem feeMonthly;
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_CERTIFICATE_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         CFeeItem feeDeposit;
         std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_CERTIFICATE_DEPOSIT);
@@ -93,7 +93,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_SIDECHAIN_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         CFeeItem feeDeposit;
         std::multimap<int32_t, CFeeItem>::iterator iDeposit = mapNoRefundDeposits.find(BDAP_NON_REFUNDABLE_SIDECHAIN_DEPOSIT);
@@ -142,7 +142,7 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_USER_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         if (monthlyFee == 0)
             monthlyFee = BDAP_CREDIT;
@@ -155,10 +155,16 @@ bool GetBDAPFees(const opcodetype& opCodeAction, const opcodetype& opCodeObject,
         std::multimap<int32_t, CFeeItem>::iterator iMonthly = mapDefaultMonthlyFees.find(BDAP_MONTHY_GROUP_FEE);
         if (iMonthly != mapDefaultMonthlyFees.end()) {
             feeMonthly = iMonthly->second;
-            monthlyFee = (nMonths * feeMonthly.Fee);
+            monthlyFee = (nQuantity * feeMonthly.Fee);
         }
         if (monthlyFee == 0)
             monthlyFee = BDAP_CREDIT;
+        depositFee = 0;
+
+    } else if (opCodeAction == OP_BDAP_NEW && opCodeObject == OP_BDAP_AUDIT && objType == BDAP::ObjectType::BDAP_AUDIT) {
+        // Fees for an add BDAP audit entry
+        oneTimeFee = BDAP_CREDIT * nQuantity;
+        monthlyFee = 0;
         depositFee = 0;
 
     } else {

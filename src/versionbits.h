@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,7 +15,7 @@
 /** What block version to use for new blocks (pre versionbits) */
 static const int32_t VERSIONBITS_LAST_OLD_BLOCK_VERSION = 4;
 /** What bits to set in version for versionbits blocks */
-static const int32_t VERSIONBITS_TOP_BITS = 0x24410000UL;
+static const int32_t VERSIONBITS_TOP_BITS = 0x25000000UL;
 /** What bitmask determines whether versionbits is in use */
 static const int32_t VERSIONBITS_TOP_MASK = 0xE0000000UL;
 /** Total bits available for versionbits */

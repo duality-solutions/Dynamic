@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1130,6 +1130,29 @@ UniValue estimatesmartpriority(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue getsubsidy(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "getsubsidy height\n"
+            "Returns subsidy value for the specified value of target.\n"
+            "\nArguments:\n"
+            "1. height     (numeric)\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"subsidy\" : n    (numeric) Subsidy value for the specified target\n"
+            "}\n"
+            "\n"
+            "\nExample:\n" +
+            HelpExampleCli("getsubsidy", "10"));
+
+    int nHeight = request.params.size() == 1 ? request.params[0].get_int() : (int)chainActive.Height();
+    if (nHeight < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+    return (uint64_t)GetFluidDynodeReward(nHeight) + GetFluidMiningReward(nHeight);
+}
+
 static const CRPCCommand commands[] =
     {
         //  category              name                      actor (function)         okSafe argNames
@@ -1139,6 +1162,7 @@ static const CRPCCommand commands[] =
         {"mining", "prioritisetransaction", &prioritisetransaction, true, {"txid", "priority_delta", "fee_delta"}},
         {"mining", "getblocktemplate", &getblocktemplate, true, {"template_request"}},
         {"mining", "submitblock", &submitblock, true, {"hexdata", "parameters"}},
+        {"mining", "getsubsidy", &getsubsidy, true, {"height"}},
 
         {"generating", "getgenerate", &getgenerate, true, {}},
         {"generating", "setgenerate", &setgenerate, true, {"generate", "genproclimit-cpu", "genproclimit-gpu"}},

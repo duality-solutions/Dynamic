@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,7 +28,8 @@ TransactionFilterProxy::TransactionFilterProxy(QObject* parent) : QSortFilterPro
                                                                   instantsendFilter(InstantSendFilter_All),
                                                                   minAmount(0),
                                                                   limitRows(-1),
-                                                                  showInactive(true)
+                                                                  showInactive(true),
+                                                                  fHideOrphans(false)
 {
 }
 
@@ -46,6 +47,8 @@ bool TransactionFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex& 
     int status = index.data(TransactionTableModel::StatusRole).toInt();
 
     if (!showInactive && status == TransactionStatus::Conflicted)
+        return false;
+    if (fHideOrphans && isOrphan(status, type))
         return false;
     if (!(TYPE(type) & typeFilter))
         return false;
@@ -115,6 +118,12 @@ void TransactionFilterProxy::setShowInactive(bool _showInactive)
     invalidateFilter();
 }
 
+void TransactionFilterProxy::setHideOrphans(bool fHide)
+{
+    this->fHideOrphans = fHide;
+    invalidateFilter();
+}
+
 int TransactionFilterProxy::rowCount(const QModelIndex& parent) const
 {
     if (limitRows != -1) {
@@ -122,4 +131,10 @@ int TransactionFilterProxy::rowCount(const QModelIndex& parent) const
     } else {
         return QSortFilterProxyModel::rowCount(parent);
     }
+}
+
+bool TransactionFilterProxy::isOrphan(const int status, const int type)
+{
+    return ( (type == TransactionRecord::Generated ||
+            type == TransactionRecord::DNReward) && (status == TransactionStatus::Conflicted || status == TransactionStatus::NotAccepted) );
 }

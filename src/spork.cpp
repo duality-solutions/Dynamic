@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -31,6 +31,7 @@ std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_14_REQUIRE_SENTINEL_FLAG, 4070908800ULL},     // OFF
     {SPORK_15_INSTANTSEND_AUTOLOCKS, 4070908800ULL},     // OFF
     {SPORK_30_ACTIVATE_BDAP, 4070908800ULL},             // OFF
+    {SPORK_32_BDAP_V2, 4070908800ULL},                   // OFF
 };
 
 bool CSporkManager::SporkValueIsActive(int nSporkID, int64_t& nActiveValueRet) const
@@ -290,6 +291,9 @@ int CSporkManager::GetSporkIDByName(std::string strName)
         return SPORK_15_INSTANTSEND_AUTOLOCKS;
     if (strName == "SPORK_30_ACTIVATE_BDAP")
         return SPORK_30_ACTIVATE_BDAP;
+    if (strName == "SPORK_32_BDAP_V2")
+        return SPORK_32_BDAP_V2;
+
     LogPrint("spork", "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
 }
@@ -321,6 +325,8 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         return "SPORK_15_INSTANTSEND_AUTOLOCKS";
     case SPORK_30_ACTIVATE_BDAP:
         return "SPORK_30_ACTIVATE_BDAP";
+    case SPORK_32_BDAP_V2:
+        return "SPORK_32_BDAP_V2";
     default:
         LogPrint("spork", "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
         return "Unknown";

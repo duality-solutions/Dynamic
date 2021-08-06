@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers 
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1121,6 +1121,7 @@ static UniValue SendMessage(const JSONRPCRequest& request)
     return oLink;
 }
 
+#ifdef ENABLE_WALLET
 static UniValue GetAccountMessages(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 4 || request.params.size() < 3)
@@ -1263,6 +1264,7 @@ static UniValue GetMessages(const JSONRPCRequest& request)
     }
     return oMessages;
 }
+#endif // ENABLE_WALLET
 
 UniValue link(const JSONRPCRequest& request) 
 {

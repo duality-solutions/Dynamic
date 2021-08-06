@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,16 +18,17 @@ that allows their custom op code.
 class CAllowDataCode {
 public:
     std::string strSalt;
-    uint32_t nMaximumSlots;
+    uint16_t nMaximumSlots;
     unsigned int nStartHeight;
     uint64_t nExpireTime;
 
-    CAllowDataCode(const std::string& salt, const uint32_t maxslots, const unsigned int& start, const uint64_t expire) :
+    CAllowDataCode(const std::string& salt, const uint16_t maxslots, const unsigned int& start, const uint64_t expire) :
         strSalt(salt), nMaximumSlots(maxslots), nStartHeight(start), nExpireTime(expire) {}
 
 };
 
 bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage);
 bool CheckPubKey(const std::vector<unsigned char>& vchPubKey);
+uint16_t GetMaximumSlots(const std::string& salt);
 
 #endif // DYNAMIC_DHT_LIMITS_H

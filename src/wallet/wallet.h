@@ -1,9 +1,9 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2017-2019 The Particl Core developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2017-2021 The Particl Core developers
 // Copyright (c) 2014 The ShadowCoin developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -49,9 +49,7 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
 
-//Set the following 2 constants together
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 200;
-static const int DEFAULT_RESCAN_THRESHOLD = 150;
 
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
@@ -766,7 +764,7 @@ private:
     bool fNeedToUpdateKeyPools = false;
     bool fNeedToUpdateLinks = false;
     bool fNeedToUpgradeWallet = false;
-
+    
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
     mutable bool fAnonymizableTallyCachedNonDenom;
@@ -803,8 +801,6 @@ private:
 
     std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn);
 
-    bool fFileBacked;
-
     std::set<int64_t> setInternalKeyPool;
     std::set<int64_t> setExternalKeyPool;
 
@@ -839,6 +835,8 @@ public:
     mutable CCriticalSection cs_wallet;
 
     const std::string strWalletFile;
+
+    bool fFileBacked;
 
     bool fNeedToRescanTransactions = false;
     CBlockIndex* rescan_index = nullptr;
@@ -899,6 +897,10 @@ public:
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID;
 
+    //Auto Combine Inputs
+    bool fCombineDust;
+    CAmount nAutoCombineThreshold;
+
     CWallet()
     {
         SetNull();
@@ -934,6 +936,9 @@ public:
         vecAnonymizableTallyCached.clear();
         vecAnonymizableTallyCachedNonDenom.clear();
         nFoundStealth = 0;
+        //Auto Combine Dust
+        fCombineDust = false;
+        nAutoCombineThreshold = 0;
     }
 
     std::map<uint256, CWalletTx> mapWallet;
@@ -969,6 +974,8 @@ public:
         AssertLockHeld(cs_wallet);
         return nWalletMaxVersion >= wf;
     }
+
+    std::map<CDynamicAddress, std::vector<COutput> > AvailableCoinsByAddress(bool fConfirmed = true, CAmount maxCoinValue = 0);
 
     /**
      * populate vCoins with vector of available COutputs.
@@ -1115,6 +1122,7 @@ public:
     void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) override;
     std::vector<uint256> ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman);
     CAmount GetBalance() const;
+    CAmount GetTotal() const; 
     CAmount GetUnconfirmedBalance() const;
     CAmount GetImmatureBalance() const;
     CAmount GetWatchOnlyBalance() const;
@@ -1346,13 +1354,12 @@ public:
     bool ProcessStealthOutput(const CTxDestination& address, std::vector<uint8_t>& vchEphemPK, uint32_t prefix, bool fHavePrefix, CKey& sShared);
     int CheckForStealthTxOut(const CTxOut* pTxOut, const CTxOut* pTxData);
     bool HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript);
-    bool ScanForOwnedOutputs(const CTransaction& tx);
+    bool ScanForStealthOwnedOutputs(const CTransaction& tx);
     bool AddStealthAddress(const CStealthAddress& sxAddr);
     bool AddStealthToMap(const std::pair<CKeyID, CStealthAddress>& pairStealthAddress);
     bool AddToStealthQueue(const std::pair<CKeyID, CStealthKeyQueueData>& pairStealthQueue);
     CWalletDB* GetWalletDB();
     bool HaveStealthAddress(const CKeyID& address) const;
-
 };
 
 /** A key allocated from the key pool. */

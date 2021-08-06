@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -59,14 +59,10 @@ static const bool DEFAULT_LOGTIMESTAMPS = true;
 static const bool DEFAULT_LOGTHREADNAMES = false;
 
 /**
- * Default average PoW block span time.
- */
-static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Dynamic average block span time is set to 128 seconds
-/**
  * Maximum amount of time that a block timestamp is allowed to exceed the
  * current network-adjusted time before the block will be accepted.
  */
-static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * DEFAULT_AVERAGE_POW_BLOCK_TIME; // ~26 minutes for Dynamic or 12 blocks
+static const int64_t MAX_FUTURE_BLOCK_TIME = 12 * 128; // ~12.8 minutes for Dynamic or 12 blocks
 
 /** Signals for translation. */
 class CTranslationInterface
@@ -286,6 +282,11 @@ void TraceThread(const char* name, Callable func)
         throw;
     }
 }
+
+template <typename Out>
+void SplitString(const std::string &s, char delim, Out result);
+std::vector<std::string> SplitString(const std::string &s, char delim);
+std::string TrimString(const std::string& s);
 
 /**
  * @brief Converts version strings to 4-byte unsigned integer

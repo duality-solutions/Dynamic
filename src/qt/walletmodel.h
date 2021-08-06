@@ -1,17 +1,18 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_QT_WALLETMODEL_H
 #define DYNAMIC_QT_WALLETMODEL_H
 
-#include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
 
+#include "script/standard.h"
 #include "support/allocators/secure.h"
+
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif // ENABLE_WALLET
@@ -29,6 +30,7 @@ class TransactionTableModel;
 class WalletModelTransaction;
 
 class CCoinControl;
+class CKey;
 class CKeyID;
 class COutPoint;
 class COutput;
@@ -60,12 +62,6 @@ public:
     CAmount amount;
     // If from a payment request, this is used for storing the memo
     QString message;
-
-    // If from a payment request, paymentRequest.IsInitialized() will be true
-    PaymentRequestPlus paymentRequest;
-    // Empty if no authentication or invalid signature/cert/etc.
-    QString authenticatedMerchant;
-
     bool fSubtractFeeFromAmount; // memory only
 
     static const int CURRENT_VERSION = 1;
@@ -79,26 +75,17 @@ public:
         std::string sAddress = address.toStdString();
         std::string sLabel = label.toStdString();
         std::string sMessage = message.toStdString();
-        std::string sPaymentRequest;
-        if (!ser_action.ForRead() && paymentRequest.IsInitialized())
-            paymentRequest.SerializeToString(&sPaymentRequest);
-        std::string sAuthenticatedMerchant = authenticatedMerchant.toStdString();
 
         READWRITE(this->nVersion);
         READWRITE(sAddress);
         READWRITE(sLabel);
         READWRITE(amount);
         READWRITE(sMessage);
-        READWRITE(sPaymentRequest);
-        READWRITE(sAuthenticatedMerchant);
 
         if (ser_action.ForRead()) {
             address = QString::fromStdString(sAddress);
             label = QString::fromStdString(sLabel);
             message = QString::fromStdString(sMessage);
-            if (!sPaymentRequest.empty())
-                paymentRequest.parse(QByteArray::fromRawData(sPaymentRequest.data(), sPaymentRequest.size()));
-            authenticatedMerchant = QString::fromStdString(sAuthenticatedMerchant);
         }
     }
 };
@@ -130,6 +117,7 @@ public:
         Unencrypted,           // !wallet->IsCrypted()
         Locked,                // wallet->IsCrypted() && wallet->IsLocked(true)
         UnlockedForMixingOnly, // wallet->IsCrypted() && !wallet->IsLocked(true) && wallet->IsLocked()
+        UnlockedForStakingOnly, // wallet->IsCrypted() && !wallet->IsLocked(true) && wallet->IsLocked()
         Unlocked,              // wallet->IsCrypted() && !wallet->IsLocked()
     };
 
@@ -140,6 +128,7 @@ public:
     RecentRequestsTableModel* getRecentRequestsTableModel();
 
     CAmount getBalance(const CCoinControl* coinControl = NULL) const;
+    CAmount getTotal() const;
     CAmount getUnconfirmedBalance() const;
     CAmount getImmatureBalance() const;
     CAmount getAnonymizedBalance() const;
@@ -172,7 +161,7 @@ public:
     // Wallet encryption
     bool setWalletEncrypted(bool encrypted, const SecureString& passphrase);
     // Passphrase only needed when unlocking
-    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), bool fMixing = false);
+    bool setWalletLocked(bool locked, const SecureString& passPhrase = SecureString(), int64_t nSeconds = 0, bool fMixing = false);
     bool changePassphrase(const SecureString& oldPass, const SecureString& newPass);
 
     // Wallet backup
@@ -245,6 +234,7 @@ private:
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
+    CAmount cachedTotal;
     CAmount cachedUnconfirmedBalance;
     CAmount cachedImmatureBalance;
     CAmount cachedAnonymizedBalance;
@@ -264,7 +254,7 @@ private:
 
 Q_SIGNALS:
     // Signal that balance in wallet changed
-    void balanceChanged(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void balanceChanged(const CAmount& balance, const CAmount& total, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
 
     // Encryption status of wallet changed
     void encryptionStatusChanged(int status);
@@ -297,6 +287,8 @@ public Q_SLOTS:
     void updateWatchOnlyFlag(bool fHaveWatchonly);
     /* Current, immature or unconfirmed balance might have changed - emit 'balanceChanged' if so */
     void pollBalanceChanged();
+    /* Update address book labels in the database */
+    void updateAddressBookLabels(const CTxDestination& address, const std::string& strName, const std::string& strPurpose);
 };
 
 #endif // DYNAMIC_QT_WALLETMODEL_H

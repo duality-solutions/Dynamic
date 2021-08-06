@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -332,16 +332,16 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("dht_publickey", stringFromVch(entry.DHTPublicKey)));
         oName.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
-        if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {
-            CBlockIndex *pindex = chainActive[entry.nHeight-1];
+        if ((unsigned int)chainActive.Height() >= entry.nHeight) {
+            CBlockIndex *pindex = chainActive[entry.nHeight];
             if (pindex) {
-                nTime = pindex->GetMedianTimePast();
+                nTime = pindex->GetBlockTime();
             }
         }
         oName.push_back(Pair("time", nTime));
         //oName.push_back(Pair("height", entry.nHeight));
         expired_time = entry.nExpireTime;
-        if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+        if(expired_time <= (unsigned int)chainActive.Tip()->GetBlockTime())
         {
             expired = true;
         }

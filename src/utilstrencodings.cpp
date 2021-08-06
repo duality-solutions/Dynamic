@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -304,6 +304,20 @@ const signed char p_util_hexdigit[256] =
 signed char HexDigit(char c)
 {
     return p_util_hexdigit[(unsigned char)c];
+}
+
+
+constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+std::string ToHex(const unsigned char *data, int len)
+{
+  std::string s(len * 2, ' ');
+  for (int i = 0; i < len; ++i) {
+    s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
+    s[2 * i + 1] = hexmap[data[i] & 0x0F];
+  }
+  return s;
 }
 
 bool IsHex(const std::string& str)

@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -76,6 +76,8 @@ private:
     std::string searchUserPath;
     std::string searchGroupCommon;
     std::string searchGroupPath;
+
+    bool walletLocked();
     
 };
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -107,6 +107,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"sendrawtransaction", 2, "instantsend"},
         {"sendrawtransaction", 3, "bypasslimits"},
         {"fundrawtransaction", 1, "options"},
+        {"getsubsidy", 0, "height"},
         {"gettxout", 1, "n"},
         {"gettxout", 2, "include_mempool"},
         {"gettxoutproof", 0, "txids"},
@@ -149,6 +150,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressdeltas", 0, "addresses"},
         {"getaddressutxos", 0, "addresses"},
         {"getaddressmempool", 0, "addresses"},
+        {"reservebalance", 0, "reserve"},
+        {"reservebalance", 1, "amount"},
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},

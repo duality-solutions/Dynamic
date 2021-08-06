@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2018-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>
- * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
+ * Copyright (C) 2018-2021 Ehsan Dalvand <dalvand.ehsan@gmail.com>
+ * Copyright (C) 2017-2021 Łukasz Kurowski <crackcomm@gmail.com>
  * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or

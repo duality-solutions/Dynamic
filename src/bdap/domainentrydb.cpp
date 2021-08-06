@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -401,7 +401,7 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
 
     if (entry.GetFullObjectPath() != stringFromVch(vvchOpParameters[0]))
     {
-        errorMessage = "CommonDataCheck failed! Script operation parameter does not match entry entry object.";
+        errorMessage = "CommonDataCheck failed! Script operation parameter does not match account entry object.";
         return false;
     }
 
@@ -468,7 +468,7 @@ static bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript
     int op = OP_BDAP_NEW;
     if (!pDomainEntryDB->AddDomainEntry(entry, op))
     {
-        errorMessage = "CheckNewDomainEntryTxInputs failed! Error adding new entry entry request to LevelDB.";
+        errorMessage = "CheckNewDomainEntryTxInputs failed! Error adding new account entry request to LevelDB.";
         return error(errorMessage.c_str());
     }
 
@@ -526,7 +526,7 @@ static bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScr
 
     if (!pDomainEntryDB->EraseDomainEntry(vchFullObjectPath))
     {
-        errorMessage = "CheckDeleteDomainEntryTxInputs: - Error deleting entry entry in LevelDB; this delete operation failed!";
+        errorMessage = "CheckDeleteDomainEntryTxInputs: - Error deleting account entry in LevelDB; this delete operation failed!";
         return error(errorMessage.c_str());
     }
 

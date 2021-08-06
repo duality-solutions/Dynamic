@@ -2,11 +2,11 @@
 
 [![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
-# **Dynamic (DYN) v2.4.4.1**
+# **Dynamic (DYN) v2.5.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2019 [Duality Blockchain Solutions](https://duality.solutions/)**
+**Copyright (c) 2016-2021 [Duality Blockchain Solutions](https://duality.solutions/)**
 
 What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------
@@ -17,8 +17,15 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: Controlled via Fluid Protocol
 * PoW Reward Start Height: Block 5,137
+* PoS Mining Algorithm: Blake2b
+* PoS Period: Unlimited
+* PoS Target Spacing: 128 Seconds
+* PoS Reward per Block: Controlled via Fluid Protocol
+* PoS Reward Start Height: Controlled via SPORK activation
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
+* PoS Blocks: ~675 per day
+* Total Blocks Per Day: ~1350
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 17 Blocks
 * Dynode Reward: Controlled via Fluid Protocol
@@ -28,7 +35,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Max Block Size: 4MB
 
 
-[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic can be used to run incentivized Dynodes; the second tier of nodes on the network processing, verifying, validating and storing data.
+[Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic utlises Proof-of-Work, and can be used to run incentivized Dynodes; the second tier of nodes on the network used for BDAP, the DHT, and processing, verifying, validating and storing data.
 
 **MainNet Parameters**
 P2P Port = 33300
@@ -107,22 +114,22 @@ C++ compilers are memory-hungry. It is recommended to have at least 3 GB of memo
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 
-It is required to build Dynamic on Ubuntu 18.04LTS(Bionic) or later due to C++14/GCC7 requirements. Also OpenSSL 1.1.0g is included in Ubuntu 18.04LTS and later, however it is suggested to use OpenSSL 1.1.1LTS.
+It is required to build Dynamic on Ubuntu 20.04LTS(Focal) or later due to C++14/GCC7 requirements. Also OpenSSL 1.1.1f is included in Ubuntu 20.04LTS and later. It is required to use OpenSSL 1.1.1LTS.
 
 Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
     
-For Ubuntu 18.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
+For Ubuntu 20.04LTS(Bionic) and later, or Debian 7 and later; libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
 
 db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).  You can add the repository using the following command:
 
-    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo add-apt-repository ppa:pivx/pivx
     sudo apt-get update
 
-Ubuntu 18.04 and later have packages for libdb 5.3.21 but using these will break binary wallet compatibility, and is not recommended.
+Ubuntu 20.04 and later have packages for libdb 5.3.21 but using these will break binary wallet compatibility, and is not recommended.
 
 for Debian 7 (Wheezy) and later:
  The oldstable repository contains db4.8 packages.
@@ -353,6 +360,15 @@ At configure time for OpenCL(Nvidia/AMD):
 At configure time for CUDA(Nvidia):
 
     --enable-gpu --enable-cuda
+
+or run the daemon with:
+
+    ./src/dynamicd -staking=1
+
+or Qt wallet with:
+
+    ./src/qt/dynamic-qt -staking=1
+
 
 Example Build Command
 --------------------

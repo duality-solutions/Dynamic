@@ -1,6 +1,25 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.5.0.0**
+
+
+* [BDAP] Add BDAP audits with meta data transactions
+* [BDAP] Add BDAP x509 Certificate CA, requests and approval transactions
+* [Build] Bump Boost version to 1.70
+* [Build] Upgrade to OpenSSL v1.1.1i
+* [PoW] Change DAA parameters
+* [RPC] Add getsubsidy RPC command
+* [RPC] Add audits RPC commands
+* [RPC] Add certificate RPC commands
+* [Wallet] Disable wallet versions
+* [Wallet] Fix wallet issue where too many keys were being created during rescans
+* [Util] Fix add months to epoch functions
+* [Params] Add checkpoints every 100,000 blocks
+* [Doc] Update build documentation for Ubuntu 20.04
+* Bump protocol version to 72500
+* Bump client version to 2.5.0.0
+
 **Dynamic v2.4.4.1**
 
 * Use std::function and std::bind in scheduler instead of boost/std mix

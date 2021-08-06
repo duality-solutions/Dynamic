@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,27 +17,33 @@
 
 //  Default accepted DHT record types:
 std::multimap<std::string, CAllowDataCode> mapAllowedData = {
-    //                             salt,       slots,  start, expire
-    {"info",        CAllowDataCode("info",     32,     0,     0)}, 
-    {"denylink",    CAllowDataCode("denylink", 32,     0,     0)},
-    {"ignore",      CAllowDataCode("ignore",   32,     0,     0)},
-    {"index",       CAllowDataCode("index",    32,     0,     0)},
-    {"avatar",      CAllowDataCode("avatar",    4,     0,     0)},
-    {"ldap",        CAllowDataCode("ldap",     32,     0,     0)},
-    {"oauth",       CAllowDataCode("oauth",    16,     0,     0)},
-    {"pshare",      CAllowDataCode("pshare",   48,     0,     0)},
-    {"pconsult",    CAllowDataCode("pconsult", 48,     0,     0)},
-    {"noid",        CAllowDataCode("noid",     48,     0,     0)},
-    {"whispers",    CAllowDataCode("whispers", 48,     0,     0)},
-    {"spam",        CAllowDataCode("spam",     64,     0,     0)},
-    {"groups",      CAllowDataCode("groups",   48,     0,     0)},
-    {"chat",        CAllowDataCode("chat",     32,     0,     0)},
-    {"message",     CAllowDataCode("message",  32,     0,     0)},
-    {"data",        CAllowDataCode("data",    128,     0,     0)},
-    {"keys",        CAllowDataCode("keys",     32,     0,     0)},
-    {"test",        CAllowDataCode("test",      8,     0,     0)},
+    //name                          salt,        slots,  start,   expire
+    {"info",        CAllowDataCode("info",       32,     0,       0)}, 
+    {"denylink",    CAllowDataCode("denylink",   32,     0,       0)},
+    {"ignore",      CAllowDataCode("ignore",     32,     0,       0)},
+    {"index",       CAllowDataCode("index",      32,     0,       0)},
+    {"avatar",      CAllowDataCode("avatar",      4,     0,       0)},
+    {"ldap",        CAllowDataCode("ldap",       32,     0,       0)},
+    {"oauth",       CAllowDataCode("oauth",      16,     0,       0)},
+    {"pshare",      CAllowDataCode("pshare",     48,     0,       0)},
+    {"pconsult",    CAllowDataCode("pconsult",   48,     0,       0)},
+    {"noid",        CAllowDataCode("noid",       48,     0,       0)},
+    {"whispers",    CAllowDataCode("whispers",   48,     0,       0)},
+    {"spam",        CAllowDataCode("spam",       64,     0,       0)},
+    {"groups",      CAllowDataCode("groups",     48,     0,       0)},
+    {"chat",        CAllowDataCode("chat",       32,     0,       0)},
+    {"message",     CAllowDataCode("message",    32,     0,       0)},
+    {"data",        CAllowDataCode("data",      128,     0,       0)},
+    {"keys",        CAllowDataCode("keys",       32,     0,       0)},
+    {"test",        CAllowDataCode("test",        8,     0,       0)},
+    {"ice",         CAllowDataCode("ice",        24,     0,       0)},
+    {"webrtc",      CAllowDataCode("webrtc",     16,     0,       0)},
+    {"webbridge",   CAllowDataCode("webbridge",  48,     0,       0)},
+    {"status",      CAllowDataCode("status",      2,     0,       0)},
+    {"verity",      CAllowDataCode("verity",     48,     0,       0)},
+    {"unity",       CAllowDataCode("unity",      48,     0,       0)},
+    {"ping",        CAllowDataCode("ping",        1,     0,       0)},
 };
-
 
 bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::string& strErrorMessage)
 {
@@ -65,7 +71,7 @@ bool CheckSalt(const std::string& strSalt, const unsigned int nHeight, std::stri
             iAllowed++;
             continue;
         }
-        if (nSlots > iAllowed->second.nMaximumSlots) {
+        if ((uint16_t)nSlots > iAllowed->second.nMaximumSlots) {
             strErrorMessage = strprintf("%sAllow data type found but too many slots (%d) used. Max slots = %d\n", strErrorMessage, nSlots, iAllowed->second.nMaximumSlots);
             iAllowed++;
             continue;
@@ -84,4 +90,14 @@ bool CheckPubKey(const std::vector<unsigned char>& vchPubKey)
         return true;
 
     return false;
+}
+
+
+uint16_t GetMaximumSlots(const std::string& salt)
+{
+    std::multimap<std::string, CAllowDataCode>::iterator iRecord = mapAllowedData.find(salt);
+    if (iRecord != mapAllowedData.end())
+        return iRecord->second.nMaximumSlots;
+
+    return 0;
 }

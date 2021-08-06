@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -69,12 +69,30 @@ std::string base_blob<BITS>::ToString() const
     return (GetHex());
 }
 
+template <unsigned int BITS>
+base_blob<BITS>& base_blob<BITS>::operator>>=(unsigned int shift)
+{
+    base_blob<BITS> a(*this);
+    for (int i = 0; i < WIDTH; i++)
+        data[i] = 0;
+    int k = shift / 32;
+    shift = shift % 32;
+    for (int i = 0; i < WIDTH; i++) {
+        if (i - k - 1 >= 0 && shift != 0)
+            data[i - k - 1] |= (a.data[i] << (32 - shift));
+        if (i - k >= 0)
+            data[i - k] |= (a.data[i] >> shift);
+    }
+    return *this;
+}
+
 // Explicit instantiations for base_blob<160>
 template base_blob<160>::base_blob(const std::vector<unsigned char>&);
 template std::string base_blob<160>::GetHex() const;
 template std::string base_blob<160>::ToString() const;
 template void base_blob<160>::SetHex(const char*);
 template void base_blob<160>::SetHex(const std::string&);
+template base_blob<160>& base_blob<160>::operator>>=(unsigned int);
 
 // Explicit instantiations for base_blob<256>
 template base_blob<256>::base_blob(const std::vector<unsigned char>&);
@@ -82,3 +100,4 @@ template std::string base_blob<256>::GetHex() const;
 template std::string base_blob<256>::ToString() const;
 template void base_blob<256>::SetHex(const char*);
 template void base_blob<256>::SetHex(const std::string&);
+template base_blob<256>& base_blob<256>::operator>>=(unsigned int);

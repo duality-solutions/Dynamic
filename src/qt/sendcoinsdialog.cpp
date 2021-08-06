@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -163,9 +163,9 @@ void SendCoinsDialog::setModel(WalletModel* _model)
             }
         }
 
-        setBalance(_model->getBalance(), _model->getUnconfirmedBalance(), _model->getImmatureBalance(), _model->getAnonymizedBalance(),
-            _model->getWatchBalance(), _model->getWatchUnconfirmedBalance(), _model->getWatchImmatureBalance());
-        connect(_model, SIGNAL(balanceChanged(CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount)), this, SLOT(setBalance(CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount)));
+        setBalance(_model->getBalance(), _model->getTotal(), _model->getUnconfirmedBalance(), _model->getImmatureBalance(), _model->getAnonymizedBalance(),
+            _model->getWatchBalance(), model->getWatchUnconfirmedBalance(), _model->getWatchImmatureBalance());
+        connect(_model, SIGNAL(balanceChanged(CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount)), this, SLOT(setBalance(CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount, CAmount)));
         connect(_model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
         updateDisplayUnit();
 
@@ -329,7 +329,6 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
 
         QString recipientElement;
 
-        if (!rcp.paymentRequest.IsInitialized()) // normal payment
         {
             if (rcp.label.length() > 0) // label with address
             {
@@ -339,14 +338,7 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
             {
                 recipientElement = tr("%1 to %2").arg(amount, address);
             }
-        } else if (!rcp.authenticatedMerchant.isEmpty()) // authenticated payment request
-        {
-            recipientElement = tr("%1 to %2").arg(amount, GUIUtil::HtmlEscape(rcp.authenticatedMerchant));
-        } else // unauthenticated payment request
-        {
-            recipientElement = tr("%1 to %2").arg(amount, address);
         }
-
         formatted.append(recipientElement);
     }
 
@@ -540,7 +532,7 @@ bool SendCoinsDialog::handlePaymentRequest(const SendCoinsRecipient& rv)
     return true;
 }
 
-void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchBalance, const CAmount& watchUnconfirmedBalance, const CAmount& watchImmatureBalance)
+void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& total, const CAmount& unconfirmedBalance, const CAmount& immatureBalance, const CAmount& anonymizedBalance, const CAmount& watchBalance, const CAmount& watchUnconfirmedBalance, const CAmount& watchImmatureBalance)
 {
     Q_UNUSED(unconfirmedBalance);
     Q_UNUSED(immatureBalance);
@@ -565,7 +557,7 @@ void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& unconfir
 
 void SendCoinsDialog::updateDisplayUnit()
 {
-    setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance(),
+    setBalance(model->getBalance(), model->getTotal(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance(),
         model->getWatchBalance(), model->getWatchUnconfirmedBalance(), model->getWatchImmatureBalance());
     CoinControlDialog::coinControl->fUsePrivateSend = ui->checkUsePrivateSend->isChecked();
     coinControlUpdateLabels();

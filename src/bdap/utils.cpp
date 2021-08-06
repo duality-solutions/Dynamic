@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -359,6 +359,18 @@ std::string GetOpCodeType(const std::string& strOpCode)
     else if (strOpCode == "bdap_move_asset") {
         return "asset";
     }
+    else if (strOpCode == "bdap_new_audit") {
+        return "audit";
+    }
+    else if (strOpCode == "bdap_new_certificate") {
+        return "certificate";
+    }
+    else if (strOpCode == "bdap_approve_certificate") {
+        return "certificate";
+    }
+    else if (strOpCode == "bdap_revoke_certificate") {
+        return "certificate";
+    }
     else {
         return "unknown";
     }
@@ -401,6 +413,18 @@ std::string GetBDAPOpTypeString(const int& op1, const int& op2)
     }
     else if (op1 == OP_BDAP_MOVE && op2 == OP_BDAP_ASSET) {
         return "bdap_move_asset";
+    }
+    else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_AUDIT) {
+        return "bdap_new_audit";
+    }
+    else if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_new_certificate";
+    }
+    else if (op1 == OP_BDAP_MODIFY && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_approve_certificate";
+    }
+    else if (op1 == OP_BDAP_EXPIRE && op2 == OP_BDAP_CERTIFICATE) {
+        return "bdap_revoke_certificate";
     }
     else {
         return "unknown";
@@ -568,6 +592,15 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
     }
     else if (strPrefix == "5 15") {
         strOpType = "bdap_move_asset";
+    }
+    else if (strPrefix == "1 9") {
+        strOpType = "bdap_new_audit";
+    }
+    else if (strPrefix == "1 10") {
+        strOpType = "bdap_new_certificate";
+    }
+    else if (strPrefix == "4 10") {
+        strOpType = "bdap_approve_certificate";
     }
     else {
         return false;

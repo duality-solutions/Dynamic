@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -34,6 +34,10 @@ void RegisterDHTRPCCommands(CRPCTable &tableRPC);
 void RegisterLinkingRPCCommands(CRPCTable &tableRPC);
 /** Register Raw BDAP Account RPC commands */
 void RegisterRawBDAPAccountRPCCommands(CRPCTable &tableRPC);
+/** Register Raw BDAP Audit RPC commands */
+void RegisterAuditRPCCommands(CRPCTable &tableRPC);
+/** Register Raw BDAP Certificate RPC commands */
+void RegisterCertificateRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
 {
@@ -49,6 +53,8 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
     RegisterDHTRPCCommands(t);
     RegisterLinkingRPCCommands(t);
     RegisterRawBDAPAccountRPCCommands(t);
+    RegisterAuditRPCCommands(t);
+    RegisterCertificateRPCCommands(t);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H

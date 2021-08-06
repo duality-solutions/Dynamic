@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -316,7 +316,7 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord* wtx) cons
         status = tr("This block was not received by any other nodes and will probably not be accepted!");
         break;
     case TransactionStatus::NotAccepted:
-        status = tr("Generated but not accepted");
+        status = tr("Orphan Block - Generated but not accepted. This does not impact your holdings.");
         break;
     }
 
@@ -363,6 +363,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("Sent to");
     case TransactionRecord::SendToSelf:
         return tr("Payment to yourself");
+    case TransactionRecord::DNReward:
+        return tr("Dynode Reward");
     case TransactionRecord::Generated:
         return tr("Mined");
     case TransactionRecord::NewDomainUser:
@@ -379,6 +381,14 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("BDAP Link Request");
     case TransactionRecord::LinkAccept:
         return tr("BDAP Link Accepted");
+    case TransactionRecord::NewAudit:
+        return tr("BDAP Audit");
+    case TransactionRecord::NewCertificate:
+        return tr("BDAP X509 Certificate Request");
+    case TransactionRecord::ApproveCertificate:
+        return tr("BDAP X509 Certificate Approved");
+    case TransactionRecord::ApproveRootCertificate:
+        return tr("New BDAP X509 Root Certificate");
     case TransactionRecord::PrivateSendDenominate:
         return tr("PrivateSend Denominate");
     case TransactionRecord::PrivateSendCollateralPayment:
@@ -401,6 +411,8 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     switch (wtx->type) {
     case TransactionRecord::Fluid:
         return QIcon(":/icons/" + theme + "/fluid");
+    case TransactionRecord::DNReward:
+        return QIcon(":/icons/" + theme + "/dynode_network");
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::RecvWithPrivateSend:
@@ -412,17 +424,32 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord* wtx
     case TransactionRecord::SendToOther:
         return QIcon(":/icons/" + theme + "/tx_output");
     case TransactionRecord::NewDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::UpdateDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::DeleteDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::RevokeDomainUser:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::NewDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::UpdateDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::DeleteDomainGroup:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::RevokeDomainGroup:
-        return QIcon(":/icons/" + theme + "/tx_bdap");
+        return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::NewAudit:
+        return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::NewCertificate:
+        return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::ApproveCertificate:
+        return QIcon(":/icons/" + theme + "/bdap");
+    case TransactionRecord::ApproveRootCertificate:
+        return QIcon(":/icons/" + theme + "/bdap");
     case TransactionRecord::LinkRequest:
     case TransactionRecord::LinkAccept:
-        return QIcon(":/icons/" + theme + "/tx_bdap");
+        return QIcon(":/icons/" + theme + "/bdap");
     default:
         return QIcon(":/icons/" + theme + "/tx_inout");
     }
@@ -444,6 +471,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::SendToAddress:
+    case TransactionRecord::DNReward:
     case TransactionRecord::Generated:
     case TransactionRecord::PrivateSend:
         return lookupAddress(wtx->address, tooltip) + watchAddress;
@@ -469,6 +497,14 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
         return tr("Link Request");
     case TransactionRecord::LinkAccept:
         return tr("Link Accepted");
+    case TransactionRecord::NewAudit:
+        return tr("New Audit Entry");
+    case TransactionRecord::NewCertificate:
+        return tr("Certificate Request Entry");
+    case TransactionRecord::ApproveCertificate:
+        return tr("Certificate Approved Entry");
+    case TransactionRecord::ApproveRootCertificate:
+        return tr("Certificate Root Entry");
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;
@@ -482,10 +518,19 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord* wtx) const
     case TransactionRecord::Fluid:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
+    case TransactionRecord::DNReward: {
+        QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
+        if (label.isEmpty())
+            return COLOR_BAREADDRESS;
+    }
     case TransactionRecord::Generated:
     case TransactionRecord::PrivateSend:
     case TransactionRecord::RecvWithPrivateSend:
     case TransactionRecord::NewDomainUser:
+    case TransactionRecord::NewAudit:
+    case TransactionRecord::NewCertificate:
+    case TransactionRecord::ApproveCertificate:
+    case TransactionRecord::ApproveRootCertificate:
     case TransactionRecord::UpdateDomainUser:
     case TransactionRecord::DeleteDomainUser:
     case TransactionRecord::RevokeDomainUser:
@@ -554,7 +599,7 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord* wtx)
         return QIcon(":/icons/" + theme + "/transaction_conflicted");
     case TransactionStatus::Immature: {
         int total = wtx->status.depth + wtx->status.matures_in;
-        int part = (wtx->status.depth * 4 / total) + 1;
+        int part = (wtx->status.depth * 5 / total) + 1;
         return QIcon(QString(":/icons/" + theme + "/transaction_%1").arg(part));
     }
     case TransactionStatus::MaturesWarning:
@@ -587,7 +632,7 @@ QString TransactionTableModel::formatTooltip(const TransactionRecord* rec) const
 {
     QString tooltip = formatTxStatus(rec) + QString("\n") + formatTxType(rec);
     if (rec->type == TransactionRecord::RecvFromOther || rec->type == TransactionRecord::SendToOther ||
-        rec->type == TransactionRecord::SendToAddress || rec->type == TransactionRecord::RecvWithAddress) {
+        rec->type == TransactionRecord::SendToAddress || rec->type == TransactionRecord::RecvWithAddress || rec->type == TransactionRecord::DNReward) {
         tooltip += QString(" ") + formatTxToAddress(rec, true);
     }
     return tooltip;
@@ -662,8 +707,17 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         if (!rec->status.countsForBalance && rec->status.status != TransactionStatus::Immature) {
             return COLOR_UNCONFIRMED;
         }
-        if (index.column() == Amount && (rec->type) == TransactionRecord::Fluid) {
+        // Fluid Transactions
+        if (rec->type == TransactionRecord::Fluid) {
             return COLOR_FLUID_TX;
+        }
+        // Dynode Rewards
+        if (rec->type == TransactionRecord::DNReward) {
+                return COLOR_DYNODE_REWARD;
+        }
+        // Generated Rewards
+        if (rec->type == TransactionRecord::Generated) {
+                return COLOR_GENERATED;
         }
         if (index.column() == Amount && (rec->credit + rec->debit) < 0) {
             return COLOR_NEGATIVE;
@@ -671,7 +725,9 @@ QVariant TransactionTableModel::data(const QModelIndex& index, int role) const
         if (index.column() == ToAddress) {
             return addressColor(rec);
         }
-        break;
+        // To avoid overriding above conditional formats a default text color for this QTableView is not defined in stylesheet,
+        // so we must always return a color here
+        return COLOR_BLACK;
     case TypeRole:
         return rec->type;
     case DateRole:

@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 
 #include "fluid.h"
 
@@ -28,7 +28,8 @@ extern CWallet* pwalletMain;
 
 bool IsTransactionFluid(const CScript& txOut)
 {
-    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
+    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || 
+                txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
 }
 
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
@@ -541,7 +542,7 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
     return false;
 }
 
-CAmount GetStandardPoWBlockPayment(const int nHeight)
+CAmount GetStandardPoWBlockPayment(const int& nHeight)
 {
     if (nHeight == 1) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
@@ -557,7 +558,7 @@ CAmount GetStandardPoWBlockPayment(const int nHeight)
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetStandardDynodePayment(const int nHeight)
+CAmount GetStandardDynodePayment(const int& nHeight)
 {
     if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
         LogPrint("fluid", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
@@ -584,7 +585,7 @@ bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, 
         }
 
         if ((txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) ||
-                txOut.IsProtocolInstruction(MINING_MODIFY_TX)) &&
+                txOut.IsProtocolInstruction(MINING_MODIFY_TX))  &&
             !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-modify-parse-failure");
         }

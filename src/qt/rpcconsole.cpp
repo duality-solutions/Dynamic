@@ -1,6 +1,6 @@
-// Copyright (c) 2009-2019 Satoshi Nakamoto
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -281,6 +281,11 @@ bool RPCConsole::RPCExecuteCommandLine(std::string& strResult, const std::string
             switch (ch) {
             case '\'':
                 state = STATE_ARGUMENT;
+                //Handle optional parameters
+                if (curarg.size() == 0) {
+                    stack.back().push_back(curarg);
+                    state = STATE_EATING_SPACES;
+                }
                 break;
             default:
                 curarg += ch;
@@ -290,6 +295,11 @@ bool RPCConsole::RPCExecuteCommandLine(std::string& strResult, const std::string
             switch (ch) {
             case '"':
                 state = STATE_ARGUMENT;
+                //Handle optional parameters
+                if (curarg.size() == 0) {
+                    stack.back().push_back(curarg);
+                    state = STATE_EATING_SPACES;
+                }
                 break;
             case '\\':
                 state = STATE_ESCAPE_DOUBLEQUOTED;
@@ -809,7 +819,7 @@ void RPCConsole::message(int category, const QString& message, bool html)
     if (html)
         out += message;
     else
-        out += GUIUtil::HtmlEscape(message, true);
+        out += GUIUtil::HtmlEscape(message, false);
     out += "</td></tr></table>";
     ui->messagesWidget->append(out);
 }

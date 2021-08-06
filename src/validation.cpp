@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +9,8 @@
 
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/auditdb.h"
+#include "bdap/certificatedb.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/fees.h"
 #include "bdap/linking.h"
@@ -34,11 +36,13 @@
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
+#include "keystore.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
 #include "pow.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
+#include "pubkey.h"
 #include "random.h"
 #include "rpc/server.h"
 #include "script/script.h"
@@ -56,6 +60,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "wallet/wallet.h"
 #include "warnings.h"
 
 #include <atomic>
@@ -85,6 +90,7 @@ CBlockIndex* pindexBestHeader = NULL;
 Mutex g_best_block_mutex;
 std::condition_variable g_best_block_cv;
 uint256 g_best_block;
+std::map<unsigned int, unsigned int> mapHashedBlocks;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 bool fReindex = false;
@@ -106,6 +112,7 @@ int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 bool fLoaded = false;
 bool fStealthTx = false;
+int64_t nReserveBalance = 0;
 
 uint256 hashAssumeValid;
 
@@ -729,7 +736,8 @@ bool CheckBDAPTxCreditUsage(const CTransaction& tx, const std::vector<Coin>& vBd
                 }
             }
         } else if (credit.first.OpType == "bdap_new_account" || credit.first.OpType == "bdap_update_account" || 
-                        credit.first.OpType == "bdap_new_link_request" || credit.first.OpType == "bdap_new_link_accept") {
+                        credit.first.OpType == "bdap_new_link_request" || credit.first.OpType == "bdap_new_link_accept" || credit.first.OpType == "bdap_new_audit" ||
+                        credit.first.OpType == "bdap_new_certificate" || credit.first.OpType == "bdap_approve_certificate") {
             // When input is a BDAP account new or update operation, make sure deposit change goes back to input wallet address
             // When input is a BDAP link operation, make sure it is only spent by a link update or delete operations with the same input address and parameters
             CDynamicAddress inputAddress = credit.second;
@@ -818,7 +826,7 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         CScript scriptOp;
         if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
             std::string errorMessage;
-            if (vvchBDAPArgs.size() > 3) {
+            if (vvchBDAPArgs.size() > 6) {
                 errorMessage = "Too many BDAP parameters in operation transactions.";
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
@@ -879,6 +887,28 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
                 LogPrint("bdap", "%s -- BDAP move asset operation. vvchBDAPArgs.size() = %d\n", __func__, vvchBDAPArgs.size());
+                return true;
+            }
+            else if (strOpType == "bdap_new_audit") {
+                bValid = CheckAuditTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                if (!errorMessage.empty())
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                LogPrint("bdap", "%s -- CheckAuditTx valid.\n", __func__);
+                return true;
+            }
+            else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+                bValid = CheckCertificateTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, block.nTime, bSanity, errorMessage);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                if (!errorMessage.empty())
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                LogPrint("bdap", "%s -- CheckCertificateTx valid.\n", __func__);
                 return true;
             }
             else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
@@ -952,37 +982,35 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
 
     bool fIsBDAP = false;
+    //TODO: Create a seperate function to check BDAP tx validity.
     if (tx.nVersion == BDAP_TX_VERSION) {
         fIsBDAP = true;
         CScript scriptBDAPOp;
         std::vector<std::vector<unsigned char>> vvch;
+        CScript scriptOp;
         int op1, op2;
         if (!GetBDAPOpScript(ptx, scriptBDAPOp, vvch, op1, op2))
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-script-error");
 
         std::string strErrorMessage;
-        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+        vchCharString vvchOpParameters;
+        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
+            return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
+        }
+        const std::string strOpType = GetBDAPOpTypeString(op1, op2);
         if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
             CDomainEntry domainEntry(ptx);
             if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-account-txn-already-in-mempool " + strErrorMessage);
             }
-            int op1, op2;
-            CScript scriptOp;
-            vchCharString vvchOpParameters;
-            if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
-                return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
-            }
-            const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-            if (strOperationType == "bdap_new_account") {
+            if (strOpType == "bdap_new_account") {
                 CDomainEntry findDomainEntry;
                 if (GetDomainEntry(domainEntry.vchFullObjectPath(), findDomainEntry))
                 {
                     strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + findDomainEntry.GetFullObjectPath() + " already exists.  Rejected by the tx memory pool!";
                     return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
                 }
-            }
-            else if (strOperationType == "bdap_update_account") {
+            } else if (strOpType == "bdap_update_account") {
                 CDomainEntry entry;
                 CDomainEntry prevEntry;
                 std::vector<unsigned char> vchData;
@@ -1011,8 +1039,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 if (txAddress.ToString() != prevAddress.ToString()) {
                     return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
                 }
-            }
-            else if (strOperationType == "bdap_delete_account") {
+            } else if (strOpType == "bdap_delete_account") {
                 if (!(vvchOpParameters.size() > 0))
                     return state.Invalid(false, REJECT_INVALID, "bdap-delete-account-get-object-path" + strErrorMessage);
 
@@ -1037,8 +1064,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                     return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
                 }
             }
-        }
-        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
+        } else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
             if (vvch.size() < 1)
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
             if (vvch.size() > 3)
@@ -1063,8 +1089,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 if (GetDomainEntryPubKey(vchSharedPubKey, prevEntry))
                     return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-duplicate-shared-pubkey-entry");
             }
-        }
-        else if (strOpType == "bdap_move_asset") {
+        } else if (strOpType == "bdap_move_asset") {
             if (vvch.size() != 2)
                 return state.Invalid(false, REJECT_INVALID, "bdap-move-invalid-parameter-size");
             std::vector<unsigned char> vchMoveSource = vchFromString(std::string("DYN"));
@@ -1073,6 +1098,179 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-source");
             if (vvch[1] != vchMoveDestination)
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-move-unknown-destination");
+
+        } else if (strOpType == "bdap_new_audit") {
+            if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
+                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
+
+            if (vvch.size() < 1)
+                return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-not-enough-parameters");
+
+            if (vvch.size() > 3)
+                return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-too-many-parameters");
+
+            if (vvch[0].size() > 10)
+                return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-parameter-too-long");
+
+            if (vvch.size() > 1) {
+                if (vvch.size() == 2)
+                   return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-pubkey-missing");
+
+                if (vvch[1].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+                    return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-fqdn-too-long");
+
+                if (vvch[2].size() > 65)
+                    return state.Invalid(false, REJECT_INVALID, "bdap-new-audit-pubkey-too-long");
+
+                // check pubkey belongs to bdap account and signature is correct.
+                CAudit audit(ptx);
+                std::string errorMessage;
+                if (!audit.ValidateValues(errorMessage)) 
+                    return state.Invalid(false, REJECT_INVALID, "bdap-new-audit: " + errorMessage);
+
+                CDomainEntry findDomainEntry;
+                if (!GetDomainEntry(audit.vchOwnerFullObjectPath, findDomainEntry)) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(audit.vchOwnerFullObjectPath) + " not found.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
+                }
+                CPubKey pubkey(vvch[2]);
+                CDynamicAddress address(pubkey.GetID());
+                if (findDomainEntry.GetWalletAddress().ToString() != address.ToString()) {
+                        strErrorMessage = "AcceptToMemoryPoolWorker -- Public key does not match BDAP account wallet address.  Rejected by the tx memory pool!";
+                        return state.Invalid(false, REJECT_INVALID, "bdap-audit-wallet-address-mismatch " + strErrorMessage);
+                    }
+                if (!audit.CheckSignature(pubkey.Raw())) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, "bdap-audit-check-signature-failed " + strErrorMessage);
+                }
+            }
+            CAudit audit;
+            if (GetAuditTxId(tx.GetHash().GetHex(), audit))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-audit-already-exists");
+
+        } else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+            if (!sporkManager.IsSporkActive(SPORK_32_BDAP_V2))
+                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-v2-tx");
+
+            std::string errorPrefix = "bdap-new-certificate-";
+
+            if (strOpType == "bdap_approve_certificate") {
+                errorPrefix = "bdap-approve-certificate-";
+            }
+
+            CX509Certificate certificate(ptx);
+
+            if (certificate.CheckIfExistsInMemPool(mempool, strErrorMessage)) {
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "already-exists-in-mempool");
+            }
+
+            if (vvch.size() < 5)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "not-enough-parameters");
+
+            if (vvch.size() > 6)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "too-many-parameters");
+
+            if (vvch.size() > 2 && vvch[2].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-fqdn-too-long");
+
+            if (vvch.size() > 4 && vvch[4].size() > MAX_OBJECT_FULL_PATH_LENGTH)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-fqdn-too-long");
+
+            if (vvch.size() > 3 && vvch[3].size() > MAX_KEY_LENGTH)
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-pubkey-too-long");
+
+            //If Approved check Issuer Pubkey length
+            if (strOpType == "bdap_approve_certificate") {
+                if (vvch.size() > 5 && vvch[5].size() > MAX_KEY_LENGTH) 
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-pubkey-too-long");
+            }
+
+            // check bdap accounts and signature is correct.
+            CDomainEntry findSubjectDomainEntry;
+            CDomainEntry findIssuerDomainEntry;
+            std::string errorMessage;
+
+            uint32_t nMonthsValid;
+            ParseUInt32(stringFromVch(vvch[1]), &nMonthsValid);
+
+            if (certificate.IsNull()) {
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-is-empty");
+            }
+
+            //update months valid check to handle root certificates
+            if (certificate.IsRootCA) {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_CA_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "rootca-months-valid-incorrect");
+            }
+            else {
+                if (!(nMonthsValid > 0 && nMonthsValid <= MAX_CERTIFICATE_MONTHS_VALID))
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "months-valid-incorrect");
+            }
+
+            if (!certificate.ValidatePEM(errorMessage)) 
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
+
+            if (!certificate.ValidateValues(errorMessage)) 
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "certificate-error: " + errorMessage);
+
+            //Check Subject BDAP
+            if (!GetDomainEntry(certificate.Subject, findSubjectDomainEntry)) {
+                strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(certificate.Subject) + " not found.  Rejected by the tx memory pool!";
+                return state.Invalid(false, REJECT_INVALID, errorPrefix + "subject-account-exists " + strErrorMessage);
+            }
+
+            CharString vchSubjectPubKey = findSubjectDomainEntry.DHTPublicKey;
+            CharString vchIssuerPubKey;
+
+            //If not self signed, check issuer BDAP
+            if (!certificate.SelfSignedX509Certificate()) {
+                if (!GetDomainEntry(certificate.Issuer, findIssuerDomainEntry)) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + stringFromVch(certificate.Issuer) + " not found.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "issuer-account-exists " + strErrorMessage);
+                }
+                vchIssuerPubKey = findIssuerDomainEntry.DHTPublicKey;
+
+                //only check subject signature if NOT self signed and NOT approved because PEM gets modified [so check for REQUEST only]
+                //Check Subject Signature
+                if (!certificate.IsApproved()) {
+                    if (!certificate.CheckSubjectSignature(EncodedPubKeyToBytes(vchSubjectPubKey))) {
+                        strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                        return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-subject-signature-failed " + strErrorMessage);
+                    }
+                }
+            }
+            else {
+                vchIssuerPubKey = vchSubjectPubKey;
+            }
+
+            //If Approve check Issuer Signature and if not self signed check request exists
+            if (strOpType == "bdap_approve_certificate") {
+
+                //check issuer signature
+                if (!certificate.CheckIssuerSignature(EncodedPubKeyToBytes(vchIssuerPubKey))) {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- Invalid signature.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, errorPrefix + "check-issuer-signature-failed " + strErrorMessage);
+                }
+
+                //if not self-signed, check that request exists
+                if (!certificate.SelfSignedX509Certificate()) {
+                    CX509Certificate certificateRequest;
+                    if (!GetCertificateTxId(certificate.txHashRequest.ToString(), certificateRequest))
+                        return state.Invalid(false, REJECT_INVALID, errorPrefix + "reqeust-not-found");
+                }
+            }
+
+            CX509Certificate certificateCheck;
+            if (GetCertificateTxId(tx.GetHash().GetHex(), certificateCheck))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "already-exists");
+
+            //check if a certificate with given serial number already exists
+            if (certificate.SerialNumber > 0) {
+                CX509Certificate certificateSerialCheck;
+                if (GetCertificateSerialNumber(std::to_string(certificate.SerialNumber), certificateSerialCheck))
+                    return state.Invalid(false, REJECT_ALREADY_KNOWN, errorPrefix + "serialnumber-already-exists");
+
+            }
 
         }
         // TODO (BDAP): Implement link delete
@@ -2197,6 +2395,18 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                         LogPrintf("%s -- Failed to undo link transaction. Disconnect %s transaction failed.\n", __func__, hash.ToString());
                     }
                 }
+                else if (strOpType == "bdap_new_audit") {
+                    CAudit audit(ptx);
+                    if (!UndoAddAudit(audit)) {
+                        LogPrintf("%s -- Failed to undo add BDAP audit transaction %s. Disconnect %s transaction failed.\n", __func__, audit.ToString(), hash.ToString());
+                    }
+                }
+                else if (strOpType == "bdap_new_certificate" || strOpType == "bdap_approve_certificate") {
+                    CX509Certificate certificate(ptx);
+                    if (!UndoAddCertificate(certificate)) {
+                        LogPrintf("%s -- Failed to undo add BDAP certificate transaction %s. Disconnect %s transaction failed.\n", __func__, certificate.ToString(), hash.ToString());
+                    }
+                }
                 else {
                     LogPrintf("%s -- Failed to undo unknown BDAP transaction (op1 = %d, op2 = %d). Nothing to undo for %s transaction.\n", __func__, op1, op2, hash.ToString());
                 }
@@ -2456,6 +2666,10 @@ static int64_t nTimeConnect = 0;
 static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
+
+/** Apply the effects of this block (with given index) on the UTXO set represented by coins.
+ *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
+ *  can fail if those validity checks fail (among other reasons). */
 
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins.
  *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
@@ -3611,6 +3825,40 @@ bool ResetBlockFailureFlags(CBlockIndex* pindex)
     return true;
 }
 
+bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex)
+{
+    AssertLockHeld(cs_main);
+
+    int nHeight = pindex->nHeight;
+
+    // Remove the invalidity flag from this block and all its descendants.
+    BlockMap::iterator it = mapBlockIndex.begin();
+    while (it != mapBlockIndex.end()) {
+        if (!it->second->IsValid() && it->second->GetAncestor(nHeight) == pindex) {
+            it->second->nStatus &= ~BLOCK_FAILED_MASK;
+            setDirtyBlockIndex.insert(it->second);
+            if (it->second->IsValid(BLOCK_VALID_TRANSACTIONS) && it->second->nChainTx && setBlockIndexCandidates.value_comp()(chainActive.Tip(), it->second)) {
+                setBlockIndexCandidates.insert(it->second);
+            }
+            if (it->second == pindexBestInvalid) {
+                // Reset invalid block marker if it was pointing to one of those.
+                pindexBestInvalid = NULL;
+            }
+        }
+        it++;
+    }
+
+    // Remove the invalidity flag from all ancestors too.
+    while (pindex != NULL) {
+        if (pindex->nStatus & BLOCK_FAILED_MASK) {
+            pindex->nStatus &= ~BLOCK_FAILED_MASK;
+            setDirtyBlockIndex.insert(pindex);
+        }
+        pindex = pindex->pprev;
+    }
+    return true;
+}
+
 CBlockIndex* AddToBlockIndex(const CBlockHeader& block)
 {
     // Check for duplicate
@@ -3782,6 +4030,11 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const 
     // Check proof of work matches claimed amount
     if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+
+    // Check timestamp
+    if (block.GetBlockTime() > GetAdjustedTime())
+        return state.Invalid(error("CheckBlockHeader() : block timestamp too far in the future"),
+                             REJECT_INVALID, "time-too-new");
 
     return true;
 }

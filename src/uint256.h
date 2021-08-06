@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,6 +16,10 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 
 /** Template base class for fixed-sized opaque blobs. */
 template <unsigned int BITS>
@@ -46,7 +50,33 @@ public:
         memset(data, 0, sizeof(data));
     }
 
+    base_blob(uint64_t b)
+    {
+        data[0] = (unsigned int)b;
+        data[1] = (unsigned int)(b >> 32);
+        for (int i = 2; i < WIDTH; i++)
+            data[i] = 0;
+    }
+
     inline int Compare(const base_blob& other) const { return memcmp(data, other.data, sizeof(data)); }
+
+    base_blob& operator=(const base_blob& b)
+    {
+        for (int i = 0; i < WIDTH; i++)
+            data[i] = b.data[i];
+        return *this;
+    }
+
+    base_blob& operator=(uint64_t b)
+    {
+        data[0] = (unsigned int)b;
+        data[1] = (unsigned int)(b >> 32);
+        for (int i = 2; i < WIDTH; i++)
+            data[i] = 0;
+        return *this;
+    }
+
+    base_blob& operator>>=(unsigned int shift);
 
     friend inline bool operator==(const base_blob& a, const base_blob& b) { return a.Compare(b) == 0; }
     friend inline bool operator!=(const base_blob& a, const base_blob& b) { return a.Compare(b) != 0; }
@@ -80,6 +110,11 @@ public:
     unsigned int size() const
     {
         return sizeof(data);
+    }
+
+    uint64_t Get64(int n = 0) const
+    {
+        return data[2 * n] | (uint64_t)data[2 * n + 1] << 32;
     }
 
     uint64_t GetUint64(int pos) const

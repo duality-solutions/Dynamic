@@ -12,7 +12,7 @@ Graph on Pull Request History
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2019 [Duality Blockchain Solutions](https://duality.solutions/)**
+**Copyright (c) 2016-2021 [Duality Blockchain Solutions](https://duality.solutions/)**
 
 What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------

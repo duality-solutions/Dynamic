@@ -1,11 +1,11 @@
 dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 2)
-define(_CLIENT_VERSION_MINOR, 4)
-define(_CLIENT_VERSION_REVISION, 4)
-define(_CLIENT_VERSION_BUILD, 1)
+define(_CLIENT_VERSION_MINOR, 5)
+define(_CLIENT_VERSION_REVISION, 0)
+define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
-define(_COPYRIGHT_YEAR, 2019)
+define(_COPYRIGHT_YEAR, 2021)
 AC_INIT([Dynamic],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/duality-solutions/dynamic/issues],[dynamic])
 AC_CONFIG_SRCDIR([src/validation.cpp])
 AC_CONFIG_HEADERS([src/config/dynamic-config.h])
@@ -52,7 +52,7 @@ dnl Require C++14 compiler (no GNU extensions)
 AX_CXX_COMPILE_STDCXX([14], [ext], [mandatory], [nodefault])
 dnl Check if -latomic is required for <std::atomic>
 CHECK_ATOMIC
- 
+
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
 m4_ifdef([AC_PROG_OBJCXX],[
@@ -207,8 +207,6 @@ AC_ARG_ENABLE([avx512f],
   [have_avx512f=${enableval}],
   [have_avx512f=no])
 
-AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
-
 # Enable debug
 AC_ARG_ENABLE([debug],
     [AS_HELP_STRING([--enable-debug],
@@ -351,8 +349,8 @@ case $host in
        AC_CHECK_PROG([BREW],brew, brew)
        if test x$BREW = xbrew; then
          dnl These Homebrew packages may be keg-only, meaning that they won't be found
-         dnl in expected paths because they may conflict with system files. Ask
          dnl Homebrew where each one is located, then adjust paths accordingly.
+         dnl in expected paths because they may conflict with system files. Ask
          dnl It's safe to add these paths even if the functionality is disabled by
          dnl the user (--without-wallet or --without-gui for example).
 
@@ -585,6 +583,22 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([
   ]
 )
 
+dnl check for gmtime_r(), fallback to gmtime_s() if that is unavailable
+dnl fail if neither are available.
+AC_MSG_CHECKING(for gmtime_r)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <ctime>]],
+  [[ gmtime_r((const time_t *) nullptr, (struct tm *) nullptr); ]])],
+  [ AC_MSG_RESULT(yes); AC_DEFINE(HAVE_GMTIME_R, 1, [Define this symbol if gmtime_r is available]) ],
+  [ AC_MSG_RESULT(no);
+    AC_MSG_CHECKING(for gmtime_s);
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <ctime>]],
+       [[ gmtime_s((struct tm *) nullptr, (const time_t *) nullptr); ]])],
+       [ AC_MSG_RESULT(yes)],
+       [ AC_MSG_RESULT(no); AC_MSG_ERROR(Both gmtime_r and gmtime_s are unavailable) ]
+    )
+  ]
+)
+
 if test x$use_reduce_exports = xyes; then
   AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],[RE_CXXFLAGS="-fvisibility=hidden"],
   [AC_MSG_ERROR([Cannot set default symbol visibility. Use --disable-reduce-exports.])])
@@ -645,10 +659,10 @@ if test x$use_upnp != xno; then
   )
 fi
 
-DYNAMIC_QT_INIT
+DYNAMIC_QT_INIT()
 
 dnl sets $dynamic_enable_qt, $dynamic_enable_qt_test, $dynamic_enable_qt_dbus
-DYNAMIC_QT_CONFIGURE([$use_pkgconfig], [qt5])
+DYNAMIC_QT_CONFIGURE([$use_pkgconfig])
 
 if test x$build_dynamic_utils$build_dynamicd$dynamic_enable_qt$use_tests = xnononono; then
     use_boost=no
@@ -829,7 +843,6 @@ if test x$use_pkgconfig = xyes; then
     [
       PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
       PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
-      DYNAMIC_QT_CHECK([PKG_CHECK_MODULES([PROTOBUF], [protobuf], [have_protobuf=yes], [DYNAMIC_QT_FAIL(libprotobuf not found)])])
       if test x$use_qr != xno; then
         DYNAMIC_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
       fi
@@ -880,11 +893,19 @@ else
     AC_DEFINE_UNQUOTED([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])
   fi
 
-  DYNAMIC_QT_CHECK(AC_CHECK_LIB([protobuf] ,[main],[PROTOBUF_LIBS=-lprotobuf], DYNAMIC_QT_FAIL(libprotobuf not found)))
   if test x$use_qr != xno; then
     DYNAMIC_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])
     DYNAMIC_QT_CHECK([AC_CHECK_HEADER([qrencode.h],, have_qrencode=no)])
   fi
+fi
+
+if test "x$use_zmq" = xyes; then
+  dnl Assume libzmq was built for static linking
+  case $host in
+    *mingw*)
+      ZMQ_CFLAGS="$ZMQ_CFLAGS -DZMQ_STATIC"
+    ;;
+  esac
 fi
 
 CXXFLAGS_TEMP="$CXXFLAGS"
@@ -894,8 +915,6 @@ LIBS="$LIBS $SSL_LIBS $CRYPTO_LIBS"
 AC_CHECK_HEADER([openssl/ec.h],, AC_MSG_ERROR(OpenSSL ec header missing),)
 CXXFLAGS="$CXXFLAGS_TEMP"
 LIBS="$LIBS_TEMP"
-
-DYNAMIC_QT_PATH_PROGS([PROTOC], [protoc],$protoc_bin_path)
 
 AC_MSG_CHECKING([whether to build dynamicd])
 AM_CONDITIONAL([BUILD_DYNAMICD], [test x$build_dynamicd = xyes])
@@ -1094,6 +1113,7 @@ AC_SUBST(MINIUPNPC_CPPFLAGS)
 AC_SUBST(MINIUPNPC_LIBS)
 AC_SUBST(LEVELDB_ATOMIC_CPPFLAGS)
 AC_SUBST(LEVELDB_ATOMIC_CXXFLAGS)
+AC_SUBST(HAVE_GMTIME_R)
 AC_CONFIG_FILES([Makefile src/Makefile share/setup.nsi share/qt/Info.plist src/test/buildenv.py])
 AC_CONFIG_FILES([qa/pull-tester/run-dynamicd-for-test.sh],[chmod +x qa/pull-tester/run-dynamicd-for-test.sh])
 AC_CONFIG_FILES([qa/pull-tester/tests_config.py],[chmod +x qa/pull-tester/tests_config.py])

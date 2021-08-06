@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2019 The Dash Core Developers
-// Copyright (c) 2009-2019 The Bitcoin Developers
-// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2021 The Dash Core Developers
+// Copyright (c) 2009-2021 The Bitcoin Developers
+// Copyright (c) 2009-2021 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -31,7 +31,7 @@
 #include "wallet/walletdb.h"
 #endif
 
-#include <QNetworkProxy>
+#include <QDebug>
 #include <QSettings>
 #include <QStringList>
 
@@ -110,6 +110,11 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fLowKeysWarning", true);
 #endif // ENABLE_WALLET
 
+    if (!settings.contains("fHideOrphans"))
+        settings.setValue("fHideOrphans", false);
+    fHideOrphans = settings.value("fHideOrphans").toBool();
+
+
     // These are shared with the core or have a command-line parameter
     // and we want command-line parameters to overwrite the GUI settings.
     //
@@ -160,7 +165,6 @@ void OptionsModel::Init(bool resetSettings)
         addOverriddenOption("-privatesendmultisession");
     privateSendClient.fPrivateSendMultiSession = settings.value("fPrivateSendMultiSession").toBool();
 #endif
-
     // Network
     if (!settings.contains("fUseUPnP"))
         settings.setValue("fUseUPnP", DEFAULT_UPNP);
@@ -286,6 +290,8 @@ QVariant OptionsModel::data(const QModelIndex& index, int role) const
         case PrivateSendMultiSession:
             return settings.value("fPrivateSendMultiSession");
 #endif
+        case HideOrphans:
+            return settings.value("fHideOrphans");
         case DisplayUnit:
             return nDisplayUnit;
         case ThirdPartyTxUrls:
@@ -448,6 +454,11 @@ bool OptionsModel::setData(const QModelIndex& index, const QVariant& value, int 
             }
             break;
 #endif
+        case HideOrphans:
+            fHideOrphans = value.toBool();
+            settings.setValue("fHideOrphans", fHideOrphans);
+            Q_EMIT hideOrphansChanged(fHideOrphans);
+            break;
         case DisplayUnit:
             setDisplayUnit(value);
             break;
@@ -522,23 +533,6 @@ void OptionsModel::setDisplayUnit(const QVariant& value)
         settings.setValue("nDisplayUnit", nDisplayUnit);
         Q_EMIT displayUnitChanged(nDisplayUnit);
     }
-}
-
-bool OptionsModel::getProxySettings(QNetworkProxy& proxy) const
-{
-    // Directly query current base proxy, because
-    // GUI settings can be overridden with -proxy.
-    proxyType curProxy;
-    if (GetProxy(NET_IPV4, curProxy)) {
-        proxy.setType(QNetworkProxy::Socks5Proxy);
-        proxy.setHostName(QString::fromStdString(curProxy.proxy.ToStringIP()));
-        proxy.setPort(curProxy.proxy.GetPort());
-
-        return true;
-    } else
-        proxy.setType(QNetworkProxy::NoProxy);
-
-    return false;
 }
 
 void OptionsModel::setRestartRequired(bool fRequired)

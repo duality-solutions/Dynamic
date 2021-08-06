@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,6 +11,7 @@
 #include "dht/sessionevents.h"
 #include "dht/datachunk.h"
 #include "dht/dataheader.h"
+#include "dht/limits.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "dht/settings.h"
@@ -40,6 +41,10 @@
 #include <fstream>
 #include <thread>
 
+typedef std::map<std::string, CMutableGetEvent> DHTGetEventMap;
+// <record infohash, last requence>
+typedef std::map<std::string, std::int64_t> RecordMap;
+
 using namespace libtorrent;
 
 static constexpr size_t nThreads = 8;
@@ -67,6 +72,10 @@ static uint64_t nGetErrors = 0;
 static bool fStarted;
 static bool fReannounceStarted = false;
 static bool fRun;
+CCriticalSection cs_DHTGetEventMap;
+CCriticalSection cs_RecordMap;
+DHTGetEventMap m_DHTGetEventMap;
+RecordMap m_RecordMap;
 
 namespace DHT {
     typedef std::vector<std::pair<std::string, libtorrent::entry>> PutBytes;
@@ -135,6 +144,16 @@ namespace DHT {
     }
 }
 
+bool RemoveDHTGetEvent(const std::string& infoHash)
+{
+    if (arraySessions.size() > 0) {
+        std::pair<std::shared_ptr<std::thread>, std::shared_ptr<CHashTableSession>> pairSession = arraySessions[0];
+        pairSession.second->RemoveDHTGetEvent(infoHash);
+        return true;
+    }
+    return false;
+}
+
 void CHashTableSession::StopEventListener()
 {
     fShutdown = true;
@@ -154,6 +173,14 @@ bool CHashTableSession::ReannounceEntry(const CMutableData& mutableData)
         Session->dht_put_item(pubkey, std::bind(&DHT::put_signed_bytes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
              pubkey, signature_bytes, mut_item, mutableData.SequenceNumber), mutableData.Salt());
         LogPrint("dht", "%s -- Re-annoucing item infohash %s, entry \n%s\n", __func__, infohash.to_string(), mut_item.to_string());
+        return true;
+    }
+    return false;
+}
+
+bool IsSaltHeader(const std::string& strSalt)
+{
+    if (strSalt.substr(strSalt.length() - 2) == ":0") {
         return true;
     }
     return false;
@@ -198,7 +225,7 @@ void StartEventListener(std::shared_ptr<CHashTableSession> dhtSession)
                     LogPrint("dht", "%s -- PubKey = %s, Salt = %s, Value = %s\nMessage = %s, Alert Type =%s, Alert Category = %u\n"
                         , __func__, aux::to_hex(pGet->key), pGet->salt, pGet->item.to_string(), strAlertMessage, strAlertTypeName, iAlertCategory);
 
-                    if (pGet->item.to_string() != "<uninitialized>") {
+                    if (pGet->item.to_string() != "<uninitialized>" && (!IsSaltHeader(pGet->salt) || pGet->authoritative)) {
                         const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
@@ -564,10 +591,9 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
 }
 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
-                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative)
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative, const int64_t& nMinSequence)
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key),recordSalt);
-    RemoveDHTGetEvent(infoHash);
     if (!SubmitGet(public_key, recordSalt))
         return false;
     MilliSleep(40);
@@ -575,7 +601,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
-        if (FindDHTGetEvent(infoHash, data)) {
+        if (FindDHTGetEvent(infoHash, nMinSequence, data)) {
             std::string strData = data.Value();
             // TODO (DHT): check the last position for the single quote character
             if (strData.substr(0, 1) == "'") {
@@ -594,6 +620,35 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
     return false;
 }
 
+bool CHashTableSession::SubmitGetAuthoritative(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence)
+{
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key),recordSalt);
+    if (!SubmitGet(public_key, recordSalt))
+        return false;
+    MilliSleep(40);
+    CMutableGetEvent data;
+    int64_t startTime = GetTimeMillis();
+    while (timeout > GetTimeMillis() - startTime)
+    {
+        if (FindDHTGetEvent(infoHash, lastSequence, data) && data.Authoritative()) {
+            std::string strData = data.Value();
+            // TODO (DHT): check the last position for the single quote character
+            if (strData.substr(0, 1) == "'") {
+                recordValue = strData.substr(1, strData.size() - 2);
+            }
+            else {
+                recordValue = strData;
+            }
+            lastSequence = data.SequenceNumber();
+            LogPrint("dht", "CHashTableSession::%s -- salt = %s, value = %s, seq = %d\n", __func__, recordSalt, recordValue, lastSequence);
+            return true;
+        }
+        MilliSleep(10);
+    }
+    return false;
+}
+
 static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& key32)
 {
     std::vector<unsigned char> vchKey;
@@ -605,18 +660,20 @@ static std::vector<unsigned char> Array32ToVector(const std::array<char, 32>& ke
 
 bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, const std::string& strOperationType, int64_t& iSequence, CDataRecord& record)
 {
-    bool fAuthoritative = false;
-    uint16_t nTotalSlots = 32;
+    int64_t nTimeout = 20000;
+    int nHeaderSeq = 0;
+    bool fAuthoritative = true;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     uint16_t nHeaderAttempts = 3;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     CRecordHeader header;
-    if (!SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+    if (!SubmitGet(public_key, strHeaderSalt, nTimeout, strHeaderHex, iSequence, fAuthoritative)) {
         unsigned int i = 0;
         while (i < nHeaderAttempts) {
             strHeaderHex = "";
             if (header.IsNull()) {
-                if (SubmitGet(public_key, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative)) {
+                if (SubmitGet(public_key, strHeaderSalt, nTimeout, strHeaderHex, iSequence, fAuthoritative)) {
                     break;
                 }
             }
@@ -626,16 +683,19 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
             i++;
         }
     }
+
+    // if header matches previous entry, only get missing chunks.
     if (strHeaderHex == "")
         return false; // Header failed, so don't try to get the rest of the record.
 
+    nHeaderSeq = iSequence;
     header.LoadHex(strHeaderHex);
     if (!header.IsNull() && header.nChunks > 0) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
-            if (!SubmitGet(public_key, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative)) {
+            if (!SubmitGet(public_key, strChunkSalt, nTimeout, strChunk, iSequence, fAuthoritative, nHeaderSeq)) {
                 strErrorMessage = "Failed to get record chunk.";
                 return false;
             }
@@ -652,6 +712,12 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
         nGetBytes += header.nDataSize;
         record = getRecord;
         return true;
+    } else if (header.IsNull()) {
+        std::vector<CDataChunk> vChunks;
+        CDataRecord getRecord(strOperationType, 0, header, vChunks, Array32ToVector(private_seed));
+        record = getRecord;
+        nGetBytes += header.nDataSize;
+        return true;
     }
     return false;
 }
@@ -659,7 +725,7 @@ bool CHashTableSession::SubmitGetRecord(const std::array<char, 32>& public_key, 
 bool CHashTableSession::GetDataFromMap(const std::array<char, 32>& public_key, const std::string& recordSalt, CMutableGetEvent& event)
 {
     std::string infoHash = GetInfoHash(aux::to_hex(public_key), recordSalt);
-    if (FindDHTGetEvent(infoHash, event)) {
+    if (FindDHTGetEvent(infoHash, 0, event)) {
         LogPrint("dht", "CHashTableSession::%s -- pubkey = %s, salt = %s, value = %s, seq = %d, auth = %u\n", __func__, event.PublicKey(), event.Salt(), event.Value(), event.SequenceNumber(), event.Authoritative());
         return true;
     }
@@ -693,7 +759,7 @@ static std::array<char, 32> EncodedVectorCharToArray32(const std::vector<unsigne
 
 bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& vchLinkInfo, const std::string& strOperationType, std::vector<CDataRecord>& vchRecords)
 {
-    uint16_t nTotalSlots = 32;
+    uint16_t nTotalSlots = GetMaximumSlots(strOperationType);
     strErrorMessage = "";
     // Get the headers first
     for (const CLinkInfo& linkInfo : vchLinkInfo) {
@@ -790,18 +856,50 @@ bool CHashTableSession::SubmitGetAllRecordsAsync(const std::vector<CLinkInfo>& v
     return true;
 }
 
+bool CHashTableSession::CheckRecordMap(const CMutableGetEvent& event)
+{
+    LOCK(cs_RecordMap);
+    std::map<std::string, std::int64_t>::iterator iRecord = m_RecordMap.find(event.RecordInfoHash());
+    if (iRecord == m_RecordMap.end()) {
+        m_RecordMap.insert(std::make_pair(event.RecordInfoHash(), event.SequenceNumber()));
+        return true;
+    } else {
+        if (event.SequenceNumber() > iRecord->second) {
+            m_RecordMap[event.RecordInfoHash()] = event.SequenceNumber();
+            return true;
+        } else {
+            if (event.SequenceNumber() == iRecord->second) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void CHashTableSession::AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
 {
-    LOCK(cs_DHTGetEventMap);
-    if (m_DHTGetEventMap.find(infoHash) == m_DHTGetEventMap.end()) {
-        // event not found. Add a new entry to DHT event map
-        LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
-        m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
+    if (CheckRecordMap(event)) {
+        LOCK(cs_DHTGetEventMap);
+        std::map<std::string, CMutableGetEvent>::iterator iEvent = m_DHTGetEventMap.find(infoHash);
+        if (iEvent == m_DHTGetEventMap.end()) {
+            // event not found. Add a new entry to DHT event map
+            LogPrint("dht", "AddToDHTGetEventMap Not found -- infohash = %s, event %s\n", infoHash, event.ToString());
+            m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
+        }
+        else {
+            // event found. Update entry in DHT event map
+            // check seq is greater than existing record
+            if (event.SequenceNumber() > iEvent->second.SequenceNumber()) {
+                LogPrint("dht", "AddToDHTGetEventMap Found -- infohash = %s, event %s\n", infoHash, event.ToString());
+                m_DHTGetEventMap[infoHash] = event;
+            } else {
+                if (event.SequenceNumber() < iEvent->second.SequenceNumber())
+                    LogPrint("dht", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
+            }
+        }
     }
     else {
-        // event found. Update entry in DHT event map
-        LogPrint("dht", "AddToDHTGetEventMap Found -- Updateinfohash = %s\n", infoHash);
-        m_DHTGetEventMap[infoHash] = event;
+        LogPrint("dht", "AddToDHTGetEventMap old sequence number found. -- infohash = %s, event %s\n", infoHash, event.ToString());
     }
 }
 
@@ -859,11 +957,11 @@ void CHashTableSession::GetEvents(const int64_t& startTime, std::vector<CEvent>&
     LogPrintf("%s -- events.size() = %u\n", __func__, events.size());
 }
 
-bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
+bool CHashTableSession::FindDHTGetEvent(const std::string& infoHash, const int64_t& min_seq, CMutableGetEvent& event)
 {
     //LOCK(cs_DHTGetEventMap);
     std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
-    if (iMutableEvent != m_DHTGetEventMap.end()) {
+    if (iMutableEvent != m_DHTGetEventMap.end() && iMutableEvent->second.SequenceNumber() >= min_seq) {
         // event found.
         event = iMutableEvent->second;
         return true;
@@ -920,9 +1018,13 @@ bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64>
     libtorrent::entry entryHeaderHex(record.HeaderHex);
     DHT::PutBytes newPut;
     newPut.push_back(std::make_pair(strHeaderSalt, entryHeaderHex));
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key), strHeaderSalt);
+    RemoveDHTGetEvent(infoHash);
     for (const CDataChunk& chunk : record.GetChunks()) {
         libtorrent::entry entryChunkRaw(stringFromVch(chunk.vchValue));
         newPut.push_back(std::make_pair(chunk.Salt, entryChunkRaw));
+        infoHash = GetInfoHash(aux::to_hex(public_key), chunk.Salt);
+        RemoveDHTGetEvent(infoHash);
         LogPrintf("%s -- chunk salt: %s, value: %s\n", __func__, chunk.Salt, entryChunkRaw.to_string());
     }
     DHT::vPutBytes.push_back(std::make_pair(nCurrentTime, newPut));
@@ -971,6 +1073,18 @@ bool SubmitGet(const size_t nSessionThread, const std::array<char, 32>& public_k
         return false;
 
     return arraySessions[nSessionThread].second->SubmitGet(public_key, recordSalt, timeout, recordValue, lastSequence, fAuthoritative);
+}
+
+bool SubmitGetAuthoritative(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence)
+{
+    if (nSessionThread >= nThreads)
+        return false;
+
+    if (!arraySessions[nSessionThread].second)
+        return false;
+
+    return arraySessions[nSessionThread].second->SubmitGetAuthoritative(public_key, recordSalt, timeout, recordValue, lastSequence);
 }
 
 bool SubmitGetRecord(const size_t nSessionThread, const std::array<char, 32>& public_key, const std::array<char, 32>& private_seed, 
