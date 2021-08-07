@@ -22,6 +22,7 @@
 #include <boost/foreach.hpp>
 #include <boost/test/unit_test.hpp>
 
+#ifdef ENABLE_ALERT_TESTS
 //
 // Sign a CAlert and serialize it
 //
@@ -234,3 +235,4 @@ BOOST_AUTO_TEST_CASE(AlertNotify)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif // ENABLE_ALERT_TESTS

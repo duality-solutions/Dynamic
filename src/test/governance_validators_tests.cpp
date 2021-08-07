@@ -20,6 +20,7 @@
 
 #include <univalue.h>
 
+#ifdef ENABLE_GOVERNANCE_TESTS
 extern UniValue read_json(const std::string& jsondata);
 
 BOOST_FIXTURE_TEST_SUITE(governance_validators_tests, BasicTestingSetup)
@@ -84,3 +85,5 @@ BOOST_AUTO_TEST_CASE(invalid_proposals_test)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // ENABLE_GOVERNANCE_TESTS
