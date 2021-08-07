@@ -4,6 +4,7 @@
 #define FLUID_DB_H
 
 #include "amount.h"
+#include "consensus/params.h"
 
 class CDynamicAddress;
 class CFluidDynode;
@@ -11,8 +12,8 @@ class CFluidMining;
 class CFluidMint;
 class CFluidSovereign;
 
-CAmount GetFluidDynodeReward(const int nHeight);
-CAmount GetFluidMiningReward(const int nHeight);
+CAmount GetFluidDynodeReward(const int nHeight, const Consensus::Params& consensusParams);
+CAmount GetFluidMiningReward(const int nHeight, const Consensus::Params& consensusParams);
 bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint);
 bool IsSovereignAddress(const CDynamicAddress& inputAddress);
 bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& dynodeEntries);

@@ -356,7 +356,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex* pindex, int nMaxBlocksToScanBack
             if (!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
 
-            CAmount nDynodePayment = GetFluidDynodeReward(BlockReading->nHeight);
+            CAmount nDynodePayment = GetFluidDynodeReward(BlockReading->nHeight, Params().GetConsensus());
 
             for (const auto& txout : block.vtx[0]->vout)
                 if (dnpayee == txout.scriptPubKey && nDynodePayment == txout.nValue) {

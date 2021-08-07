@@ -483,13 +483,13 @@ bool CFluid::ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CA
     return true;
 }
 
-bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
+bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block, const Consensus::Params& consensusParams)
 {
     if (pblockindex != nullptr) {
         // Check for invalid block position and file.
         const CDiskBlockPos pos = pblockindex->GetBlockPos();
         if (pos.nFile > -1 && pos.nPos > 0) {
-            if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            if (!ReadBlockFromDisk(block, pblockindex, consensusParams)) {
                 LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
                 return false;
             }
@@ -502,10 +502,10 @@ bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
     return true;
 }
 
-bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount)
+bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount, const Consensus::Params& consensusParams)
 {
     CBlock block;
-    if (GetFluidBlock(pblockindex, block)) {
+    if (GetFluidBlock(pblockindex, block, consensusParams)) {
         for (const CTransactionRef& tx : block.vtx) {
             for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
@@ -542,25 +542,25 @@ bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockInd
     return false;
 }
 
-CAmount GetStandardPoWBlockPayment(const int& nHeight)
+CAmount GetStandardPoWBlockPayment(const int& nHeight, const Consensus::Params& consensusParams)
 {
     if (nHeight == 1) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
         LogPrint("superblock creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
-    } else if (nHeight > 1 && nHeight <= Params().GetConsensus().nRewardsStart) {
+    } else if (nHeight > 1 && nHeight <= consensusParams.nRewardsStart) {
         LogPrint("zero-reward block creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
-    } else if (nHeight > Params().GetConsensus().nRewardsStart) {
+    } else if (nHeight > consensusParams.nRewardsStart) {
         LogPrint("creation", "GetStandardPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
         return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
     } else
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetStandardDynodePayment(const int& nHeight)
+CAmount GetStandardDynodePayment(const int& nHeight, const Consensus::Params& consensusParams)
 {
-    if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
+    if (nHeight > consensusParams.nDynodePaymentsStartBlock) {
         LogPrint("fluid", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
     } else {

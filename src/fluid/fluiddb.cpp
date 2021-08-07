@@ -9,47 +9,47 @@
 #include "fluidmint.h"
 #include "fluidsovereign.h"
 
-CAmount GetFluidDynodeReward(const int nHeight)
+CAmount GetFluidDynodeReward(const int nHeight, const Consensus::Params& consensusParams)
 {
     if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
-        return GetStandardDynodePayment(nHeight);
+        return GetStandardDynodePayment(nHeight, consensusParams);
 
     if (!CheckFluidDynodeDB())
-        return GetStandardDynodePayment(nHeight);
+        return GetStandardDynodePayment(nHeight, consensusParams);
 
     if (pFluidDynodeDB->IsEmpty())
-        return GetStandardDynodePayment(nHeight);
+        return GetStandardDynodePayment(nHeight, consensusParams);
 
     CFluidDynode lastDynodeRecord;
     if (!pFluidDynodeDB->GetLastFluidDynodeRecord(lastDynodeRecord, nHeight)) {
-        return GetStandardDynodePayment(nHeight);
+        return GetStandardDynodePayment(nHeight, consensusParams);
     }
     if (lastDynodeRecord.DynodeReward > 0) {
         return lastDynodeRecord.DynodeReward;
     } else {
-        return GetStandardDynodePayment(nHeight);
+        return GetStandardDynodePayment(nHeight, consensusParams);
     }
 }
 
-CAmount GetFluidMiningReward(const int nHeight)
+CAmount GetFluidMiningReward(const int nHeight, const Consensus::Params& consensusParams)
 {
     if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
-        return GetStandardPoWBlockPayment(nHeight);
+        return GetStandardPoWBlockPayment(nHeight, consensusParams);
 
     if (!CheckFluidMiningDB())
-        return GetStandardPoWBlockPayment(nHeight);
+        return GetStandardPoWBlockPayment(nHeight, consensusParams);
 
     if (pFluidMiningDB->IsEmpty())
-        return GetStandardPoWBlockPayment(nHeight);
+        return GetStandardPoWBlockPayment(nHeight, consensusParams);
 
     CFluidMining lastMiningRecord;
     if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord, nHeight)) {
-        return GetStandardPoWBlockPayment(nHeight);
+        return GetStandardPoWBlockPayment(nHeight, consensusParams);
     }
     if (lastMiningRecord.MiningReward > 0) {
         return lastMiningRecord.MiningReward;
     } else {
-        return GetStandardPoWBlockPayment(nHeight);
+        return GetStandardPoWBlockPayment(nHeight, consensusParams);
     }
 }
 

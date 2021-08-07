@@ -895,7 +895,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     CScript scriptMint;
     if (areWeMinting) {
         // Add minting output to superblock payments
-        CAmount fluidIssuance = nCoinbaseValue - GetFluidDynodeReward(nHeight) - GetFluidMiningReward(nHeight);
+        CAmount fluidIssuance = nCoinbaseValue - GetFluidDynodeReward(nHeight, Params().GetConsensus()) - GetFluidMiningReward(nHeight, Params().GetConsensus());
         if (fluidIssuance > 0) {
             UniValue entry(UniValue::VOBJ);
             CDynamicAddress mintAddress = fluidMint.GetDestinationAddress();
@@ -1150,7 +1150,7 @@ UniValue getsubsidy(const JSONRPCRequest& request)
     if (nHeight < 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
-    return (uint64_t)GetFluidDynodeReward(nHeight) + GetFluidMiningReward(nHeight);
+    return (uint64_t)GetFluidDynodeReward(nHeight, Params().GetConsensus()) + GetFluidMiningReward(nHeight, Params().GetConsensus());
 }
 
 static const CRPCCommand commands[] =
