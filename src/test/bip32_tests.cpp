@@ -120,11 +120,11 @@ void RunTest(const TestVector &test) {
 
         CDataStream ssPub(SER_DISK, CLIENT_VERSION);
         ssPub << pubkeyNew;
-        BOOST_CHECK(ssPub.size() == BIP32_EXTKEY_SIZE);
+        BOOST_CHECK(ssPub.size() == BIP32_EXTKEY_SIZE + 1);
 
         CDataStream ssPriv(SER_DISK, CLIENT_VERSION);
         ssPriv << keyNew;
-        BOOST_CHECK(ssPriv.size() == BIP32_EXTKEY_SIZE);
+        BOOST_CHECK(ssPriv.size() == BIP32_EXTKEY_SIZE + 1);
 
         CExtPubKey pubCheck;
         CExtKey privCheck;
