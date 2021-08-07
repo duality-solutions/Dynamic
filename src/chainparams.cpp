@@ -189,7 +189,7 @@ public:
         startNewChain = false;
         nSwitchDifficultyBlock = 795350; // approx: September 22, 2021
 
-        genesis = CreateGenesisBlock(1513619300, 626614, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1513619300, 626614, 0x1e0fffff, 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -346,7 +346,7 @@ public:
         startNewChain = false;
         nSwitchDifficultyBlock = 5000; // ~ 1 week
 
-        genesis = CreateGenesisBlock(1515641597, 747, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1515641597, 747, 0x2000ffff, 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -480,7 +480,7 @@ public:
         startNewChain = false;
         nSwitchDifficultyBlock = 500;
 
-        genesis = CreateGenesisBlock(1513619951, 1754, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1513619951, 1754, 0x1f0fffff, 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -609,7 +609,7 @@ public:
         startNewChain = false;
         nSwitchDifficultyBlock = 500000;
 
-        genesis = CreateGenesisBlock(1559867972, 60883, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1559867972, 60883, 0x1f00ffff, 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
