@@ -122,8 +122,6 @@ BOOST_AUTO_TEST_CASE(audit_test1)
         //test OwnerFullObjectPath Length GOOD
         audit.vchOwnerFullObjectPath = vchFromString(strLen191);
         BOOST_CHECK(audit.ValidateValues(strErrorMsg) == true);
-
-        std::cout << "Exit: audit_test1\n";
     }
 } //audit_test1
 
@@ -167,8 +165,6 @@ BOOST_AUTO_TEST_CASE(audit_test2)
 
         //test valid signature
         BOOST_CHECK(audit.CheckSignature(pubKey.Raw()));
-
-        std::cout << "Exit: audit_test2\n";
     }
 } //audit_test2
 

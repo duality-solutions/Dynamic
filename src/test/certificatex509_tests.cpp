@@ -176,8 +176,6 @@ BOOST_AUTO_TEST_CASE(certificatex509_test1)
 
         //test ExternalVerificationFile GOOD
         BOOST_CHECK(testCertificate.ValidateValues(strErrorMsg) == true);
-
-        std::cout << "Exit: certificatex509_test1\n";
     }
 } //certificate_test1
 
@@ -307,9 +305,6 @@ BOOST_AUTO_TEST_CASE(certificatex509_test2)
         //Check against PEM BAD
         BOOST_CHECK(!(testCertificate.ValidatePEM(strErrorMsg) == true));
 
-
-        std::cout << "Exit: certificatex509_test2\n";
-
     }
 } //certificatex509_test2
 
@@ -432,8 +427,6 @@ BOOST_AUTO_TEST_CASE(certificatex509_test3)
 
         //check against good certificate, GOOD
         BOOST_CHECK((testCertificate2.UnserializeFromTx(txRef2) == true));
-
-        std::cout << "Exit: certificatex509_test3\n";
     }
 } //certificatex509_test3
 

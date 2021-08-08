@@ -34,7 +34,6 @@ BOOST_AUTO_TEST_CASE(dht_key_getlinksharedpubkey_test)
     std::vector<unsigned char> vchSharedPubKey1 = GetLinkSharedPubKey(dhtKey1, dhtKey2.GetPubKey());
     std::vector<unsigned char> vchSharedPubKey2 = GetLinkSharedPubKey(dhtKey2, dhtKey1.GetPubKey());
     BOOST_CHECK(vchSharedPubKey1 == vchSharedPubKey2);
-    std::cout << "Exit: dht_key_getlinksharedpubkey_test\n";
 
 }
 
