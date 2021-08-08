@@ -26,41 +26,45 @@
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
+struct TestnetSetup : public TestingSetup {
+    TestnetSetup() : TestingSetup(CBaseChainParams::TESTNET) {}
+};
+
+BOOST_FIXTURE_TEST_SUITE(miner_tests, TestnetSetup)
 
 static
 struct {
     unsigned char extranonce;
     unsigned int nonce;
 } blockinfo[] = {
-    {0, 0x009c5477}, {0, 0x00a94582}, {0, 0x00af3d7f}, {0, 0x00d0b721},
-    {0, 0x00d53e10}, {0, 0x00f52f0f}, {0, 0x00fb5876}, {0, 0x0117fb12},
-    {0, 0x011f930b}, {0, 0x013365d2}, {0, 0x0151737e}, {0, 0x0152cdd0},
-    {0, 0x01758d20}, {0, 0x0178d509}, {0, 0x0192103c}, {0, 0x01a3f1b8},
-    {0, 0x01abc9c7}, {0, 0x01d2f50c}, {0, 0x01eebad1}, {0, 0x01ef3419},
-    {0, 0x01f3f154}, {0, 0x01fa6245}, {0, 0x0224e780}, {0, 0x02281625},
-    {0, 0x023a4d10}, {0, 0x0251d3cf}, {0, 0x02555277}, {0, 0x02648a41},
-    {0, 0x0280795e}, {0, 0x02a3a585}, {0, 0x02ade34a}, {0, 0x02b02b02},
-    {0, 0x02c9dc32}, {0, 0x02da9867}, {0, 0x02e4126e}, {0, 0x02e738c7},
-    {0, 0x02f5c6a9}, {0, 0x0307bb0f}, {0, 0x0328ea58}, {0, 0x034fe819},
-    {0, 0x036c6fcb}, {0, 0x039b8e11}, {0, 0x039fec90}, {0, 0x03a268ff},
-    {0, 0x03d37583}, {0, 0x03d6a9a7}, {0, 0x03e7a013}, {0, 0x03f01ebe},
-    {0, 0x0437104d}, {0, 0x043d0af7}, {0, 0x043d824d}, {0, 0x043f50fc},
-    {0, 0x044def8c}, {0, 0x0452309a}, {0, 0x04538bd3}, {0, 0x0459286b},
-    {0, 0x045bc734}, {0, 0x045c878a}, {0, 0x0485d3ba}, {0, 0x048a64e5},
-    {0, 0x048d6ae1}, {0, 0x048dcfec}, {0, 0x049d2c79}, {0, 0x04ade791},
-    {0, 0x04b75856}, {0, 0x04c1f89e}, {0, 0x04c2f731}, {0, 0x04ca0376},
-    {0, 0x04ca102a}, {0, 0x04cbdfe5}, {0, 0x04cbe35a}, {0, 0x04ccfa95},
-    {0, 0x04dcd6e4}, {0, 0x05066d8b}, {0, 0x05150274}, {0, 0x051dcfa0},
-    {0, 0x052a4c40}, {0, 0x05310c4e}, {0, 0x05452f69}, {0, 0x05517592},
-    {0, 0x05543eb8}, {0, 0x05549dc7}, {0, 0x05732695}, {0, 0x057b00d3},
-    {0, 0x0584760d}, {0, 0x059ca419}, {0, 0x05b23b58}, {0, 0x05c69745},
-    {0, 0x05e31a12}, {0, 0x05e932d5}, {0, 0x05ef8400}, {0, 0x05f0bdf6},
-    {0, 0x05f93997}, {0, 0x05ff2978}, {0, 0x06030233}, {0, 0x0627d615},
-    {0, 0x0644a441}, {0, 0x06518661}, {0, 0x06805ef2}, {0, 0x068c43dd},
-    {0, 0x069cca16}, {0, 0x06acbf10}, {0, 0x06c2d607}, {0, 0x06d9ea08},
-    {0, 0x0700d639}, {0, 0x07083d86}, {0, 0x071cc39d}, {0, 0x072c3cb8},
-    {0, 0x07665a0f}, {0, 0x07741214},
+    {0, 0x0000002d}, {0, 0x0000003a}, {0, 0x0000005a}, {0, 0x000000fe},
+    {0, 0x0000008e}, {0, 0x00000059}, {0, 0x00000047}, {0, 0x00000002},
+    {0, 0x0000007e}, {0, 0x00000113}, {0, 0x000000ed}, {0, 0x00000222},
+    {0, 0x00000023}, {0, 0x0000033d}, {0, 0x000001c0}, {0, 0x000002b6},
+    {0, 0x0000017f}, {0, 0x00000413}, {0, 0x0000006b}, {0, 0x000001b0},
+    {0, 0x000001da}, {0, 0x00000057}, {0, 0x000003ec}, {0, 0x000000e9},
+    {0, 0x00000163}, {0, 0x000002df}, {0, 0x00000210}, {0, 0x00000417},
+    {0, 0x00000020}, {0, 0x0000035d}, {0, 0x000004d7}, {0, 0x00000c76},
+    {0, 0x000002e0}, {0, 0x0000089f}, {0, 0x0000019c}, {0, 0x000019d3},
+    {0, 0x00000267}, {0, 0x0000339e}, {0, 0x00000e6d}, {0, 0x0000009d},
+    {0, 0x00000651}, {0, 0x000009d2}, {0, 0x00000ad7}, {0, 0x00000042},
+    {0, 0x000007a9}, {0, 0x000006d5}, {0, 0x00000520}, {0, 0x00001b5f},
+    {0, 0x000011d0}, {0, 0x0000343e}, {0, 0x00001eb3}, {0, 0x0000190c},
+    {0, 0x00000af6}, {0, 0x0000988c}, {0, 0x00000d92}, {0, 0x000034c2},
+    {0, 0x00010758}, {0, 0x0000d811}, {0, 0x00005181}, {0, 0x00009f91},
+    {0, 0x00006ca9}, {0, 0x00021238}, {0, 0x0001715d}, {0, 0x0000ec02},
+    {0, 0x00012713}, {0, 0x0000a83b}, {0, 0x0000e960}, {0, 0x0002ee6c},
+    {0, 0x00001398}, {0, 0x000012f4}, {0, 0x00017f8f}, {0, 0x0001f52a},
+    {0, 0x00003239}, {0, 0x000109fa}, {0, 0x00009765}, {0, 0x0000285f},
+    {0, 0x000002e6}, {0, 0x00030797}, {0, 0x00005d15}, {0, 0x00041501},
+    {0, 0x00001e26}, {0, 0x00004ddf}, {0, 0x00016652}, {0, 0x000b928e},
+    {0, 0x000de016}, {0, 0x00082f30}, {0, 0x0000e1f1}, {0, 0x000125da},
+    {0, 0x000cfbbe}, {0, 0x000d958c}, {0, 0x00025e54}, {0, 0x0003f379},
+    {0, 0x000663ec}, {0, 0x002302d6}, {0, 0x001bb337}, {0, 0x00150a69},
+    {0, 0x0002bbc4}, {0, 0x0002c196}, {0, 0x0012dac6}, {0, 0x00025c0b},
+    {0, 0x000e3f0f}, {0, 0x000a597e}, {0, 0x00215367}, {0, 0x0022519f},
+    {0, 0x001629a7}, {0, 0x000076ea}, {0, 0x0032b76e}, {0, 0x001a5b01},
+    {0, 0x001a75af}, {0, 0x00238db1}
 };
 
 CBlockIndex CreateBlockIndex(int nHeight)
@@ -117,7 +121,7 @@ BOOST_AUTO_TEST_CASE(ScanNoncesGPU_check)
 // NOTE: These tests rely on CreateNewBlock doing its own self-validation!
 BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 {
-    const CChainParams& chainparams = Params(CBaseChainParams::MAIN);
+    const CChainParams& chainparams = Params(CBaseChainParams::TESTNET);
     CScript scriptPubKey = CScript() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
     std::unique_ptr<CBlockTemplate> pblocktemplate;
     CMutableTransaction tx,tx2;
@@ -131,18 +135,16 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     LOCK(cs_main);
     fCheckpointsEnabled = false;
 
-    // force UpdatedBlockTip to initialize nCachedBlockHeight
-    dnpayments.UpdatedBlockTip(chainActive.Tip(), *connman);
-
-    // Simple block creation, nothing special yet:
-    BOOST_CHECK(pblocktemplate = CreateNewBlock(chainparams, scriptPubKey));
-
     // We can't make transactions until we have inputs
     // Therefore, load 100 blocks :)
     int baseheight = 0;
     std::vector<CTransactionRef> txFirst;
     for (unsigned int i = 0; i < sizeof(blockinfo)/sizeof(*blockinfo); ++i)
     {
+        BOOST_CHECK(pblocktemplate = CreateNewBlock(chainparams, scriptPubKey));
+        // force UpdatedBlockTip to initialize nCachedBlockHeight
+        dnpayments.UpdatedBlockTip(chainActive.Tip(), *connman);
+
         CBlock *pblock = &pblocktemplate->block; // pointer for convenience
         pblock->nVersion = 2;
         pblock->nTime = chainActive.Tip()->GetMedianTimePast()+1;
