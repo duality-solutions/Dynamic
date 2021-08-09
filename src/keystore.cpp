@@ -41,37 +41,6 @@ bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
     return true;
 }
 
-bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey)
-{
-    LOCK(cs_KeyStore);
-
-    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-    LogPrint("dht", "CBasicKeyStore::AddDHTKey, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
-                                                keyID.ToString(), key.GetPubKeyString(), 
-                                                key.GetPrivKeyString(), key.GetPrivSeedString());
-    if (keyID != key.GetID()) {
-        LogPrint("dht", "CBasicKeyStore::AddDHTKey GetID does't match \nvchPubKey.GetID() = %s, \nkey.GetID() = %s\n", 
-                                                                keyID.ToString(), key.GetID().ToString());
-        return false;
-    }
-    mapDHTKeys[keyID] = key;
-    return true;
-}
-
-bool CBasicKeyStore::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
-{
-    {
-        LOCK(cs_KeyStore);
-        DHTKeyMap::const_iterator mi = mapDHTKeys.find(address);
-        if (mi != mapDHTKeys.end())
-        {
-            keyOut = mi->second;
-            return true;
-        }
-    }
-    return false;
-}
-
 bool CBasicKeyStore::AddCScript(const CScript& redeemScript)
 {
     if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
@@ -151,13 +120,4 @@ bool CBasicKeyStore::GetHDChain(CHDChain& hdChainRet) const
 {
     hdChainRet = hdChain;
     return !hdChain.IsNull();
-}
-
-bool CBasicKeyStore::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const
-{
-    for (const std::pair<CKeyID, CKeyEd25519>& key : mapDHTKeys) {
-        vvchDHTPubKeys.push_back(key.second.GetPubKey());
-        LogPrint("dht", "CBasicKeyStore::GetDHTPubKeys -- pubkey = %s\n", key.second.GetPubKeyString());
-    }
-    return (vvchDHTPubKeys.size() > 0);
 }

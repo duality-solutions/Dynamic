@@ -13,6 +13,7 @@
 
 class CCoinsViewCache;
 class CDynamicAddress;
+class CStealthAddress;
 struct CRecipient;
 class CScript;
 class CTxOut;

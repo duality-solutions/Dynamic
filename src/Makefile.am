@@ -381,6 +381,12 @@ libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
   bdap/stealth.cpp \
+  bdap/linkstorage.cpp \
+  bdap/wallet/keys.cpp \
+  bdap/wallet/wallet.cpp \
+  bdap/wallet/linkmanager.cpp \
+  bdap/wallet/utils.cpp \
+  bdap/wallet/vgp.cpp \
   keepass.cpp \
   policy/rbf.cpp \
   privatesend-client.cpp \
@@ -475,6 +481,7 @@ libdynamic_common_a_SOURCES = \
   base58.cpp \
   bdap/stealth.cpp \
   bip39.cpp \
+  bdap/wallet/keys.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
@@ -490,6 +497,7 @@ libdynamic_common_a_SOURCES = \
   scheduler.cpp \
   script/sign.cpp \
   script/standard.cpp \
+  wallet/crypter.cpp \
   wallet/wallet_ismine.cpp \
   $(DYNAMIC_CORE_H)
 
@@ -628,6 +636,7 @@ CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a
 CLEANFILES += *.gcda *.gcno
 CLEANFILES += bdap/*.gcda bdap/*.gcno
 CLEANFILES += bdap/vgp/*.gcda bdap/vgp/*.gcno
+CLEANFILES += bdap/wallet/*.gcda bdap/wallet/*.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno

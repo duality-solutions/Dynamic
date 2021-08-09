@@ -177,6 +177,66 @@ public:
 
 };
 
+class CMessage
+{
+public:
+    static const int CURRENT_VERSION = 1;
+    int nMessageVersion;
+    std::vector<unsigned char> vchMessageType;
+    std::vector<unsigned char> vchMessage;
+    std::vector<unsigned char> vchSenderFQDN;
+    bool fKeepLast;
+
+    CMessage()
+    {
+        SetNull();
+    }
+
+    CMessage(const int& version, const std::vector<unsigned char>& type, const std::vector<unsigned char>& message, const std::vector<unsigned char>& sender, bool keeplast)
+                : nMessageVersion(version), vchMessageType(type), vchMessage(message), vchSenderFQDN(sender), fKeepLast(keeplast) {}
+
+    CMessage(const std::vector<unsigned char>& vchData)
+    {
+        UnserializeFromData(vchData);
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(nMessageVersion);
+        READWRITE(vchMessageType);
+        READWRITE(vchMessage);
+        READWRITE(vchSenderFQDN);
+        READWRITE(fKeepLast);
+    }
+
+    void SetNull()
+    {
+        nMessageVersion = -1;
+        vchMessageType.clear();
+        vchMessage.clear();
+        vchSenderFQDN.clear();
+        fKeepLast = false;
+    }
+
+    inline bool IsNull() const { return (nMessageVersion == -1); }
+
+    inline CMessage operator=(const CMessage& b)
+    {
+        nMessageVersion = b.nMessageVersion;
+        vchMessageType = b.vchMessageType;
+        vchMessage = b.vchMessage;
+        vchSenderFQDN = b.vchSenderFQDN;
+        fKeepLast = b.fKeepLast;
+        return *this;
+    }
+
+    void Serialize(std::vector<unsigned char>& vchData);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
+};
+
 bool GetSecretSharedKey(const std::string& strSenderFQDN, const std::string& strRecipientFQDN, CKeyEd25519& key, std::string& strErrorMessage);
 uint256 GetSubjectIDFromKey(const CKeyEd25519& key);
 
