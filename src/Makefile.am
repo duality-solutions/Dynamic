@@ -160,16 +160,7 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
-  miner/impl/miner-cpu.h \
-  miner/impl/miner-gpu.h \
-  miner/internal/hash-rate-counter.h \
-  miner/internal/miner-base.h \
-  miner/internal/miner-context.h \
-  miner/internal/miners-controller.h \
-  miner/internal/miners-group.h \
-  miner/internal/thread-group.h \
-  miner/miner-util.h \
-  miner/miner.h \
+  miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
@@ -315,14 +306,7 @@ libdynamic_server_a_SOURCES = \
   instantsend.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
-  miner/impl/miner-cpu.cpp \
-  miner/impl/miner-gpu.cpp \
-  miner/internal/hash-rate-counter.cpp \
-  miner/internal/miner-base.cpp \
-  miner/internal/miner-context.cpp \
-  miner/internal/miners-controller.cpp \
-  miner/miner-util.cpp \
-  miner/miner.cpp \
+  miner.cpp \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
@@ -684,10 +668,6 @@ include Makefile.libtorrent.include
 endif
 
 include Makefile.vgp.include
-
-if ENABLE_GPU
-include Makefile.gpu.include
-endif
 
 if ENABLE_TESTS
 include Makefile.test.include

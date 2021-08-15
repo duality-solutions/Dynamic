@@ -18,7 +18,6 @@
 #include "fluid/fluiddb.h"
 #include "fluid/fluidmint.h"
 #include "init.h"
-#include "miner/miner.h"
 #include "net.h"
 #include "pow.h"
 #include "rpc/server.h"
@@ -31,6 +30,7 @@
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
+#include "miner.h"
 
 #include "dynode-payments.h"
 #include "dynode-sync.h"
@@ -301,14 +301,9 @@ UniValue setgenerate(const JSONRPCRequest& request)
             "See the getgenerate call for the current setting.\n"
             "\nArguments:\n"
             "1. generate         (boolean, required) Set to true to turn on generation, false to turn off.\n"
-            "2. genproclimit-cpu (numeric, optional) Set the CPU thread limit for when generation is on. Can be -1 for unlimited.\n"
-            "3. genproclimit-gpu (numeric, optional) Set the GPU thread limit for when generation is on. Can be -1 for unlimited.\n"
             "\nExamples:\n"
             "\nSet the generation on with a limit of one CPU processor\n" +
             HelpExampleCli("setgenerate", "true 1") +
-#if ENABLE_GPU
-            "\nSet the generation on with a limit of one GPU\n" + HelpExampleCli("setgenerate", "true 0 1") +
-#endif
             "\nCheck the setting\n" + HelpExampleCli("getgenerate", "") +
             "\nTurn off generation\n" + HelpExampleCli("setgenerate", "false") +
             "\nUsing json rpc\n" + HelpExampleRpc("setgenerate", "true, 1"));
@@ -320,84 +315,11 @@ UniValue setgenerate(const JSONRPCRequest& request)
     if (request.params.size() > 0)
         fGenerate = request.params[0].get_bool();
 
-    int nGenProcLimitCPU = GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU);
-    if (request.params.size() > 1)
-        nGenProcLimitCPU = request.params[1].get_int();
-
-    int nGenProcLimitGPU = GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
-    if (request.params.size() > 2)
-        nGenProcLimitGPU = request.params[2].get_int();
-
-    if (nGenProcLimitCPU == 0 && nGenProcLimitGPU == 0)
-        fGenerate = false;
-
     ForceSetArg("-gen", fGenerate ? "1" : "0");
-    ForceSetArg("-genproclimit-cpu", nGenProcLimitCPU);
-    ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
-
     if (fGenerate) {
-        #ifdef ENABLE_WALLET
-            //Check to see if wallet needs upgrading
-            if(pwalletMain->WalletNeedsUpgrading())
-                throw JSONRPCError(RPC_WALLET_NEEDS_UPGRADING, "Error: Your wallet has not been fully upgraded to version 2.4.  Please unlock your wallet to continue.");
-        #endif //ENABLE_WALLET
-
-        InitMiners(Params(), *g_connman);
-        SetCPUMinerThreads(nGenProcLimitCPU);
-        SetGPUMinerThreads(nGenProcLimitGPU);
-        StartMiners();
     } else {
-        ShutdownMiners();
     }
-
     return NullUniValue;
-}
-
-UniValue gethashespersec(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "gethashespersec\n"
-            "\nReturns a recent hashes per second performance measurement while generating.\n"
-            "See the getgenerate and setgenerate calls to turn generation on and off.\n"
-            "\nResult:\n"
-            "n            (numeric) The recent hashes per second when generation is on (will return 0 if generation is off)\n"
-            "\nExamples:\n" +
-            HelpExampleCli("gethashespersec", "") + HelpExampleRpc("gethashespersec", ""));
-
-    return GetHashRate();
-}
-
-
-UniValue getcpuhashespersec(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getcpuhashespersec\n"
-            "\nReturns a recent CPU hashes per second performance measurement while generating.\n"
-            "See the getgenerate and setgenerate calls to turn generation on and off.\n"
-            "\nResult:\n"
-            "n            (numeric) The recent CPU hashes per second when generation is on (will return 0 if generation is off)\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getcpuhashespersec", "") + HelpExampleRpc("getcpuhashespersec", ""));
-
-    return GetCPUHashRate();
-}
-
-
-UniValue getgpuhashespersec(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getgpuhashespersec\n"
-            "\nReturns a recent GPU hashes per second performance measurement while generating.\n"
-            "See the getgenerate and setgenerate calls to turn generation on and off.\n"
-            "\nResult:\n"
-            "n            (numeric) The recent GPU hashes per second when generation is on (will return 0 if generation is off)\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getgpuhashespersec", "") + HelpExampleRpc("getgpuhashespersec", ""));
-
-    return GetGPUHashRate();
 }
 
 UniValue getmininginfo(const JSONRPCRequest& request)
@@ -417,9 +339,6 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"genproclimit\": n          (numeric) The processor limit for generation. -1 if no generation. (see getgenerate or setgenerate calls)\n"
             "  \"pooledtx\": n              (numeric) The size of the mempool\n"
             "  \"chain\": \"xxxx\",         (string) current network name as defined in BIP70 (main, test, regtest)\n"
-            "  \"hashespersec\": n          (numeric) The recent hashes per second when generation is on (will return 0 if generation is off)\n"
-            "  \"cpuhashespersec\": n       (numeric) The recent CPU hashes per second when generation is on (will return 0 if generation is off)\n"
-            "  \"gpuhashespersec\": n       (numeric) The recent GPU hashes per second when generation is on (will return 0 if generation is off)\n"
             "}\n"
             "\nExamples:\n" +
             HelpExampleCli("getmininginfo", "") + HelpExampleRpc("getmininginfo", ""));
@@ -439,9 +358,6 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
     obj.push_back(Pair("chain", Params().NetworkIDString()));
     obj.push_back(Pair("generate", getgenerate(request)));
-    obj.push_back(Pair("hashespersec", gethashespersec(request)));
-    obj.push_back(Pair("cpuhashespersec", getcpuhashespersec(request)));
-    obj.push_back(Pair("gpuhashespersec", getgpuhashespersec(request)));
     return obj;
 }
 
@@ -1168,9 +1084,6 @@ static const CRPCCommand commands[] =
         {"generating", "setgenerate", &setgenerate, true, {"generate", "genproclimit-cpu", "genproclimit-gpu"}},
         {"generating", "generate", &generate, true, {"nblocks", "maxtries"}},
         {"generating", "generatetoaddress", &generatetoaddress, true, {"nblocks", "address", "maxtries"}},
-        {"generating", "gethashespersec", &gethashespersec, true, {}},
-        {"generating", "getcpuhashespersec", &getcpuhashespersec, true, {}},
-        {"generating", "getgpuhashespersec", &getgpuhashespersec, true, {}},
 
         {"util", "estimatefee", &estimatefee, true, {"nblocks"}},
         {"util", "estimatepriority", &estimatepriority, true, {"nblocks"}},

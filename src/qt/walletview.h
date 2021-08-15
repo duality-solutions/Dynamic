@@ -16,7 +16,6 @@
 
 class DynamicGUI;
 class ClientModel;
-class MiningPage;
 class BdapPage;
 class OverviewPage;
 class PlatformStyle;
@@ -74,7 +73,6 @@ private:
     QWidget* transactionsPage;
     TransactionView* transactionView;
     DynodeList* dynodeListPage;
-    MiningPage* miningPage;
     BdapPage* bdapPage;
 
     QProgressDialog* progressDialog;
@@ -92,8 +90,6 @@ public Q_SLOTS:
     void gotoHistoryPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
-    /** Switch to mining page */
-    void gotoMiningPage();
     /** Switch to bdap page */
     void gotoBdapPage();
 

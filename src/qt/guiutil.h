@@ -9,7 +9,7 @@
 #define DYNAMIC_QT_GUIUTIL_H
 
 #include "amount.h"
-#include "miner/miner.h"
+#include "miner.h"
 
 #include <QEvent>
 #include <QHeaderView>

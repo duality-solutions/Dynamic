@@ -40,9 +40,8 @@
 #include "httpserver.h"
 #include "instantsend.h"
 #include "key.h"
+#include "miner.h"
 #include "messagesigner.h"
-#include "miner/internal/miners-controller.h"
-#include "miner/miner.h"
 #include "net.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
@@ -304,7 +303,6 @@ void PrepareShutdown()
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
-    ShutdownMiners();
     MapPort(false);
     UnregisterValidationInterface(peerLogic.get());
     peerLogic.reset();
@@ -2119,14 +2117,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
-
-    // Generate coins in the background
-    if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
-        InitMiners(chainparams, connman);
-        SetCPUMinerThreads(GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
-        SetGPUMinerThreads(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
-        StartMiners();
-    }
 
     // Start the DHT Torrent networks in the background
     //const bool fMultiSessions = GetArg("-multidhtsessions", false);
