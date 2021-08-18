@@ -134,11 +134,11 @@ DYNAMIC_CORE_H = \
   flat-database.h \
   fluid/banaccount.h \
   fluid/fluid.h \
-  fluid/fluiddb.h \
-  fluid/fluiddynode.h \
-  fluid/fluidmining.h \
-  fluid/fluidmint.h \
-  fluid/fluidsovereign.h \
+  fluid/db.h \
+  fluid/dynode.h \
+  fluid/mining.h \
+  fluid/mint.h \
+  fluid/sovereign.h \
   fluid/operations.h \
   governance.h \
   governance-classes.h \
@@ -297,11 +297,11 @@ libdynamic_server_a_SOURCES = \
   dynodeman.cpp \
   fluid/banaccount.cpp \
   fluid/fluid.cpp \
-  fluid/fluiddb.cpp \
-  fluid/fluiddynode.cpp \
-  fluid/fluidmining.cpp \
-  fluid/fluidmint.cpp \
-  fluid/fluidsovereign.cpp \
+  fluid/db.cpp \
+  fluid/dynode.cpp \
+  fluid/mining.cpp \
+  fluid/mint.cpp \
+  fluid/sovereign.cpp \
   fluid/operations.cpp \
   governance.cpp \
   governance-classes.cpp \

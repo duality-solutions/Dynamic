@@ -1,10 +1,10 @@
 // Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
 
-#include "fluidsovereign.h"
+#include "fluid/sovereign.h"
 
 #include "core_io.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 #include "operations.h"
 #include "script/script.h"
 

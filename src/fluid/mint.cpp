@@ -1,18 +1,19 @@
-// Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Duality Blockchain Solutions Developers
 
 
-#include "fluidmining.h"
+#include "fluid/mint.h"
 
+#include "base58.h"
 #include "core_io.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 #include "operations.h"
 #include "script/script.h"
 
 #include <boost/thread.hpp>
 
-CFluidMiningDB* pFluidMiningDB = NULL;
+CFluidMintDB* pFluidMintDB = NULL;
 
-bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
+bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
     std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
@@ -24,26 +25,29 @@ bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
     std::vector<std::string> vecSplitScript;
     SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
 
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_REWARD_MINING") {
+    if (vecSplitScript.size() >= 6 && strOperationCode == "OP_MINT") {
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         std::string strAmount = vecSplitScript[0];
         CAmount fluidAmount;
         if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-            entry.MiningReward = fluidAmount;
+            entry.MintAmount = fluidAmount;
         }
         std::string strTimeStamp = vecSplitScript[1];
         int64_t tokenTimeStamp;
         if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
             entry.nTimeStamp = tokenTimeStamp;
         }
+        std::vector<unsigned char> vchDestinationAddress = CharVectorFromString(vecSplitScript[2]);
+        entry.DestinationAddress.insert(entry.DestinationAddress.end(), vchDestinationAddress.begin(), vchDestinationAddress.end());
         entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
+        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
 
-        LogPrintf("GetFluidMiningData: strAmount = %s, strTimeStamp = %d, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
-            strAmount, entry.nTimeStamp, StringFromCharVector(entry.SovereignAddresses[0]),
+        LogPrintf("GetFluidMintData: strAmount = %s, strTimeStamp = %d, DestinationAddress = %s, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
+            strAmount, entry.nTimeStamp,
+            StringFromCharVector(entry.DestinationAddress), StringFromCharVector(entry.SovereignAddresses[0]),
             StringFromCharVector(entry.SovereignAddresses[1]), StringFromCharVector(entry.SovereignAddresses[2]));
 
         return true;
@@ -51,78 +55,80 @@ bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
     return false;
 }
 
-bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut)
+bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)
 {
     int n = 0;
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
         if (IsTransactionFluid(txOut)) {
             nOut = n;
-            return GetFluidMiningData(txOut, entry);
+            return GetFluidMintData(txOut, entry);
         }
         n++;
     }
     return false;
 }
 
-bool CFluidMining::UnserializeFromTx(const CTransaction& tx)
+bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidMiningData(tx, *this, nOut)) {
+    if (!GetFluidMintData(tx, *this, nOut)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-bool CFluidMining::UnserializeFromScript(const CScript& fluidScript)
+bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidMiningData(fluidScript, *this)) {
+    if (!GetFluidMintData(fluidScript, *this)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-void CFluidMining::Serialize(std::vector<unsigned char>& vchData)
+void CFluidMint::Serialize(std::vector<unsigned char>& vchData)
 {
     CDataStream dsFluidOp(SER_NETWORK, PROTOCOL_VERSION);
     dsFluidOp << *this;
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
 }
 
-CFluidMiningDB::CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-mining", nCacheSize, fMemory, fWipe, obfuscate)
+CDynamicAddress CFluidMint::GetDestinationAddress() const
+{
+    return CDynamicAddress(StringFromCharVector(DestinationAddress));
+}
+
+CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
 {
 }
 
-bool CFluidMiningDB::AddFluidMiningEntry(const CFluidMining& entry, const int op)
+bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op)
 {
     bool writeState = false;
     {
-        LOCK(cs_fluid_mining);
+        LOCK(cs_fluid_mint);
         writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
     }
 
     return writeState;
 }
 
-bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry, const int nHeight)
+bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry)
 {
-    LOCK(cs_fluid_mining);
+    LOCK(cs_fluid_mint);
     returnEntry.SetNull();
     std::pair<std::string, std::vector<unsigned char> > key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
-        CFluidMining entry;
+        CFluidMint entry;
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.IsNull()) {
-                    return false;
-                }
-                if (entry.nHeight > returnEntry.nHeight && (int)(entry.nHeight + 1) < nHeight) {
+                if (entry.nHeight > returnEntry.nHeight) {
                     returnEntry = entry;
                 }
             }
@@ -134,15 +140,15 @@ bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry, const i
     return true;
 }
 
-bool CFluidMiningDB::GetAllFluidMiningRecords(std::vector<CFluidMining>& entries)
+bool CFluidMintDB::GetAllFluidMintRecords(std::vector<CFluidMint>& entries)
 {
-    LOCK(cs_fluid_mining);
+    LOCK(cs_fluid_mint);
     std::pair<std::string, std::vector<unsigned char> > key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
-        CFluidMining entry;
+        CFluidMint entry;
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
@@ -158,13 +164,13 @@ bool CFluidMiningDB::GetAllFluidMiningRecords(std::vector<CFluidMining>& entries
     return true;
 }
 
-bool CFluidMiningDB::IsEmpty()
+bool CFluidMintDB::IsEmpty()
 {
-    LOCK(cs_fluid_mining);
+    LOCK(cs_fluid_mint);
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
     if (pcursor->Valid()) {
-        CFluidMining entry;
+        CFluidMint entry;
         try {
             std::pair<std::string, std::vector<unsigned char> > key;
             if (pcursor->GetKey(key) && key.first == "script") {
@@ -179,16 +185,16 @@ bool CFluidMiningDB::IsEmpty()
     return true;
 }
 
-bool CFluidMiningDB::RecordExists(const std::vector<unsigned char>& vchFluidScript)
+bool CFluidMintDB::RecordExists(const std::vector<unsigned char>& vchFluidScript)
 {
-    LOCK(cs_fluid_mining);
-    CFluidMining fluidMining;
-    return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMining);
+    LOCK(cs_fluid_mint);
+    CFluidMint fluidMint;
+    return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMint);
 }
 
-bool CheckFluidMiningDB()
+bool CheckFluidMintDB()
 {
-    if (!pFluidMiningDB)
+    if (!pFluidMintDB)
         return false;
 
     return true;

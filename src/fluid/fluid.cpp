@@ -1,6 +1,6 @@
 // Copyright (c) 2016-2021 Duality Blockchain Solutions Developers
 
-#include "fluid.h"
+#include "fluid/fluid.h"
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"

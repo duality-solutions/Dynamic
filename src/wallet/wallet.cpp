@@ -24,7 +24,7 @@
 #include "core_io.h"
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
-#include "fluid/fluiddb.h"
+#include "fluid/db.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"

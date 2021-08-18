@@ -1,13 +1,13 @@
 // Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
-#include "fluiddb.h"
+#include "fluid/db.h"
 
 #include "base58.h"
-#include "fluid.h"
-#include "fluiddynode.h"
-#include "fluidmining.h"
-#include "fluidmint.h"
-#include "fluidsovereign.h"
+#include "fluid/fluid.h"
+#include "fluid/dynode.h"
+#include "fluid/mining.h"
+#include "fluid/mint.h"
+#include "fluid/sovereign.h"
 
 CAmount GetFluidDynodeReward(const int nHeight)
 {
