@@ -23,12 +23,8 @@ extern std::string PrimaryDelimiter;
 extern std::string SubDelimiter;
 extern std::string SignatureDelimiter;
 
-class COperations
-{
-public:
-    bool VerifyAddressOwnership(const CDynamicAddress& dynamicAddress);
-    bool SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch = true);
-    bool GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
-};
+bool VerifyAddressOwnership(const CDynamicAddress& dynamicAddress);
+bool SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch = true);
+bool GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
 
 #endif // OPERATIONS_H
