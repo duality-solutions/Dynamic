@@ -122,7 +122,6 @@ public:
 
 bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);
 bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut);
-bool CheckFluidDynodeDB();
 
 extern CFluidDynodeDB* pFluidDynodeDB;
 

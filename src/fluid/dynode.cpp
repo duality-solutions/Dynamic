@@ -185,11 +185,3 @@ bool CFluidDynodeDB::RecordExists(const std::vector<unsigned char>& vchFluidScri
     CFluidDynode fluidDynode;
     return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidDynode);
 }
-
-bool CheckFluidDynodeDB()
-{
-    if (!pFluidDynodeDB)
-        return false;
-
-    return true;
-}
