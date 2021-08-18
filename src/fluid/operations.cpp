@@ -147,7 +147,7 @@ bool COperations::GenericSignMessage(const std::string& message, std::string& si
     if (!SignTokenMessage(signer, message, signedString, true))
         return false;
     else
-        ConvertToHex(signedString);
+        signedString = HexStr(signedString);
 
     return true;
 }

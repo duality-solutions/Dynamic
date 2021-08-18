@@ -260,7 +260,7 @@ bool CFluid::GenericConsentMessage(const std::string& message, std::string& sign
     strConvertedMessage = stringFromVch(ParseHex(strConvertedMessage));
     signedString = StitchString(strConvertedMessage, digest, false);
 
-    ConvertToHex(signedString);
+    signedString = HexStr(signedString);
 
     return true;
 }
