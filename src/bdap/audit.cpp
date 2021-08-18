@@ -266,7 +266,6 @@ bool BuildVerifyAuditJson(const CAudit& audit, UniValue& oAudit)
 {
     int64_t nTime = 0;
     CAuditData auditData = audit.GetAuditData();
-
     oAudit.push_back(Pair("version", std::to_string(audit.Version())));
     oAudit.push_back(Pair("audit_count", (int)auditData.vAuditData.size()));
     oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
