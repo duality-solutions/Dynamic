@@ -10,6 +10,7 @@
 #include "operations.h"
 #include "script/script.h"
 #include "utilstrencodings.h"
+#include "bdap/utils.h"
 
 #include <algorithm>
 #include <stdint.h>

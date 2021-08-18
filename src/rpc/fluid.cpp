@@ -278,7 +278,7 @@ UniValue signtoken(const JSONRPCRequest& request)
     if (!IsHex(r))
         throw std::runtime_error("Hex isn't even valid! Cannot process ahead...");
 
-    fluid.ConvertToString(r);
+    r = stringFromVch(ParseHex(r));
 
     if (!fluid.GenericSignMessage(r, result, address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Message signing failed");
@@ -693,7 +693,7 @@ UniValue readfluidtoken(const JSONRPCRequest& request)
     if (IsHex(strFluidToken)) {
         bool fBanAccount = false;
         HexFunctions fluidFunctions;
-        std::string strUnHexedFluidOpScript = fluidFunctions.HexToString(strFluidToken);
+        std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(strFluidToken));
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, true);
         if (vecSplitScript.size() > 1) {
