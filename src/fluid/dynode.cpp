@@ -10,8 +10,6 @@
 
 #include <boost/thread.hpp>
 
-CFluidDynodeDB* pFluidDynodeDB = NULL;
-
 bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);

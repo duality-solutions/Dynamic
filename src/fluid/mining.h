@@ -123,6 +123,6 @@ public:
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
 bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
 
-extern CFluidMiningDB* pFluidMiningDB;
+static CFluidMiningDB* pFluidMiningDB = NULL;
 
 #endif // FLUID_MINING

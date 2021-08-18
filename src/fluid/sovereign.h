@@ -110,6 +110,6 @@ private:
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry);
 bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& nOut);
 
-extern CFluidSovereignDB* pFluidSovereignDB;
+static CFluidSovereignDB* pFluidSovereignDB = NULL;
 
 #endif // FLUID_SOVEREIGN_H

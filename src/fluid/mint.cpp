@@ -11,8 +11,6 @@
 
 #include <boost/thread.hpp>
 
-CFluidMintDB* pFluidMintDB = NULL;
-
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);

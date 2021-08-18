@@ -11,8 +11,6 @@
 
 #include <boost/thread.hpp>
 
-CBanAccountDB* pBanAccountDB = NULL;
-
 bool AddBanAccountEntry(const CBanAccount& entry)
 {
     assert(pBanAccountDB);

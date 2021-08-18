@@ -110,6 +110,6 @@ public:
 bool AddBanAccountEntry(const CBanAccount& entry);
 bool GetAllBanAccountRecords(std::vector<CBanAccount>& entries);
 
-extern CBanAccountDB* pBanAccountDB;
+static CBanAccountDB* pBanAccountDB = NULL;
 
 #endif // FLUID_BANACCOUNT_H

@@ -129,6 +129,6 @@ public:
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
 bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut);
 
-extern CFluidMintDB* pFluidMintDB;
+static CFluidMintDB* pFluidMintDB = NULL;
 
 #endif // FLUID_MINT_H

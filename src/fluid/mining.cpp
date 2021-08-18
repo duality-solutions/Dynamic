@@ -10,8 +10,6 @@
 
 #include <boost/thread.hpp>
 
-CFluidMiningDB* pFluidMiningDB = NULL;
-
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
