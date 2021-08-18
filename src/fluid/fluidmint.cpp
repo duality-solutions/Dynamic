@@ -19,7 +19,6 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
     std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
     std::vector<std::string> splitString;
-    HexFunctions hexConvert;
     verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
     SeparateString(verificationWithoutOpCode, splitString, false);
     std::string messageTokenKey = splitString.at(0);

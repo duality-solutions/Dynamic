@@ -99,7 +99,7 @@ UniValue maketoken(const JSONRPCRequest& request)
     }
 
     result.pop_back();
-    fluid.ConvertToHex(result);
+    result = HexStr(result);
 
     return result;
 }
@@ -140,7 +140,7 @@ UniValue banaccountstoken(const JSONRPCRequest& request)
     }
 
     strResult.pop_back();
-    fluid.ConvertToHex(strResult);
+    strResult = HexStr(strResult);
     return strResult;
 }
 
@@ -196,7 +196,7 @@ UniValue burndynamic(const JSONRPCRequest& request)
     }
 
     std::string result = std::to_string(nAmount);
-    fluid.ConvertToHex(result);
+    result = HexStr(result);
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
     SendBurnTransaction(destroyScript, wtx, nAmount, scriptSendFrom);
@@ -692,7 +692,6 @@ UniValue readfluidtoken(const JSONRPCRequest& request)
     std::string strFluidToken = request.params[0].get_str();
     if (IsHex(strFluidToken)) {
         bool fBanAccount = false;
-        HexFunctions fluidFunctions;
         std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(strFluidToken));
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, true);
