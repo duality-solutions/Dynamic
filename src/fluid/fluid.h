@@ -26,7 +26,7 @@ struct CBlockTemplate;
 class CTransaction;
 
 /** Fluid Asset Management Framework */
-class CFluid : public COperations
+class CFluid
 {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
