@@ -125,6 +125,7 @@ public:
     bool IsValidStealthAddress(const CChainParams& params) const;
 
     CDynamicAddress() {}
+    CDynamicAddress(const CPubKey& pk) { Set(pk.GetID()); } // Dynamic: Add the ability to directly import from pubkey
     CDynamicAddress(const CTxDestination& dest) { Set(dest); }
     CDynamicAddress(const std::string& strAddress) { SetString(strAddress); }
     CDynamicAddress(const char* pszAddress) { SetString(pszAddress); }
