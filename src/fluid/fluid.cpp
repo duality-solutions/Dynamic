@@ -71,7 +71,7 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
         }
     }
     if (IsHex(verificationWithoutOpCode)) {
-        std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
+        std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
         if (strOperationCode == "OP_MINT" || strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") {
@@ -160,7 +160,7 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
         strErrorMessage = "Fluid token is not a valid hexidecimal value.";
         return false;
     }
-    std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
+    std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
     std::vector<std::string> vecSplitScript;
     SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
     if (vecSplitScript.size() == 0) {
@@ -257,7 +257,7 @@ bool CFluid::GenericConsentMessage(const std::string& message, std::string& sign
         return false;
 
     std::string strConvertedMessage = message;
-    ConvertToString(strConvertedMessage);
+    strConvertedMessage = stringFromVch(ParseHex(strConvertedMessage));
     signedString = StitchString(strConvertedMessage, digest, false);
 
     ConvertToHex(signedString);
@@ -269,7 +269,7 @@ bool CFluid::GenericConsentMessage(const std::string& message, std::string& sign
 bool CFluid::ExtractCheckTimestamp(const std::string& strOpCode, const std::string& consentToken, const int64_t& timeStamp)
 {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
-    std::string dehexString = HexToString(consentTokenNoScript);
+    std::string dehexString = stringFromVch(ParseHex(consentTokenNoScript));
     std::vector<std::string> strs, ptrs;
     SeparateString(dehexString, strs, false);
     if (strs.size() == 0)
@@ -306,7 +306,7 @@ bool CFluid::ProcessFluidToken(const std::string& consentToken, std::vector<std:
     if (!CheckNonScriptQuorum(consentTokenNoScript, message))
         return false;
 
-    std::string dehexString = HexToString(consentTokenNoScript);
+    std::string dehexString = stringFromVch(ParseHex(consentTokenNoScript));
 
     std::vector<std::string> strs;
     SeparateString(dehexString, strs, false);
@@ -373,7 +373,7 @@ bool CFluid::GenericVerifyInstruction(const std::string& consentToken, CDynamicA
     messageTokenKey = "";
     std::vector<std::string> strs;
 
-    ConvertToString(consentTokenNoScript);
+    consentTokenNoScript = stringFromVch(ParseHex(consentTokenNoScript));
     SeparateString(consentTokenNoScript, strs, false);
 
     messageTokenKey = strs.at(0);
@@ -598,7 +598,7 @@ bool CFluid::ExtractTimestampWithAddresses(const std::string& strOpCode, const C
 {
     std::string fluidOperationString = ScriptToAsmStr(fluidScript);
     std::string consentTokenNoScript = GetRidOfScriptStatement(fluidOperationString);
-    std::string strDehexedToken = HexToString(consentTokenNoScript);
+    std::string strDehexedToken = stringFromVch(ParseHex(consentTokenNoScript));
     std::vector<std::string> strs, ptrs;
     SeparateString(strDehexedToken, strs, false);
     if (strs.size() == 0)
