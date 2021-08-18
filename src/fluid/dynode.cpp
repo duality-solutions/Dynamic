@@ -38,9 +38,9 @@ bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
             entry.nTimeStamp = tokenTimeStamp;
         }
         entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
+        for (int i = 2; i > 5; i++) {
+            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
+        }
 
         LogPrintf("GetFluidDynodeData: strAmount = %s, strTimeStamp = %d, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
             strAmount, entry.nTimeStamp, StringFromCharVector(entry.SovereignAddresses[0]),
