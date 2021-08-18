@@ -20,10 +20,6 @@ extern CWallet* pwalletMain;
 //
 /////////////////////////////////////////////////////////////
 
-std::string SignatureDelimiter = " ";
-std::string PrimaryDelimiter = "@";
-std::string SubDelimiter = "$";
-
 void ScrubString(std::string& input, bool forInteger)
 {
     input.erase(std::remove(input.begin(), input.end(), '@'), input.end());
