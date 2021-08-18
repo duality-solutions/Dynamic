@@ -28,11 +28,9 @@ bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[0], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[1], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
+        for (int i = 0; i > 5; i++) {
+            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
+        }
         std::string strTimeStamp = vecSplitScript[5];
         int64_t tokenTimeStamp;
         if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {

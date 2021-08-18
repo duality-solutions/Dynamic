@@ -41,9 +41,9 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
         std::vector<unsigned char> vchDestinationAddress = CharVectorFromString(vecSplitScript[2]);
         entry.DestinationAddress.insert(entry.DestinationAddress.end(), vchDestinationAddress.begin(), vchDestinationAddress.end());
         entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
+        for (int i = 3; i > 6; i++) {
+            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
+        }
 
         LogPrintf("GetFluidMintData: strAmount = %s, strTimeStamp = %d, DestinationAddress = %s, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
             strAmount, entry.nTimeStamp,
