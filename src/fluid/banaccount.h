@@ -107,7 +107,6 @@ public:
     bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
-bool CheckBanAccountDB();
 bool AddBanAccountEntry(const CBanAccount& entry);
 bool GetAllBanAccountRecords(std::vector<CBanAccount>& entries);
 

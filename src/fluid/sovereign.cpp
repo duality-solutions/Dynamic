@@ -193,11 +193,3 @@ bool CFluidSovereignDB::IsEmpty()
     }
     return true;
 }
-
-bool CheckFluidSovereignDB()
-{
-    if (!pFluidSovereignDB)
-        return false;
-
-    return true;
-}

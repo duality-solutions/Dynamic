@@ -11,10 +11,9 @@
 
 CAmount GetFluidDynodeReward(const int nHeight)
 {
-    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
-        return GetStandardDynodePayment(nHeight);
+    assert(pFluidDynodeDB);
 
-    if (!CheckFluidDynodeDB())
+    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardDynodePayment(nHeight);
 
     if (pFluidDynodeDB->IsEmpty())
@@ -33,10 +32,9 @@ CAmount GetFluidDynodeReward(const int nHeight)
 
 CAmount GetFluidMiningReward(const int nHeight)
 {
-    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
-        return GetStandardPoWBlockPayment(nHeight);
+    assert(pFluidMiningDB);
 
-    if (!CheckFluidMiningDB())
+    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardPoWBlockPayment(nHeight);
 
     if (pFluidMiningDB->IsEmpty())
@@ -55,8 +53,7 @@ CAmount GetFluidMiningReward(const int nHeight)
 
 bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
 {
-    if (!CheckFluidMintDB())
-        return false;
+    assert(pFluidDynodeDB);
 
     if (pFluidMintDB->IsEmpty())
         return false;
@@ -76,11 +73,9 @@ bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
 /** Checks if any given address is a current sovereign wallet address (invoked by RPC) */
 bool IsSovereignAddress(const CDynamicAddress& inputAddress)
 {
-    if (!inputAddress.IsValid()) {
-        return false;
-    }
+    assert(pFluidSovereignDB);
 
-    if (!CheckFluidSovereignDB()) {
+    if (!inputAddress.IsValid()) {
         return false;
     }
 
@@ -100,50 +95,42 @@ bool IsSovereignAddress(const CDynamicAddress& inputAddress)
 
 bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& dynodeEntries)
 {
-    if (CheckFluidDynodeDB()) {
-        if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
-            return false;
-        }
-    } else {
-        return false;
+    assert(pFluidDynodeDB);
+
+    if (pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool GetAllFluidMiningRecords(std::vector<CFluidMining>& miningEntries)
 {
-    if (CheckFluidMiningDB()) {
-        if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
-            return false;
-        }
-    } else {
-        return false;
+    assert(pFluidMiningDB);
+
+    if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool GetAllFluidMintRecords(std::vector<CFluidMint>& mintEntries)
 {
-    if (CheckFluidMintDB()) {
-        if (!pFluidMintDB->GetAllFluidMintRecords(mintEntries)) {
-            return false;
-        }
-    } else {
-        return false;
+    assert(pFluidMintDB);
+
+    if (pFluidMintDB->GetAllFluidMintRecords(mintEntries)) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& sovereignEntries)
 {
-    if (CheckFluidSovereignDB()) {
-        if (pFluidSovereignDB->IsEmpty()) {
-            return false;
-        }
-        if (!pFluidSovereignDB->GetAllFluidSovereignRecords(sovereignEntries)) {
-            return false;
-        }
-    } else {
+    assert(pFluidSovereignDB);
+
+    if (pFluidSovereignDB->IsEmpty()) {
+        return false;
+    }
+    if (!pFluidSovereignDB->GetAllFluidSovereignRecords(sovereignEntries)) {
         return false;
     }
     return true;
@@ -151,9 +138,7 @@ bool GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& sovereignEntries)
 
 bool GetLastFluidSovereignAddressStrings(std::vector<std::string>& sovereignAddresses)
 {
-    if (!CheckFluidSovereignDB()) {
-        return false;
-    }
+    assert(pFluidSovereignDB);
 
     CFluidSovereign lastSovereign;
     if (!pFluidSovereignDB->GetLastFluidSovereignRecord(lastSovereign)) {

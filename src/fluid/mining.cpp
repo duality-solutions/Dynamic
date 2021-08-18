@@ -185,11 +185,3 @@ bool CFluidMiningDB::RecordExists(const std::vector<unsigned char>& vchFluidScri
     CFluidMining fluidMining;
     return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMining);
 }
-
-bool CheckFluidMiningDB()
-{
-    if (!pFluidMiningDB)
-        return false;
-
-    return true;
-}

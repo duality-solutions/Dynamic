@@ -191,11 +191,3 @@ bool CFluidMintDB::RecordExists(const std::vector<unsigned char>& vchFluidScript
     CFluidMint fluidMint;
     return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMint);
 }
-
-bool CheckFluidMintDB()
-{
-    if (!pFluidMintDB)
-        return false;
-
-    return true;
-}

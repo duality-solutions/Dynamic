@@ -2966,35 +2966,32 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (IsTransactionFluid(tx, scriptFluid)) {
             int OpCode = GetFluidOpCode(scriptFluid);
             if (OpCode == OP_REWARD_DYNODE) {
+                assert(pFluidDynodeDB);
                 CFluidDynode fluidDynode(scriptFluid);
                 fluidDynode.nHeight = pindex->nHeight;
                 fluidDynode.txHash = tx.GetHash();
-                if (CheckFluidDynodeDB()) {
-                    if (!CheckSignatureQuorum(fluidDynode.FluidScript, strError)) {
-                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-dynode-address-signature");
-                    }
-                    pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
+                if (!CheckSignatureQuorum(fluidDynode.FluidScript, strError)) {
+                    return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-dynode-address-signature");
                 }
+                pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
             } else if (OpCode == OP_REWARD_MINING) {
+                assert(pFluidMiningDB);
                 CFluidMining fluidMining(scriptFluid);
                 fluidMining.nHeight = pindex->nHeight;
                 fluidMining.txHash = tx.GetHash();
-                if (CheckFluidMiningDB()) {
-                    if (!CheckSignatureQuorum(fluidMining.FluidScript, strError)) {
-                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
-                    }
-                    pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
+                if (!CheckSignatureQuorum(fluidMining.FluidScript, strError)) {
+                    return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
                 }
+                pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
             } else if (OpCode == OP_MINT) {
+                assert(pFluidMintDB);
                 CFluidMint fluidMint(scriptFluid);
                 fluidMint.nHeight = pindex->nHeight;
                 fluidMint.txHash = tx.GetHash();
-                if (CheckFluidMintDB()) {
-                    if (!CheckSignatureQuorum(fluidMint.FluidScript, strError)) {
-                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mint-address-signature");
-                    }
-                    pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
+                if (!CheckSignatureQuorum(fluidMint.FluidScript, strError)) {
+                    return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mint-address-signature");
                 }
+                pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
             } else if (OpCode == OP_BDAP_REVOKE) {
                 if (!CheckSignatureQuorum(FluidScriptToCharVector(scriptFluid), strError))
                     return state.DoS(0, error("%s: %s", __func__, strError), REJECT_INVALID, "invalid-fluid-ban-address-signature");

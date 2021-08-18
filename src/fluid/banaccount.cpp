@@ -13,27 +13,15 @@
 
 CBanAccountDB* pBanAccountDB = NULL;
 
-bool CheckBanAccountDB()
-{
-    if (!pBanAccountDB)
-        return false;
-
-    return true;
-}
-
 bool AddBanAccountEntry(const CBanAccount& entry)
 {
-    if (!CheckBanAccountDB())
-        return false;
-
+    assert(pBanAccountDB);
     return pBanAccountDB->AddBanAccountEntry(entry);
 }
 
 bool GetAllBanAccountRecords(std::vector<CBanAccount>& entries)
 {
-    if (!CheckBanAccountDB())
-        return false;
-
+    assert(pBanAccountDB);
     return pBanAccountDB->GetAllBanAccountRecords(entries);
 }
 
