@@ -243,7 +243,7 @@ bool BuildAuditJson(const CAudit& audit, UniValue& oAudit)
         oAuditHashes.push_back(Pair("audit_hash" + std::to_string(counter), stringFromVch(vchAudit)));
     }
     oAudit.push_back(Pair("version", std::to_string(audit.Version())));
-    oAudit.push_back(Pair("audit_count", auditData.vAuditData.size()));
+    oAudit.push_back(Pair("audit_count", std::to_string(auditData.vAuditData.size())));
     oAudit.push_back(Pair("audit_hashes", oAuditHashes));
     oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
     oAudit.push_back(Pair("owner", stringFromVch(audit.vchOwnerFullObjectPath)));
@@ -268,7 +268,7 @@ bool BuildVerifyAuditJson(const CAudit& audit, UniValue& oAudit)
     CAuditData auditData = audit.GetAuditData();
 
     oAudit.push_back(Pair("version", std::to_string(audit.Version())));
-    oAudit.push_back(Pair("audit_count", auditData.vAuditData.size()));
+    oAudit.push_back(Pair("audit_count", std::to_string(auditData.vAuditData.size())));
     oAudit.push_back(Pair("timestamp", std::to_string(auditData.nTimeStamp)));
     oAudit.push_back(Pair("owner", stringFromVch(audit.vchOwnerFullObjectPath)));
     oAudit.push_back(Pair("signed", audit.IsSigned() ? "True" : "False"));

@@ -13,8 +13,8 @@
 #include "bdap/utils.h"
 #include "bdap/vgpmessage.h"
 #include "dht/ed25519.h"
-#include "dht/datarecord.h" // for CDataRecord
-#include "dht/session.h" // for CDataRecord
+//#include "dht/datarecord.h" // for CDataRecord
+//#include "dht/session.h" // for CDataRecord
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "hash.h"
@@ -869,8 +869,8 @@ static UniValue DenyLink(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!DHT::SessionStatus())
-        throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
+    //if (!DHT::SessionStatus())
+    //    throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRecipientFQDN);
@@ -895,10 +895,11 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 32;
     int64_t iSequence = 0;
     bool fNotFound = false;
+    /*
     CDataRecord record;
     if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record))
         fNotFound = true;
-
+    
     std::vector<unsigned char> vchSerializedList;
     int nRecords = 0;
     if (record.GetHeader().IsNull() || fNotFound) {
@@ -923,18 +924,19 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     uint64_t nExpire = DEFAULT_LINK_EXPIRE_TIME; // Does not expire.
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+
     CDataRecord newRecord(strOperationType, nTotalSlots, vvchPubKeys, vchSerializedList, nVersion, (uint32_t)nExpire, DHT::DataFormat::BinaryBlob);
     if (newRecord.HasError())
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4245 - Error creating DHT data entry. " + newRecord.ErrorMessage() + _("\n"));
-
+    
     if (vchSerializedList.size() > 7000)
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
 
     iSequence++;
     std::string strErrorMessage;
-    if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord, strErrorMessage))
-        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + strErrorMessage + _("\n"));
-
+    //if (!DHT::SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord, strErrorMessage))
+    //    throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + strErrorMessage + _("\n"));
+    */
     oLink.push_back(Pair("recipient_fqdn", strRecipientFQDN));
     oLink.push_back(Pair("requestor_fqdn", strRequestorFQDN));
 
@@ -961,8 +963,8 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked();
 
-    if (!DHT::SessionStatus())
-        throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
+    //if (!DHT::SessionStatus())
+    //    throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
 
     std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRecipientFQDN);
@@ -982,14 +984,16 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
 
     std::string strOperationType = "denylink";
     int64_t iSequence = 0;
+    /*
     CDataRecord record;
+    
     if (!DHT::SubmitGetRecord(0, getKey.GetDHTPubKey(), getKey.GetDHTPrivSeed(), strOperationType, iSequence, record)) {
         // return empty JSON 
         UniValue oDeniedLink(UniValue::VOBJ);
         oLink.push_back(Pair("denied_list", oDeniedLink));
         return oLink;
     }
-
+    
     UniValue oDeniedLink(UniValue::VOBJ);
     CLinkDenyList denyList(record.RawData());
     int timestamp = 0;
@@ -1008,7 +1012,7 @@ static UniValue DeniedLinkList(const JSONRPCRequest& request)
     oLink.push_back(Pair("list_updated_epoch", timestamp));
     oLink.push_back(Pair("list_updated", DateTimeStrFormat("%Y-%m-%dT%H:%M:%SZ", timestamp)));
     oLink.push_back(Pair("denied_list", oDeniedLink));
-
+    */
     return oLink;
 }
 

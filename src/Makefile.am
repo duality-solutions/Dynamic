@@ -114,18 +114,6 @@ DYNAMIC_CORE_H = \
   core_memusage.h \
   cuckoocache.h \
   dbwrapper.h \
-  dht/datachunk.h \
-  dht/dataheader.h \
-  dht/datarecord.h \
-  dht/dataset.h \
-  dht/ed25519.h \
-  dht/limits.h \
-  dht/mutable.h \
-  dht/mutabledb.h \
-  dht/session.h \
-  dht/sessionevents.h \
-  dht/settings.h \
-  dht/storage.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
@@ -279,17 +267,6 @@ libdynamic_server_a_SOURCES = \
   bdap/vgpmessage.cpp \
   bdap/x509certificate.cpp \
   dbwrapper.cpp \
-  dht/datachunk.cpp \
-  dht/dataheader.cpp \
-  dht/datarecord.cpp \
-  dht/dataset.cpp \
-  dht/limits.cpp \
-  dht/mutable.cpp \
-  dht/mutabledb.cpp \
-  dht/session.cpp \
-  dht/sessionevents.cpp \
-  dht/settings.cpp \
-  dht/storage.cpp \
   dynode.cpp \
   dynode-payments.cpp\
   dynode-sync.cpp \
@@ -338,7 +315,6 @@ libdynamic_server_a_SOURCES = \
   rpc/audits.cpp \
   rpc/blockchain.cpp \
   rpc/certificates.cpp \
-  rpc/dht.cpp \
   rpc/domainentry.cpp \
   rpc/dynode.cpp \
   rpc/fluid.cpp \

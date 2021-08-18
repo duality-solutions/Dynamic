@@ -28,8 +28,6 @@ void RegisterGovernanceRPCCommands(CRPCTable& tableRPC);
 void RegisterFluidRPCCommands(CRPCTable& tableRPC);
 /** Register BDAP Domain Entry RPC commands */
 void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC);
-/** Register DHT RPC commands */
-void RegisterDHTRPCCommands(CRPCTable &tableRPC);
 /** Register BDAP Linking RPC commands */
 void RegisterLinkingRPCCommands(CRPCTable &tableRPC);
 /** Register Raw BDAP Account RPC commands */
@@ -50,7 +48,6 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
     RegisterGovernanceRPCCommands(t);
     RegisterFluidRPCCommands(t);
     RegisterDomainEntryRPCCommands(t);
-    RegisterDHTRPCCommands(t);
     RegisterLinkingRPCCommands(t);
     RegisterRawBDAPAccountRPCCommands(t);
     RegisterAuditRPCCommands(t);
