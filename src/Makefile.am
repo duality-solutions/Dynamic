@@ -138,6 +138,7 @@ DYNAMIC_CORE_H = \
   fluid/dynode.h \
   fluid/mining.h \
   fluid/mint.h \
+  fluid/script.h \
   fluid/sovereign.h \
   fluid/operations.h \
   governance.h \
@@ -301,6 +302,7 @@ libdynamic_server_a_SOURCES = \
   fluid/dynode.cpp \
   fluid/mining.cpp \
   fluid/mint.cpp \
+  fluid/script.cpp \
   fluid/sovereign.cpp \
   fluid/operations.cpp \
   governance.cpp \
