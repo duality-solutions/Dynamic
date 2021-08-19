@@ -194,6 +194,12 @@ enum opcodetype {
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
     OP_BDAP_REVOKE = 0xc9,               // = BDAP delete using fluid protocol
+    OP_RESERVED_0001 = 0xca,
+    OP_RESERVED_0002 = 0xcb,
+    OP_RESERVED_0003 = 0xcc,
+    OP_RESERVED_0004 = 0xcd,
+    OP_RESERVED_0005 = 0xce,
+    OP_RESERVED_0006 = 0xcf,
 
     // BDAP directory access, user identity and certificate system
     OP_BDAP_NEW = 0x01,                  // = BDAP new entry
