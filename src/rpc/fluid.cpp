@@ -13,6 +13,7 @@
 #include "fluid/mining.h"
 #include "fluid/mint.h"
 #include "fluid/sovereign.h"
+#include "fluid/script.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -54,30 +55,6 @@ struct MiningCompareTimeStamp {
     {
     return (a.nTimeStamp < b.nTimeStamp);
     }
-};
-
-opcodetype getOpcodeFromString(std::string input)
-{
-    if (input == "OP_MINT")
-        return OP_MINT;
-    else if (input == "OP_REWARD_DYNODE")
-        return OP_REWARD_DYNODE;
-    else if (input == "OP_REWARD_MINING")
-        return OP_REWARD_MINING;
-    else if (input == "OP_SWAP_SOVEREIGN_ADDRESS")
-        return OP_SWAP_SOVEREIGN_ADDRESS;
-    else if (input == "OP_UPDATE_FEES")
-        return OP_UPDATE_FEES;
-    else if (input == "OP_FREEZE_ADDRESS")
-        return OP_FREEZE_ADDRESS;
-    else if (input == "OP_RELEASE_ADDRESS")
-        return OP_RELEASE_ADDRESS;
-    else if (input == "OP_BDAP_REVOKE")
-        return OP_BDAP_REVOKE;
-    else
-        return OP_RETURN;
-
-    return OP_RETURN;
 };
 
 UniValue maketoken(const JSONRPCRequest& request)
@@ -225,7 +202,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
     CScript finalScript;
 
     EnsureWalletIsUnlocked();
-    opcodetype opcode = getOpcodeFromString(request.params[0].get_str());
+    opcodetype opcode = (opcodetype)TranslationTable(request.params[0].get_str());
 
     if (negatif == opcode)
         throw std::runtime_error("OP_CODE is either not a Fluid OP_CODE or is invalid");

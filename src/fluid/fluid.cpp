@@ -16,6 +16,7 @@
 #include "utilmoneystr.h"
 #include "utiltime.h"
 #include "validation.h"
+#include "fluid/script.h"
 
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
@@ -28,8 +29,7 @@ extern CWallet* pwalletMain;
 
 bool IsTransactionFluid(const CScript& txOut)
 {
-    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || 
-                txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
+    return WithinFluidRange(txOut.GetFlag());
 }
 
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
@@ -46,16 +46,7 @@ bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
 
 int GetFluidOpCode(const CScript& fluidScript)
 {
-    if (fluidScript.IsProtocolInstruction(MINT_TX)) {
-        return OP_MINT;
-    } else if (fluidScript.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
-        return OP_REWARD_DYNODE;
-    } else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX)) {
-        return OP_REWARD_MINING;
-    } else if (fluidScript.IsProtocolInstruction(BDAP_REVOKE_TX)) {
-        return OP_BDAP_REVOKE;
-    }
-    return 0;
+    return fluidScript.GetFlag();
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */
@@ -447,7 +438,7 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
     if (GetFluidBlock(pblockindex, block)) {
         for (const CTransactionRef& tx : block.vtx) {
             for (const CTxOut& txout : tx->vout) {
-                if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
+                if (txout.scriptPubKey.GetFlag() == OP_MINT) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
                         return ParseMintKey(block.nTime, toMintAddress, mintAmount, ScriptToAsmStr(txout.scriptPubKey));
@@ -518,13 +509,13 @@ bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, 
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-auth-failure");
         }
 
-        if (txOut.IsProtocolInstruction(MINT_TX) &&
+        if (txOut.GetFlag() == OP_MINT &&
             !ParseMintKey(0, toMintAddress, mintAmount, ScriptToAsmStr(txOut), true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-mint-auth-failure");
         }
 
-        if ((txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) ||
-                txOut.IsProtocolInstruction(MINING_MODIFY_TX))  &&
+        if ((txOut.GetFlag() == OP_REWARD_DYNODE ||
+                txOut.GetFlag() == OP_REWARD_MINING)  &&
             !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-modify-parse-failure");
         }
