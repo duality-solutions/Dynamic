@@ -4064,12 +4064,12 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     
                     if (IsTransactionFluid(recipient.scriptPubKey)) {
                         // Check if fluid transaction is already in the mempool
-                        if (fluid.CheckIfExistsInMemPool(mempool, recipient.scriptPubKey, strFailReason)) {
+                        if (fluid.CheckIfExistsInMemPool(mempool, recipient.scriptPubKey)) {
                             // fluid transaction is already in the mempool.  Invalid transaction.
                             return false;
                         }
                         // Check the validity of the fluid transaction's public script.
-                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, GetTime(), strFailReason)) {
+                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, GetTime())) {
                             return false;
                         }
                     }

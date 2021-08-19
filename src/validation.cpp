@@ -274,14 +274,14 @@ bool IsFinalTx(const CTransaction& tx, int nBlockHeight, int64_t nBlockTime)
     if ((int64_t)tx.nLockTime < ((int64_t)tx.nLockTime < LOCKTIME_THRESHOLD ? (int64_t)nBlockHeight : nBlockTime))
         return true;
 
-    if (nBlockHeight >= fluid.FLUID_ACTIVATE_HEIGHT) {
+    if (nBlockHeight >= FLUID_ACTIVATE_HEIGHT) {
         if (!fluid.ProvisionalCheckTransaction(tx))
             return false;
 
         CScript scriptFluid;
         if (IsTransactionFluid(tx, scriptFluid)) {
             std::string strErrorMessage;
-            if (!fluid.CheckFluidOperationScript(scriptFluid, nBlockTime, strErrorMessage)) {
+            if (!fluid.CheckFluidOperationScript(scriptFluid, nBlockTime)) {
                 return false;
             }
         }
@@ -574,7 +574,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
         if (IsTransactionFluid(txout.scriptPubKey)) {
-            if (fluid.FLUID_TRANSACTION_COST > txout.nValue)
+            if (FLUID_TRANSACTION_COST > txout.nValue)
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-vout-amount-toolow");
             if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
@@ -959,7 +959,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             fluidTransaction = true;
             std::string strErrorMessage;
             // Check if fluid transaction is already in the mempool
-            if (fluid.CheckIfExistsInMemPool(pool, txout.scriptPubKey, strErrorMessage)) {
+            if (fluid.CheckIfExistsInMemPool(pool, txout.scriptPubKey)) {
                 // fluid transaction is already in the mempool.  Reject tx.
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
@@ -972,7 +972,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (!fluid.ExtractCheckTimestamp(strOperationCode, ScriptToAsmStr(txout.scriptPubKey), GetTime())) {
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
             }
-            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), true)) {
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
@@ -1750,7 +1750,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
     BOOST_FOREACH (const CTxOut& txout, tx->vout) {
         if (IsTransactionFluid(txout.scriptPubKey)) {
             std::string strErrorMessage;
-            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage)) {
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime())) {
                 fluidTimestampCheck = false;
             }
         }
@@ -2941,7 +2941,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         CAmount newMintIssuance = 0;
         CDynamicAddress mintAddress;
-        if (prevIndex->nHeight + 1 >= fluid.FLUID_ACTIVATE_HEIGHT) {
+        if (prevIndex->nHeight + 1 >= FLUID_ACTIVATE_HEIGHT) {
             CFluidMint fluidMint;
             if (GetMintingInstructions(pindex->nHeight, fluidMint)) {
                 newMintIssuance = fluidMint.MintAmount;
@@ -3000,7 +3000,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 //    return state.DoS(0, error("%s: BDAP spork is inactive.", __func__), REJECT_INVALID, "bdap-spork-inactive");
 
                 std::vector<CDomainEntry> vBanAccounts;
-                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts, strError))
+                if (!fluid.CheckAccountBanScript(scriptFluid, tx.GetHash(), pindex->nHeight, vBanAccounts))
                     return state.DoS(0, error("%s -- CheckAccountBanScript failed: %s", __func__, strError), REJECT_INVALID, "fluid-ban-script-invalid");
 
                 int64_t nTimeStamp;
@@ -4118,7 +4118,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         for (const auto& txout : tx->vout) {
             if (IsTransactionFluid(txout.scriptPubKey)) {
                 std::string strErrorMessage;
-                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime, strErrorMessage)) {
+                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime)) {
                     return error("CheckBlock(): %s, Block %s failed with %s",
                         strErrorMessage,
                         tx->GetHash().ToString(),

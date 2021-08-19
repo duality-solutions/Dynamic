@@ -25,21 +25,21 @@ class CTxMemPool;
 struct CBlockTemplate;
 class CTransaction;
 
+static const int FLUID_ACTIVATE_HEIGHT = 10;
+static const int64_t MAX_FLUID_TIME_DISTORT = 60 * 60;          // Maximum time distort = 1 hour.
+static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN;    // Cost to send a fluid transaction
+static const CAmount FLUID_MAX_REWARD_FOR_DYNODE = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
+static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
+static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN;    // Max minting amount per fluid transaction
+
 /** Fluid Asset Management Framework */
 class CFluid
 {
 public:
-    static const int FLUID_ACTIVATE_HEIGHT = 10;
-    static const int64_t MAX_FLUID_TIME_DISTORT = 60 * 60;          // Maximum time distort = 1 hour.
-    static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN;    // Cost to send a fluid transaction
-    static const CAmount FLUID_MAX_REWARD_FOR_DYNODE = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
-    static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
-    static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN;    // Max minting amount per fluid transaction
-
     void ReplaceFluidSovereigns(const CBlockHeader& blockHeader, std::vector<std::string>& fluidSovereigns);
 
-    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck = false);
-    bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage);
+    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, const bool fSkipTimeStampCheck = false);
+    bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey);
     bool CheckIfQuorumExists(const std::string& consentToken, std::string& message, const bool individual = false);
     bool CheckNonScriptQuorum(const std::string& consentToken, std::string& message, const bool individual = false);
     bool CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex = NULL);
@@ -60,7 +60,7 @@ public:
 
     bool ProvisionalCheckTransaction(const CTransaction& transaction);
     CDynamicAddress GetAddressFromDigestSignature(const std::string& digestSignature, const std::string& messageTokenKey);
-    bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::string& strErrorMessage);
+    bool CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts);
     bool ExtractTimestampWithAddresses(const std::string& strOpCode, const CScript& fluidScript, int64_t& nTimeStamp, std::vector<std::vector<unsigned char>>& vSovereignAddresses);
 
 };

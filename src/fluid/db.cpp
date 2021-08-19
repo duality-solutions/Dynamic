@@ -13,7 +13,7 @@ CAmount GetFluidDynodeReward(const int nHeight)
 {
     assert(pFluidDynodeDB);
 
-    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
+    if (FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardDynodePayment(nHeight);
 
     if (pFluidDynodeDB->IsEmpty())
@@ -34,7 +34,7 @@ CAmount GetFluidMiningReward(const int nHeight)
 {
     assert(pFluidMiningDB);
 
-    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
+    if (FLUID_ACTIVATE_HEIGHT > nHeight)
         return GetStandardPoWBlockPayment(nHeight);
 
     if (pFluidMiningDB->IsEmpty())
