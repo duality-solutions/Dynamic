@@ -54,9 +54,8 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
-    std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
     if (!fSkipTimeStampCheck) {
-        if (!ExtractCheckTimestamp(strOperationCode, strFluidOpScript, timeStamp)) {
+        if (!ExtractCheckTimestamp(TranslationTable(fluidScriptPubKey.GetFlag()), strFluidOpScript, timeStamp)) {
             errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
             return false;
         }
@@ -65,52 +64,65 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
         std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
-        if (strOperationCode == "OP_MINT" || strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") {
-            if (vecSplitScript.size() > 1) {
-                std::string strAmount = vecSplitScript[0];
-                CAmount fluidAmount;
-                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && fluidAmount < 0) {
-                        errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
-                        return false;
-                    } else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
-                        errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
-                        return false;
-                    } else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
-                        errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
-                        return false;
-                    } else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
-                        errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
-                        return false;
-                    }
+        std::string strAmount = vecSplitScript[0];
+        CAmount fluidAmount;
+        switch (fluidScriptPubKey.GetFlag()) {
+            case OP_MINT:
+            case OP_REWARD_MINING:
+            case OP_REWARD_DYNODE:
+                if (vecSplitScript.size() < 1) {
+                    errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
+                    return false;
                 }
-            } else {
-                errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
-                return false;
-            }
-        }
-        else if (strOperationCode == "OP_BDAP_REVOKE") {
-            if (vecSplitScript.size() > 1) {
-                if (!fSkipTimeStampCheck) {
-                    for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
-                        CDomainEntry entry;
-                        std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
-                        std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
-                        if (!DomainEntryExists(vchBanAccountFQDN)) {
-                            LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
-                            errorMessage = strprintf("Skipping... Can't ban %s account because it was not found.", strBanAccountFQDN);
+
+                if (!ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                    errorMessage = "Unable to parse " + strAmount + ", not a valid integer!";
+                    return false;
+                }
+
+                if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING || fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && fluidAmount < 0) {
+                    errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
+                    return false;
+                }
+
+                if (fluidScriptPubKey.GetFlag() == OP_MINT && (fluidAmount > FLUID_MAX_FOR_MINT)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+
+                if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+
+                if (fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+                break;
+            case OP_BDAP_REVOKE:
+                if (vecSplitScript.size() > 1) {
+                    if (!fSkipTimeStampCheck) {
+                        for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
+                            CDomainEntry entry;
+                            std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
+                            std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
+                            if (!DomainEntryExists(vchBanAccountFQDN)) {
+                                LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
+                                errorMessage = strprintf("Skipping... Can't ban %s account because it was not found.", strBanAccountFQDN);
+                            }
                         }
                     }
                 }
-            }
-            else {
-                errorMessage = strprintf("CheckFluidOperationScript fluid OP_BDAP_REVOKE incorrect paramaters %d", vecSplitScript.size());
+                else {
+                    errorMessage = strprintf("CheckFluidOperationScript fluid OP_BDAP_REVOKE incorrect paramaters %d", vecSplitScript.size());
+                    return false;
+                }
+                break;
+            default:
+                errorMessage = strprintf("%s -- %s is an unknown fluid operation", __func__, TranslationTable(fluidScriptPubKey.GetFlag()));
                 return false;
-            }
-        }
-        else {
-            errorMessage = strprintf("%s -- %s is an unknown fluid operation", __func__, strOperationCode);
-            return false;
+                break;
         }
     } else {
         errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
@@ -158,7 +170,7 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
         strErrorMessage = "Could not split fluid command script.";
         return false;
     }
-    
+
     for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
         CDomainEntry entry;
         std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
@@ -243,7 +255,7 @@ bool CFluid::GenericConsentMessage(const std::string& message, std::string& sign
 
     if (token == "")
         return false;
-    
+
     if (!SignTokenMessage(signer, token, digest, false))
         return false;
 
@@ -600,12 +612,19 @@ bool CFluid::ExtractTimestampWithAddresses(const std::string& strOpCode, const C
         return false;
 
     std::string strTimeStamp;
-    if (strOpCode == "OP_MINT" || strOpCode == "OP_REWARD_MINING" || strOpCode == "OP_REWARD_DYNODE") {
-        strTimeStamp = ptrs.at(1);
-    } else if (strOpCode == "OP_BDAP_REVOKE") {
-        strTimeStamp = ptrs.at(0);
-    } else {
-        return false;
+
+    switch (fluidScript.GetFlag()) {
+        case OP_MINT:
+        case OP_REWARD_MINING:
+        case OP_REWARD_DYNODE:
+          strTimeStamp = ptrs.at(1);
+          break;
+        case OP_BDAP_REVOKE:
+          strTimeStamp = ptrs.at(0);
+          break;
+        default:
+          return false;
+          break;
     }
 
     ScrubString(strTimeStamp, true);

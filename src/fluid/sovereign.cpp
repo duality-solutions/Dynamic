@@ -13,7 +13,6 @@
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
     std::vector<std::string> splitString;
     verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
@@ -22,7 +21,7 @@ bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
     std::vector<std::string> vecSplitScript;
     SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
 
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_SWAP_SOVEREIGN_ADDRESS") {
+    if (vecSplitScript.size() == 5 && scriptPubKey.GetFlag() == OP_SWAP_SOVEREIGN_ADDRESS) {
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         entry.SovereignAddresses.clear();
