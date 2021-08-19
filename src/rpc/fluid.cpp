@@ -241,7 +241,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
+        SendCustomTransaction(finalScript, wtx, FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
     } else {
         throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", request.params[0].get_str()));
@@ -379,7 +379,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
             totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -398,7 +398,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.FluidScript)));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -417,7 +417,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.FluidScript)));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -516,7 +516,7 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
             totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -547,7 +547,7 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -578,7 +578,7 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }

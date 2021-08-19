@@ -50,125 +50,95 @@ int GetFluidOpCode(const CScript& fluidScript)
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */
-bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck)
+bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, const bool fSkipTimeStampCheck)
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
     if (!fSkipTimeStampCheck) {
         if (!ExtractCheckTimestamp(TranslationTable(fluidScriptPubKey.GetFlag()), strFluidOpScript, timeStamp)) {
-            errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
-            return false;
+            return error("%s: Timestamp is too old", __PRETTY_FUNCTION__);
         }
     }
-    if (IsHex(verificationWithoutOpCode)) {
-        std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
-        std::vector<std::string> vecSplitScript;
-        SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
-        std::string strAmount = vecSplitScript[0];
-        CAmount fluidAmount;
-        switch (fluidScriptPubKey.GetFlag()) {
-            case OP_MINT:
-            case OP_REWARD_MINING:
-            case OP_REWARD_DYNODE:
-                if (vecSplitScript.size() < 1) {
-                    errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
-                    return false;
-                }
 
-                if (!ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    errorMessage = "Unable to parse " + strAmount + ", not a valid integer!";
-                    return false;
-                }
+    if (!IsHex(verificationWithoutOpCode))
+        return error("%s: Not encoded in valid format", __PRETTY_FUNCTION__);
 
-                if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING || fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && fluidAmount < 0) {
-                    errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
-                    return false;
-                }
+    std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
+    std::vector<std::string> vecSplitScript;
+    SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
+    std::string strAmount = vecSplitScript[0];
+    CAmount fluidAmount;
+    switch (fluidScriptPubKey.GetFlag()) {
+        case OP_MINT:
+        case OP_REWARD_MINING:
+        case OP_REWARD_DYNODE:
+            if (vecSplitScript.size() < 1)
+                return error("%s: Token string is an invalid size", __PRETTY_FUNCTION__);
 
-                if (fluidScriptPubKey.GetFlag() == OP_MINT && (fluidAmount > FLUID_MAX_FOR_MINT)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
-                    return false;
-                }
+            if (!ParseFixedPoint(strAmount, 8, &fluidAmount))
+                return error("%s: Unable to parse \"%s\" as integer", __PRETTY_FUNCTION__, strAmount);
 
-                if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
-                    return false;
-                }
+            if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING || fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && fluidAmount < 0)
+                return error("%s: Reward cannot be less than zero, attempted to set as \"%s\" instead", __PRETTY_FUNCTION__, strAmount);
 
-                if (fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
-                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
-                    return false;
-                }
-                break;
-            case OP_BDAP_REVOKE:
-                if (vecSplitScript.size() > 1) {
-                    if (!fSkipTimeStampCheck) {
-                        for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
-                            CDomainEntry entry;
-                            std::string strBanAccountFQDN = DecodeBase64(vecSplitScript[iter]);
-                            std::vector<unsigned char> vchBanAccountFQDN = vchFromString(strBanAccountFQDN);
-                            if (!DomainEntryExists(vchBanAccountFQDN)) {
-                                LogPrintf("%s -- Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
-                                errorMessage = strprintf("Skipping... Can't ban %s account because it was not found.", strBanAccountFQDN);
-                            }
+            if (fluidScriptPubKey.GetFlag() == OP_MINT && (fluidAmount > FLUID_MAX_FOR_MINT))
+                return error("%s: Reward cannot exceed %s, attempted to set as \"%s\" instead", __PRETTY_FUNCTION__, FLUID_MAX_FOR_MINT, strAmount);
+
+            if (fluidScriptPubKey.GetFlag() == OP_REWARD_MINING && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING))
+                return error("%s: Reward cannot exceed %s, attempted to set as \"%s\" instead", __PRETTY_FUNCTION__, FLUID_MAX_REWARD_FOR_MINING, strAmount);
+
+            if (fluidScriptPubKey.GetFlag() == OP_REWARD_DYNODE && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE))
+                return error("%s: Reward cannot exceed %s, attempted to set as \"%s\" instead", __PRETTY_FUNCTION__, FLUID_MAX_REWARD_FOR_DYNODE, strAmount);
+            break;
+        case OP_BDAP_REVOKE:
+            if (vecSplitScript.size() > 1) {
+                if (!fSkipTimeStampCheck) {
+                    for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
+                        if (!DomainEntryExists(vchFromString(DecodeBase64(vecSplitScript[iter])))) {
+                            LogPrintf("%s: Unable to ban at index %d, not found\n", __PRETTY_FUNCTION__, iter);
                         }
                     }
                 }
-                else {
-                    errorMessage = strprintf("CheckFluidOperationScript fluid OP_BDAP_REVOKE incorrect paramaters %d", vecSplitScript.size());
-                    return false;
-                }
-                break;
-            default:
-                errorMessage = strprintf("%s -- %s is an unknown fluid operation", __func__, TranslationTable(fluidScriptPubKey.GetFlag()));
-                return false;
-                break;
-        }
-    } else {
-        errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
-        return false;
+            }
+            else {
+                return error("%s: OP_BDAP_REVOKE met with incorrect parameter size %d", __PRETTY_FUNCTION__, vecSplitScript.size());
+            }
+            break;
+        default:
+            return error("%s: Invalid opcode \"%s\" called in Fluid routine", __PRETTY_FUNCTION__, TranslationTable(fluidScriptPubKey.GetFlag()));
+            break;
     }
 
     return true;
 }
 
 /** Checks whether fluid transaction is in the memory pool already */
-bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage)
+bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransaction& tx = e.GetTx();
         for (const CTxOut& txOut : tx.vout) {
             if (IsTransactionFluid(txOut.scriptPubKey)) {
-                std::string strNewFluidScript = ScriptToAsmStr(fluidScriptPubKey);
-                std::string strMemPoolFluidScript = ScriptToAsmStr(txOut.scriptPubKey);
-                std::string strNewTxWithoutOpCode = GetRidOfScriptStatement(strNewFluidScript);
-                std::string strMemPoolTxWithoutOpCode = GetRidOfScriptStatement(strMemPoolFluidScript);
-                if (strNewTxWithoutOpCode == strMemPoolTxWithoutOpCode) {
-                    errorMessage = "CheckIfExistsInMemPool: fluid transaction is already in the memory pool!";
-                    LogPrintf("CheckIfExistsInMemPool: fluid transaction, %s is already in the memory pool! %s\n", tx.GetHash().ToString(), strNewTxWithoutOpCode);
-                    return true;
-                }
+                return (GetRidOfScriptStatement(ScriptToAsmStr(fluidScriptPubKey)) == GetRidOfScriptStatement(ScriptToAsmStr(txOut.scriptPubKey)));
             }
         }
     }
-
     return false;
 }
 
-bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts, std::string& strErrorMessage)
+bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& txHashId, const unsigned int& nHeight, std::vector<CDomainEntry>& vBanAccounts)
 {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScript);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
-    if (!IsHex(verificationWithoutOpCode)) {
-        strErrorMessage = "Fluid token is not a valid hexidecimal value.";
-        return false;
-    }
+
+    if (!IsHex(verificationWithoutOpCode))
+        return error("%s: Not encoded in valid format", __PRETTY_FUNCTION__);
+
     std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(verificationWithoutOpCode));
     std::vector<std::string> vecSplitScript;
     SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
     if (vecSplitScript.size() == 0) {
-        strErrorMessage = "Could not split fluid command script.";
-        return false;
+        return error("%s: Message payload is of invalid length, reported size: %d", vecSplitScript.size());;
     }
 
     for (uint32_t iter = 1; iter != vecSplitScript.size(); iter++) {
@@ -179,7 +149,7 @@ bool CFluid::CheckAccountBanScript(const CScript& fluidScript, const uint256& tx
             vBanAccounts.push_back(entry);
         }
         else {
-            LogPrintf("%s -- Skipping... Can't ban %s account because it was not found.\n", __func__, strBanAccountFQDN);
+            LogPrintf("%s -- Skipping... Can't ban %s account because it was not found.\n", __PRETTY_FUNCTION__, strBanAccountFQDN);
         }
     }
 
@@ -295,7 +265,7 @@ bool CFluid::ExtractCheckTimestamp(const std::string& strOpCode, const std::stri
     ScrubString(ls, true);
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
-    if (timeStamp > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT)
+    if (timeStamp > tokenTimeStamp + MAX_FLUID_TIME_DISTORT)
         return false;
 
     return true;
@@ -336,7 +306,7 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
 
-    if (timeStamp > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    if (timeStamp > tokenTimeStamp + MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
     ParseFixedPoint(lr, 8, &coinAmount);
@@ -350,7 +320,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string& digestS
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
 
     if (fInvalid) {
-        LogPrintf("GetAddressFromDigestSignature(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
+        LogPrintf("%s: Digest Signature Found Invalid, Signature: %s \n", __PRETTY_FUNCTION__, digestSignature);
         return nullptr;
     }
 
@@ -361,7 +331,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string& digestS
     CPubKey pubkey;
 
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
-        LogPrintf("GetAddressFromDigestSignature(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
+        LogPrintf("%s: Public Key recovery failed, hash: %s\n", __PRETTY_FUNCTION__, ss.GetHash().ToString());
         return nullptr;
     }
     CDynamicAddress newAddress;
@@ -409,7 +379,7 @@ bool CFluid::ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CA
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
 
-    if (nTime > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    if (nTime > tokenTimeStamp + MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
     ParseFixedPoint(lr, 8, &coinAmount);
