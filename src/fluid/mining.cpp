@@ -15,7 +15,6 @@ CFluidMiningDB* pFluidMiningDB = NULL;
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
 {
     std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
     std::vector<std::string> splitString;
     verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
@@ -24,7 +23,7 @@ bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
     std::vector<std::string> vecSplitScript;
     SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
 
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_REWARD_MINING") {
+    if (vecSplitScript.size() == 5 && scriptPubKey.GetFlag() == OP_REWARD_MINING) {
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         std::string strAmount = vecSplitScript[0];
