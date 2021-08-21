@@ -1,4 +1,4 @@
-packages:=boost openssl libevent zeromq gmp chia_bls backtrace
+packages:=boost openssl libevent zeromq gmp chia_bls backtrace cmake randomx
 native_packages := native_ccache
 
 qt_packages = qrencode zlib
