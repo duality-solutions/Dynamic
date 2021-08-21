@@ -7,9 +7,32 @@
 
 #include "crypto/common.h"
 
+#include "chain.h"
+#include "chainparams.h"
 #include "hash.h"
 #include "tinyformat.h"
+#include "validation.h"
 #include "utilstrencodings.h"
+
+uint64_t GetHeight(const uint256& block_hash)
+{
+    CBlockIndex* pblockindex = mapBlockIndex[block_hash];
+    assert(pblockindex);
+    return pblockindex->nHeight;
+}
+
+bool ReadBlock(const uint64_t& nHeight, CBlock& block)
+{
+    CBlockIndex* pblockindex = chainActive[nHeight];
+
+    if (!(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
+        return error("%s: invalid block index %d", __func__, nHeight);
+
+    if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+        return error("%s: block not found, expected index: %x", __func__, nHeight);
+
+    return true;
+}
 
 uint256 CBlockHeader::GetHash() const
 {
