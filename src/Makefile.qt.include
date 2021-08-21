@@ -36,7 +36,6 @@ QT_FORMS_UI = \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
-  qt/forms/miningpage.ui \
   qt/forms/mnemonicdialog.ui \
   qt/forms/modaloverlay.ui \
   qt/forms/openuridialog.ui \
@@ -80,7 +79,6 @@ QT_MOC_CPP = \
   qt/moc_hashrategraphwidget.cpp \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
-  qt/moc_miningpage.cpp \
   qt/moc_mnemonicdialog.cpp \
   qt/moc_modaloverlay.cpp \
   qt/moc_notificator.cpp \
@@ -157,7 +155,6 @@ DYNAMIC_QT_H = \
   qt/intro.h \
   qt/macdockiconhandler.h \
   qt/macnotificationhandler.h \
-  qt/miningpage.h \
   qt/mnemonicdialog.h \
   qt/modaloverlay.h \
   qt/networkstyle.h \
@@ -315,7 +312,6 @@ DYNAMIC_QT_CPP += \
   qt/dynodelist.cpp \
   qt/editaddressdialog.cpp \
   qt/hashrategraphwidget.cpp \
-  qt/miningpage.cpp \
   qt/mnemonicdialog.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
@@ -399,10 +395,6 @@ if ENABLE_WALLET
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_WALLET)
 endif
 qt_dynamic_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
-if ENABLE_GPU
-qt_dynamic_qt_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)
-qt_dynamic_qt_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS_EXTRA)
-endif
 if ENABLE_ZMQ
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif

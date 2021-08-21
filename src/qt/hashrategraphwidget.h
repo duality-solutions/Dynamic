@@ -51,7 +51,6 @@ private:
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
     void truncateSampleQueue();
-    int64_t getHashRate();
 
     unsigned int iDesiredSamples;
     int64_t iMaxHashRate;

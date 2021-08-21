@@ -21,7 +21,6 @@
 class ClientModel;
 class DynodeList;
 class HelpMessageDialog;
-class MiningPage;
 class BdapPage;
 class BdapAccountTableModel;
 class BdapAddUserDialog;
@@ -245,8 +244,6 @@ private Q_SLOTS:
     void gotoHistoryPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
-    /** Switch to mining page */
-    void gotoMiningPage();
     /** Switch to BDAP page */
     void gotoBdapPage();
     /** Show Sign/Verify Message dialog and switch to sign message tab */

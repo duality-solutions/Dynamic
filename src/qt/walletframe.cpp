@@ -131,13 +131,6 @@ void WalletFrame::gotoDynodePage()
         i.value()->gotoDynodePage();
 }
 
-void WalletFrame::gotoMiningPage()
-{
-    QMap<QString, WalletView*>::const_iterator i;
-    for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
-        i.value()->gotoMiningPage();
-}
-
 void WalletFrame::gotoBdapPage()
 {
     QMap<QString, WalletView*>::const_iterator i;

@@ -91,20 +91,6 @@ AC_ARG_ENABLE([wallet],
   [enable_wallet=$enableval],
   [enable_wallet=yes])
 
-# Enable GPU miner
-AC_ARG_ENABLE([gpu],
-  [AS_HELP_STRING([--enable-gpu],
-  [enable GPU miner (disabled by default)])],
-  [enable_gpu=$enableval],
-  [enable_gpu=no])
-
-# Enable CUDA
-AC_ARG_ENABLE([cuda],
-  [AS_HELP_STRING([--enable-cuda],
-  [enable CUDA miner (defaults is no)])],
-  [enable_cuda=$enableval],
-  [enable_cuda=no])
-
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
   [enable UPNP (default is yes if libminiupnpc is found)])],
@@ -963,18 +949,6 @@ else
   AC_MSG_RESULT(no)
 fi
 
-if test x$enable_gpu = xyes; then
-  AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable GPU miner])
-
-  if test "x$enable_cuda" = xyes; then
-    AX_CHECK_CUDA
-    if test "x$NVCC" = xno; then
-      enable_cuda=no
-      AC_MSG_WARN([NVIDIA CUDA nvcc compiler not found, falling back on OpenCL. Specify --with-cuda=/path/to/cuda or --disable-gpu])
-    fi
-  fi
-fi
-
 dnl enable upnp support
 AC_MSG_CHECKING([whether to build with support for UPnP])
 if test x$have_miniupnpc = xno; then
@@ -1067,8 +1041,6 @@ fi
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
 AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
-AM_CONDITIONAL([ENABLE_GPU],[test x$enable_gpu = xyes])
-AM_CONDITIONAL([ENABLE_CUDA], [test x"$enable_cuda" = xyes])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
 AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
 AM_CONDITIONAL([ENABLE_QT],[test x$dynamic_enable_qt = xyes])

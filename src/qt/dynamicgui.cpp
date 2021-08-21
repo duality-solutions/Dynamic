@@ -104,7 +104,6 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  receiveCoinsMenuAction(0),
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
-                                                                                                                 miningAction(0),
                                                                                                                  bdapAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
@@ -360,17 +359,6 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(dynodeAction);
 
-    miningAction = new QAction(QIcon(":/icons/" + theme + "/tx_mined"), tr("&Mining"), this);
-    miningAction->setStatusTip(tr("Mine Dynamic(DYN)"));
-    miningAction->setToolTip(miningAction->statusTip());
-    miningAction->setCheckable(true);
-#ifdef Q_OS_MAC
-    miningAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
-#else
-    miningAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
-#endif
-    tabGroup->addAction(miningAction);
-
     bdapAction = new QAction(QIcon(":/icons/" + theme + "/bdap"), tr("&BDAP"), this);
     bdapAction->setStatusTip(tr("BDAP"));
     bdapAction->setToolTip(bdapAction->statusTip());
@@ -398,8 +386,6 @@ void DynamicGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
-    connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(bdapAction, SIGNAL(triggered()), this, SLOT(gotoBdapPage()));
 
@@ -598,7 +584,6 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
         toolbar->addAction(dynodeAction);
-        toolbar->addAction(miningAction);
         toolbar->addAction(bdapAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
@@ -743,7 +728,6 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
-    miningAction->setEnabled(enabled);
     bdapAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
@@ -782,7 +766,6 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(receiveCoinsAction);
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
-    pmenu->addAction(miningAction);
     pmenu->addAction(bdapAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
@@ -949,13 +932,6 @@ void DynamicGUI::gotoDynodePage()
     dynodeAction->setChecked(true);
     if (walletFrame)
         walletFrame->gotoDynodePage();
-}
-
-void DynamicGUI::gotoMiningPage()
-{
-    miningAction->setChecked(true);
-    if (walletFrame)
-        walletFrame->gotoMiningPage();
 }
 
 void DynamicGUI::gotoBdapPage()
