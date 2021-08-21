@@ -116,6 +116,12 @@ bool isObscured(QWidget* w);
 // Open debug.log
 void openDebugLogfile();
 
+// Activate, show and raise the widget
+void bringToFront(QWidget* w);
+
+// Open debug.log
+void openDebugLogfile();
+
 // Open dynamic.conf
 void openConfigfile();
 
@@ -190,11 +196,6 @@ bool SetStartOnSystemStartup(bool fAutoStart);
 
 /** Modify Qt network specific settings on migration */
 void migrateQtSettings();
-
-/** Save window size and position */
-void saveWindowGeometry(const QString& strSetting, QWidget* parent);
-/** Restore window size and position */
-void restoreWindowGeometry(const QString& strSetting, const QSize& defaultSizeIn, QWidget* parent);
 
 /** Load global CSS theme */
 QString loadStyleSheet();

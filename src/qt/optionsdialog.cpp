@@ -75,6 +75,9 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool enableWallet) : QDialog(paren
 #ifdef Q_OS_MAC
     /* remove Window tab on Mac */
     ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->tabWindow));
+    /* hide launch at startup option on macOS */
+    ui->dynamicAtStartup->setVisible(false);
+    ui->verticalLayout_Main->removeWidget(ui->dynamicAtStartup);
 #endif
 
     /* remove Wallet tab in case of -disablewallet */

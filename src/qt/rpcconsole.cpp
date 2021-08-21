@@ -31,6 +31,7 @@
 #endif
 
 #include <QDir>
+#include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QScrollBar>
@@ -369,7 +370,12 @@ RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent),
                                           consoleFontSize(0)
 {
     ui->setupUi(this);
-    GUIUtil::restoreWindowGeometry("nRPCConsoleWindow", this->size(), this);
+
+    QSettings settings;
+    if (!restoreGeometry(settings.value("RPCConsoleWindowGeometry").toByteArray())) {
+        // Restore failed (perhaps missing setting), center the window
+        move(QApplication::desktop()->availableGeometry().center() - frameGeometry().center());
+    }
 
 #ifndef Q_OS_MAC
     ui->openDebugLogfileButton->setIcon(QIcon(":/icons/export"));
@@ -420,7 +426,6 @@ RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent),
     ui->detailWidget->hide();
     ui->peerHeading->setText(tr("Select a peer to view detailed information."));
 
-    QSettings settings;
     consoleFontSize = settings.value(fontSizeSettingsKey, QFontInfo(QFont()).pointSize()).toInt();
 
     clear();
@@ -428,7 +433,8 @@ RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent),
 
 RPCConsole::~RPCConsole()
 {
-    GUIUtil::saveWindowGeometry("nRPCConsoleWindow", this);
+    QSettings settings;
+    settings.setValue("RPCConsoleWindowGeometry", saveGeometry());
     RPCUnsetTimerInterface(rpcTimerInterface);
     delete rpcTimerInterface;
     delete ui;
