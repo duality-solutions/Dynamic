@@ -35,7 +35,6 @@ bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
     if (!GetFluidDynodeData(tx, *this, nOut)) {
-        SetNull();
         return false;
     }
     return true;
@@ -44,7 +43,6 @@ bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 bool CFluidDynode::UnserializeFromScript(const CScript& fluidScript)
 {
     if (!GetFluidDynodeData(fluidScript, *this)) {
-        SetNull();
         return false;
     }
     return true;
@@ -66,7 +64,7 @@ bool CFluidDynodeDB::AddFluidDynodeEntry(const CFluidDynode& entry, const int op
     bool writeState = false;
     {
         LOCK(cs_fluid_dynode);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
 
     return writeState;
@@ -88,7 +86,7 @@ bool CFluidDynodeDB::GetLastFluidDynodeRecord(CFluidDynode& returnEntry, const i
                 if (entry.IsNull()) {
                     return false;
                 }
-                if (entry.nHeight > returnEntry.nHeight && (int)(entry.nHeight + 1) < nHeight) {
+                if (entry.GetHeight() > returnEntry.GetHeight() && (int)(entry.GetHeight() + 1) < nHeight) {
                     returnEntry = entry;
                 }
             }

@@ -39,21 +39,21 @@ extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, co
 struct DynodeCompareTimeStamp {
     bool operator()(const CFluidDynode& a, const CFluidDynode& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
 };
 
 struct MintCompareTimeStamp {
     bool operator()(const CFluidMint& a, const CFluidMint& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
 };
 
 struct MiningCompareTimeStamp {
     bool operator()(const CFluidMining& a, const CFluidMining& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
 };
 
@@ -352,10 +352,10 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(mintEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(mintEntry.GetTransactionScript())));
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
-            totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
+            totalMintedCoins = totalMintedCoins + mintEntry.GetReward();
             totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
@@ -372,7 +372,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.GetTransactionScript())));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
             totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
@@ -391,7 +391,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.GetTransactionScript())));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
             totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
@@ -478,21 +478,21 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mint"));
-            obj.push_back(Pair("amount", FormatMoney(mintEntry.MintAmount)));
-            obj.push_back(Pair("timestamp", mintEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", mintEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)mintEntry.nHeight));
-            obj.push_back(Pair("txid", mintEntry.txHash.GetHex()));
-            obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.DestinationAddress)));
+            obj.push_back(Pair("amount", FormatMoney(mintEntry.GetReward())));
+            obj.push_back(Pair("timestamp", mintEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", mintEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)mintEntry.GetHeight()));
+            obj.push_back(Pair("txid", mintEntry.GetTransactionHash().GetHex()));
+            obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.obj_address)));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : mintEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : mintEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
             }
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
-            totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
+            totalMintedCoins = totalMintedCoins + mintEntry.GetReward();
             totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
@@ -511,13 +511,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Dynode Reward Update"));
-            obj.push_back(Pair("amount", FormatMoney(dynEntry.DynodeReward)));
-            obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", dynEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)dynEntry.nHeight));
-            obj.push_back(Pair("txid", dynEntry.txHash.GetHex()));
+            obj.push_back(Pair("amount", FormatMoney(dynEntry.GetReward())));
+            obj.push_back(Pair("timestamp", dynEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", dynEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)dynEntry.GetHeight()));
+            obj.push_back(Pair("txid", dynEntry.GetTransactionHash().GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : dynEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
@@ -542,13 +542,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mining Reward Update"));
-            obj.push_back(Pair("amount", FormatMoney(miningEntry.MiningReward)));
-            obj.push_back(Pair("timestamp", miningEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", miningEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)miningEntry.nHeight));
-            obj.push_back(Pair("txid", miningEntry.txHash.GetHex()));
+            obj.push_back(Pair("amount", FormatMoney(miningEntry.GetReward())));
+            obj.push_back(Pair("timestamp", miningEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", miningEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)miningEntry.GetHeight()));
+            obj.push_back(Pair("txid", miningEntry.GetTransactionHash().GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : miningEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : miningEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
@@ -635,7 +635,7 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
     for (const CFluidSovereign& sovereignEntry : sovereignEntries) {
         int index = 1;
         UniValue oEntry(UniValue::VOBJ);
-        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.SovereignAddresses) {
+        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.obj_sigs) {
             std::string addLabel = "address_" + std::to_string(index);
             oEntry.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
             index++;

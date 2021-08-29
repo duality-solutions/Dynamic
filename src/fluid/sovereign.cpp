@@ -35,7 +35,6 @@ bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
     if (!GetFluidSovereignData(tx, *this, nOut)) {
-        SetNull();
         return false;
     }
     return true;
@@ -44,7 +43,6 @@ bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
 {
     if (!GetFluidSovereignData(fluidScript, *this)) {
-        SetNull();
         return false;
     }
     return true;
@@ -60,7 +58,7 @@ void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData)
 std::vector<std::string> CFluidSovereign::SovereignAddressesStrings()
 {
     std::vector<std::string> vchAddressStrings;
-    for (const std::vector<unsigned char>& vchAddress : SovereignAddresses) {
+    for (const std::vector<unsigned char>& vchAddress : obj_sigs) {
         vchAddressStrings.push_back(StringFromCharVector(vchAddress));
     }
     return vchAddressStrings;
@@ -77,13 +75,10 @@ void CFluidSovereignDB::InitEmpty()
         LOCK(cs_fluid_sovereign);
         CFluidSovereign fluidSovereign;
         for (const auto& pk : Params().FluidSignatureKeys()) {
-            fluidSovereign.SovereignAddresses.push_back(
+            fluidSovereign.obj_sigs.insert(
               CharVectorFromString(CDynamicAddress(pk).ToString())
             );
         }
-        fluidSovereign.FluidScript = CharVectorFromString("init sovereign");
-        fluidSovereign.nTimeStamp = 1;
-        fluidSovereign.nHeight = 1;
         if (!AddFluidSovereignEntry(fluidSovereign)) {
             LogPrintf("CFluidSovereignDB::InitEmpty add failed.\n");
         }
@@ -95,7 +90,7 @@ bool CFluidSovereignDB::AddFluidSovereignEntry(const CFluidSovereign& entry)
     bool writeState = false;
     {
         LOCK(cs_fluid_sovereign);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
     return writeState;
 }
@@ -113,7 +108,7 @@ bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight) {
+                if (entry.GetHeight() > returnEntry.GetHeight()) {
                     returnEntry = entry;
                 }
             }

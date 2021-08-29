@@ -2944,9 +2944,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (prevIndex->nHeight + 1 >= FLUID_ACTIVATE_HEIGHT) {
             CFluidMint fluidMint;
             if (GetMintingInstructions(pindex->nHeight, fluidMint)) {
-                newMintIssuance = fluidMint.MintAmount;
+                newMintIssuance = fluidMint.GetReward();
                 mintAddress = fluidMint.GetDestinationAddress();
-                LogPrintf("ConnectBlock, GetMintingInstructions MintAmount = %u\n", fluidMint.MintAmount);
+                LogPrintf("ConnectBlock, GetMintingInstructions MintAmount = %u\n", fluidMint.GetReward());
             }
         }
         nExpectedBlockValue = newMintIssuance + newMiningReward + newDynodeReward;
@@ -2961,34 +2961,29 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         }
     }
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
+        assert(pFluidDynodeDB);
         const CTransaction& tx = *block.vtx[i];
         CScript scriptFluid;
         if (IsTransactionFluid(tx, scriptFluid)) {
             int OpCode = GetFluidOpCode(scriptFluid);
             if (OpCode == OP_REWARD_DYNODE) {
-                assert(pFluidDynodeDB);
                 CFluidDynode fluidDynode(scriptFluid);
-                fluidDynode.nHeight = pindex->nHeight;
-                fluidDynode.txHash = tx.GetHash();
-                if (!CheckSignatureQuorum(fluidDynode.FluidScript, strError)) {
+                fluidDynode.InitialiseHeightHash(pindex->nHeight, tx.GetHash());
+                if (!CheckSignatureQuorum(fluidDynode.GetTransactionScript(), strError)) {
                     return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-dynode-address-signature");
                 }
                 pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
             } else if (OpCode == OP_REWARD_MINING) {
-                assert(pFluidMiningDB);
                 CFluidMining fluidMining(scriptFluid);
-                fluidMining.nHeight = pindex->nHeight;
-                fluidMining.txHash = tx.GetHash();
-                if (!CheckSignatureQuorum(fluidMining.FluidScript, strError)) {
+                fluidMining.InitialiseHeightHash(pindex->nHeight, tx.GetHash());
+                if (!CheckSignatureQuorum(fluidMining.GetTransactionScript(), strError)) {
                     return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
                 }
                 pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
             } else if (OpCode == OP_MINT) {
-                assert(pFluidMintDB);
                 CFluidMint fluidMint(scriptFluid);
-                fluidMint.nHeight = pindex->nHeight;
-                fluidMint.txHash = tx.GetHash();
-                if (!CheckSignatureQuorum(fluidMint.FluidScript, strError)) {
+                fluidMint.InitialiseHeightHash(pindex->nHeight, tx.GetHash());
+                if (!CheckSignatureQuorum(fluidMint.GetTransactionScript(), strError)) {
                     return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mint-address-signature");
                 }
                 pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);

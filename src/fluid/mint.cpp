@@ -36,7 +36,6 @@ bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
     if (!GetFluidMintData(tx, *this, nOut)) {
-        SetNull();
         return false;
     }
     return true;
@@ -45,7 +44,6 @@ bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
 {
     if (!GetFluidMintData(fluidScript, *this)) {
-        SetNull();
         return false;
     }
     return true;
@@ -60,7 +58,7 @@ void CFluidMint::Serialize(std::vector<unsigned char>& vchData)
 
 CDynamicAddress CFluidMint::GetDestinationAddress() const
 {
-    return CDynamicAddress(StringFromCharVector(DestinationAddress));
+    return CDynamicAddress(StringFromCharVector(obj_address));
 }
 
 CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
@@ -72,7 +70,7 @@ bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op)
     bool writeState = false;
     {
         LOCK(cs_fluid_mint);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
 
     return writeState;
@@ -91,7 +89,7 @@ bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry)
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight) {
+                if (entry.GetHeight() > returnEntry.GetHeight()) {
                     returnEntry = entry;
                 }
             }
