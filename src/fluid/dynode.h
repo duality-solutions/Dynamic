@@ -6,6 +6,7 @@
 #include "amount.h"
 #include "dbwrapper.h"
 #include "serialize.h"
+#include "fluid/fluid.h"
 
 #include "sync.h"
 #include "uint256.h"
@@ -13,103 +14,28 @@
 class CScript;
 class CTransaction;
 
-class CFluidDynode
+class CFluidDynode : public DSFluidObject
 {
 public:
-    static const int CURRENT_VERSION = 1;
-    int nVersion;
-    std::vector<unsigned char> FluidScript;
-    CAmount DynodeReward;
-    int64_t nTimeStamp;
-    std::vector<std::vector<unsigned char> > SovereignAddresses;
-    uint256 txHash;
-    unsigned int nHeight;
-    std::vector<unsigned char> DestinationAddress;
-
-    CFluidDynode()
-    {
-        SetNull();
-    }
-
-    CFluidDynode(const CTransaction& tx)
-    {
-        SetNull();
-        UnserializeFromTx(tx);
-    }
-
-    CFluidDynode(const CScript& fluidScript)
-    {
-        SetNull();
-        UnserializeFromScript(fluidScript);
-    }
-
-    void Initialise(std::vector<unsigned char> _vch, CAmount _amt, int64_t _t)
-    {
-        FluidScript = _vch;
-        DynodeReward = _amt;
-        nTimeStamp = _t;
-    }
-
-    inline void SetNull()
-    {
-        nVersion = CFluidDynode::CURRENT_VERSION;
-        FluidScript.clear();
-        DynodeReward = -1;
-        nTimeStamp = 0;
-        SovereignAddresses.clear();
-        txHash.SetNull();
-        nHeight = 0;
-    }
+    CFluidDynode() = default;
+    CFluidDynode(const CTransaction& tx) { UnserializeFromTx(tx); }
+    CFluidDynode(const CScript& fluidScript) { UnserializeFromScript(fluidScript); }
+    ~CFluidDynode() = default;
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(this->nVersion);
-        READWRITE(FluidScript);
-        READWRITE(DynodeReward);
-        READWRITE(VARINT(nTimeStamp));
-        READWRITE(SovereignAddresses);
-        READWRITE(txHash);
-        READWRITE(VARINT(nHeight));
+        READWRITE(this->version);
+        READWRITE(tx_script);
+        READWRITE(obj_reward);
+        READWRITE(VARINT(obj_time));
+        READWRITE(obj_sigs);
+        READWRITE(tx_hash);
+        READWRITE(VARINT(tx_height));
     }
 
-    inline friend bool operator==(const CFluidDynode& a, const CFluidDynode& b)
-    {
-        return (a.FluidScript == b.FluidScript && a.DynodeReward == b.DynodeReward && a.nTimeStamp == b.nTimeStamp);
-    }
-
-    inline friend bool operator!=(const CFluidDynode& a, const CFluidDynode& b)
-    {
-        return !(a == b);
-    }
-
-    friend bool operator<(const CFluidDynode& a, const CFluidDynode& b)
-    {
-        return (a.nTimeStamp < b.nTimeStamp);
-    }
-
-    friend bool operator>(const CFluidDynode& a, const CFluidDynode& b)
-    {
-        return (a.nTimeStamp > b.nTimeStamp);
-    }
-
-    inline CFluidDynode operator=(const CFluidDynode& b)
-    {
-        FluidScript = b.FluidScript;
-        DynodeReward = b.DynodeReward;
-        nTimeStamp = b.nTimeStamp;
-        SovereignAddresses.clear(); //clear out previous entries
-        for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
-            SovereignAddresses.push_back(vchAddress);
-        }
-        txHash = b.txHash;
-        nHeight = b.nHeight;
-        return *this;
-    }
-
-    inline bool IsNull() const { return (nTimeStamp == 0); }
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
     void Serialize(std::vector<unsigned char>& vchData);

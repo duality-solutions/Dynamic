@@ -65,6 +65,131 @@ public:
 
 };
 
+class DSFluidObject
+{
+    typedef std::vector<unsigned char> byte_vec;
+    static constexpr int CURRENT_VERSION = 1;
+
+    friend class CFluidDynode;
+    friend class CFluidMining;
+    friend class CFluidMint;
+    friend class CFluidSovereign;
+
+private:
+    int version;
+
+    uint256  tx_hash;
+    uint32_t tx_height;
+    byte_vec tx_script;
+
+    uint64_t obj_reward;
+    uint64_t obj_time;
+
+protected:
+    DSFluidObject Null()
+    {
+        DSFluidObject obj;
+        version = DSFluidObject::CURRENT_VERSION;
+        tx_hash.SetNull();
+        tx_script.clear();
+        tx_height = 0;
+        obj_reward = -1;
+        obj_time = 0;
+        obj_sigs.clear();
+        obj_address.clear();
+
+        return obj;
+    }
+
+public:
+    byte_vec obj_address;
+    std::set<byte_vec> obj_sigs;
+
+    DSFluidObject()
+    {
+        *this = Null();
+    }
+
+    DSFluidObject(DSFluidObject&& obj)
+    {
+        std::swap(version, obj.version);
+        std::swap(tx_hash, obj.tx_hash);
+        std::swap(tx_script, obj.tx_script);
+        std::swap(obj_reward, obj.obj_reward);
+        std::swap(obj_time, obj.obj_time);
+        std::swap(obj_sigs, obj.obj_sigs);
+        std::swap(obj_address, obj.obj_address);
+    }
+
+    DSFluidObject& operator=(DSFluidObject&& obj)
+    {
+        std::swap(version, obj.version);
+        std::swap(tx_hash, obj.tx_hash);
+        std::swap(tx_script, obj.tx_script);
+        std::swap(obj_reward, obj.obj_reward);
+        std::swap(obj_time, obj.obj_time);
+        std::swap(obj_sigs, obj.obj_sigs);
+        std::swap(obj_address, obj.obj_address);
+        return *this;
+    }
+
+    DSFluidObject(const DSFluidObject& obj) = default;
+    DSFluidObject& operator=(const DSFluidObject& obj) = default;
+
+    bool operator>(const DSFluidObject& obj) const
+    {
+        return obj_time > obj.obj_time;
+    }
+
+    bool operator<(const DSFluidObject& obj) const
+    {
+        return obj_time < obj.obj_time;
+    }
+
+    bool operator==(const DSFluidObject& obj) const
+    {
+        return tx_script == obj.tx_script;
+    }
+
+    bool operator!=(const DSFluidObject& obj) const
+    {
+        return !((*this) == obj);
+    }
+
+    void Initialise(byte_vec _vch, CAmount _amt, int64_t _t)
+    {
+        return InitialiseScriptRewardTime(_vch, _amt, _t);
+    }
+
+    void InitialiseScriptRewardTime(byte_vec _vch, CAmount _amt, int64_t _t)
+    {
+        tx_script = _vch;
+        obj_reward = _amt;
+        obj_time = _t;
+    }
+
+    void InitialiseHeightHash(CAmount _ht, uint256 _hash)
+    {
+        tx_height = _ht;
+        tx_hash = _hash;
+    }
+
+    void SetAddress(byte_vec _vch)
+    {
+        obj_address = _vch;
+    }
+
+    uint64_t GetTime() const { return obj_time; }
+    uint64_t GetHeight() const { return tx_height; }
+    uint64_t GetReward() const { return obj_reward; }
+    uint256 GetTransactionHash() const { return tx_hash; }
+    uint32_t GetTransactionHeight() const { return tx_height; }
+    byte_vec GetTransactionScript() const { return tx_script; }
+
+    bool IsNull() { return *this == Null(); }
+    void SetNull() const { DSFluidObject(); }
+};
+
 /** Standard Reward Payment Determination Functions */
 CAmount GetStandardPoWBlockPayment(const int& nHeight);
 CAmount GetStandardDynodePayment(const int& nHeight);

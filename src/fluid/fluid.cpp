@@ -634,7 +634,7 @@ bool ParseScript(const CScript& scriptPubKey, T1& object)
         switch (scriptPubKey.GetFlag())
         {
             case OP_MINT:
-                object.DestinationAddress = CharVectorFromString(ser_fields[2]);
+                object.obj_address = CharVectorFromString(ser_fields[2]);
             case OP_REWARD_DYNODE:
             case OP_REWARD_MINING:
                 object.Initialise(
@@ -659,7 +659,7 @@ bool ParseScript(const CScript& scriptPubKey, T1& object)
     }
 
     for (; s > e; s++) {
-        object.SovereignAddresses.push_back(
+        object.obj_sigs.insert(
             CharVectorFromString(
                 fluid.GetAddressFromDigestSignature(ser_fields[s], payload).ToString()
             )
