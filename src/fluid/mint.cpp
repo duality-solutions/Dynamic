@@ -6,6 +6,7 @@
 #include "base58.h"
 #include "core_io.h"
 #include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -13,19 +14,14 @@
 
 CFluidMintDB* pFluidMintDB = NULL;
 
-bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
-{
-    return ParseScript(scriptPubKey, entry);
-}
-
 bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)
 {
     int n = 0;
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag())) {
             nOut = n;
-            return GetFluidMintData(txOut, entry);
+            return ParseScript(txOut, entry);
         }
         n++;
     }
@@ -43,7 +39,7 @@ bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidMintData(fluidScript, *this)) {
+    if (!ParseScript(fluidScript, *this)) {
         return false;
     }
     return true;

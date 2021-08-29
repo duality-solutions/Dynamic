@@ -58,9 +58,6 @@ public:
     bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
-bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
-bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut);
-
 extern CFluidMintDB* pFluidMintDB;
 
 #endif // FLUID_MINT_H

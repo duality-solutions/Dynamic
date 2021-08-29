@@ -54,9 +54,6 @@ public:
     bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
-bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
-bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
-
 extern CFluidMiningDB* pFluidMiningDB;
 
 #endif // FLUID_MINING

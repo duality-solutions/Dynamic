@@ -5,6 +5,7 @@
 
 #include "core_io.h"
 #include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -12,19 +13,14 @@
 
 CFluidMiningDB* pFluidMiningDB = NULL;
 
-bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)
-{
-    return ParseScript(scriptPubKey, entry);
-}
-
 bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut)
 {
     int n = 0;
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag())) {
             nOut = n;
-            return GetFluidMiningData(txOut, entry);
+            return ParseScript(txOut, entry);
         }
         n++;
     }
@@ -42,7 +38,7 @@ bool CFluidMining::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidMining::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidMiningData(fluidScript, *this)) {
+    if (!ParseScript(fluidScript, *this)) {
         return false;
     }
     return true;

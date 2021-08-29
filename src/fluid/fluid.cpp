@@ -31,16 +31,11 @@ CFluid fluid;
 extern CWallet* pwalletMain;
 #endif //ENABLE_WALLET
 
-bool IsTransactionFluid(const CScript& txOut)
-{
-    return WithinFluidRange(txOut.GetFlag());
-}
-
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
 {
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag())) {
             fluidScript = txOut;
             return true;
         }
@@ -122,7 +117,7 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransaction& tx = e.GetTx();
         for (const CTxOut& txOut : tx.vout) {
-            if (IsTransactionFluid(txOut.scriptPubKey)) {
+            if (WithinFluidRange(txOut.scriptPubKey.GetFlag())) {
                 return (GetRidOfScriptStatement(ScriptToAsmStr(fluidScriptPubKey)) == GetRidOfScriptStatement(ScriptToAsmStr(txOut.scriptPubKey)));
             }
         }
@@ -438,7 +433,7 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
 /* Check if transaction exists in record */
 bool CFluid::CheckTransactionInRecord(const CScript& fluidInstruction, CBlockIndex* pindex)
 {
-    if (IsTransactionFluid(fluidInstruction)) {
+    if (WithinFluidRange(fluidInstruction.GetFlag())) {
         std::string verificationString = ScriptToAsmStr(fluidInstruction);
         std::vector<std::string> transactionRecord;
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
@@ -490,7 +485,7 @@ bool CFluid::ValidationProcesses(CValidationState& state, const CScript& txOut, 
     CAmount mintAmount;
     CDynamicAddress toMintAddress;
 
-    if (IsTransactionFluid(txOut)) {
+    if (WithinFluidRange(txOut.GetFlag())) {
         if (!CheckIfQuorumExists(ScriptToAsmStr(txOut), message)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-auth-failure");
         }
@@ -515,7 +510,7 @@ bool CFluid::ProvisionalCheckTransaction(const CTransaction& transaction)
     for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
-        if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag()) && CheckTransactionInRecord(txOut)) {
             LogPrintf("ProvisionalCheckTransaction(): Fluid Transaction %s has already been executed!\n", transaction.GetHash().ToString());
             return false;
         }
@@ -540,7 +535,7 @@ bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint
     for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
-        if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut, pblockindex)) {
+        if (WithinFluidRange(txOut.GetFlag()) && CheckTransactionInRecord(txOut, pblockindex)) {
             LogPrintf("CheckTransactionToBlock(): Fluid Transaction %s has already been executed!\n", transaction.GetHash().ToString());
             return false;
         }

@@ -5,6 +5,7 @@
 
 #include "core_io.h"
 #include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -12,19 +13,14 @@
 
 CFluidDynodeDB* pFluidDynodeDB = NULL;
 
-bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
-{
-    return ParseScript(scriptPubKey, entry);
-}
-
 bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut)
 {
     int n = 0;
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag())) {
             nOut = n;
-            return GetFluidDynodeData(txOut, entry);
+            return ParseScript(txOut, entry);
         }
         n++;
     }
@@ -42,7 +38,7 @@ bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidDynode::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidDynodeData(fluidScript, *this)) {
+    if (!ParseScript(fluidScript, *this)) {
         return false;
     }
     return true;

@@ -33,6 +33,7 @@
 #include "fluid/dynode.h"
 #include "fluid/mining.h"
 #include "fluid/mint.h"
+#include "fluid/script.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -573,7 +574,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state)
         nValueOut += txout.nValue;
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
-        if (IsTransactionFluid(txout.scriptPubKey)) {
+        if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
             if (FLUID_TRANSACTION_COST > txout.nValue)
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-vout-amount-toolow");
             if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
@@ -955,7 +956,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         return false;
 
     for (const CTxOut& txout : tx.vout) {
-        if (IsTransactionFluid(txout.scriptPubKey)) {
+        if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
             fluidTransaction = true;
             std::string strErrorMessage;
             // Check if fluid transaction is already in the mempool
@@ -1748,7 +1749,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
         return false;
 
     BOOST_FOREACH (const CTxOut& txout, tx->vout) {
-        if (IsTransactionFluid(txout.scriptPubKey)) {
+        if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
             std::string strErrorMessage;
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime())) {
                 fluidTimestampCheck = false;
@@ -2965,7 +2966,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         const CTransaction& tx = *block.vtx[i];
         CScript scriptFluid;
         if (IsTransactionFluid(tx, scriptFluid)) {
-            int OpCode = GetFluidOpCode(scriptFluid);
+            int OpCode = scriptFluid.GetFlag();
             if (OpCode == OP_REWARD_DYNODE) {
                 CFluidDynode fluidDynode(scriptFluid);
                 fluidDynode.InitialiseHeightHash(pindex->nHeight, tx.GetHash());
@@ -4111,7 +4112,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
                 strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
 
         for (const auto& txout : tx->vout) {
-            if (IsTransactionFluid(txout.scriptPubKey)) {
+            if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
                 std::string strErrorMessage;
                 if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime)) {
                     return error("CheckBlock(): %s, Block %s failed with %s",

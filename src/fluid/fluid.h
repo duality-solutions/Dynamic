@@ -195,14 +195,12 @@ CAmount GetStandardPoWBlockPayment(const int& nHeight);
 CAmount GetStandardDynodePayment(const int& nHeight);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount& nExpectedBlockValue, bool fDynodePaid);
-bool IsTransactionFluid(const CScript& txOut);
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript);
 int GetFluidOpCode(const CScript& fluidScript);
 
 std::vector<unsigned char> CharVectorFromString(const std::string& str);
 std::string StringFromCharVector(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
-bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block);
 
 template <typename T1>
 bool ParseScript(const CScript& scriptPubKey, T1& object);

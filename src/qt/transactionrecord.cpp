@@ -13,6 +13,7 @@
 #include "bdap/x509certificate.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "instantsend.h"
 #include "policy/policy.h"
 #include "privatesend.h"
@@ -70,7 +71,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                     sub.type = TransactionRecord::RecvFromOther;
                     sub.address = mapValue["from"];
                 }
-                if (IsTransactionFluid(txout.scriptPubKey)) {
+                if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
                     // Fluid type
                     sub.type = TransactionRecord::Fluid;
                 }
@@ -147,7 +148,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                             sub.type = TransactionRecord::PrivateSendCreateDenominations;
                             break;
                         }
-                        if (IsTransactionFluid(txout.scriptPubKey)) {
+                        if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
                             sub.type = TransactionRecord::Fluid;
                             break;
                         }
@@ -263,7 +264,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                         }
                     }
                 }
-                if (IsTransactionFluid(txout.scriptPubKey)) {
+                if (WithinFluidRange(txout.scriptPubKey.GetFlag())) {
                     sub.type = TransactionRecord::Fluid;
                 } else if (mapValue["PS"] == "1") {
                     sub.type = TransactionRecord::PrivateSend;

@@ -54,9 +54,6 @@ public:
     bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
-bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);
-bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut);
-
 extern CFluidDynodeDB* pFluidDynodeDB;
 
 #endif // FLUID_DYNODE_H

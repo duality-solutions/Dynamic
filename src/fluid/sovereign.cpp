@@ -5,6 +5,7 @@
 
 #include "core_io.h"
 #include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -12,19 +13,14 @@
 
 CFluidSovereignDB* pFluidSovereignDB = NULL;
 
-bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
-{
-    return ParseScript(scriptPubKey, entry);
-}
-
 bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& nOut)
 {
     int n = 0;
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
+        if (WithinFluidRange(txOut.GetFlag())) {
             nOut = n;
-            return GetFluidSovereignData(txOut, entry);
+            return ParseScript(txOut, entry);
         }
         n++;
     }
@@ -42,7 +38,7 @@ bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 
 bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidSovereignData(fluidScript, *this)) {
+    if (!ParseScript(fluidScript, *this)) {
         return false;
     }
     return true;
