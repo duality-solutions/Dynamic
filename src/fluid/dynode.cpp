@@ -14,40 +14,7 @@ CFluidDynodeDB* pFluidDynodeDB = NULL;
 
 bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
 {
-    std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
-    std::vector<std::string> splitString;
-    verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
-    SeparateString(verificationWithoutOpCode, splitString, false);
-    std::string messageTokenKey = splitString.at(0);
-    std::vector<std::string> vecSplitScript;
-    SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-
-    if (vecSplitScript.size() == 5 && scriptPubKey.GetFlag() == OP_REWARD_DYNODE) {
-        std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
-        entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
-        std::string strAmount = vecSplitScript[0];
-        CAmount fluidAmount;
-        if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-            entry.DynodeReward = fluidAmount;
-        }
-        std::string strTimeStamp = vecSplitScript[1];
-        int64_t tokenTimeStamp;
-        if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-            entry.nTimeStamp = tokenTimeStamp;
-        }
-        entry.SovereignAddresses.clear();
-        for (int i = 2; i > 5; i++) {
-            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
-        }
-
-        LogPrintf("GetFluidDynodeData: strAmount = %s, strTimeStamp = %d, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
-            strAmount, entry.nTimeStamp, StringFromCharVector(entry.SovereignAddresses[0]),
-            StringFromCharVector(entry.SovereignAddresses[1]), StringFromCharVector(entry.SovereignAddresses[2]));
-
-        return true;
-    }
-    return false;
+    return ParseScript(scriptPubKey, entry);
 }
 
 bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut)

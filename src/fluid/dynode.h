@@ -24,6 +24,7 @@ public:
     std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
+    std::vector<unsigned char> DestinationAddress;
 
     CFluidDynode()
     {
@@ -40,6 +41,13 @@ public:
     {
         SetNull();
         UnserializeFromScript(fluidScript);
+    }
+
+    void Initialise(std::vector<unsigned char> _vch, CAmount _amt, int64_t _t)
+    {
+        FluidScript = _vch;
+        DynodeReward = _amt;
+        nTimeStamp = _t;
     }
 
     inline void SetNull()

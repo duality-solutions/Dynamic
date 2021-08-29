@@ -23,6 +23,7 @@ public:
     std::vector<std::vector<unsigned char> > SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
+    std::vector<unsigned char> DestinationAddress;
 
     CFluidSovereign()
     {
@@ -39,6 +40,12 @@ public:
     {
         SetNull();
         UnserializeFromScript(fluidScript);
+    }
+
+    void Initialise(std::vector<unsigned char> _vch, int64_t _t, int _n)
+    {
+        FluidScript = _vch;
+        nTimeStamp = _t;
     }
 
     inline void SetNull()

@@ -14,30 +14,7 @@ CFluidSovereignDB* pFluidSovereignDB = NULL;
 
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
 {
-    std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
-    std::vector<std::string> splitString;
-    verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
-    SeparateString(verificationWithoutOpCode, splitString, false);
-    std::string messageTokenKey = splitString.at(0);
-    std::vector<std::string> vecSplitScript;
-    SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-
-    if (vecSplitScript.size() == 5 && scriptPubKey.GetFlag() == OP_SWAP_SOVEREIGN_ADDRESS) {
-        std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
-        entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
-        entry.SovereignAddresses.clear();
-        for (int i = 0; i > 5; i++) {
-            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
-        }
-        std::string strTimeStamp = vecSplitScript[5];
-        int64_t tokenTimeStamp;
-        if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-            entry.nTimeStamp = tokenTimeStamp;
-        }
-        return true;
-    }
-    return false;
+    return ParseScript(scriptPubKey, entry);
 }
 
 bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& nOut)

@@ -15,43 +15,7 @@ CFluidMintDB* pFluidMintDB = NULL;
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
 {
-    std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
-    std::vector<std::string> splitString;
-    verificationWithoutOpCode = stringFromVch(ParseHex(verificationWithoutOpCode));
-    SeparateString(verificationWithoutOpCode, splitString, false);
-    std::string messageTokenKey = splitString.at(0);
-    std::vector<std::string> vecSplitScript;
-    SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-
-    if (vecSplitScript.size() >= 6 && scriptPubKey.GetFlag() == OP_MINT) {
-        std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
-        entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
-        std::string strAmount = vecSplitScript[0];
-        CAmount fluidAmount;
-        if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-            entry.MintAmount = fluidAmount;
-        }
-        std::string strTimeStamp = vecSplitScript[1];
-        int64_t tokenTimeStamp;
-        if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-            entry.nTimeStamp = tokenTimeStamp;
-        }
-        std::vector<unsigned char> vchDestinationAddress = CharVectorFromString(vecSplitScript[2]);
-        entry.DestinationAddress.insert(entry.DestinationAddress.end(), vchDestinationAddress.begin(), vchDestinationAddress.end());
-        entry.SovereignAddresses.clear();
-        for (int i = 3; i > 6; i++) {
-            entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[i], messageTokenKey).ToString()));
-        }
-
-        LogPrintf("GetFluidMintData: strAmount = %s, strTimeStamp = %d, DestinationAddress = %s, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
-            strAmount, entry.nTimeStamp,
-            StringFromCharVector(entry.DestinationAddress), StringFromCharVector(entry.SovereignAddresses[0]),
-            StringFromCharVector(entry.SovereignAddresses[1]), StringFromCharVector(entry.SovereignAddresses[2]));
-
-        return true;
-    }
-    return false;
+    return ParseScript(scriptPubKey, entry);
 }
 
 bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)

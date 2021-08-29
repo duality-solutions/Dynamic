@@ -147,3 +147,20 @@ bool GenericSignMessage(const std::string& message, std::string& signedString, c
 
     return true;
 }
+
+/* Unsafe Parsing Variants */
+CAmount ParseFixedPoint(std::string str)
+{
+    CAmount val;
+    if (!ParseFixedPoint(str, 8, &val))
+        throw std::runtime_error("Invalid value");
+    return val;
+}
+
+CAmount ParseInt64(std::string str)
+{
+    CAmount val;
+    if (!ParseInt64(str, &val))
+        throw std::runtime_error("Invalid value");
+    return val;
+}

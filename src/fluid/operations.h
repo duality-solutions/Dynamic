@@ -27,4 +27,7 @@ bool VerifyAddressOwnership(const CDynamicAddress& dynamicAddress);
 bool SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch = true);
 bool GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer);
 
+CAmount ParseFixedPoint(std::string str);
+CAmount ParseInt64(std::string str);
+
 #endif // OPERATIONS_H

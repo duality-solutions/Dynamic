@@ -16,7 +16,11 @@
 #include "utilmoneystr.h"
 #include "utiltime.h"
 #include "validation.h"
+#include "fluid/dynode.h"
+#include "fluid/mint.h"
+#include "fluid/mining.h"
 #include "fluid/script.h"
+#include "fluid/sovereign.h"
 
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
@@ -612,3 +616,68 @@ bool CFluid::ExtractTimestampWithAddresses(const std::string& strOpCode, const C
     }
     return true;
 }
+
+template <typename T1>
+bool ParseScript(const CScript& scriptPubKey, T1& object)
+{
+    std::vector<std::string> ser_fields;
+    std::string payload; int s, e;
+    payload = stringFromVch(ParseHex(GetRidOfScriptStatement(ScriptToAsmStr(scriptPubKey))));
+    SeparateString(payload, ser_fields, false);
+    payload = ser_fields.at(0); ser_fields ={};
+    SeparateFluidOpString(payload, ser_fields);
+
+    if (ser_fields.size() != 5 && scriptPubKey.GetFlag() != OP_MINT)
+        return false;
+
+    try {
+        switch (scriptPubKey.GetFlag())
+        {
+            case OP_MINT:
+                object.DestinationAddress = CharVectorFromString(ser_fields[2]);
+            case OP_REWARD_DYNODE:
+            case OP_REWARD_MINING:
+                object.Initialise(
+                    CharVectorFromString(ScriptToAsmStr(scriptPubKey)), /* Byte Vector of Script */
+                    ParseFixedPoint(ser_fields[0]),   /* int64_t field one */
+                    ParseInt64(ser_fields[1])         /* int64_t field two */
+                );
+                (scriptPubKey.GetFlag() == OP_MINT) ? s = 3, e = 6 : s = 2, e = 5;
+                break;
+            case OP_SWAP_SOVEREIGN_ADDRESS:
+                object.Initialise(
+                    CharVectorFromString(ScriptToAsmStr(scriptPubKey)), /* Byte Vector of Script */
+                    ParseInt64(ser_fields[5]),        /* int64_t field two */
+                    0                                 /* null */
+                ); s = 0; e = 5;
+                break;
+            default:
+                return false;
+        }
+    } catch (...) {
+        return false;
+    }
+
+    for (; s > e; s++) {
+        object.SovereignAddresses.push_back(
+            CharVectorFromString(
+                fluid.GetAddressFromDigestSignature(ser_fields[s], payload).ToString()
+            )
+        );
+    }
+
+    // Debug
+    LogPrintf("%s: vector contents: ", __PRETTY_FUNCTION__);
+    for (auto& value : ser_fields) {
+        LogPrintf("%s, ", value);
+    }
+    LogPrintf("\n");
+    // End Debug
+
+    return object.IsNull();
+}
+
+template bool ParseScript<CFluidMint>(const CScript& scriptPubKey, CFluidMint& object);
+template bool ParseScript<CFluidMining>(const CScript& scriptPubKey, CFluidMining& object);
+template bool ParseScript<CFluidDynode>(const CScript& scriptPubKey, CFluidDynode& object);
+template bool ParseScript<CFluidSovereign>(const CScript& scriptPubKey, CFluidSovereign& object);

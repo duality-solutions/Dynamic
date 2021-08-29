@@ -79,6 +79,9 @@ std::string StringFromCharVector(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
 bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block);
 
+template <typename T1>
+bool ParseScript(const CScript& scriptPubKey, T1& object);
+
 extern CFluid fluid;
 
 #endif // FLUID_PROTOCOL_H

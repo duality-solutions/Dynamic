@@ -44,6 +44,13 @@ public:
         UnserializeFromScript(fluidScript);
     }
 
+    void Initialise(std::vector<unsigned char> _vch, CAmount _amt, int64_t _t)
+    {
+        FluidScript = _vch;
+        MintAmount = _amt;
+        nTimeStamp = _t;
+    }
+
     inline void SetNull()
     {
         nVersion = CFluidMint::CURRENT_VERSION;
