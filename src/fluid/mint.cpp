@@ -14,35 +14,15 @@
 
 CFluidMintDB* pFluidMintDB = NULL;
 
-bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (WithinFluidRange(txOut.GetFlag())) {
-            nOut = n;
-            return ParseScript(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidMintData(tx, *this, nOut)) {
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!ParseScript(fluidScript, *this)) {
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidMint::Serialize(std::vector<unsigned char>& vchData)
@@ -68,7 +48,6 @@ bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op)
         LOCK(cs_fluid_mint);
         writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
-
     return writeState;
 }
 

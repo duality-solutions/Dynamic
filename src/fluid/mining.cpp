@@ -13,35 +13,15 @@
 
 CFluidMiningDB* pFluidMiningDB = NULL;
 
-bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (WithinFluidRange(txOut.GetFlag())) {
-            nOut = n;
-            return ParseScript(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidMining::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidMiningData(tx, *this, nOut)) {
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidMining::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!ParseScript(fluidScript, *this)) {
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidMining::Serialize(std::vector<unsigned char>& vchData)

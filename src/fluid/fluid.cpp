@@ -672,7 +672,26 @@ bool ParseScript(const CScript& scriptPubKey, T1& object)
     return object.IsNull();
 }
 
+template <typename T1>
+bool ParseData(const CTransaction& tx, T1& entry, int& nOut)
+{
+    nOut = 0;
+    for (const CTxOut& txout : tx.vout) {
+        CScript txOut = txout.scriptPubKey;
+        if (WithinFluidRange(txOut.GetFlag())) {
+            return ParseScript(txOut, entry);
+        }
+        nOut++;
+    }
+    return false;
+}
+
 template bool ParseScript<CFluidMint>(const CScript& scriptPubKey, CFluidMint& object);
 template bool ParseScript<CFluidMining>(const CScript& scriptPubKey, CFluidMining& object);
 template bool ParseScript<CFluidDynode>(const CScript& scriptPubKey, CFluidDynode& object);
 template bool ParseScript<CFluidSovereign>(const CScript& scriptPubKey, CFluidSovereign& object);
+
+template bool ParseData<CFluidMint>(const CTransaction& tx, CFluidMint& entry, int& nOut);
+template bool ParseData<CFluidMining>(const CTransaction& tx, CFluidMining& entry, int& nOut);
+template bool ParseData<CFluidDynode>(const CTransaction& tx, CFluidDynode& entry, int& nOut);
+template bool ParseData<CFluidSovereign>(const CTransaction& tx, CFluidSovereign& entry, int& nOut);

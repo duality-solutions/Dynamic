@@ -13,35 +13,15 @@
 
 CFluidSovereignDB* pFluidSovereignDB = NULL;
 
-bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (WithinFluidRange(txOut.GetFlag())) {
-            nOut = n;
-            return ParseScript(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidSovereignData(tx, *this, nOut)) {
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!ParseScript(fluidScript, *this)) {
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData)

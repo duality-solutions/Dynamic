@@ -205,6 +205,9 @@ std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
 template <typename T1>
 bool ParseScript(const CScript& scriptPubKey, T1& object);
 
+template <typename T1>
+bool ParseData(const CTransaction& tx, T1& entry, int& nOut);
+
 extern CFluid fluid;
 
 #endif // FLUID_PROTOCOL_H

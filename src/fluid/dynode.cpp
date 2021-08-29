@@ -13,35 +13,15 @@
 
 CFluidDynodeDB* pFluidDynodeDB = NULL;
 
-bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (WithinFluidRange(txOut.GetFlag())) {
-            nOut = n;
-            return ParseScript(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidDynodeData(tx, *this, nOut)) {
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidDynode::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!ParseScript(fluidScript, *this)) {
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidDynode::Serialize(std::vector<unsigned char>& vchData)
