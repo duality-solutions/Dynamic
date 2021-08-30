@@ -10,9 +10,9 @@
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
 #include "dynode-payments.h"
-#include "fluid/fluiddb.h"
-#include "fluid/fluidmining.h"
-#include "fluid/fluidmint.h"
+#include "fluid/db.h"
+#include "fluid/mining.h"
+#include "fluid/mint.h"
 #include "governance.h"
 #include "policy/policy.h"
 #include "pow.h"
@@ -287,7 +287,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
         if (areWeMinting) {
             mintAddress = fluidMint.GetDestinationAddress();
-            fluidIssuance = fluidMint.MintAmount;
+            fluidIssuance = fluidMint.GetReward();
             txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
             txNew.vout[0].nValue = blockReward;

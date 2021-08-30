@@ -1,10 +1,11 @@
 // Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
 
-#include "fluidsovereign.h"
+#include "fluid/sovereign.h"
 
 #include "core_io.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -12,69 +13,15 @@
 
 CFluidSovereignDB* pFluidSovereignDB = NULL;
 
-bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
-{
-    std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
-    std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
-    std::vector<std::string> splitString;
-    HexFunctions hexConvert;
-    hexConvert.ConvertToString(verificationWithoutOpCode);
-    SeparateString(verificationWithoutOpCode, splitString, false);
-    std::string messageTokenKey = splitString.at(0);
-    std::vector<std::string> vecSplitScript;
-    SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_SWAP_SOVEREIGN_ADDRESS") {
-        std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
-        entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
-        entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[0], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[1], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-        std::string strTimeStamp = vecSplitScript[5];
-        int64_t tokenTimeStamp;
-        if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-            entry.nTimeStamp = tokenTimeStamp;
-        }
-        return true;
-    }
-    return false;
-}
-
-bool GetFluidSovereignData(const CTransaction& tx, CFluidSovereign& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
-            nOut = n;
-            return GetFluidSovereignData(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidSovereign::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidSovereignData(tx, *this, nOut)) {
-        SetNull();
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidSovereign::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidSovereignData(fluidScript, *this)) {
-        SetNull();
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData)
@@ -87,7 +34,7 @@ void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData)
 std::vector<std::string> CFluidSovereign::SovereignAddressesStrings()
 {
     std::vector<std::string> vchAddressStrings;
-    for (const std::vector<unsigned char>& vchAddress : SovereignAddresses) {
+    for (const std::vector<unsigned char>& vchAddress : obj_sigs) {
         vchAddressStrings.push_back(StringFromCharVector(vchAddress));
     }
     return vchAddressStrings;
@@ -102,15 +49,12 @@ void CFluidSovereignDB::InitEmpty()
 {
     if (IsEmpty()) {
         LOCK(cs_fluid_sovereign);
-        CFluidParameters initSovereign;
-        std::vector<std::vector<unsigned char> > vchAddresses = initSovereign.InitialiseAddressCharVector();
         CFluidSovereign fluidSovereign;
-        for (const std::vector<unsigned char>& sovereignId : vchAddresses) {
-            fluidSovereign.SovereignAddresses.push_back(sovereignId);
+        for (const auto& pk : Params().FluidSignatureKeys()) {
+            fluidSovereign.obj_sigs.insert(
+              CharVectorFromString(CDynamicAddress(pk).ToString())
+            );
         }
-        fluidSovereign.FluidScript = CharVectorFromString("init sovereign");
-        fluidSovereign.nTimeStamp = 1;
-        fluidSovereign.nHeight = 1;
         if (!AddFluidSovereignEntry(fluidSovereign)) {
             LogPrintf("CFluidSovereignDB::InitEmpty add failed.\n");
         }
@@ -122,7 +66,7 @@ bool CFluidSovereignDB::AddFluidSovereignEntry(const CFluidSovereign& entry)
     bool writeState = false;
     {
         LOCK(cs_fluid_sovereign);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
     return writeState;
 }
@@ -140,7 +84,7 @@ bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight) {
+                if (entry.GetHeight() > returnEntry.GetHeight()) {
                     returnEntry = entry;
                 }
             }
@@ -194,13 +138,5 @@ bool CFluidSovereignDB::IsEmpty()
         }
         return false;
     }
-    return true;
-}
-
-bool CheckFluidSovereignDB()
-{
-    if (!pFluidSovereignDB)
-        return false;
-
     return true;
 }

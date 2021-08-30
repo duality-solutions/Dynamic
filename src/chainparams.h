@@ -96,6 +96,7 @@ public:
     const std::vector<std::string>& SporkAddresses() const { return vSporkAddresses; }
     int MinSporkKeys() const { return nMinSporkKeys; }
     uint64_t DifficultySwitchBlock() const { return nSwitchDifficultyBlock; }
+    std::set<CPubKey> FluidSignatureKeys() const { std::set<CPubKey> pkVch; for (auto& pk : fluidSignatureKeys) { pkVch.insert(CPubKey(ParseHex(pk))); } return pkVch; }
 
 protected:
     CChainParams() {}
@@ -130,6 +131,7 @@ protected:
     int64_t nTargetPosSpacing;
     int nFutureTimeDriftPoS;
     uint64_t nSwitchDifficultyBlock;
+    std::vector<std::string> fluidSignatureKeys;
 };
 
 /**

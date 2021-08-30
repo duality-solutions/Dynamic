@@ -20,10 +20,6 @@ extern CWallet* pwalletMain;
 //
 /////////////////////////////////////////////////////////////
 
-std::string SignatureDelimiter = " ";
-std::string PrimaryDelimiter = "@";
-std::string SubDelimiter = "$";
-
 void ScrubString(std::string& input, bool forInteger)
 {
     input.erase(std::remove(input.begin(), input.end(), '@'), input.end());
@@ -90,7 +86,7 @@ std::string GetRidOfScriptStatement(const std::string& input, const int& positio
 //
 /////////////////////////////////////////////////////////////
 
-bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
+bool VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
 {
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
@@ -111,7 +107,7 @@ bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
 #endif //ENABLE_WALLET
 }
 
-bool COperations::SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
+bool SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
 {
 #ifdef ENABLE_WALLET
     CHashWriter ss(SER_GETHASH, 0);
@@ -142,12 +138,29 @@ bool COperations::SignTokenMessage(const CDynamicAddress& address, std::string u
 #endif //ENABLE_WALLET
 }
 
-bool COperations::GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer)
+bool GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer)
 {
     if (!SignTokenMessage(signer, message, signedString, true))
         return false;
     else
-        ConvertToHex(signedString);
+        signedString = HexStr(signedString);
 
     return true;
+}
+
+/* Unsafe Parsing Variants */
+CAmount ParseFixedPoint(std::string str)
+{
+    CAmount val;
+    if (!ParseFixedPoint(str, 8, &val))
+        throw std::runtime_error("Invalid value");
+    return val;
+}
+
+CAmount ParseInt64(std::string str)
+{
+    CAmount val;
+    if (!ParseInt64(str, &val))
+        throw std::runtime_error("Invalid value");
+    return val;
 }

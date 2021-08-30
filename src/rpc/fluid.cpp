@@ -8,11 +8,12 @@
 #include "dynode-sync.h"
 #include "fluid/banaccount.h"
 #include "fluid/fluid.h"
-#include "fluid/fluiddb.h"
-#include "fluid/fluiddynode.h"
-#include "fluid/fluidmining.h"
-#include "fluid/fluidmint.h"
-#include "fluid/fluidsovereign.h"
+#include "fluid/db.h"
+#include "fluid/dynode.h"
+#include "fluid/mining.h"
+#include "fluid/mint.h"
+#include "fluid/sovereign.h"
+#include "fluid/script.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -38,46 +39,22 @@ extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, co
 struct DynodeCompareTimeStamp {
     bool operator()(const CFluidDynode& a, const CFluidDynode& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
 };
 
 struct MintCompareTimeStamp {
     bool operator()(const CFluidMint& a, const CFluidMint& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
 };
 
 struct MiningCompareTimeStamp {
     bool operator()(const CFluidMining& a, const CFluidMining& b)
     {
-    return (a.nTimeStamp < b.nTimeStamp);
+    return (a.GetTime() < b.GetTime());
     }
-};
-
-opcodetype getOpcodeFromString(std::string input)
-{
-    if (input == "OP_MINT")
-        return OP_MINT;
-    else if (input == "OP_REWARD_DYNODE")
-        return OP_REWARD_DYNODE;
-    else if (input == "OP_REWARD_MINING")
-        return OP_REWARD_MINING;
-    else if (input == "OP_SWAP_SOVEREIGN_ADDRESS")
-        return OP_SWAP_SOVEREIGN_ADDRESS;
-    else if (input == "OP_UPDATE_FEES")
-        return OP_UPDATE_FEES;
-    else if (input == "OP_FREEZE_ADDRESS")
-        return OP_FREEZE_ADDRESS;
-    else if (input == "OP_RELEASE_ADDRESS")
-        return OP_RELEASE_ADDRESS;
-    else if (input == "OP_BDAP_REVOKE")
-        return OP_BDAP_REVOKE;
-    else
-        return OP_RETURN;
-
-    return OP_RETURN;
 };
 
 UniValue maketoken(const JSONRPCRequest& request)
@@ -99,7 +76,7 @@ UniValue maketoken(const JSONRPCRequest& request)
     }
 
     result.pop_back();
-    fluid.ConvertToHex(result);
+    result = HexStr(result);
 
     return result;
 }
@@ -140,7 +117,7 @@ UniValue banaccountstoken(const JSONRPCRequest& request)
     }
 
     strResult.pop_back();
-    fluid.ConvertToHex(strResult);
+    strResult = HexStr(strResult);
     return strResult;
 }
 
@@ -196,7 +173,7 @@ UniValue burndynamic(const JSONRPCRequest& request)
     }
 
     std::string result = std::to_string(nAmount);
-    fluid.ConvertToHex(result);
+    result = HexStr(result);
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
     SendBurnTransaction(destroyScript, wtx, nAmount, scriptSendFrom);
@@ -225,7 +202,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
     CScript finalScript;
 
     EnsureWalletIsUnlocked();
-    opcodetype opcode = getOpcodeFromString(request.params[0].get_str());
+    opcodetype opcode = (opcodetype)TranslationTable(request.params[0].get_str());
 
     if (negatif == opcode)
         throw std::runtime_error("OP_CODE is either not a Fluid OP_CODE or is invalid");
@@ -241,7 +218,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE || opcode == OP_BDAP_REVOKE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
+        SendCustomTransaction(finalScript, wtx, FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
     } else {
         throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", request.params[0].get_str()));
@@ -267,10 +244,10 @@ UniValue signtoken(const JSONRPCRequest& request)
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
-    if (!fluid.VerifyAddressOwnership(address))
+    if (!VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.VerifyAddressOwnership(address))
+    if (!VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string r = request.params[1].get_str();
@@ -278,9 +255,9 @@ UniValue signtoken(const JSONRPCRequest& request)
     if (!IsHex(r))
         throw std::runtime_error("Hex isn't even valid! Cannot process ahead...");
 
-    fluid.ConvertToString(r);
+    r = stringFromVch(ParseHex(r));
 
-    if (!fluid.GenericSignMessage(r, result, address))
+    if (!GenericSignMessage(r, result, address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Message signing failed");
 
     return result;
@@ -311,7 +288,7 @@ UniValue consenttoken(const JSONRPCRequest& request)
     if (!IsSovereignAddress(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.VerifyAddressOwnership(address))
+    if (!VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string message;
@@ -375,11 +352,11 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(mintEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(mintEntry.GetTransactionScript())));
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
-            totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalMintedCoins = totalMintedCoins + mintEntry.GetReward();
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -395,10 +372,10 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.GetTransactionScript())));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -414,10 +391,10 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         int x = 1;
         for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
-            obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.FluidScript)));
+            obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.GetTransactionScript())));
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -501,22 +478,22 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mint"));
-            obj.push_back(Pair("amount", FormatMoney(mintEntry.MintAmount)));
-            obj.push_back(Pair("timestamp", mintEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", mintEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)mintEntry.nHeight));
-            obj.push_back(Pair("txid", mintEntry.txHash.GetHex()));
-            obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.DestinationAddress)));
+            obj.push_back(Pair("amount", FormatMoney(mintEntry.GetReward())));
+            obj.push_back(Pair("timestamp", mintEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", mintEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)mintEntry.GetHeight()));
+            obj.push_back(Pair("txid", mintEntry.GetTransactionHash().GetHex()));
+            obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.obj_address)));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : mintEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : mintEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
             }
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
-            totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalMintedCoins = totalMintedCoins + mintEntry.GetReward();
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -534,20 +511,20 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Dynode Reward Update"));
-            obj.push_back(Pair("amount", FormatMoney(dynEntry.DynodeReward)));
-            obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", dynEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)dynEntry.nHeight));
-            obj.push_back(Pair("txid", dynEntry.txHash.GetHex()));
+            obj.push_back(Pair("amount", FormatMoney(dynEntry.GetReward())));
+            obj.push_back(Pair("timestamp", dynEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", dynEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)dynEntry.GetHeight()));
+            obj.push_back(Pair("txid", dynEntry.GetTransactionHash().GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : dynEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -565,20 +542,20 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mining Reward Update"));
-            obj.push_back(Pair("amount", FormatMoney(miningEntry.MiningReward)));
-            obj.push_back(Pair("timestamp", miningEntry.nTimeStamp));
-            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", miningEntry.nTimeStamp)));
-            obj.push_back(Pair("block_height", (int)miningEntry.nHeight));
-            obj.push_back(Pair("txid", miningEntry.txHash.GetHex()));
+            obj.push_back(Pair("amount", FormatMoney(miningEntry.GetReward())));
+            obj.push_back(Pair("timestamp", miningEntry.GetTime()));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", miningEntry.GetTime())));
+            obj.push_back(Pair("block_height", (int)miningEntry.GetHeight()));
+            obj.push_back(Pair("txid", miningEntry.GetTransactionHash().GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : miningEntry.SovereignAddresses) {
+            for (const std::vector<unsigned char>& vchAddress : miningEntry.obj_sigs) {
                 std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
                 index++;
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
-            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+            totalFluidTxCost = totalFluidTxCost + FLUID_TRANSACTION_COST;
             x++;
             nTotal++;
         }
@@ -658,7 +635,7 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
     for (const CFluidSovereign& sovereignEntry : sovereignEntries) {
         int index = 1;
         UniValue oEntry(UniValue::VOBJ);
-        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.SovereignAddresses) {
+        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.obj_sigs) {
             std::string addLabel = "address_" + std::to_string(index);
             oEntry.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
             index++;
@@ -692,8 +669,7 @@ UniValue readfluidtoken(const JSONRPCRequest& request)
     std::string strFluidToken = request.params[0].get_str();
     if (IsHex(strFluidToken)) {
         bool fBanAccount = false;
-        HexFunctions fluidFunctions;
-        std::string strUnHexedFluidOpScript = fluidFunctions.HexToString(strFluidToken);
+        std::string strUnHexedFluidOpScript = stringFromVch(ParseHex(strFluidToken));
         std::vector<std::string> vecSplitScript;
         SeparateString(strUnHexedFluidOpScript, vecSplitScript, true);
         if (vecSplitScript.size() > 1) {

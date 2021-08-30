@@ -194,6 +194,12 @@ enum opcodetype {
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
     OP_BDAP_REVOKE = 0xc9,               // = BDAP delete using fluid protocol
+    OP_RESERVED_0001 = 0xca,
+    OP_RESERVED_0002 = 0xcb,
+    OP_RESERVED_0003 = 0xcc,
+    OP_RESERVED_0004 = 0xcd,
+    OP_RESERVED_0005 = 0xce,
+    OP_RESERVED_0006 = 0xcf,
 
     // BDAP directory access, user identity and certificate system
     OP_BDAP_NEW = 0x01,                  // = BDAP new entry
@@ -223,9 +229,6 @@ const char* GetOpName(opcodetype opcode);
 
 // Identification codes for Fluid and BDAP Transactions
 enum ProtocolCodes {
-    MINT_TX = 1,
-    DYNODE_MODFIY_TX = 2,
-    MINING_MODIFY_TX = 3,
     BDAP_NEW_TX = 4,
     BDAP_DELETE_TX = 5,
     BDAP_REVOKE_TX = 6,
@@ -675,25 +678,9 @@ public:
         return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
     }
 
-    bool IsProtocolInstruction(const ProtocolCodes& code) const
+    opcodetype GetFlag() const
     {
-        switch (code) {
-        case MINT_TX:
-            return (size() > 0 && *begin() == OP_MINT);
-            break;
-        case DYNODE_MODFIY_TX:
-            return (size() > 0 && *begin() == OP_REWARD_DYNODE);
-            break;
-        case MINING_MODIFY_TX:
-            return (size() > 0 && *begin() == OP_REWARD_MINING);
-            break;
-        case BDAP_REVOKE_TX:
-            return (size() > 0 && *begin() == OP_BDAP_REVOKE);
-            break;
-        default:
-            throw std::runtime_error("Protocol code is invalid!");
-        }
-        return false;
+        return size() > 0 ? static_cast<opcodetype>(*begin()) : OP_INVALIDOPCODE;
     }
 
     //TODO: (bdap) test if this is working

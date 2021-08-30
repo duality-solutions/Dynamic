@@ -24,7 +24,8 @@
 #include "core_io.h"
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
-#include "fluid/fluiddb.h"
+#include "fluid/db.h"
+#include "fluid/script.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"
@@ -4062,14 +4063,14 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 for (const auto& recipient : vecSend) {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
                     
-                    if (IsTransactionFluid(recipient.scriptPubKey)) {
+                    if (WithinFluidRange(recipient.scriptPubKey.GetFlag())) {
                         // Check if fluid transaction is already in the mempool
-                        if (fluid.CheckIfExistsInMemPool(mempool, recipient.scriptPubKey, strFailReason)) {
+                        if (fluid.CheckIfExistsInMemPool(mempool, recipient.scriptPubKey)) {
                             // fluid transaction is already in the mempool.  Invalid transaction.
                             return false;
                         }
                         // Check the validity of the fluid transaction's public script.
-                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, GetTime(), strFailReason)) {
+                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, GetTime())) {
                             return false;
                         }
                     }

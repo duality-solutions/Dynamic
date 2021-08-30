@@ -1,10 +1,11 @@
 // Copyright (c) 2019-2021 Duality Blockchain Solutions Developers
 
 
-#include "fluiddynode.h"
+#include "fluid/dynode.h"
 
 #include "core_io.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
+#include "fluid/script.h"
 #include "operations.h"
 #include "script/script.h"
 
@@ -12,77 +13,15 @@
 
 CFluidDynodeDB* pFluidDynodeDB = NULL;
 
-bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry)
-{
-    std::string fluidOperationString = ScriptToAsmStr(scriptPubKey);
-    std::string strOperationCode = GetRidOfScriptStatement(fluidOperationString, 0);
-    std::string verificationWithoutOpCode = GetRidOfScriptStatement(fluidOperationString);
-    std::vector<std::string> splitString;
-    HexFunctions hexConvert;
-    hexConvert.ConvertToString(verificationWithoutOpCode);
-    SeparateString(verificationWithoutOpCode, splitString, false);
-    std::string messageTokenKey = splitString.at(0);
-    std::vector<std::string> vecSplitScript;
-    SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_REWARD_DYNODE") {
-        std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
-        entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
-        std::string strAmount = vecSplitScript[0];
-        CAmount fluidAmount;
-        if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-            entry.DynodeReward = fluidAmount;
-        }
-        std::string strTimeStamp = vecSplitScript[1];
-        int64_t tokenTimeStamp;
-        if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-            entry.nTimeStamp = tokenTimeStamp;
-        }
-        entry.SovereignAddresses.clear();
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-        entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-
-        LogPrintf("GetFluidDynodeData: strAmount = %s, strTimeStamp = %d, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
-            strAmount, entry.nTimeStamp, StringFromCharVector(entry.SovereignAddresses[0]),
-            StringFromCharVector(entry.SovereignAddresses[1]), StringFromCharVector(entry.SovereignAddresses[2]));
-
-        return true;
-    }
-    return false;
-}
-
-bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut)
-{
-    int n = 0;
-    for (const CTxOut& txout : tx.vout) {
-        CScript txOut = txout.scriptPubKey;
-        if (IsTransactionFluid(txOut)) {
-            nOut = n;
-            return GetFluidDynodeData(txOut, entry);
-        }
-        n++;
-    }
-    return false;
-}
-
 bool CFluidDynode::UnserializeFromTx(const CTransaction& tx)
 {
     int nOut;
-    if (!GetFluidDynodeData(tx, *this, nOut)) {
-        SetNull();
-        return false;
-    }
-    return true;
+    return ParseData(tx, *this, nOut);
 }
 
 bool CFluidDynode::UnserializeFromScript(const CScript& fluidScript)
 {
-    if (!GetFluidDynodeData(fluidScript, *this)) {
-        SetNull();
-        return false;
-    }
-    return true;
+    return ParseScript(fluidScript, *this);
 }
 
 void CFluidDynode::Serialize(std::vector<unsigned char>& vchData)
@@ -101,7 +40,7 @@ bool CFluidDynodeDB::AddFluidDynodeEntry(const CFluidDynode& entry, const int op
     bool writeState = false;
     {
         LOCK(cs_fluid_dynode);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.GetTransactionScript()), entry) && Write(make_pair(std::string("txid"), entry.GetTransactionHash()), entry.GetTransactionScript());
     }
 
     return writeState;
@@ -123,7 +62,7 @@ bool CFluidDynodeDB::GetLastFluidDynodeRecord(CFluidDynode& returnEntry, const i
                 if (entry.IsNull()) {
                     return false;
                 }
-                if (entry.nHeight > returnEntry.nHeight && (int)(entry.nHeight + 1) < nHeight) {
+                if (entry.GetHeight() > returnEntry.GetHeight() && (int)(entry.GetHeight() + 1) < nHeight) {
                     returnEntry = entry;
                 }
             }
@@ -185,12 +124,4 @@ bool CFluidDynodeDB::RecordExists(const std::vector<unsigned char>& vchFluidScri
     LOCK(cs_fluid_dynode);
     CFluidDynode fluidDynode;
     return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidDynode);
-}
-
-bool CheckFluidDynodeDB()
-{
-    if (!pFluidDynodeDB)
-        return false;
-
-    return true;
 }

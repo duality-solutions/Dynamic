@@ -12,7 +12,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
-#include "fluid/fluiddb.h"
+#include "fluid/db.h"
 #include "init.h"
 #include "messagesigner.h"
 #include "netbase.h"
