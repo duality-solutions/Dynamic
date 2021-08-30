@@ -15,7 +15,6 @@
 #include "miner/miner.h"
 #include "net_processing.h"
 #include "pubkey.h"
-#include "random.h"
 #include "rpc/server.h"
 #include "rpc/register.h"
 #include "txdb.h"
@@ -44,7 +43,6 @@ extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
-        RandomInit();
         ECC_Start();
         ECC_Start_Stealth();
         SetupEnvironment();
