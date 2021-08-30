@@ -24,8 +24,8 @@ class CTxMemPool;
 struct CBlockTemplate;
 class CTransaction;
 
-/** Configuration Framework */
-class CFluidParameters
+/** Fluid Asset Management Framework */
+class CFluid : public COperations
 {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
@@ -35,18 +35,6 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN;    // Max minting amount per fluid transaction
 
-    std::vector<std::pair<std::string, CDynamicAddress> > InitialiseSovereignIdentities();
-
-    std::vector<std::string> InitialiseAddresses();
-    std::vector<std::vector<unsigned char> > InitialiseAddressCharVector();
-};
-
-std::vector<std::string> InitialiseAddresses();
-
-/** Fluid Asset Management Framework */
-class CFluid : public CFluidParameters, public COperations
-{
-public:
     void ReplaceFluidSovereigns(const CBlockHeader& blockHeader, std::vector<std::string>& fluidSovereigns);
 
     bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t& timeStamp, std::string& errorMessage, const bool fSkipTimeStampCheck = false);

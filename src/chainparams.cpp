@@ -236,6 +236,13 @@ public:
         vSporkAddresses = {"DDDax6fjzoCqHj9nwTgNdAQsucFBJUJ3Jk"};
         nMinSporkKeys = 1;
 
+        fluidSignatureKeys = {
+            "032f31a815c3bbb8c2386d6006542bb1367073013639161d5e406034203ab9178b",
+            "03d7f7b945571672b6d6cd06d0abde805a1578872e436cbd4d4624c74cc7c86aef",
+            "02dab261cd65669d09e83db22d16308f17e99c1c3fe25af2b5b6a105332ce60bbb",
+            "02e267ae5cc5f7ea05769dacc5c7d0fc61d7a4c0b9bb8a213e77663d8ce002da5e"
+        };
+
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
                 (0,         uint256S("0x00000e140b0c3028f898431890e9dea79ae6ca537ac9362c65b45325db712de2"))
@@ -392,6 +399,14 @@ public:
         vSporkAddresses = {"DLWYuC7SNhnqZeY87UMqJzVdMVyLzwebhE"}; // QVdXi1qyxxQwTuZ8h3Dh3YRdpMDBWv6oMs9dTmvJmGzQcnsKtdGm
         nMinSporkKeys = 1;
 
+        fluidSignatureKeys = {
+            "0246227f26c5a71881ba3312fd443db06b39bdb5f8b6d66cd82e3268f127ebe642",
+            "0330876a6d45b4b988bc13863ee99d6b8e96022a75979010b46f22ea1cc5551350",
+            "0359cedc78b59a750641d51c70a30b760b5a0da37ff84a850e7925138c191ab261",
+            "020506608829abecdb3a61b9ff64a65ea400f882f39dfb2dbb95a71d3b5e3c3434",
+            "03714874801166849c6dce7bf23b46dc36e05a3cfd06dd5edf038151ffd6c725c0"
+        };
+
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
             (0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))
@@ -507,6 +522,14 @@ public:
 
         vSporkAddresses = {"ygUqnUfyRnRfBUks3EBc937tgmYBwQYE2S"}; //private key: cT21Wm3oozS7HpP9K9g1SDxdgr2vw9TBPSTxjxeArLjYxGastsf9
         nMinSporkKeys = 1;
+
+        fluidSignatureKeys = {
+            "0246227f26c5a71881ba3312fd443db06b39bdb5f8b6d66cd82e3268f127ebe642",
+            "0330876a6d45b4b988bc13863ee99d6b8e96022a75979010b46f22ea1cc5551350",
+            "0359cedc78b59a750641d51c70a30b760b5a0da37ff84a850e7925138c191ab261",
+            "020506608829abecdb3a61b9ff64a65ea400f882f39dfb2dbb95a71d3b5e3c3434",
+            "03714874801166849c6dce7bf23b46dc36e05a3cfd06dd5edf038151ffd6c725c0"
+        };
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of(0, uint256S("0x000ab751d858e116043e741d097311f2382e600c219483cfda8f25c7f369cc2c"))};
@@ -655,6 +678,14 @@ public:
         // To import spork key (D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL): importprivkey QWUVh41RrhjhnF813U5XLU4S8qYjvDQ5L1n53jC7Qawr8bBCQfFh
         vSporkAddresses = {"D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL"};
         nMinSporkKeys = 1;
+
+        fluidSignatureKeys = {
+            "02f5e52b333f5a4b312785d63fabb86540649cdfa8d3e462e43eb1a77a58416129",
+            "02a20a6ab3830d007b9658be2dbf2117c8967c5cb98774e0f514f5ae21fe26c037",
+            "02edd019d81bc33c868540624561ced215d2b31681947cc1ea7c8ae0f882659d26",
+            "028386691a85811d91f314d01d17cea0d8afda1b82c7b5068310c720d87f6b6628",
+            "0327490dff2869b81f46cf7801b582b5ade6d2546b6d5a8818135f4b4f24eff245"
+        };
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of(0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))};

@@ -102,11 +102,11 @@ void CFluidSovereignDB::InitEmpty()
 {
     if (IsEmpty()) {
         LOCK(cs_fluid_sovereign);
-        CFluidParameters initSovereign;
-        std::vector<std::vector<unsigned char> > vchAddresses = initSovereign.InitialiseAddressCharVector();
         CFluidSovereign fluidSovereign;
-        for (const std::vector<unsigned char>& sovereignId : vchAddresses) {
-            fluidSovereign.SovereignAddresses.push_back(sovereignId);
+        for (const auto& pk : Params().FluidSignatureKeys()) {
+            fluidSovereign.SovereignAddresses.push_back(
+              CharVectorFromString(CDynamicAddress(pk).ToString())
+            );
         }
         fluidSovereign.FluidScript = CharVectorFromString("init sovereign");
         fluidSovereign.nTimeStamp = 1;
