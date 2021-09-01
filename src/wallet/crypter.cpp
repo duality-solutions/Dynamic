@@ -128,7 +128,7 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
 }
 
 
-static bool EncryptSecret(const CKeyingMaterial& vMasterKey, const CKeyingMaterial& vchPlaintext, const uint256& nIV, std::vector<unsigned char>& vchCiphertext)
+bool EncryptSecret(const CKeyingMaterial& vMasterKey, const CKeyingMaterial& vchPlaintext, const uint256& nIV, std::vector<unsigned char>& vchCiphertext)
 {
     CCrypter cKeyCrypter;
     std::vector<unsigned char> chIV(WALLET_CRYPTO_IV_SIZE);
@@ -246,7 +246,7 @@ static bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsi
     return key.VerifyPubKey(vchPubKey);
 }
 
-static bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsigned char>& vchCryptedSecret, const std::vector<unsigned char>& vchPubKey, CKeyEd25519& key)
+bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsigned char>& vchCryptedSecret, const std::vector<unsigned char>& vchPubKey, CKeyEd25519& key)
 {
     CKeyingMaterial vchSecret;
     uint256 hashPubKey = Hash(vchPubKey.begin(), vchPubKey.end());
@@ -383,36 +383,6 @@ bool CCryptoKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
     return true;
 }
 
-bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
-{
-    {
-        LOCK(cs_KeyStore);
-        if (!IsCrypted()) {
-            return CBasicKeyStore::AddDHTKey(key, pubkey);
-        }
-
-        if (IsLocked(true))
-            return false;
-
-        LogPrint("dht", "CCryptoKeyStore::AddDHTKey \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
-                    key.GetPubKeyString(), key.GetPrivKeyString(), key.GetPrivSeedString());
-
-        std::vector<unsigned char> vchDHTPrivSeed = key.GetPrivSeed();
-        std::vector<unsigned char> vchCryptedSecret;
-        CKeyingMaterial vchSecret(vchDHTPrivSeed.begin(), vchDHTPrivSeed.end());
-        if (!EncryptSecret(vMasterKey, vchSecret, key.GetHash(), vchCryptedSecret)) {
-            LogPrint("dht", "CCryptoKeyStore::AddDHTKey -- Error after EncryptSecret\n");
-            return false;
-        }
-
-        if (!AddCryptedDHTKey(key.GetPubKey(), vchCryptedSecret)) {
-            LogPrint("dht", "CCryptoKeyStore::AddDHTKey -- Error after AddCryptedDHTKey\n");
-            return false;
-        }
-    }
-    return true;
-}
-
 bool CCryptoKeyStore::AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
 {
     {
@@ -421,19 +391,6 @@ bool CCryptoKeyStore::AddCryptedKey(const CPubKey& vchPubKey, const std::vector<
             return false;
 
         mapCryptedKeys[vchPubKey.GetID()] = make_pair(vchPubKey, vchCryptedSecret);
-    }
-    return true;
-}
-
-bool CCryptoKeyStore::AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
-{
-    {
-        LOCK(cs_KeyStore);
-        if (!SetCrypted())
-            return false;
-        
-        CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-        mapCryptedDHTKeys[keyID] = make_pair(vchPubKey, vchCryptedSecret);
     }
     return true;
 }
@@ -448,24 +405,6 @@ bool CCryptoKeyStore::GetKey(const CKeyID& address, CKey& keyOut) const
         CryptedKeyMap::const_iterator mi = mapCryptedKeys.find(address);
         if (mi != mapCryptedKeys.end()) {
             const CPubKey& vchPubKey = (*mi).second.first;
-            const std::vector<unsigned char>& vchCryptedSecret = (*mi).second.second;
-            return DecryptKey(vMasterKey, vchCryptedSecret, vchPubKey, keyOut);
-        }
-    }
-    return false;
-}
-
-bool CCryptoKeyStore::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
-{
-    {
-        LOCK(cs_KeyStore);
-        if (!IsCrypted())
-            return CBasicKeyStore::GetDHTKey(address, keyOut);
-
-        CryptedDHTKeyMap::const_iterator mi = mapCryptedDHTKeys.find(address);
-        if (mi != mapCryptedDHTKeys.end())
-        {
-            const std::vector<unsigned char>& vchPubKey = (*mi).second.first;
             const std::vector<unsigned char>& vchCryptedSecret = (*mi).second.second;
             return DecryptKey(vMasterKey, vchCryptedSecret, vchPubKey, keyOut);
         }

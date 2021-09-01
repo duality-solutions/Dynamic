@@ -23,6 +23,7 @@
 #include "wallet/crypter.h"
 #include "wallet/wallet_ismine.h"
 #include "wallet/walletdb.h"
+#include "bdap/wallet/wallet.h"
 
 #include "privatesend.h"
 
@@ -145,41 +146,6 @@ public:
             READWRITE(nVersion);
         READWRITE(nTime);
         READWRITE(vchPubKey);
-        if (ser_action.ForRead()) {
-            try {
-                READWRITE(fInternal);
-            } catch (std::ios_base::failure&) {
-                /* flag as external address if we can't read the internal boolean
-                   (this will be the case for any wallet before the HD chain split version) */
-                fInternal = false;
-            }
-        } else {
-            READWRITE(fInternal);
-        }
-    }
-};
-
-/** An Ed key pool entry */
-class CEdKeyPool
-{
-public:
-    int64_t nTime;
-    std::vector<unsigned char> edPubKey;
-    bool fInternal; // for change outputs
-
-    CEdKeyPool();
-    CEdKeyPool(const std::vector<unsigned char>& edPubKeyIn, bool fInternalIn);
-
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action)
-    {
-        int nVersion = s.GetVersion();
-        if (!(s.GetType() & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(nTime);
-        READWRITE(edPubKey);
         if (ser_action.ForRead()) {
             try {
                 READWRITE(fInternal);
