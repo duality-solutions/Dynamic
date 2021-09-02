@@ -256,9 +256,6 @@ BOOST_AUTO_TEST_CASE(bdap_vgp_message_test1)
 
     //message values should match (original vs decrypted retrieved value)
     BOOST_CHECK(vchMessage == retrievedvchMessage);
-
-    std::cout << "Exit: bdap_vgp_message_tests\n";
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

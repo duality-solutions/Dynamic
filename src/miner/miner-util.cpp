@@ -272,7 +272,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
         }
 
-        CAmount blockReward = GetFluidMiningReward(nHeight);
+        CAmount blockReward = GetFluidMiningReward(nHeight, chainparams.GetConsensus());
         CDynamicAddress mintAddress;
         CAmount fluidIssuance = 0;
         CFluidMint fluidMint;

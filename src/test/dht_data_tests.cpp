@@ -45,8 +45,6 @@ BOOST_AUTO_TEST_CASE(dht_data_test1)
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     std::vector<unsigned char> vchValue = vchFromString("GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1"); //= vchFromValue(); //?????
 
-    std::cout << "Enter: dht_data_tests\n";
-
     vvchPubKeys.push_back(key.GetPubKeyBytes()); //add public keys for key1
     vvchPubKeys.push_back(key2.GetPubKeyBytes()); //add public keys for key2
 
@@ -63,9 +61,6 @@ BOOST_AUTO_TEST_CASE(dht_data_test1)
     BOOST_CHECK(DataRecord.Value() == getRecord.Value()); //compare value using key1 to original value
     BOOST_CHECK(DataRecord.Value() == getRecord2.Value()); //compare value using key2 to original value
     BOOST_CHECK((DataRecord.Value() == getRecord3.Value()) == false); //compare value using key3 to original value. expect this to be false
-
-    std::cout << "Exit: dht_data_tests\n";
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -272,7 +272,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
 
     // make sure it's not filled yet
     txoutDynodeRet = CTxOut();
-    CAmount dynodePayment = GetFluidDynodeReward(nBlockHeight);
+    CAmount dynodePayment = GetFluidDynodeReward(nBlockHeight, Params().GetConsensus());
 
     // split reward between miner ...
     txoutDynodeRet = CTxOut(dynodePayment, payee);
@@ -593,7 +593,7 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int
 
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
-    CAmount nDynodePayment = GetFluidDynodeReward(nHeight);
+    CAmount nDynodePayment = GetFluidDynodeReward(nHeight, Params().GetConsensus());
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 

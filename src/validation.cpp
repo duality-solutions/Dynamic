@@ -2923,9 +2923,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     // TODO: resync data (both ways?) and try to reprocess this block later.
     bool fDynodePaid = false;
 
-    if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
+    if (chainActive.Height() > chainparams.GetConsensus().nDynodePaymentsStartBlock) {
         fDynodePaid = true;
-    } else if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+    } else if (chainActive.Height() <= chainparams.GetConsensus().nDynodePaymentsStartBlock) {
         fDynodePaid = false;
     }
 
@@ -2934,10 +2934,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::string strError = "";
     {
         CBlockIndex* prevIndex = pindex->pprev;
-        CAmount newMiningReward = GetFluidMiningReward(pindex->nHeight);
+        CAmount newMiningReward = GetFluidMiningReward(pindex->nHeight, chainparams.GetConsensus());
         CAmount newDynodeReward = 0;
         if (fDynodePaid)
-            newDynodeReward = GetFluidDynodeReward(pindex->nHeight);
+            newDynodeReward = GetFluidDynodeReward(pindex->nHeight, chainparams.GetConsensus());
 
         CAmount newMintIssuance = 0;
         CDynamicAddress mintAddress;
@@ -4166,7 +4166,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     int nHeight = (pindexPrev->nHeight + 1);
     uint256 hash = block.GetHash();
 
-    if (hash == Params().GetConsensus().hashGenesisBlock)
+    if (hash == consensusParams.hashGenesisBlock)
         return true;
 
     if (block.nBits != GetNextWorkRequired(pindexPrev, block, consensusParams)) {
@@ -4224,7 +4224,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Co
     CDynamicAddress mintAddress;
     CAmount fluidIssuance;
 
-    if (fluid.GetMintingInstructions(pindexPrev, mintAddress, fluidIssuance)) {
+    if (fluid.GetMintingInstructions(pindexPrev, mintAddress, fluidIssuance, consensusParams)) {
         bool found = false;
 
         CScript script;

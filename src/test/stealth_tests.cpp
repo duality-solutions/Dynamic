@@ -142,7 +142,6 @@ BOOST_AUTO_TEST_CASE(stealth_test1)
     //cleanup
     delete pwalletMain2;
     pwalletMain2 = NULL;
-    std::cout << "Exit: stealth_test1\n";
     }
 } //stealth_test1
 
@@ -249,8 +248,6 @@ BOOST_AUTO_TEST_CASE(stealth_test1_negative)
     //cleanup
     delete pwalletMain2;
     pwalletMain2 = NULL;
-
-    std::cout << "Exit: stealth_test1_negative\n";
     }
 } //stealth_test1_negative
 
@@ -347,8 +344,6 @@ BOOST_AUTO_TEST_CASE(stealth_test2)
     //cleanup
     delete pwalletMain2;
     pwalletMain2 = NULL;
-
-    std::cout << "Exit: stealth_test2\n";
     }
 
 } //stealth_test2

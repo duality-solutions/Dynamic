@@ -530,8 +530,6 @@ BOOST_AUTO_TEST_CASE(certificate_test1)
 
         //test SCTList records good
         BOOST_CHECK(testCertificate.ValidateValues(strErrorMsg) == true);
-
-        std::cout << "Exit: certificate_test1\n";
     }
 } //certificate_test1
 
@@ -609,10 +607,6 @@ BOOST_AUTO_TEST_CASE(certificate_test2)
 
         //Check Issuer Signature using Unknown BAD
         BOOST_CHECK(!(testCertificate.CheckIssuerSignature(UnknownPublicKey) == true));
-
-
-        std::cout << "Exit: certificate_test2\n";
-
     }
 } //certificate_test2
 

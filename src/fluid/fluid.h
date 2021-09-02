@@ -63,7 +63,7 @@ public:
     bool ParseMintKey(const int64_t& nTime, CDynamicAddress& destination, CAmount& coinAmount, const std::string& uniqueIdentifier, const bool txCheckPurpose = false);
     bool ProcessFluidToken(const std::string& consentToken, std::vector<std::string>& ptrs, const int& strVecNo);
 
-    bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount);
+    bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount, const Consensus::Params& consensusParams);
     bool ValidationProcesses(CValidationState& state, const CScript& txOut, const CAmount& txValue);
 
     bool CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader);
@@ -77,8 +77,8 @@ public:
 };
 
 /** Standard Reward Payment Determination Functions */
-CAmount GetStandardPoWBlockPayment(const int& nHeight);
-CAmount GetStandardDynodePayment(const int& nHeight);
+CAmount GetStandardPoWBlockPayment(const int& nHeight, const Consensus::Params& consensusParams);
+CAmount GetStandardDynodePayment(const int& nHeight, const Consensus::Params& consensusParams);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount& nExpectedBlockValue, bool fDynodePaid);
 bool IsTransactionFluid(const CScript& txOut);
@@ -88,7 +88,7 @@ int GetFluidOpCode(const CScript& fluidScript);
 std::vector<unsigned char> CharVectorFromString(const std::string& str);
 std::string StringFromCharVector(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> FluidScriptToCharVector(const CScript& fluidScript);
-bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block);
+bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block, const Consensus::Params& consensusParams);
 
 extern CFluid fluid;
 

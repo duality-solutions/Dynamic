@@ -38,9 +38,6 @@ BOOST_AUTO_TEST_CASE(bdap_link_test1)
     CKeyID keyID = pubKey.GetID();
     CDynamicAddress address = CDynamicAddress(keyID);
     BOOST_CHECK(SignatureProofIsValid(address, strTestFQDN, vchSignature) == true);
-
-    std::cout << "Exit: bdap_link_test1\n";
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()
