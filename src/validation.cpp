@@ -4343,6 +4343,10 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
     if (!AcceptBlockHeader(block, state, chainparams, &pindex))
         return false;
 
+    if (pindex->nHeight > 5000) {
+        LogPrintf("RandomX equivalent hash: %s", block.GetHash(true).ToString());
+    }
+
     // Try to process all requested blocks that we don't have, but only
     // process an unrequested block if it's new and has enough work to
     // advance our tip, and isn't too many blocks ahead.

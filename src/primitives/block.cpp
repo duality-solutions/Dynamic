@@ -13,6 +13,7 @@
 #include "tinyformat.h"
 #include "validation.h"
 #include "utilstrencodings.h"
+#include "proof/hash.cpp"
 
 uint64_t GetHeight(const uint256& block_hash)
 {
@@ -34,8 +35,17 @@ bool ReadBlock(const uint64_t& nHeight, CBlock& block)
     return true;
 }
 
-uint256 CBlockHeader::GetHash() const
+uint256 CBlockHeader::GetHash(bool hash_override) const
 {
+    if (chainActive.Height() > std::numeric_limits<uint64_t>::max() || hash_override) {
+        uint64_t nHeight = GetHeight(hashPrevBlock);
+        CBlock epoch_block;
+        while (nHeight % 2048 != 0) {
+            nHeight--;
+        }
+        assert(ReadBlock(nHeight, epoch_block));
+        return RXHashFunction(BEGIN(nVersion), END(nNonce), epoch_block.GetHash().begin(), epoch_block.GetHash().end());
+    }
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }
 
