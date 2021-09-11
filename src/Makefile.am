@@ -115,6 +115,7 @@ DYNAMIC_CORE_H = \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
+  crypto/randomx.h \
   dbwrapper.h \
   dht/datachunk.h \
   dht/dataheader.h \
@@ -280,6 +281,7 @@ libdynamic_server_a_SOURCES = \
   bdap/utils.cpp \
   bdap/vgpmessage.cpp \
   bdap/x509certificate.cpp \
+  crypto/randomx.cpp \
   dbwrapper.cpp \
   dht/datachunk.cpp \
   dht/dataheader.cpp \
