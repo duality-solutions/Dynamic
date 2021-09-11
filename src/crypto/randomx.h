@@ -50,17 +50,35 @@ public:
     {
         LOCK(cs);
         cache.insert({height, hash});
-        return Update(phrase, *this);
+        bool result = Update(phrase, *this);
+        std::cout << "AddEpoch(): " << std::to_string(height)
+                  << " " << hash.ToString()
+                  << result ? std::to_string(0) : std::to_string(1)
+                  << std::endl;
+        return result;
     }
 
     bool RemoveEpoch(int64_t height, uint256 hash)
     {
         LOCK(cs);
         cache.erase(height);
-        return Update(phrase, *this);
+        bool result = Update(phrase, *this);
+        std::cout << "RemoveEpoch(): " << std::to_string(height)
+                  << " " << hash.ToString()
+                  << result ? std::to_string(0) : std::to_string(1)
+                  << std::endl;
+        return result;
     }
 
     uint256 GetClosestEpoch(uint256 hash) const
+    {
+        uint256 h = GetClosestEpoch_(hash);
+        std::cout << "GetClosestEpoch(): "
+                  << h.ToString() << std::endl;
+        return h;
+    }
+
+    uint256 GetClosestEpoch_(uint256 hash) const
     {
         LOCK(cs);
         int64_t height = GetHeight(hash);
