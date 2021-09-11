@@ -29,19 +29,30 @@ public:
     RXBuilder(const T1 pbegin, const T1 pend, bool mining = false) {
         flags = randomx_get_flags();
 
-        cache = randomx_alloc_cache(flags);
+        cache = randomx_alloc_cache(flags | RANDOMX_FLAG_LARGE_PAGES);
+        if (cache == nullptr) {
+            cache = randomx_alloc_cache(flags);
+        }
         assert (cache != nullptr);
         randomx_init_cache(cache, pbegin, pend - pbegin);
 
-        dataset = randomx_alloc_dataset(flags);
-        dsic = randomx_dataset_item_count();
+        dataset = randomx_alloc_dataset(flags | RANDOMX_FLAG_LARGE_PAGES);
+        if (dataset == nullptr) {
+            dataset = randomx_alloc_dataset(flags);
+        }
         assert (dataset != nullptr);
 
         randomx_init_dataset(dataset, cache, 0, dsic / 2);
         randomx_init_dataset(dataset, cache, dsic / 2, dsic - dsic / 2);
         randomx_release_cache(cache);
 
-        vm = randomx_create_vm(flags, cache, dataset);
+        flags |= mining ? RANDOMX_FLAG_FULL_MEM : (randomx_flags)0;
+        flags |= flags & RANDOMX_FLAG_JIT && !mining ? RANDOMX_FLAG_SECURE : (randomx_flags)0;
+
+        vm = randomx_create_vm(flags | RANDOMX_FLAG_LARGE_PAGES, cache, dataset);
+        if (vm == nullptr) {
+            vm = randomx_create_vm(flags, cache, dataset);
+        }
         assert(vm != nullptr);
     }
 
