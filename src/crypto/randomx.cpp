@@ -32,15 +32,15 @@ public:
         cache = randomx_alloc_cache(flags | RANDOMX_FLAG_LARGE_PAGES);
         if (cache == nullptr) {
             cache = randomx_alloc_cache(flags);
+            assert (cache != nullptr);
         }
-        assert (cache != nullptr);
         randomx_init_cache(cache, pbegin, pend - pbegin);
 
         dataset = randomx_alloc_dataset(flags | RANDOMX_FLAG_LARGE_PAGES);
         if (dataset == nullptr) {
             dataset = randomx_alloc_dataset(flags);
+            assert (dataset != nullptr);
         }
-        assert (dataset != nullptr);
 
         randomx_init_dataset(dataset, cache, 0, dsic / 2);
         randomx_init_dataset(dataset, cache, dsic / 2, dsic - dsic / 2);
@@ -52,8 +52,8 @@ public:
         vm = randomx_create_vm(flags | RANDOMX_FLAG_LARGE_PAGES, cache, dataset);
         if (vm == nullptr) {
             vm = randomx_create_vm(flags, cache, dataset);
+            assert(vm != nullptr);
         }
-        assert(vm != nullptr);
     }
 
     template<typename T1>
