@@ -17,9 +17,7 @@ uint256 CBlockHeader::GetHash(bool hash_override) const
 {
     if (chainActive.Height() > std::numeric_limits<uint64_t>::max() || hash_override) {
         uint256 k = epoch_cache->GetClosestEpoch(hashPrevBlock);
-        return RXHashFunction(BEGIN(nVersion), END(nNonce),
-        reinterpret_cast<const char *>(k.begin()),
-        reinterpret_cast<const char *>(k.end()));
+        return RXHashFunction(BEGIN(nVersion), END(nNonce), k.begin(), k.end());
     }
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }

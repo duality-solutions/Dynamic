@@ -53,7 +53,7 @@ public:
         bool result = Update(phrase, *this);
         std::cout << "AddEpoch(): " << std::to_string(height)
                   << " " << hash.ToString()
-                  << result ? std::to_string(0) : std::to_string(1)
+                  << (result ? std::to_string(0) : std::to_string(1))
                   << std::endl;
         return result;
     }
@@ -65,7 +65,7 @@ public:
         bool result = Update(phrase, *this);
         std::cout << "RemoveEpoch(): " << std::to_string(height)
                   << " " << hash.ToString()
-                  << result ? std::to_string(0) : std::to_string(1)
+                  << (result ? std::to_string(0) : std::to_string(1))
                   << std::endl;
         return result;
     }

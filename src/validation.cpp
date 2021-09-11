@@ -2343,10 +2343,6 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         return DISCONNECT_FAILED;
     }
 
-    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
-        epoch_cache->RemoveEpoch(pindex->nHeight, block.GetHash());
-    }
-
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
@@ -2541,6 +2537,9 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         }
     }
 
+    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
+        epoch_cache->RemoveEpoch(pindex->nHeight, pindex->GetBlockHash());
+    }
 
     // move best block pointer to prevout block
     view.SetBestBlock(pindex->pprev->GetBlockHash());
@@ -2775,10 +2774,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
-
-    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
-        epoch_cache->AddEpoch(pindex->nHeight, block.GetHash());
-    }
 
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
@@ -3035,6 +3030,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         }
     }
     // END FLUID
+
+    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
+        epoch_cache->AddEpoch(pindex->nHeight, pindex->GetBlockHash());
+    }
 
     if (!control.Wait())
         return state.DoS(100, false);
