@@ -12,6 +12,8 @@
 #include <thread>
 #include <randomx.h>
 
+#include <boost/thread.hpp>
+
 namespace RandomX
 {
 class RXBuilder {
@@ -42,8 +44,21 @@ public:
             assert (dataset != nullptr);
         }
 
-        randomx_init_dataset(dataset, cache, 0, dsic / 2);
-        randomx_init_dataset(dataset, cache, dsic / 2, dsic - dsic / 2);
+        if (mining) {
+            static uint32_t threads = boost::thread::hardware_concurrency() / 2;
+            static boost::thread_group* dsi_threads = new boost::thread_group();
+            for (int i = 0; i < threads; i++) {
+                dsi_threads->create_thread([this]()
+                    {
+                        randomx_init_dataset(dataset, cache, dsic / (threads / 2), dsic / threads);
+                    }
+                );
+            }
+            dsi_threads->join_all();
+        } else {
+            randomx_init_dataset(dataset, cache, 0, dsic / 2);
+            randomx_init_dataset(dataset, cache, dsic / 2, dsic - dsic / 2);
+        }
         randomx_release_cache(cache);
 
         flags |= mining ? RANDOMX_FLAG_FULL_MEM : (randomx_flags)0;
