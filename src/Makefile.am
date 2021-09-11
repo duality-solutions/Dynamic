@@ -22,6 +22,8 @@ LIBDYNAMICQT=qt/libdynamicqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
 
+RANDOMX_LIBS=-lrandomx
+
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
@@ -563,7 +565,7 @@ if ENABLE_WALLET
 dynamicd_LDADD += libdynamic_wallet.a
 endif
 
-dynamicd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+dynamicd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(RANDOMX_LIBS)
 
 # dynamic-cli binary #
 dynamic_cli_SOURCES = dynamic-cli.cpp
@@ -581,7 +583,7 @@ dynamic_cli_LDADD = \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO)
 
-dynamic_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+dynamic_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(RANDOMX_LIBS)
 #
 
 # dynamic-tx binary #
@@ -595,16 +597,20 @@ dynamic_tx_SOURCES += dynamic-tx-res.rc
 endif
 
 dynamic_tx_LDADD = \
-  $(LIBUNIVALUE) \
+  $(LIBDYNAMIC_SERVER) \
   $(LIBDYNAMIC_COMMON) \
+  $(LIBUNIVALUE) \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CONSENSUS) \
   $(LIBDYNAMIC_CRYPTO) \
   $(LIBVGP) \
-  $(LIBSECP256K1)  \
+  $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
+  $(LIBMEMENV) \
+  $(LIBSECP256K1) \
   $(LIBTORRENT)
 
-dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(RANDOMX_LIBS)
 #
 
 # dynamicconsensus library #
