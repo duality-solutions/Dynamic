@@ -24,6 +24,7 @@
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/linkmanager.h"
+#include "crypto/randomx.h"
 #include "dht/ed25519.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
@@ -377,6 +378,8 @@ void PrepareShutdown()
         // LibTorrent DHT Netowrk Services
         //delete pMutableDataDB;
         //pMutableDataDB = NULL;
+        delete epoch_cache;
+        epoch_cache = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1746,6 +1749,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
                 //delete pMutableDataDB;
+                delete epoch_cache;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1767,6 +1771,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
                 //pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
+                epoch_cache = new RXEpochCache(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);

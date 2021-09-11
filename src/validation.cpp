@@ -24,6 +24,7 @@
 #include "consensus/merkle.h"
 #include "consensus/params.h"
 #include "consensus/validation.h"
+#include "crypto/randomx.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
@@ -2342,6 +2343,10 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         return DISCONNECT_FAILED;
     }
 
+    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
+        epoch_cache->RemoveEpoch(pindex->nHeight, block.GetHash());
+    }
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
@@ -2770,6 +2775,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
+
+    if (pindex->nHeight % epoch_cache->GetPeriod() == 0) {
+        epoch_cache->AddEpoch(pindex->nHeight, block.GetHash());
+    }
 
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];

@@ -7,46 +7,19 @@
 
 #include "crypto/common.h"
 
-#include "chain.h"
-#include "chainparams.h"
 #include "hash.h"
 #include "tinyformat.h"
 #include "validation.h"
 #include "utilstrencodings.h"
 #include "crypto/randomx.h"
 
-uint64_t GetHeight(const uint256& block_hash)
-{
-    CBlockIndex* pblockindex = mapBlockIndex[block_hash];
-    assert(pblockindex);
-    return pblockindex->nHeight;
-}
-
-bool ReadBlock(const uint64_t& nHeight, CBlock& block)
-{
-    CBlockIndex* pblockindex = chainActive[nHeight];
-
-    if (!(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
-        return error("%s: invalid block index %d", __func__, nHeight);
-
-    if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
-        return error("%s: block not found, expected index: %x", __func__, nHeight);
-
-    return true;
-}
-
 uint256 CBlockHeader::GetHash(bool hash_override) const
 {
     if (chainActive.Height() > std::numeric_limits<uint64_t>::max() || hash_override) {
-        uint64_t nHeight = GetHeight(hashPrevBlock);
-        CBlock epoch_block;
-        while (nHeight % 2048 != 0) {
-            nHeight--;
-        }
-        assert(ReadBlock(nHeight, epoch_block));
+        uint256 k = epoch_cache->GetClosestEpoch(hashPrevBlock);
         return RXHashFunction(BEGIN(nVersion), END(nNonce),
-        reinterpret_cast<const char *>(epoch_block.GetHash().begin()),
-        reinterpret_cast<const char *>(epoch_block.GetHash().end()));
+        reinterpret_cast<const char *>(k.begin()),
+        reinterpret_cast<const char *>(k.end()));
     }
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }

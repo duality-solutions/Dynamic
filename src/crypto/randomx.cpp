@@ -4,13 +4,26 @@
 
 #include <crypto/randomx.h>
 
+#include "chain.h"
+#include "chainparams.h"
+#include "dbwrapper.h"
 #include "sync.h"
 #include "primitives/block.h"
+#include "validation.h"
 #include "streams.h"
 #include "utilstrencodings.h"
 
 #include <thread>
 #include <randomx.h>
+
+RXEpochCache* epoch_cache;
+
+uint64_t GetHeight(const uint256& block_hash)
+{
+    CBlockIndex* pblockindex = mapBlockIndex[block_hash];
+    assert(pblockindex);
+    return pblockindex->nHeight;
+}
 
 namespace RandomX
 {
