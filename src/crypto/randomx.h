@@ -46,7 +46,7 @@ public:
         READWRITE(activation_wait);
     }
 
-    bool AddEpoch(int64_t height, uint256 hash)
+    bool AddEpoch(const int64_t& height, const uint256& hash)
     {
         LOCK(cs);
         cache.insert({height, hash});
@@ -58,7 +58,7 @@ public:
         return result;
     }
 
-    bool RemoveEpoch(int64_t height, uint256 hash)
+    bool RemoveEpoch(const int64_t& height, const uint256& hash)
     {
         LOCK(cs);
         cache.erase(height);
@@ -70,7 +70,7 @@ public:
         return result;
     }
 
-    uint256 GetClosestEpoch(uint256 hash) const
+    uint256 GetClosestEpoch(const uint256& hash) const
     {
         uint256 h = GetClosestEpoch_(hash);
         std::cout << "GetClosestEpoch(): "
@@ -78,7 +78,7 @@ public:
         return h;
     }
 
-    uint256 GetClosestEpoch_(uint256 hash) const
+    uint256 GetClosestEpoch_(const uint256& hash) const
     {
         LOCK(cs);
         int64_t height = GetHeight(hash);
