@@ -29,6 +29,8 @@ uint64_t GetHeight(const uint256& block_hash)
 
 namespace RandomX
 {
+boost::thread_group* dsi_threads = new boost::thread_group();
+
 class RXBuilder {
 private:
     uint32_t dsic;
@@ -42,6 +44,8 @@ private:
 public:
     template<typename T1>
     RXBuilder(const T1 pbegin, const T1 pend, bool mining = false) {
+        const uint32_t dsi_threadcount = boost::thread::hardware_concurrency() / 2;
+
         flags = randomx_get_flags();
 
         cache = randomx_alloc_cache(flags | RANDOMX_FLAG_LARGE_PAGES);
@@ -52,18 +56,17 @@ public:
         randomx_init_cache(cache, pbegin, pend - pbegin);
 
         dataset = randomx_alloc_dataset(flags | RANDOMX_FLAG_LARGE_PAGES);
+        dsic = randomx_dataset_item_count();
         if (dataset == nullptr) {
             dataset = randomx_alloc_dataset(flags);
             assert (dataset != nullptr);
         }
 
         if (mining) {
-            static uint32_t threads = boost::thread::hardware_concurrency() / 2;
-            static boost::thread_group* dsi_threads = new boost::thread_group();
-            for (int i = 0; i < threads; i++) {
-                dsi_threads->create_thread([this]()
+            for (int i = 0; i < dsi_threadcount; i++) {
+                dsi_threads->create_thread([this, i, dsi_threadcount]()
                     {
-                        randomx_init_dataset(dataset, cache, dsic / (threads / 2), dsic / threads);
+                        randomx_init_dataset(dataset, cache, (dsic / dsi_threadcount) * i, dsic / dsi_threadcount);
                     }
                 );
             }
