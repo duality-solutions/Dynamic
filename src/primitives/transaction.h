@@ -222,6 +222,7 @@ public:
     bool IsData() const;
     bool GetBDAPOpCodes(int& opCode1, int& opCode2) const;
     bool GetBDAPOpCodes(int& opCode1, int& opCode2, std::vector<std::vector<unsigned char>>& vvch) const;
+    bool IsFluid() const;
 
     std::string ToString() const;
 };

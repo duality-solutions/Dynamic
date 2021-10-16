@@ -88,6 +88,11 @@ bool CTxOut::GetBDAPOpCodes(int& opCode1, int& opCode2, std::vector<std::vector<
     return DecodeBDAPScript(scriptPubKey, opCode1, opCode2, vvch);
 }
 
+bool CTxOut::IsFluid() const
+{
+    return scriptPubKey.IsFluid();
+}
+
 bool CTxOut::IsData() const
 {
     opcodetype opcode;
