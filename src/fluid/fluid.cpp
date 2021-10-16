@@ -28,8 +28,7 @@ extern CWallet* pwalletMain;
 
 bool IsTransactionFluid(const CScript& txOut)
 {
-    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX) || 
-                txOut.IsProtocolInstruction(BDAP_REVOKE_TX));
+    return txOut.IsFluid();
 }
 
 bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)

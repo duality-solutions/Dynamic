@@ -751,6 +751,12 @@ public:
         return false;
     }
 
+    bool IsFluid() const
+    {
+        return (IsProtocolInstruction(MINT_TX) || IsProtocolInstruction(DYNODE_MODFIY_TX) || IsProtocolInstruction(MINING_MODIFY_TX) || 
+                    IsProtocolInstruction(BDAP_REVOKE_TX));
+    }
+
     void clear()
     {
         // The default std::vector::clear() does not release memory.
