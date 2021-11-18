@@ -602,28 +602,29 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int
             nMaxSignatures = payee.GetVoteCount();
         }
     }
-
+    LogPrintf("CDynodeBlockPayees::%s nHeight %d, nMaxSignatures = %d\n", __func__, nHeight, nMaxSignatures);
     // if we don't have at least DNPAYMENTS_SIGNATURES_REQUIRED signatures on a payee, approve whichever is the longest chain
     if (nMaxSignatures < DNPAYMENTS_SIGNATURES_REQUIRED)
         return true;
 
     for (const auto& payee : vecPayees) {
+        CTxDestination address1;
+        ExtractDestination(payee.GetPayee(), address1);
+        CDynamicAddress address2(address1);
+        LogPrintf("CDynodeBlockPayees::%s nHeight = %d, payee.GetVoteCount() = %d address %s\n", __func__, nHeight, payee.GetVoteCount(), address2.ToString());
         if (payee.GetVoteCount() >= DNPAYMENTS_SIGNATURES_REQUIRED) {
             for (const auto& txout : txNew.vout) {
                 if (payee.GetPayee() == txout.scriptPubKey && nDynodePayment == txout.nValue) {
-                    LogPrint("dnpayments", "CDynodeBlockPayees::IsTransactionValid -- Found required payment\n");
+                    LogPrintf("CDynodeBlockPayees::IsTransactionValid -- Found (nHeight = %d) required payment address = %s, votes = %d\n", 
+                        nHeight, address2.ToString(), payee.GetVoteCount());
                     return true;
                 }
             }
 
-            CTxDestination address1;
-            ExtractDestination(payee.GetPayee(), address1);
-            CDynamicAddress address2(address1);
-
             if (strPayeesPossible == "") {
-                strPayeesPossible = address2.ToString();
+                strPayeesPossible = strprintf("%s:%d", address2.ToString(), payee.GetVoteCount());
             } else {
-                strPayeesPossible += "," + address2.ToString();
+                strPayeesPossible += "," + strprintf("%s:%d", address2.ToString(), payee.GetVoteCount());
             }
         }
     }
