@@ -396,4 +396,15 @@ inline uint256 hash_Argon2d(const T1 pbegin, const T1 pend, const unsigned int& 
     return hashResult;
 }
 
+template<typename T1>
+inline uint256 HashBlake2b_256(const T1 pbegin, const T1 pend)
+{
+    static unsigned char pblank[1];
+    uint256 hash1;
+    blake2b_state S[1];
+    blake2b_init( S, OUTPUT_BYTES );
+    blake2b_update( S, (pbegin == pend ? pblank : (unsigned char*)&pbegin[0]), (pend - pbegin) * sizeof(pbegin[0]) );
+    blake2b_final( S, (unsigned char*)&hash1, OUTPUT_BYTES );
+    return hash1;
+}
 #endif // DYNAMIC_HASH_H
