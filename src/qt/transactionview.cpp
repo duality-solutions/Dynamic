@@ -121,6 +121,7 @@ TransactionView::TransactionView(const PlatformStyle* platformStyle, QWidget* pa
                                         TransactionFilterProxy::TYPE(TransactionRecord::RevokeDomainGroup) |
                                         TransactionFilterProxy::TYPE(TransactionRecord::LinkRequest) |
                                         TransactionFilterProxy::TYPE(TransactionRecord::LinkAccept));
+    typeWidget->addItem(tr("Swap"), TransactionFilterProxy::TYPE(TransactionRecord::Swap));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
     typeWidget->setCurrentIndex(settings.value("transactionType").toInt());
 

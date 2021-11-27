@@ -106,7 +106,8 @@ public:
         NewAudit,
         NewCertificate,
         ApproveCertificate,
-        ApproveRootCertificate
+        ApproveRootCertificate,
+        Swap
     };
 
     /** Number of confirmation recommended for accepting a transaction */

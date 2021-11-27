@@ -399,6 +399,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("PrivateSend Create Denominations");
     case TransactionRecord::PrivateSend:
         return tr("PrivateSend");
+    case TransactionRecord::Swap:
+        return tr("Swap");
 
     default:
         return QString();
@@ -505,6 +507,8 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
         return tr("Certificate Approved Entry");
     case TransactionRecord::ApproveRootCertificate:
         return tr("Certificate Root Entry");
+    case TransactionRecord::Swap:
+        return QString::fromStdString(wtx->address);
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;

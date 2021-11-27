@@ -262,6 +262,10 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet* 
                             }
                         }
                     }
+                } else if (txout.scriptPubKey.IsUnspendable()) {
+                    // ToDo: Parse Swap address to show in UI
+                    sub.type = TransactionRecord::Swap;
+                    sub.address = "OP_RETURN Data Burn";
                 }
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     sub.type = TransactionRecord::Fluid;
