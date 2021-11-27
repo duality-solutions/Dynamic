@@ -976,6 +976,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
+        if (txout.IsData() && tx.nVersion != BDAP_TX_VERSION) {
+            std::vector<unsigned char> vchData;
+            if (txout.GetData(vchData))
+                LogPrintf("%s -- Swap transaction %s\n", __func__, EncodeBase58(vchData));
+        }
     }
     // Don't relay BDAP transaction until spork is activated
     if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))

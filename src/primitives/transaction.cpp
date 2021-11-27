@@ -101,6 +101,17 @@ bool CTxOut::IsData() const
     return false;
 }
 
+bool CTxOut::GetData(std::vector<unsigned char>& vchData) const
+{
+    if (!IsData())
+        return false;
+
+    if (GetOpReturnData(scriptPubKey, vchData))
+        return true;
+
+    return false;
+}
+
 std::string CTxOut::ToString() const
 {
     return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s, IsBDAP=%s, IsData=%s)", nValue / COIN, nValue % COIN

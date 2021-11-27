@@ -771,5 +771,6 @@ public:
 bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
 bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);
+bool GetOpReturnData(const CScript& script, std::vector<unsigned char>& vchRet);
 
 #endif // DYNAMIC_SCRIPT_SCRIPT_H
