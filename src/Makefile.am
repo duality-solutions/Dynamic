@@ -350,6 +350,7 @@ libdynamic_server_a_SOURCES = \
   rpc/rawbdap.cpp \
   rpc/rawtransaction.cpp \
   rpc/server.cpp \
+  rpc/swap.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   spork.cpp \
