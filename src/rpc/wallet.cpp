@@ -722,6 +722,51 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     delete ccCoins;
 }
 
+void SendSwapTransaction(const CScript& swapScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& scriptSendFrom)
+{
+
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount");
+
+    if (nValue > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    LogPrintf("%s - Script public key to be sent over to the swap transaction processing: %s\n", __func__, ScriptToAsmStr(swapScript));
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosRet = -1;
+    CRecipient recipient = {swapScript, nValue, false};
+    vecSend.push_back(recipient);
+    CCoinControl* ccCoins = new CCoinControl;
+    if (!scriptSendFrom.empty()) {
+        if (!GetCoinControl(scriptSendFrom, ccCoins)) {
+            strError = strprintf("Error: GetCoinControl failed");
+            delete ccCoins;
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+    }
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strError, ccCoins, true, ALL_COINS, false, false, true)) {
+        if (nValue + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        delete ccCoins;
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        delete ccCoins;
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    delete ccCoins;
+}
+
 UniValue sendtoaddress(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))

@@ -11,6 +11,8 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpc/server.h"
+#include "swap/swapdata.h"
+#include "swap/swapdb.h"
 #include "timedata.h"
 #include "uint256.h"
 #include "util.h"
@@ -25,7 +27,7 @@
 #include <cmath>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
+extern void SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
 
 // todo: move to seperate file
 UniValue swapdynamic(const JSONRPCRequest& request)
@@ -91,31 +93,57 @@ UniValue swapdynamic(const JSONRPCRequest& request)
         oResult.push_back(Pair("original_value", EncodeBase58(vchAddress)));
     }
     CScript scriptSendFrom;
-    if (nAmount > 0)
-        SendBurnTransaction(swapScript, wtx, nAmount, scriptSendFrom);
+    if (nAmount > 0) {
+        SendSwapTransaction(swapScript, wtx, nAmount, scriptSendFrom);
+        oResult.push_back(Pair("txid", wtx.GetHash().ToString()));
+    }
     return oResult;
 }
 
-UniValue getswap(const JSONRPCRequest& request)
+UniValue getswaps(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() > 1 || request.params.size() == 0)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
-            "getswap \"address\"\n"
+            "getswaps start_height end_height\n"
             "\nSend coins to be swapped for Substrate chain\n"
             "\nArguments:\n"
-            "1. \"address_hex\"        (string, required)  The Substrate address to swap funds.\n"
+            "1. \"start_height\"        (int, optional)  Swaps starting at this block height.\n"
+            "1. \"end_height\"          (int, optional)  Swaps ending at this block height.\n"
             "\nExamples:\n" +
-            HelpExampleCli("getswap", "\"16da00f41abe55e069d4ee0cdb45bea01a3afaa30d1fd6a363e8d84d46550d90750ec1\" ") + 
-            HelpExampleRpc("getswap", "\"16da00f41abe55e069d4ee0cdb45bea01a3afaa30d1fd6a363e8d84d46550d90750ec1\" "));
+            HelpExampleCli("getswap", "0 100000") + 
+            HelpExampleRpc("getswap", "0 100000"));
 
-    std::string address_hex = request.params[0].get_str();
-    std::vector<uint8_t> vchAddress = ParseHex(address_hex);
-    std::string strSubstrateAddress = EncodeBase58(vchAddress);
+    int nStartHeight = 0;
+    int nEndHeight = (std::numeric_limits<int>::max());
+    if (!request.params[0].isNull()) {
+        nStartHeight = request.params[0].get_int();
+        if (!request.params[1].isNull()) {
+            nEndHeight = request.params[1].get_int();
+        }
+    }
 
-    UniValue oResult(UniValue::VOBJ);
-    
-    oResult.push_back(Pair("substrate_address", strSubstrateAddress));
-    return oResult;
+    std::vector<CSwapData> vSwaps;
+    CAmount totalAmount = 0;
+    if (GetAllSwaps(vSwaps)) {
+        UniValue oResult(UniValue::VOBJ);
+        for (const CSwapData& swap : vSwaps) {
+            if (swap.nHeight >= nStartHeight && swap.nHeight <= nEndHeight) {
+                UniValue oSwap(UniValue::VOBJ);
+                oSwap.push_back(Pair("address", swap.Address()));
+                oSwap.push_back(Pair("amount", FormatMoney(swap.Amount)));
+                oSwap.push_back(Pair("txid", swap.TxId.ToString()));
+                oSwap.push_back(Pair("nout", swap.nOut));
+                oSwap.push_back(Pair("block_height", swap.nHeight));
+                oResult.push_back(Pair(swap.TxId.ToString(), oSwap));
+                totalAmount += swap.Amount;
+            }
+        }
+        oResult.push_back(Pair("count", vSwaps.size()));
+        oResult.push_back(Pair("total_amount", FormatMoney(totalAmount)));
+        return oResult;
+    } else {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Get all swaps from LevelDB failed.");
+    }
 }
 
 static const CRPCCommand commands[] =
@@ -126,7 +154,7 @@ static const CRPCCommand commands[] =
         /* Dynamic Swap To Substrate Chain */
         {"swap", "swapdynamic", &swapdynamic, true, {"address", "amount"}},
 #endif //ENABLE_WALLET
-        {"swap", "getswap", &getswap, true, {"address_hex"}},
+        {"swap", "getswaps", &getswaps, true, {"address_hex"}},
 };
 
 void RegisterSwapRPCCommands(CRPCTable &t)

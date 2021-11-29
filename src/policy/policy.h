@@ -62,6 +62,9 @@ static const unsigned int STANDARD_LOCKTIME_VERIFY_FLAGS = LOCKTIME_VERIFY_SEQUE
 /** Used for BDAP transactions. */
 static const int BDAP_TX_VERSION = 0x3500;
 
+/** Used for BDAP transactions. */
+static const int SWAP_TX_VERSION = 0x3600;
+
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
 /**
      * Check for standard transaction types

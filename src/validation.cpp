@@ -49,6 +49,8 @@
 #include "script/sigcache.h"
 #include "script/standard.h"
 #include "spork.h"
+#include "swap/swapdata.h"
+#include "swap/swapdb.h"
 #include "timedata.h"
 #include "tinyformat.h"
 #include "txdb.h"
@@ -976,10 +978,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
-        if (txout.IsData() && tx.nVersion != BDAP_TX_VERSION) {
+        if (txout.IsData() && tx.nVersion == SWAP_TX_VERSION) {
             std::vector<unsigned char> vchData;
-            if (txout.GetData(vchData))
-                LogPrintf("%s -- Swap transaction %s\n", __func__, EncodeBase58(vchData));
+            if (txout.GetData(vchData) && txout.nValue > 0)
+                LogPrintf("%s -- Swap transaction in mempool %s %s\n", __func__, EncodeBase58(vchData), FormatMoney(txout.nValue));
         }
     }
     // Don't relay BDAP transaction until spork is activated
@@ -2416,6 +2418,10 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     LogPrintf("%s -- Failed to undo unknown BDAP transaction (op1 = %d, op2 = %d). Nothing to undo for %s transaction.\n", __func__, op1, op2, hash.ToString());
                 }
             }
+        } else if (tx.nVersion == SWAP_TX_VERSION) {
+            CSwapData swap(MakeTransactionRef(tx), pindex->nHeight);
+            if (!swap.IsNull())
+                UndoAddSwap(swap);
         }
         if (fAddressIndex) {
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
@@ -2965,6 +2971,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 REJECT_INVALID, "bad-cb-payee");
         }
     }
+
     for (unsigned int i = 0; i < block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
         CScript scriptFluid;
@@ -3028,6 +3035,25 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
                 return state.DoS(100, error("%s -- Invalid fluid operation code %s (%d)", __func__, strOperationCode, OpCode), REJECT_INVALID, "invalid-fluid-operation-code");
             }
+        } else if (tx.nVersion == SWAP_TX_VERSION) {
+            // Check for swap transactions
+            for (unsigned int j = 0; j < tx.vout.size(); j++)
+            {
+                const CTxOut& out = tx.vout[j];
+                if (out.IsData() && out.nValue > 0) {
+                    LogPrintf("%s -- Swap transaction found Amount %s\n", __func__, FormatMoney(out.nValue));
+                    std::vector<unsigned char> vchData;
+                    if (out.GetData(vchData)) {
+                        CSwapData swap(MakeTransactionRef(tx), pindex->nHeight);
+                        if (!swap.IsNull() && swap.Amount > 0)
+                        {
+                            if (!AddSwap(swap))
+                                LogPrintf("%s -- Swap transaction leveldb add failed %s Amount %s\n", __func__, EncodeBase58(vchData), FormatMoney(out.nValue));
+                        }
+                    }
+                }
+            }
+            // End Check for swap transactions
         }
     }
     // END FLUID

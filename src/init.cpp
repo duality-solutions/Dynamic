@@ -61,6 +61,8 @@
 #include "script/sigcache.h"
 #include "script/standard.h"
 #include "spork.h"
+#include "swap/swapdata.h"
+#include "swap/swapdb.h"
 #include "timedata.h"
 #include "torcontrol.h"
 #include "txdb.h"
@@ -377,6 +379,8 @@ void PrepareShutdown()
         // LibTorrent DHT Netowrk Services
         //delete pMutableDataDB;
         //pMutableDataDB = NULL;
+        delete pSwapDB;
+        pSwapDB = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1739,6 +1743,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
                 //delete pMutableDataDB;
+                delete pSwapDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1760,6 +1765,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pLinkManager = new CLinkManager();
                 // Init DHT Services DB
                 //pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
+                // Init SwapDB
+                pSwapDB = new CSwapDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
