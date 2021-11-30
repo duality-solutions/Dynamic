@@ -11,6 +11,7 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpc/server.h"
+#include "swap/ss58.h"
 #include "swap/swapdata.h"
 #include "swap/swapdb.h"
 #include "timedata.h"
@@ -51,49 +52,27 @@ UniValue swapdynamic(const JSONRPCRequest& request)
     EnsureWalletIsUnlocked();
 
     std::string strSubstrateAddress = request.params[0].get_str();
-    std::vector<uint8_t> vchAddress;
-    // Validate the address is correct.
-    bool valid = DecodeBase58(strSubstrateAddress, vchAddress);
-    if (!valid)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid swap address: base58 error");
+    CSS58 ss58Address(strSubstrateAddress);
+    if (!ss58Address.fValid)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid swap address. " + ss58Address.strError);
 
-    CScript swapScript = CScript() << OP_RETURN << vchAddress;
-
-    CAmount nAmount;
+    CAmount nAmount = 0;
     if (!request.params[1].isNull()) {
         nAmount = AmountFromValue(request.params[1]);
         if (nAmount <= 0)
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for swap");
     }
-    
+
     UniValue oResult(UniValue::VOBJ);
-    std::string strHexAddress = CharVectorToHexString(vchAddress);
-    size_t addressLen = strHexAddress.length();
-    std::string strTypeHex = strHexAddress.substr(0, 2);
-    std::string strPubKeyHex = strHexAddress.substr(2, 64);
-    oResult.push_back(Pair("address_bytes", vchAddress.size()));
-    oResult.push_back(Pair("hex_address", "0x" + strHexAddress));
-    oResult.push_back(Pair("address_type", "0x" + strTypeHex));
-    oResult.push_back(Pair("address_pubkey", "0x" + strPubKeyHex));
-    if (vchAddress.size() - 34 > 0)
-    {
-        oResult.push_back(Pair("checksum", "0x" + strHexAddress.substr(66, addressLen - 66)));
-        // validate checksum by hashing the first 66 bytes.
-        // blake2d_512(address_type + address_pubkey)
-        // first two is type, next 64 is pubkey and the remaining are checksum
-        std::vector<uint8_t> vchAddressChecksumData = vchAddress;
-        vchAddressChecksumData.resize(34);
-        std::string strPreimageBase58 = EncodeBase58(vchAddressChecksumData);
-        std::string strPreimage = "SS58PRE" + strPreimageBase58;
-        std::vector<uint8_t> vchData = vchFromString(strPreimage);
-        oResult.push_back(Pair("preimage_base58", strPreimageBase58));
-        oResult.push_back(Pair("preimage", strPreimage));
-        uint256 hash = HashBlake2b_256(vchData.begin(), vchData.end());
-        oResult.push_back(Pair("checksum_hash", hash.ToString()));
-        oResult.push_back(Pair("original_value", EncodeBase58(vchAddress)));
-    }
-    CScript scriptSendFrom;
+    oResult.push_back(Pair("address_bytes", ss58Address.nLength));
+    oResult.push_back(Pair("hex_address", ss58Address.AddressHex()));
+    oResult.push_back(Pair("address_type", ss58Address.AddressType()));
+    oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
+    oResult.push_back(Pair("checksum", ss58Address.CheckSumHex()));
+
     if (nAmount > 0) {
+        CScript scriptSendFrom;
+        CScript swapScript = CScript() << OP_RETURN << ss58Address.Address();
         SendSwapTransaction(swapScript, wtx, nAmount, scriptSendFrom);
         oResult.push_back(Pair("txid", wtx.GetHash().ToString()));
     }
