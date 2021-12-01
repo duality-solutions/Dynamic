@@ -27,10 +27,11 @@
 
 #include <cmath>
 
+#ifdef ENABLE_WALLET
+
 extern bool EnsureWalletIsAvailable(bool avoidException);
 extern void SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
 
-// todo: move to seperate file
 UniValue swapdynamic(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 2 || request.params.size() == 0)
@@ -78,6 +79,7 @@ UniValue swapdynamic(const JSONRPCRequest& request)
     }
     return oResult;
 }
+#endif // ENABLE_WALLET
 
 UniValue getswaps(const JSONRPCRequest& request)
 {
