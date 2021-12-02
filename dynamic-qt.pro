@@ -309,6 +309,7 @@ HEADERS += \
     src/qt/askpassphrasedialog.h \
     src/qt/addresstablemodel.h \
     src/qt/addressbookpage.h \
+    src/qt/swapdialog.h \
     src/compat/byteswap.h \
     src/compat/sanity.h \
     src/consensus/consensus.h \
@@ -485,6 +486,7 @@ SOURCES += \
     src/qt/sendcoinsentry.cpp \
     src/qt/signverifymessagedialog.cpp \
     src/qt/splashscreen.cpp \
+    src/qt/swapdialog.cpp \
     src/qt/dynodelist.cpp \
     src/qt/trafficgraphwidget.cpp \
     src/qt/transactiondesc.cpp \
@@ -652,4 +654,5 @@ FORMS += \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/signverifymessagedialog.ui \
+    src/qt/forms/swapdialog.ui \
     src/qt/forms/transactiondescdialog.ui

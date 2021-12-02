@@ -151,6 +151,7 @@ private:
     QAction* showBackupsAction;
     QAction* openAction;
     QAction *mnemonicAction;
+    QAction* swapAction;
     QAction* showHelpMessageAction;
     QAction* showPrivateSendHelpAction;
 
@@ -257,6 +258,7 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
+    void swapClicked();
 
 #endif // ENABLE_WALLET
     /** Show configuration dialog */
