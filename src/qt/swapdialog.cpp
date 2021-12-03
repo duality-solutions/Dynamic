@@ -6,7 +6,9 @@
 #include "ui_swapdialog.h"
 
 #include "guiutil.h"
-#include "walletmodel.h"
+#include "rpc/server.h"
+
+#include <univalue.h>
 
 #include <QUrl>
 #include <QDialogButtonBox>
@@ -31,19 +33,24 @@ QString SwapDialog::getSwapAddress()
     return ui->swapAddress->text();
 }
 
-void SwapDialog::accept()
-{
-    QDialog::accept();
-}
-
-void SwapDialog::reject()
-{
-    QDialog::reject();
-}
-
-// ok button
 void SwapDialog::buttonBoxClicked(QAbstractButton* button)
 {
-    if (ui->buttonBox->buttonRole(button) == QDialogButtonBox::AcceptRole)
-        done(QDialog::Accepted); // closes the dialog
+    if (ui->buttonBox->buttonRole(button) == QDialogButtonBox::AcceptRole) {
+        if (swapDynamic())
+            done(QDialog::Accepted); // closes the dialog
+    } else {
+        done(QDialog::Rejected); // closes the dialog
+    }
+}
+
+bool SwapDialog::swapDynamic()
+{
+    std::string errorMessage = "";
+    UniValue result = SwapDynamic(ui->swapAddress->text().toStdString(), true, errorMessage);
+    if (errorMessage != "") {
+        QMessageBox::critical(0, "Swap Dynamic Error", QObject::tr(errorMessage.c_str()));
+        return false;
+    }
+    LogPrintf("%s -- Success %s\n", __func__, ui->swapAddress->text().toStdString());
+    return true;
 }

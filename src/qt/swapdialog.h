@@ -22,10 +22,9 @@ public:
     ~SwapDialog();
 
     QString getSwapAddress();
+    bool swapDynamic();
 
 protected Q_SLOTS:
-    void accept();
-    void reject();
 
 private Q_SLOTS:
     void buttonBoxClicked(QAbstractButton*);

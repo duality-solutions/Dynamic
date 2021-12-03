@@ -30,38 +30,23 @@
 #ifdef ENABLE_WALLET
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
+extern bool SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CScript& sendAddress, std::string& strError);
 
-UniValue swapdynamic(const JSONRPCRequest& request)
+UniValue SwapDynamic(const std::string& address, const bool fSend, std::string& errorMessage)
 {
-    if (request.fHelp || request.params.size() > 2 || request.params.size() == 0)
-        throw std::runtime_error(
-            "swapdynamic \"address\" \"amount\"\n"
-            "\nSend coins to be swapped for Substrate chain\n"
-            "\nArguments:\n"
-            "1. \"address\"        (string, required)  The Substrate address to swap funds.\n"
-            "2. \"amount\"         (numeric, optional) The amount of coins to be swapped.\n"
-            "\nExamples:\n" +
-            HelpExampleCli("swapdynamic", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\" \"123.456\" ") + 
-            HelpExampleRpc("swapdynamic", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\" \"123.456\" "));
-
-    if (!EnsureWalletIsAvailable(request.fHelp))
+    if (!EnsureWalletIsAvailable(true)) {
+        errorMessage = "Wallet is not available";
         return NullUniValue;
+    }
+    if (pwalletMain->IsLocked()) {
+        errorMessage = "Wallet is locked";
+        return NullUniValue;
+    }
 
-    CWalletTx wtx;
-
-    EnsureWalletIsUnlocked();
-
-    std::string strSubstrateAddress = request.params[0].get_str();
-    CSS58 ss58Address(strSubstrateAddress);
-    if (!ss58Address.fValid)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid swap address. " + ss58Address.strError);
-
-    CAmount nAmount = 0;
-    if (!request.params[1].isNull()) {
-        nAmount = AmountFromValue(request.params[1]);
-        if (nAmount <= 0)
-            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for swap");
+    CSS58 ss58Address(address);
+    if (!ss58Address.fValid) {
+        errorMessage = "Invalid swap address. " + ss58Address.strError;
+        return NullUniValue;
     }
 
     UniValue oResult(UniValue::VOBJ);
@@ -70,13 +55,46 @@ UniValue swapdynamic(const JSONRPCRequest& request)
     oResult.push_back(Pair("address_type", ss58Address.AddressType()));
     oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
     oResult.push_back(Pair("checksum", ss58Address.CheckSumHex()));
-
-    if (nAmount > 0) {
+    if (fSend) {
+        CWalletTx wtx;
         CScript scriptSendFrom;
         CScript swapScript = CScript() << OP_RETURN << ss58Address.Address();
-        SendSwapTransaction(swapScript, wtx, nAmount, scriptSendFrom);
-        oResult.push_back(Pair("txid", wtx.GetHash().ToString()));
+        std::string strError = "";
+        if (SendSwapTransaction(swapScript, wtx, scriptSendFrom, strError)) {
+            oResult.push_back(Pair("amount", FormatMoney(wtx.GetDebit(ISMINE_SPENDABLE))));
+            oResult.push_back(Pair("txid", wtx.GetHash().ToString()));
+        } else {
+            errorMessage = strError;
+            return NullUniValue;
+        }
     }
+    return oResult;
+}
+
+UniValue swapdynamic(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1 || request.params.size() == 0)
+        throw std::runtime_error(
+            "swapdynamic \"address\"\n"
+            "\nSend coins to be swapped for Substrate chain\n"
+            "\nArguments:\n"
+            "1. \"address\"        (string, required)  The Substrate address to swap funds.\n"
+            "\nExamples:\n" +
+            HelpExampleCli("swapdynamic", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\"") + 
+            HelpExampleRpc("swapdynamic", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\""));
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    EnsureWalletIsUnlocked();
+
+    std::string strSubstrateAddress = request.params[0].get_str();
+
+    std::string errorMessage = "";
+    UniValue oResult = SwapDynamic(strSubstrateAddress, true, errorMessage);
+    if (errorMessage != "")
+        throw JSONRPCError(RPC_TYPE_ERROR, errorMessage);
+
     return oResult;
 }
 #endif // ENABLE_WALLET

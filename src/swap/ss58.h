@@ -10,6 +10,8 @@
 
 //See https://docs.substrate.io/v3/advanced/ss58
 
+const std::vector<uint16_t> vAcceptedAddressTypes = {42, 128}; // just accept Substrate and Clover address types for now.
+
 class CSS58
 {
 private:

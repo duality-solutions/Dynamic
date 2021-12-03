@@ -42,9 +42,18 @@ CSS58::CSS58(std::string strAddress)
         } else {
             strError = strprintf("BadLength: Invalid SS58 address size %d", vchAddress.size());
             fValid = false;
+            return;
         }
     } else {
         strError = strprintf("BadBase58: Failed to decode base58 address");
+        return;
+    }
+    if (strError == "" && std::count(vAcceptedAddressTypes.begin(), vAcceptedAddressTypes.end(), type) == 0)
+    {
+        strError = strprintf("AddressType: Invalid SS58 address type (%d)", type);
+        fValid = false;
+    } else {
+        fValid = true;
     }
 }
 

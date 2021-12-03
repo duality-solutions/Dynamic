@@ -921,9 +921,7 @@ void DynamicGUI::openClicked()
 void DynamicGUI::swapClicked()
 {
     SwapDialog dlg(this);
-    if (dlg.exec()) {
-        //Q_EMIT swapAddress(dlg.getSwapAddress());
-    }
+    dlg.exec();
 }
 
 void DynamicGUI::gotoOverviewPage()
