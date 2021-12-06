@@ -724,20 +724,15 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
 
 bool SendSwapTransaction(const CScript& swapScript, CWalletTx& wtxNew, const CScript& scriptSendFrom, std::string& strError)
 {
-    const CAmount curBalance = pwalletMain->GetBalance();
-    const CAmount nValue =  curBalance;
+    const CAmount curUnlockedBalance = pwalletMain->GetBalance() - pwalletMain->LockedCoinsTotal();
+    const CAmount nValue = curUnlockedBalance;
     // Check amount
     if (nValue <= 0) {
         strError = strprintf("Invalid amount");
         return false;
     }
 
-    if (nValue > curBalance) {
-        strError = strprintf("Insufficient funds");
-        return false;
-    }
-
-    LogPrintf("%s - Script public key to be sent over to the swap transaction processing: %s\n", __func__, ScriptToAsmStr(swapScript));
+    LogPrintf("%s - Script to the swap %s DYN transaction processing: %s\n", __func__, FormatMoney(curUnlockedBalance), ScriptToAsmStr(swapScript));
 
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);

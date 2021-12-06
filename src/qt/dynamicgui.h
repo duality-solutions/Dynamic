@@ -108,6 +108,9 @@ protected:
 private:
     ClientModel* clientModel;
     WalletFrame* walletFrame;
+#ifdef ENABLE_WALLET
+    WalletModel* walletModel;
+#endif // ENABLE_WALLET
 
     UnitDisplayStatusBarControl* unitDisplayControl;
     QLabel* labelWalletHDStatusIcon;

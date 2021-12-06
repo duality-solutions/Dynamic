@@ -714,12 +714,13 @@ void DynamicGUI::setClientModel(ClientModel* _clientModel)
 }
 
 #ifdef ENABLE_WALLET
-bool DynamicGUI::addWallet(const QString& name, WalletModel* walletModel)
+bool DynamicGUI::addWallet(const QString& name, WalletModel* _walletModel)
 {
     if (!walletFrame)
         return false;
     setWalletActionsEnabled(true);
-    return walletFrame->addWallet(name, walletModel);
+    walletModel = _walletModel;
+    return walletFrame->addWallet(name, _walletModel);
 }
 
 bool DynamicGUI::setCurrentWallet(const QString& name)
@@ -921,6 +922,7 @@ void DynamicGUI::openClicked()
 void DynamicGUI::swapClicked()
 {
     SwapDialog dlg(this);
+    dlg.setWalletModel(walletModel);
     dlg.exec();
 }
 

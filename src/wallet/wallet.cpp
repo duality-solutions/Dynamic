@@ -5495,10 +5495,28 @@ void CWallet::ListLockedCoins(std::vector<COutPoint>& vOutpts)
 {
     AssertLockHeld(cs_wallet); // setLockedCoins
     for (std::set<COutPoint>::iterator it = setLockedCoins.begin();
-         it != setLockedCoins.end(); it++) {
+        it != setLockedCoins.end(); it++) {
         COutPoint outpt = (*it);
         vOutpts.push_back(outpt);
     }
+}
+
+CAmount CWallet::LockedCoinsTotal()
+{
+    AssertLockHeld(cs_wallet); // setLockedCoins
+    CAmount lockedAmount = 0;
+    for (std::set<COutPoint>::iterator it = setLockedCoins.begin(); it != setLockedCoins.end(); it++) {
+        COutPoint outpt = (*it);
+        std::map<uint256, CWalletTx>::iterator itLocked = mapWallet.find(outpt.hash);
+        if (itLocked != mapWallet.end()) {
+            for (unsigned int i = 0; i < itLocked->second.tx->vout.size(); ++i) {
+                if (i == outpt.n) {
+                   lockedAmount += itLocked->second.tx->vout[i].nValue;
+                }
+            }
+        }
+    }
+    return lockedAmount;
 }
 
 /** @} */ // end of Actions

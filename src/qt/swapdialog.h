@@ -5,6 +5,8 @@
 #ifndef DYNAMIC_QT_SWAPDIALOG_H
 #define DYNAMIC_QT_SWAPDIALOG_H
 
+#include "amount.h"
+
 #include <QDialog>
 #include <QAbstractButton>
 
@@ -12,6 +14,8 @@ namespace Ui
 {
 class SwapDialog;
 }
+
+class WalletModel;
 
 class SwapDialog : public QDialog
 {
@@ -21,8 +25,7 @@ public:
     explicit SwapDialog(QWidget* parent);
     ~SwapDialog();
 
-    QString getSwapAddress();
-    bool swapDynamic();
+    void setWalletModel(WalletModel* _walletModel);
 
 protected Q_SLOTS:
 
@@ -31,6 +34,15 @@ private Q_SLOTS:
 
 private:
     Ui::SwapDialog* ui;
+    WalletModel* walletModel;
+    CAmount totalBalance;
+    CAmount immatureBalance;
+    CAmount lockedBalance;
+    CAmount swapBalance;
+    bool walletLocked;
+
+    QString getSwapAddress();
+    bool swapDynamic();
 };
 
 #endif // DYNAMIC_QT_SWAPDIALOG_H
