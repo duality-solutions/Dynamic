@@ -5,6 +5,8 @@
 #ifndef DYNAMIC_SWAP_SS58_H
 #define DYNAMIC_SWAP_SS58_H
 
+#include "uint256.h"
+
 #include <string>
 #include <vector>
 
@@ -15,13 +17,15 @@ const std::vector<uint16_t> vAcceptedAddressTypes = {42, 128}; // just accept Su
 class CSS58
 {
 private:
+    std::string strAddress;
+    std::vector<uint8_t> vchPrefix;
     std::vector<uint8_t> vchAddress;
     std::vector<uint8_t> vchAddressType;
     std::vector<uint8_t> vchPublicKey;
-    std::vector<uint8_t> vchCheckSum;
-    uint8_t lower;
-    uint8_t upper;
-    uint16_t type;
+    std::vector<uint8_t> vchAddressCheckSum;
+    uint512 calulatedhash;
+    std::vector<uint8_t> vchCalulatedCheckSum;
+    uint32_t type;
 
 public:
     static const int CURRENT_VERSION = 1;
@@ -35,24 +39,36 @@ public:
         nVersion = CSS58::CURRENT_VERSION;
         nLength = -1;
         fValid = false;
+        strError = "";
+        strAddress = "";
         vchAddress.clear();
         vchAddressType.clear();
         vchPublicKey.clear();
-        vchCheckSum.clear();
-        lower = 0;
-        upper = 0;
+        vchAddressCheckSum.clear();
+        calulatedhash = uint512(0);
+        vchCalulatedCheckSum.clear();
         type = 0;
-        strError = "";
     }
 
-    CSS58(std::string strAddress);
+    CSS58(std::string address);
 
-    uint16_t AddressType() const;
-    std::vector<uint8_t> Address() const { return vchAddress; }
+    uint32_t AddressType() const;
+    std::string Address() const { return strAddress; }
+    std::vector<uint8_t> AddressBytes() const { return vchAddress; }
     std::string AddressHex() const;
     std::string AddressTypeHex() const;
     std::string PublicKeyHex() const;
-    std::string CheckSumHex() const;
+    std::string AddressChecksumHex() const;
+    std::string CalulatedChecksumHex() const;
+
+    uint512 CalculatedHash() const { return calulatedhash; }
+    std::string CalculatedHashHex() const { return calulatedhash.GetHex(); }
+    bool ValidChecksum() const { return (vchCalulatedCheckSum == vchAddressCheckSum); }
+    bool Valid() const { return (fValid && ValidChecksum()); }
+
+private:
+    void calulatedChecksumHash();
+    void setAddressType();
 };
 
 #endif // DYNAMIC_SWAP_SS58_H

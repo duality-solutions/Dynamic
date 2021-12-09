@@ -52,13 +52,13 @@ UniValue SwapDynamic(const std::string& address, const bool fSend, std::string& 
     UniValue oResult(UniValue::VOBJ);
     oResult.push_back(Pair("address_bytes", ss58Address.nLength));
     oResult.push_back(Pair("hex_address", ss58Address.AddressHex()));
-    oResult.push_back(Pair("address_type", ss58Address.AddressType()));
+    oResult.push_back(Pair("address_type", (int64_t)ss58Address.AddressType()));
     oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
-    oResult.push_back(Pair("checksum", ss58Address.CheckSumHex()));
+    oResult.push_back(Pair("address_checksum", ss58Address.AddressChecksumHex()));
     if (fSend) {
         CWalletTx wtx;
         CScript scriptSendFrom;
-        CScript swapScript = CScript() << OP_RETURN << ss58Address.Address();
+        CScript swapScript = CScript() << OP_RETURN << ss58Address.AddressBytes();
         std::string strError = "";
         if (SendSwapTransaction(swapScript, wtx, scriptSendFrom, strError)) {
             oResult.push_back(Pair("amount", FormatMoney(wtx.GetDebit(ISMINE_SPENDABLE))));
@@ -98,6 +98,46 @@ UniValue swapdynamic(const JSONRPCRequest& request)
     return oResult;
 }
 #endif // ENABLE_WALLET
+
+UniValue GetAddress(const std::string& address, std::string& errorMessage)
+{
+    CSS58 ss58Address(address);
+    UniValue oResult(UniValue::VOBJ);
+    oResult.push_back(Pair("address_bytes", ss58Address.nLength));
+    oResult.push_back(Pair("hex_address", ss58Address.AddressHex()));
+    oResult.push_back(Pair("address_type", (int64_t)ss58Address.AddressType()));
+    oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
+    oResult.push_back(Pair("address_checksum", ss58Address.AddressChecksumHex()));
+    oResult.push_back(Pair("calculated_checksum", ss58Address.CalulatedChecksumHex()));
+    oResult.push_back(Pair("calculated_hash", ss58Address.CalculatedHashHex()));
+    oResult.push_back(Pair("valid_checksum", ss58Address.ValidChecksum() ? "true" : "false"));
+    oResult.push_back(Pair("valid", ss58Address.Valid() ? "true" : "false"));
+    if (ss58Address.strError != "") {
+        oResult.push_back(Pair("errorMessage", ss58Address.strError));
+    }
+    return oResult;
+}
+
+UniValue ss58valid(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1 || request.params.size() == 0)
+        throw std::runtime_error(
+            "ss58valid \"address\"\n"
+            "\nArguments:\n"
+            "1. \"address\"        (string, required)  The Substrate address to swap funds.\n"
+            "\nExamples:\n" +
+            HelpExampleCli("ss58valid", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\"") + 
+            HelpExampleRpc("ss58valid", "\"1a1LcBX6hGPKg5aQ6DXZpAHCCzWjckhea4sz3P1PvL3oc4F\""));
+
+    std::string strSubstrateAddress = request.params[0].get_str();
+
+    std::string errorMessage = "";
+    UniValue oResult = GetAddress(strSubstrateAddress, errorMessage);
+    if (errorMessage != "")
+        throw JSONRPCError(RPC_TYPE_ERROR, errorMessage);
+
+    return oResult;
+}
 
 UniValue getswaps(const JSONRPCRequest& request)
 {
@@ -151,9 +191,10 @@ static const CRPCCommand commands[] =
         //  --------------------- ------------------------ -----------------------    ------ --------------------
 #ifdef ENABLE_WALLET
         /* Dynamic Swap To Substrate Chain */
-        {"swap", "swapdynamic", &swapdynamic, true, {"address", "amount"}},
+        {"swap", "swapdynamic", &swapdynamic, true, {"address"}},
 #endif //ENABLE_WALLET
         {"swap", "getswaps", &getswaps, true, {"address_hex"}},
+        {"swap", "ss58valid", &ss58valid, true, {"address"}},
 };
 
 void RegisterSwapRPCCommands(CRPCTable &t)
