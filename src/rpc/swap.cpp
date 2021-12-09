@@ -162,9 +162,10 @@ UniValue getswaps(const JSONRPCRequest& request)
     }
 
     std::vector<CSwapData> vSwaps;
-    CAmount totalAmount = 0;
     if (GetAllSwaps(vSwaps)) {
         UniValue oResult(UniValue::VOBJ);
+        CAmount totalAmount = 0;
+        int count = 0;
         for (const CSwapData& swap : vSwaps) {
             if (swap.nHeight >= nStartHeight && swap.nHeight <= nEndHeight) {
                 UniValue oSwap(UniValue::VOBJ);
@@ -175,9 +176,10 @@ UniValue getswaps(const JSONRPCRequest& request)
                 oSwap.push_back(Pair("block_height", swap.nHeight));
                 oResult.push_back(Pair(swap.TxId.ToString(), oSwap));
                 totalAmount += swap.Amount;
+                count += 1;
             }
         }
-        oResult.push_back(Pair("count", vSwaps.size()));
+        oResult.push_back(Pair("count", count));
         oResult.push_back(Pair("total_amount", FormatMoney(totalAmount)));
         return oResult;
     } else {
