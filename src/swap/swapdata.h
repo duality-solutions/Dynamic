@@ -19,6 +19,7 @@ public:
     int nVersion;
     std::vector<unsigned char> vSwapData; // Swap address
     CAmount Amount; // Swap amount
+    CAmount Fee; // Swap fee amount
     uint256 TxId;
     int nOut;
     int nHeight;
@@ -39,6 +40,7 @@ public:
         nVersion = CSwapData::CURRENT_VERSION;
         vSwapData.clear();
         Amount = -1;
+        Fee = 0;
         TxId = uint256();
         nOut = -1;
         nHeight = -1;
@@ -51,6 +53,7 @@ public:
         READWRITE(this->nVersion);
         READWRITE(vSwapData);
         READWRITE(Amount);
+        READWRITE(Fee);
         READWRITE(TxId);
         READWRITE(VARINT(nOut));
         READWRITE(VARINT(nHeight));
@@ -68,12 +71,21 @@ public:
         nVersion = b.nVersion;
         vSwapData = b.vSwapData;
         Amount = b.Amount;
+        Fee = b.Fee;
         TxId = b.TxId;
         nOut = b.nOut;
         nHeight = b.nHeight;
         return *this;
     }
- 
+
+    inline friend bool operator<(const CSwapData& a, const CSwapData& b) {
+        return (a.nHeight < b.nHeight);
+    }
+
+    inline friend bool operator>(const CSwapData& a, const CSwapData& b) {
+        return (a.nHeight > b.nHeight);
+    }
+
     inline bool IsNull() const { return (Amount == -1); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
@@ -81,6 +93,8 @@ public:
     std::string Address() const;
     std::string ToString() const;
     std::vector<unsigned char> vchTxId() const;
+    CAmount GetFee() const;
+
 };
 
 #endif // DYNAMIC_SWAP_SWAP_H

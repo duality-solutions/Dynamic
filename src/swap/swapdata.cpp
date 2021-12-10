@@ -6,11 +6,14 @@
 
 #include "base58.h"
 #include "bdap/utils.h"
+#include "chainparams.h"
+#include "coins.h"
 #include "policy/policy.h"
 #include "serialize.h"
 #include "streams.h"
 #include "uint256.h"
 #include "utilmoneystr.h"
+#include "validation.h"
 
 #include <univalue.h>
 
@@ -68,8 +71,15 @@ CSwapData::CSwapData(const CTransactionRef& tx, const int& height)
 
     if (tx->nVersion == SWAP_TX_VERSION)
     {
+        CAmount nValueIn = 0;
+        CCoinsViewCache view(pcoinsTip);
+        for (const CTxIn& txin : tx->vin) {
+            const Coin& coin = view.AccessCoin(txin.prevout);
+            nValueIn += coin.out.nValue;
+        }
         // This assumes there is only one swap output per transaction
         int nCurrentIndex = 0;
+        CAmount nValueOut = 0;
         for (const auto& txout : tx->vout) {
             if (txout.IsData()) {
                 std::vector<unsigned char> vchData;
@@ -80,12 +90,49 @@ CSwapData::CSwapData(const CTransactionRef& tx, const int& height)
                         TxId = tx->GetHash();
                         nOut = nCurrentIndex;
                         nHeight = height;
-                        return;
                     }
                 }
             }
+            nValueOut += txout.nValue;
             nCurrentIndex++;
         }
+        if (nValueIn > nValueOut) {
+            Fee = (nValueIn - nValueOut);
+        } else {
+            Fee = 0;
+            LogPrintf("%s Error getting Fee %s, nValueIn %s, nValueOut %s\n", __func__, FormatMoney((nValueIn - nValueOut)), FormatMoney(nValueIn), FormatMoney(nValueOut));
+        }
+    }
+}
+
+CAmount CSwapData::GetFee() const
+{
+    if (Fee <= 0) {
+        CTransactionRef tx;
+        uint256 hashBlock;
+        if (!GetTransaction(TxId, tx, Params().GetConsensus(), hashBlock, true)) {
+            LogPrintf("%s Unable to get %s transaction \n", __func__, TxId.GetHex());
+            return 0;
+        }
+        CAmount nValueIn = 0;
+        CCoinsViewCache view(pcoinsTip);
+        for (const CTxIn& txin : tx->vin) {
+            const Coin& coin = view.AccessCoin(txin.prevout);
+            nValueIn += coin.out.nValue;
+        }
+        CAmount nValueOut = 0;
+        for (const auto& txout : tx->vout) {
+            nValueOut += txout.nValue;
+        }
+
+        if (nValueIn > nValueOut) {
+            return (nValueIn - nValueOut);
+        } else {
+            LogPrintf("%s - Txid %s nValueIn (%s) is less than nValueOut (%s)\n", __func__, TxId.GetHex(), FormatMoney(nValueIn), FormatMoney(nValueOut));
+            return 0;
+        }
+    } else {
+        return Fee;
     }
 }
 
@@ -96,6 +143,7 @@ std::string CSwapData::ToString() const
             "    nVersion                   = %d\n"
             "    vSwapData                  = %s\n"
             "    Amount                     = %s\n"
+            "    Fee                        = %s\n"
             "    TxId                       = %s\n"
             "    nOut                       = %d\n"
             "    nHeight                    = %d\n"
@@ -103,6 +151,7 @@ std::string CSwapData::ToString() const
             nVersion,
             Address(),
             FormatMoney(Amount),
+            FormatMoney(Fee),
             TxId.ToString(),
             nOut,
             nHeight

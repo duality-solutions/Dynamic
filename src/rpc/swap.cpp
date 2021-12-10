@@ -32,6 +32,13 @@
 extern bool EnsureWalletIsAvailable(bool avoidException);
 extern bool SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CScript& sendAddress, std::string& strError);
 
+
+struct SwapCompareHeight {
+    bool operator()(const CSwapData& a, const CSwapData& b) {
+        return (a.nHeight < b.nHeight);
+    }
+};
+
 UniValue SwapDynamic(const std::string& address, const bool fSend, std::string& errorMessage)
 {
     if (!EnsureWalletIsAvailable(true)) {
@@ -163,19 +170,26 @@ UniValue getswaps(const JSONRPCRequest& request)
 
     std::vector<CSwapData> vSwaps;
     if (GetAllSwaps(vSwaps)) {
+        std::sort(vSwaps.begin(), vSwaps.end(), SwapCompareHeight()); //sort entries by nHeight
         UniValue oResult(UniValue::VOBJ);
         CAmount totalAmount = 0;
         int count = 0;
         for (const CSwapData& swap : vSwaps) {
             if (swap.nHeight >= nStartHeight && swap.nHeight <= nEndHeight) {
                 UniValue oSwap(UniValue::VOBJ);
+                const CAmount fee = swap.GetFee();
                 oSwap.push_back(Pair("address", swap.Address()));
-                oSwap.push_back(Pair("amount", FormatMoney(swap.Amount)));
+                oSwap.push_back(Pair("out_amount", FormatMoney(swap.Amount)));
+                oSwap.push_back(Pair("fee", FormatMoney(fee)));
+                oSwap.push_back(Pair("swap_amount", FormatMoney(swap.Amount + fee)));
                 oSwap.push_back(Pair("txid", swap.TxId.ToString()));
                 oSwap.push_back(Pair("nout", swap.nOut));
                 oSwap.push_back(Pair("block_height", swap.nHeight));
+                if (fee <= 0) {
+                    oSwap.push_back(Pair("warning", "Zero fee."));
+                }
                 oResult.push_back(Pair(swap.TxId.ToString(), oSwap));
-                totalAmount += swap.Amount;
+                totalAmount += (swap.Amount + fee);
                 count += 1;
             }
         }
