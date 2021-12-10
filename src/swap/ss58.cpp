@@ -35,9 +35,13 @@ CSS58::CSS58(std::string address)
         return;
     }
     calulatedChecksumHash();
-    if (strError == "" && std::count(vAcceptedAddressTypes.begin(), vAcceptedAddressTypes.end(), type) == 0)
+    if (std::count(vAcceptedAddressTypes.begin(), vAcceptedAddressTypes.end(), type) == 0)
     {
-        strError = strprintf("AddressType: Invalid SS58 address type (%d)", type);
+        if (strError == "") {
+            strError = strprintf("AddressType: Invalid SS58 address type (%d).", type);
+        } else {
+            strError += ", " + strprintf("AddressType: Invalid SS58 address type (%d)", type);
+        }
         fValid = false;
     } else {
         // ToDo: Check if checksum prefix matches the checksum hash prefix
@@ -121,7 +125,6 @@ void CSS58::calulatedChecksumHash()
             } else {
                 strError += ", Checksum does not match.";
             }
-            
         }
     }
 }
