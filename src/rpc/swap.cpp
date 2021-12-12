@@ -201,6 +201,61 @@ UniValue getswaps(const JSONRPCRequest& request)
     }
 }
 
+UniValue getswaperrors(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 2)
+        throw std::runtime_error(
+            "getswaperrors start_height end_height\n"
+            "\nSend coins to be swapped for Substrate chain\n"
+            "\nArguments:\n"
+            "1. \"start_height\"        (int, optional)  Swaps starting at this block height.\n"
+            "1. \"end_height\"          (int, optional)  Swaps ending at this block height.\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getswaperrors", "0 100000") + 
+            HelpExampleRpc("getswaperrors", "0 100000"));
+
+    int nStartHeight = 0;
+    int nEndHeight = (std::numeric_limits<int>::max());
+    if (!request.params[0].isNull()) {
+        nStartHeight = request.params[0].get_int();
+        if (!request.params[1].isNull()) {
+            nEndHeight = request.params[1].get_int();
+        }
+    }
+
+    std::vector<CSwapData> vSwaps;
+    if (GetAllSwaps(vSwaps)) {
+        std::sort(vSwaps.begin(), vSwaps.end(), SwapCompareHeight()); //sort entries by nHeight
+        UniValue oResult(UniValue::VOBJ);
+        CAmount totalAmount = 0;
+        int count = 0;
+        for (const CSwapData& swap : vSwaps) {
+            if (swap.nHeight >= nStartHeight && swap.nHeight <= nEndHeight) {
+                const CAmount fee = swap.GetFee();
+                if (fee <= 0) {
+                    UniValue oSwap(UniValue::VOBJ);
+                    oSwap.push_back(Pair("address", swap.Address()));
+                    oSwap.push_back(Pair("out_amount", FormatMoney(swap.Amount)));
+                    oSwap.push_back(Pair("fee", FormatMoney(fee)));
+                    oSwap.push_back(Pair("swap_amount", FormatMoney(swap.Amount + fee)));
+                    oSwap.push_back(Pair("txid", swap.TxId.ToString()));
+                    oSwap.push_back(Pair("nout", swap.nOut));
+                    oSwap.push_back(Pair("block_height", swap.nHeight));
+                    oSwap.push_back(Pair("warning", "Zero fee."));
+                    oResult.push_back(Pair(swap.TxId.ToString(), oSwap));
+                    totalAmount += (swap.Amount);
+                    count += 1;
+                }
+            }
+        }
+        oResult.push_back(Pair("count", count));
+        oResult.push_back(Pair("total_amount", FormatMoney(totalAmount)));
+        return oResult;
+    } else {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Get all swaps from LevelDB failed.");
+    }
+}
+
 static const CRPCCommand commands[] =
     {
         //  category              name                     actor (function)           okSafe argNames
@@ -209,7 +264,8 @@ static const CRPCCommand commands[] =
         /* Dynamic Swap To Substrate Chain */
         {"swap", "swapdynamic", &swapdynamic, true, {"address"}},
 #endif //ENABLE_WALLET
-        {"swap", "getswaps", &getswaps, true, {"address_hex"}},
+        {"swap", "getswaps", &getswaps, true, {"start_height", "end_height"}},
+        {"swap", "getswaperrors", &getswaperrors, true, {"start_height", "end_height"}},
         {"swap", "ss58valid", &ss58valid, true, {"address"}},
 };
 

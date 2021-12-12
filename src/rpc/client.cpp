@@ -154,6 +154,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"reservebalance", 1, "amount"},
         {"getswaps", 0, "start_height"},
         {"getswaps", 1, "end_height"},
+        {"getswaperrors", 0, "start_height"},
+        {"getswaperrors", 1, "end_height"},
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},
