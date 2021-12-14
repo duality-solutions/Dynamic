@@ -8,6 +8,7 @@
 #include "bdap/utils.h"
 #include "chainparams.h"
 #include "coins.h"
+#include "core_io.h"
 #include "policy/policy.h"
 #include "serialize.h"
 #include "streams.h"
@@ -116,9 +117,14 @@ CAmount CSwapData::GetFee() const
         }
         CAmount nValueIn = 0;
         CCoinsViewCache view(pcoinsTip);
+        size_t index = 0;
         for (const CTxIn& txin : tx->vin) {
             const Coin& coin = view.AccessCoin(txin.prevout);
+            if (coin.out.nValue <= 0) {
+                LogPrintf("%s Unable to get %s transaction value\n", __func__, TxId.GetHex(), ScriptToAsmStr(coin.out.scriptPubKey));
+            }
             nValueIn += coin.out.nValue;
+            index ++;
         }
         CAmount nValueOut = 0;
         for (const auto& txout : tx->vout) {
@@ -151,7 +157,7 @@ std::string CSwapData::ToString() const
             nVersion,
             Address(),
             FormatMoney(Amount),
-            FormatMoney(Fee),
+            FormatMoney(GetFee()),
             TxId.ToString(),
             nOut,
             nHeight

@@ -29,10 +29,10 @@ SwapDialog::SwapDialog(QWidget* parent) : QDialog(parent), ui(new Ui::SwapDialog
 #ifdef ENABLE_WALLET
     if (pwalletMain) {
         walletLocked = pwalletMain->IsLocked();
-        immatureBalance = pwalletMain->GetImmatureBalance();
-        totalBalance = pwalletMain->GetBalance() + immatureBalance;
+        totalBalance = pwalletMain->GetBalance();
         lockedBalance = pwalletMain->LockedCoinsTotal();
-        swapBalance = totalBalance - immatureBalance - lockedBalance;
+        swapBalance = pwalletMain->SwapBalance();
+        immatureBalance = totalBalance - swapBalance - lockedBalance;
         std::string label = "<label>Total Balance: " + FormatMoney(totalBalance) + "</label>";
         QString questionString = tr(label.c_str());
         questionString.append("<br />");

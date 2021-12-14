@@ -31,7 +31,7 @@
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
 extern bool SendSwapTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CScript& sendAddress, std::string& strError);
-
+extern CAmount GetSwapOutputsBalance(std::vector<CSwapOutput>& vchTxOuts);
 
 struct SwapCompareHeight {
     bool operator()(const CSwapData& a, const CSwapData& b) {
@@ -102,6 +102,39 @@ UniValue swapdynamic(const JSONRPCRequest& request)
     if (errorMessage != "")
         throw JSONRPCError(RPC_TYPE_ERROR, errorMessage);
 
+    return oResult;
+}
+
+UniValue swapbalance(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "swapbalance\n"
+            "\nGet total coins available for swap\n"
+            "\nExamples:\n" +
+            HelpExampleCli("swapbalance", "") + 
+            HelpExampleRpc("swapbalance", ""));
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    UniValue oResult(UniValue::VOBJ);
+    std::vector<CSwapOutput> vchUtxos;
+    CAmount balance = GetSwapOutputsBalance(vchUtxos);
+    int count = 0;
+    for (const CSwapOutput& utxo : vchUtxos) {
+        UniValue oTxOut(UniValue::VOBJ);
+        oTxOut.push_back(Pair("amount", FormatMoney(utxo.TxOut.nValue)));
+        oTxOut.push_back(Pair("txid", utxo.Hash.GetHex()));
+        oTxOut.push_back(Pair("n", utxo.n));
+        oTxOut.push_back(Pair("nValue", FormatMoney(utxo.nValue)));
+        oTxOut.push_back(Pair("confirmations", utxo.nDepth));
+        std::string utxoName = utxo.Hash.GetHex() + ":" + std::to_string(utxo.n);
+        oResult.push_back(Pair(utxoName, oTxOut));
+        count++;
+    }
+    oResult.push_back(Pair("swap_balance", FormatMoney(balance)));
+    oResult.push_back(Pair("count", count));
     return oResult;
 }
 #endif // ENABLE_WALLET
@@ -263,6 +296,7 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
         /* Dynamic Swap To Substrate Chain */
         {"swap", "swapdynamic", &swapdynamic, true, {"address"}},
+        {"swap", "swapbalance", &swapbalance, true, {}},
 #endif //ENABLE_WALLET
         {"swap", "getswaps", &getswaps, true, {"start_height", "end_height"}},
         {"swap", "getswaperrors", &getswaperrors, true, {"start_height", "end_height"}},

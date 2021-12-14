@@ -21,6 +21,7 @@
 #include "checkpoints.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
+#include "coins.h"
 #include "core_io.h"
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
@@ -2661,6 +2662,43 @@ CAmount CWallet::GetTotal() const
     return nTotal;
 }
 
+CAmount CWallet::GetSwapOutputs(std::vector<CSwapOutput>& vchUtxos) const
+{
+    CAmount nTotal = 0;
+    {
+        LOCK2(cs_main, cs_wallet);
+        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
+            const CWalletTx* pcoin = &(*it).second;
+            if (pcoin->IsTrusted()) {
+                int nDepth = pcoin->GetDepthInMainChain();
+                if (nDepth >= SWAP_UTXO_MIN_CONFIRMATIONS) {
+                    const uint256 hash = pcoin->tx->GetHash();
+                    for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+                        const CTxOut txout = pcoin->tx->vout[i];
+                        if (!txout.IsData() && !txout.IsFluid() && !txout.IsBDAP()) {
+                            if (!IsLockedCoin(hash, i)) {
+                                if (!IsSpent(hash, i) && IsMine(txout)) {
+                                    nTotal += txout.nValue;
+                                    CSwapOutput swapOut (txout, hash, (int)i, txout.nValue, nDepth);
+                                    vchUtxos.push_back(swapOut);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return nTotal;
+}
+
+CAmount CWallet::SwapBalance() const
+{
+    std::vector<CSwapOutput> vSwapCoins;
+    return GetSwapOutputs(vSwapCoins);
+}
+
 CAmount CWallet::GetAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) const
 {
     if (fLiteMode)
@@ -4430,6 +4468,134 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
     return true;
 }
 
+bool CWallet::CreateSwapTransaction(const CScript& swapScript, std::vector<CWalletTx>& vwtxNew, CReserveKey& reservekey, const CCoinControl* coinControl, std::string& strFailReason)
+{
+    {
+        std::map<CTxIn, CScript> mapScripts;
+        std::set<std::pair<const CWalletTx*, unsigned int> > setCoins;
+        LOCK2(cs_main, cs_wallet);
+        {
+            for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
+                //const uint256& wtxid = it->first;
+                const CWalletTx* pcoin = &(*it).second;
+
+                if (!CheckFinalTx(*pcoin))
+                    continue;
+
+                if (!pcoin->IsTrusted())
+                    continue;
+
+                int nDepth = pcoin->GetDepthInMainChain();
+                // Only select coins with 100 or more confirmations
+                if (nDepth < 100)
+                    continue;
+
+                for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+                    if (pcoin->IsTrusted()) {
+                        const uint256 hash = pcoin->tx->GetHash();
+                        for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+                            const CTxOut txout = pcoin->tx->vout[i];
+                            if (!txout.IsData() && !txout.IsFluid() && !txout.IsBDAP() && IsMine(txout)) {
+                                if (!IsLockedCoin(hash, i)) {
+                                    if (!IsSpent(hash, i)) {
+                                        setCoins.insert(std::make_pair(pcoin, i));
+                                        CTxIn txin = CTxIn(hash, i, CScript(), std::numeric_limits<unsigned int>::max() - 1);
+                                        mapScripts[txin] = txout.scriptPubKey;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            std::vector<CMutableTransaction> vTxs;
+            CMutableTransaction txNew;
+            txNew.nVersion = SWAP_TX_VERSION;
+            txNew.nLockTime = chainActive.Height();
+            if (GetRandInt(10) == 0)
+                txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
+
+            assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
+            assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
+            txNew.vin.clear();
+            txNew.vout.clear();
+
+            LogPrint("swap", "%s - setCoins size %d, mapScripts size %d\n", __func__, setCoins.size(), mapScripts.size());
+            // Fill vin
+            CAmount nValueIn = 0;
+            int n = 0;
+            for (const auto& coin : setCoins) {
+                CTransaction txNewConst(txNew);
+                const CTxOut txout = coin.first->tx->vout[coin.second];
+                CTxIn txin = CTxIn(coin.first->GetHash(), coin.second, CScript(),
+                    std::numeric_limits<unsigned int>::max() - 1);
+                // Sign utxos
+                const CScript scriptPubKey = mapScripts[txin];
+                CScript scriptSigRes;
+                if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, coin.second, SIGHASH_ALL), scriptPubKey, scriptSigRes)) {
+                    strFailReason = "Signing transaction failed " + txin.ToString();
+                    return false;
+                }
+                txNew.vin.push_back(txin);
+                txNew.vin[n].scriptSig = scriptSigRes;
+                nValueIn += txout.nValue;
+                n ++;
+
+                unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
+                if (nBytes > SWAP_TX_MAX_BTYES) {
+                    CMutableTransaction tx = txNew;
+                    sort(tx.vin.begin(), tx.vin.end(), CompareInputBIP69());
+                    sort(tx.vout.begin(), tx.vout.end(), CompareOutputBIP69());
+                    CAmount nFeeNeeded = ::minRelayTxFee.GetFee(nBytes) * 10;
+                    tx.vout.push_back(CTxOut(nValueIn - nFeeNeeded, swapScript));
+                    LogPrint("swap", "%s - nValueIn %s, Fee %s, nValueOut %s, Bytes %d\n", __func__, 
+                        FormatMoney(nValueIn), FormatMoney(nFeeNeeded), FormatMoney(nValueIn - nFeeNeeded), nBytes);
+                    vTxs.push_back(tx);
+                    txNew.vin.clear();
+                    txNew.vout.clear();
+                    nValueIn = 0;
+                    n = 0;
+                }
+            }
+
+            CMutableTransaction tx = txNew;
+            sort(tx.vin.begin(), tx.vin.end(), CompareInputBIP69());
+            sort(tx.vout.begin(), tx.vout.end(), CompareOutputBIP69());
+            unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
+            CAmount nFeeNeeded = ::minRelayTxFee.GetFee(nBytes) * 10;
+            LogPrint("swap", "%s - nValueIn %s, Fee %s, Bytes %d\n", __func__, FormatMoney(nValueIn), FormatMoney(nFeeNeeded), nBytes);
+            tx.vout.push_back(CTxOut(nValueIn - nFeeNeeded, swapScript));
+            vTxs.push_back(tx);
+
+            reservekey.ReturnKey();
+
+            for (CMutableTransaction& mTx : vTxs) {
+                CTransaction txNewConst(mTx);
+                // Sign utxos
+                unsigned int n = 0;
+                for (auto& txin : mTx.vin) {
+                    const CScript prevPubKey = mapScripts[txin];
+                    CScript scriptSigRes;
+                    if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, n, SIGHASH_ALL), prevPubKey, scriptSigRes)) {
+                        strFailReason = "Signing transaction failed " + txin.ToString();
+                        return false;
+                    }
+                    mTx.vin[n].scriptSig = scriptSigRes;
+                    n++;
+                }
+                CWalletTx wtxNew;
+                wtxNew.fTimeReceivedIsTxTime = true;
+                wtxNew.BindWallet(this);
+                // Embed the constructed transaction data in wtxNew.
+                wtxNew.SetTx(MakeTransactionRef(std::move(mTx)));
+                vwtxNew.push_back(wtxNew);
+            }
+        }
+    }
+    return true;
+}
+
 /**
  * Call after CreateTransaction unless you want to abort
  */
@@ -5055,7 +5221,7 @@ bool CWallet::ReserveKeyForTransactions(const CPubKey& pubKeyToReserve)
                 fNeedToUpdateKeyPools = true;
                 IndexToErase = nIndex;
                 ReserveKeyCount++;
-                if (ReserveKeyCount < DEFAULT_KEYPOOL_SIZE) {
+                if (ReserveKeyCount < (int)DEFAULT_KEYPOOL_SIZE) {
                     SaveRescanIndex = true;
                 }
             }

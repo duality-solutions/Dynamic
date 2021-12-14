@@ -233,6 +233,7 @@ bool LogAcceptCategory(const char* category)
                     ptrCategory->insert(std::string("bdap"));
                     ptrCategory->insert(std::string("validation"));
                     ptrCategory->insert(std::string("stealth"));
+                    ptrCategory->insert(std::string("swap"));
                 }
             } else {
                 ptrCategory.reset(new std::set<std::string>());

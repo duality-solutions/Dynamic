@@ -81,6 +81,10 @@ extern const char* DEFAULT_WALLET_DAT_MNEMONIC;
 
 //! if set, all keys will be derived by using BIP32
 static const bool DEFAULT_USE_HD_WALLET = true;
+//! Maximum swap transaction bytes
+const unsigned int SWAP_TX_MAX_BTYES = 50000;
+//! Minimum swap transaction confirmations
+const unsigned int SWAP_UTXO_MIN_CONFIRMATIONS = 100;
 
 bool AutoBackupWallet(CWallet* wallet, std::string strWalletFile, std::string& strBackupWarning, std::string& strBackupError);
 
@@ -235,6 +239,41 @@ static inline void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
         return;
     mapValue["n"] = i64tostr(nOrderPos);
 }
+
+class CSwapOutput
+{
+public:
+    CTxOut TxOut;
+    uint256 Hash;
+    int n;
+    CAmount nValue;
+    int nDepth;
+
+    CSwapOutput(const CTxOut& out, const uint256& hash, const int& _n, const CAmount& value, const int& depth)
+    {
+        TxOut = out;
+        Hash = hash;
+        n = _n;
+        nValue = value;
+        nDepth = depth;
+    }
+
+    CSwapOutput()
+    {
+        SetNull();
+    }
+
+    void SetNull()
+    {
+        TxOut = CTxOut();
+        Hash = uint256();
+        n = -1;
+        nDepth = -1;
+    }
+
+    bool IsNull() { return (n == -1); }
+
+};
 
 struct COutputEntry {
     CTxDestination destination;
@@ -1124,6 +1163,8 @@ public:
     std::vector<uint256> ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman);
     CAmount GetBalance() const;
     CAmount GetTotal() const; 
+    CAmount SwapBalance() const;
+    CAmount GetSwapOutputs(std::vector<CSwapOutput>& vchUtxos) const;
     CAmount GetUnconfirmedBalance() const;
     CAmount GetImmatureBalance() const;
     CAmount GetWatchOnlyBalance() const;
@@ -1151,6 +1192,7 @@ public:
      * selected by SelectCoins(); Also create the change output, when needed
      */
     bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut, std::string& strFailReason, const CCoinControl* coinControl = NULL, bool sign = true, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false, bool fIsBDAP = false, bool fIsSwap = false);
+    bool CreateSwapTransaction(const CScript& swapScript, std::vector<CWalletTx>& vwtxNew, CReserveKey& reservekey, const CCoinControl* coinControl, std::string& strFailReason);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CConnman* connman, CValidationState& state, const std::string& strCommand = "tx");
 
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
