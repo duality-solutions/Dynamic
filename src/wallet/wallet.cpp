@@ -2671,7 +2671,7 @@ CAmount CWallet::GetSwapOutputs(std::vector<CSwapOutput>& vchUtxos) const
             const CWalletTx* pcoin = &(*it).second;
             if (pcoin->IsTrusted()) {
                 int nDepth = pcoin->GetDepthInMainChain();
-                if (nDepth >= SWAP_UTXO_MIN_CONFIRMATIONS) {
+                if ((unsigned int)nDepth >= SWAP_UTXO_MIN_CONFIRMATIONS) {
                     const uint256 hash = pcoin->tx->GetHash();
                     for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
                         const CTxOut txout = pcoin->tx->vout[i];
@@ -6568,6 +6568,9 @@ bool CWallet::HasBDAPLinkTx(const CTransaction& tx, CScript& bdapOpScript)
 
 bool CWallet::ScanForStealthOwnedOutputs(const CTransaction& tx)
 {
+    if (tx.nVersion == SWAP_TX_VERSION)
+        return false;
+
     bool fIsMine = false;
     CScript bdapOpScript;
     //if (HasBDAPLinkTx(tx, bdapOpScript)) { // Only support stealth when using links

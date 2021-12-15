@@ -64,10 +64,12 @@ bool CSwapDB::GetAllSwaps(std::vector<CSwapData>& vSwaps)
 
 bool AddSwap(const CSwapData& swap)
 {
+    LogPrint("swap", "%s - %s\n", __func__, swap.TxId.ToString());
     CSwapData readSwap;
     if (!pSwapDB || pSwapDB->ReadSwapTxId(swap.vchTxId(), readSwap))
         return false;
 
+    LogPrint("swap", "%s - not found %s\n", __func__, swap.TxId.ToString());
     if (!pSwapDB->AddSwap(swap))
         return false;
 
@@ -99,6 +101,7 @@ bool SwapExists(const std::vector<unsigned char>& vchTxId, CSwapData& swap)
 
 bool UndoAddSwap(const CSwapData& swap)
 {
+    LogPrint("swap", "%s - %s\n", __func__, swap.TxId.ToString());
     if (!pSwapDB)
         return false;
 

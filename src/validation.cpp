@@ -981,7 +981,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         if (txout.IsData() && tx.nVersion == SWAP_TX_VERSION) {
             std::vector<unsigned char> vchData;
             if (txout.GetData(vchData) && txout.nValue > 0)
-                LogPrintf("%s -- Swap transaction in mempool %s %s\n", __func__, EncodeBase58(vchData), FormatMoney(txout.nValue));
+                LogPrint("swap", "%s -- Swap transaction in mempool %s %s\n", __func__, EncodeBase58(vchData), FormatMoney(txout.nValue));
         }
     }
     // Don't relay BDAP transaction until spork is activated
@@ -2418,7 +2418,9 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     LogPrintf("%s -- Failed to undo unknown BDAP transaction (op1 = %d, op2 = %d). Nothing to undo for %s transaction.\n", __func__, op1, op2, hash.ToString());
                 }
             }
-        } else if (tx.nVersion == SWAP_TX_VERSION) {
+        } // ToDo (swap): Causes problems when rewinding blocks but need Undo for forks.
+        else if (tx.nVersion == SWAP_TX_VERSION && !fReindex && nCheckLevel >= 4 ) {
+            LogPrintf("%s -- Swap tx nCheckLevel %d\n", __func__, nCheckLevel);
             CSwapData swap(MakeTransactionRef(tx), pindex->nHeight);
             if (!swap.IsNull())
                 UndoAddSwap(swap);
@@ -3041,14 +3043,14 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             {
                 const CTxOut& out = tx.vout[j];
                 if (out.IsData() && out.nValue > 0) {
-                    LogPrintf("%s -- Swap transaction found Amount %s\n", __func__, FormatMoney(out.nValue));
+                    LogPrint("swap", "%s -- Swap transaction found Amount %s, Txid %s\n", __func__, FormatMoney(out.nValue), tx.GetHash().GetHex());
                     std::vector<unsigned char> vchData;
                     if (out.GetData(vchData)) {
                         CSwapData swap(MakeTransactionRef(tx), pindex->nHeight);
                         if (!swap.IsNull() && swap.Amount > 0)
                         {
                             if (!AddSwap(swap))
-                                LogPrintf("%s -- Swap transaction leveldb add failed %s Amount %s\n", __func__, EncodeBase58(vchData), FormatMoney(out.nValue));
+                                LogPrint("swap", "%s -- Swap transaction leveldb add failed %s Amount %s, Txid %s\n", __func__, EncodeBase58(vchData), FormatMoney(out.nValue), tx.GetHash().GetHex());
                         }
                     }
                 }

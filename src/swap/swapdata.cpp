@@ -112,7 +112,7 @@ CAmount CSwapData::GetFee() const
         CTransactionRef tx;
         uint256 hashBlock;
         if (!GetTransaction(TxId, tx, Params().GetConsensus(), hashBlock, true)) {
-            LogPrintf("%s Unable to get %s transaction \n", __func__, TxId.GetHex());
+            LogPrint("swap", "%s Unable to get %s transaction\n", __func__, TxId.GetHex());
             return 0;
         }
         CAmount nValueIn = 0;
@@ -121,7 +121,7 @@ CAmount CSwapData::GetFee() const
         for (const CTxIn& txin : tx->vin) {
             const Coin& coin = view.AccessCoin(txin.prevout);
             if (coin.out.nValue <= 0) {
-                LogPrintf("%s Unable to get %s transaction value\n", __func__, TxId.GetHex(), ScriptToAsmStr(coin.out.scriptPubKey));
+                LogPrint("swap", "%s Unable to get %s transaction value scriptPubKey %s\n", __func__, TxId.GetHex(), ScriptToAsmStr(coin.out.scriptPubKey));
             }
             nValueIn += coin.out.nValue;
             index ++;
@@ -134,7 +134,7 @@ CAmount CSwapData::GetFee() const
         if (nValueIn > nValueOut) {
             return (nValueIn - nValueOut);
         } else {
-            LogPrintf("%s - Txid %s nValueIn (%s) is less than nValueOut (%s)\n", __func__, TxId.GetHex(), FormatMoney(nValueIn), FormatMoney(nValueOut));
+            LogPrint("swap", "%s - Txid %s nValueIn (%s) is less than nValueOut (%s)\n", __func__, TxId.GetHex(), FormatMoney(nValueIn), FormatMoney(nValueOut));
             return 0;
         }
     } else {
