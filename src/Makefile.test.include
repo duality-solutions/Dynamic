@@ -94,6 +94,7 @@ DYNAMIC_TESTS =\
   test/sighash_tests.cpp \
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
+  test/ss58_tests.cpp \
   test/streams_tests.cpp \
   test/test_dynamic.cpp \
   test/test_dynamic.h \

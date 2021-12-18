@@ -208,6 +208,8 @@ extern std::string HelpExampleRpc(const std::string& methodname, const std::stri
 extern void EnsureWalletIsUnlocked();
 extern void relockWalletAfterDuration(CWallet *wallet, int64_t nSeconds);
 
+extern UniValue SwapDynamic(const std::string& address, const bool fSend, std::string& errorMessage);
+
 bool StartRPC();
 void InterruptRPC();
 void StopRPC();

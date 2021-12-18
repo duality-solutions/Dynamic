@@ -751,6 +751,12 @@ public:
         return false;
     }
 
+    bool IsFluid() const
+    {
+        return (IsProtocolInstruction(MINT_TX) || IsProtocolInstruction(DYNODE_MODFIY_TX) || IsProtocolInstruction(MINING_MODIFY_TX) || 
+                    IsProtocolInstruction(BDAP_REVOKE_TX));
+    }
+
     void clear()
     {
         // The default std::vector::clear() does not release memory.
@@ -771,5 +777,6 @@ public:
 bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
 bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);
+bool GetOpReturnData(const CScript& script, std::vector<unsigned char>& vchRet);
 
 #endif // DYNAMIC_SCRIPT_SCRIPT_H

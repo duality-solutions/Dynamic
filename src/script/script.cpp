@@ -377,6 +377,19 @@ bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut)
     scriptOut = CScript(pc, scriptIn.end());
     return true;
 }
+
+bool GetOpReturnData(const CScript& script, std::vector<unsigned char>& vchRet)
+{
+    opcodetype opcode;
+    CScript::const_iterator pc = script.begin();
+    if (!script.GetOp(pc, opcode))
+        return false;
+
+    if (opcode == OP_RETURN)
+        script.GetOp2(pc, opcode, &vchRet);
+
+    return true;
+}
 // TODO (bdap): move the above functions to seperate code file
 
 unsigned int CScript::GetSigOpCount(bool fAccurate) const

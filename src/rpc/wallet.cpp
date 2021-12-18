@@ -722,6 +722,52 @@ void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAm
     delete ccCoins;
 }
 
+CAmount GetSwapOutputsBalance(std::vector<CSwapOutput>& vchUtxos)
+{
+    return pwalletMain->GetSwapOutputs(vchUtxos);
+}
+
+bool SendSwapTransaction(const CScript& swapScript, CWalletTx& wtxNew, const CScript& scriptSendFrom, std::string& strError)
+{
+    const CAmount curUnlockedMatureBalance = pwalletMain->SwapBalance();
+    const CAmount nValue = curUnlockedMatureBalance;
+    // Check amount
+    if (nValue <= 0) {
+        strError = strprintf("Invalid amount");
+        return false;
+    }
+
+    LogPrint("swap", "%s - Script to the swap %s DYN transaction processing: %s\n", __func__, FormatMoney(nValue), ScriptToAsmStr(swapScript));
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CCoinControl* ccCoins = new CCoinControl;
+    if (!scriptSendFrom.empty()) {
+        if (!GetCoinControl(scriptSendFrom, ccCoins)) {
+            strError = strprintf("Error: GetCoinControl failed");
+            delete ccCoins;
+            return false;
+        }
+    }
+
+    std::vector<CWalletTx> vWtxNew;
+    if (pwalletMain->CreateSwapTransaction(swapScript, vWtxNew, reservekey, ccCoins, strError)) {
+        for(CWalletTx& wtx : vWtxNew) {
+            CValidationState state;
+            if (!pwalletMain->CommitTransaction(wtx, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+                strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+                delete ccCoins;
+                return false;
+            }
+        }
+    } else {
+        delete ccCoins;
+        return false;
+    }
+    delete ccCoins;
+    return true;
+}
+
 UniValue sendtoaddress(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))

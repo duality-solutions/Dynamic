@@ -24,6 +24,7 @@
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "rpcconsole.h"
+#include "swapdialog.h"
 #include "utilitydialog.h"
 #ifdef ENABLE_WALLET
 #include "walletframe.h"
@@ -121,6 +122,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  openRPCConsoleAction(0),
                                                                                                                  openAction(0),
                                                                                                                  mnemonicAction(0),
+                                                                                                                 swapAction(0),
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
                                                                                                                  trayIcon(0),
@@ -468,7 +470,7 @@ void DynamicGUI::createActions()
     openAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), tr("Open &URI..."), this);
     openAction->setStatusTip(tr("Open a dynamic: URI"));
 
-    mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("&Import mnemonic/private key..."), this);
+    mnemonicAction = new QAction(QIcon(":/icons/" + theme + "/receiving_addresses"), tr("&Import mnemonic/private key..."), this);
     mnemonicAction->setStatusTip(tr("Import Mnemonic Phrase or Private Key"));
 
     showHelpMessageAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Command-line options"), this);
@@ -478,6 +480,9 @@ void DynamicGUI::createActions()
     showPrivateSendHelpAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&PrivateSend information"), this);
     showPrivateSendHelpAction->setMenuRole(QAction::NoRole);
     showPrivateSendHelpAction->setStatusTip(tr("Show the PrivateSend basic information"));
+    
+    swapAction = new QAction(QIcon(":/icons/" + theme + "/send"), tr("&Swap Dynamic"), this);
+    swapAction->setStatusTip(tr("Swap current chain Dynamic for new Substrate chain"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
@@ -517,6 +522,7 @@ void DynamicGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+        connect(swapAction, SIGNAL(triggered()), this, SLOT(swapClicked()));
         connect(mnemonicAction, SIGNAL(triggered()), this, SLOT(mnemonicClicked()));
     }
 #endif // ENABLE_WALLET
@@ -542,11 +548,14 @@ void DynamicGUI::createMenuBar()
     QMenu* file = appMenuBar->addMenu(tr("&File"));
     if (walletFrame) {
         file->addAction(openAction);
-        file->addAction(backupWalletAction);
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
         file->addSeparator();
+#ifdef ENABLE_WALLET
+        file->addAction(backupWalletAction);
+        file->addAction(swapAction);
         file->addAction(mnemonicAction);
+#endif // ENABLE_WALLET
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
@@ -705,12 +714,13 @@ void DynamicGUI::setClientModel(ClientModel* _clientModel)
 }
 
 #ifdef ENABLE_WALLET
-bool DynamicGUI::addWallet(const QString& name, WalletModel* walletModel)
+bool DynamicGUI::addWallet(const QString& name, WalletModel* _walletModel)
 {
     if (!walletFrame)
         return false;
     setWalletActionsEnabled(true);
-    return walletFrame->addWallet(name, walletModel);
+    walletModel = _walletModel;
+    return walletFrame->addWallet(name, _walletModel);
 }
 
 bool DynamicGUI::setCurrentWallet(const QString& name)
@@ -749,6 +759,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
     mnemonicAction->setEnabled(enabled);
+    swapAction->setEnabled(enabled);
 }
 
 void DynamicGUI::createTrayIcon(const NetworkStyle* networkStyle)
@@ -906,6 +917,13 @@ void DynamicGUI::openClicked()
     if (dlg.exec()) {
         Q_EMIT receivedURI(dlg.getURI());
     }
+}
+
+void DynamicGUI::swapClicked()
+{
+    SwapDialog dlg(this);
+    dlg.setWalletModel(walletModel);
+    dlg.exec();
 }
 
 void DynamicGUI::gotoOverviewPage()

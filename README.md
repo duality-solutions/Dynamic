@@ -14,18 +14,11 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * PoW Mining Algorithm: Argon2d
 * PoW Difficulty Algorithm: Digishield V3
 * PoW Period: Unlimited
-* PoW Target Spacing: 128 Seconds
+* PoW Target Spacing: 75 Seconds
 * PoW Reward per Block: Controlled via Fluid Protocol
 * PoW Reward Start Height: Block 5,137
-* PoS Mining Algorithm: Blake2b
-* PoS Period: Unlimited
-* PoS Target Spacing: 128 Seconds
-* PoS Reward per Block: Controlled via Fluid Protocol
-* PoS Reward Start Height: Controlled via SPORK activation
 * Maturity: 10 Blocks
-* PoW Blocks: ~675 per day
-* PoS Blocks: ~675 per day
-* Total Blocks Per Day: ~1350
+* PoW Blocks: ~1152 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 17 Blocks
 * Dynode Reward: Controlled via Fluid Protocol

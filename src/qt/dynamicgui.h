@@ -108,6 +108,9 @@ protected:
 private:
     ClientModel* clientModel;
     WalletFrame* walletFrame;
+#ifdef ENABLE_WALLET
+    WalletModel* walletModel;
+#endif // ENABLE_WALLET
 
     UnitDisplayStatusBarControl* unitDisplayControl;
     QLabel* labelWalletHDStatusIcon;
@@ -151,6 +154,7 @@ private:
     QAction* showBackupsAction;
     QAction* openAction;
     QAction *mnemonicAction;
+    QAction* swapAction;
     QAction* showHelpMessageAction;
     QAction* showPrivateSendHelpAction;
 
@@ -257,6 +261,7 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
     void mnemonicClicked();
+    void swapClicked();
 
 #endif // ENABLE_WALLET
     /** Show configuration dialog */

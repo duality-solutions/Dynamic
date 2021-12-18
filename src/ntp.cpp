@@ -15,7 +15,7 @@
 #include "utiltime.h"
 #include "warnings.h"
 
-extern int GetRandInt(int nMax);
+extern int GetRandInt(int nMax) noexcept;
 
 /*
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"

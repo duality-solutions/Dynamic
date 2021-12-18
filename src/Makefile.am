@@ -208,6 +208,9 @@ DYNAMIC_CORE_H = \
   support/cleanse.h \
   support/lockedpool.h \
   support/events.h \
+  swap/ss58.h \
+  swap/swapdata.h \
+  swap/swapdb.h \
   sync.h \
   threadinterrupt.h \
   threadsafety.h \
@@ -350,9 +353,13 @@ libdynamic_server_a_SOURCES = \
   rpc/rawbdap.cpp \
   rpc/rawtransaction.cpp \
   rpc/server.cpp \
+  rpc/swap.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   spork.cpp \
+  swap/ss58.cpp \
+  swap/swapdata.cpp \
+  swap/swapdb.cpp \
   timedata.cpp \
   torcontrol.cpp \
   txdb.cpp \

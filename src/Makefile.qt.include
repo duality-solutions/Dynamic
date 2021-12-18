@@ -49,6 +49,7 @@ QT_FORMS_UI = \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
+  qt/forms/swapdialog.ui \
   qt/forms/transactiondescdialog.ui
 
 QT_MOC_CPP = \
@@ -100,6 +101,7 @@ QT_MOC_CPP = \
   qt/moc_sendcoinsentry.cpp \
   qt/moc_signverifymessagedialog.cpp \
   qt/moc_splashscreen.cpp \
+  qt/moc_swapdialog.cpp \
   qt/moc_trafficgraphwidget.cpp \
   qt/moc_transactiondesc.cpp \
   qt/moc_transactiondescdialog.cpp \
@@ -179,6 +181,7 @@ DYNAMIC_QT_H = \
   qt/sendcoinsentry.h \
   qt/signverifymessagedialog.h \
   qt/splashscreen.h \
+  qt/swapdialog.h \
   qt/trafficgraphdata.h \
   qt/trafficgraphwidget.h \
   qt/transactiondesc.h \
@@ -242,13 +245,10 @@ RES_ICONS = \
   qt/res/icons/drk/lock_open.png \
   qt/res/icons/drk/notsynced.png \
   qt/res/icons/drk/overview.png \
-  qt/res/icons/drk/pos.png \
   qt/res/icons/drk/quit.png \
   qt/res/icons/drk/receive.png \
   qt/res/icons/drk/remove.png \
   qt/res/icons/drk/send.png \
-  qt/res/icons/drk/staking_active.png \
-  qt/res/icons/drk/staking_inactive.png \
   qt/res/icons/drk/synced.png \
   qt/res/icons/drk/transaction_abandoned.png \
   qt/res/icons/drk/transaction_conflicted.png \
@@ -332,6 +332,7 @@ DYNAMIC_QT_CPP += \
   qt/transactionrecord.cpp \
   qt/transactiontablemodel.cpp \
   qt/transactionview.cpp \
+  qt/swapdialog.cpp \
   qt/walletframe.cpp \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \

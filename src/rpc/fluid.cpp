@@ -1,6 +1,6 @@
 // Copyright (c) 2017-2021 Duality Blockchain Solutions Developers
 
-
+#include "base58.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/utils.h"
 #include "chain.h"
@@ -13,6 +13,7 @@
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
 #include "fluid/fluidsovereign.h"
+#include "hash.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -20,6 +21,7 @@
 #include "rpc/server.h"
 #include "spork.h"
 #include "timedata.h"
+#include "uint256.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
