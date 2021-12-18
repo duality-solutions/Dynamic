@@ -12,7 +12,8 @@
 
 //See https://docs.substrate.io/v3/advanced/ss58
 
-const std::vector<uint16_t> vAcceptedAddressTypes = {42, 128}; // just accept Substrate and Clover address types for now.
+// Accept Substrate generic (42) and Clover address types for now.
+const std::vector<uint32_t> vAcceptedAddressTypes = {42, 128}; 
 
 class CSS58
 {
@@ -67,7 +68,7 @@ public:
     bool Valid() const { return (fValid && ValidChecksum()); }
 
 private:
-    void calulatedChecksumHash();
+    bool calulatedChecksumHash();
     void setAddressType();
 };
 

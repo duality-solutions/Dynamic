@@ -34,7 +34,7 @@ CSS58::CSS58(std::string address)
         strError = strprintf("BadBase58: Failed to decode base58 address");
         return;
     }
-    calulatedChecksumHash();
+    fValid = calulatedChecksumHash();
     if (std::count(vAcceptedAddressTypes.begin(), vAcceptedAddressTypes.end(), type) == 0)
     {
         if (strError == "") {
@@ -43,9 +43,6 @@ CSS58::CSS58(std::string address)
             strError += ", " + strprintf("AddressType: Invalid SS58 address type (%d)", type);
         }
         fValid = false;
-    } else {
-        // ToDo: Check if checksum prefix matches the checksum hash prefix
-        fValid = true;
     }
 }
 
@@ -105,7 +102,7 @@ void CSS58::setAddressType()
     }
 }
 
-void CSS58::calulatedChecksumHash()
+bool CSS58::calulatedChecksumHash()
 {
     std::vector<uint8_t> vchImageData = vchPrefix;
     vchImageData.insert(vchImageData.end(), vchAddress.begin(), vchAddress.end());
@@ -115,11 +112,13 @@ void CSS58::calulatedChecksumHash()
     size_t hashSize = vchHash.size();
     if (hashSize >= 32 && hashSize > vchAddressCheckSum.size() + 1) {
         vchCalulatedCheckSum.clear();
-        //reverse bytes by starting from the right
+        //reverse vector by starting from the last item
         for (size_t i = 1; i < vchAddressCheckSum.size() + 1; i++) {
           vchCalulatedCheckSum.push_back(vchHash[hashSize - i]);
         }
-        if (vchCalulatedCheckSum != vchAddressCheckSum) {
+        if (vchCalulatedCheckSum.size() > 0 && vchCalulatedCheckSum == vchAddressCheckSum) {
+            return true;
+        } else {
             if (strError == "") {
                 strError = "Checksum does not match.";
             } else {
@@ -127,4 +126,5 @@ void CSS58::calulatedChecksumHash()
             }
         }
     }
+    return false;
 }

@@ -57,7 +57,7 @@ UniValue SwapDynamic(const std::string& address, const bool fSend, std::string& 
     }
 
     UniValue oResult(UniValue::VOBJ);
-    oResult.push_back(Pair("address_bytes", ss58Address.nLength));
+    oResult.push_back(Pair("address_length", ss58Address.nLength));
     oResult.push_back(Pair("hex_address", ss58Address.AddressHex()));
     oResult.push_back(Pair("address_type", (int64_t)ss58Address.AddressType()));
     oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
@@ -143,7 +143,7 @@ UniValue GetAddress(const std::string& address, std::string& errorMessage)
 {
     CSS58 ss58Address(address);
     UniValue oResult(UniValue::VOBJ);
-    oResult.push_back(Pair("address_bytes", ss58Address.nLength));
+    oResult.push_back(Pair("address_length", ss58Address.nLength));
     oResult.push_back(Pair("hex_address", ss58Address.AddressHex()));
     oResult.push_back(Pair("address_type", (int64_t)ss58Address.AddressType()));
     oResult.push_back(Pair("address_pubkey", ss58Address.PublicKeyHex()));
